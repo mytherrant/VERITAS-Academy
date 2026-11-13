@@ -11,7 +11,7 @@
  */
 const fs=require('fs'),vm=require('vm'),path=require('path');const R=path.join(__dirname,'..')+'/';
 global.window=global;require(R+'apprendre/progressions.js');const P=window.VRT_PROG;
-const MAT={'Français':['Français'],'Éducation à la citoyenneté et à la morale':['ECM'],'Espagnol':['Espagnol'],'Allemand':['Allemand'],'Histoire':['Histoire'],'Géographie':['Géographie'],'Anglais':['Anglais'],'Philosophie':['Philosophie'],'Italien':['Italien'],'Chinois':['Chinois'],'Orientation-conseil':['Orientation Conseil'],'Langues nationales':['Langues nationales'],'Cultures nationales':['Cultures nationales'],'Arabe':['Arabe']};
+const MAT={'Français':['Français'],'Éducation à la citoyenneté et à la morale':['ECM'],'Espagnol':['Espagnol'],'Allemand':['Allemand'],'Histoire':['Histoire'],'Géographie':['Géographie'],'Anglais':['Anglais'],'Philosophie':['Philosophie'],'Italien':['Italien'],'Chinois':['Chinois'],'Orientation-conseil':['Orientation Conseil'],'Langues nationales':['Langues nationales'],'Cultures nationales':['Cultures nationales'],'Arabe':['Arabe'],'Mathématiques':['Mathématiques'],'SVT':['SVTEEHB','Sciences'],'Physique-Chimie':['PCT','Physique','Chimie'],'Informatique':['Informatique','Informatique TIC','Informatique Fondamentale'],'Économie sociale et familiale':['Économie Sociale et Familiale'],'Latin':['Latin'],'Grec':['Grec'],'Sciences':['Sciences'],'Chimie':['Chimie','PCT'],'Physique':['Physique','PCT'],'Arts':['Arts'],'Éducation physique et sportive':['Education physique et Sportive'],'Travail manuel':['Travail manuel (Production Animale)','Travail manuel (Production Vegetale)','Travail manuel (Artisanat)']};
 function classes(n){n=(n||'').trim();if(/^Terminale|^Tle/.test(n))return Object.keys(P).filter(k=>/^Tle/.test(k));if(/^1re|^Premi/.test(n))return Object.keys(P).filter(k=>/^1re/.test(k));if(/^2nde/.test(n))return Object.keys(P).filter(k=>/^2nde/.test(k));const m=n.match(/\d+e/g);return m?m:[];}
 const norm=s=>s.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/[^a-z0-9 ]/g,' ');
 const STOP=new Set('les des une un de du la le et en a au aux d l sur dans par pour leur leurs the and of to in a an on with its their'.split(' '));
@@ -33,7 +33,8 @@ for(const f of fs.readdirSync(R+'scenes').filter(f=>f.endsWith('.html'))){
   // proposition : la ou les leçons officielles dont l'intitulé correspond le mieux
   const props=[];for(const c of cl)for(const mt of mats){const L=(P[c]||{})[mt];if(!L)continue;L.forEach(u=>(u[1]||[]).forEach(x=>{const s2=sim(r[2],String(x[1]));if(s2>=.5)props.push(c+' '+mt+' n°'+x[0]+' «'+String(x[1]).slice(0,60)+'» '+s2.toFixed(2));}));}
   const uniq=[...new Set(props.map(x=>x.replace(/^\S+ \S+ /,'').replace(/^(?:\S+ )*?(n°)/,'$1')))];
-  if(best>=.34)nOk++;else out.push(f+' | '+Sc.niveau+' '+Sc.discipline+' | leçon '+nums.join(',')+' «'+r[2].slice(0,60)+'» ≠ '+(where||'?')+' «'+bestT.slice(0,90)+'» ('+best.toFixed(2)+')'+(uniq.length?' → officiel : '+uniq.slice(0,3).join(' | '):''));}
+  let maxAll=0;for(const c of cl)for(const mt of mats){const L=(P[c]||{})[mt];if(!L)continue;L.forEach(u=>(u[1]||[]).forEach(x=>{maxAll=Math.max(maxAll,sim(r[2],String(x[1])));}));}
+  if(best>=.34&&maxAll-best<.3)nOk++;else out.push(f+' | '+Sc.niveau+' '+Sc.discipline+' | leçon '+nums.join(',')+' «'+r[2].slice(0,60)+'» ≠ '+(where||'?')+' «'+bestT.slice(0,90)+'» ('+best.toFixed(2)+')'+(uniq.length?' → officiel : '+uniq.slice(0,3).join(' | '):''));}
 }
 console.log('références vérifiées',nRef,'conformes',nOk);out.forEach(x=>console.log(x));
 // TD / TP / dossiers : l'étiquette officielle (« TD2 : … », « Dossier 3 : … ») doit exister et parler du même sujet
@@ -41,10 +42,11 @@ let nL=0;const outL=[];
 for(const f of fs.readdirSync(R+'scenes').filter(f=>f.endsWith('.html'))){
  const h=fs.readFileSync(R+'scenes/'+f,'utf8');const m=h.match(/<script>\s*(window\.SCENE\s*=[\s\S]*?)<\/script>/);if(!m)continue;
  const ctx={window:{}};try{vm.runInNewContext(m[1],ctx)}catch(e){continue}const Sc=ctx.window.SCENE;if(!Sc||!Sc.programme||!/Progression harmonis/.test(Sc.programme))continue;
- const cl=classes(Sc.niveau),mats=MAT[Sc.discipline]||[];const re=/\b(TD|TP|dossiers?)\s*([\d\-– ]+?)\s*\(([^)]*)\)/gi;let r;
- while((r=re.exec(Sc.programme))){nL++;const lab=r[1].toLowerCase().startsWith('dossier')?'dossier':r[1].toLowerCase();const nums=[];r[2].replace(/(\d+)\s*[-–]\s*(\d+)|(\d+)/g,(_,a,b,c)=>{if(a){for(let i=+a;i<=+b;i++)nums.push(i)}else nums.push(+c)});
-  let best=0,bt='';for(const c of cl)for(const mt of mats){const L=(P[c]||{})[mt];if(!L)continue;L.forEach(u=>(u[1]||[]).forEach(x=>{const t=String(x[1]);const mm=t.match(/^\s*(TD|TP|Dossier)\s*(\d+)/i);if(mm&&mm[1].toLowerCase()===lab&&nums.includes(+mm[2])){const s=sim(r[3],t);if(s>=best){best=s;bt=c+' '+mt+' n°'+x[0]+' «'+t.slice(0,70)+'»';}}}));}
-  if(best<.34)outL.push(f+' | '+r[0].slice(0,90)+' ≠ '+(bt||'étiquette introuvable'));}}
+ const cl=classes(Sc.niveau),mats=MAT[Sc.discipline]||[];const re=/\b(TD|TP|dossiers?|s[ée]ances?|titles?|titres?)\s*([\d\-– ]+?)\s*\(([^)]*)\)/gi;let r;
+ while((r=re.exec(Sc.programme))){nL++;const l0=r[1].toLowerCase();const lab=l0.startsWith('dossier')?'dossier':/^s[ée]ance/.test(l0)?'séance':/^tit/.test(l0)?'title':l0;const nums=[];r[2].replace(/(\d+)\s*[-–]\s*(\d+)|(\d+)/g,(_,a,b,c)=>{if(a){for(let i=+a;i<=+b;i++)nums.push(i)}else nums.push(+c)});
+  let best=0,bt='';for(const c of cl)for(const mt of mats){const L=(P[c]||{})[mt];if(!L)continue;L.forEach(u=>(u[1]||[]).forEach(x=>{const t=String(x[1]);const mm=t.match(/^\s*(TD|TP|Dossier|Séance|Title|Titre)\s*N?°?\s*(\d+)/i);if(mm&&mm[1].toLowerCase().replace('titre','title')===lab&&nums.includes(+mm[2])){const s=sim(r[3],t);if(s>=best){best=s;bt=c+' '+mt+' n°'+x[0]+' «'+t.slice(0,70)+'»';}}}));}
+  let maxL=0,bestAll='';for(const c of cl)for(const mt of mats){const L=(P[c]||{})[mt];if(!L)continue;L.forEach(u=>(u[1]||[]).forEach(x=>{const s3=sim(r[3],String(x[1]));if(s3>maxL){maxL=s3;bestAll=String(x[1]).slice(0,70);}}));}
+  if(best<.34||maxL-best>=.3)outL.push(f+' | '+r[0].slice(0,90)+' ≠ '+(bt||'étiquette introuvable')+(maxL-best>=.3?' → plus proche : «'+bestAll+'»':''));}}
 console.log('TD/TP/dossiers vérifiés',nL,'écarts',outL.length);outL.forEach(x=>console.log(x));
 if(out.length||outL.length){console.error('\n✗ Des scènes citent une leçon qui ne correspond pas à la progression officielle (apprendre/progressions.js).');process.exit(1);}
 console.log('✓ Chaque leçon citée par une scène correspond à la progression officielle.');

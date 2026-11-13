@@ -1,0 +1,183 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Le panier de Grâce — Scènes vivantes | VÉRITAS</title>
+<meta name="description" content="Scène animée d’économie sociale et familiale (6e) : aliments et nutriments, rôles énergétique, bâtisseur et protecteur, origine des aliments, repas équilibré.">
+<link rel="icon" href="../VERITAS_favicon_512.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="scene.css?v=20261113a">
+<!-- scene-tete -->
+<link rel="canonical" href="https://veritas-school.com/scenes/6e-esf-nutriments-marche.html">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Le panier de Grâce — Scènes vivantes | VÉRITAS">
+<meta property="og:description" content="Scène animée d’économie sociale et familiale (6e) : aliments et nutriments, rôles énergétique, bâtisseur et protecteur, origine des aliments, repas équilibré.">
+<meta property="og:url" content="https://veritas-school.com/scenes/6e-esf-nutriments-marche.html">
+<meta property="og:image" content="https://veritas-school.com/og-image.jpg">
+<meta property="og:locale" content="fr_FR">
+<meta name="twitter:card" content="summary_large_image">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"LearningResource","name":"Le panier de Grâce","description":"Scène animée d’économie sociale et familiale (6e) : aliments et nutriments, rôles énergétique, bâtisseur et protecteur, origine des aliments, repas équilibré.","url":"https://veritas-school.com/scenes/6e-esf-nutriments-marche.html","inLanguage":"fr","learningResourceType":"Simulation interactive","educationalLevel":"6ᵉ","about":"Économie sociale et familiale","teaches":"Distinguer aliments et nutriments, classer les nutriments selon leur rôle (énergétiques, bâtisseurs, protecteurs) et les aliments selon leur origine (animale, végétale, minérale), pour composer un repas équilibré.","isAccessibleForFree":true,"interactivityType":"active","provider":{"@type":"EducationalOrganization","name":"Centre VÉRITAS","url":"https://veritas-school.com/"},"isPartOf":{"@type":"CollectionPage","name":"Scènes vivantes","url":"https://veritas-school.com/scenes/"}}</script>
+<!-- /scene-tete -->
+</head>
+<body>
+<noscript>Cette scène a besoin de JavaScript pour se jouer.</noscript>
+<script>
+window.SCENE = {
+  id: '6e-esf-nutriments',
+  discipline: 'Économie sociale et familiale', niveau: '6e',
+  titre: 'Le panier de Grâce',
+  decor: 'marche', lieu: 'Le marché de Mvog-Mbi, Yaoundé', moment: 'Un mercredi après les cours',
+  objectif: 'Distinguer aliments et nutriments, classer les nutriments selon leur rôle (énergétiques, bâtisseurs, protecteurs) et les aliments selon leur origine (animale, végétale, minérale), pour composer un repas équilibré.',
+  programme: 'Progression harmonisée 6e · Étude des nutriments, leçon 13 (aliments et nutriments, classification des nutriments selon leur rôle, classification des aliments selon leur origine)',
+  jauges: [
+    { id: 'equilibre', nom: 'Équilibre du repas', val: 20, couleur: '#1F9D5B' },
+    { id: 'budget', nom: 'Budget restant', val: 100, couleur: '#D98E04' }
+  ],
+  personnages: {
+    grace: { nom: 'Grâce, élève de 6e', couleur: '#B03A6E', look: { metier: 'eleve', tenue: 'jupe', peau: 'fonce', cheveux: 'tresses', objet: 'sac' } },
+    maman: { nom: 'Maman Biloa, sa mère', couleur: '#2E6B5A', look: { tenue: 'robe', peau: 'fonce', coiffe: 'foulard', couleurCoiffe: '#2E6B5A', habit: '#2E6B5A' } },
+    vendeuse: { nom: 'Mama Afane, vendeuse de vivres', couleur: '#C2551F', look: { metier: 'commercant', tenue: 'robe', peau: 'tresfonce', coiffe: 'foulard', couleurCoiffe: '#C2551F' } }
+  },
+  etapes: [
+    { t: 'recit', entre: ['grace', 'maman'], txt: 'Ce soir, c’est Grâce qui compose le repas de la famille. Maman Biloa lui confie 2 000 francs et une règle : un repas qui donne de l’énergie, qui fait grandir et qui protège.', objet: { i: 'panier', lib: '2 000 F' } },
+    { t: 'dit', qui: 'grace', txt: 'Maman, en ESF on a appris que les aliments contiennent des nutriments. C’est pareil ?' },
+    { t: 'remarque', titre: 'Aliment ou nutriment ?', txt: 'Un ALIMENT est ce que l’on mange : plantain, poisson, arachide. Un NUTRIMENT est la substance que la digestion en tire et que le corps utilise : glucides, lipides, protides, vitamines, sels minéraux, et l’eau.' },
+    { t: 'remarque', titre: 'Trois rôles', txt: 'Les nutriments ÉNERGÉTIQUES (glucides, lipides) donnent la force. Les nutriments BÂTISSEURS (protides) construisent et réparent le corps : muscles, croissance. Les nutriments PROTECTEURS ou FONCTIONNELS (vitamines, sels minéraux) protègent l’organisme et le font bien fonctionner.' },
+    { t: 'recit', entre: ['vendeuse'], txt: 'Devant l’étal de Mama Afane : plantains, macabo, poisson fumé, haricots, arachides, huile de palme, feuilles de ndolè, avocats et papayes.' },
+    { t: 'atelier', mode: 'tri', titre: 'Atelier · à quoi sert chaque aliment ?', consigne: 'Classe chaque aliment selon le rôle principal de ses nutriments.',
+      cats: ['Énergétique', 'Bâtisseur', 'Protecteur'],
+      items: [
+        { txt: 'Plantain', cat: 0 },
+        { txt: 'Huile de palme', cat: 0 },
+        { txt: 'Poisson fumé', cat: 1 },
+        { txt: 'Haricots', cat: 1 },
+        { txt: 'Papaye', cat: 2 },
+        { txt: 'Feuilles de ndolè', cat: 2 }
+      ],
+      bravo: 'Un même aliment contient plusieurs nutriments ; on le classe d’après le principal. L’arachide, par exemple, est riche à la fois en lipides et en protides.', jauges: { equilibre: 45 } },
+    { t: 'dit', qui: 'vendeuse', txt: 'Ma fille, le sel aussi c’est un aliment ? Et l’eau ?' },
+    { t: 'question', q: 'Le sel de cuisine est un aliment d’origine…',
+      options: [
+        { txt: 'minérale.', ok: true, retour: 'Comme l’eau : ni animal ni végétal.' },
+        { txt: 'végétale.', retour: 'Non : il ne vient pas d’une plante.' },
+        { txt: 'animale.', retour: 'Non.' }
+      ] },
+    { t: 'atelier', mode: 'tri', titre: 'Atelier · l’origine des aliments', consigne: 'Classe chaque aliment selon son origine.',
+      cats: ['Animale', 'Végétale', 'Minérale'],
+      items: [
+        { txt: 'Poisson fumé', cat: 0 },
+        { txt: 'Œuf', cat: 0 },
+        { txt: 'Macabo', cat: 1 },
+        { txt: 'Avocat', cat: 1 },
+        { txt: 'Sel', cat: 2 },
+        { txt: 'Eau', cat: 2 }
+      ],
+      bravo: 'Origine animale, végétale ou minérale : une autre façon de classer les aliments.', jauges: { equilibre: 55 } },
+    { t: 'choix', qui: 'grace', q: 'Avec 2 000 francs, quel repas choisis-tu ?',
+      options: [
+        { txt: 'Plantains, poisson fumé, ndolè aux arachides, et une papaye en dessert.', consequence: 'Énergie, croissance et protection : un repas complet et équilibré.', jauges: { equilibre: 40, budget: -60 } },
+        { txt: 'Beaucoup de beignets et une boisson sucrée.', consequence: 'Rassasiant, mais presque uniquement énergétique : rien pour grandir ni pour se protéger.', jauges: { equilibre: -20, budget: -50 } },
+        { txt: 'Seulement du poisson, beaucoup de poisson.', consequence: 'Des protides en excès, mais peu d’énergie et peu de vitamines.', jauges: { equilibre: -10, budget: -80 } }
+      ],
+      oeuvre: 'Un repas équilibré associe les trois groupes : énergétiques, bâtisseurs et protecteurs, avec de l’eau.' },
+    { t: 'atelier', mode: 'monnaie', titre: 'Atelier · payer le poisson fumé', consigne: 'Le tas de poisson fumé coûte 750 francs. Paie le montant exact.', cible: 750, pieces: [500, 100, 50, 25], devise: 'FCFA',
+      bravo: 'Payé ! Le poisson apporte les protides du repas.' },
+    { t: 'dit', qui: 'maman', emo: 'fier', txt: 'Ma fille fait les courses comme une diététicienne !' },
+    { t: 'dit', qui: 'grace', emo: 'joie', txt: 'Et je n’oublie pas le grand verre d’eau : l’eau aussi est indispensable.' }
+  ],
+  labo: {
+    titre: 'Laboratoire · composer un repas',
+    intro: 'Règle la part des aliments énergétiques, bâtisseurs et protecteurs : le repas est-il équilibré ?',
+    persos: ['grace', 'maman', 'vendeuse'],
+    curseurs: [
+      { id: 'energie', nom: 'Aliments énergétiques', val: 60, bas: 'peu', haut: 'beaucoup' },
+      { id: 'batisseurs', nom: 'Aliments bâtisseurs', val: 50, bas: 'peu', haut: 'beaucoup' },
+      { id: 'protecteurs', nom: 'Fruits et légumes', val: 30, bas: 'peu', haut: 'beaucoup' }
+    ],
+    scenarios: [
+      { nom: 'Le repas de Grâce', icone: 'fruit', valeurs: { energie: 55, batisseurs: 55, protecteurs: 60 } },
+      { nom: 'Beignets et soda', icone: 'gateau', valeurs: { energie: 95, batisseurs: 10, protecteurs: 5 } },
+      { nom: 'Rien que du poisson', icone: 'vagues', valeurs: { energie: 15, batisseurs: 95, protecteurs: 15 } }
+    ],
+    liens: [
+      { a: 'grace', b: 'maman', type: 'confiance', lib: 'cuisine pour', base: .5, poids: { protecteurs: .3 } },
+      { a: 'grace', b: 'vendeuse', type: 'alliance', lib: 'achète', base: .4 },
+      { a: 'maman', b: 'vendeuse', type: 'confiance', lib: 'cliente fidèle', base: .5 }
+    ],
+    issue: function(v){
+      if(v.protecteurs < 25){ return { niveau: 'ko', badge: 'Il manque la protection', recit: 'Sans fruits ni légumes, les vitamines et les sels minéraux manquent : fatigue, défenses affaiblies.', apres: 'Les nutriments protecteurs sont indispensables chaque jour.', themes: ['vitamines'] }; }
+      if(v.energie > 80 && v.batisseurs < 30){ return { niveau: 'ko', badge: 'Trop d’énergie, pas de construction', recit: 'Le corps reçoit du carburant, mais rien pour grandir et se réparer.', apres: 'Les protides construisent le corps.', themes: ['protides'] }; }
+      if(v.energie > 35 && v.batisseurs > 35 && v.protecteurs > 35){ return { niveau: 'ok', badge: 'Un repas équilibré', recit: 'Toute la famille a de l’énergie, grandit et reste en bonne santé.', apres: 'Un aliment de chaque groupe à chaque repas.', themes: ['équilibre alimentaire'] }; }
+      return { niveau: 'moyen', badge: 'Presque équilibré', recit: 'Le repas nourrit, mais un groupe est trop faible.', apres: 'Ajustez les proportions.', themes: ['nutriments'] };
+    }
+  },
+  quiz: [
+    { q: 'Quelle est la différence entre un aliment et un nutriment ?', options: [
+      { txt: 'On mange l’aliment ; le corps utilise les nutriments qu’il contient.', ok: true, retour: 'Exact.' },
+      { txt: 'Il n’y en a aucune.', retour: 'Non.' } ] },
+    { q: 'Les protides sont des nutriments…', options: [
+      { txt: 'bâtisseurs.', ok: true, retour: 'Ils construisent et réparent le corps.' },
+      { txt: 'protecteurs.', retour: 'Ce sont les vitamines et sels minéraux.' } ] },
+    { q: 'Lequel est surtout énergétique ?', options: [
+      { txt: 'Le manioc.', ok: true, retour: 'Riche en glucides.' },
+      { txt: 'La papaye.', retour: 'Elle est surtout protectrice (vitamines).' } ] },
+    { q: 'L’œuf est un aliment d’origine…', options: [
+      { txt: 'animale.', ok: true, retour: 'Exact.' },
+      { txt: 'minérale.', retour: 'Non.' } ] },
+    { q: 'Un repas équilibré contient…', options: [
+      { txt: 'des aliments énergétiques, bâtisseurs et protecteurs, avec de l’eau.', ok: true, retour: 'Les trois groupes.' },
+      { txt: 'seulement des aliments énergétiques.', retour: 'Non.' } ] }
+  ],
+  bilan: {
+    retenir: [
+      'Aliment : ce que l’on mange ; nutriment : substance que le corps en tire et utilise.',
+      'Nutriments : glucides, lipides, protides, vitamines, sels minéraux, eau.',
+      'Rôles : énergétiques (glucides, lipides), bâtisseurs (protides), protecteurs (vitamines, sels minéraux).',
+      'Origine des aliments : animale, végétale ou minérale (sel, eau).'
+    ],
+    ecrire: 'Composez les menus équilibrés d’une journée (petit-déjeuner, déjeuner, dîner) avec des aliments du marché de votre quartier, en indiquant le rôle de chaque aliment.'
+  }
+};
+</script>
+<script src="decors.js?v=20261113c"></script>
+<script src="scene.js?v=20261113a"></script>
+<!-- scene-texte -->
+<details id="scene-texte" style="max-width:860px;margin:28px auto 40px;padding:0 16px;font:15px/1.6 Poppins,system-ui,sans-serif;color:#0C2A6A">
+<summary style="cursor:pointer;font-weight:600;padding:12px 0">Lire la scène en texte</summary>
+<article lang="fr">
+<h1>Le panier de Grâce</h1>
+<p><b>Économie sociale et familiale · 6ᵉ</b></p>
+<p><i>Dialogue fictif écrit pour la leçon. Les faits et les dates cités sont exacts.</i></p>
+<h3>Objectif</h3><p>Distinguer aliments et nutriments, classer les nutriments selon leur rôle (énergétiques, bâtisseurs, protecteurs) et les aliments selon leur origine (animale, végétale, minérale), pour composer un repas équilibré.</p>
+<p>Programme : Progression harmonisée 6e · Étude des nutriments, leçon 13 (aliments et nutriments, classification des nutriments selon leur rôle, classification des aliments selon leur origine)</p>
+<p>Lieu : Le marché de Mvog-Mbi, Yaoundé · Un mercredi après les cours</p>
+<h3>Personnages</h3><ul><li>Grâce, élève de 6e</li><li>Maman Biloa, sa mère</li><li>Mama Afane, vendeuse de vivres</li></ul>
+<h3>La scène</h3>
+<p>Ce soir, c’est Grâce qui compose le repas de la famille. Maman Biloa lui confie 2 000 francs et une règle : un repas qui donne de l’énergie, qui fait grandir et qui protège.</p>
+<p><b>Grâce, élève de 6e</b> : Maman, en ESF on a appris que les aliments contiennent des nutriments. C’est pareil ?</p>
+<h4>Aliment ou nutriment ?</h4><p>Un ALIMENT est ce que l’on mange : plantain, poisson, arachide. Un NUTRIMENT est la substance que la digestion en tire et que le corps utilise : glucides, lipides, protides, vitamines, sels minéraux, et l’eau.</p>
+<h4>Trois rôles</h4><p>Les nutriments ÉNERGÉTIQUES (glucides, lipides) donnent la force. Les nutriments BÂTISSEURS (protides) construisent et réparent le corps : muscles, croissance. Les nutriments PROTECTEURS ou FONCTIONNELS (vitamines, sels minéraux) protègent l’organisme et le font bien fonctionner.</p>
+<p>Devant l’étal de Mama Afane : plantains, macabo, poisson fumé, haricots, arachides, huile de palme, feuilles de ndolè, avocats et papayes.</p>
+<h4>Atelier · à quoi sert chaque aliment ?</h4><p>Classe chaque aliment selon le rôle principal de ses nutriments.</p>
+<ul><li><b>Énergétique</b> : Plantain ; Huile de palme</li><li><b>Bâtisseur</b> : Poisson fumé ; Haricots</li><li><b>Protecteur</b> : Papaye ; Feuilles de ndolè</li></ul>
+<p>Un même aliment contient plusieurs nutriments ; on le classe d’après le principal. L’arachide, par exemple, est riche à la fois en lipides et en protides.</p>
+<p><b>Mama Afane, vendeuse de vivres</b> : Ma fille, le sel aussi c’est un aliment ? Et l’eau ?</p>
+<p><b>Question :</b> Le sel de cuisine est un aliment d’origine…</p><ul><li>minérale. <b>(bonne réponse)</b></li><li>végétale.</li><li>animale.</li></ul><p>Comme l’eau : ni animal ni végétal.</p>
+<h4>Atelier · l’origine des aliments</h4><p>Classe chaque aliment selon son origine.</p>
+<ul><li><b>Animale</b> : Poisson fumé ; Œuf</li><li><b>Végétale</b> : Macabo ; Avocat</li><li><b>Minérale</b> : Sel ; Eau</li></ul>
+<p>Origine animale, végétale ou minérale : une autre façon de classer les aliments.</p>
+<p><b>À toi de décider :</b> Avec 2 000 francs, quel repas choisis-tu ?</p><ul><li>Plantains, poisson fumé, ndolè aux arachides, et une papaye en dessert. — Énergie, croissance et protection : un repas complet et équilibré.</li><li>Beaucoup de beignets et une boisson sucrée. — Rassasiant, mais presque uniquement énergétique : rien pour grandir ni pour se protéger.</li><li>Seulement du poisson, beaucoup de poisson. — Des protides en excès, mais peu d’énergie et peu de vitamines.</li></ul>
+<h4>Atelier · payer le poisson fumé</h4><p>Le tas de poisson fumé coûte 750 francs. Paie le montant exact.</p>
+<p>Payé ! Le poisson apporte les protides du repas.</p>
+<p><b>Maman Biloa, sa mère</b> : Ma fille fait les courses comme une diététicienne !</p>
+<p><b>Grâce, élève de 6e</b> : Et je n’oublie pas le grand verre d’eau : l’eau aussi est indispensable.</p>
+<h3>Quiz</h3><ol><li>Quelle est la différence entre un aliment et un nutriment ? — <b>On mange l’aliment ; le corps utilise les nutriments qu’il contient.</b> Exact.</li><li>Les protides sont des nutriments… — <b>bâtisseurs.</b> Ils construisent et réparent le corps.</li><li>Lequel est surtout énergétique ? — <b>Le manioc.</b> Riche en glucides.</li><li>L’œuf est un aliment d’origine… — <b>animale.</b> Exact.</li><li>Un repas équilibré contient… — <b>des aliments énergétiques, bâtisseurs et protecteurs, avec de l’eau.</b> Les trois groupes.</li></ol>
+<h3>À retenir</h3><ul><li>Aliment : ce que l’on mange ; nutriment : substance que le corps en tire et utilise.</li><li>Nutriments : glucides, lipides, protides, vitamines, sels minéraux, eau.</li><li>Rôles : énergétiques (glucides, lipides), bâtisseurs (protides), protecteurs (vitamines, sels minéraux).</li><li>Origine des aliments : animale, végétale ou minérale (sel, eau).</li></ul>
+<h3>À écrire</h3><p>Composez les menus équilibrés d’une journée (petit-déjeuner, déjeuner, dîner) avec des aliments du marché de votre quartier, en indiquant le rôle de chaque aliment.</p>
+<p><a href="index.html">Toutes les Scènes vivantes</a> · <a href="6e-esf-nutriments-marche.html">Jouer la scène</a></p>
+</article>
+<!-- /scene-texte -->
+</body>
+</html>

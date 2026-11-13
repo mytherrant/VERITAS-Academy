@@ -1,0 +1,179 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Cincinnatus et sa charrue — Scènes vivantes | VÉRITAS</title>
+<meta name="description" content="Scène animée de latin (5e) : le sens de la vertu romaine (virtus, pietas, fides) à travers Cincinnatus, d’après Tite-Live, et les valeurs actuelles.">
+<link rel="icon" href="../VERITAS_favicon_512.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="scene.css?v=20261113a">
+<!-- scene-tete -->
+<link rel="canonical" href="https://veritas-school.com/scenes/5e-latin-cincinnatus-vertu.html">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Cincinnatus et sa charrue — Scènes vivantes | VÉRITAS">
+<meta property="og:description" content="Scène animée de latin (5e) : le sens de la vertu romaine (virtus, pietas, fides) à travers Cincinnatus, d’après Tite-Live, et les valeurs actuelles.">
+<meta property="og:url" content="https://veritas-school.com/scenes/5e-latin-cincinnatus-vertu.html">
+<meta property="og:image" content="https://veritas-school.com/og-image.jpg">
+<meta property="og:locale" content="fr_FR">
+<meta name="twitter:card" content="summary_large_image">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"LearningResource","name":"Cincinnatus et sa charrue","description":"Scène animée de latin (5e) : le sens de la vertu romaine (virtus, pietas, fides) à travers Cincinnatus, d’après Tite-Live, et les valeurs actuelles.","url":"https://veritas-school.com/scenes/5e-latin-cincinnatus-vertu.html","inLanguage":"fr","learningResourceType":"Simulation interactive","educationalLevel":"5ᵉ","about":"Latin","teaches":"Découvrir les valeurs romaines (virtus, pietas, fides, gravitas) à travers l’histoire de Cincinnatus racontée par Tite-Live, en tirer du vocabulaire latin et ses héritiers français, et les confronter aux valeurs actuelles du service public.","isAccessibleForFree":true,"interactivityType":"active","provider":{"@type":"EducationalOrganization","name":"Centre VÉRITAS","url":"https://veritas-school.com/"},"isPartOf":{"@type":"CollectionPage","name":"Scènes vivantes","url":"https://veritas-school.com/scenes/"}}</script>
+<!-- /scene-tete -->
+</head>
+<body>
+<noscript>Cette scène a besoin de JavaScript pour se jouer.</noscript>
+<script>
+window.SCENE = {
+  id: '5e-latin-cincinnatus',
+  discipline: 'Latin', niveau: '5e',
+  titre: 'Cincinnatus et sa charrue',
+  decor: 'agora', lieu: 'Rome et la campagne au-delà du Tibre', moment: '458 avant J.-C., d’après Tite-Live (livre III)',
+  objectif: 'Découvrir les valeurs romaines (virtus, pietas, fides, gravitas) à travers l’histoire de Cincinnatus racontée par Tite-Live, en tirer du vocabulaire latin et ses héritiers français, et les confronter aux valeurs actuelles du service public.',
+  programme: 'Progression harmonisée 5e · Fondamentaux du latin et culture antique, title 16 (le sens de la vertu : de la Rome antique aux valeurs actuelles, avec citations), title 17 (le sens de la vertu, suite)',
+  jauges: [
+    { id: 'virtus', nom: 'Virtus (courage, valeur)', val: 50, couleur: '#B03A2E' },
+    { id: 'res', nom: 'Salut de la République', val: 20, couleur: '#1E499B' }
+  ],
+  personnages: {
+    nadege: { nom: 'Nadège, élève de 5e, conteuse', couleur: '#1F6F78', look: { metier: 'eleve', tenue: 'jupe', peau: 'fonce', cheveux: 'tresses', objet: 'livre' } },
+    cinci: { nom: 'Lucius Quinctius Cincinnatus', couleur: '#8A5A2B', look: { metier: 'paysan', tenue: 'boubou', peau: 'mat', cheveux: 'court', habit: '#E9DFC7' } },
+    racilia: { nom: 'Racilia, son épouse', couleur: '#7A2E5A', look: { tenue: 'robe', peau: 'mat', cheveux: 'chignon', habit: '#7A2E5A' } },
+    legatus: { nom: 'Un envoyé du Sénat', couleur: '#5A2E2E', look: { tenue: 'boubou', peau: 'mat', cheveux: 'court', habit: '#F2EBD8', objet: 'lettre' } }
+  },
+  etapes: [
+    { t: 'recit', entre: ['nadege'], txt: 'Au cours de latin, Nadège raconte une histoire que l’historien romain Tite-Live a écrite il y a plus de deux mille ans.', objet: { i: 'livre', lib: 'Tite-Live, livre III' } },
+    { t: 'dit', qui: 'nadege', txt: 'En 458 avant Jésus-Christ, une armée romaine est encerclée par les Èques sur le mont Algide. Rome est en danger. Le Sénat décide de nommer un dictateur, un chef aux pleins pouvoirs pour six mois au plus.' },
+    { t: 'recit', entre: ['cinci', 'racilia'], txt: 'De l’autre côté du Tibre, sur son petit champ de quatre arpents, un ancien consul travaille la terre de ses mains : Cincinnatus.', jauges: { res: 15 } },
+    { t: 'recit', entre: ['legatus'], txt: 'Les envoyés du Sénat arrivent. Ils lui demandent de revêtir sa toge pour écouter le message du Sénat. Racilia court la chercher.' },
+    { t: 'dit', qui: 'legatus', txt: 'Le Sénat et le peuple romain te nomment dictateur. L’armée du consul est assiégée : sauve la République !' },
+    { t: 'choix', qui: 'cinci', q: 'Tu es Cincinnatus. Que réponds-tu ?',
+      options: [
+        { txt: 'J’accepte : la patrie passe avant ma récolte.', consequence: 'Il quitte sa charrue, lève une armée et part le soir même.', jauges: { virtus: 30, res: 40 } },
+        { txt: 'Je refuse : mon champ ne peut pas attendre.', consequence: 'Ce n’est pas ce que raconte Tite-Live : Cincinnatus fait passer le salut de Rome avant ses intérêts.', jauges: { res: -10 } }
+      ],
+      oeuvre: 'Pour les Romains, servir la res publica (la « chose publique ») est un devoir.' },
+    { t: 'recit', txt: 'Cincinnatus lève une armée, délivre le consul, bat les Èques et les fait passer sous le joug. Il rentre à Rome en triomphe.', jauges: { virtus: 85, res: 90 } },
+    { t: 'dit', qui: 'nadege', txt: 'Et voici le plus étonnant : il avait les pleins pouvoirs pour six mois. Tite-Live dit qu’il les abandonne au seizième jour, et retourne à sa charrue.' },
+    { t: 'question', q: 'Pourquoi les Romains admiraient-ils autant ce geste ?',
+      options: [
+        { txt: 'Parce qu’il rend le pouvoir dès que sa mission est accomplie, sans chercher à s’enrichir ni à le garder.', ok: true, retour: 'Il incarne le service désintéressé de la République.' },
+        { txt: 'Parce qu’il préférait l’agriculture à la guerre.', retour: 'Il a bien combattu ; ce qu’on admire, c’est qu’il rende le pouvoir.' }
+      ] },
+    { t: 'remarque', titre: 'Les valeurs romaines', txt: 'VIRTUS : le courage, la valeur de l’homme (de vir, « homme »). PIETAS : le respect du devoir envers les dieux, la patrie et la famille. FIDES : la loyauté, le respect de la parole donnée. GRAVITAS : le sérieux, la dignité. Cincinnatus les réunit toutes.' },
+    { t: 'atelier', mode: 'tri', titre: 'Atelier · le mot latin et sa valeur', consigne: 'Associe chaque situation à la valeur romaine qu’elle illustre.',
+      cats: ['Virtus', 'Pietas', 'Fides'],
+      items: [
+        { txt: 'Combattre l’ennemi pour sauver l’armée.', cat: 0 },
+        { txt: 'Obéir à l’appel de la patrie.', cat: 1 },
+        { txt: 'Rendre le pouvoir comme promis.', cat: 2 },
+        { txt: 'Honorer ses parents et les dieux.', cat: 1 },
+        { txt: 'Tenir sa parole envers un allié.', cat: 2 }
+      ],
+      bravo: 'Virtus, pietas, fides : trois piliers du mos maiorum, la « coutume des ancêtres ».', jauges: { virtus: 95 } },
+    { t: 'atelier', mode: 'tri', titre: 'Atelier · des mots latins aux mots français', consigne: 'Retrouve le mot latin d’origine.',
+      cats: ['virtus', 'fides', 'res publica'],
+      items: [
+        { txt: 'vertu', cat: 0 },
+        { txt: 'vertueux', cat: 0 },
+        { txt: 'fidèle', cat: 1 },
+        { txt: 'confiance', cat: 1 },
+        { txt: 'république', cat: 2 }
+      ],
+      bravo: 'Le latin vit dans le français : vertu, fidélité, république.' },
+    { t: 'dit', qui: 'nadege', txt: 'Une citation de Cicéron le résume : « Salus populi suprema lex esto » : que le salut du peuple soit la loi suprême.' },
+    { t: 'dit', qui: 'nadege', emo: 'fier', txt: 'Aujourd’hui encore, on appelle « Cincinnatus » un responsable qui sert puis rend le pouvoir. Être intègre, servir l’intérêt général, respecter sa parole : ce sont toujours des valeurs de citoyen.' }
+  ],
+  labo: {
+    titre: 'Laboratoire · le bon magistrat',
+    intro: 'Règle le sens du devoir, l’ambition personnelle et le respect de la parole : le dictateur sauve-t-il la République ?',
+    persos: ['cinci', 'racilia', 'legatus', 'nadege'],
+    curseurs: [
+      { id: 'devoir', nom: 'Sens du devoir (pietas)', val: 85, bas: 'faible', haut: 'total' },
+      { id: 'ambition', nom: 'Ambition personnelle', val: 10, bas: 'aucune', haut: 'dévorante' },
+      { id: 'parole', nom: 'Respect de la parole (fides)', val: 90, bas: 'trahie', haut: 'tenue' }
+    ],
+    scenarios: [
+      { nom: 'Cincinnatus selon Tite-Live', icone: 'couronne', valeurs: { devoir: 90, ambition: 5, parole: 95 } },
+      { nom: 'Un dictateur ambitieux', icone: 'colere', valeurs: { ambition: 95, parole: 20 } },
+      { nom: 'Un homme sans devoir', icone: 'nuage', valeurs: { devoir: 10, ambition: 20 } }
+    ],
+    liens: [
+      { a: 'legatus', b: 'cinci', type: 'confiance', lib: 'appelle', base: .5, poids: { devoir: .3 } },
+      { a: 'racilia', b: 'cinci', type: 'amour', lib: 'épouse', base: .7 },
+      { a: 'nadege', b: 'cinci', type: 'alliance', lib: 'raconte', base: .4 }
+    ],
+    issue: function(v){
+      if(v.devoir < 30){ return { niveau: 'ko', badge: 'Rome sans défenseur', recit: 'L’appel du Sénat reste sans réponse ; l’armée encerclée est perdue.', apres: 'Sans pietas, pas de service de la patrie.', themes: ['pietas'] }; }
+      if(v.ambition > 60 || v.parole < 40){ return { niveau: 'moyen', badge: 'Victoire, puis tyrannie', recit: 'L’ennemi est battu, mais le dictateur garde le pouvoir : la République est sauvée de l’ennemi, pas de son sauveur.', apres: 'La vertu, c’est aussi savoir rendre le pouvoir.', themes: ['fides', 'pouvoir'] }; }
+      return { niveau: 'ok', badge: 'Le modèle romain', recit: 'Seize jours de dictature, une victoire, puis le retour à la charrue.', apres: 'Virtus, pietas, fides : servir sans se servir.', themes: ['virtus', 'res publica'] };
+    }
+  },
+  quiz: [
+    { q: 'Qui raconte l’histoire de Cincinnatus ?', options: [
+      { txt: 'L’historien romain Tite-Live.', ok: true, retour: 'Dans son Histoire romaine, livre III.' },
+      { txt: 'Homère.', retour: 'Non : Homère est un poète grec.' } ] },
+    { q: 'Que signifie virtus ?', options: [
+      { txt: 'Le courage, la valeur.', ok: true, retour: 'Mot formé sur vir, « l’homme ».' },
+      { txt: 'La richesse.', retour: 'Non.' } ] },
+    { q: 'Au bout de combien de jours Cincinnatus abandonne-t-il la dictature, selon Tite-Live ?', options: [
+      { txt: 'Seize jours.', ok: true, retour: 'Alors qu’il pouvait la garder six mois.' },
+      { txt: 'Dix ans.', retour: 'Non.' } ] },
+    { q: '« Salus populi suprema lex esto » signifie…', options: [
+      { txt: 'Que le salut du peuple soit la loi suprême.', ok: true, retour: 'Cicéron, Des lois.' },
+      { txt: 'Le peuple doit saluer la loi.', retour: 'Salus veut dire « salut, sauvegarde ».' } ] },
+    { q: 'Quel mot français vient de fides ?', options: [
+      { txt: 'Fidèle.', ok: true, retour: 'Et fidélité, confiance.' },
+      { txt: 'Fidèle vient de filius.', retour: 'Non : filius a donné « fils ».' } ] }
+  ],
+  bilan: {
+    retenir: [
+      'Cincinnatus (458 av. J.-C., d’après Tite-Live) quitte sa charrue pour sauver Rome, puis rend le pouvoir au seizième jour.',
+      'Valeurs romaines : virtus (courage), pietas (devoir), fides (loyauté), gravitas (sérieux).',
+      'Héritage français : vertu, fidèle, république (res publica).',
+      'Citation : « Salus populi suprema lex esto » (Cicéron).'
+    ],
+    ecrire: 'Choisissez une personne de votre entourage ou de l’histoire du Cameroun qui incarne une valeur romaine. Présentez-la en dix lignes en employant au moins deux mots latins expliqués.'
+  }
+};
+</script>
+<script src="decors.js?v=20261113c"></script>
+<script src="scene.js?v=20261113a"></script>
+<!-- scene-texte -->
+<details id="scene-texte" style="max-width:860px;margin:28px auto 40px;padding:0 16px;font:15px/1.6 Poppins,system-ui,sans-serif;color:#0C2A6A">
+<summary style="cursor:pointer;font-weight:600;padding:12px 0">Lire la scène en texte</summary>
+<article lang="fr">
+<h1>Cincinnatus et sa charrue</h1>
+<p><b>Latin · 5ᵉ</b></p>
+<p><i>Dialogue fictif écrit pour la leçon. Les faits et les dates cités sont exacts.</i></p>
+<h3>Objectif</h3><p>Découvrir les valeurs romaines (virtus, pietas, fides, gravitas) à travers l’histoire de Cincinnatus racontée par Tite-Live, en tirer du vocabulaire latin et ses héritiers français, et les confronter aux valeurs actuelles du service public.</p>
+<p>Programme : Progression harmonisée 5e · Fondamentaux du latin et culture antique, title 16 (le sens de la vertu : de la Rome antique aux valeurs actuelles, avec citations), title 17 (le sens de la vertu, suite)</p>
+<p>Lieu : Rome et la campagne au-delà du Tibre · 458 avant J.-C., d’après Tite-Live (livre III)</p>
+<h3>Personnages</h3><ul><li>Nadège, élève de 5e, conteuse</li><li>Lucius Quinctius Cincinnatus</li><li>Racilia, son épouse</li><li>Un envoyé du Sénat</li></ul>
+<h3>La scène</h3>
+<p>Au cours de latin, Nadège raconte une histoire que l’historien romain Tite-Live a écrite il y a plus de deux mille ans.</p>
+<p><b>Nadège, élève de 5e, conteuse</b> : En 458 avant Jésus-Christ, une armée romaine est encerclée par les Èques sur le mont Algide. Rome est en danger. Le Sénat décide de nommer un dictateur, un chef aux pleins pouvoirs pour six mois au plus.</p>
+<p>De l’autre côté du Tibre, sur son petit champ de quatre arpents, un ancien consul travaille la terre de ses mains : Cincinnatus.</p>
+<p>Les envoyés du Sénat arrivent. Ils lui demandent de revêtir sa toge pour écouter le message du Sénat. Racilia court la chercher.</p>
+<p><b>Un envoyé du Sénat</b> : Le Sénat et le peuple romain te nomment dictateur. L’armée du consul est assiégée : sauve la République !</p>
+<p><b>À toi de décider :</b> Tu es Cincinnatus. Que réponds-tu ?</p><ul><li>J’accepte : la patrie passe avant ma récolte. — Il quitte sa charrue, lève une armée et part le soir même.</li><li>Je refuse : mon champ ne peut pas attendre. — Ce n’est pas ce que raconte Tite-Live : Cincinnatus fait passer le salut de Rome avant ses intérêts.</li></ul>
+<p>Cincinnatus lève une armée, délivre le consul, bat les Èques et les fait passer sous le joug. Il rentre à Rome en triomphe.</p>
+<p><b>Nadège, élève de 5e, conteuse</b> : Et voici le plus étonnant : il avait les pleins pouvoirs pour six mois. Tite-Live dit qu’il les abandonne au seizième jour, et retourne à sa charrue.</p>
+<p><b>Question :</b> Pourquoi les Romains admiraient-ils autant ce geste ?</p><ul><li>Parce qu’il rend le pouvoir dès que sa mission est accomplie, sans chercher à s’enrichir ni à le garder. <b>(bonne réponse)</b></li><li>Parce qu’il préférait l’agriculture à la guerre.</li></ul><p>Il incarne le service désintéressé de la République.</p>
+<h4>Les valeurs romaines</h4><p>VIRTUS : le courage, la valeur de l’homme (de vir, « homme »). PIETAS : le respect du devoir envers les dieux, la patrie et la famille. FIDES : la loyauté, le respect de la parole donnée. GRAVITAS : le sérieux, la dignité. Cincinnatus les réunit toutes.</p>
+<h4>Atelier · le mot latin et sa valeur</h4><p>Associe chaque situation à la valeur romaine qu’elle illustre.</p>
+<ul><li><b>Virtus</b> : Combattre l’ennemi pour sauver l’armée.</li><li><b>Pietas</b> : Obéir à l’appel de la patrie. ; Honorer ses parents et les dieux.</li><li><b>Fides</b> : Rendre le pouvoir comme promis. ; Tenir sa parole envers un allié.</li></ul>
+<p>Virtus, pietas, fides : trois piliers du mos maiorum, la « coutume des ancêtres ».</p>
+<h4>Atelier · des mots latins aux mots français</h4><p>Retrouve le mot latin d’origine.</p>
+<ul><li><b>virtus</b> : vertu ; vertueux</li><li><b>fides</b> : fidèle ; confiance</li><li><b>res publica</b> : république</li></ul>
+<p>Le latin vit dans le français : vertu, fidélité, république.</p>
+<p><b>Nadège, élève de 5e, conteuse</b> : Une citation de Cicéron le résume : « Salus populi suprema lex esto » : que le salut du peuple soit la loi suprême.</p>
+<p><b>Nadège, élève de 5e, conteuse</b> : Aujourd’hui encore, on appelle « Cincinnatus » un responsable qui sert puis rend le pouvoir. Être intègre, servir l’intérêt général, respecter sa parole : ce sont toujours des valeurs de citoyen.</p>
+<h3>Quiz</h3><ol><li>Qui raconte l’histoire de Cincinnatus ? — <b>L’historien romain Tite-Live.</b> Dans son Histoire romaine, livre III.</li><li>Que signifie virtus ? — <b>Le courage, la valeur.</b> Mot formé sur vir, « l’homme ».</li><li>Au bout de combien de jours Cincinnatus abandonne-t-il la dictature, selon Tite-Live ? — <b>Seize jours.</b> Alors qu’il pouvait la garder six mois.</li><li>« Salus populi suprema lex esto » signifie… — <b>Que le salut du peuple soit la loi suprême.</b> Cicéron, Des lois.</li><li>Quel mot français vient de fides ? — <b>Fidèle.</b> Et fidélité, confiance.</li></ol>
+<h3>À retenir</h3><ul><li>Cincinnatus (458 av. J.-C., d’après Tite-Live) quitte sa charrue pour sauver Rome, puis rend le pouvoir au seizième jour.</li><li>Valeurs romaines : virtus (courage), pietas (devoir), fides (loyauté), gravitas (sérieux).</li><li>Héritage français : vertu, fidèle, république (res publica).</li><li>Citation : « Salus populi suprema lex esto » (Cicéron).</li></ul>
+<h3>À écrire</h3><p>Choisissez une personne de votre entourage ou de l’histoire du Cameroun qui incarne une valeur romaine. Présentez-la en dix lignes en employant au moins deux mots latins expliqués.</p>
+<p><a href="index.html">Toutes les Scènes vivantes</a> · <a href="5e-latin-cincinnatus-vertu.html">Jouer la scène</a></p>
+</article>
+<!-- /scene-texte -->
+</body>
+</html>

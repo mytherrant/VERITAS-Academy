@@ -1,0 +1,178 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Le conte sur scène — Scènes vivantes | VÉRITAS</title>
+<meta name="description" content="Scène animée d’arts (4e) : le théâtre camerounais, la communication non verbale (geste, mimique, mime) et la théâtralisation d’un conte.">
+<link rel="icon" href="../VERITAS_favicon_512.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="scene.css?v=20261113a">
+<!-- scene-tete -->
+<link rel="canonical" href="https://veritas-school.com/scenes/4e-arts-theatre-conte.html">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Le conte sur scène — Scènes vivantes | VÉRITAS">
+<meta property="og:description" content="Scène animée d’arts (4e) : le théâtre camerounais, la communication non verbale (geste, mimique, mime) et la théâtralisation d’un conte.">
+<meta property="og:url" content="https://veritas-school.com/scenes/4e-arts-theatre-conte.html">
+<meta property="og:image" content="https://veritas-school.com/og-image.jpg">
+<meta property="og:locale" content="fr_FR">
+<meta name="twitter:card" content="summary_large_image">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"LearningResource","name":"Le conte sur scène","description":"Scène animée d’arts (4e) : le théâtre camerounais, la communication non verbale (geste, mimique, mime) et la théâtralisation d’un conte.","url":"https://veritas-school.com/scenes/4e-arts-theatre-conte.html","inLanguage":"fr","learningResourceType":"Simulation interactive","educationalLevel":"4ᵉ","about":"Arts","teaches":"Découvrir l’histoire du théâtre camerounais, utiliser la communication non verbale (geste, mimique, mime) et théâtraliser un conte de dix minutes : rôles, espace, voix, public.","isAccessibleForFree":true,"interactivityType":"active","provider":{"@type":"EducationalOrganization","name":"Centre VÉRITAS","url":"https://veritas-school.com/"},"isPartOf":{"@type":"CollectionPage","name":"Scènes vivantes","url":"https://veritas-school.com/scenes/"}}</script>
+<!-- /scene-tete -->
+</head>
+<body>
+<noscript>Cette scène a besoin de JavaScript pour se jouer.</noscript>
+<script>
+window.SCENE = {
+  id: '4e-arts-theatre',
+  discipline: 'Arts', niveau: '4e',
+  titre: 'Le conte sur scène',
+  decor: 'chefferie', lieu: 'La cour du collège, préparée comme une place de village', moment: 'Répétition pour la fête de fin d’année',
+  objectif: 'Découvrir l’histoire du théâtre camerounais, utiliser la communication non verbale (geste, mimique, mime) et théâtraliser un conte de dix minutes : rôles, espace, voix, public.',
+  programme: 'Progression harmonisée 4e · Arts scéniques, leçon 18 (histoire du théâtre : le théâtre camerounais), leçon 20 (communication non verbale : le geste, la mimique, le mime et la grimace), leçon 21 (théâtralisation d’un conte de 10 minutes)',
+  jauges: [
+    { id: 'jeu', nom: 'Qualité du jeu', val: 25, couleur: '#B03A6E' },
+    { id: 'public', nom: 'Attention du public', val: 30, couleur: '#D98E04' }
+  ],
+  personnages: {
+    prof: { nom: 'Mme Mengue, professeure d’arts', couleur: '#5B4FA8', look: { metier: 'enseignant', tenue: 'robe', peau: 'fonce', coiffe: 'foulard', couleurCoiffe: '#5B4FA8', habit: '#5B4FA8' } },
+    conteur: { nom: 'Steve, le conteur', couleur: '#8A5A2B', look: { metier: 'eleve', tenue: 'boubou', peau: 'fonce', cheveux: 'ras', habit: '#C9982E' } },
+    tortue: { nom: 'Linda, qui joue la Tortue', couleur: '#2E6B3A', look: { metier: 'eleve', tenue: 'jupe', peau: 'fonce', cheveux: 'tresses' } },
+    leopard: { nom: 'Boris, qui joue le Léopard', couleur: '#C2551F', look: { metier: 'eleve', peau: 'fonce', cheveux: 'court' } }
+  },
+  etapes: [
+    { t: 'recit', entre: ['prof', 'conteur', 'tortue', 'leopard'], txt: 'Le club théâtre prépare un conte pour la fête de fin d’année : « La Tortue et le Léopard ». Dix minutes, devant tout le collège.', objet: { i: 'porteVoix', lib: 'Répétition' } },
+    { t: 'dit', qui: 'prof', txt: 'Avant de jouer, un peu d’histoire. Le théâtre camerounais puise dans nos traditions : les contes de la veillée, l’épopée du mvet, les danses et les rites.' },
+    { t: 'remarque', titre: 'Le théâtre camerounais', txt: 'Dès les années 1960, des auteurs écrivent pour la scène : Guillaume Oyônô Mbia fait rire le pays entier avec « Trois prétendants… un mari » (1964), satire de la dot. Werewere Liking développe plus tard un théâtre inspiré des rituels. Aujourd’hui, troupes scolaires et compagnies continuent de mêler conte, chant et danse.' },
+    { t: 'question', q: 'Quelle pièce camerounaise célèbre fait la satire de la dot ?',
+      options: [
+        { txt: '« Trois prétendants… un mari », de Guillaume Oyônô Mbia.', ok: true, retour: 'Une comédie de 1964, jouée dans tout le pays.' },
+        { txt: '« Le Cid », de Corneille.', retour: 'C’est une tragi-comédie française du XVIIe siècle.' }
+      ] },
+    { t: 'dit', qui: 'leopard', emo: 'doute', txt: 'Madame, je dis mon texte, mais le public ne voit pas que je suis un léopard…' },
+    { t: 'dit', qui: 'prof', txt: 'Parce que tu joues seulement avec ta voix ! Au théâtre, le corps parle autant que les mots. C’est la communication non verbale.' },
+    { t: 'remarque', titre: 'Le corps qui parle', txt: 'Le GESTE (mouvement des mains, des bras), la MIMIQUE (expression du visage), le MIME (raconter une action sans parole) et la GRIMACE (déformer son visage pour faire rire ou effrayer) transmettent des émotions sans un mot.' },
+    { t: 'atelier', mode: 'tri', titre: 'Atelier · quel moyen d’expression ?', consigne: 'Classe chaque action du comédien.',
+      cats: ['Geste', 'Mimique', 'Mime'],
+      items: [
+        { txt: 'Lever lentement une patte griffue vers le public.', cat: 0 },
+        { txt: 'Plisser les yeux d’un air rusé.', cat: 1 },
+        { txt: 'Faire semblant de grimper à un arbre, sans arbre.', cat: 2 },
+        { txt: 'Ouvrir grand les yeux de peur.', cat: 1 },
+        { txt: 'Montrer la direction de la forêt.', cat: 0 },
+        { txt: 'Faire semblant de porter une lourde jarre.', cat: 2 }
+      ],
+      bravo: 'Le public comprend désormais qui est le Léopard, avant même qu’il ne parle.', jauges: { jeu: 55 } },
+    { t: 'dit', qui: 'conteur', txt: 'Et moi, le conteur, je reste immobile au milieu ?' },
+    { t: 'choix', qui: 'prof', q: 'Où placer le conteur ?',
+      options: [
+        { txt: 'Sur le côté, tourné vers le public : il le prend à témoin et lance les chants.', consequence: 'L’espace central reste libre pour l’action ; le public est impliqué, comme à la veillée.', jauges: { public: 30, jeu: 10 } },
+        { txt: 'Au centre, devant les personnages.', consequence: 'Il cache les comédiens : le public ne voit plus l’action.', jauges: { public: -15 } }
+      ],
+      oeuvre: 'Dans la tradition du conte, le conteur dialogue avec son public : questions, chants repris en chœur, interpellations.' },
+    { t: 'atelier', mode: 'ordre', titre: 'Atelier · monter le conte', consigne: 'Remets dans l’ordre les étapes de la mise en scène.',
+      items: [
+        'Choisir le conte et le résumer en scènes.',
+        'Distribuer les rôles : conteur, personnages, chœur.',
+        'Travailler la voix, les gestes et les mimiques de chaque personnage.',
+        'Organiser l’espace : entrées, sorties, place du conteur.',
+        'Répéter en minutant pour tenir les dix minutes.'
+      ],
+      bravo: 'Une mise en scène, c’est une suite de choix au service de l’histoire et du public.', jauges: { jeu: 80 } },
+    { t: 'dit', qui: 'tortue', emo: 'joie', txt: '« Léopard, tu es fort, mais moi je suis patiente ! » Et j’avance… très… lentement.' },
+    { t: 'recit', txt: 'Le jour de la fête, le public rit, répond au conteur et reprend le chant en chœur. Applaudissements !', jauges: { public: 95, jeu: 90 } }
+  ],
+  labo: {
+    titre: 'Laboratoire · captiver le public',
+    intro: 'Règle l’expression corporelle, la portée de la voix et la gestion de l’espace : le public est-il captivé ?',
+    persos: ['prof', 'conteur', 'tortue', 'leopard'],
+    curseurs: [
+      { id: 'corps', nom: 'Expression corporelle', val: 40, bas: 'figée', haut: 'expressive' },
+      { id: 'voix', nom: 'Portée de la voix', val: 50, bas: 'inaudible', haut: 'claire et forte' },
+      { id: 'espace', nom: 'Gestion de l’espace', val: 40, bas: 'encombré', haut: 'organisé' }
+    ],
+    scenarios: [
+      { nom: 'Première lecture', icone: 'doute', valeurs: { corps: 10, voix: 35, espace: 20 } },
+      { nom: 'Le jour de la fête', icone: 'porteVoix', valeurs: { corps: 85, voix: 80, espace: 80 } },
+      { nom: 'Trop de bruit, voix faible', icone: 'muet', valeurs: { voix: 10, corps: 70 } }
+    ],
+    liens: [
+      { a: 'prof', b: 'conteur', type: 'confiance', lib: 'met en scène', base: .5, poids: { espace: .3 } },
+      { a: 'tortue', b: 'leopard', type: 'conflit', lib: 'rivaux du conte', base: .5, poids: { corps: .3 } },
+      { a: 'conteur', b: 'tortue', type: 'alliance', lib: 'raconte', base: .4 }
+    ],
+    issue: function(v){
+      if(v.voix < 25){ return { niveau: 'ko', badge: 'Le fond de la cour n’entend rien', recit: 'Les gestes sont beaux, mais personne n’entend le texte : le public décroche.', apres: 'Au théâtre, on parle pour le dernier rang.', themes: ['voix'] }; }
+      if(v.corps < 30){ return { niveau: 'moyen', badge: 'Une récitation', recit: 'Le texte est su, mais les comédiens restent figés : on écoute un récit, on ne voit pas une scène.', apres: 'Le corps raconte autant que les mots.', themes: ['non verbal'] }; }
+      if(v.espace > 55){ return { niveau: 'ok', badge: 'Le public en chœur', recit: 'Chacun voit et entend tout ; le public reprend le chant du conteur.', apres: 'Corps, voix et espace au service du conte.', themes: ['mise en scène', 'conte'] }; }
+      return { niveau: 'moyen', badge: 'Un peu confus', recit: 'Les comédiens se gênent et se cachent les uns les autres.', apres: 'Organisez les entrées, les sorties et les places.', themes: ['espace scénique'] };
+    }
+  },
+  quiz: [
+    { q: 'Qui a écrit « Trois prétendants… un mari » ?', options: [
+      { txt: 'Guillaume Oyônô Mbia.', ok: true, retour: 'En 1964.' },
+      { txt: 'Mongo Beti.', retour: 'Il est romancier (Ville cruelle, Le Pauvre Christ de Bomba).' } ] },
+    { q: 'La mimique, c’est…', options: [
+      { txt: 'l’expression du visage.', ok: true, retour: 'Exact.' },
+      { txt: 'le déplacement sur scène.', retour: 'Non.' } ] },
+    { q: 'Mimer, c’est…', options: [
+      { txt: 'raconter une action par le corps, sans parole.', ok: true, retour: 'Exact.' },
+      { txt: 'parler très fort.', retour: 'Non.' } ] },
+    { q: 'Dans la tradition, le conteur…', options: [
+      { txt: 'dialogue avec son public et le fait chanter.', ok: true, retour: 'Il l’interpelle, le prend à témoin.' },
+      { txt: 'tourne le dos au public.', retour: 'Non.' } ] },
+    { q: 'Le théâtre camerounais s’inspire notamment…', options: [
+      { txt: 'des contes, du mvet, des chants et des rites.', ok: true, retour: 'Traditions orales et scène se nourrissent mutuellement.' },
+      { txt: 'uniquement du cinéma.', retour: 'Non.' } ] }
+  ],
+  bilan: {
+    retenir: [
+      'Le théâtre camerounais puise dans les traditions orales (contes, mvet, rites) ; Guillaume Oyônô Mbia, « Trois prétendants… un mari » (1964).',
+      'Communication non verbale : geste, mimique, mime, grimace.',
+      'Théâtraliser un conte : découper en scènes, distribuer les rôles, travailler voix et corps, organiser l’espace, répéter.',
+      'Le conteur dialogue avec le public.'
+    ],
+    ecrire: 'Choisissez un conte de votre région et rédigez sa mise en scène pour dix minutes : liste des scènes, rôles, gestes clés, place du conteur, chant repris par le public.'
+  }
+};
+</script>
+<script src="decors.js?v=20261113c"></script>
+<script src="scene.js?v=20261113a"></script>
+<!-- scene-texte -->
+<details id="scene-texte" style="max-width:860px;margin:28px auto 40px;padding:0 16px;font:15px/1.6 Poppins,system-ui,sans-serif;color:#0C2A6A">
+<summary style="cursor:pointer;font-weight:600;padding:12px 0">Lire la scène en texte</summary>
+<article lang="fr">
+<h1>Le conte sur scène</h1>
+<p><b>Arts · 4ᵉ</b></p>
+<p><i>Dialogue fictif écrit pour la leçon. Les faits et les dates cités sont exacts.</i></p>
+<h3>Objectif</h3><p>Découvrir l’histoire du théâtre camerounais, utiliser la communication non verbale (geste, mimique, mime) et théâtraliser un conte de dix minutes : rôles, espace, voix, public.</p>
+<p>Programme : Progression harmonisée 4e · Arts scéniques, leçon 18 (histoire du théâtre : le théâtre camerounais), leçon 20 (communication non verbale : le geste, la mimique, le mime et la grimace), leçon 21 (théâtralisation d’un conte de 10 minutes)</p>
+<p>Lieu : La cour du collège, préparée comme une place de village · Répétition pour la fête de fin d’année</p>
+<h3>Personnages</h3><ul><li>Mme Mengue, professeure d’arts</li><li>Steve, le conteur</li><li>Linda, qui joue la Tortue</li><li>Boris, qui joue le Léopard</li></ul>
+<h3>La scène</h3>
+<p>Le club théâtre prépare un conte pour la fête de fin d’année : « La Tortue et le Léopard ». Dix minutes, devant tout le collège.</p>
+<p><b>Mme Mengue, professeure d’arts</b> : Avant de jouer, un peu d’histoire. Le théâtre camerounais puise dans nos traditions : les contes de la veillée, l’épopée du mvet, les danses et les rites.</p>
+<h4>Le théâtre camerounais</h4><p>Dès les années 1960, des auteurs écrivent pour la scène : Guillaume Oyônô Mbia fait rire le pays entier avec « Trois prétendants… un mari » (1964), satire de la dot. Werewere Liking développe plus tard un théâtre inspiré des rituels. Aujourd’hui, troupes scolaires et compagnies continuent de mêler conte, chant et danse.</p>
+<p><b>Question :</b> Quelle pièce camerounaise célèbre fait la satire de la dot ?</p><ul><li>« Trois prétendants… un mari », de Guillaume Oyônô Mbia. <b>(bonne réponse)</b></li><li>« Le Cid », de Corneille.</li></ul><p>Une comédie de 1964, jouée dans tout le pays.</p>
+<p><b>Boris, qui joue le Léopard</b> : Madame, je dis mon texte, mais le public ne voit pas que je suis un léopard…</p>
+<p><b>Mme Mengue, professeure d’arts</b> : Parce que tu joues seulement avec ta voix ! Au théâtre, le corps parle autant que les mots. C’est la communication non verbale.</p>
+<h4>Le corps qui parle</h4><p>Le GESTE (mouvement des mains, des bras), la MIMIQUE (expression du visage), le MIME (raconter une action sans parole) et la GRIMACE (déformer son visage pour faire rire ou effrayer) transmettent des émotions sans un mot.</p>
+<h4>Atelier · quel moyen d’expression ?</h4><p>Classe chaque action du comédien.</p>
+<ul><li><b>Geste</b> : Lever lentement une patte griffue vers le public. ; Montrer la direction de la forêt.</li><li><b>Mimique</b> : Plisser les yeux d’un air rusé. ; Ouvrir grand les yeux de peur.</li><li><b>Mime</b> : Faire semblant de grimper à un arbre, sans arbre. ; Faire semblant de porter une lourde jarre.</li></ul>
+<p>Le public comprend désormais qui est le Léopard, avant même qu’il ne parle.</p>
+<p><b>Steve, le conteur</b> : Et moi, le conteur, je reste immobile au milieu ?</p>
+<p><b>À toi de décider :</b> Où placer le conteur ?</p><ul><li>Sur le côté, tourné vers le public : il le prend à témoin et lance les chants. — L’espace central reste libre pour l’action ; le public est impliqué, comme à la veillée.</li><li>Au centre, devant les personnages. — Il cache les comédiens : le public ne voit plus l’action.</li></ul>
+<h4>Atelier · monter le conte</h4><p>Remets dans l’ordre les étapes de la mise en scène.</p>
+<ol><li>Choisir le conte et le résumer en scènes.</li><li>Distribuer les rôles : conteur, personnages, chœur.</li><li>Travailler la voix, les gestes et les mimiques de chaque personnage.</li><li>Organiser l’espace : entrées, sorties, place du conteur.</li><li>Répéter en minutant pour tenir les dix minutes.</li></ol>
+<p>Une mise en scène, c’est une suite de choix au service de l’histoire et du public.</p>
+<p><b>Linda, qui joue la Tortue</b> : « Léopard, tu es fort, mais moi je suis patiente ! » Et j’avance… très… lentement.</p>
+<p>Le jour de la fête, le public rit, répond au conteur et reprend le chant en chœur. Applaudissements !</p>
+<h3>Quiz</h3><ol><li>Qui a écrit « Trois prétendants… un mari » ? — <b>Guillaume Oyônô Mbia.</b> En 1964.</li><li>La mimique, c’est… — <b>l’expression du visage.</b> Exact.</li><li>Mimer, c’est… — <b>raconter une action par le corps, sans parole.</b> Exact.</li><li>Dans la tradition, le conteur… — <b>dialogue avec son public et le fait chanter.</b> Il l’interpelle, le prend à témoin.</li><li>Le théâtre camerounais s’inspire notamment… — <b>des contes, du mvet, des chants et des rites.</b> Traditions orales et scène se nourrissent mutuellement.</li></ol>
+<h3>À retenir</h3><ul><li>Le théâtre camerounais puise dans les traditions orales (contes, mvet, rites) ; Guillaume Oyônô Mbia, « Trois prétendants… un mari » (1964).</li><li>Communication non verbale : geste, mimique, mime, grimace.</li><li>Théâtraliser un conte : découper en scènes, distribuer les rôles, travailler voix et corps, organiser l’espace, répéter.</li><li>Le conteur dialogue avec le public.</li></ul>
+<h3>À écrire</h3><p>Choisissez un conte de votre région et rédigez sa mise en scène pour dix minutes : liste des scènes, rôles, gestes clés, place du conteur, chant repris par le public.</p>
+<p><a href="index.html">Toutes les Scènes vivantes</a> · <a href="4e-arts-theatre-conte.html">Jouer la scène</a></p>
+</article>
+<!-- /scene-texte -->
+</body>
+</html>

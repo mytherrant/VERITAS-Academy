@@ -1,0 +1,192 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>L’eau du puits — Scènes vivantes | VÉRITAS</title>
+<meta name="description" content="Scène animée de SVT (3e) : les groupes de microorganismes, les voies de contamination et les pratiques d’asepsie et d’antisepsie, face au choléra.">
+<link rel="icon" href="../VERITAS_favicon_512.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="scene.css?v=20261113a">
+<!-- scene-tete -->
+<link rel="canonical" href="https://veritas-school.com/scenes/3e-svt-microbes-puits.html">
+<meta property="og:type" content="website">
+<meta property="og:title" content="L’eau du puits — Scènes vivantes | VÉRITAS">
+<meta property="og:description" content="Scène animée de SVT (3e) : les groupes de microorganismes, les voies de contamination et les pratiques d’asepsie et d’antisepsie, face au choléra.">
+<meta property="og:url" content="https://veritas-school.com/scenes/3e-svt-microbes-puits.html">
+<meta property="og:image" content="https://veritas-school.com/og-image.jpg">
+<meta property="og:locale" content="fr_FR">
+<meta name="twitter:card" content="summary_large_image">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"LearningResource","name":"L’eau du puits","description":"Scène animée de SVT (3e) : les groupes de microorganismes, les voies de contamination et les pratiques d’asepsie et d’antisepsie, face au choléra.","url":"https://veritas-school.com/scenes/3e-svt-microbes-puits.html","inLanguage":"fr","learningResourceType":"Simulation interactive","educationalLevel":"3ᵉ","about":"SVT","teaches":"Identifier les grands groupes de microorganismes, les voies de contamination de l’organisme, et les pratiques qui l’évitent (asepsie, antisepsie, traitement de l’eau, hygiène des mains).","isAccessibleForFree":true,"interactivityType":"active","provider":{"@type":"EducationalOrganization","name":"Centre VÉRITAS","url":"https://veritas-school.com/"},"isPartOf":{"@type":"CollectionPage","name":"Scènes vivantes","url":"https://veritas-school.com/scenes/"}}</script>
+<!-- /scene-tete -->
+</head>
+<body>
+<noscript>Cette scène a besoin de JavaScript pour se jouer.</noscript>
+<script>
+window.SCENE = {
+  id: '3e-svt-microbes',
+  discipline: 'SVT', niveau: '3e',
+  titre: 'L’eau du puits',
+  decor: 'rue', lieu: 'Un quartier de Douala, après de fortes pluies', moment: 'Une semaine d’août',
+  objectif: 'Identifier les grands groupes de microorganismes, les voies de contamination de l’organisme, et les pratiques qui l’évitent (asepsie, antisepsie, traitement de l’eau, hygiène des mains).',
+  programme: 'Progression harmonisée 3e · Microorganismes dans notre environnement, séance 9 (les différents groupes de microorganismes), séance 12 (les voies de pénétration des microbes) ; séance 13 (asepsie et antisepsie)',
+  jauges: [
+    { id: 'malades', nom: 'Malades dans le quartier', val: 40, couleur: '#C0392B' },
+    { id: 'prevention', nom: 'Prévention', val: 15, couleur: '#1F9D5B' }
+  ],
+  personnages: {
+    infirmiere: { nom: 'Mme Ekwalla, infirmière du centre de santé', couleur: '#0E7C86', look: { metier: 'infirmier', tenue: 'robe', peau: 'fonce', cheveux: 'chignon' } },
+    paul: { nom: 'Paul, élève de 3e', couleur: '#1E499B', look: { metier: 'eleve', peau: 'fonce', cheveux: 'ras' } },
+    rose: { nom: 'Rose, élève de 3e', couleur: '#B03A6E', look: { metier: 'eleve', tenue: 'jupe', peau: 'fonce', cheveux: 'tresses' } },
+    mama: { nom: 'Mama Nyemb, vendeuse de jus', couleur: '#C2551F', look: { metier: 'commercant', tenue: 'robe', peau: 'tresfonce', coiffe: 'foulard', couleurCoiffe: '#C2551F' } }
+  },
+  etapes: [
+    { t: 'recit', entre: ['paul', 'rose', 'infirmiere'], txt: 'Après les pluies, plusieurs voisins souffrent de diarrhées aiguës et de vomissements. Le centre de santé suspecte le choléra et envoie Mme Ekwalla enquêter, avec deux élèves volontaires.', objet: { i: 'oeil', lib: 'Enquête' } },
+    { t: 'dit', qui: 'infirmiere', txt: 'Le choléra est causé par une bactérie, le vibrion cholérique. Une bactérie, c’est un être vivant d’une seule cellule, si petit qu’on ne le voit qu’au microscope.' },
+    { t: 'atelier', mode: 'tri', titre: 'Atelier · qui est quel microbe ?', consigne: 'Classe chaque agent de maladie dans son groupe.',
+      cats: ['Bactérie', 'Virus', 'Champignon microscopique', 'Unicellulaire (protozoaire)'],
+      items: [
+        { txt: 'Le vibrion du choléra', cat: 0 },
+        { txt: 'Le bacille de la tuberculose', cat: 0 },
+        { txt: 'Le VIH', cat: 1 },
+        { txt: 'Le virus de la rougeole', cat: 1 },
+        { txt: 'L’agent de la teigne', cat: 2 },
+        { txt: 'Le plasmodium du paludisme', cat: 3 }
+      ],
+      bravo: 'Bactéries, virus, champignons microscopiques, unicellulaires : quatre grands groupes de microorganismes.', jauges: { prevention: 30 } },
+    { t: 'recit', entre: ['mama'], txt: 'Devant le puits, Mama Nyemb remplit ses bidons pour préparer ses jus. À quelques mètres, une latrine a débordé avec les pluies.' },
+    { t: 'dit', qui: 'rose', emo: 'peur', txt: 'Madame, l’eau de pluie a pu entraîner les matières fécales de la latrine jusqu’au puits !' },
+    { t: 'question', q: 'Par quelle voie le vibrion du choléra pénètre-t-il dans l’organisme ?',
+      options: [
+        { txt: 'La voie digestive : eau ou aliments souillés par des selles.', ok: true, retour: 'C’est le « péril fécal » : des selles à la bouche, par l’eau, les aliments ou les mains sales.' },
+        { txt: 'La voie respiratoire : en respirant l’air.', retour: 'C’est la voie de la tuberculose ou de la grippe, pas du choléra.' },
+        { txt: 'La piqûre d’un moustique.', retour: 'C’est la voie du paludisme (voie sanguine).' }
+      ] },
+    { t: 'atelier', mode: 'tri', titre: 'Atelier · les voies de contamination', consigne: 'Associe chaque situation à la voie de pénétration du microbe.',
+      cats: ['Digestive', 'Respiratoire', 'Cutanée ou sanguine', 'Sexuelle'],
+      items: [
+        { txt: 'Boire l’eau d’un puits pollué.', cat: 0 },
+        { txt: 'Manger avec des mains non lavées.', cat: 0 },
+        { txt: 'Respirer près d’un malade qui tousse.', cat: 1 },
+        { txt: 'Une plaie au pied dans la boue.', cat: 2 },
+        { txt: 'Une piqûre d’anophèle.', cat: 2 },
+        { txt: 'Un rapport sexuel non protégé.', cat: 3 }
+      ],
+      bravo: 'Connaître la voie d’entrée, c’est savoir où placer la barrière.', jauges: { prevention: 45 } },
+    { t: 'dit', qui: 'mama', emo: 'triste', txt: 'Mes jus… j’en ai vendu toute la semaine. Je ne savais pas.' },
+    { t: 'choix', qui: 'infirmiere', q: 'Tu es l’infirmière. Que proposes-tu d’abord à Mama Nyemb ?',
+      options: [
+        { txt: 'Fermer son commerce définitivement.', consequence: 'Mama Nyemb perd son revenu et ne comprend pas comment éviter le problème.', jauges: { prevention: -5 } },
+        { txt: 'Suspendre la vente, traiter l’eau (ébullition ou chloration selon les consignes du centre de santé) et laver les mains au savon avant de préparer.', consequence: 'Elle reprend son commerce sans danger et explique les gestes à ses clientes.', jauges: { prevention: 20, malades: -10 } },
+        { txt: 'Rien : les jus sont sucrés, ça tue les microbes.', consequence: 'Faux : le sucre ne détruit pas le vibrion. De nouveaux malades apparaissent.', jauges: { malades: 20 } }
+      ],
+      oeuvre: 'Face au choléra : réhydrater les malades et consulter vite, traiter l’eau, se laver les mains, éloigner latrines et puits.' },
+    { t: 'remarque', titre: 'Asepsie et antisepsie', txt: 'L’ASEPSIE empêche les microbes d’arriver : matériel stérilisé, eau bouillie, mains lavées, aliments couverts. L’ANTISEPSIE détruit les microbes déjà présents sur la peau ou une plaie : alcool, produits iodés, eau savonneuse. Le préservatif empêche aussi la transmission des microbes par voie sexuelle.' },
+    { t: 'atelier', mode: 'ordre', titre: 'Atelier · se laver les mains', consigne: 'Remets dans l’ordre les étapes d’un lavage des mains efficace.',
+      items: [
+        'Se mouiller les mains à l’eau propre.',
+        'Prendre du savon.',
+        'Frotter paumes, dos des mains, entre les doigts et sous les ongles au moins 20 secondes.',
+        'Rincer à l’eau propre.',
+        'Sécher avec un linge propre ou à l’air.'
+      ],
+      bravo: 'Un geste simple qui coupe la voie digestive des microbes.', jauges: { prevention: 75 } },
+    { t: 'dit', qui: 'paul', txt: 'On organise une causerie au marché samedi : puits, latrines, mains, eau traitée !' },
+    { t: 'recit', txt: 'Deux semaines plus tard, le centre de santé ne signale plus de nouveau cas dans le quartier. La mairie fait déplacer la latrine loin du puits.', jauges: { malades: 5, prevention: 90 } }
+  ],
+  labo: {
+    titre: 'Laboratoire · stopper l’épidémie',
+    intro: 'Règle le traitement de l’eau, le lavage des mains et l’assainissement : l’épidémie recule-t-elle ?',
+    persos: ['infirmiere', 'paul', 'rose', 'mama'],
+    curseurs: [
+      { id: 'eau', nom: 'Eau traitée (bouillie ou chlorée)', val: 30, bas: 'jamais', haut: 'toujours' },
+      { id: 'mains', nom: 'Lavage des mains au savon', val: 40, bas: 'rare', haut: 'systématique' },
+      { id: 'assainissement', nom: 'Latrines loin des puits', val: 20, bas: 'collées', haut: 'éloignées' }
+    ],
+    scenarios: [
+      { nom: 'Avant l’enquête', icone: 'nuage', valeurs: { eau: 15, mains: 30, assainissement: 10 } },
+      { nom: 'Après la causerie', icone: 'groupe', valeurs: { eau: 85, mains: 80, assainissement: 75 } },
+      { nom: 'Eau traitée seulement', icone: 'vagues', valeurs: { eau: 90, mains: 20, assainissement: 20 } }
+    ],
+    liens: [
+      { a: 'infirmiere', b: 'mama', type: 'confiance', lib: 'conseille', base: .4, poids: { eau: .3 } },
+      { a: 'paul', b: 'rose', type: 'alliance', lib: 'causerie', base: .5, poids: { mains: .3 } },
+      { a: 'rose', b: 'infirmiere', type: 'confiance', lib: 'enquête', base: .5 }
+    ],
+    issue: function(v){
+      var s = (v.eau + v.mains + v.assainissement) / 3;
+      if(s < 35){ return { niveau: 'ko', badge: 'L’épidémie s’étend', recit: 'Le péril fécal reste ouvert : eau, mains et puits transmettent le vibrion. Les malades affluent au centre de santé.', apres: 'Une seule barrière ne suffit pas : il faut les fermer toutes.', themes: ['contamination', 'choléra'] }; }
+      if(v.eau > 60 && v.mains > 60 && v.assainissement > 60){ return { niveau: 'ok', badge: 'Plus aucun nouveau cas', recit: 'Eau traitée, mains lavées, latrines éloignées : la chaîne de contamination est rompue.', apres: 'La prévention protège tout le quartier.', themes: ['asepsie', 'hygiène'] }; }
+      return { niveau: 'moyen', badge: 'L’épidémie ralentit', recit: 'Certains gestes sont adoptés, d’autres pas : les cas diminuent, mais l’épidémie n’est pas éteinte.', apres: 'Chaque voie de contamination non fermée laisse passer le microbe.', themes: ['prévention'] };
+    }
+  },
+  quiz: [
+    { q: 'Le choléra est dû à…', options: [
+      { txt: 'une bactérie, le vibrion cholérique.', ok: true, retour: 'Exact.' },
+      { txt: 'un virus.', retour: 'Non, c’est une bactérie.' } ] },
+    { q: 'Le paludisme est transmis…', options: [
+      { txt: 'par la piqûre de l’anophèle femelle, qui injecte le plasmodium.', ok: true, retour: 'Voie sanguine.' },
+      { txt: 'par l’eau des puits.', retour: 'Non.' } ] },
+    { q: 'Qu’est-ce que l’antisepsie ?', options: [
+      { txt: 'Détruire les microbes présents sur la peau ou une plaie.', ok: true, retour: 'Avec de l’alcool, un produit iodé…' },
+      { txt: 'Empêcher les microbes d’arriver.', retour: 'C’est l’asepsie.' } ] },
+    { q: 'Quel geste coupe le plus simplement la voie digestive ?', options: [
+      { txt: 'Se laver les mains au savon avant de manger.', ok: true, retour: 'Et boire une eau traitée.' },
+      { txt: 'Porter un chapeau.', retour: 'Non.' } ] },
+    { q: 'Le VIH est…', options: [
+      { txt: 'un virus.', ok: true, retour: 'Il se transmet par voie sexuelle, sanguine et de la mère à l’enfant.' },
+      { txt: 'un champignon.', retour: 'Non.' } ] }
+  ],
+  bilan: {
+    retenir: [
+      'Quatre grands groupes de microorganismes : bactéries, virus, champignons microscopiques, êtres unicellulaires (protozoaires).',
+      'Voies de pénétration : digestive, respiratoire, cutanée et sanguine, sexuelle.',
+      'Asepsie : empêcher l’entrée des microbes ; antisepsie : détruire ceux qui sont présents.',
+      'Contre le choléra : eau traitée, mains lavées au savon, latrines éloignées des puits, consultation rapide.'
+    ],
+    ecrire: 'Rédigez une affiche de sensibilisation pour votre quartier : comment éviter le choléra en saison des pluies (six conseils, chacun justifié par une voie de contamination).'
+  }
+};
+</script>
+<script src="decors.js?v=20261113c"></script>
+<script src="scene.js?v=20261113a"></script>
+<!-- scene-texte -->
+<details id="scene-texte" style="max-width:860px;margin:28px auto 40px;padding:0 16px;font:15px/1.6 Poppins,system-ui,sans-serif;color:#0C2A6A">
+<summary style="cursor:pointer;font-weight:600;padding:12px 0">Lire la scène en texte</summary>
+<article lang="fr">
+<h1>L’eau du puits</h1>
+<p><b>SVT · 3ᵉ</b></p>
+<p><i>Dialogue fictif écrit pour la leçon. Les faits et les dates cités sont exacts.</i></p>
+<h3>Objectif</h3><p>Identifier les grands groupes de microorganismes, les voies de contamination de l’organisme, et les pratiques qui l’évitent (asepsie, antisepsie, traitement de l’eau, hygiène des mains).</p>
+<p>Programme : Progression harmonisée 3e · Microorganismes dans notre environnement, séance 9 (les différents groupes de microorganismes), séance 12 (les voies de pénétration des microbes) ; séance 13 (asepsie et antisepsie)</p>
+<p>Lieu : Un quartier de Douala, après de fortes pluies · Une semaine d’août</p>
+<h3>Personnages</h3><ul><li>Mme Ekwalla, infirmière du centre de santé</li><li>Paul, élève de 3e</li><li>Rose, élève de 3e</li><li>Mama Nyemb, vendeuse de jus</li></ul>
+<h3>La scène</h3>
+<p>Après les pluies, plusieurs voisins souffrent de diarrhées aiguës et de vomissements. Le centre de santé suspecte le choléra et envoie Mme Ekwalla enquêter, avec deux élèves volontaires.</p>
+<p><b>Mme Ekwalla, infirmière du centre de santé</b> : Le choléra est causé par une bactérie, le vibrion cholérique. Une bactérie, c’est un être vivant d’une seule cellule, si petit qu’on ne le voit qu’au microscope.</p>
+<h4>Atelier · qui est quel microbe ?</h4><p>Classe chaque agent de maladie dans son groupe.</p>
+<ul><li><b>Bactérie</b> : Le vibrion du choléra ; Le bacille de la tuberculose</li><li><b>Virus</b> : Le VIH ; Le virus de la rougeole</li><li><b>Champignon microscopique</b> : L’agent de la teigne</li><li><b>Unicellulaire (protozoaire)</b> : Le plasmodium du paludisme</li></ul>
+<p>Bactéries, virus, champignons microscopiques, unicellulaires : quatre grands groupes de microorganismes.</p>
+<p>Devant le puits, Mama Nyemb remplit ses bidons pour préparer ses jus. À quelques mètres, une latrine a débordé avec les pluies.</p>
+<p><b>Rose, élève de 3e</b> : Madame, l’eau de pluie a pu entraîner les matières fécales de la latrine jusqu’au puits !</p>
+<p><b>Question :</b> Par quelle voie le vibrion du choléra pénètre-t-il dans l’organisme ?</p><ul><li>La voie digestive : eau ou aliments souillés par des selles. <b>(bonne réponse)</b></li><li>La voie respiratoire : en respirant l’air.</li><li>La piqûre d’un moustique.</li></ul><p>C’est le « péril fécal » : des selles à la bouche, par l’eau, les aliments ou les mains sales.</p>
+<h4>Atelier · les voies de contamination</h4><p>Associe chaque situation à la voie de pénétration du microbe.</p>
+<ul><li><b>Digestive</b> : Boire l’eau d’un puits pollué. ; Manger avec des mains non lavées.</li><li><b>Respiratoire</b> : Respirer près d’un malade qui tousse.</li><li><b>Cutanée ou sanguine</b> : Une plaie au pied dans la boue. ; Une piqûre d’anophèle.</li><li><b>Sexuelle</b> : Un rapport sexuel non protégé.</li></ul>
+<p>Connaître la voie d’entrée, c’est savoir où placer la barrière.</p>
+<p><b>Mama Nyemb, vendeuse de jus</b> : Mes jus… j’en ai vendu toute la semaine. Je ne savais pas.</p>
+<p><b>À toi de décider :</b> Tu es l’infirmière. Que proposes-tu d’abord à Mama Nyemb ?</p><ul><li>Fermer son commerce définitivement. — Mama Nyemb perd son revenu et ne comprend pas comment éviter le problème.</li><li>Suspendre la vente, traiter l’eau (ébullition ou chloration selon les consignes du centre de santé) et laver les mains au savon avant de préparer. — Elle reprend son commerce sans danger et explique les gestes à ses clientes.</li><li>Rien : les jus sont sucrés, ça tue les microbes. — Faux : le sucre ne détruit pas le vibrion. De nouveaux malades apparaissent.</li></ul>
+<h4>Asepsie et antisepsie</h4><p>L’ASEPSIE empêche les microbes d’arriver : matériel stérilisé, eau bouillie, mains lavées, aliments couverts. L’ANTISEPSIE détruit les microbes déjà présents sur la peau ou une plaie : alcool, produits iodés, eau savonneuse. Le préservatif empêche aussi la transmission des microbes par voie sexuelle.</p>
+<h4>Atelier · se laver les mains</h4><p>Remets dans l’ordre les étapes d’un lavage des mains efficace.</p>
+<ol><li>Se mouiller les mains à l’eau propre.</li><li>Prendre du savon.</li><li>Frotter paumes, dos des mains, entre les doigts et sous les ongles au moins 20 secondes.</li><li>Rincer à l’eau propre.</li><li>Sécher avec un linge propre ou à l’air.</li></ol>
+<p>Un geste simple qui coupe la voie digestive des microbes.</p>
+<p><b>Paul, élève de 3e</b> : On organise une causerie au marché samedi : puits, latrines, mains, eau traitée !</p>
+<p>Deux semaines plus tard, le centre de santé ne signale plus de nouveau cas dans le quartier. La mairie fait déplacer la latrine loin du puits.</p>
+<h3>Quiz</h3><ol><li>Le choléra est dû à… — <b>une bactérie, le vibrion cholérique.</b> Exact.</li><li>Le paludisme est transmis… — <b>par la piqûre de l’anophèle femelle, qui injecte le plasmodium.</b> Voie sanguine.</li><li>Qu’est-ce que l’antisepsie ? — <b>Détruire les microbes présents sur la peau ou une plaie.</b> Avec de l’alcool, un produit iodé…</li><li>Quel geste coupe le plus simplement la voie digestive ? — <b>Se laver les mains au savon avant de manger.</b> Et boire une eau traitée.</li><li>Le VIH est… — <b>un virus.</b> Il se transmet par voie sexuelle, sanguine et de la mère à l’enfant.</li></ol>
+<h3>À retenir</h3><ul><li>Quatre grands groupes de microorganismes : bactéries, virus, champignons microscopiques, êtres unicellulaires (protozoaires).</li><li>Voies de pénétration : digestive, respiratoire, cutanée et sanguine, sexuelle.</li><li>Asepsie : empêcher l’entrée des microbes ; antisepsie : détruire ceux qui sont présents.</li><li>Contre le choléra : eau traitée, mains lavées au savon, latrines éloignées des puits, consultation rapide.</li></ul>
+<h3>À écrire</h3><p>Rédigez une affiche de sensibilisation pour votre quartier : comment éviter le choléra en saison des pluies (six conseils, chacun justifié par une voie de contamination).</p>
+<p><a href="index.html">Toutes les Scènes vivantes</a> · <a href="3e-svt-microbes-puits.html">Jouer la scène</a></p>
+</article>
+<!-- /scene-texte -->
+</body>
+</html>
