@@ -1059,6 +1059,8 @@ jobs:
         run: |
           node tools/oeuvres_statiques.js --controle
           node tools/scenes_statiques.js --controle
+          # Chaque leçon citée par une scène existe-t-elle sous ce numéro dans la progression officielle ?
+          node tools/controle_scenes_programme.cjs
           # Apprendre : RÉGÉNÉRÉ ici plutôt que contrôlé. lecons.js change souvent
           # (autres sessions) ; un --controle rougirait le déploiement de tous.
           # Les pages produites sont copiées plus bas puis habillées dans deploy/.

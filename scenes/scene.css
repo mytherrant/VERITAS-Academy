@@ -465,3 +465,54 @@ h1,h2,h3,h4{font-family:var(--v-font);font-weight:600;color:var(--v-navy)}
 .sc-res.payant:hover,.sc-res.payant:focus-visible{border-color:var(--v-or2)}
 .sc-res.payant .sc-res-badge{background:var(--v-or);color:var(--v-or-txt)}
 .sc-res.payant em{color:var(--v-bleu)}
+
+/* ---------- Thème sombre, au choix (13/11/2026) ----------
+   Posé par scene.js sur <html data-scene-theme="sombre">. Les variables
+   portent l'essentiel ; le décor illustré (.sc-plateau, .sc-jauges) et les schémas SVG du
+   laboratoire repartent sur la palette claire, pour garder leurs couleurs et
+   leurs étiquettes (encre navy cerclée de blanc). */
+html[data-scene-theme="sombre"]{
+  color-scheme:dark;
+  --v-bleu:#6E9BF2; --v-bleu2:#0A1B42; --v-bleu3:#8DB2F5; --v-cyan:#4DB8FF;
+  --v-navy:#EEF2FB; --v-texte:#C5CCDA; --v-texte2:#9AA3B6;
+  --v-blanc:#162140; --v-gris:#0B1428; --v-gris2:#26324F;
+  --v-teinte:#1B2B4D; --v-ciel:#1E3360; --v-vert:#163A24; --v-rouge:#43201D; --v-beige:#2B2717;
+  --v-ok:#4CC26A; --v-ko:#FF7A6B;
+}
+html[data-scene-theme="sombre"] .sc-plateau,
+html[data-scene-theme="sombre"] .sc-jauges,
+html[data-scene-theme="sombre"] .sc-labo svg{
+  --v-bleu:#1E499B; --v-bleu2:#0C2A6A; --v-bleu3:#3B6FCB; --v-cyan:#0098FF;
+  --v-navy:#001136; --v-texte:#4D5163; --v-texte2:#6E7385;
+  --v-blanc:#FFFFFF; --v-gris:#F4F5F8; --v-gris2:#E9ECF2;
+  --v-teinte:#E5EFF7; --v-ciel:#DBE8FE; --v-vert:#E5F5E8; --v-rouge:#FBEAE8; --v-beige:#F5F2E9;
+  --v-ok:#007E11; --v-ko:#C0392B;
+}
+/* Pastilles pleines : le bleu clair du thème sombre porte une encre foncée */
+html[data-scene-theme="sombre"] .sc-onglet.on,
+html[data-scene-theme="sombre"] .sc-case::before,
+html[data-scene-theme="sombre"] .sc-tri-l .sc-mini.sel,
+html[data-scene-theme="sombre"] .sc-etapes-l li::before,
+html[data-scene-theme="sombre"] .sc-scen.on,
+html[data-scene-theme="sombre"] .sc-l-centre .sc-mini.on{color:#071330}
+html[data-scene-theme="sombre"] .sc-res-badge{color:#071330}
+html[data-scene-theme="sombre"] .sc-f-alire li::before,
+html[data-scene-theme="sombre"] .sc-guide li::before,
+html[data-scene-theme="sombre"] .sc-pp.rc,
+html[data-scene-theme="sombre"] .sc-pp.qc{background:var(--v-blanc)}
+html[data-scene-theme="sombre"] select,
+html[data-scene-theme="sombre"] textarea,
+html[data-scene-theme="sombre"] input{background-color:var(--v-blanc);color:var(--v-navy)}
+.sc-theme .ic{width:16px;height:16px;margin-right:6px;vertical-align:-3px}
+/* Le texte de la scène pour les moteurs (tools/scenes_statiques.js) porte une encre en ligne */
+html[data-scene-theme="sombre"] #scene-texte{color:var(--v-texte)!important}
+html[data-scene-theme="sombre"] #scene-texte summary{color:var(--v-bleu3)}
+/* Fonds clairs écrits en dur : ils gardent une encre foncée, ou s'assombrissent */
+html[data-scene-theme="sombre"] .sc-plateau-pieces span{color:#001136}
+html[data-scene-theme="sombre"] .sc-res.payant{background:#2E2712}
+html[data-scene-theme="sombre"] .sc-trad p,
+html[data-scene-theme="sombre"] .sc-prog{color:var(--v-texte)}
+/* Noms des personnages : leur couleur (foncée, choisie pour le fond clair) est éclaircie */
+html[data-scene-theme="sombre"] .sc-script b[style*="color"],
+html[data-scene-theme="sombre"] .sc-bulle-qui b[style*="color"]{filter:brightness(1.9) saturate(.85)}
+html[data-scene-theme="sombre"] .sc-l.q{color:#5CC8D2}
