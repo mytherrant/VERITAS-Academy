@@ -280,6 +280,10 @@ jobs:
       - name: 🧮 Atelier — la synchro admin préserve-t-elle les compteurs de quotas ?
         run: php tests/banc_db_quotas.php
 
+      # Le quota du tuteur IA suit la formule du compte (table des droits).
+      - name: 🎓 Tuteur IA — le quota du jour suit-il la formule de l'abonné ?
+        run: php tests/banc_ia_paliers.php
+
       # Chaque formule n'ouvre que ce qu'elle annonce : classes, fiches, tuteur,
       # labos premium (servis par le serveur), règle Famille (12/11/2026).
       - name: 🎟️ Formules — chaque abonnement ouvre-t-il ce qu'il annonce, et pas plus ?
@@ -1526,7 +1530,7 @@ jobs:
           #    depuis apprendre/_src/ : les sources restent dans le dépôt, hors ligne.
           #    ÉCHEC BRUYANT si un fichier manque : les quatre pages les chargent tous.
           if [ -d apprendre ]; then
-            for f in index.html matiere.html lecon.html manuel.html ressources.html labo.html notes.html ressources.js verrou.js labo.js charge.js apprendre.css jeu.css commun.js jeu.js calendrier.js lecons.js progressions.js scenes.js atelier.js; do
+            for f in index.html matiere.html lecon.html manuel.html ressources.html labo.html notes.html ressources.js verrou.js labo.js charge.js apprendre.css jeu.css commun.js jeu.js calendrier.js lecons.js progressions.js scenes.js atelier.js tuteur.js; do
               if [ ! -f "apprendre/$f" ]; then
                 echo "::error title=Apprendre incomplet::apprendre/$f manque (régénérez avec 'python tools/build_apprendre.py'). Déploiement ANNULÉ."
                 exit 1

@@ -18735,26 +18735,25 @@ function _vheroToggleSound(ev){
 // ════════════════════════════════════════════════════════════════════
 // v2.7 — SYSTÈME DE QUOTAS IA PAR PLAN D'ABONNEMENT
 // ════════════════════════════════════════════════════════════════════
-// Stratégie freemium :
-// - Visiteur anonyme : 2 essais TOTAL (lifetime, localStorage)
-// - Visiteur inscrit gratuit : 3 essais / SEMAINE (reset lundi)
-// - Plan Starter : 5 / jour
-// - Plan Pro : 30 / jour
-// - Plan Elite : illimité
-// - Enseignant : 50 / jour
-// - Admin / Super-admin : illimité
+// Stratégie freemium (alignée sur le serveur le 13/11/2026 — ia_proxy.php compte
+// PAR JOUR, ce tableau ne sert qu'à prévenir l'utilisateur avant l'appel) :
+// - Visiteur anonyme : 2 / jour
+// - Compte gratuit (« découverte ») et Starter : 5 / jour
+// - Pro : 30 / jour · Élite et Famille : 100 / jour
+// - Prof 3 / 6 / toutes classes : 40 / 80 / 150 par jour
+// - Enseignant de l'établissement : 120 / jour · Admin : illimité
 
 /* Quotas alignés sur la table des droits (vrt_droits_formules, api/_auth_lib.php)
    le 12/11/2026 : Élite = 100 / jour (plus « illimité » : le serveur bornait à 100),
    et les formules Famille et enseignant ont leur colonne. */
 window.AI_QUOTAS = {
-  // [type d'action] : { anonyme, gratuit_sem, starter_j, pro_j, élite_j, famille_j, prof3_j, prof6_j, proftout_j, enseignant_j, admin }
-  default:  { anon:2, free:3, starter:5, pro:30, elite:100, famille:100, prof3:40, prof6:80, proftout:150, teach:50, admin:-1 },
-  ambassa:  { anon:2, free:3, starter:5, pro:30, elite:100, famille:100, prof3:40, prof6:80, proftout:150, teach:50, admin:-1 },
-  devoir:   { anon:2, free:3, starter:5, pro:30, elite:100, famille:100, prof3:40, prof6:80, proftout:150, teach:50, admin:-1 },
+  // [type d'action] : { anonyme_j, gratuit_j, starter_j, pro_j, élite_j, famille_j, prof3_j, prof6_j, proftout_j, enseignant_j, admin }
+  default:  { anon:2, free:5, starter:5, pro:30, elite:100, famille:100, prof3:40, prof6:80, proftout:150, teach:120, admin:-1 },
+  ambassa:  { anon:2, free:5, starter:5, pro:30, elite:100, famille:100, prof3:40, prof6:80, proftout:150, teach:120, admin:-1 },
+  devoir:   { anon:2, free:5, starter:5, pro:30, elite:100, famille:100, prof3:40, prof6:80, proftout:150, teach:120, admin:-1 },
   photo_ia: { anon:1, free:2, starter:3, pro:15, elite:50,  famille:50,  prof3:20, prof6:40, proftout:75,  teach:20, admin:-1 },
   orient:   { anon:1, free:2, starter:3, pro:10, elite:30,  famille:30,  prof3:10, prof6:20, proftout:30,  teach:20, admin:-1 },
-  correct:  { anon:2, free:3, starter:5, pro:30, elite:100, famille:100, prof3:40, prof6:80, proftout:150, teach:50, admin:-1 }
+  correct:  { anon:2, free:5, starter:5, pro:30, elite:100, famille:100, prof3:40, prof6:80, proftout:150, teach:120, admin:-1 }
 };
 
 // Helper : déterminer le tier de l'utilisateur courant
@@ -18793,7 +18792,8 @@ window._aiTier = function(){
     if(mg) t=mg[1];
     else if(p==='plan4') t='famille';
     else if(p==='plan2') t='starter';                            // INTERMÉDIAIRE
-    else t='pro';                                                // EXAMEN(plan1)/ENSEIGNANT(plan3)/TECHNIQUE(plan5)/GCE(plan6)/inconnu payant
+    else if(/^plan(1|3|5|6|7|10)$/.test(p)) t='pro';             // EXAMEN/ENSEIGNANT/TECHNIQUE/GCE/E-LEARNING ENSEIGNANT/SUIVI EN LIGNE
+    else return;                                                 // Atelier, prestations, packs : aucun palier IA (même règle que vrt_groupe_droits)
     if(_rank[t] > _bestR){ _bestR = _rank[t]; _best = t; }
   });
   if(_bestR >= 0) return _best;
@@ -18844,8 +18844,8 @@ window._requirePlan = function(feature, labelFeature){
 
 // Période de comptage selon tier (lifetime, semaine, jour)
 window._aiPeriod = function(tier){
-  if(tier==='anon') return 'lifetime';
-  if(tier==='free') return 'week';
+  // Tout se compte au JOUR, comme ia_proxy.php (13/11/2026) : l'ancien « 2 à vie »
+  // et « 3 par semaine » contredisaient le serveur et les cartes de prix.
   return 'day';
 };
 
@@ -19037,7 +19037,7 @@ window._showQuotaExceeded = function(action, tier, used, limit){
       +'<div style="background:linear-gradient(135deg,#FFC93C,#F59E0B);color:#142554;padding:16px;border-radius:14px;margin-bottom:14px;text-align:left">'
         +'<div style="font-weight:900;font-size:15px;margin-bottom:6px">✨ Inscrivez-vous GRATUITEMENT et recevez :</div>'
         +'<ul style="margin:0;padding-left:20px;font-size:13px;line-height:1.8">'
-        +'<li>3 essais Ambassa / semaine</li>'
+        +'<li>'+(((AI_QUOTAS[action]||AI_QUOTAS.default).free)||5)+' questions par jour à Ambassa</li>'
         +'<li>Sauvegarde de votre progression</li>'
         +'<li>500 FCFA de crédit par ami parrainé</li>'
         +'<li>Badges + Genome + Wrapped annuel</li>'

@@ -59,6 +59,10 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 
 // ── 1. CONFIG ──────────────────────────────────────────────────────────
 @include_once __DIR__ . '/payment_config.php';  // clés IA (GEMINI/OPENROUTER/GROQ/MISTRAL)
+// Table des droits par formule (vrt_droits_formules, vrt_groupe_droits) : chargée
+// pour TOUS les appels, pas seulement ceux qui portent un jeton — sinon le palier
+// d'un visiteur se calculait avec des valeurs codées ici, différentes des cartes.
+@include_once __DIR__ . '/_auth_lib.php';
 
 // ── 2. PARSE INPUT ─────────────────────────────────────────────────────
 $body = json_decode(file_get_contents('php://input'), true) ?: [];
@@ -300,6 +304,7 @@ if ($IA_GLOBAL_DAILY_MAX > 0 && $gCount >= $IA_GLOBAL_DAILY_MAX) {
 // avant, mais on ÉCRÊTE les paliers à privilège. Les abonnés légitimes gardent
 // un quota confortable ; l'usurpation ne rapporte plus rien.
 $utilisateurVerifie = '';
+$compteVerifie = null;
 $abonneAtelier = false;
 $fichierAtelier = ''; $compteAtelier = 0;
 // Vrai seulement si un crédit a RÉELLEMENT été pris (section 4bis) : un échec
@@ -368,6 +373,7 @@ if ($jetonIA !== '') {
             $verif = vrt_verify_token($jetonIA);
             if ($verif !== null) {
                 $utilisateurVerifie = (string) ($verif['acc']['user'] ?? $verif['acc']['id'] ?? '');
+                $compteVerifie = $verif['acc'];
                 /* ABONNÉ DE L'ATELIER DE FRANÇAIS. server_user_tier() ne lit
                    que les abonnements e-learning : un abonné de l'Atelier
                    tombait au palier « free » (5 appels/jour), si bien qu'une
@@ -430,6 +436,21 @@ if ($jetonIA !== '') {
 
 $userTier = server_user_tier($utilisateurVerifie !== '' ? $utilisateurVerifie : (string) $userId);
 
+/* PALIER D'UN COMPTE PROUVÉ = TABLE DES DROITS (13/11/2026). Le tuteur de
+   l'espace Apprendre, les leçons (apprendre.php) et les fiches (content.php)
+   doivent lire la MÊME formule. server_user_tier() ne regardait que
+   elearning.abonnements : une formule accordée par l'administration
+   (acc.plans) restait à 5 questions par jour, et un plan de l'Atelier ou une
+   prestation (orientation, bibliothèque…) passait pour « pro ». Pour un
+   compte prouvé, on prend donc le groupe de droits de vrt_palier_ia() —
+   sauf administrateur ou enseignant de l'établissement, reconnus plus haut. */
+if (is_array($compteVerifie) && !in_array($userTier, ['admin', 'teach'], true) && function_exists('vrt_palier_ia')) {
+    try {
+        $dbPalier = vrt_load_db();
+        if (is_array($dbPalier)) $userTier = vrt_palier_ia($compteVerifie, $dbPalier)['palier'];
+    } catch (Throwable $e) { /* base illisible : on garde server_user_tier() */ }
+}
+
 if ($utilisateurVerifie === '') {
     if ($userTier === 'admin' || $userTier === 'teach') {
         @file_put_contents(__DIR__ . '/data/_security_log.txt',
@@ -470,7 +491,8 @@ $tierDaily = ['anon' => 2, 'free' => 5, 'starter' => 5, 'pro' => 30, 'elite' => 
 if (function_exists('vrt_droits_formules')) {
     try {
         foreach (vrt_droits_formules(function_exists('vrt_load_db') ? (vrt_load_db() ?: []) : []) as $gD => $vD) {
-            if ($gD !== 'decouverte' && isset($vD['iaJour'])) $tierDaily[$gD] = (int) $vD['iaJour'];
+            // « découverte » = compte inscrit sans formule : c'est le palier « free » d'ici.
+            if (isset($vD['iaJour'])) $tierDaily[$gD === 'decouverte' ? 'free' : $gD] = (int) $vD['iaJour'];
         }
     } catch (Throwable $e) { /* table illisible : on garde les valeurs ci-dessus */ }
 }
@@ -682,7 +704,11 @@ if ($isShared && $sharedFile !== '' && $text !== '') {
 echo json_encode([
     'text'   => $text,
     'source' => $source,
-    'cached' => false
+    'cached' => false,
+    /* Ce qui reste au compte aujourd'hui : le tuteur de l'espace Apprendre
+       l'affiche sous la réponse (« il te reste 27 questions »). */
+    'quota'  => ['tier' => $userTier, 'limit' => (int) $uDailyMax,
+                 'used' => ($uDailyMax > 0 ? (int) ($uCount ?? 0) + 1 : 0)],
 ]);
 exit;
 
@@ -1136,7 +1162,14 @@ function server_user_tier(string $userId): string {
             // « famille » : chaque enfant couvert est au niveau Élite (formule du 13/09/2026).
             /* Le palier suit le GROUPE de droits de la formule (vrt_groupe_droits,
                api/_auth_lib.php) : formules enseignant comprises (12/11/2026). */
-            if (preg_match('/^abo_(starter|pro|elite|famille|prof3|prof6|proftout)_[ma]$/', $p, $mg)) $t = $mg[1];
+            /* Même règle que vrt_groupe_droits() : un plan de l'Atelier ou une
+               prestation (orientation, bibliothèque…) n'ouvre AUCUN palier du
+               tuteur — il valait « pro » jusqu'au 13/11/2026. */
+            if (function_exists('vrt_groupe_droits')) {
+                $t = vrt_groupe_droits($p);
+                if ($t === null || !isset($rank[$t])) continue;
+            }
+            elseif (preg_match('/^abo_(starter|pro|elite|famille|prof3|prof6|proftout)_[ma]$/', $p, $mg)) $t = $mg[1];
             elseif ($p === 'plan4') $t = 'famille';
             elseif ($p === 'plan2') $t = 'starter';
             else $t = 'pro';
