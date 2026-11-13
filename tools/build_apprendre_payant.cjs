@@ -39,6 +39,10 @@ global.VRT_SIT = (ids, o) => { for (const id of [].concat(ids)) { if (SIT[id]) e
    (a, b, c, d) d'une question à l'autre, pour une répartition équilibrée des lettres. */
 const QCM = {};
 global.VRT_QCM = (ids, liste) => { for (const id of [].concat(ids)) { if (QCM[id]) err.push(`${id} : QCM en double`); QCM[id] = liste; } };
+/* Schéma ou carte posé sur une partie : VRT_ILLUS(ids, partie, légende, svg). Une partie porte un
+   seul schéma ; fichier lu dans n'importe quel ordre (appliqué après la lecture de toutes les sources). */
+const ILLUS = [];
+global.VRT_ILLUS = (ids, partie, legende, svg) => { for (const id of [].concat(ids)) ILLUS.push([id, partie, legende, svg]); };
 const crc = s => { let h = 0; for (const c of s) h = (h * 31 + c.charCodeAt(0)) >>> 0; return h; };
 function poserQcm(id, liste) {
   if (!Array.isArray(liste) || liste.length !== 10) { err.push(`${id} : il faut exactement 10 QCM (${liste && liste.length})`); return null; }
@@ -62,6 +66,14 @@ for (const [id, o] of Object.entries(SIT)) {
   if (!APC[id]) { err.push(`${id} : situation réécrite pour une leçon sans fiche APC`); continue; }
   for (const k of ["situation", "tache", "resolution"]) if (!o[k]) err.push(`${id} : situation réécrite sans ${k}`);
   Object.assign(APC[id], o);
+}
+
+for (const [id, p, legende, svg] of ILLUS) {
+  const l = L[id], q = l && l.parties && l.parties[p];
+  if (!q) { err.push(`${id} : schéma pour une ${l ? "partie " + p + " inexistante" : "leçon inconnue"}`); continue; }
+  if (q.illus) { err.push(`${id} : la partie ${p} a déjà un schéma`); continue; }
+  if (!/^<svg[\s\S]*<\/svg>$/.test(svg) || !/aria-label='/.test(svg) || /<script|\son\w+=/i.test(svg)) { err.push(`${id} : schéma SVG invalide`); continue; }
+  q.illus = { legende, svg };
 }
 
 /* Types de labos réellement codés dans apprendre/labo.js */
