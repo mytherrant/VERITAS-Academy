@@ -99,6 +99,10 @@ const LECONS_METHODE = {
 };
 require("./methodes/_classement.json").forEach(e => exports.pages.push({ id: e.id, t: "methode", ti: e.ti, d: e.d, u: e.u, l: e.l.concat(LECONS_METHODE[e.id] || []) }));
 
+// Annales corrigées (tools/annales.cjs → _liste.json) : chacune dans sa classe et sa matière, en accès libre.
+require("./annales/_liste.json").forEach(a => exports.pages.push({ id: "an_" + a.id.replace(/-/g, "_"), t: "epreuve",
+  ti: "Annale " + a.nomExamen + " " + a.annee + " : " + a.matiere, d: "Sujet officiel et " + (a.national ? "corrigé harmonisé national" : "corrigé détaillé") + ".", u: a.u, l: [[a.classes, a.mat]] }));
+
 // Œuvres au programme : fichier → [classes, recherche dans les titres]. N'kum-Wam : étudiée en 5e selon la progression.
 exports.oeuvres = [
   ["6e-bimanes","Les Bimanes","6e",/bimanes/i], ["6e-chants-foret","Chants de la forêt","6e",/chants de la forêt/i], ["6e-contes-korotoumou","Les Contes de Korotoumou","6e",/korotoumou/i],

@@ -22,23 +22,32 @@ const CONTROLE = process.argv.includes("--controle");
 const esc = s => String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
 let erreurs = 0; const err = m => { erreurs++; console.error("ERREUR : " + m); };
 
-const EXAMENS = { bepc: { nom: "BEPC", classe: "3e" }, probatoire: { nom: "Probatoire", classe: "1re" }, bac: { nom: "Baccalauréat", classe: "Tle" } };
-// Matières : libellé, fiche de méthode liée (par examen), ordre d'affichage.
+// classes : classes d'Apprendre où l'annale est rangée quand la source ne précise pas sa série.
+const EXAMENS = { bepc: { nom: "BEPC", classe: "3e", classes: "3e" }, probatoire: { nom: "Probatoire", classe: "1re", classes: "1re A,1re C,1re D" }, bac: { nom: "Baccalauréat", classe: "Tle", classes: "Tle A,Tle C,Tle D" } };
+// Matières : libellé, fiche de méthode liée (par examen), matière d'Apprendre (apprendre/commun.js). L'ordre est celui de l'affichage.
+const P = "ressources/";
 const MATIERES = {
-  "etude-de-texte": ["Étude de texte", { bepc: "ressources/bepc-francais.html" }],
-  "correction-orthographique": ["Correction orthographique", { bepc: "ressources/bepc-francais.html" }],
-  "expression-ecrite": ["Expression écrite", { bepc: "ressources/bepc-francais.html" }],
-  "mathematiques": ["Mathématiques", { bepc: "ressources/examen-mathematiques-bepc.html" }],
-  "pct": ["Physique, chimie et technologie", { bepc: "ressources/examen-pct-bepc.html" }],
-  "svt": ["SVTEEHB", { bepc: "ressources/examen-svt-bepc.html" }],
-  "histoire": ["Histoire", { bepc: "ressources/examen-histoire-geographie-bepc.html" }],
-  "geographie": ["Géographie", { bepc: "ressources/examen-histoire-geographie-bepc.html" }],
-  "ecm": ["Éducation à la citoyenneté et à la morale", { bepc: "ressources/examen-ecm-bepc.html" }],
-  "anglais": ["Anglais", { bepc: "ressources/examen-anglais-bepc.html" }],
-  "espagnol": ["Espagnol", { bepc: "ressources/examen-langues-vivantes-bepc.html" }],
-  "allemand": ["Allemand", { bepc: "ressources/examen-langues-vivantes-bepc.html" }],
-  "informatique": ["Informatique", { bepc: "ressources/examen-informatique-bepc.html" }],
+  "etude-de-texte": ["Étude de texte", { bepc: P + "bepc-francais.html" }, "francais"],
+  "correction-orthographique": ["Correction orthographique", { bepc: P + "bepc-francais.html" }, "francais"],
+  "expression-ecrite": ["Expression écrite", { bepc: P + "bepc-francais.html" }, "francais"],
+  "litterature": ["Littérature", { probatoire: P + "probatoire-francais.html", bac: P + "bac-francais.html" }, "francais"],
+  "langue-francaise": ["Langue française", { probatoire: P + "probatoire-francais.html", bac: P + "bac-francais.html" }, "francais"],
+  "mathematiques": ["Mathématiques", { bepc: P + "examen-mathematiques-bepc.html", probatoire: P + "examen-mathematiques-probatoire.html", bac: P + "examen-mathematiques-bac.html" }, "maths"],
+  "pct": ["Physique, chimie et technologie", { bepc: P + "examen-pct-bepc.html" }, "pct"],
+  "physique": ["Physique", { probatoire: P + "examen-physique-chimie-probatoire.html", bac: P + "examen-physique-chimie-bac.html" }, "physique"],
+  "chimie": ["Chimie", { probatoire: P + "examen-physique-chimie-probatoire.html", bac: P + "examen-physique-chimie-bac.html" }, "chimie"],
+  "svt": ["SVTEEHB", { bepc: P + "examen-svt-bepc.html", probatoire: P + "examen-svt-probatoire.html", bac: P + "examen-svt-bac.html" }, "svt"],
+  "histoire": ["Histoire", { bepc: P + "examen-histoire-geographie-bepc.html", probatoire: P + "examen-histoire-geographie-probatoire.html", bac: P + "examen-histoire-geographie-bac.html" }, "histoire"],
+  "geographie": ["Géographie", { bepc: P + "examen-histoire-geographie-bepc.html", probatoire: P + "examen-histoire-geographie-probatoire.html", bac: P + "examen-histoire-geographie-bac.html" }, "geo"],
+  "ecm": ["Éducation à la citoyenneté et à la morale", { bepc: P + "examen-ecm-bepc.html", probatoire: P + "examen-ecm-probatoire.html", bac: P + "examen-ecm-bac.html" }, "ecm"],
+  "philosophie": ["Philosophie", { probatoire: P + "examen-philosophie-probatoire.html", bac: P + "examen-philosophie-bac.html" }, "philo"],
+  "anglais": ["Anglais", { bepc: P + "examen-anglais-bepc.html", probatoire: P + "examen-anglais-probatoire.html", bac: P + "examen-anglais-bac.html" }, "anglais"],
+  "espagnol": ["Espagnol", { bepc: P + "examen-langues-vivantes-bepc.html", probatoire: P + "examen-langues-vivantes-probatoire.html", bac: P + "examen-langues-vivantes-bac.html" }, "espagnol"],
+  "allemand": ["Allemand", { bepc: P + "examen-langues-vivantes-bepc.html", probatoire: P + "examen-langues-vivantes-probatoire.html", bac: P + "examen-langues-vivantes-bac.html" }, "allemand"],
+  "informatique": ["Informatique", { bepc: P + "examen-informatique-bepc.html", probatoire: P + "examen-informatique-probatoire.html", bac: P + "examen-informatique-bac.html" }, "info"],
 };
+// Série (Probatoire, BAC) : « serie » dans la méta, en minuscules (a, c, d, cd, ce, dti…) ; « classes » précise où ranger l'annale.
+const nomSerie = s => { const t = s.toUpperCase().match(/TI|ABI|[A-Z]/g) || []; return (t.length > 1 ? "séries " + t.slice(0, -1).join(", ") + " et " + t[t.length - 1] : "série " + t[0]); };
 const ORDRE = Object.keys(MATIERES);
 const CSS = fs.readFileSync(path.join(R, "tools/methodes/_methode.css"), "utf8").trim() + "\n" + fs.readFileSync(path.join(SRC, "_annales.css"), "utf8").trim();
 const JS_V = require("crypto").createHash("sha1").update(fs.readFileSync(path.join(R, "tools/methodes/_methode.js"), "utf8").replace(/\r/g, "")).digest("hex").slice(0, 8);
@@ -88,7 +97,12 @@ for (const ex of fs.readdirSync(SRC).filter(d => EXAMENS[d])) {
     const s = { nom, meta, sujet: bareme(formules(bloc("sujet"))), corrige: bareme(formules(bloc("corrige"))) };
     if (meta.examen !== ex) err(nom + " : examen " + meta.examen + " hors de son dossier");
     if (!MATIERES[meta.matiere]) err(nom + " : matière inconnue " + meta.matiere);
-    if (f !== meta.matiere + "-" + meta.annee + ".html") err(nom + " : nom de fichier ≠ matière-année de la méta");
+    s.cle = meta.matiere + (meta.serie ? "-" + meta.serie : "");
+    if (meta.serie && !/^[a-z]+$/.test(meta.serie)) err(nom + " : série illisible " + meta.serie);
+    if (f !== s.cle + "-" + meta.annee + ".html") err(nom + " : nom de fichier ≠ matière(-série)-année de la méta");
+    s.serie = meta.serie ? nomSerie(meta.serie) : "";
+    s.classes = meta.classes || EXAMENS[ex].classes;
+    if (s.classes.split(",").some(c => !/^(3e|1re [ACD]|Tle [ACD])$/.test(c))) err(nom + " : classes inconnues " + s.classes);
     if (!/^https:\/\//.test(meta.sujet_source || "")) err(nom + " : sujet_source manquant");
     if (!["veritas", "national"].includes(meta.corrige)) err(nom + " : corrige doit valoir veritas ou national");
     if (meta.corrige === "national" && !/^https:\/\//.test(meta.corrige_source || "")) err(nom + " : corrigé national sans source");
@@ -100,7 +114,7 @@ for (const ex of fs.readdirSync(SRC).filter(d => EXAMENS[d])) {
       const ouv = (h.match(/<(table|p|ul|ol|li|tr|td|th|strong|em|span|sup|sub)[\s>]/g) || []).length, fer = (h.match(/<\/(table|p|ul|ol|li|tr|td|th|strong|em|span|sup|sub)>/g) || []).length;
       if (ouv !== fer) err(nom + " (" + k + ") : balises déséquilibrées (" + ouv + " ouvertes, " + fer + " fermées)");
     });
-    s.page = "ressources/annales/" + ex + "-" + meta.matiere + "-" + meta.annee + ".html";
+    s.page = "ressources/annales/" + ex + "-" + s.cle + "-" + meta.annee + ".html";
     sources.push(s);
   }
 }
@@ -143,12 +157,13 @@ const domaine = u => u.replace(/^https:\/\/(www\.)?/, "").replace(/\/.*$/, "");
 // --- Une page par épreuve ---
 for (const s of sources) {
   const { meta } = s, E = EXAMENS[meta.examen], [lib, fiches] = MATIERES[meta.matiere];
-  const soeurs = sources.filter(x => x.meta.examen === meta.examen && x.meta.matiere === meta.matiere).sort((a, b) => b.meta.annee - a.meta.annee);
+  const soeurs = sources.filter(x => x.meta.examen === meta.examen && x.cle === s.cle).sort((a, b) => b.meta.annee - a.meta.annee);
   const annees = '<div class="ax-annees">' + soeurs.map(x => x === s ? "<span>" + x.meta.annee + "</span>" : '<a href="/' + x.page + '">' + x.meta.annee + "</a>").join("") + "</div>";
-  const titre = lib + " au " + E.nom + " " + meta.annee + " : sujet et corrigé";
-  const description = "Sujet officiel de " + lib.toLowerCase() + " du " + E.nom + " " + meta.annee + " (Cameroun, " + E.classe + ") et " + (meta.corrige === "national" ? "corrigé harmonisé national" : "corrigé détaillé") + ", barème inclus.";
+  const exa = E.nom + (s.serie ? " " + s.serie.replace(/^séries? /, "") : "");
+  const titre = lib + " au " + exa + " " + meta.annee + " : sujet et corrigé";
+  const description = "Sujet officiel de " + lib.toLowerCase() + " du " + E.nom + " " + meta.annee + (s.serie ? ", " + s.serie : "") + " (Cameroun, " + s.classes.split(",").join(", ") + ") et " + (meta.corrige === "national" ? "corrigé harmonisé national" : "corrigé détaillé") + ", barème inclus.";
   const national = meta.corrige === "national";
-  const epreuve = '<div class="ax-meta"><span><b>Examen</b> ' + E.nom + " " + meta.annee + "</span>" + (meta.duree ? "<span><b>Durée</b> " + esc(meta.duree) + "</span>" : "") + (meta.coef ? "<span><b>Coefficient</b> " + esc(meta.coef) + "</span>" : "") + "</div>" +
+  const epreuve = '<div class="ax-meta"><span><b>Examen</b> ' + E.nom + " " + meta.annee + "</span>" + (s.serie ? "<span><b>Série</b> " + esc(s.serie.replace(/^séries? /, "")) + "</span>" : "") +(meta.duree ? "<span><b>Durée</b> " + esc(meta.duree) + "</span>" : "") + (meta.coef ? "<span><b>Coefficient</b> " + esc(meta.coef) + "</span>" : "") + "</div>" +
     "<p>Traite le sujet dans les conditions de l'examen, montre en main, puis compare ta copie au corrigé. Les autres sessions :</p>" + annees +
     (fiches[meta.examen] ? '<p style="margin-top:14px">La méthode de l\'épreuve, le barème et les erreurs fréquentes : <a href="/' + fiches[meta.examen] + '">voir la fiche</a>.</p>' : "");
   const corrigeTete = national
@@ -163,7 +178,7 @@ for (const s of sources) {
   ];
   const cta = '<a class="cta" href="/ressources/annales/">Toutes les annales corrigées<small>Par examen, par matière et par session</small></a>';
   let html = GAB.replace(RE_ART, () => article("Annales · " + E.nom + " " + meta.annee, titre, "Le sujet officiel de la session " + meta.annee + ", puis son corrigé, à ouvrir une fois ta copie terminée.", parties, cta));
-  html = habiller(html, s.page, titre + " | VÉRITAS", description, { "@type": "LearningResource", name: titre, description, educationalLevel: E.classe, learningResourceType: "Annale d'examen", about: lib });
+  html = habiller(html, s.page, titre + " | VÉRITAS", description, { "@type": "LearningResource", name: titre, description, educationalLevel: s.classes, learningResourceType: "Annale d'examen", about: lib });
   ecrire(s.page, html);
 }
 
@@ -172,9 +187,10 @@ for (const s of sources) {
   const page = "ressources/annales/index.html";
   const parties = Object.keys(EXAMENS).map(ex => {
     const xs = sources.filter(s => s.meta.examen === ex); if (!xs.length) return null;
-    const lignes = ORDRE.filter(m => xs.some(s => s.meta.matiere === m)).map(m => {
-      const ys = xs.filter(s => s.meta.matiere === m).sort((a, b) => b.meta.annee - a.meta.annee);
-      return "<tr><th>" + esc(MATIERES[m][0]) + "</th><td>" + ys.map(s => '<a href="/' + s.page + '">' + s.meta.annee + "</a>").join(" · ") + "</td></tr>";
+    const cles = [...new Set(xs.map(s => s.cle))].sort((a, b) => ORDRE.indexOf(xs.find(s => s.cle === a).meta.matiere) - ORDRE.indexOf(xs.find(s => s.cle === b).meta.matiere) || a.localeCompare(b));
+    const lignes = cles.map(k => {
+      const ys = xs.filter(s => s.cle === k).sort((a, b) => b.meta.annee - a.meta.annee);
+      return "<tr><th>" + esc(MATIERES[ys[0].meta.matiere][0]) + (ys[0].serie ? " <small>(" + esc(ys[0].serie) + ")</small>" : "") + "</th><td>" + ys.map(s => '<a href="/' + s.page + '">' + s.meta.annee + "</a>").join(" · ") + "</td></tr>";
     }).join("");
     return [ex, EXAMENS[ex].nom + " (" + EXAMENS[ex].classe + ")", '<table class="ax-tbl"><thead><tr><th>Matière</th><th>Sessions corrigées</th></tr></thead><tbody>' + lignes + "</tbody></table>"];
   }).filter(Boolean);
@@ -192,8 +208,9 @@ for (const s of sources) {
 // --- Liste pour les fiches de méthode ---
 (function liste() {
   const f = path.join(SRC, "_liste.json");
-  const L = sources.map(s => ({ examen: s.meta.examen, fiche: MATIERES[s.meta.matiere][1][s.meta.examen] || null, matiere: MATIERES[s.meta.matiere][0], annee: s.meta.annee, u: "/" + s.page }))
-    .sort((a, b) => ORDRE.indexOf(Object.keys(MATIERES).find(k => MATIERES[k][0] === a.matiere)) - ORDRE.indexOf(Object.keys(MATIERES).find(k => MATIERES[k][0] === b.matiere)) || b.annee - a.annee);
+  // Lue par methodes_examens.cjs (fiches) et apprendre_carte.cjs (classe et matière d'Apprendre).
+  const L = sources.slice().sort((a, b) => ORDRE.indexOf(a.meta.matiere) - ORDRE.indexOf(b.meta.matiere) || a.cle.localeCompare(b.cle) || b.meta.annee - a.meta.annee)
+    .map(s => ({ id: s.meta.examen + "-" + s.cle + "-" + s.meta.annee, examen: s.meta.examen, nomExamen: EXAMENS[s.meta.examen].nom, fiche: MATIERES[s.meta.matiere][1][s.meta.examen] || null, matiere: MATIERES[s.meta.matiere][0] + (s.serie ? " (" + s.serie + ")" : ""), mat: MATIERES[s.meta.matiere][2], classes: s.classes, annee: s.meta.annee, national: s.meta.corrige === "national", u: "/" + s.page }));
   const json = JSON.stringify(L, null, 1) + "\n";
   if (fs.existsSync(f) && fs.readFileSync(f, "utf8") === json) return;
   if (CONTROLE) return err("tools/annales/_liste.json : à régénérer");
