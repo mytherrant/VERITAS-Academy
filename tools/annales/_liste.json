@@ -40,5 +40,26 @@
   "matiere": "Physique, chimie et technologie",
   "annee": 2024,
   "u": "/ressources/annales/bepc-pct-2024.html"
+ },
+ {
+  "examen": "bepc",
+  "fiche": "ressources/examen-svt-bepc.html",
+  "matiere": "SVTEEHB",
+  "annee": 2026,
+  "u": "/ressources/annales/bepc-svt-2026.html"
+ },
+ {
+  "examen": "bepc",
+  "fiche": "ressources/examen-svt-bepc.html",
+  "matiere": "SVTEEHB",
+  "annee": 2025,
+  "u": "/ressources/annales/bepc-svt-2025.html"
+ },
+ {
+  "examen": "bepc",
+  "fiche": "ressources/examen-svt-bepc.html",
+  "matiere": "SVTEEHB",
+  "annee": 2024,
+  "u": "/ressources/annales/bepc-svt-2024.html"
  }
 ]
