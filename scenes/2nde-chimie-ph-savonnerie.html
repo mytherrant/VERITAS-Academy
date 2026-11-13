@@ -1,0 +1,186 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Le savon de Mama Ngono — Scènes vivantes | VÉRITAS</title>
+<meta name="description" content="Scène animée de chimie (2nde C) : solutions acides, basiques et neutres, échelle de pH, papier pH et indicateur coloré, dilution et sécurité au laboratoire.">
+<link rel="icon" href="../VERITAS_favicon_512.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="scene.css?v=20261113a">
+<!-- scene-tete -->
+<link rel="canonical" href="https://veritas-school.com/scenes/2nde-chimie-ph-savonnerie.html">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Le savon de Mama Ngono — Scènes vivantes | VÉRITAS">
+<meta property="og:description" content="Scène animée de chimie (2nde C) : solutions acides, basiques et neutres, échelle de pH, papier pH et indicateur coloré, dilution et sécurité au laboratoire.">
+<meta property="og:url" content="https://veritas-school.com/scenes/2nde-chimie-ph-savonnerie.html">
+<meta property="og:image" content="https://veritas-school.com/og-image.jpg">
+<meta property="og:locale" content="fr_FR">
+<meta name="twitter:card" content="summary_large_image">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"LearningResource","name":"Le savon de Mama Ngono","description":"Scène animée de chimie (2nde C) : solutions acides, basiques et neutres, échelle de pH, papier pH et indicateur coloré, dilution et sécurité au laboratoire.","url":"https://veritas-school.com/scenes/2nde-chimie-ph-savonnerie.html","inLanguage":"fr","learningResourceType":"Simulation interactive","educationalLevel":"Seconde","about":"Chimie","teaches":"Distinguer solutions acides, basiques et neutres, connaître l’échelle de pH, déterminer expérimentalement le pH (papier pH, indicateur coloré) et comprendre l’effet d’une dilution, en respectant les règles de sécurité.","isAccessibleForFree":true,"interactivityType":"active","provider":{"@type":"EducationalOrganization","name":"Centre VÉRITAS","url":"https://veritas-school.com/"},"isPartOf":{"@type":"CollectionPage","name":"Scènes vivantes","url":"https://veritas-school.com/scenes/"}}</script>
+<!-- /scene-tete -->
+</head>
+<body>
+<noscript>Cette scène a besoin de JavaScript pour se jouer.</noscript>
+<script>
+window.SCENE = {
+  id: '2nde-chimie-ph',
+  discipline: 'Chimie', niveau: '2nde',
+  titre: 'Le savon de Mama Ngono',
+  tableau: ['Le pH', 'acide  < 7 <  basique'],
+  decor: 'classe', lieu: 'Le laboratoire du lycée de Bafang', moment: 'Une séance de travaux pratiques',
+  objectif: 'Distinguer solutions acides, basiques et neutres, connaître l’échelle de pH, déterminer expérimentalement le pH (papier pH, indicateur coloré) et comprendre l’effet d’une dilution, en respectant les règles de sécurité.',
+  programme: 'Progression harmonisée 2nde C · Généralités sur les solutions aqueuses, leçon 17 (grandeurs caractéristiques, dilution) ; leçons 18-20 (solutions acides, basiques et neutres) ; notion de pH, leçon 21 (domaines de pH et nature d’une solution), leçon 22 (détermination expérimentale du pH)',
+  jauges: [
+    { id: 'securite', nom: 'Sécurité au laboratoire', val: 50, couleur: '#C0392B' },
+    { id: 'mesure', nom: 'Résultats de mesure', val: 10, couleur: '#1E499B' }
+  ],
+  personnages: {
+    prof: { nom: 'M. Kamdem, professeur de chimie', couleur: '#2E5A7A', look: { tenue: 'blouse', habit: '#F4F6FA', chemise: '#2E5A7A', bas: '#2B3A55', peau: 'fonce', cheveux: 'ras', objet: 'dossier' } },
+    joelle: { nom: 'Joëlle, élève de 2nde C', couleur: '#B03A6E', look: { metier: 'eleve', tenue: 'jupe', peau: 'fonce', cheveux: 'tresses' } },
+    franck: { nom: 'Franck, élève de 2nde C', couleur: '#1E499B', look: { metier: 'eleve', peau: 'fonce', cheveux: 'ras' } },
+    ngono: { nom: 'Mama Ngono, savonnière', couleur: '#C2551F', look: { metier: 'commercant', tenue: 'robe', peau: 'tresfonce', coiffe: 'foulard', couleurCoiffe: '#C2551F', objet: 'sac' } }
+  },
+  etapes: [
+    { t: 'recit', entre: ['prof', 'joelle', 'franck', 'ngono'], txt: 'Mama Ngono fabrique du savon artisanal avec de l’huile de palme et une solution de soude. Ses clientes se plaignent : certains savons « brûlent » la peau. Elle vient demander l’aide du lycée.', objet: { i: 'flamme', lib: 'Le savon pique…' } },
+    { t: 'dit', qui: 'prof', txt: 'Le problème vient sans doute du caractère basique de son savon. Aujourd’hui, on mesure le pH : l’échelle qui dit si une solution est acide, neutre ou basique.' },
+    { t: 'remarque', titre: 'L’échelle de pH', txt: 'À 25 °C, le pH d’une solution aqueuse va de 0 à 14. pH inférieur à 7 : solution ACIDE ; pH égal à 7 : solution NEUTRE (l’eau pure) ; pH supérieur à 7 : solution BASIQUE. Plus le pH est loin de 7, plus la solution est acide ou basique.' },
+    { t: 'atelier', mode: 'ordre', titre: 'Atelier · les règles de sécurité', consigne: 'Remets dans l’ordre les gestes avant et pendant la manipulation.',
+      items: [
+        'Mettre la blouse, les lunettes et les gants.',
+        'Lire l’étiquette et les pictogrammes de danger.',
+        'Pour diluer : verser l’acide ou la base dans l’eau, jamais l’inverse.',
+        'Prélever avec une pipette, jamais à la bouche.',
+        'Rincer le matériel et ranger les flacons fermés.'
+      ],
+      bravo: 'La soude et les acides concentrés sont corrosifs : la sécurité passe avant la mesure.', jauges: { securite: 90 } },
+    { t: 'recit', txt: 'Sur la paillasse : jus de citron, vinaigre, eau de pluie, eau distillée, eau savonneuse, eau de Javel. Joëlle dépose une goutte de chaque sur du papier pH.', jauges: { mesure: 40 } },
+    { t: 'atelier', mode: 'tri', titre: 'Atelier · acide, neutre ou basique ?', consigne: 'Classe chaque solution d’après son pH mesuré.',
+      cats: ['Acide (pH < 7)', 'Neutre (pH = 7)', 'Basique (pH > 7)'],
+      items: [
+        { txt: 'Jus de citron, pH ≈ 2', cat: 0 },
+        { txt: 'Vinaigre, pH ≈ 3', cat: 0 },
+        { txt: 'Eau distillée, pH ≈ 7', cat: 1 },
+        { txt: 'Eau savonneuse, pH ≈ 9', cat: 2 },
+        { txt: 'Eau de Javel, pH ≈ 12', cat: 2 },
+        { txt: 'Eau de pluie, pH ≈ 5,6', cat: 0 }
+      ],
+      bravo: 'L’eau de pluie est légèrement acide : elle dissout un peu du dioxyde de carbone de l’air.', jauges: { mesure: 60 } },
+    { t: 'dit', qui: 'franck', txt: 'Et avec le bleu de bromothymol, monsieur ?' },
+    { t: 'remarque', titre: 'Un indicateur coloré', txt: 'Le bleu de bromothymol (BBT) change de couleur selon le pH : jaune en milieu acide, vert en milieu neutre, bleu en milieu basique. Le papier pH donne une valeur approchée ; le pH-mètre, une mesure précise.' },
+    { t: 'question', q: 'On verse quelques gouttes de BBT dans le savon liquide de Mama Ngono. La solution devient bleue. Que conclure ?',
+      options: [
+        { txt: 'Le savon est basique.', ok: true, retour: 'Bleu = milieu basique. Le pH-mètre indique 12 : beaucoup trop pour la peau.' },
+        { txt: 'Le savon est acide.', retour: 'Non : le BBT est jaune en milieu acide.' }
+      ], jauges: { mesure: 75 } },
+    { t: 'dit', qui: 'ngono', emo: 'doute', txt: 'Alors j’ai mis trop de soude ?' },
+    { t: 'question', q: 'On dilue dix fois une solution de soude de pH 12. Son pH…',
+      options: [
+        { txt: 'diminue et se rapproche de 7, sans descendre en dessous.', ok: true, retour: 'Une solution basique diluée reste basique, mais moins : son pH baisse vers 7.' },
+        { txt: 'augmente vers 14.', retour: 'Non : diluer rapproche le pH de celui de l’eau.' },
+        { txt: 'devient acide.', retour: 'Non : on ne rend pas une base acide en ajoutant de l’eau.' }
+      ] },
+    { t: 'choix', qui: 'prof', q: 'Quel conseil donner à Mama Ngono ?',
+      options: [
+        { txt: 'Peser exactement la soude selon une recette dosée, et laisser mûrir le savon plusieurs semaines avant la vente.', consequence: 'La soude réagit entièrement avec l’huile : le savon devient doux pour la peau.', jauges: { mesure: 20, securite: 5 } },
+        { txt: 'Ajouter du jus de citron dans chaque savon.', consequence: 'Résultat imprévisible et savon abîmé : il faut corriger la recette à la source.', jauges: { mesure: -15 } }
+      ],
+      oeuvre: 'En fabrication, on maîtrise le pH en dosant les réactifs, pas en corrigeant au hasard.' },
+    { t: 'dit', qui: 'ngono', emo: 'joie', txt: 'Je reviendrai avec mes nouveaux savons. Vous me mesurerez leur pH !' },
+    { t: 'dit', qui: 'joelle', txt: 'La chimie de la classe sert au marché de Bafang : on a gagné une cliente pour le labo !' }
+  ],
+  labo: {
+    titre: 'Laboratoire · une mesure sûre et juste',
+    intro: 'Règle la protection, le soin de la mesure et le dosage de la soude : le savon est-il doux et la séance sans accident ?',
+    persos: ['prof', 'joelle', 'franck', 'ngono'],
+    curseurs: [
+      { id: 'protection', nom: 'Protection (blouse, lunettes, gants)', val: 70, bas: 'aucune', haut: 'complète' },
+      { id: 'soin', nom: 'Soin de la mesure', val: 60, bas: 'à l’œil', haut: 'pH-mètre étalonné' },
+      { id: 'soude', nom: 'Quantité de soude dans la recette', val: 80, bas: 'dosée', haut: 'excessive' }
+    ],
+    scenarios: [
+      { nom: 'Le savon d’avant', icone: 'flamme', valeurs: { soude: 90, soin: 20 } },
+      { nom: 'La recette corrigée', icone: 'diplome', valeurs: { soude: 30, soin: 85, protection: 90 } },
+      { nom: 'Sans lunettes', icone: 'oeil', valeurs: { protection: 5, soude: 40 } }
+    ],
+    liens: [
+      { a: 'prof', b: 'ngono', type: 'confiance', lib: 'conseille', base: .5, poids: { soin: .3 } },
+      { a: 'joelle', b: 'franck', type: 'alliance', lib: 'mesurent', base: .5, poids: { soin: .2 } },
+      { a: 'prof', b: 'joelle', type: 'confiance', lib: 'encadre', base: .5, poids: { protection: .2 } }
+    ],
+    issue: function(v){
+      if(v.protection < 30){ return { niveau: 'ko', badge: 'Une projection dans l’œil', recit: 'Une goutte de soude gicle : sans lunettes, l’accident est grave. Rinçage immédiat et urgences.', apres: 'Les solutions basiques concentrées sont corrosives.', themes: ['sécurité'] }; }
+      if(v.soude > 65){ return { niveau: 'moyen', badge: 'Savon trop basique', recit: 'Le pH reste autour de 12 : le savon irrite la peau.', apres: 'Doser la soude, c’est maîtriser le pH.', themes: ['pH', 'base'] }; }
+      if(v.soin > 50){ return { niveau: 'ok', badge: 'Un savon doux', recit: 'Recette dosée, savon mûri, pH mesuré au pH-mètre : les clientes sont satisfaites.', apres: 'La mesure du pH guide la fabrication.', themes: ['pH', 'mesure'] }; }
+      return { niveau: 'moyen', badge: 'Mesure approximative', recit: 'Le papier pH donne « environ 9 » : il faudrait une mesure plus précise.', apres: 'Choisir l’instrument adapté à la précision voulue.', themes: ['mesure'] };
+    }
+  },
+  quiz: [
+    { q: 'Une solution de pH 4 est…', options: [
+      { txt: 'acide.', ok: true, retour: 'pH < 7.' },
+      { txt: 'basique.', retour: 'Non : pH > 7 pour une base.' } ] },
+    { q: 'Le pH de l’eau pure à 25 °C vaut…', options: [
+      { txt: '7.', ok: true, retour: 'Solution neutre.' },
+      { txt: '0.', retour: 'Non.' } ] },
+    { q: 'Le BBT est bleu dans une solution…', options: [
+      { txt: 'basique.', ok: true, retour: 'Jaune : acide ; vert : neutre ; bleu : basique.' },
+      { txt: 'acide.', retour: 'Non.' } ] },
+    { q: 'Quand on dilue une solution acide, son pH…', options: [
+      { txt: 'augmente et se rapproche de 7.', ok: true, retour: 'Sans dépasser 7.' },
+      { txt: 'diminue vers 0.', retour: 'Non.' } ] },
+    { q: 'Pour diluer un acide concentré, on…', options: [
+      { txt: 'verse l’acide dans l’eau, lentement.', ok: true, retour: 'Jamais l’eau dans l’acide : risque de projections.' },
+      { txt: 'verse l’eau dans l’acide.', retour: 'Dangereux.' } ] }
+  ],
+  bilan: {
+    retenir: [
+      'Échelle de pH à 25 °C : pH < 7 acide, pH = 7 neutre, pH > 7 basique.',
+      'Mesure : papier pH (valeur approchée), indicateur coloré comme le BBT (jaune, vert, bleu), pH-mètre (précis).',
+      'Diluer une solution rapproche son pH de 7, sans le franchir.',
+      'Sécurité : blouse, lunettes, gants ; verser l’acide ou la base dans l’eau, jamais l’inverse.'
+    ],
+    ecrire: 'Rédigez le compte rendu du TP : matériel, mesures de pH de six solutions de la maison, classement, et conseils de sécurité pour leur usage domestique.'
+  }
+};
+</script>
+<script src="decors.js?v=20261113b"></script>
+<script src="scene.js?v=20261113a"></script>
+<!-- scene-texte -->
+<details id="scene-texte" style="max-width:860px;margin:28px auto 40px;padding:0 16px;font:15px/1.6 Poppins,system-ui,sans-serif;color:#0C2A6A">
+<summary style="cursor:pointer;font-weight:600;padding:12px 0">Lire la scène en texte</summary>
+<article lang="fr">
+<h1>Le savon de Mama Ngono</h1>
+<p><b>Chimie · Seconde</b></p>
+<p><i>Dialogue fictif écrit pour la leçon. Les faits et les dates cités sont exacts.</i></p>
+<h3>Objectif</h3><p>Distinguer solutions acides, basiques et neutres, connaître l’échelle de pH, déterminer expérimentalement le pH (papier pH, indicateur coloré) et comprendre l’effet d’une dilution, en respectant les règles de sécurité.</p>
+<p>Programme : Progression harmonisée 2nde C · Généralités sur les solutions aqueuses, leçon 17 (grandeurs caractéristiques, dilution) ; leçons 18-20 (solutions acides, basiques et neutres) ; notion de pH, leçon 21 (domaines de pH et nature d’une solution), leçon 22 (détermination expérimentale du pH)</p>
+<p>Lieu : Le laboratoire du lycée de Bafang · Une séance de travaux pratiques</p>
+<h3>Personnages</h3><ul><li>M. Kamdem, professeur de chimie</li><li>Joëlle, élève de 2nde C</li><li>Franck, élève de 2nde C</li><li>Mama Ngono, savonnière</li></ul>
+<h3>La scène</h3>
+<p>Mama Ngono fabrique du savon artisanal avec de l’huile de palme et une solution de soude. Ses clientes se plaignent : certains savons « brûlent » la peau. Elle vient demander l’aide du lycée.</p>
+<p><b>M. Kamdem, professeur de chimie</b> : Le problème vient sans doute du caractère basique de son savon. Aujourd’hui, on mesure le pH : l’échelle qui dit si une solution est acide, neutre ou basique.</p>
+<h4>L’échelle de pH</h4><p>À 25 °C, le pH d’une solution aqueuse va de 0 à 14. pH inférieur à 7 : solution ACIDE ; pH égal à 7 : solution NEUTRE (l’eau pure) ; pH supérieur à 7 : solution BASIQUE. Plus le pH est loin de 7, plus la solution est acide ou basique.</p>
+<h4>Atelier · les règles de sécurité</h4><p>Remets dans l’ordre les gestes avant et pendant la manipulation.</p>
+<ol><li>Mettre la blouse, les lunettes et les gants.</li><li>Lire l’étiquette et les pictogrammes de danger.</li><li>Pour diluer : verser l’acide ou la base dans l’eau, jamais l’inverse.</li><li>Prélever avec une pipette, jamais à la bouche.</li><li>Rincer le matériel et ranger les flacons fermés.</li></ol>
+<p>La soude et les acides concentrés sont corrosifs : la sécurité passe avant la mesure.</p>
+<p>Sur la paillasse : jus de citron, vinaigre, eau de pluie, eau distillée, eau savonneuse, eau de Javel. Joëlle dépose une goutte de chaque sur du papier pH.</p>
+<h4>Atelier · acide, neutre ou basique ?</h4><p>Classe chaque solution d’après son pH mesuré.</p>
+<ul><li><b>Acide (pH &lt; 7)</b> : Jus de citron, pH ≈ 2 ; Vinaigre, pH ≈ 3 ; Eau de pluie, pH ≈ 5,6</li><li><b>Neutre (pH = 7)</b> : Eau distillée, pH ≈ 7</li><li><b>Basique (pH &gt; 7)</b> : Eau savonneuse, pH ≈ 9 ; Eau de Javel, pH ≈ 12</li></ul>
+<p>L’eau de pluie est légèrement acide : elle dissout un peu du dioxyde de carbone de l’air.</p>
+<p><b>Franck, élève de 2nde C</b> : Et avec le bleu de bromothymol, monsieur ?</p>
+<h4>Un indicateur coloré</h4><p>Le bleu de bromothymol (BBT) change de couleur selon le pH : jaune en milieu acide, vert en milieu neutre, bleu en milieu basique. Le papier pH donne une valeur approchée ; le pH-mètre, une mesure précise.</p>
+<p><b>Question :</b> On verse quelques gouttes de BBT dans le savon liquide de Mama Ngono. La solution devient bleue. Que conclure ?</p><ul><li>Le savon est basique. <b>(bonne réponse)</b></li><li>Le savon est acide.</li></ul><p>Bleu = milieu basique. Le pH-mètre indique 12 : beaucoup trop pour la peau.</p>
+<p><b>Mama Ngono, savonnière</b> : Alors j’ai mis trop de soude ?</p>
+<p><b>Question :</b> On dilue dix fois une solution de soude de pH 12. Son pH…</p><ul><li>diminue et se rapproche de 7, sans descendre en dessous. <b>(bonne réponse)</b></li><li>augmente vers 14.</li><li>devient acide.</li></ul><p>Une solution basique diluée reste basique, mais moins : son pH baisse vers 7.</p>
+<p><b>À toi de décider :</b> Quel conseil donner à Mama Ngono ?</p><ul><li>Peser exactement la soude selon une recette dosée, et laisser mûrir le savon plusieurs semaines avant la vente. — La soude réagit entièrement avec l’huile : le savon devient doux pour la peau.</li><li>Ajouter du jus de citron dans chaque savon. — Résultat imprévisible et savon abîmé : il faut corriger la recette à la source.</li></ul>
+<p><b>Mama Ngono, savonnière</b> : Je reviendrai avec mes nouveaux savons. Vous me mesurerez leur pH !</p>
+<p><b>Joëlle, élève de 2nde C</b> : La chimie de la classe sert au marché de Bafang : on a gagné une cliente pour le labo !</p>
+<h3>Quiz</h3><ol><li>Une solution de pH 4 est… — <b>acide.</b> pH &lt; 7.</li><li>Le pH de l’eau pure à 25 °C vaut… — <b>7.</b> Solution neutre.</li><li>Le BBT est bleu dans une solution… — <b>basique.</b> Jaune : acide ; vert : neutre ; bleu : basique.</li><li>Quand on dilue une solution acide, son pH… — <b>augmente et se rapproche de 7.</b> Sans dépasser 7.</li><li>Pour diluer un acide concentré, on… — <b>verse l’acide dans l’eau, lentement.</b> Jamais l’eau dans l’acide : risque de projections.</li></ol>
+<h3>À retenir</h3><ul><li>Échelle de pH à 25 °C : pH &lt; 7 acide, pH = 7 neutre, pH &gt; 7 basique.</li><li>Mesure : papier pH (valeur approchée), indicateur coloré comme le BBT (jaune, vert, bleu), pH-mètre (précis).</li><li>Diluer une solution rapproche son pH de 7, sans le franchir.</li><li>Sécurité : blouse, lunettes, gants ; verser l’acide ou la base dans l’eau, jamais l’inverse.</li></ul>
+<h3>À écrire</h3><p>Rédigez le compte rendu du TP : matériel, mesures de pH de six solutions de la maison, classement, et conseils de sécurité pour leur usage domestique.</p>
+<p><a href="index.html">Toutes les Scènes vivantes</a> · <a href="2nde-chimie-ph-savonnerie.html">Jouer la scène</a></p>
+</article>
+<!-- /scene-texte -->
+</body>
+</html>

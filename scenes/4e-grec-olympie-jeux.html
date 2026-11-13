@@ -1,0 +1,182 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>La couronne d’olivier — Scènes vivantes | VÉRITAS</title>
+<meta name="description" content="Scène animée de grec (4e) : l’Olympe et Olympie, la trêve sacrée, les épreuves et la place des jeux chez les Grecs, et les mots grecs du sport.">
+<link rel="icon" href="../VERITAS_favicon_512.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="scene.css?v=20261113a">
+<!-- scene-tete -->
+<link rel="canonical" href="https://veritas-school.com/scenes/4e-grec-olympie-jeux.html">
+<meta property="og:type" content="website">
+<meta property="og:title" content="La couronne d’olivier — Scènes vivantes | VÉRITAS">
+<meta property="og:description" content="Scène animée de grec (4e) : l’Olympe et Olympie, la trêve sacrée, les épreuves et la place des jeux chez les Grecs, et les mots grecs du sport.">
+<meta property="og:url" content="https://veritas-school.com/scenes/4e-grec-olympie-jeux.html">
+<meta property="og:image" content="https://veritas-school.com/og-image.jpg">
+<meta property="og:locale" content="fr_FR">
+<meta name="twitter:card" content="summary_large_image">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"LearningResource","name":"La couronne d’olivier","description":"Scène animée de grec (4e) : l’Olympe et Olympie, la trêve sacrée, les épreuves et la place des jeux chez les Grecs, et les mots grecs du sport.","url":"https://veritas-school.com/scenes/4e-grec-olympie-jeux.html","inLanguage":"fr","learningResourceType":"Simulation interactive","educationalLevel":"4ᵉ","about":"Grec","teaches":"Distinguer l’Olympe (montagne des dieux) et Olympie (sanctuaire de Zeus, lieu des jeux), découvrir la place des jeux chez les Grecs (trêve sacrée, épreuves, récompense) et les mots grecs qui ont donné du français.","isAccessibleForFree":true,"interactivityType":"active","provider":{"@type":"EducationalOrganization","name":"Centre VÉRITAS","url":"https://veritas-school.com/"},"isPartOf":{"@type":"CollectionPage","name":"Scènes vivantes","url":"https://veritas-school.com/scenes/"}}</script>
+<!-- /scene-tete -->
+</head>
+<body>
+<noscript>Cette scène a besoin de JavaScript pour se jouer.</noscript>
+<script>
+window.SCENE = {
+  id: '4e-grec-olympie',
+  discipline: 'Grec', niveau: '4e',
+  titre: 'La couronne d’olivier',
+  decor: 'agora', lieu: 'Olympie, sanctuaire de Zeus, dans le Péloponnèse', moment: 'L’été d’une olympiade, au Ve siècle avant J.-C.',
+  objectif: 'Distinguer l’Olympe (montagne des dieux) et Olympie (sanctuaire de Zeus, lieu des jeux), découvrir la place des jeux chez les Grecs (trêve sacrée, épreuves, récompense) et les mots grecs qui ont donné du français.',
+  programme: 'Progression harmonisée 4e · Fondamentaux du grec et culture antique, titre 4 (Olympe et Olympie), titre 17 (jeux et place des jeux chez les Grecs)',
+  jauges: [
+    { id: 'agon', nom: 'Agôn (l’esprit de compétition)', val: 40, couleur: '#B03A2E' },
+    { id: 'treve', nom: 'Trêve sacrée respectée', val: 50, couleur: '#1F9D5B' }
+  ],
+  personnages: {
+    eleve: { nom: 'Ornella, élève de 4e, guide de la visite', couleur: '#1F6F78', look: { metier: 'eleve', tenue: 'jupe', peau: 'fonce', cheveux: 'tresses', objet: 'livre' } },
+    athlete: { nom: 'Mélanippos, coureur du stade', couleur: '#8A5A2B', look: { tenue: 'boubou', peau: 'mat', cheveux: 'court', habit: '#F2EBD8' } },
+    hellanodice: { nom: 'Un hellanodice, juge des jeux', couleur: '#5A2E5A', look: { tenue: 'boubou', peau: 'mat', cheveux: 'court', habit: '#5A2E5A', objet: 'dossier' } },
+    heraut: { nom: 'Un héraut, messager de la trêve', couleur: '#1E499B', look: { tenue: 'boubou', peau: 'mat', cheveux: 'court', habit: '#C9D9F0', objet: 'lettre' } }
+  },
+  etapes: [
+    { t: 'recit', entre: ['eleve'], txt: 'Ornella présente à sa classe un voyage imaginaire au cœur de la Grèce antique.', objet: { i: 'statue', lib: 'Olympie' } },
+    { t: 'dit', qui: 'eleve', txt: 'Attention au piège ! L’Olympe, Ὄλυμπος, est la plus haute montagne de Grèce, où les Grecs imaginaient la demeure des dieux. Olympie, Ὀλυμπία, est un sanctuaire de Zeus, dans le Péloponnèse : c’est là qu’avaient lieu les jeux.' },
+    { t: 'question', q: 'Où se déroulaient les jeux Olympiques antiques ?',
+      options: [
+        { txt: 'À Olympie, dans le sanctuaire de Zeus.', ok: true, retour: 'Dans le Péloponnèse, au sud-ouest de la Grèce.' },
+        { txt: 'Au sommet du mont Olympe.', retour: 'Non : l’Olympe est la montagne des dieux, au nord de la Grèce.' }
+      ] },
+    { t: 'recit', entre: ['heraut'], txt: 'Avant les jeux, des hérauts parcourent les cités grecques.' },
+    { t: 'dit', qui: 'heraut', txt: 'Écoutez, Grecs ! Les jeux de Zeus approchent. Que cessent les guerres : les athlètes et les pèlerins doivent pouvoir venir à Olympie en sécurité !', jauges: { treve: 85 } },
+    { t: 'remarque', titre: 'La trêve sacrée', txt: 'Selon la tradition, les jeux ont commencé en 776 avant J.-C. et revenaient tous les quatre ans : cette période s’appelle une olympiade. Une trêve sacrée, ἐκεχειρία, protégeait les voyageurs qui se rendaient à Olympie.' },
+    { t: 'recit', entre: ['athlete', 'hellanodice'], txt: 'Dans le stade, Mélanippos s’apprête à courir l’épreuve la plus ancienne : la course du stade, environ 192 mètres.' },
+    { t: 'atelier', mode: 'tri', titre: 'Atelier · les épreuves', consigne: 'Classe chaque épreuve antique.',
+      cats: ['Course', 'Combat', 'Fait partie du pentathle'],
+      items: [
+        { txt: 'Le stade : un aller sur la piste', cat: 0 },
+        { txt: 'Le diaule : un aller-retour', cat: 0 },
+        { txt: 'Le pugilat', cat: 1 },
+        { txt: 'Le pancrace', cat: 1 },
+        { txt: 'Le lancer du disque', cat: 2 },
+        { txt: 'Le lancer du javelot', cat: 2 }
+      ],
+      bravo: 'Le pentathle réunissait course, saut, disque, javelot et lutte.', jauges: { agon: 70 } },
+    { t: 'dit', qui: 'hellanodice', txt: 'Athlète, jure devant Zeus que tu concourras sans tricher. Le tricheur paiera une amende, qui financera une statue de Zeus portant son nom.' },
+    { t: 'choix', qui: 'athlete', q: 'Un rival te propose de l’argent pour le laisser gagner. Que fais-tu ?',
+      options: [
+        { txt: 'Je refuse : j’ai juré devant Zeus et ma cité compte sur moi.', consequence: 'Mélanippos court loyalement. Son nom sera gravé avec honneur.', jauges: { agon: 20 } },
+        { txt: 'J’accepte : personne ne le saura.', consequence: 'Les juges l’apprennent : amende et honte, son nom est gravé sur une statue des tricheurs.', jauges: { agon: -30, treve: -20 } }
+      ],
+      oeuvre: 'L’ἀγών, la compétition, était aussi une fête religieuse en l’honneur de Zeus : tricher, c’était offenser le dieu.' },
+    { t: 'question', q: 'Quelle récompense recevait le vainqueur à Olympie ?',
+      options: [
+        { txt: 'Une couronne d’olivier sauvage.', ok: true, retour: 'Une simple couronne, mais une gloire immense pour lui et sa cité.' },
+        { txt: 'Une médaille d’or.', retour: 'C’est la récompense des jeux modernes.' }
+      ] },
+    { t: 'atelier', mode: 'tri', titre: 'Atelier · du grec au français', consigne: 'Retrouve le mot grec d’origine.',
+      cats: ['ἀθλητής (athlète)', 'στάδιον (stade)', 'ἀγών (agôn, lutte)'],
+      items: [
+        { txt: 'athlétisme', cat: 0 },
+        { txt: 'stade', cat: 1 },
+        { txt: 'stadier', cat: 1 },
+        { txt: 'agonie (lutte contre la mort)', cat: 2 },
+        { txt: 'antagoniste', cat: 2 }
+      ],
+      bravo: 'Le grec vit dans le vocabulaire du sport et de la médecine.' },
+    { t: 'dit', qui: 'eleve', emo: 'fier', txt: 'En 1896, Pierre de Coubertin fait renaître les jeux Olympiques à Athènes. Aujourd’hui encore, la flamme olympique est allumée à Olympie !', jauges: { agon: 90, treve: 90 } }
+  ],
+  labo: {
+    titre: 'Laboratoire · des jeux réussis',
+    intro: 'Règle le respect de la trêve, la loyauté des athlètes et la dimension religieuse : les jeux d’Olympie sont-ils réussis ?',
+    persos: ['eleve', 'athlete', 'hellanodice', 'heraut'],
+    curseurs: [
+      { id: 'treve', nom: 'Respect de la trêve', val: 80, bas: 'violée', haut: 'respectée' },
+      { id: 'loyaute', nom: 'Loyauté des athlètes', val: 75, bas: 'tricherie', haut: 'serment tenu' },
+      { id: 'piete', nom: 'Honneurs rendus à Zeus', val: 70, bas: 'oubliés', haut: 'célébrés' }
+    ],
+    scenarios: [
+      { nom: 'Une olympiade glorieuse', icone: 'couronne', valeurs: { treve: 90, loyaute: 90, piete: 85 } },
+      { nom: 'La trêve violée', icone: 'colere', valeurs: { treve: 10 } },
+      { nom: 'Les tricheurs', icone: 'pieces', valeurs: { loyaute: 10 } }
+    ],
+    liens: [
+      { a: 'heraut', b: 'athlete', type: 'confiance', lib: 'protège le voyage', base: .5, poids: { treve: .3 } },
+      { a: 'hellanodice', b: 'athlete', type: 'domination', lib: 'juge', base: .5, poids: { loyaute: .2 } },
+      { a: 'eleve', b: 'athlete', type: 'alliance', lib: 'raconte', base: .4 }
+    ],
+    issue: function(v){
+      if(v.treve < 30){ return { niveau: 'ko', badge: 'Les routes sont dangereuses', recit: 'La guerre continue : athlètes et pèlerins n’osent pas se rendre à Olympie.', apres: 'Sans trêve sacrée, pas de jeux.', themes: ['trêve'] }; }
+      if(v.loyaute < 30){ return { niveau: 'moyen', badge: 'Des statues de la honte', recit: 'Les tricheurs sont démasqués : leurs amendes paient des statues de Zeus à l’entrée du stade.', apres: 'La victoire n’a de valeur que loyale.', themes: ['serment'] }; }
+      return { niveau: 'ok', badge: 'La couronne d’olivier', recit: 'Le vainqueur reçoit la couronne d’olivier ; sa cité l’accueille en héros.', apres: 'Jeux, religion et gloire de la cité étaient liés.', themes: ['agôn', 'Olympie'] };
+    }
+  },
+  quiz: [
+    { q: 'L’Olympe est…', options: [
+      { txt: 'la montagne où les Grecs plaçaient la demeure des dieux.', ok: true, retour: 'La plus haute montagne de Grèce.' },
+      { txt: 'le stade des jeux.', retour: 'Non : les jeux avaient lieu à Olympie.' } ] },
+    { q: 'Une olympiade, c’est…', options: [
+      { txt: 'la période de quatre ans entre deux jeux.', ok: true, retour: 'Exact.' },
+      { txt: 'une épreuve de course.', retour: 'Non.' } ] },
+    { q: 'En quelle année la tradition place-t-elle les premiers jeux ?', options: [
+      { txt: '776 avant J.-C.', ok: true, retour: 'Exact.' },
+      { txt: '1896 après J.-C.', retour: 'C’est la renaissance des jeux modernes.' } ] },
+    { q: 'Le vainqueur recevait…', options: [
+      { txt: 'une couronne d’olivier sauvage.', ok: true, retour: 'Exact.' },
+      { txt: 'un sac d’or.', retour: 'Non.' } ] },
+    { q: 'Quel mot français vient de ἀγών ?', options: [
+      { txt: 'Antagoniste.', ok: true, retour: 'Et agonie : la lutte.' },
+      { txt: 'Agneau.', retour: 'Non : agneau vient du latin agnus.' } ] }
+  ],
+  bilan: {
+    retenir: [
+      'L’Olympe (Ὄλυμπος) : montagne des dieux ; Olympie (Ὀλυμπία) : sanctuaire de Zeus, lieu des jeux.',
+      'Jeux tous les quatre ans (olympiade), selon la tradition depuis 776 av. J.-C., protégés par une trêve sacrée.',
+      'Épreuves : stade, diaule, pentathle, lutte, pugilat, pancrace, courses de chars ; récompense : couronne d’olivier.',
+      'Mots grecs : ἀθλητής (athlète), στάδιον (stade), ἀγών (lutte).'
+    ],
+    ecrire: 'Imaginez le récit d’un jeune athlète venu d’une cité lointaine aux jeux d’Olympie : son voyage pendant la trêve, son serment, son épreuve. Employez au moins trois mots grecs.'
+  }
+};
+</script>
+<script src="decors.js?v=20261113b"></script>
+<script src="scene.js?v=20261113a"></script>
+<!-- scene-texte -->
+<details id="scene-texte" style="max-width:860px;margin:28px auto 40px;padding:0 16px;font:15px/1.6 Poppins,system-ui,sans-serif;color:#0C2A6A">
+<summary style="cursor:pointer;font-weight:600;padding:12px 0">Lire la scène en texte</summary>
+<article lang="fr">
+<h1>La couronne d’olivier</h1>
+<p><b>Grec · 4ᵉ</b></p>
+<p><i>Dialogue fictif écrit pour la leçon. Les faits et les dates cités sont exacts.</i></p>
+<h3>Objectif</h3><p>Distinguer l’Olympe (montagne des dieux) et Olympie (sanctuaire de Zeus, lieu des jeux), découvrir la place des jeux chez les Grecs (trêve sacrée, épreuves, récompense) et les mots grecs qui ont donné du français.</p>
+<p>Programme : Progression harmonisée 4e · Fondamentaux du grec et culture antique, titre 4 (Olympe et Olympie), titre 17 (jeux et place des jeux chez les Grecs)</p>
+<p>Lieu : Olympie, sanctuaire de Zeus, dans le Péloponnèse · L’été d’une olympiade, au Ve siècle avant J.-C.</p>
+<h3>Personnages</h3><ul><li>Ornella, élève de 4e, guide de la visite</li><li>Mélanippos, coureur du stade</li><li>Un hellanodice, juge des jeux</li><li>Un héraut, messager de la trêve</li></ul>
+<h3>La scène</h3>
+<p>Ornella présente à sa classe un voyage imaginaire au cœur de la Grèce antique.</p>
+<p><b>Ornella, élève de 4e, guide de la visite</b> : Attention au piège ! L’Olympe, Ὄλυμπος, est la plus haute montagne de Grèce, où les Grecs imaginaient la demeure des dieux. Olympie, Ὀλυμπία, est un sanctuaire de Zeus, dans le Péloponnèse : c’est là qu’avaient lieu les jeux.</p>
+<p><b>Question :</b> Où se déroulaient les jeux Olympiques antiques ?</p><ul><li>À Olympie, dans le sanctuaire de Zeus. <b>(bonne réponse)</b></li><li>Au sommet du mont Olympe.</li></ul><p>Dans le Péloponnèse, au sud-ouest de la Grèce.</p>
+<p>Avant les jeux, des hérauts parcourent les cités grecques.</p>
+<p><b>Un héraut, messager de la trêve</b> : Écoutez, Grecs ! Les jeux de Zeus approchent. Que cessent les guerres : les athlètes et les pèlerins doivent pouvoir venir à Olympie en sécurité !</p>
+<h4>La trêve sacrée</h4><p>Selon la tradition, les jeux ont commencé en 776 avant J.-C. et revenaient tous les quatre ans : cette période s’appelle une olympiade. Une trêve sacrée, ἐκεχειρία, protégeait les voyageurs qui se rendaient à Olympie.</p>
+<p>Dans le stade, Mélanippos s’apprête à courir l’épreuve la plus ancienne : la course du stade, environ 192 mètres.</p>
+<h4>Atelier · les épreuves</h4><p>Classe chaque épreuve antique.</p>
+<ul><li><b>Course</b> : Le stade : un aller sur la piste ; Le diaule : un aller-retour</li><li><b>Combat</b> : Le pugilat ; Le pancrace</li><li><b>Fait partie du pentathle</b> : Le lancer du disque ; Le lancer du javelot</li></ul>
+<p>Le pentathle réunissait course, saut, disque, javelot et lutte.</p>
+<p><b>Un hellanodice, juge des jeux</b> : Athlète, jure devant Zeus que tu concourras sans tricher. Le tricheur paiera une amende, qui financera une statue de Zeus portant son nom.</p>
+<p><b>À toi de décider :</b> Un rival te propose de l’argent pour le laisser gagner. Que fais-tu ?</p><ul><li>Je refuse : j’ai juré devant Zeus et ma cité compte sur moi. — Mélanippos court loyalement. Son nom sera gravé avec honneur.</li><li>J’accepte : personne ne le saura. — Les juges l’apprennent : amende et honte, son nom est gravé sur une statue des tricheurs.</li></ul>
+<p><b>Question :</b> Quelle récompense recevait le vainqueur à Olympie ?</p><ul><li>Une couronne d’olivier sauvage. <b>(bonne réponse)</b></li><li>Une médaille d’or.</li></ul><p>Une simple couronne, mais une gloire immense pour lui et sa cité.</p>
+<h4>Atelier · du grec au français</h4><p>Retrouve le mot grec d’origine.</p>
+<ul><li><b>ἀθλητής (athlète)</b> : athlétisme</li><li><b>στάδιον (stade)</b> : stade ; stadier</li><li><b>ἀγών (agôn, lutte)</b> : agonie (lutte contre la mort) ; antagoniste</li></ul>
+<p>Le grec vit dans le vocabulaire du sport et de la médecine.</p>
+<p><b>Ornella, élève de 4e, guide de la visite</b> : En 1896, Pierre de Coubertin fait renaître les jeux Olympiques à Athènes. Aujourd’hui encore, la flamme olympique est allumée à Olympie !</p>
+<h3>Quiz</h3><ol><li>L’Olympe est… — <b>la montagne où les Grecs plaçaient la demeure des dieux.</b> La plus haute montagne de Grèce.</li><li>Une olympiade, c’est… — <b>la période de quatre ans entre deux jeux.</b> Exact.</li><li>En quelle année la tradition place-t-elle les premiers jeux ? — <b>776 avant J.-C.</b> Exact.</li><li>Le vainqueur recevait… — <b>une couronne d’olivier sauvage.</b> Exact.</li><li>Quel mot français vient de ἀγών ? — <b>Antagoniste.</b> Et agonie : la lutte.</li></ol>
+<h3>À retenir</h3><ul><li>L’Olympe (Ὄλυμπος) : montagne des dieux ; Olympie (Ὀλυμπία) : sanctuaire de Zeus, lieu des jeux.</li><li>Jeux tous les quatre ans (olympiade), selon la tradition depuis 776 av. J.-C., protégés par une trêve sacrée.</li><li>Épreuves : stade, diaule, pentathle, lutte, pugilat, pancrace, courses de chars ; récompense : couronne d’olivier.</li><li>Mots grecs : ἀθλητής (athlète), στάδιον (stade), ἀγών (lutte).</li></ul>
+<h3>À écrire</h3><p>Imaginez le récit d’un jeune athlète venu d’une cité lointaine aux jeux d’Olympie : son voyage pendant la trêve, son serment, son épreuve. Employez au moins trois mots grecs.</p>
+<p><a href="index.html">Toutes les Scènes vivantes</a> · <a href="4e-grec-olympie-jeux.html">Jouer la scène</a></p>
+</article>
+<!-- /scene-texte -->
+</body>
+</html>

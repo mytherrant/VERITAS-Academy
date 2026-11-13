@@ -1,0 +1,179 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>L’étang du GIC — Scènes vivantes | VÉRITAS</title>
+<meta name="description" content="Scène animée de travail manuel (3e) : la production de poissons en étang, de la mise en charge des alevins à la récolte, la conservation et la vente.">
+<link rel="icon" href="../VERITAS_favicon_512.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="scene.css?v=20261113a">
+<!-- scene-tete -->
+<link rel="canonical" href="https://veritas-school.com/scenes/3e-tm-pisciculture-etang.html">
+<meta property="og:type" content="website">
+<meta property="og:title" content="L’étang du GIC — Scènes vivantes | VÉRITAS">
+<meta property="og:description" content="Scène animée de travail manuel (3e) : la production de poissons en étang, de la mise en charge des alevins à la récolte, la conservation et la vente.">
+<meta property="og:url" content="https://veritas-school.com/scenes/3e-tm-pisciculture-etang.html">
+<meta property="og:image" content="https://veritas-school.com/og-image.jpg">
+<meta property="og:locale" content="fr_FR">
+<meta name="twitter:card" content="summary_large_image">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"LearningResource","name":"L’étang du GIC","description":"Scène animée de travail manuel (3e) : la production de poissons en étang, de la mise en charge des alevins à la récolte, la conservation et la vente.","url":"https://veritas-school.com/scenes/3e-tm-pisciculture-etang.html","inLanguage":"fr","learningResourceType":"Simulation interactive","educationalLevel":"3ᵉ","about":"Travail manuel","teaches":"Installer et conduire un petit élevage de poissons en étang : choix des reproducteurs ou alevins, préparation et mise en charge, entretien, alimentation et fertilisation, maladies, récolte, conservation et vente.","isAccessibleForFree":true,"interactivityType":"active","provider":{"@type":"EducationalOrganization","name":"Centre VÉRITAS","url":"https://veritas-school.com/"},"isPartOf":{"@type":"CollectionPage","name":"Scènes vivantes","url":"https://veritas-school.com/scenes/"}}</script>
+<!-- /scene-tete -->
+</head>
+<body>
+<noscript>Cette scène a besoin de JavaScript pour se jouer.</noscript>
+<script>
+window.SCENE = {
+  id: '3e-tm-pisciculture',
+  discipline: 'Travail manuel', niveau: '3e',
+  titre: 'L’étang du GIC',
+  decor: 'village', lieu: 'Un GIC de pisciculteurs, près de Mbalmayo', moment: 'De la mise en charge à la récolte',
+  objectif: 'Installer et conduire un petit élevage de poissons en étang : choix des reproducteurs ou alevins, préparation et mise en charge, entretien, alimentation et fertilisation, maladies, récolte, conservation et vente.',
+  programme: 'Progression harmonisée 3e · Production de poissons, leçon 10 (installation de l’étang : choix des reproducteurs), leçon 11 (préparation et mise en charge), leçon 13 (entretien et alimentation des poissons), leçon 19 (principales maladies), leçon 22 (conditions et techniques de récolte), leçon 25 (recherche de marchés et vente)',
+  jauges: [
+    { id: 'eau', nom: 'Qualité de l’eau', val: 60, couleur: '#1E499B' },
+    { id: 'poissons', nom: 'Croissance des poissons', val: 10, couleur: '#1F9D5B' }
+  ],
+  personnages: {
+    mbida: { nom: 'M. Mbida, président du GIC', couleur: '#2E6B3A', look: { metier: 'paysan', peau: 'tresfonce', cheveux: 'court' } },
+    sylvie: { nom: 'Sylvie, élève de 3e', couleur: '#B03A6E', look: { metier: 'eleve', tenue: 'jupe', peau: 'fonce', cheveux: 'tresses', objet: 'livre' } },
+    eric: { nom: 'Éric, élève de 3e', couleur: '#1E499B', look: { metier: 'eleve', peau: 'fonce', cheveux: 'ras' } },
+    technicienne: { nom: 'Mme Atangana, technicienne d’élevage', couleur: '#0E7C86', look: { tenue: 'pantalon', peau: 'fonce', cheveux: 'chignon', habit: '#0E7C86', objet: 'dossier' } }
+  },
+  etapes: [
+    { t: 'recit', entre: ['mbida', 'sylvie', 'eric'], txt: 'Le club de travail manuel du collège rejoint, pour un trimestre, un GIC (groupe d’initiative commune) qui élève des tilapias dans un étang alimenté par un ruisseau.', objet: { i: 'vagues', lib: 'L’étang' } },
+    { t: 'dit', qui: 'mbida', txt: 'Un bon étang, c’est d’abord un bon site : de l’eau toute l’année, un sol argileux qui retient l’eau, une pente douce pour pouvoir le vider.' },
+    { t: 'recit', entre: ['technicienne'], txt: 'Mme Atangana, technicienne d’élevage, apporte des alevins de tilapia et quelques silures.' },
+    { t: 'dit', qui: 'technicienne', txt: 'Le tilapia grandit vite et se nourrit de plancton et de sons de céréales. Le silure, ou clarias, mange les petits poissons en trop. On choisit des alevins vigoureux, sans blessure.' },
+    { t: 'atelier', mode: 'ordre', titre: 'Atelier · préparer et mettre en charge l’étang', consigne: 'Remets les étapes dans l’ordre.',
+      items: [
+        'Vider et nettoyer l’étang, enlever la boue en excès.',
+        'Épandre de la chaux sur le fond pour assainir.',
+        'Remplir d’eau en filtrant l’arrivée pour bloquer les poissons sauvages.',
+        'Fertiliser l’eau (fumier, compost) pour faire pousser le plancton.',
+        'Acclimater les alevins puis les relâcher doucement : c’est la mise en charge.'
+      ],
+      bravo: 'L’étang est prêt : les alevins découvrent leur nouveau milieu.', jauges: { eau: 75, poissons: 25 } },
+    { t: 'remarque', titre: 'Fertiliser l’eau', txt: 'Le fumier ou le compost enrichit l’eau en éléments nutritifs : les algues microscopiques et le plancton s’y développent et nourrissent les tilapias. Une eau verte, mais pas trop, est signe d’un étang productif.' },
+    { t: 'question', q: 'Pourquoi met-on un grillage à l’arrivée d’eau ?',
+      options: [
+        { txt: 'Pour empêcher les poissons sauvages et les prédateurs d’entrer, et les alevins de sortir.', ok: true, retour: 'Le filtre protège l’élevage.' },
+        { txt: 'Pour réchauffer l’eau.', retour: 'Non.' }
+      ] },
+    { t: 'dit', qui: 'eric', txt: 'On peut leur donner les restes de la cantine ?' },
+    { t: 'dit', qui: 'technicienne', txt: 'En petite quantité seulement : son de maïs ou de riz, tourteaux, chaque jour à la même heure. Trop de nourriture pourrit au fond et gâte l’eau.' },
+    { t: 'recit', txt: 'Un matin de saison sèche, les poissons viennent respirer en surface, bouche ouverte.', jauges: { eau: 35 } },
+    { t: 'choix', qui: 'mbida', q: 'Les poissons manquent d’oxygène. Que faites-vous ?',
+      options: [
+        { txt: 'Arrêter de nourrir quelques jours et renouveler une partie de l’eau.', consequence: 'L’eau se renouvelle, l’oxygène revient ; les poissons replongent.', jauges: { eau: 35, poissons: 15 } },
+        { txt: 'Donner encore plus à manger.', consequence: 'La nourriture en excès pourrit et consomme encore plus d’oxygène : des poissons meurent.', jauges: { eau: -20, poissons: -15 } }
+      ],
+      oeuvre: 'Surveiller chaque jour le comportement des poissons et la couleur de l’eau permet de réagir à temps.' },
+    { t: 'atelier', mode: 'tri', titre: 'Atelier · bonne pratique ou risque ?', consigne: 'Classe chaque situation.',
+      cats: ['Bonne pratique', 'Risque pour l’élevage'],
+      items: [
+        { txt: 'Nourrir chaque jour à heure fixe, sans excès.', cat: 0 },
+        { txt: 'Mettre beaucoup trop de poissons dans l’étang.', cat: 1 },
+        { txt: 'Retirer rapidement les poissons morts ou malades.', cat: 0 },
+        { txt: 'Laisser entrer l’eau sans filtre.', cat: 1 },
+        { txt: 'Observer le comportement des poissons chaque matin.', cat: 0 }
+      ],
+      bravo: 'Densité raisonnable, alimentation régulière, hygiène et surveillance : les poissons grandissent sans maladie.', jauges: { poissons: 65 } },
+    { t: 'recit', txt: 'Six mois plus tard, on vide l’étang : récolte ! Les tilapias pèsent chacun plusieurs centaines de grammes.', jauges: { poissons: 90 } },
+    { t: 'dit', qui: 'sylvie', emo: 'joie', txt: 'On en vend frais au marché de Mbalmayo, on en fume une partie pour la conserver, et on garde des reproducteurs pour la prochaine saison !' }
+  ],
+  labo: {
+    titre: 'Laboratoire · un étang productif',
+    intro: 'Règle la densité de poissons, la quantité de nourriture et le renouvellement de l’eau : la récolte sera-t-elle bonne ?',
+    persos: ['mbida', 'sylvie', 'eric', 'technicienne'],
+    curseurs: [
+      { id: 'densite', nom: 'Nombre de poissons', val: 50, bas: 'peu', haut: 'entassés' },
+      { id: 'nourriture', nom: 'Quantité de nourriture', val: 50, bas: 'insuffisante', haut: 'excessive' },
+      { id: 'renouvellement', nom: 'Renouvellement de l’eau', val: 60, bas: 'jamais', haut: 'régulier' }
+    ],
+    scenarios: [
+      { nom: 'L’étang du GIC', icone: 'vagues', valeurs: { densite: 45, nourriture: 50, renouvellement: 70 } },
+      { nom: 'Trop de poissons', icone: 'groupe', valeurs: { densite: 95, renouvellement: 30 } },
+      { nom: 'Trop nourri', icone: 'panier', valeurs: { nourriture: 95, renouvellement: 20 } }
+    ],
+    liens: [
+      { a: 'technicienne', b: 'mbida', type: 'confiance', lib: 'conseille', base: .5, poids: { renouvellement: .3 } },
+      { a: 'sylvie', b: 'eric', type: 'alliance', lib: 'nourrissent', base: .5, poids: { nourriture: -.2 } },
+      { a: 'mbida', b: 'sylvie', type: 'confiance', lib: 'forme', base: .5 }
+    ],
+    issue: function(v){
+      if(v.densite > 80){ return { niveau: 'ko', badge: 'Poissons entassés', recit: 'Trop nombreux, les tilapias manquent d’oxygène et de nourriture ; les maladies se propagent.', apres: 'Respecter une densité adaptée à l’étang.', themes: ['densité'] }; }
+      if(v.nourriture > 80 && v.renouvellement < 40){ return { niveau: 'ko', badge: 'L’eau se gâte', recit: 'La nourriture en excès pourrit au fond ; sans renouvellement, l’eau manque d’oxygène.', apres: 'Nourrir juste ce qu’il faut et renouveler l’eau.', themes: ['qualité de l’eau'] }; }
+      if(v.nourriture < 25){ return { niveau: 'moyen', badge: 'Petits poissons', recit: 'Les poissons survivent mais grandissent peu : la récolte se vend mal.', apres: 'Une alimentation régulière fait grossir les poissons.', themes: ['alimentation'] }; }
+      return { niveau: 'ok', badge: 'Belle récolte', recit: 'Des tilapias bien nourris, une eau saine : la vente rapporte de quoi agrandir l’étang.', apres: 'Une pisciculture bien conduite est rentable.', themes: ['pisciculture', 'rentabilité'] };
+    }
+  },
+  quiz: [
+    { q: 'Quel poisson est le plus élevé dans les étangs au Cameroun ?', options: [
+      { txt: 'Le tilapia.', ok: true, retour: 'Avec le silure (clarias).' },
+      { txt: 'Le requin.', retour: 'Non.' } ] },
+    { q: 'La mise en charge, c’est…', options: [
+      { txt: 'l’introduction des alevins dans l’étang préparé.', ok: true, retour: 'Après acclimatation.' },
+      { txt: 'la vente des poissons.', retour: 'Non.' } ] },
+    { q: 'Pourquoi fertiliser l’eau de l’étang ?', options: [
+      { txt: 'Pour faire pousser le plancton qui nourrit les poissons.', ok: true, retour: 'Exact.' },
+      { txt: 'Pour colorer l’eau.', retour: 'Non.' } ] },
+    { q: 'Des poissons qui respirent en surface, bouche ouverte, signalent…', options: [
+      { txt: 'un manque d’oxygène dans l’eau.', ok: true, retour: 'On arrête de nourrir et on renouvelle l’eau.' },
+      { txt: 'qu’ils ont faim.', retour: 'Non.' } ] },
+    { q: 'Comment conserver le poisson récolté sans réfrigérateur ?', options: [
+      { txt: 'Le fumer.', ok: true, retour: 'Ou le sécher, ou le garder sur glace pour le vendre frais.' },
+      { txt: 'Le laisser au soleil dans un sac.', retour: 'Non : il s’abîme vite.' } ] }
+  ],
+  bilan: {
+    retenir: [
+      'Site : eau permanente, sol argileux, pente pour vidanger.',
+      'Préparation : vidange, chaulage, remplissage filtré, fertilisation, puis mise en charge des alevins.',
+      'Conduite : alimentation régulière sans excès, surveillance quotidienne, renouvellement de l’eau, retrait des poissons malades.',
+      'Récolte par vidange, conservation (fumage, glace), vente au marché ; garder des reproducteurs.'
+    ],
+    ecrire: 'Rédigez le calendrier de six mois d’un petit étang de tilapias pour votre établissement : préparation, mise en charge, alimentation, surveillance, récolte et vente.'
+  }
+};
+</script>
+<script src="decors.js?v=20261113b"></script>
+<script src="scene.js?v=20261113a"></script>
+<!-- scene-texte -->
+<details id="scene-texte" style="max-width:860px;margin:28px auto 40px;padding:0 16px;font:15px/1.6 Poppins,system-ui,sans-serif;color:#0C2A6A">
+<summary style="cursor:pointer;font-weight:600;padding:12px 0">Lire la scène en texte</summary>
+<article lang="fr">
+<h1>L’étang du GIC</h1>
+<p><b>Travail manuel · 3ᵉ</b></p>
+<p><i>Dialogue fictif écrit pour la leçon. Les faits et les dates cités sont exacts.</i></p>
+<h3>Objectif</h3><p>Installer et conduire un petit élevage de poissons en étang : choix des reproducteurs ou alevins, préparation et mise en charge, entretien, alimentation et fertilisation, maladies, récolte, conservation et vente.</p>
+<p>Programme : Progression harmonisée 3e · Production de poissons, leçon 10 (installation de l’étang : choix des reproducteurs), leçon 11 (préparation et mise en charge), leçon 13 (entretien et alimentation des poissons), leçon 19 (principales maladies), leçon 22 (conditions et techniques de récolte), leçon 25 (recherche de marchés et vente)</p>
+<p>Lieu : Un GIC de pisciculteurs, près de Mbalmayo · De la mise en charge à la récolte</p>
+<h3>Personnages</h3><ul><li>M. Mbida, président du GIC</li><li>Sylvie, élève de 3e</li><li>Éric, élève de 3e</li><li>Mme Atangana, technicienne d’élevage</li></ul>
+<h3>La scène</h3>
+<p>Le club de travail manuel du collège rejoint, pour un trimestre, un GIC (groupe d’initiative commune) qui élève des tilapias dans un étang alimenté par un ruisseau.</p>
+<p><b>M. Mbida, président du GIC</b> : Un bon étang, c’est d’abord un bon site : de l’eau toute l’année, un sol argileux qui retient l’eau, une pente douce pour pouvoir le vider.</p>
+<p>Mme Atangana, technicienne d’élevage, apporte des alevins de tilapia et quelques silures.</p>
+<p><b>Mme Atangana, technicienne d’élevage</b> : Le tilapia grandit vite et se nourrit de plancton et de sons de céréales. Le silure, ou clarias, mange les petits poissons en trop. On choisit des alevins vigoureux, sans blessure.</p>
+<h4>Atelier · préparer et mettre en charge l’étang</h4><p>Remets les étapes dans l’ordre.</p>
+<ol><li>Vider et nettoyer l’étang, enlever la boue en excès.</li><li>Épandre de la chaux sur le fond pour assainir.</li><li>Remplir d’eau en filtrant l’arrivée pour bloquer les poissons sauvages.</li><li>Fertiliser l’eau (fumier, compost) pour faire pousser le plancton.</li><li>Acclimater les alevins puis les relâcher doucement : c’est la mise en charge.</li></ol>
+<p>L’étang est prêt : les alevins découvrent leur nouveau milieu.</p>
+<h4>Fertiliser l’eau</h4><p>Le fumier ou le compost enrichit l’eau en éléments nutritifs : les algues microscopiques et le plancton s’y développent et nourrissent les tilapias. Une eau verte, mais pas trop, est signe d’un étang productif.</p>
+<p><b>Question :</b> Pourquoi met-on un grillage à l’arrivée d’eau ?</p><ul><li>Pour empêcher les poissons sauvages et les prédateurs d’entrer, et les alevins de sortir. <b>(bonne réponse)</b></li><li>Pour réchauffer l’eau.</li></ul><p>Le filtre protège l’élevage.</p>
+<p><b>Éric, élève de 3e</b> : On peut leur donner les restes de la cantine ?</p>
+<p><b>Mme Atangana, technicienne d’élevage</b> : En petite quantité seulement : son de maïs ou de riz, tourteaux, chaque jour à la même heure. Trop de nourriture pourrit au fond et gâte l’eau.</p>
+<p>Un matin de saison sèche, les poissons viennent respirer en surface, bouche ouverte.</p>
+<p><b>À toi de décider :</b> Les poissons manquent d’oxygène. Que faites-vous ?</p><ul><li>Arrêter de nourrir quelques jours et renouveler une partie de l’eau. — L’eau se renouvelle, l’oxygène revient ; les poissons replongent.</li><li>Donner encore plus à manger. — La nourriture en excès pourrit et consomme encore plus d’oxygène : des poissons meurent.</li></ul>
+<h4>Atelier · bonne pratique ou risque ?</h4><p>Classe chaque situation.</p>
+<ul><li><b>Bonne pratique</b> : Nourrir chaque jour à heure fixe, sans excès. ; Retirer rapidement les poissons morts ou malades. ; Observer le comportement des poissons chaque matin.</li><li><b>Risque pour l’élevage</b> : Mettre beaucoup trop de poissons dans l’étang. ; Laisser entrer l’eau sans filtre.</li></ul>
+<p>Densité raisonnable, alimentation régulière, hygiène et surveillance : les poissons grandissent sans maladie.</p>
+<p>Six mois plus tard, on vide l’étang : récolte ! Les tilapias pèsent chacun plusieurs centaines de grammes.</p>
+<p><b>Sylvie, élève de 3e</b> : On en vend frais au marché de Mbalmayo, on en fume une partie pour la conserver, et on garde des reproducteurs pour la prochaine saison !</p>
+<h3>Quiz</h3><ol><li>Quel poisson est le plus élevé dans les étangs au Cameroun ? — <b>Le tilapia.</b> Avec le silure (clarias).</li><li>La mise en charge, c’est… — <b>l’introduction des alevins dans l’étang préparé.</b> Après acclimatation.</li><li>Pourquoi fertiliser l’eau de l’étang ? — <b>Pour faire pousser le plancton qui nourrit les poissons.</b> Exact.</li><li>Des poissons qui respirent en surface, bouche ouverte, signalent… — <b>un manque d’oxygène dans l’eau.</b> On arrête de nourrir et on renouvelle l’eau.</li><li>Comment conserver le poisson récolté sans réfrigérateur ? — <b>Le fumer.</b> Ou le sécher, ou le garder sur glace pour le vendre frais.</li></ol>
+<h3>À retenir</h3><ul><li>Site : eau permanente, sol argileux, pente pour vidanger.</li><li>Préparation : vidange, chaulage, remplissage filtré, fertilisation, puis mise en charge des alevins.</li><li>Conduite : alimentation régulière sans excès, surveillance quotidienne, renouvellement de l’eau, retrait des poissons malades.</li><li>Récolte par vidange, conservation (fumage, glace), vente au marché ; garder des reproducteurs.</li></ul>
+<h3>À écrire</h3><p>Rédigez le calendrier de six mois d’un petit étang de tilapias pour votre établissement : préparation, mise en charge, alimentation, surveillance, récolte et vente.</p>
+<p><a href="index.html">Toutes les Scènes vivantes</a> · <a href="3e-tm-pisciculture-etang.html">Jouer la scène</a></p>
+</article>
+<!-- /scene-texte -->
+</body>
+</html>

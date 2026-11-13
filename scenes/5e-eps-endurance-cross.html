@@ -1,0 +1,183 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Le cross du collège — Scènes vivantes | VÉRITAS</title>
+<meta name="description" content="Scène animée d’éducation physique et sportive (5e) : l’endurance, allure régulière, fréquence cardiaque, échauffement et hydratation pour courir plus de 3 minutes et plus de 400 m.">
+<link rel="icon" href="../VERITAS_favicon_512.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="scene.css?v=20261113a">
+<!-- scene-tete -->
+<link rel="canonical" href="https://veritas-school.com/scenes/5e-eps-endurance-cross.html">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Le cross du collège — Scènes vivantes | VÉRITAS">
+<meta property="og:description" content="Scène animée d’éducation physique et sportive (5e) : l’endurance, allure régulière, fréquence cardiaque, échauffement et hydratation pour courir plus de 3 minutes et plus de 400 m.">
+<meta property="og:url" content="https://veritas-school.com/scenes/5e-eps-endurance-cross.html">
+<meta property="og:image" content="https://veritas-school.com/og-image.jpg">
+<meta property="og:locale" content="fr_FR">
+<meta name="twitter:card" content="summary_large_image">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"LearningResource","name":"Le cross du collège","description":"Scène animée d’éducation physique et sportive (5e) : l’endurance, allure régulière, fréquence cardiaque, échauffement et hydratation pour courir plus de 3 minutes et plus de 400 m.","url":"https://veritas-school.com/scenes/5e-eps-endurance-cross.html","inLanguage":"fr","learningResourceType":"Simulation interactive","educationalLevel":"5ᵉ","about":"Éducation physique et sportive","teaches":"Comprendre les notions de base de l’endurance (allure régulière, respiration, fréquence cardiaque, échauffement, hydratation) et savoir produire un effort de plus de 3 minutes ou sur plus de 400 m sans s’épuiser.","isAccessibleForFree":true,"interactivityType":"active","provider":{"@type":"EducationalOrganization","name":"Centre VÉRITAS","url":"https://veritas-school.com/"},"isPartOf":{"@type":"CollectionPage","name":"Scènes vivantes","url":"https://veritas-school.com/scenes/"}}</script>
+<!-- /scene-tete -->
+</head>
+<body>
+<noscript>Cette scène a besoin de JavaScript pour se jouer.</noscript>
+<script>
+window.SCENE = {
+  id: '5e-eps-endurance',
+  discipline: 'Éducation physique et sportive', niveau: '5e',
+  titre: 'Le cross du collège',
+  decor: 'village', lieu: 'La cour et le terrain du collège, à Ebolowa', moment: 'Trois semaines avant le cross scolaire',
+  objectif: 'Comprendre les notions de base de l’endurance (allure régulière, respiration, fréquence cardiaque, échauffement, hydratation) et savoir produire un effort de plus de 3 minutes ou sur plus de 400 m sans s’épuiser.',
+  programme: 'Progression harmonisée 5e · Activités d’endurance, leçon 20 (notions de base dans les activités d’endurance), leçon 22 (efforts d’une durée supérieure à 3 min), leçon 23 (efforts sur une distance supérieure à 400 m)',
+  jauges: [
+    { id: 'souffle', nom: 'Souffle', val: 80, couleur: '#1F9D5B' },
+    { id: 'regularite', nom: 'Régularité de l’allure', val: 30, couleur: '#1E499B' }
+  ],
+  personnages: {
+    coach: { nom: 'M. Nnanga, professeur d’EPS', couleur: '#B03A2E', look: { metier: 'enseignant', peau: 'fonce', cheveux: 'ras', habit: '#B03A2E', bas: '#1E2A44' } },
+    yves: { nom: 'Yves, élève de 5e', couleur: '#1E499B', look: { metier: 'eleve', peau: 'fonce', cheveux: 'ras' } },
+    clarisse: { nom: 'Clarisse, élève de 5e', couleur: '#1F6F78', look: { metier: 'eleve', tenue: 'jupe', peau: 'fonce', cheveux: 'tresses' } }
+  },
+  etapes: [
+    { t: 'recit', entre: ['coach', 'yves', 'clarisse'], txt: 'Dans trois semaines, c’est le cross scolaire : 1 500 mètres pour les élèves de 5e. M. Nnanga commence l’entraînement par un test : six minutes de course autour du terrain.', objet: { i: 'course', lib: 'Cross : 1 500 m' } },
+    { t: 'dit', qui: 'yves', emo: 'fier', txt: 'Facile ! Je pars à fond, je laisse tout le monde derrière moi !' },
+    { t: 'recit', txt: 'Yves démarre comme une flèche. Au bout d’une minute, il est le premier… Au bout de deux minutes, il marche, les mains sur les côtes.', jauges: { souffle: 25, regularite: 10 } },
+    { t: 'dit', qui: 'clarisse', txt: 'Moi je suis partie doucement, et je cours encore. Je peux même parler !' },
+    { t: 'remarque', titre: 'L’endurance', txt: 'L’endurance, c’est la capacité à maintenir un effort longtemps. On y parvient avec une ALLURE RÉGULIÈRE et modérée : on doit pouvoir parler en courant. Partir trop vite essouffle et oblige à s’arrêter.' },
+    { t: 'question', q: 'Pourquoi Yves a-t-il dû s’arrêter ?',
+      options: [
+        { txt: 'Il est parti trop vite : son allure était trop élevée pour un effort long.', ok: true, retour: 'Un départ trop rapide épuise : l’allure doit être tenue du début à la fin.' },
+        { txt: 'Il n’est pas fait pour courir.', retour: 'Non : avec une allure régulière, chacun progresse en endurance.' }
+      ] },
+    { t: 'dit', qui: 'coach', txt: 'Pose deux doigts sur ton cou, sur le côté. Compte tes battements pendant 15 secondes, puis multiplie par 4.' },
+    { t: 'question', q: 'Yves compte 45 battements en 15 secondes. Quelle est sa fréquence cardiaque ?',
+      options: [
+        { txt: '180 battements par minute.', ok: true, retour: '45 × 4 = 180 : son cœur bat très vite, il était dans le rouge.' },
+        { txt: '60 battements par minute.', retour: '45 × 4, et non 15 × 4.' }
+      ] },
+    { t: 'atelier', mode: 'ordre', titre: 'Atelier · une séance d’endurance', consigne: 'Remets les étapes d’une séance dans l’ordre.',
+      items: [
+        'Boire un peu d’eau avant l’effort.',
+        'S’échauffer : trottiner, puis mobiliser chevilles, genoux et épaules.',
+        'Courir à allure régulière, en pouvant parler.',
+        'Ralentir progressivement en fin de course (retour au calme).',
+        'S’étirer doucement et boire pour récupérer.'
+      ],
+      bravo: 'Échauffement, effort régulier, retour au calme, récupération : la structure de toute séance.', jauges: { regularite: 60 } },
+    { t: 'remarque', titre: 'Respirer et s’hydrater', txt: 'Une respiration régulière, ample, par le nez et la bouche, apporte l’oxygène aux muscles. Sous la chaleur, on perd beaucoup d’eau en transpirant : on boit avant et après l’effort, par petites gorgées.' },
+    { t: 'atelier', mode: 'tri', titre: 'Atelier · bon réflexe ou erreur ?', consigne: 'Classe chaque comportement.',
+      cats: ['Bon réflexe', 'Erreur'],
+      items: [
+        { txt: 'Partir à fond pour prendre de l’avance.', cat: 1 },
+        { txt: 'Garder la même allure du début à la fin.', cat: 0 },
+        { txt: 'Courir sans s’échauffer.', cat: 1 },
+        { txt: 'Boire avant et après l’effort.', cat: 0 },
+        { txt: 'S’arrêter net après la ligne d’arrivée.', cat: 1 },
+        { txt: 'Ralentir progressivement et marcher après la course.', cat: 0 }
+      ],
+      bravo: 'L’endurance est une affaire de gestion, pas de vitesse.', jauges: { regularite: 80, souffle: 70 } },
+    { t: 'choix', qui: 'yves', q: 'Deuxième essai. Quelle stratégie choisis-tu ?',
+      options: [
+        { txt: 'Je pars au rythme de Clarisse et j’accélère seulement dans le dernier tour.', consequence: 'Yves tient les six minutes et finit fort : il a géré son effort.', jauges: { regularite: 15, souffle: 10 } },
+        { txt: 'Je repars à fond, je serai plus fort cette fois.', consequence: 'Même résultat : arrêt au bout de deux minutes.', jauges: { regularite: -30, souffle: -40 } }
+      ],
+      oeuvre: 'Pour un effort de plus de 3 minutes ou de plus de 400 m, la régularité compte plus que la vitesse de départ.' },
+    { t: 'dit', qui: 'coach', txt: 'Trois séances par semaine, en augmentant peu à peu la durée. Le jour du cross, vous serez prêts.' },
+    { t: 'recit', txt: 'Trois semaines plus tard, Yves et Clarisse franchissent la ligne des 1 500 mètres côte à côte, essoufflés mais souriants.', jauges: { souffle: 75, regularite: 95 } }
+  ],
+  labo: {
+    titre: 'Laboratoire · gérer sa course',
+    intro: 'Règle la vitesse de départ, l’échauffement et l’hydratation : le coureur termine-t-il ses 1 500 m ?',
+    persos: ['coach', 'yves', 'clarisse'],
+    curseurs: [
+      { id: 'depart', nom: 'Vitesse de départ', val: 40, bas: 'prudente', haut: 'à fond' },
+      { id: 'echauffement', nom: 'Échauffement', val: 60, bas: 'aucun', haut: 'complet' },
+      { id: 'hydratation', nom: 'Hydratation', val: 60, bas: 'aucune', haut: 'bonne' }
+    ],
+    scenarios: [
+      { nom: 'Le premier essai d’Yves', icone: 'course', valeurs: { depart: 95, echauffement: 10, hydratation: 30 } },
+      { nom: 'La course de Clarisse', icone: 'fier', valeurs: { depart: 35, echauffement: 75, hydratation: 75 } },
+      { nom: 'En plein soleil, sans eau', icone: 'soleil', valeurs: { hydratation: 5, depart: 50 } }
+    ],
+    liens: [
+      { a: 'coach', b: 'yves', type: 'confiance', lib: 'entraîne', base: .5, poids: { echauffement: .3 } },
+      { a: 'yves', b: 'clarisse', type: 'alliance', lib: 'courent ensemble', base: .4, poids: { depart: -.3 } },
+      { a: 'coach', b: 'clarisse', type: 'confiance', lib: 'encourage', base: .5 }
+    ],
+    issue: function(v){
+      if(v.depart > 75){ return { niveau: 'ko', badge: 'Arrêt au deuxième tour', recit: 'Le départ trop rapide épuise le coureur : il finit en marchant.', apres: 'L’allure doit être tenue d’un bout à l’autre.', themes: ['allure'] }; }
+      if(v.hydratation < 25){ return { niveau: 'ko', badge: 'Coup de chaleur', recit: 'Sans eau, sous le soleil d’Ebolowa, le coureur a la tête qui tourne et doit s’arrêter.', apres: 'Boire avant et après l’effort.', themes: ['hydratation'] }; }
+      if(v.echauffement > 50){ return { niveau: 'ok', badge: '1 500 m réussis', recit: 'Allure régulière, corps échauffé, bien hydraté : le coureur termine fort.', apres: 'L’endurance se gère.', themes: ['endurance', 'régularité'] }; }
+      return { niveau: 'moyen', badge: 'Une crampe en chemin', recit: 'Sans échauffement, le mollet se contracte au troisième tour.', apres: 'L’échauffement prépare les muscles et le cœur.', themes: ['échauffement'] };
+    }
+  },
+  quiz: [
+    { q: 'Qu’est-ce que l’endurance ?', options: [
+      { txt: 'La capacité à maintenir un effort longtemps.', ok: true, retour: 'Exact.' },
+      { txt: 'Courir le plus vite possible sur 50 m.', retour: 'C’est la vitesse.' } ] },
+    { q: 'Comment savoir que l’on court à la bonne allure d’endurance ?', options: [
+      { txt: 'On peut encore parler en courant.', ok: true, retour: 'C’est le test de la parole.' },
+      { txt: 'On est complètement essoufflé.', retour: 'Non : c’est trop vite.' } ] },
+    { q: '30 battements en 15 secondes donnent une fréquence cardiaque de…', options: [
+      { txt: '120 battements par minute.', ok: true, retour: '30 × 4.' },
+      { txt: '45 battements par minute.', retour: 'Non.' } ] },
+    { q: 'À quoi sert l’échauffement ?', options: [
+      { txt: 'À préparer le cœur et les muscles à l’effort.', ok: true, retour: 'Il limite aussi les blessures.' },
+      { txt: 'À se fatiguer avant la course.', retour: 'Non.' } ] },
+    { q: 'Après la ligne d’arrivée, on…', options: [
+      { txt: 'ralentit progressivement, puis on boit et on s’étire.', ok: true, retour: 'C’est le retour au calme.' },
+      { txt: 's’allonge immédiatement.', retour: 'Non : on ralentit d’abord.' } ] }
+  ],
+  bilan: {
+    retenir: [
+      'L’endurance : maintenir un effort longtemps grâce à une allure régulière et modérée.',
+      'Test de la parole : on doit pouvoir parler en courant.',
+      'Fréquence cardiaque : battements en 15 s × 4.',
+      'Une séance : hydratation, échauffement, effort régulier, retour au calme, étirements.'
+    ],
+    ecrire: 'Établissez votre plan d’entraînement de trois semaines pour un cross de 1 500 m : durée de chaque séance, allure, échauffement et hydratation.'
+  }
+};
+</script>
+<script src="decors.js?v=20261113b"></script>
+<script src="scene.js?v=20261113a"></script>
+<!-- scene-texte -->
+<details id="scene-texte" style="max-width:860px;margin:28px auto 40px;padding:0 16px;font:15px/1.6 Poppins,system-ui,sans-serif;color:#0C2A6A">
+<summary style="cursor:pointer;font-weight:600;padding:12px 0">Lire la scène en texte</summary>
+<article lang="fr">
+<h1>Le cross du collège</h1>
+<p><b>Éducation physique et sportive · 5ᵉ</b></p>
+<p><i>Dialogue fictif écrit pour la leçon. Les faits et les dates cités sont exacts.</i></p>
+<h3>Objectif</h3><p>Comprendre les notions de base de l’endurance (allure régulière, respiration, fréquence cardiaque, échauffement, hydratation) et savoir produire un effort de plus de 3 minutes ou sur plus de 400 m sans s’épuiser.</p>
+<p>Programme : Progression harmonisée 5e · Activités d’endurance, leçon 20 (notions de base dans les activités d’endurance), leçon 22 (efforts d’une durée supérieure à 3 min), leçon 23 (efforts sur une distance supérieure à 400 m)</p>
+<p>Lieu : La cour et le terrain du collège, à Ebolowa · Trois semaines avant le cross scolaire</p>
+<h3>Personnages</h3><ul><li>M. Nnanga, professeur d’EPS</li><li>Yves, élève de 5e</li><li>Clarisse, élève de 5e</li></ul>
+<h3>La scène</h3>
+<p>Dans trois semaines, c’est le cross scolaire : 1 500 mètres pour les élèves de 5e. M. Nnanga commence l’entraînement par un test : six minutes de course autour du terrain.</p>
+<p><b>Yves, élève de 5e</b> : Facile ! Je pars à fond, je laisse tout le monde derrière moi !</p>
+<p>Yves démarre comme une flèche. Au bout d’une minute, il est le premier… Au bout de deux minutes, il marche, les mains sur les côtes.</p>
+<p><b>Clarisse, élève de 5e</b> : Moi je suis partie doucement, et je cours encore. Je peux même parler !</p>
+<h4>L’endurance</h4><p>L’endurance, c’est la capacité à maintenir un effort longtemps. On y parvient avec une ALLURE RÉGULIÈRE et modérée : on doit pouvoir parler en courant. Partir trop vite essouffle et oblige à s’arrêter.</p>
+<p><b>Question :</b> Pourquoi Yves a-t-il dû s’arrêter ?</p><ul><li>Il est parti trop vite : son allure était trop élevée pour un effort long. <b>(bonne réponse)</b></li><li>Il n’est pas fait pour courir.</li></ul><p>Un départ trop rapide épuise : l’allure doit être tenue du début à la fin.</p>
+<p><b>M. Nnanga, professeur d’EPS</b> : Pose deux doigts sur ton cou, sur le côté. Compte tes battements pendant 15 secondes, puis multiplie par 4.</p>
+<p><b>Question :</b> Yves compte 45 battements en 15 secondes. Quelle est sa fréquence cardiaque ?</p><ul><li>180 battements par minute. <b>(bonne réponse)</b></li><li>60 battements par minute.</li></ul><p>45 × 4 = 180 : son cœur bat très vite, il était dans le rouge.</p>
+<h4>Atelier · une séance d’endurance</h4><p>Remets les étapes d’une séance dans l’ordre.</p>
+<ol><li>Boire un peu d’eau avant l’effort.</li><li>S’échauffer : trottiner, puis mobiliser chevilles, genoux et épaules.</li><li>Courir à allure régulière, en pouvant parler.</li><li>Ralentir progressivement en fin de course (retour au calme).</li><li>S’étirer doucement et boire pour récupérer.</li></ol>
+<p>Échauffement, effort régulier, retour au calme, récupération : la structure de toute séance.</p>
+<h4>Respirer et s’hydrater</h4><p>Une respiration régulière, ample, par le nez et la bouche, apporte l’oxygène aux muscles. Sous la chaleur, on perd beaucoup d’eau en transpirant : on boit avant et après l’effort, par petites gorgées.</p>
+<h4>Atelier · bon réflexe ou erreur ?</h4><p>Classe chaque comportement.</p>
+<ul><li><b>Bon réflexe</b> : Garder la même allure du début à la fin. ; Boire avant et après l’effort. ; Ralentir progressivement et marcher après la course.</li><li><b>Erreur</b> : Partir à fond pour prendre de l’avance. ; Courir sans s’échauffer. ; S’arrêter net après la ligne d’arrivée.</li></ul>
+<p>L’endurance est une affaire de gestion, pas de vitesse.</p>
+<p><b>À toi de décider :</b> Deuxième essai. Quelle stratégie choisis-tu ?</p><ul><li>Je pars au rythme de Clarisse et j’accélère seulement dans le dernier tour. — Yves tient les six minutes et finit fort : il a géré son effort.</li><li>Je repars à fond, je serai plus fort cette fois. — Même résultat : arrêt au bout de deux minutes.</li></ul>
+<p><b>M. Nnanga, professeur d’EPS</b> : Trois séances par semaine, en augmentant peu à peu la durée. Le jour du cross, vous serez prêts.</p>
+<p>Trois semaines plus tard, Yves et Clarisse franchissent la ligne des 1 500 mètres côte à côte, essoufflés mais souriants.</p>
+<h3>Quiz</h3><ol><li>Qu’est-ce que l’endurance ? — <b>La capacité à maintenir un effort longtemps.</b> Exact.</li><li>Comment savoir que l’on court à la bonne allure d’endurance ? — <b>On peut encore parler en courant.</b> C’est le test de la parole.</li><li>30 battements en 15 secondes donnent une fréquence cardiaque de… — <b>120 battements par minute.</b> 30 × 4.</li><li>À quoi sert l’échauffement ? — <b>À préparer le cœur et les muscles à l’effort.</b> Il limite aussi les blessures.</li><li>Après la ligne d’arrivée, on… — <b>ralentit progressivement, puis on boit et on s’étire.</b> C’est le retour au calme.</li></ol>
+<h3>À retenir</h3><ul><li>L’endurance : maintenir un effort longtemps grâce à une allure régulière et modérée.</li><li>Test de la parole : on doit pouvoir parler en courant.</li><li>Fréquence cardiaque : battements en 15 s × 4.</li><li>Une séance : hydratation, échauffement, effort régulier, retour au calme, étirements.</li></ul>
+<h3>À écrire</h3><p>Établissez votre plan d’entraînement de trois semaines pour un cross de 1 500 m : durée de chaque séance, allure, échauffement et hydratation.</p>
+<p><a href="index.html">Toutes les Scènes vivantes</a> · <a href="5e-eps-endurance-cross.html">Jouer la scène</a></p>
+</article>
+<!-- /scene-texte -->
+</body>
+</html>
