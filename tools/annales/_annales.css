@@ -1,5 +1,5 @@
 /* Annales : sujet officiel + corrigé, même dessin que les fiches de méthode (_methode.css). */
-.ax-sujet,.ax-corrige{font-size:16px;line-height:1.7}
+.ax-sujet,.ax-corrige{font-size:16px;line-height:1.5}
 .ax-sujet p,.ax-corrige p{margin:0 0 10px}
 .ax-sujet table,.ax-corrige table{border-collapse:collapse;margin:10px 0 16px;max-width:100%;display:block;overflow-x:auto}
 .ax-sujet td,.ax-sujet th,.ax-corrige td,.ax-corrige th{border:1px solid #D8D2C4;padding:6px 10px;vertical-align:top;font-size:15px}
@@ -33,3 +33,7 @@
 .ax-sujet strong,.ax-corrige strong{color:#1E499B}
 .ax-sujet th,.ax-corrige th{color:#1E499B}
 .ax-sujet strong.ax-pts,.ax-corrige strong.ax-pts{color:#8A6A12;font-weight:600;white-space:nowrap}
+/* Pages d'annales seulement (cette feuille n'y est chargée que là) : interligne resserré. */
+#mx p,#mx li{line-height:1.5}
+#mx article li{margin-bottom:4px}
+.ax-sujet p,.ax-corrige p{margin:0 0 8px}

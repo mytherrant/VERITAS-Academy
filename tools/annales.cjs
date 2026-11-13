@@ -161,7 +161,7 @@ for (const s of sources) {
     ["sources", "Sources", "<ul><li>Sujet : épreuve officielle du " + E.nom + " " + meta.annee + " (MINESEC / DECC), transcription relue d'après <a href=\"" + esc(meta.sujet_source) + "\" rel=\"nofollow noopener\">" + domaine(meta.sujet_source) + "</a>.</li>" +
       (national ? "<li>Corrigé : corrigé harmonisé national, d'après <a href=\"" + esc(meta.corrige_source) + "\" rel=\"nofollow noopener\">" + domaine(meta.corrige_source) + "</a>.</li>" : "<li>Corrigé : Centre VÉRITAS.</li>") + "</ul>"],
   ];
-  const cta = '<a class="cta" href="/ressources/annales/">Toutes les annales corrigées<small>BEPC, Probatoire et BAC, par matière et par session</small></a>';
+  const cta = '<a class="cta" href="/ressources/annales/">Toutes les annales corrigées<small>Par examen, par matière et par session</small></a>';
   let html = GAB.replace(RE_ART, () => article("Annales · " + E.nom + " " + meta.annee, titre, "Le sujet officiel de la session " + meta.annee + ", puis son corrigé, à ouvrir une fois ta copie terminée.", parties, cta));
   html = habiller(html, s.page, titre + " | VÉRITAS", description, { "@type": "LearningResource", name: titre, description, educationalLevel: E.classe, learningResourceType: "Annale d'examen", about: lib });
   ecrire(s.page, html);
