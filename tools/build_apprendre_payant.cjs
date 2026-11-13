@@ -102,7 +102,7 @@ for (const [id, l] of Object.entries(L)) {
      annales du dépôt pour l'anglais et la philosophie). L'histoire et la géographie GARDENT
      « évaluation des ressources / évaluation des compétences » : c'est le format de leurs épreuves
      APC (Probatoire de géographie 2023, BEPC blancs d'histoire). */
-  const LETTRES = { francais: 1, anglais: 1, espagnol: 1 };
+  const LETTRES = { francais: 1, anglais: 1, espagnol: 1, allemand: 1 };
   if (LETTRES[l.m]) {
     const exam = /^3e/.test(l.c) ? "BEPC" : /^1re/.test(l.c) ? "Probatoire" : /^Tle/.test(l.c) ? "Baccalauréat" : "examen";
     const pre = exam === "examen" ? "Vers l'examen" : "Vers le " + exam;
@@ -113,6 +113,11 @@ for (const [id, l] of Object.entries(L)) {
       espagnol: exam === "BEPC" ? ["Compruebo mis conocimientos", "Estructuras o comunicación (formato del BEPC)", "Comprensión y redacción (formato del BEPC)", "Texto", "Consigna"]
         : exam === "Probatoire" ? ["Compruebo mis conocimientos", "Competencias lingüísticas (formato del Probatoire)", "Comentario dirigido y producción de textos (formato del Probatoire)", "Texto", "Consigna"]
         : ["Compruebo mis conocimientos", "Producción de textos : traducción (formato del Bac)", "Recepción y producción de textos (formato del Bac)", "Texto", "Consigna"],
+      /* Allemand LV II : intitulés des sujets officiels (BEPC 2025 : Leseverstehen, Schriftlicher Ausdruck, Strukturen und
+         Kommunikation ; Probatoire A4 2025 et Bac A4 2024-2025 : + Mediation). Tutoiement au BEPC, vouvoiement ensuite. */
+      allemand: exam === "BEPC" ? ["Überprüfe dein Wissen", "Strukturen und Kommunikation (BEPC-Format)", "Leseverstehen, Mediation und Schriftlicher Ausdruck (BEPC-Format)", "Text", "Aufgabe"]
+        : exam === "Probatoire" ? ["Überprüfen Sie Ihr Wissen", "Strukturen und Kommunikation (Format des Probatoire)", "Leseverstehen, Mediation und Schriftlicher Ausdruck (Format des Probatoire)", "Text", "Aufgabe"]
+        : ["Überprüfen Sie Ihr Wissen", "Strukturen und Kommunikation (Format des Bac)", "Leseverstehen, Mediation und Schriftlicher Ausdruck (Format des Bac)", "Text", "Aufgabe"],
       anglais: ["Check your knowledge", "Section A: Grammar (" + (exam === "BEPC" ? "BEPC" : exam === "Probatoire" ? "Probatoire" : "Bac") + " format)", "Section D: Composition (" + (exam === "BEPC" ? "BEPC" : exam === "Probatoire" ? "Probatoire" : "Bac") + " format)", "Situation", "Task"]
     }[l.m];
     l.parties = l.parties.concat([{ t: pre, html: "<div class='integ'><h3>" + T[0] + "</h3><p>" + esc(q0.q) + "</p><ol type='a'>" + q0.r.map(x => "<li>" + esc(x) + "</li>").join("") + "</ol><details><summary>Voir la réponse</summary><p><strong>" + esc(q0.r[q0.b] || "") + "</strong>. " + esc(q0.e) + "</p></details><h3>" + T[1] + "</h3>" + enonce + (mE ? "<details><summary>Voir la réponse</summary><p>" + mE[1] + "</p></details>" : "") + (ex ? "<h3>" + (ex.titre || T[2]) + "</h3><p><strong>" + (ex.etiquette || T[3]) + ".</strong> " + ex.situation + "</p>" + ex.consignes.map((c, k) => "<p><strong>" + T[4] + (ex.consignes.length > 1 ? " " + (k + 1) : "") + ".</strong> " + c + "</p>").join("") + "<details><summary>Voir une réponse attendue</summary><p>" + ex.reponse + "</p></details>" : "") + "</div>", retenir: "Savoir-être mobilisé : " + a.etre + "." }]);
