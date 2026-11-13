@@ -70,6 +70,21 @@
   function cle(){ return 'vrt_scene_' + (S.id || location.pathname); }
   function lire(k){ try{ return localStorage.getItem(k); }catch(e){ return null; } }
   function ecrire(k, v){ try{ localStorage.setItem(k, v); return true; }catch(e){ return false; } }
+  /* Thème clair (défaut, celui de la vitrine) ou sombre, au choix de l'élève (13/11/2026).
+     Mémorisé pour toutes les scènes. La scène illustrée garde ses couleurs : seule
+     la page autour (onglets, cartes, texte, quiz, laboratoire) change. */
+  var CLE_THEME = 'vrt_scene_theme';
+  function theme(){ return lire(CLE_THEME) === 'sombre' ? 'sombre' : 'clair'; }
+  function majTheme(){
+    var sombre = theme() === 'sombre', b = document.getElementById('bTheme');
+    document.documentElement.setAttribute('data-scene-theme', sombre ? 'sombre' : 'clair');
+    if(b){
+      b.innerHTML = ico(sombre ? 'soleil' : 'lune') + (sombre ? 'Thème clair' : 'Thème sombre');
+      b.setAttribute('aria-label', sombre ? 'Passer en thème clair' : 'Passer en thème sombre');
+      b.setAttribute('aria-pressed', sombre ? 'true' : 'false');
+    }
+  }
+  if(theme() === 'sombre'){ document.documentElement.setAttribute('data-scene-theme', 'sombre'); }
   function melange(a){ a = a.slice(); for(var k = a.length - 1; k > 0; k--){ var j = Math.floor(Math.random() * (k + 1)), t = a[k]; a[k] = a[j]; a[j] = t; } return a; }
 
   /* ---------- Avatars dessinés ----------
@@ -118,6 +133,7 @@
 
   /* ---------- Icônes au trait (style du jeu d'icônes du site : 24 × 24, trait 1,75) ---------- */
   var IC = {
+    soleil: '<circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/>',
     scene: '<path d="M20.2 6 3 11l-.9-2.4c-.3-1.1.3-2.2 1.3-2.5l13.5-4c1.1-.3 2.2.3 2.5 1.3Z"/><path d="m6.2 5.3 3.1 3.9"/><path d="m12.4 3.4 3.1 4"/><path d="M3 11h18v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2Z"/>',
     labo: '<path d="M10 2v7.5a2 2 0 0 1-.2.9L4.7 20.5a1 1 0 0 0 .9 1.5h12.8a1 1 0 0 0 .9-1.5l-5.1-10.1a2 2 0 0 1-.2-.9V2"/><path d="M8.5 2h7"/><path d="M7 16h10"/>',
     quiz: '<rect x="8" y="2" width="8" height="4" rx="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><path d="m9 14 2 2 4-4"/>',
@@ -359,6 +375,7 @@
       +   (S.fiche ? '<button class="sc-onglet" role="tab" aria-selected="false" data-vue="oeuvre">' + ico('livre') + 'L’œuvre</button>' : '')
       +   '<button class="sc-onglet" data-modal="quiz">' + ico('quiz') + 'Quiz</button>'
       +   '<button class="sc-onglet" data-modal="guide">' + ico('aide') + 'Guide</button>'
+      +   '<button class="sc-onglet sc-theme" id="bTheme" type="button"></button>'
       + '</nav>'
       + '<section id="vueLabo" class="sc-labo" hidden></section>'
       + (S.fiche ? '<section id="vueOeuvre" class="sc-fiche" hidden></section>' : '')
@@ -386,7 +403,9 @@
       + '</main>'
       + '<div class="sc-modal" id="modal" hidden><div class="sc-modal-in" role="dialog" aria-modal="true" aria-labelledby="modalT"><button class="sc-fermer" id="modalX" aria-label="Fermer">×</button><div id="modalC"></div></div></div>';
 
-    document.querySelectorAll('.sc-onglet').forEach(function(b){
+    majTheme();
+    $('bTheme').onclick = function(){ ecrire(CLE_THEME, theme() === 'sombre' ? 'clair' : 'sombre'); majTheme(); };
+    document.querySelectorAll('.sc-onglet[data-vue], .sc-onglet[data-modal]').forEach(function(b){
       b.onclick = function(){
         if(b.getAttribute('data-modal')){ ouvrirModal(b.getAttribute('data-modal')); return; }
         var v = b.getAttribute('data-vue');
