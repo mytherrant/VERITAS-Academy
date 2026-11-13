@@ -1659,6 +1659,7 @@ jobs:
             api/demandes.php \
             api/manuels.php \
             api/apprendre.php \
+            api/apprendre_config.php \
             api/_labos_premium.php \
             api/examens.php \
             api/direct.php \

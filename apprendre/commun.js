@@ -40,6 +40,86 @@
   var CLASSES = ["6e", "5e", "4e", "3e", "2nde A", "2nde C", "1re A", "1re C", "1re D", "Tle A", "Tle C", "Tle D"];
   var CLASSE_SCENE = { "3e": "3e", "1re A": "1re", "1re C": "1re", "1re D": "1re", "Tle A": "tle", "Tle C": "tle", "Tle D": "tle" };
 
+  /* ════════ RÉGLAGES DE L'ADMINISTRATION (13/11/2026) ════════
+     Écran « Apprendre » du tableau de bord (app.js, pgApprendreAdmin) : tout ce
+     qui suit peut y être modifié sans toucher au code. Les réglages arrivent par
+     /api/apprendre_config.php (window.VRT_APP_CFG, chargé avant ce fichier).
+     Aperçu : la page ouverte depuis l'écran admin avec ?apercu=1 lit le
+     BROUILLON (localStorage, même origine) au lieu des réglages publiés, et
+     le garde pour tout l'onglet (sessionStorage). Sans réglage : rien ne change. */
+  var CFG = (function () {
+    var c = W.VRT_APP_CFG, ap = false;
+    try {
+      if (/[?&]apercu=1(&|$)/.test(W.location.search)) W.sessionStorage.setItem("vrt_app_apercu", "1");
+      if (/[?&]apercu=0(&|$)/.test(W.location.search)) W.sessionStorage.removeItem("vrt_app_apercu");
+      if (W.sessionStorage.getItem("vrt_app_apercu") === "1") {
+        var b = W.localStorage.getItem("vrt_app_cfg_apercu");
+        if (b) { c = JSON.parse(b); ap = true; }
+      }
+    } catch (e) { }
+    c = (c && typeof c === "object") ? c : {};
+    c._apercu = ap;
+    return c;
+  })();
+  function obj(x) { return x && typeof x === "object" && !Array.isArray(x) ? x : {}; }
+  function arr(x) { return Array.isArray(x) ? x : []; }
+  function txt(x) { return typeof x === "string" ? x.trim() : (typeof x === "number" ? String(x) : ""); }
+  /* Une couleur choisie dans l'admin donne les quatre teintes d'une matière. */
+  function nuance(hex, k) {
+    var n = parseInt(hex.slice(1), 16), r = n >> 16, g = n >> 8 & 255, b = n & 255, cible = k > 0 ? 255 : 0, a = Math.abs(k);
+    function c(v) { return ("0" + Math.round(v + (cible - v) * a).toString(16)).slice(-2); }
+    return "#" + c(r) + c(g) + c(b);
+  }
+  (function reglerMatieresClasses() {
+    var cm = obj(CFG.matieres), cc = obj(CFG.classes);
+    MATIERES.forEach(function (m) {
+      var o = obj(cm[m.id]);
+      if (txt(o.nom)) m.nom = txt(o.nom);
+      if (/^#[0-9a-f]{6}$/i.test(o.couleur || "")) m.t = [o.couleur, nuance(o.couleur, .86), nuance(o.couleur, .45), nuance(o.couleur, -.4)];
+      m.masque = o.visible === false;
+    });
+    MATIERES = MATIERES.filter(function (m) { return !m.masque; });   // PAR_ID garde toutes les matières : rien ne casse
+    CLASSES = CLASSES.filter(function (c) { return obj(cc[c]).visible !== false; });
+  })();
+  function classeOuverte(c) { return CLASSES.indexOf(c) >= 0; }
+  /* Leçons : masquer, corriger (titre, contenu, quiz…), en ajouter.
+     Une leçon payante (verrou) ne reçoit que ses champs d'en-tête : son contenu
+     vit sur le serveur, l'écraser ici casserait la suite réservée aux abonnés. */
+  (function reglerLecons() {
+    var LE = W.VRT_LECONS = W.VRT_LECONS || {}, mod = obj(CFG.lecons);
+    var ENTETE = ["titre", "accroche", "cle"], CORPS = ["intro", "objectifs", "revision", "exo", "quiz", "examen"];
+    Object.keys(mod).forEach(function (id) {
+      var o = obj(mod[id]), L = LE[id]; if (!L) return;
+      if (o.masquer) { delete LE[id]; return; }
+      ENTETE.forEach(function (k) { if (txt(o[k])) L[k] = txt(o[k]); });
+      if (+o.duree > 0) L.duree = +o.duree;
+      var verrou = L.verrou || arr(L.parties).some(function (p) { return p && p.verrou; });
+      if (verrou) return;
+      CORPS.forEach(function (k) { if (o[k] === false) delete L[k]; else if (o[k] != null) L[k] = o[k]; });
+      if (Array.isArray(o.parties)) {
+        var orig = arr(L.parties);
+        L.parties = o.parties.map(function (p) {
+          p = obj(p); var base = (p.src >= 0 && orig[p.src]) ? orig[p.src] : {}, n = {};
+          Object.keys(base).forEach(function (k) { n[k] = base[k]; });   // garde schémas et animations
+          ["t", "html", "retenir"].forEach(function (k) { if (p[k] != null) n[k] = p[k]; });
+          return n;
+        });
+      }
+    });
+    arr(CFG.nouvelles).forEach(function (n, i) {
+      n = obj(n); var id = txt(n.id);
+      if (!id || n.masquer || !txt(n.c) || !txt(n.m) || !txt(n.titre) || LE[id]) return;
+      LE[id] = { c: txt(n.c), m: txt(n.m), cle: txt(n.cle), rang: +n.rang || undefined, titre: txt(n.titre), duree: +n.duree || 15,
+        accroche: txt(n.accroche), intro: txt(n.intro), objectifs: arr(n.objectifs).map(txt).filter(Boolean),
+        parties: arr(n.parties).map(function (p) { p = obj(p); return { t: txt(p.t), html: String(p.html || ""), retenir: p.retenir ? String(p.retenir) : undefined }; }),
+        revision: arr(n.revision).map(String).filter(Boolean), exo: String(n.exo || ""),
+        quiz: arr(n.quiz).map(obj).filter(function (q) { return txt(q.q) && arr(q.r).length > 1; }).map(function (q) { return { q: txt(q.q), r: arr(q.r).map(txt), b: Math.max(0, Math.min(arr(q.r).length - 1, +q.b || 0)), e: txt(q.e) }; }),
+        examen: (n.examen && txt(n.examen.t) && txt(n.examen.href)) ? { t: txt(n.examen.t), href: txt(n.examen.href) } : undefined,
+        ordre: 5000 + i, ajout: true };
+    });
+    Object.keys(LE).forEach(function (k) { var L = LE[k]; if (!classeOuverte(L.c) || (PAR_ID[L.m] && PAR_ID[L.m].masque)) delete LE[k]; });
+  })();
+
   /* ---------- mémoire locale ---------- */
   function lire(k, def) { try { var v = W.localStorage.getItem("vrt_app_" + k); return v ? JSON.parse(v) : def; } catch (e) { return def; } }
   function ecrire(k, v) { try { W.localStorage.setItem("vrt_app_" + k, JSON.stringify(v)); } catch (e) { } }
@@ -130,7 +210,8 @@
     var LE = W.VRT_LECONS || {}, PR = W.VRT_PROG || {};
     function norm(s) { return String(s).normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase().replace(/[’']/g, "'").replace(/\s+/g, " ").trim(); }
     Object.keys(LE).forEach(function (k) {
-      var L = LE[k], m = PAR_ID[L.m]; L.id = k; if (!m || !(L.cle || L.rang)) return;
+      var L = LE[k], m = PAR_ID[L.m]; L.id = k;
+      if (!m || !(L.cle || L.rang)) { if (!L.n) L.n = 900 + (L.ordre || 0); return; }   // leçon ajoutée hors progression (admin)
       var p = PR[L.c] || {};
       m.minesec.forEach(function (s) {
         (p[s] || []).forEach(function (ch) {
@@ -219,6 +300,13 @@
      qu'il ne promet pas. Prix des cahiers : ceux des pages livrets/. ── */
   function examen(c) { return /^(3e|1re|Tle)/.test(c || ""); }
   function cahierPour(c, m) {
+    var oc = obj(CFG.offre);
+    if (oc.cahiers === false) return null;
+    var perso = arr(CFG.cahiers).filter(function (x) { x = obj(x); return x.c === c && x.m === m; })[0];
+    if (perso) return perso.masquer || !txt(perso.h) ? null : { h: txt(perso.h), t: txt(perso.t) || "Mon cahier", d: txt(perso.d) };
+    return cahierDefaut(c, m);
+  }
+  function cahierDefaut(c, m) {
     c = c || ""; var col = { "6e": "6e", "5e": "5e", "4e": "4e", "3e": "3e" }[c];
     if (m === "francais") {
       if (col) return { h: "/livrets/" + col + ".html", t: "Mon cahier de français " + c, d: "Le cahier interactif de l'année, leçon par leçon : 1 500 F l'année." };
@@ -270,7 +358,32 @@
       av: ["2 classes : la tienne + celle d'avant", "100 questions par jour au tuteur", "40 fiches PDF par semaine", "Classes virtuelles en direct", "Entretien d'orientation sur rendez-vous"],
       non: [] }
   ];
-  var WA_VERITAS = "237697637739";
+  /* Formules : nom, public, prix de repli, avantages, masquage — réglés dans l'admin. */
+  (function reglerFormules() {
+    var cf = obj(CFG.formules);
+    FORMULES.forEach(function (f) {
+      var o = obj(cf[f.g]);
+      ["nom", "pour", "mois", "an"].forEach(function (k) { if (txt(o[k])) f[k] = txt(o[k]); });
+      if (Array.isArray(o.av)) f.av = o.av.map(txt).filter(Boolean);
+      if (Array.isArray(o.non)) f.non = o.non.map(txt).filter(Boolean);
+      f.masque = o.masquer === true;
+    });
+    FORMULES = FORMULES.filter(function (f) { return !f.masque; });
+  })();
+  var WA_VERITAS = (txt(CFG.whatsapp) || "237697637739").replace(/[^0-9]/g, "");
+  /* **gras** saisi dans l'admin → <b>, le reste échappé. */
+  function gras(s) { return esc(s).replace(/\*\*([^*]+)\*\*/g, "<b>$1</b>"); }
+  var HUMAIN = { nom: "Avec un professeur", pour: "Quand il faut quelqu'un à côté",
+    points: ["**Suivi particulier en ligne** : un professeur attitré, des séances en visio, des devoirs corrigés",
+             "**Répétitions à domicile** : un enseignant chez toi, à Douala et environs",
+             "Fréquence, matières et durée selon tes besoins"],
+    tarif: "Tarif sur devis, réponse sous 24 h.", bouton: "Demander un devis",
+    lien: "/decouvrir/repetitions-domicile-douala.html", lienT: "En savoir plus" };
+  (function () {
+    var h = obj(obj(CFG.offre).humain);
+    ["nom", "pour", "tarif", "bouton", "lien", "lienT"].forEach(function (k) { if (txt(h[k])) HUMAIN[k] = txt(h[k]); });
+    if (Array.isArray(h.points) && h.points.length) HUMAIN.points = h.points.map(txt).filter(Boolean);
+  })();
   function carteFormule(f, conseillee) {
     var idM = "abo_" + f.g + "_m", idA = "abo_" + f.g + "_a";
     return '<div class="fo' + (conseillee ? " fo-c" : "") + '">' +
@@ -284,26 +397,26 @@
   }
   function carteHumain(c, m) {
     var txt = "Bonjour VÉRITAS, je souhaite un devis pour un accompagnement" + (c ? " en " + c : "") + (m ? " (" + m + ")" : "") + " : suivi particulier en ligne / répétitions à domicile. Ville et quartier : ";
-    return '<div class="fo fo-h"><p class="fo-nom">Avec un professeur</p><p class="fo-pour">Quand il faut quelqu\'un à côté</p>' +
-      '<ul class="fo-av fo-av-h">' +
-      '<li><b>Suivi particulier en ligne</b> : un professeur attitré, des séances en visio, des devoirs corrigés</li>' +
-      '<li><b>Répétitions à domicile</b> : un enseignant chez toi, à Douala et environs</li>' +
-      '<li>Fréquence, matières et durée selon tes besoins</li></ul>' +
-      '<p class="fo-an">Tarif sur devis, réponse sous 24 h.</p>' +
-      '<a class="fo-btn fo-btn-h" href="https://wa.me/' + WA_VERITAS + '?text=' + encodeURIComponent(txt) + '" target="_blank" rel="noopener">Demander un devis</a>' +
-      '<a class="fo-lien" href="/decouvrir/repetitions-domicile-douala.html">En savoir plus</a></div>';
+    return '<div class="fo fo-h"><p class="fo-nom">' + esc(HUMAIN.nom) + '</p><p class="fo-pour">' + esc(HUMAIN.pour) + '</p>' +
+      '<ul class="fo-av fo-av-h">' + HUMAIN.points.map(function (x) { return "<li>" + gras(x) + "</li>"; }).join("") + '</ul>' +
+      '<p class="fo-an">' + esc(HUMAIN.tarif) + '</p>' +
+      '<a class="fo-btn fo-btn-h" href="https://wa.me/' + WA_VERITAS + '?text=' + encodeURIComponent(txt) + '" target="_blank" rel="noopener">' + esc(HUMAIN.bouton) + '</a>' +
+      (HUMAIN.lien ? '<a class="fo-lien" href="' + esc(HUMAIN.lien) + '">' + esc(HUMAIN.lienT) + '</a>' : '') + '</div>';
   }
   function offre(c, m, ctx) {
-    var cah = cahierPour(c, m), ex = examen(c);
-    var titre = { lecon: "Pour aller plus loin", quiz: "Continue sur ta lancée", matiere: "En attendant les prochaines leçons", accueil: "Aller plus loin avec VÉRITAS" }[ctx] || "Pour aller plus loin";
-    return '<aside class="offre offre-' + ctx + '" aria-label="' + titre + '"><p class="offre-t">' + titre + '</p>' +
-      '<h2 class="offre-h">Choisis ta formule</h2>' +
+    var oc = obj(CFG.offre);
+    if (oc.actif === false) return "";
+    var cah = cahierPour(c, m), ex = examen(c), tt = obj(oc.titres);
+    var titre = txt(tt[ctx]) || { lecon: "Pour aller plus loin", quiz: "Continue sur ta lancée", matiere: "En attendant les prochaines leçons", accueil: "Aller plus loin avec VÉRITAS" }[ctx] || "Pour aller plus loin";
+    var conseil = ex ? (txt(oc.conseilExamen) || "pro") : (txt(oc.conseilAutre) || "starter"), ens = obj(oc.enseignant);
+    return '<aside class="offre offre-' + ctx + '" aria-label="' + esc(titre) + '"><p class="offre-t">' + esc(titre) + '</p>' +
+      '<h2 class="offre-h">' + esc(txt(oc.titre) || "Choisis ta formule") + '</h2>' +
       '<div class="offre-grille"><div class="offre-plans">' +
-      FORMULES.map(function (f) { return carteFormule(f, ex ? f.g === "pro" : f.g === "starter"); }).join("") +
-      '</div>' + carteHumain(c, m) + '</div>' +
-      '<p class="offre-n">Payer l\'année en une fois revient à un peu plus de huit mois (Starter : 10 000 F au lieu de 14 400 F). Plusieurs enfants ? La <a href="/app.html#abonnement?plan=abo_famille_m">formule Famille</a> couvre jusqu\'à 4 enfants au niveau Élite pour <span data-vrt-prix="abo_famille_m">' + prixConnu("abo_famille_m", "6 000") + '</span> F par mois. Paiement Orange Money ou MTN MoMo, sans engagement.</p>' +
+      FORMULES.map(function (f) { return carteFormule(f, f.g === conseil); }).join("") +
+      '</div>' + (oc.humainActif === false ? "" : carteHumain(c, m)) + '</div>' +
+      (txt(oc.note) ? '<p class="offre-n">' + gras(txt(oc.note)) + '</p>' : '<p class="offre-n">Payer l\'année en une fois revient à un peu plus de huit mois (Starter : 10 000 F au lieu de 14 400 F). Plusieurs enfants ? La <a href="/app.html#abonnement?plan=abo_famille_m">formule Famille</a> couvre jusqu\'à 4 enfants au niveau Élite pour <span data-vrt-prix="abo_famille_m">' + prixConnu("abo_famille_m", "6 000") + '</span> F par mois. Paiement Orange Money ou MTN MoMo, sans engagement.</p>') +
       (cah ? lienOffre(cah.h, cah.t, cah.d, PICTO_LIVRE) : "") +
-      lienOffre("/app.html#tarifs", "Enseignant ? Les formules multi-classes", "3 classes, 6 classes ou toutes, dès 2 500 F par mois : leçons à projeter, fiches à distribuer, épreuves corrigées.", PICTO_CLE) +
+      (ens.actif === false ? "" : lienOffre(txt(ens.h) || "/app.html#tarifs", txt(ens.t) || "Enseignant ? Les formules multi-classes", txt(ens.d) || "3 classes, 6 classes ou toutes, dès 2 500 F par mois : leçons à projeter, fiches à distribuer, épreuves corrigées.", PICTO_CLE)) +
       '</aside>';
   }
   /* Les bonnes réponses étaient rangées en 1ʳᵉ ou 2ᵉ position (3ᵉ : 5 fois sur 177) :
@@ -340,6 +453,45 @@
   var RE_EMO = /[\u{1F000}-\u{1FAFF}\u{2190}-\u{21FF}\u{2300}-\u{23FF}\u{2460}-\u{24FF}\u{25A0}-\u{27BF}\u{2900}-\u{297F}\u{2B00}-\u{2BFF}\u{3030}\u{303D}\u{FE0F}\u{20E3}\u{200D}]/gu;
   function net(s) { return String(s == null ? "" : s).replace(RE_EMO, "").replace(/\s{2,}/g, " ").trim(); }
   var LIB_F = {}; FAMILLES.forEach(function (f, i) { f[5] = ton(i); LIB_F[f[0]] = f; });
+  /* Rubriques, familles et ressources réglées dans l'admin (13/11/2026). */
+  var FAM_MASQ = {};
+  (function reglerFamilles() {
+    var cg = obj(CFG.groupes), cf = obj(CFG.familles);
+    GROUPES.forEach(function (g) { var o = obj(cg[g[0]]); if (txt(o.nom)) g[1] = txt(o.nom); if (txt(o.desc)) g[3] = txt(o.desc); });
+    FAMILLES.forEach(function (f) {
+      var o = obj(cf[f[0]]);
+      if (txt(o.nom)) f[1] = txt(o.nom); if (txt(o.desc)) f[3] = txt(o.desc);
+      if (GROUPES.some(function (g) { return g[0] === o.groupe; })) f[4] = o.groupe;
+      if (o.visible === false) FAM_MASQ[f[0]] = 1;
+    });
+    for (var i = FAMILLES.length - 1; i >= 0; i--) if (FAM_MASQ[FAMILLES[i][0]]) FAMILLES.splice(i, 1);
+  })();
+  (function reglerRessources() {
+    var R0 = W.VRT_RES = W.VRT_RES || { items: {}, lec: {}, mat: {}, cl: {} }, mod = obj(CFG.ressources), parti = {};
+    ["items", "lec", "mat", "cl"].forEach(function (k) { R0[k] = R0[k] || {}; });
+    Object.keys(mod).forEach(function (id) {
+      var o = obj(mod[id]), it = R0.items[id]; if (!it) return;
+      if (o.masquer) { parti[id] = 1; return; }
+      ["ti", "d", "u"].forEach(function (k) { if (txt(o[k])) it[k] = txt(o[k]); });
+      if (o.ab === 0 || o.ab === 1) it.ab = o.ab;
+    });
+    arr(CFG.ressourcesAjout).forEach(function (n) {
+      n = obj(n); var id = txt(n.id);
+      if (!id || n.masquer || !txt(n.ti) || !txt(n.u)) return;
+      R0.items[id] = { t: LIB_F[n.t] ? n.t : "aide", ti: txt(n.ti), d: txt(n.d), u: txt(n.u), ab: n.ab ? 1 : 0 };
+      function poser(tab, k) { (tab[k] = tab[k] || []); if (tab[k].indexOf(id) < 0) (n.debut ? tab[k].unshift(id) : tab[k].push(id)); }
+      arr(n.classes).forEach(function (c) {
+        if (txt(n.m) && +n.n > 0) poser(R0.lec, c + "|" + n.m + "|" + (+n.n));
+        else if (txt(n.m)) poser(R0.mat, c + "|" + n.m);
+        else poser(R0.cl, c);
+      });
+    });
+    Object.keys(R0.items).forEach(function (id) { if (FAM_MASQ[R0.items[id].t]) parti[id] = 1; });
+    Object.keys(parti).forEach(function (id) { delete R0.items[id]; });
+    ["lec", "mat", "cl"].forEach(function (k) {
+      Object.keys(R0[k]).forEach(function (cle) { R0[k][cle] = R0[k][cle].filter(function (id) { return R0.items[id]; }); });
+    });
+  })();
   function RES() { return W.VRT_RES || { items: {}, lec: {}, mat: {}, cl: {} }; }
   function resLecon(c, m, n) { return RES().lec[c + "|" + m + "|" + n] || []; }
   function resDeMatiere(c, m) {
@@ -442,7 +594,63 @@
     liste.parentNode.insertBefore(b, liste.nextSibling);
     liste._vpBtn = b;
   }
-  W.VRT.app = { replier: replier, titreL: titreL, si: si, net: net, ton: ton, GROUPES: GROUPES, chargerCatalogue: chargerCatalogue, FAMILLES: FAMILLES, resLecon: resLecon, resDeMatiere: resDeMatiere, resClasse: resClasse, gratuitDabord: gratuitDabord, selectionGratuite: selectionGratuite, leconsDeRes: leconsDeRes, carteRes: carteRes, pastilles: pastilles, MATIERES: MATIERES, PAR_ID: PAR_ID, CLASSES: CLASSES, lire: lire, ecrire: ecrire, noterJour: noterJour, serie: serie,
+  /* ════════ Habillage réglé dans l'admin : bandeau, fermeture, textes (13/11/2026) ════════ */
+  /* Textes : « remplacer ce texte par celui-ci », sur toutes les pages d'Apprendre,
+     y compris ce qui est dessiné après coup (MutationObserver sur les ajouts). */
+  var REMPL = arr(CFG.textes).map(obj).filter(function (r) { return txt(r.de) && typeof r.vers === "string" && r.actif !== false; })
+    .map(function (r) { return [txt(r.de), r.vers]; });
+  function remplacerDans(racine) {
+    if (!REMPL.length || !racine) return;
+    if (racine.nodeType === 3) { remplacerNoeud(racine); return; }
+    if (racine.nodeType !== 1 || /^(SCRIPT|STYLE|TEXTAREA|INPUT)$/.test(racine.tagName)) return;
+    var w = document.createTreeWalker(racine, 4, null), n, l = [];
+    while ((n = w.nextNode())) l.push(n);
+    l.forEach(remplacerNoeud);
+    [].forEach.call(racine.querySelectorAll ? racine.querySelectorAll("[placeholder],[title],[aria-label]") : [], function (e) {
+      ["placeholder", "title", "aria-label"].forEach(function (a) { var v = e.getAttribute(a); if (v) { var v2 = remplacerTexte(v); if (v2 !== v) e.setAttribute(a, v2); } });
+    });
+  }
+  function remplacerTexte(v) { REMPL.forEach(function (r) { if (v.indexOf(r[0]) >= 0) v = v.split(r[0]).join(r[1]); }); return v; }
+  function remplacerNoeud(n) {
+    var p = n.parentNode; if (!p || /^(SCRIPT|STYLE|TEXTAREA)$/.test(p.nodeName)) return;
+    var v = n.nodeValue, v2 = remplacerTexte(v); if (v2 !== v) n.nodeValue = v2;
+  }
+  function habiller() {
+    var b = obj(CFG.bandeau), corps = document.body; if (!corps) return;
+    if (CFG.ferme && !CFG._apercu) {
+      corps.innerHTML = '<main style="max-width:640px;margin:12vh auto;padding:24px;font-family:Poppins,Arial,sans-serif;text-align:center;color:#142554">' +
+        '<h1 style="font-size:1.6rem;margin:0 0 12px">' + esc(txt(CFG.fermeTitre) || "Apprendre revient très vite") + '</h1>' +
+        '<p style="font-size:1.05rem;line-height:1.6">' + gras(txt(CFG.fermeTexte) || "Nous mettons à jour les cours. Reviens dans quelques instants.") + '</p>' +
+        '<p><a href="/" style="color:#1E499B;font-weight:600">Retour à l\'accueil VÉRITAS</a></p></main>';
+      return;
+    }
+    if (b.actif && txt(b.texte)) {
+      var TONS_B = { info: ["#1E499B", "#fff"], or: ["#FFC93C", "#142554"], vert: ["#007E11", "#fff"], alerte: ["#B42318", "#fff"] }, t = TONS_B[b.ton] || TONS_B.info;
+      var el = document.createElement(txt(b.lien) ? "a" : "div");
+      el.className = "vrt-bandeau-admin"; if (txt(b.lien)) el.href = txt(b.lien);
+      el.style.cssText = "display:block;padding:9px 16px;text-align:center;font:600 14px/1.45 Poppins,Arial,sans-serif;text-decoration:none;background:" + t[0] + ";color:" + t[1];
+      el.innerHTML = gras(txt(b.texte)) + (txt(b.lien) ? " ›" : "");
+      corps.insertBefore(el, corps.firstChild);
+    }
+    if (CFG._apercu) {
+      var ap = document.createElement("div");
+      ap.style.cssText = "position:fixed;right:12px;bottom:12px;z-index:99999;background:#142554;color:#FFC93C;padding:8px 12px;border-radius:10px;font:600 13px Poppins,Arial,sans-serif;box-shadow:0 4px 16px rgba(0,0,0,.25)";
+      ap.innerHTML = 'Aperçu du brouillon' + (CFG.ferme ? ' (Apprendre est FERMÉ au public)' : '') + ' · <a href="?apercu=0" style="color:#fff">quitter</a>';
+      corps.appendChild(ap);
+    }
+    if (REMPL.length) {
+      document.title = remplacerTexte(document.title);
+      remplacerDans(corps);
+      if (W.MutationObserver) new MutationObserver(function (ms) {
+        ms.forEach(function (m) { [].forEach.call(m.addedNodes, remplacerDans); });
+      }).observe(corps, { childList: true, subtree: true });
+    }
+  }
+  if (typeof document !== "undefined") {
+    if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", habiller); else habiller();
+  }
+
+  W.VRT.app = { cfg: CFG, FORMULES: FORMULES, HUMAIN: HUMAIN, WA: WA_VERITAS, cahierDefaut: cahierDefaut, replier: replier, titreL: titreL, si: si, net: net, ton: ton, GROUPES: GROUPES, chargerCatalogue: chargerCatalogue, FAMILLES: FAMILLES, resLecon: resLecon, resDeMatiere: resDeMatiere, resClasse: resClasse, gratuitDabord: gratuitDabord, selectionGratuite: selectionGratuite, leconsDeRes: leconsDeRes, carteRes: carteRes, pastilles: pastilles, MATIERES: MATIERES, PAR_ID: PAR_ID, CLASSES: CLASSES, lire: lire, ecrire: ecrire, noterJour: noterJour, serie: serie,
     marquerLu: marquerLu, noterQuiz: noterQuiz, teinter: teinter, ico: ico, icoM: icoM, pic: pic, etoiles: etoiles, esc: esc, slug: slug, rail: rail, chiffreSerie: chiffreSerie, scenesPour: scenesPour, jour: jour,
     exporterImage: exporterImage, offre: offre, cahierPour: cahierPour, melanger: melanger, boutonsImage: boutonsImage, filigraneCanvas: filigraneCanvas };
 })(window);
