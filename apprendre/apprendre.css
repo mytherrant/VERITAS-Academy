@@ -928,3 +928,22 @@ h2 .num .pic{vertical-align:middle}
 .tuteur-pied{margin:8px 0 0!important;font-size:12px;color:var(--gris)}
 .tuteur-att{color:var(--gris)}
 @media print{.tuteur{display:none}}
+
+/* Schémas lisibles sur téléphone et figures agrandissables (13/11/2026). */
+.defile-x{overflow-x:auto;-webkit-overflow-scrolling:touch;overscroll-behavior-x:contain}
+.defile-x>svg{display:block}
+.carte pre{max-width:100%;overflow-x:auto}
+@media (max-width:640px){
+  figure.illus{margin:16px -10px;padding:10px 8px}
+  figure.illus.defile-x::after,.anim-c.defile-x::after,.labo-z.defile-x::after{content:"↔ Fais glisser pour voir tout le schéma";display:block;font-size:12px;color:var(--gris);text-align:center;margin-top:6px;position:sticky;left:0}
+}
+figure.illus .btn-zoom{right:84px;opacity:.95;color:#1E499B;border-color:#9FBEEA}
+figure.illus{position:relative}
+.zoom-fig{width:min(96vw,1100px);max-width:96vw;max-height:92vh;padding:0;border:0;border-radius:16px;box-shadow:0 20px 60px rgba(0,17,54,.35)}
+.zoom-fig::backdrop{background:rgba(0,17,54,.6)}
+.zoom-t{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 16px;border-bottom:1px solid var(--trait);position:sticky;top:0;background:#fff}
+.zoom-t b{font:600 15px var(--sans);color:var(--titre)}
+.zoom-x{border:0;background:#EEF2FA;color:var(--titre);width:34px;height:34px;border-radius:10px;font-size:20px;cursor:pointer}
+.zoom-c{overflow:auto;max-height:calc(92vh - 60px);padding:16px;background:#FBFAF7}
+.zoom-c svg{display:block;height:auto;margin:0 auto}
+@media print{.btn-zoom,.zoom-fig{display:none!important}}

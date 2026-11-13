@@ -289,7 +289,57 @@
       b.title = "Enregistrer l'image (PNG avec filigrane VÉRITAS)"; b.setAttribute("aria-label", "Enregistrer l'image");
       b.addEventListener("click", function () { var s = f.querySelector("svg:not(.pic)"); if (s) exporterImage(s, titre); });
       (f.classList.contains("anim") ? f.querySelector(".anim-c") || f : f).appendChild(b);
+      /* « Agrandir » (13/11/2026) : la carte ou le schéma s'ouvre en plein écran, zoomé et
+         défilable. Réservé aux illustrations fixes : un labo cloné perdrait ses curseurs. */
+      if (f.matches("figure.illus") && !f.querySelector(".btn-zoom")) {
+        var z = document.createElement("button"); z.type = "button"; z.className = "btn-img btn-zoom"; z.textContent = "⤢ Agrandir";
+        z.title = "Afficher la figure en grand"; z.setAttribute("aria-label", "Agrandir la figure");
+        z.addEventListener("click", function () { agrandir(f.querySelector("svg:not(.pic)"), titre); });
+        f.appendChild(z);
+      }
     });
+    lisible(racine);
+  }
+
+  /* LISIBILITÉ DES SCHÉMAS SUR TÉLÉPHONE (13/11/2026). Un SVG en width:100% rétrécit avec
+     l'écran : sur 390 px, les textes des schémas tombaient à 7,5-10 px (81 figures mesurées).
+     Pour chaque SVG de figure, d'animation ou de labo, on calcule la largeur minimale qui
+     garde son plus petit texte à 11 px au moins ; si le cadre est plus étroit, le SVG garde
+     cette largeur et son cadre défile horizontalement. Sur ordinateur, rien ne change. */
+  var LISIBLE_PX = 11;
+  function lisible(racine) {
+    (racine || document).querySelectorAll("figure.illus svg:not(.pic), .anim-c svg:not(.pic)").forEach(function (s) {
+      if (s.closest(".btn-img")) return;
+      var vb = s.viewBox && s.viewBox.baseVal, cadre = s.parentElement;
+      if (!vb || !vb.width || !cadre) return;
+      var mini = Infinity;
+      s.querySelectorAll("text").forEach(function (t) { var v = parseFloat(getComputedStyle(t).fontSize); if (v > 0 && v < mini) mini = v; });
+      if (!isFinite(mini)) return;                                  // schéma sans texte : il peut rétrécir
+      var largeur = Math.ceil(vb.width * LISIBLE_PX / mini);
+      if (largeur <= vb.width * 1.6) {                              // jamais plus de 1,6 fois la taille prévue
+        s.style.minWidth = largeur + "px";
+        s.style.maxHeight = "none";                                 // le plafond de 340 px écrasait les cartes en hauteur
+        cadre.classList.add("defile-x");
+      }
+    });
+  }
+
+  function agrandir(svg, titre) {
+    if (!svg) return;
+    var d = document.getElementById("vrtZoom");
+    if (!d) {
+      d = document.createElement("dialog"); d.id = "vrtZoom"; d.className = "zoom-fig"; d.setAttribute("aria-label", "Figure agrandie");
+      d.innerHTML = '<div class="zoom-t"><b></b><button type="button" class="zoom-x" aria-label="Fermer">×</button></div><div class="zoom-c"></div>';
+      d.querySelector(".zoom-x").addEventListener("click", function () { d.close(); });
+      d.addEventListener("click", function (e) { if (e.target === d) d.close(); });
+      document.body.appendChild(d);
+    }
+    var c = d.querySelector(".zoom-c"), copie = svg.cloneNode(true), vb = svg.viewBox && svg.viewBox.baseVal;
+    copie.removeAttribute("width"); copie.removeAttribute("height"); copie.style.minWidth = "";
+    copie.style.width = vb && vb.width ? "max(100%, " + Math.round(vb.width * 1.5) + "px)" : "100%";
+    c.innerHTML = ""; c.appendChild(copie);
+    d.querySelector(".zoom-t b").textContent = titre || "Figure";
+    if (d.showModal) d.showModal(); else d.setAttribute("open", "");
   }
   if (typeof document !== "undefined") {   /* hors navigateur (bancs Node) : pas de filigrane à poser */
     if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", filigraneImpression); else filigraneImpression();

@@ -131,6 +131,9 @@ jobs:
       - name: 📚 Apprendre — un lot de leçons s'ajoute-t-il sans rien effacer ?
         run: node tests/banc_build_apprendre_ajout.cjs
 
+      - name: 🗺️ Apprendre — schémas, cartes et labos branchés et agrandissables ?
+        run: node tests/banc_apprendre_schemas.cjs
+
       - name: ✍️ Les écrans lisent-ils l'argent reçu ?
         run: node tests/banc_recettes_parts_auteur.cjs
 

@@ -291,6 +291,9 @@ jobs:
       - name: 📚 Apprendre — un lot de leçons s'ajoute-t-il sans rien effacer ?
         run: node tests/banc_build_apprendre_ajout.cjs
 
+      - name: 🗺️ Apprendre — schémas, cartes et labos branchés et agrandissables ?
+        run: node tests/banc_apprendre_schemas.cjs
+
       # Chaque formule n'ouvre que ce qu'elle annonce : classes, fiches, tuteur,
       # labos premium (servis par le serveur), règle Famille (12/11/2026).
       - name: 🎟️ Formules — chaque abonnement ouvre-t-il ce qu'il annonce, et pas plus ?
