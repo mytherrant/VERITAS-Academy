@@ -142,6 +142,10 @@ function ligneProg(l) {
   for (const s of CARTE[l.m] || []) for (const ch of ((PROG[l.c] || {})[s] || [])) for (const x of ch[1]) if (x[0] === l.rang) return { officiel: x[1], chap: ch, s };
   return null;
 }
+/* Schéma offert (demande de Jacques : « sur certaines leçons tu mets les schémas gratuits pour inciter
+   à l'abonnement ») : une leçon payante sur deux (rang impair) garde dans son aperçu public les schémas
+   et cartes de ses parties fermées ; l.schemaOffert = true / false force le choix. */
+function schemaOffert(l) { return l.schemaOffert === true || (l.schemaOffert !== false && (+l.rang || 0) % 2 === 1); }
 function premierDuTrimestre(l) {
   const vus = new Set();
   for (const s of CARTE[l.m] || []) for (const ch of ((PROG[l.c] || {})[s] || [])) {
@@ -182,12 +186,14 @@ for (const f of fs.readdirSync(APP)) if (/^apercus-.*\.js$/.test(f)) fs.unlinkSy
 
 const parClasse = {}; let libres = 0, payantes = 0;
 for (const [id, l] of Object.entries(L)) {
-  const gratuit = !!l.gratuit || premierDuTrimestre(l);
+  // l.payant : force le verrou même pour la première leçon d'un trimestre (demande de Jacques :
+  // « Ne fais pas trop de leçons gratuites sinon ils ne vont pas vouloir s'abonner »).
+  const gratuit = !l.payant && (!!l.gratuit || premierDuTrimestre(l));
   let pub;
   if (gratuit) { pub = { ...l, gratuit: true }; libres++; }
   else {
     pub = { ...l, verrou: true, nq: l.quiz.length, revision: [], exo: "", quiz: [],
-      labo: l.parties.some(p => p.labo), parties: [l.parties[0]].concat(l.parties.slice(1).map(p => ({ t: p.t, verrou: true }))) };
+      labo: l.parties.some(p => p.labo), parties: [l.parties[0]].concat(l.parties.slice(1).map(p => Object.assign({ t: p.t, verrou: true }, p.illus && schemaOffert(l) ? { illus: p.illus } : {}))) };
     fs.writeFileSync(path.join(dest, id + ".json"), JSON.stringify({ parties: l.parties.slice(1), revision: l.revision, exo: l.exo, quiz: l.quiz }));
     payantes++;
   }

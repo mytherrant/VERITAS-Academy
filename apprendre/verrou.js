@@ -76,6 +76,7 @@
       : "";
     return '<section class="mur" aria-label="Suite réservée aux abonnés"><p class="mur-t">' + CADENAS + (/^classe_/.test(etat.raison) ? 'Cette classe n\'est pas encore dans ta formule' : 'La suite de cette leçon est réservée aux abonnés') + '</p>' +
       (/^classe_/.test(etat.raison) ? blocClasse(etat, A) : '<p class="mur-m" data-mur-msg>' + A.esc(MSG[etat.raison] || MSG.reseau) + '</p>') +
+      fermees.filter(function (p) { return p.illus; }).map(function (p) { return '<figure class="illus mur-schema">' + p.illus.svg + '<figcaption><b>Schéma offert</b> · ' + A.esc(p.t) + ' — ' + A.esc(p.illus.legende || "") + '</figcaption></figure>'; }).join("") +
       (fermees.length ? '<ol class="mur-l">' + fermees.map(function (p) { return '<li>' + CADENAS + A.esc(p.t) + '</li>'; }).join("") + '</ol>' : "") +
       '<p class="mur-p">Avec ' + (L.labo ? 'un labo à manipuler, ' : '') + 'un entraînement corrigé au format de l\'examen, la fiche de révision et un quiz de ' + (L.nq || 0) + ' questions corrigées.</p>' +
       form + A.offre(L.c, L.m, "lecon") + '</section>';
