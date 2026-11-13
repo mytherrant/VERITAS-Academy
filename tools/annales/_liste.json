@@ -19,5 +19,26 @@
   "matiere": "Mathématiques",
   "annee": 2024,
   "u": "/ressources/annales/bepc-mathematiques-2024.html"
+ },
+ {
+  "examen": "bepc",
+  "fiche": "ressources/examen-pct-bepc.html",
+  "matiere": "Physique, chimie et technologie",
+  "annee": 2026,
+  "u": "/ressources/annales/bepc-pct-2026.html"
+ },
+ {
+  "examen": "bepc",
+  "fiche": "ressources/examen-pct-bepc.html",
+  "matiere": "Physique, chimie et technologie",
+  "annee": 2025,
+  "u": "/ressources/annales/bepc-pct-2025.html"
+ },
+ {
+  "examen": "bepc",
+  "fiche": "ressources/examen-pct-bepc.html",
+  "matiere": "Physique, chimie et technologie",
+  "annee": 2024,
+  "u": "/ressources/annales/bepc-pct-2024.html"
  }
 ]
