@@ -22365,6 +22365,22 @@ function _showLittFiche(oeuvreKey){
       +'<div style="font-weight:800;color:#92400E;font-size:12px;margin-bottom:6px;text-transform:uppercase">📝 Argument / Résumé</div>'
       +'<div style="font-size:13px;line-height:1.7;color:var(--ink)">'+_esc(fi.resume)+'</div></div>';
   }
+  // 13/11/2026 — leçons de vie et envie de lire la suite (chunks/litt-oeuvres.js : morales, envie)
+  if(oe.morales&&oe.morales.length){
+    h+='<div style="margin-top:16px"><div style="font-weight:800;color:'+COL+';font-size:13px;margin-bottom:8px;text-transform:uppercase">Les leçons de vie</div>';
+    oe.morales.forEach(function(m){
+      h+='<div style="background:#FFF8E5;border-radius:10px;padding:10px 12px;margin-bottom:8px"><div style="font-weight:700;color:#001136;font-size:14px">'+_esc(m.t)+'</div><div style="font-size:13px;line-height:1.6;color:var(--ink);margin-top:2px">'+_esc(m.d)+'</div></div>';
+    });
+    h+='</div>';
+  }
+  if(oe.envie&&oe.envie.accroche){
+    var ev=oe.envie;
+    h+='<div style="margin-top:16px;padding:12px 14px;background:#EEF3FC;border-radius:12px"><div style="font-weight:800;color:'+COL+';font-size:13px;margin-bottom:6px;text-transform:uppercase">Envie de lire la suite ?</div>'
+      +'<div style="font-size:13px;line-height:1.7;color:var(--ink)">'+_esc(ev.accroche)+'</div>'
+      +((ev.questions||[]).length?'<ul style="margin:8px 0 0;padding-left:18px;font-size:13px;line-height:1.7">'+ev.questions.map(function(q){return '<li>'+_esc(q)+'</li>';}).join('')+'</ul>':'')
+      +(ev.defi?'<div style="margin-top:8px;padding:8px 10px;background:#fff;border-radius:8px;font-size:13px;line-height:1.6">'+_esc(ev.defi)+'</div>':'')
+      +'</div>';
+  }
   h+='</div>';
   // v2.9.4 — Carte mentale intégrée à la fiche d'identité (bouton dédié)
   if(oe.carte){
