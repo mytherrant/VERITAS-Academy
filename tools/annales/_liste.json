@@ -141,6 +141,48 @@
  },
  {
   "examen": "bepc",
+  "fiche": "ressources/examen-anglais-bepc.html",
+  "matiere": "Anglais",
+  "annee": 2025,
+  "u": "/ressources/annales/bepc-anglais-2025.html"
+ },
+ {
+  "examen": "bepc",
+  "fiche": "ressources/examen-langues-vivantes-bepc.html",
+  "matiere": "Espagnol",
+  "annee": 2026,
+  "u": "/ressources/annales/bepc-espagnol-2026.html"
+ },
+ {
+  "examen": "bepc",
+  "fiche": "ressources/examen-langues-vivantes-bepc.html",
+  "matiere": "Espagnol",
+  "annee": 2025,
+  "u": "/ressources/annales/bepc-espagnol-2025.html"
+ },
+ {
+  "examen": "bepc",
+  "fiche": "ressources/examen-langues-vivantes-bepc.html",
+  "matiere": "Espagnol",
+  "annee": 2024,
+  "u": "/ressources/annales/bepc-espagnol-2024.html"
+ },
+ {
+  "examen": "bepc",
+  "fiche": "ressources/examen-langues-vivantes-bepc.html",
+  "matiere": "Allemand",
+  "annee": 2025,
+  "u": "/ressources/annales/bepc-allemand-2025.html"
+ },
+ {
+  "examen": "bepc",
+  "fiche": "ressources/examen-langues-vivantes-bepc.html",
+  "matiere": "Allemand",
+  "annee": 2024,
+  "u": "/ressources/annales/bepc-allemand-2024.html"
+ },
+ {
+  "examen": "bepc",
   "fiche": "ressources/examen-informatique-bepc.html",
   "matiere": "Informatique",
   "annee": 2026,
