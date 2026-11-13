@@ -83,7 +83,9 @@ for (const ex of fs.readdirSync(SRC).filter(d => EXAMENS[d])) {
     const m = t.match(/^<!--meta\s*([\s\S]*?)-->/); if (!m) { err(nom + " : méta absente"); continue; }
     let meta; try { meta = JSON.parse(m[1]); } catch (e) { err(nom + " : méta illisible " + e.message); continue; }
     const bloc = k => { const b = t.match(new RegExp("<!--" + k + "-->([\\s\\S]*?)<!--/" + k + "-->")); return b ? b[1].trim() : ""; };
-    const s = { nom, meta, sujet: formules(bloc("sujet")), corrige: formules(bloc("corrige")) };
+    // Les titres (<strong>) sont en couleur ; un <strong> qui ne porte qu'un barème (« 3 pts ») reste sobre.
+    const bareme = h => h.replace(/<strong>([^<]{1,40})<\/strong>/g, (m, t) => /\d/.test(t) && /^[\s\d,.×x=+*()\/–-]*$/i.test(t.replace(/\b(pts?|points?|ptos?|puntos?|marks?|P)\b/gi, "")) ?'<strong class="ax-pts">' + t + "</strong>" : m);
+    const s = { nom, meta, sujet: bareme(formules(bloc("sujet"))), corrige: bareme(formules(bloc("corrige"))) };
     if (meta.examen !== ex) err(nom + " : examen " + meta.examen + " hors de son dossier");
     if (!MATIERES[meta.matiere]) err(nom + " : matière inconnue " + meta.matiere);
     if (f !== meta.matiere + "-" + meta.annee + ".html") err(nom + " : nom de fichier ≠ matière-année de la méta");

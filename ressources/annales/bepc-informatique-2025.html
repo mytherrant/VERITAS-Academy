@@ -137,7 +137,10 @@ ul.mx-check li::before{content:"";position:absolute;left:4px;top:9px;width:16px;
 .ax-tbl a{color:#1E499B}
 .ax-col{display:inline-flex;flex-direction:column;vertical-align:middle;text-align:center;line-height:1.2;margin:0 2px}
 .ax-col{padding:0 5px;border-left:1.5px solid currentColor;border-right:1.5px solid currentColor;border-radius:9px}
-.ax-sujet pre,.ax-corrige pre{white-space:pre-wrap;overflow-wrap:anywhere;max-width:100%;background:#F7F5F0;border:1px solid #E6E0D4;border-radius:8px;padding:12px 14px;font-size:14px;line-height:1.55}</style><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap"><link rel="stylesheet" href="/assets/veritas-tokens.css?v=1.19.25">
+.ax-sujet pre,.ax-corrige pre{white-space:pre-wrap;overflow-wrap:anywhere;max-width:100%;background:#F7F5F0;border:1px solid #E6E0D4;border-radius:8px;padding:12px 14px;font-size:14px;line-height:1.55}
+.ax-sujet strong,.ax-corrige strong{color:#1E499B}
+.ax-sujet th,.ax-corrige th{color:#1E499B}
+.ax-sujet strong.ax-pts,.ax-corrige strong.ax-pts{color:#8A6A12;font-weight:600;white-space:nowrap}</style><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap"><link rel="stylesheet" href="/assets/veritas-tokens.css?v=1.19.25">
 <link rel="stylesheet" href="/assets/veritas-refonte.css?v=1.19.25"><!-- seo-tete -->
 <meta property="og:image" content="https://veritas-school.com/og-image.jpg">
 <meta name="twitter:card" content="summary_large_image">
@@ -233,26 +236,26 @@ ul.mx-check li::before{content:"";position:absolute;left:4px;top:9px;width:16px;
 <section class="partie" id="sujet"><h2><span class="mx-num">2</span><span class="mx-txt">Le sujet</span></h2><div class="ax-sujet"><p><strong>ÉPREUVE THÉORIQUE D'INFORMATIQUE</strong><br><em>Aucun document n'est autorisé en dehors de ceux remis aux candidats par les examinateurs.</em></p>
 <p><strong>PARTIE I : ARCHITECTURE D'UN MICRO-ORDINATEUR ET REPRÉSENTATION DE L'INFORMATION / 08 pts</strong></p>
 <p><strong>Exercice 1 : architecture d'un micro-ordinateur (04 pts)</strong><br>
-1. Définir le terme : <strong>bus</strong>. <strong>1 pt</strong><br>
-2. Donner le rôle de chacun des composants suivants : a) mémoire ; b) clavier. <strong>0,5 pt + 0,5 pt</strong><br>
-3. Donner une différence entre l'architecture CISC et RISC. <strong>1 pt</strong><br>
-4. Déterminer le type de maintenance informatique correspondant à chaque action suivante : a) utiliser un régulateur de tension ; b) remplacer une barrette mémoire en panne. <strong>0,5 pt + 0,5 pt</strong></p>
+1. Définir le terme : <strong>bus</strong>. <strong class="ax-pts">1 pt</strong><br>
+2. Donner le rôle de chacun des composants suivants : a) mémoire ; b) clavier. <strong class="ax-pts">0,5 pt + 0,5 pt</strong><br>
+3. Donner une différence entre l'architecture CISC et RISC. <strong class="ax-pts">1 pt</strong><br>
+4. Déterminer le type de maintenance informatique correspondant à chaque action suivante : a) utiliser un régulateur de tension ; b) remplacer une barrette mémoire en panne. <strong class="ax-pts">0,5 pt + 0,5 pt</strong></p>
 <p><strong>Exercice 2 : représentation de l'information (04 pts)</strong><br>
-1. Définir l'expression : <strong>format de données</strong>. <strong>1 pt</strong><br>
+1. Définir l'expression : <strong>format de données</strong>. <strong class="ax-pts">1 pt</strong><br>
 2. ASCII est un exemple de code permettant de représenter les informations dans l'ordinateur.<br>
-a) Donner la signification du sigle ASCII. <strong>0,5 pt</strong><br>
-b) Citer un (01) autre exemple de code permettant de représenter les informations dans l'ordinateur. <strong>0,5 pt</strong><br>
-3. Les notes des élèves sont présentées de deux manières : sous forme de paragraphe (un texte) et sous forme de tableau. Identifier parmi ces deux présentations celle qui contient les données structurées et celle qui contient les données non structurées. <strong>0,5 pt × 2 = 1 pt</strong><br>
-4. En vous servant de l'extrait de la table ASCII ci-dessous, déterminer le code binaire ASCII du mot « passe ». <strong>1 pt</strong></p>
+a) Donner la signification du sigle ASCII. <strong class="ax-pts">0,5 pt</strong><br>
+b) Citer un (01) autre exemple de code permettant de représenter les informations dans l'ordinateur. <strong class="ax-pts">0,5 pt</strong><br>
+3. Les notes des élèves sont présentées de deux manières : sous forme de paragraphe (un texte) et sous forme de tableau. Identifier parmi ces deux présentations celle qui contient les données structurées et celle qui contient les données non structurées. <strong class="ax-pts">0,5 pt × 2 = 1 pt</strong><br>
+4. En vous servant de l'extrait de la table ASCII ci-dessous, déterminer le code binaire ASCII du mot « passe ». <strong class="ax-pts">1 pt</strong></p>
 <table><thead><tr><th colspan="3">Extrait de la table ASCII</th></tr><tr><th>Binaire</th><th>Décimal</th><th>Caractères</th></tr></thead><tbody>
 <tr><td>110 0001</td><td>97</td><td>a</td></tr><tr><td>111 0000</td><td>112</td><td>p</td></tr><tr><td>111 0001</td><td>113</td><td>q</td></tr><tr><td>111 0011</td><td>115</td><td>s</td></tr><tr><td>111 0101</td><td>101</td><td>e</td></tr>
 </tbody></table>
 <p><strong>PARTIE II : CITOYENNETÉ NUMÉRIQUE / 5 pts</strong></p>
 <p>Un influenceur numérique publie sur son compte Facebook une fausse information sur la modification de la date de la rentrée scolaire. Plusieurs internautes abonnés à cette page sont troublés et l'un se rapproche de vous pour distinguer l'information vraie de la fausse. À l'aide du texte ci-dessus et de vos connaissances, répondre aux questions suivantes :<br>
-1. Définir l'expression : <strong>influenceur numérique</strong>. <strong>1 pt</strong><br>
-2. Donner le nom générique attribué aux fausses informations publiées dans les réseaux sociaux. <strong>1 pt</strong><br>
-3. Citer deux (02) sanctions auxquelles s'expose cet influenceur numérique. <strong>2 pts</strong><br>
-4. Donner deux (02) critères d'une information vraie. <strong>0,5 pt × 2 = 1 pt</strong></p>
+1. Définir l'expression : <strong>influenceur numérique</strong>. <strong class="ax-pts">1 pt</strong><br>
+2. Donner le nom générique attribué aux fausses informations publiées dans les réseaux sociaux. <strong class="ax-pts">1 pt</strong><br>
+3. Citer deux (02) sanctions auxquelles s'expose cet influenceur numérique. <strong class="ax-pts">2 pts</strong><br>
+4. Donner deux (02) critères d'une information vraie. <strong class="ax-pts">0,5 pt × 2 = 1 pt</strong></p>
 <p><strong>PARTIE III : INITIATION À L'ALGORITHMIQUE ET AU DÉVELOPPEMENT LOGICIEL / 7 pts</strong></p>
 <p><strong>Exercice 1 : initiation à l'algorithmique (04 pts)</strong> — on considère l'algorithme suivant :</p>
 <pre>1.  Algorithme Montant_Commande ;
@@ -268,14 +271,14 @@ b) Citer un (01) autre exemple de code permettant de représenter les informatio
 11.    Ecrire ("Le montant de votre commande est : ", Montant) ;
 12. Fin</pre>
 <p>Lire attentivement cet algorithme puis répondre aux questions ci-dessous :<br>
-1. Identifier dans cet algorithme : a) un type de données ; b) une instruction de sortie de données ; c) une instruction d'affectation ; d) le nom de la structure de contrôle utilisée. <strong>0,5 pt × 4</strong><br>
-2. Donner le résultat qui sera affiché à la fin lorsque l'utilisateur fournit la valeur 20 comme quantité commandée. <strong>1 pt</strong><br>
-3. Dessiner le symbole d'algorigramme correspondant à la : a) ligne 3 ; b) ligne 9. <strong>0,5 pt + 0,5 pt</strong></p>
+1. Identifier dans cet algorithme : a) un type de données ; b) une instruction de sortie de données ; c) une instruction d'affectation ; d) le nom de la structure de contrôle utilisée. <strong class="ax-pts">0,5 pt × 4</strong><br>
+2. Donner le résultat qui sera affiché à la fin lorsque l'utilisateur fournit la valeur 20 comme quantité commandée. <strong class="ax-pts">1 pt</strong><br>
+3. Dessiner le symbole d'algorigramme correspondant à la : a) ligne 3 ; b) ligne 9. <strong class="ax-pts">0,5 pt + 0,5 pt</strong></p>
 <p><strong>Exercice 2 : développement logiciel (03 pts)</strong><br>
 La traduction de l'algorithme de l'exercice 1 ci-dessus à l'aide d'un langage de programmation en un programme nécessite l'utilisation des outils de développement logiciel.<br>
-1. Définir l'expression : <strong>langage de programmation</strong>. <strong>1 pt</strong><br>
-2. Citer deux (02) approches des cycles de développement des logiciels. <strong>1 pt</strong><br>
-3. Citer deux (02) principaux acteurs qui interviennent dans la production d'un logiciel. <strong>1 pt</strong></p></div></section>
+1. Définir l'expression : <strong>langage de programmation</strong>. <strong class="ax-pts">1 pt</strong><br>
+2. Citer deux (02) approches des cycles de développement des logiciels. <strong class="ax-pts">1 pt</strong><br>
+3. Citer deux (02) principaux acteurs qui interviennent dans la production d'un logiciel. <strong class="ax-pts">1 pt</strong></p></div></section>
 <section class="partie" id="corrige"><h2><span class="mx-num">3</span><span class="mx-txt">Le corrigé</span></h2><details class="ax-cache"><summary>Afficher le corrigé (après avoir traité le sujet)</summary><div class="ax-corrige"><div class="ax-avert"><strong>Proposition de corrigé VÉRITAS.</strong> Ce n'est pas le corrigé officiel : c'est la réponse attendue, rédigée par nos enseignants selon le barème du sujet. Une autre démarche juste rapporte les mêmes points.</div><p><strong>PARTIE I</strong></p>
 <p><strong>Exercice 1</strong><br>
 1. Un <strong>bus</strong> est un ensemble de fils (liaisons) qui transporte les informations (données, adresses, commandes) entre les composants de l'ordinateur.<br>
@@ -286,7 +289,7 @@ La traduction de l'algorithme de l'exercice 1 ci-dessus à l'aide d'un langage d
 1. Un <strong>format de données</strong> est la manière dont les données sont codées et organisées dans un fichier (exemples : .docx, .jpg, .mp3).<br>
 2. a) ASCII : <em>American Standard Code for Information Interchange</em>. b) Un autre code : l'Unicode (UTF-8), l'EBCDIC, le code BCD.<br>
 3. Le <strong>tableau</strong> contient les données structurées ; le <strong>paragraphe</strong> (texte) contient les données non structurées.<br>
-4. p = 111 0000 ; a = 110 0001 ; s = 111 0011 ; s = 111 0011 ; e = 111 0101 (d'après l'extrait donné). Le mot « passe » s'écrit : <strong>1110000 1100001 1110011 1110011 1110101</strong>.<br>
+4. p = 111 0000 ; a = 110 0001 ; s = 111 0011 ; s = 111 0011 ; e = 111 0101 (d'après l'extrait donné). Le mot « passe » s'écrit : <strong class="ax-pts">1110000 1100001 1110011 1110011 1110101</strong>.<br>
 <em>Remarque : dans la vraie table ASCII, « e » (code 101) s'écrit 110 0101 ; l'extrait du sujet comporte une coquille, et l'on accepte les deux réponses.</em></p>
 <p><strong>PARTIE II</strong><br>
 1. Un <strong>influenceur numérique</strong> est une personne qui, grâce à sa notoriété et à ses nombreux abonnés sur les réseaux sociaux, peut influencer leurs opinions et leurs comportements.<br>

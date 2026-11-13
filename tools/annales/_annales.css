@@ -30,3 +30,6 @@
 .ax-col{display:inline-flex;flex-direction:column;vertical-align:middle;text-align:center;line-height:1.2;margin:0 2px}
 .ax-col{padding:0 5px;border-left:1.5px solid currentColor;border-right:1.5px solid currentColor;border-radius:9px}
 .ax-sujet pre,.ax-corrige pre{white-space:pre-wrap;overflow-wrap:anywhere;max-width:100%;background:#F7F5F0;border:1px solid #E6E0D4;border-radius:8px;padding:12px 14px;font-size:14px;line-height:1.55}
+.ax-sujet strong,.ax-corrige strong{color:#1E499B}
+.ax-sujet th,.ax-corrige th{color:#1E499B}
+.ax-sujet strong.ax-pts,.ax-corrige strong.ax-pts{color:#8A6A12;font-weight:600;white-space:nowrap}
