@@ -21412,61 +21412,140 @@ function _lancerCustomQuiz(id){
   else if(j.type==="trous") _lancerTrousCustom(j);
   else _lancerQCMCustom(j); // qcm ou vf
 }
-function _lancerQCMCustom(j){
-  var qs=j.questions.slice();var idx=0;var score=0;var isVF=j.type==="vf";
-  function render(){
-    if(idx>=qs.length){
-      _vc("<div class='vsec'><button class='back-btn' onclick='showJeuxEdu()'>← Jeux</button>"
-        +"<div class='vcard' style='text-align:center'><div style='font-size:52px;margin-bottom:16px'>🎉</div>"
-        +"<div style='font-family:Montserrat,sans-serif;font-size:20px;font-weight:800;color:#142554;margin-bottom:8px'>"+j.titre+" — Terminé !</div>"
-        +"<div style='font-size:16px;color:var(--ink3)'>Score : "+score+"/"+qs.length+"</div>"
-        +"<button class='btn bi mt16' onclick='_lancerCustomQuiz(\""+j.id+"\")'>Rejouer</button></div></div>");
-      return;
-    }
-    var q=qs[idx];var opts=isVF?["Vrai","Faux"]:q.opts||[];
-    var h="<div class='vsec'><button class='back-btn' onclick='showJeuxEdu()'>← Jeux</button>";
-    h+="<div class='vsec-title'>"+j.emoji+" "+j.titre+"</div>";
-    h+="<div class='quiz-container'><div class='quiz-header'><h3>"+j.titre+"</h3>";
-    h+="<p>Question "+(idx+1)+"/"+qs.length+"</p></div>";
-    h+="<div class='quiz-progress'><div class='quiz-progress-fill' style='width:"+Math.round((idx/qs.length)*100)+"%'></div></div>";
-    h+="<div class='quiz-q'><div class='quiz-q-text'>"+q.q+"</div>";
-    h+="<div class='quiz-opts'>";
-    opts.forEach(function(o,oi){
-      h+="<button class='quiz-opt' onclick='_cqCheck("+oi+","+q.ans+",this,\""+encodeURIComponent(q.exp||"")+"\")'>"+String.fromCharCode(65+oi)+". "+o+"</button>";
+/* 13/11/2026 — MOTEUR DES QUIZ RÉÉCRIT. « Uncaught SyntaxError: Invalid or
+   unexpected token » au premier clic sur « Auteurs camerounais » : l'explication
+   (« jeune 'boy' camerounais ») partait dans un onclick='…' ; encodeURIComponent
+   laisse passer l'apostrophe, qui refermait l'attribut. Plus AUCUNE donnée de
+   jeu ne transite par un attribut : les boutons portent un indice (data-i) et
+   les gestionnaires sont posés en JS. Les textes sont échappés (_esc).
+   Et pour captiver : questions et réponses mélangées à chaque partie, chrono
+   par question, série de bonnes réponses (bonus), étoiles, record personnel,
+   corrigé des erreurs en fin de partie, touches A-D / 1-4 / V-F au clavier. */
+function _cqEsc(s){return (typeof _esc==='function')?_esc(String(s==null?'':s)):String(s==null?'':s).replace(/[&<>"']/g,function(c){return '&#'+c.charCodeAt(0)+';';});}
+function _cqMelange(t){t=t.slice();for(var i=t.length-1;i>0;i--){var k=Math.floor(Math.random()*(i+1)),x=t[i];t[i]=t[k];t[k]=x;}return t;}
+function _cqSansAccent(s){return String(s||'').normalize?String(s||'').normalize('NFD').replace(/[̀-ͯ]/g,''):String(s||'');}
+function _cqRecord(id,val){var cle='vrt_jq_'+id,r=null;try{r=JSON.parse(localStorage.getItem(cle)||'null');}catch(e){}
+  var neuf=r===null||val>r;if(neuf){try{localStorage.setItem(cle,JSON.stringify(val));}catch(e){}}return {neuf:neuf,ancien:r};}
+function _cqInvitation(){
+  try{var t=typeof _aiTier==='function'?_aiTier():'anon';if(t!=='anon'&&t!=='free')return '';}catch(e){}
+  return "<div style='margin-top:18px;padding:14px 16px;border-radius:14px;background:#FFF6DC;border:1px solid #F3DFA6;text-align:left;font-size:14px;color:#4D3B00'>"
+    +"<b>Envie d'aller plus loin ?</b> Avec une formule VÉRITAS, tu as les leçons complètes de ta classe, le tuteur IA et les examens blancs notés."
+    +"<div style='margin-top:10px'><button class='btn bi' data-cq='formules'>Voir les formules</button></div></div>";
+}
+/* Écran de fin commun : étoiles, record, corrigé des erreurs. */
+function _cqFin(j,bons,total,points,ratees,relancer){
+  var pc=total?bons/total:0,et=pc>=0.9?3:pc>=0.6?2:pc>=0.3?1:0;
+  var rec=_cqRecord(j.id,points);
+  var msg=et===3?'Excellent !':et===2?'Bien joué !':et===1?'Pas mal, on recommence ?':'Courage, rejoue pour progresser !';
+  var h="<div class='vsec'><button class='back-btn' data-cq='retour'>← Jeux</button>"
+    +"<div class='vcard' style='max-width:620px;margin:0 auto;text-align:center'>"
+    +"<div style='font-size:40px;letter-spacing:6px;margin-bottom:6px' aria-label='"+et+" étoile(s) sur 3'>"
+    +[0,1,2].map(function(i){return "<span style='color:"+(i<et?"#F5B301":"#D7DBE3")+"'>★</span>";}).join("")+"</div>"
+    +"<div style='font:800 22px Montserrat,sans-serif;color:#142554'>"+msg+"</div>"
+    +"<div style='color:#4D5163;margin-top:6px'>"+_cqEsc(j.titre)+" : <b>"+bons+"/"+total+"</b> · "+points+" points</div>"
+    +"<div style='margin-top:6px;font-weight:700;color:"+(rec.neuf?"#047857'>Nouveau record !":"#5B6170'>Record : "+rec.ancien+" points")+"</div>";
+  if(ratees.length){
+    h+="<div style='text-align:left;margin-top:18px'><div style='font-weight:800;color:#142554;margin-bottom:8px'>À retenir</div>";
+    ratees.forEach(function(r){
+      h+="<div style='padding:10px 12px;border:1px solid #E6E9F0;border-radius:10px;margin-bottom:8px;font-size:14px'>"
+        +"<div style='color:#142554;font-weight:600'>"+_cqEsc(r.q)+"</div>"
+        +"<div style='color:#047857;margin-top:4px'>✓ "+_cqEsc(r.rep)+"</div>"
+        +(r.exp?"<div style='color:#5B6170;margin-top:4px'>"+_cqEsc(r.exp)+"</div>":"")+"</div>";
     });
-    h+="</div><div id='cqExp' style='display:none;margin-top:12px;padding:10px;background:#FEF3C7;border-radius:0 8px 8px 0;font-size:12px'></div>"
-    +"</div><div class='quiz-nav'><span style='font-size:13px;color:var(--ink4)'>Score : "+score+"/"+qs.length+"</span>"
-    +"<button id='cqNext' class='btn bi xs' style='display:none' onclick='window._cqNext()'>Suivant →</button></div></div></div>";
-    _vc(h);
-    window._cqNext=function(){idx++;render();};
-    window._cqCheck=function(chosen,ans,btn,exp){
-      document.querySelectorAll(".quiz-opt").forEach(function(b,bi){
-        b.disabled=true;
-        if(bi===ans)b.classList.add("correct");
-        else if(b===btn)b.classList.add("wrong");
-      });
-      if(chosen===ans)score++;
-      var expEl=document.getElementById("cqExp");
-      if(expEl&&exp){expEl.style.display="block";expEl.textContent=decodeURIComponent(exp);}
-      var nxt=document.getElementById("cqNext");if(nxt)nxt.style.display="inline-flex";
-    };
+    h+="</div>";
   }
+  h+="<div style='margin-top:14px;display:flex;gap:8px;justify-content:center;flex-wrap:wrap'><button class='btn bi' data-cq='rejouer'>Rejouer</button><button class='btn bo' data-cq='retour'>Autres jeux</button></div>"
+    +_cqInvitation()+"</div></div>";
+  _vc(h);
+  [].forEach.call(document.querySelectorAll('[data-cq]'),function(b){
+    var a=b.getAttribute('data-cq');
+    b.onclick=a==='rejouer'?relancer:a==='retour'?function(){showJeuxEdu();}:function(){if(typeof vShowSec==='function')vShowSec('elearning',null);};
+  });
+}
+function _lancerQCMCustom(j){
+  var isVF=j.type==="vf";
+  var DUREE=isVF?15:30;
+  var qs=_cqMelange(j.questions).map(function(q){
+    var opts=isVF?["Vrai","Faux"]:(q.opts||[]);
+    var ans=isVF?((q.ans===true||q.ans===0||String(q.ans).toLowerCase()==='vrai')?0:1):(+q.ans||0);
+    var ordre=isVF?[0,1]:_cqMelange(opts.map(function(_,i){return i;}));
+    return {q:q.q,exp:q.exp||'',opts:ordre.map(function(i){return opts[i];}),ans:ordre.indexOf(ans)};
+  });
+  var idx=0,bons=0,points=0,serie=0,meilleure=0,ratees=[],repondu=false,chrono=null,partie=(window._cqPartie=(window._cqPartie||0)+1);
+  function stop(){if(chrono){clearInterval(chrono);chrono=null;}}
+  function render(){
+    stop();
+    if(idx>=qs.length){document.onkeydown=null;_cqFin(j,bons,qs.length,points,ratees,function(){_lancerQCMCustom(j);});return;}
+    var q=qs[idx];repondu=false;
+    var h="<div class='vsec'><button class='back-btn' id='cqRetour'>← Jeux</button>";
+    h+="<div class='vsec-title'>"+_cqEsc(j.emoji||'')+" "+_cqEsc(j.titre)+"</div>";
+    h+="<div class='quiz-container'><div class='quiz-header' style='display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap'>"
+      +"<p style='margin:0'>Question "+(idx+1)+"/"+qs.length+"</p>"
+      +"<p style='margin:0;font-weight:700;color:#142554'>"+points+" pts"+(serie>=2?" · <span style='color:#C24E00'>série ×"+serie+"</span>":"")+"</p></div>";
+    h+="<div class='quiz-progress'><div class='quiz-progress-fill' style='width:"+Math.round((idx/qs.length)*100)+"%'></div></div>";
+    h+="<div style='height:6px;border-radius:3px;background:#EEF1F6;margin:10px 0 4px;overflow:hidden'><div id='cqTemps' style='height:100%;width:100%;background:#2E7D32;transition:width .25s linear'></div></div>";
+    h+="<div class='quiz-q'><div class='quiz-q-text'>"+_cqEsc(q.q)+"</div><div class='quiz-opts'>";
+    q.opts.forEach(function(o,oi){
+      h+="<button type='button' class='quiz-opt' data-i='"+oi+"'>"+(isVF?"":String.fromCharCode(65+oi)+". ")+_cqEsc(o)+"</button>";
+    });
+    h+="</div><div id='cqExp' style='display:none;margin-top:12px;padding:10px 12px;background:#FEF3C7;border-radius:0 8px 8px 0;font-size:13px'></div>"
+      +"</div><div class='quiz-nav'><span style='font-size:13px;color:var(--ink4)'>"+bons+" bonne"+(bons>1?"s":"")+" réponse"+(bons>1?"s":"")+"</span>"
+      +"<button id='cqNext' class='btn bi xs' style='display:none'>"+(idx+1<qs.length?"Suivant →":"Résultat")+"</button></div></div></div>";
+    _vc(h);
+    var r=document.getElementById('cqRetour');if(r)r.onclick=function(){stop();document.onkeydown=null;showJeuxEdu();};
+    [].forEach.call(document.querySelectorAll('.quiz-opt[data-i]'),function(b){b.onclick=function(){repond(+b.getAttribute('data-i'));};});
+    var n=document.getElementById('cqNext');if(n)n.onclick=suivant;
+    document.onkeydown=function(e){
+      if(!document.getElementById('cqTemps')&&!document.getElementById('cqNext')){document.onkeydown=null;return;}
+      var k=(e.key||'').toLowerCase();
+      if(repondu){if(k==='enter'||k===' '){e.preventDefault();suivant();}return;}
+      var i=isVF?(k==='v'?0:k==='f'?1:-1):'abcd'.indexOf(k);
+      if(i<0&&/^[1-4]$/.test(k))i=+k-1;
+      if(i>=0&&i<q.opts.length)repond(i);
+    };
+    var debut=Date.now();
+    chrono=setInterval(function(){
+      var t=document.getElementById('cqTemps');
+      if(!t||window._cqPartie!==partie){stop();return;}
+      var reste=DUREE-(Date.now()-debut)/1000;
+      t.style.width=Math.max(0,reste/DUREE*100)+'%';
+      t.style.background=reste<DUREE/4?'#B42318':reste<DUREE/2?'#E59E00':'#2E7D32';
+      if(reste<=0)repond(-1);
+    },250);
+    function repond(choisi){
+      if(repondu)return;repondu=true;stop();
+      var reste=Math.max(0,DUREE-(Date.now()-debut)/1000);
+      [].forEach.call(document.querySelectorAll('.quiz-opt[data-i]'),function(b){
+        var bi=+b.getAttribute('data-i');b.disabled=true;
+        if(bi===q.ans)b.classList.add('correct');else if(bi===choisi)b.classList.add('wrong');
+      });
+      var ok=choisi===q.ans,gain=0;
+      if(ok){bons++;serie++;meilleure=Math.max(meilleure,serie);gain=10+Math.round(reste/DUREE*5)+Math.min(serie-1,5)*2;points+=gain;}
+      else{serie=0;ratees.push({q:q.q,rep:q.opts[q.ans],exp:q.exp});}
+      var e=document.getElementById('cqExp');
+      if(e){e.style.display='block';
+        e.innerHTML=(ok?"<b style='color:#047857'>Juste ! +"+gain+" pts"+(serie>=3?" — série de "+serie+" !":"")+"</b>"
+          :"<b style='color:#B42318'>"+(choisi<0?"Temps écoulé.":"Raté.")+"</b> Bonne réponse : "+_cqEsc(q.opts[q.ans]))
+          +(q.exp?"<div style='margin-top:4px'>"+_cqEsc(q.exp)+"</div>":"");}
+      var nx=document.getElementById('cqNext');if(nx){nx.style.display='inline-flex';try{nx.focus();}catch(_){}}
+    }
+  }
+  function suivant(){idx++;render();}
   render();
 }
 function _lancerPenduCustom(j){
-  var mots=j.questions.map(function(q){return{mot:(q.mot||q.q||"VERITAS").toUpperCase(),ind:q.exp||q.q||""};});
-  var midx=Math.floor(Math.random()*mots.length);var item=mots[midx];
-  var tries=0;var maxT=7;var found=[];var wrong=[];
+  var mots=j.questions.map(function(q){return{mot:_cqSansAccent(q.mot||q.q||"VERITAS").toUpperCase(),ind:q.ind||q.exp||(q.mot?q.q:"")||""};});
+  var item=mots[Math.floor(Math.random()*mots.length)];
+  var tries=0,maxT=7,found=[],wrong=[];
+  function lettre(c){return c>='A'&&c<='Z';}
   function render(){
-    var display=item.mot.split("").map(function(c){return(c===" "?"&nbsp;":found.indexOf(c)>=0?c:"_");}).join(" ");
-    var won=item.mot.split("").every(function(c){return c===" "||found.indexOf(c)>=0;});
+    var display=item.mot.split("").map(function(c){return c===" "?"&nbsp;":!lettre(c)?_cqEsc(c):found.indexOf(c)>=0?c:"_";}).join(" ");
+    var won=item.mot.split("").every(function(c){return !lettre(c)||found.indexOf(c)>=0;});
     var lost=tries>=maxT;
-    var ALPHA="ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-    var h="<div class='vsec'><button class='back-btn' onclick='showJeuxEdu()'>← Jeux</button>";
-    h+="<div class='vsec-title'><span class='vsec-ico'><svg class='vico vico-21' aria-hidden='true'><use href='#lc-pencil'/></svg></span>"+j.titre+"</div>";
+    var h="<div class='vsec'><button class='back-btn' id='cqRetour'>← Jeux</button>";
+    h+="<div class='vsec-title'><span class='vsec-ico'><svg class='vico vico-21' aria-hidden='true'><use href='#lc-pencil'/></svg></span>"+_cqEsc(j.titre)+"</div>";
     h+="<div class='vcard' style='max-width:560px;margin:0 auto;text-align:center'>";
-    if(item.ind)h+="<div style='font-size:12px;color:var(--ink4);margin-bottom:10px;font-style:italic'>💡 "+item.ind+"</div>";
-    // Bonhomme pendu SVG simplifié
+    if(item.ind)h+="<div style='font-size:13px;color:var(--ink4);margin-bottom:10px;font-style:italic'>💡 "+_cqEsc(item.ind)+"</div>";
     var parts=["<circle cx='100' cy='30' r='18' fill='none' stroke='#AE5353' stroke-width='3'/>",
       "<line x1='100' y1='48' x2='100' y2='110' stroke='#AE5353' stroke-width='3'/>",
       "<line x1='100' y1='65' x2='70' y2='95' stroke='#AE5353' stroke-width='3'/>",
@@ -21474,66 +21553,71 @@ function _lancerPenduCustom(j){
       "<line x1='100' y1='110' x2='75' y2='145' stroke='#AE5353' stroke-width='3'/>",
       "<line x1='100' y1='110' x2='125' y2='145' stroke='#AE5353' stroke-width='3'/>",
       "<line x1='40' y1='0' x2='40' y2='160' stroke='#142554' stroke-width='3'/><line x1='40' y1='0' x2='100' y2='0' stroke='#142554' stroke-width='3'/><line x1='100' y1='0' x2='100' y2='12' stroke='#142554' stroke-width='3'/>"];
-    h+="<svg viewBox='0 0 200 170' style='width:160px;height:130px;margin:0 auto;display:block'>"
-      +parts.slice(Math.max(0,7-tries)).join("")
-      +"</svg>";
-    h+="<div style='font-size:26px;font-family:\"Fira Code\",monospace;letter-spacing:8px;color:#142554;margin:14px 0'>"+display+"</div>";
-    if(won){h+="<div style='color:#059669;font-weight:800;font-size:16px;margin-bottom:12px'>🎉 Bravo ! Mot trouvé !</div><button class='btn bi' onclick='_lancerPenduCustom("+JSON.stringify(j).replace(/'/g,"&#39;")+")'>Rejouer</button>";}
-    else if(lost){h+="<div style='color:#AE5353;font-weight:800;font-size:14px;margin-bottom:8px'>❌ Perdu ! Le mot était : <strong>"+item.mot+"</strong></div><button class='btn bi' onclick='_lancerPenduCustom("+JSON.stringify(j).replace(/'/g,"&#39;")+")'>Rejouer</button>";}
-    else{
+    h+="<svg viewBox='0 0 200 170' style='width:160px;height:130px;margin:0 auto;display:block'>"+parts.slice(Math.max(0,7-tries)).join("")+"</svg>";
+    h+="<div style='font-size:26px;font-family:\"Fira Code\",monospace;letter-spacing:8px;color:#142554;margin:14px 0;word-break:break-word'>"+display+"</div>";
+    if(won||lost){
+      h+=won?"<div style='color:#059669;font-weight:800;font-size:16px;margin-bottom:12px'>🎉 Bravo ! Mot trouvé avec "+tries+" erreur"+(tries>1?"s":"")+" !</div>"
+        :"<div style='color:#AE5353;font-weight:800;font-size:14px;margin-bottom:8px'>Perdu ! Le mot était : <strong>"+_cqEsc(item.mot)+"</strong></div>";
+      h+="<button class='btn bi' id='cqRejouer'>Rejouer</button>"+_cqInvitation();
+    }else{
       h+="<div style='display:flex;flex-wrap:wrap;gap:5px;justify-content:center;margin-top:8px'>";
-      ALPHA.split("").forEach(function(c){
+      "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("").forEach(function(c){
         var used=found.indexOf(c)>=0||wrong.indexOf(c)>=0;
-        h+="<button style='width:32px;height:32px;border-radius:6px;border:1.5px solid "+(used?"#ccc":"#142554")+";background:"+(wrong.indexOf(c)>=0?"#FEE2E2":found.indexOf(c)>=0?"#D1FAE5":"#fff")+";color:"+(used?"#999":"#142554")+";font-weight:700;font-size:13px;cursor:"+(used?"default":"pointer")+";transition:.15s'"
-          +(used?"disabled":"")+(!used?" onclick='_phLetter(\""+c+"\")'":"")+" >"+c+"</button>";
+        h+="<button type='button' data-l='"+c+"' style='width:34px;height:34px;border-radius:6px;border:1.5px solid "+(used?"#ccc":"#142554")+";background:"+(wrong.indexOf(c)>=0?"#FEE2E2":found.indexOf(c)>=0?"#D1FAE5":"#fff")+";color:"+(used?"#999":"#142554")+";font-weight:700;font-size:13px;cursor:"+(used?"default":"pointer")+"'"+(used?" disabled":"")+">"+c+"</button>";
       });
-      h+="</div><div style='font-size:12px;color:var(--ink4);margin-top:10px'>Essais restants : "+(maxT-tries)+" / "+maxT+"</div>";
+      h+="</div><div style='font-size:12px;color:var(--ink4);margin-top:10px'>Essais restants : "+(maxT-tries)+" / "+maxT+" · tape les lettres au clavier</div>";
     }
     h+="</div></div>";
     _vc(h);
-    window._phLetter=function(c){
-      if(item.mot.indexOf(c)>=0){found.push(c);}else{wrong.push(c);tries++;}
-      render();
+    var r=document.getElementById('cqRetour');if(r)r.onclick=function(){document.onkeydown=null;showJeuxEdu();};
+    var rj=document.getElementById('cqRejouer');if(rj)rj.onclick=function(){_lancerPenduCustom(j);};
+    [].forEach.call(document.querySelectorAll('[data-l]'),function(b){if(!b.disabled)b.onclick=function(){joue(b.getAttribute('data-l'));};});
+    [].forEach.call(document.querySelectorAll('[data-cq]'),function(b){b.onclick=function(){if(typeof vShowSec==='function')vShowSec('elearning',null);};});
+    document.onkeydown=(won||lost)?null:function(e){
+      if(!document.querySelector('[data-l]')){document.onkeydown=null;return;}
+      var k=(e.key||'').toUpperCase();if(k.length===1&&lettre(k))joue(k);
     };
+  }
+  function joue(c){
+    if(found.indexOf(c)>=0||wrong.indexOf(c)>=0)return;
+    if(item.mot.indexOf(c)>=0)found.push(c);else{wrong.push(c);tries++;}
+    render();
   }
   render();
 }
 function _lancerTrousCustom(j){
-  var qs=j.questions.slice();var idx=0;var score=0;
+  var qs=_cqMelange(j.questions),idx=0,bons=0,points=0,serie=0,ratees=[];
+  function norme(s){return _cqSansAccent(String(s||'')).toLowerCase().replace(/[’`]/g,"'").replace(/\s+/g,' ').trim();}
   function render(){
-    if(idx>=qs.length){
-      _vc("<div class='vsec'><button class='back-btn' onclick='showJeuxEdu()'>← Jeux</button>"
-        +"<div class='vcard' style='text-align:center'><div style='font-size:48px;margin-bottom:12px'>✍️</div>"
-        +"<div style='font-size:20px;font-weight:800;color:#142554'>Score : "+score+"/"+qs.length+"</div>"
-        +"<button class='btn bi mt14' onclick='_lancerCustomQuiz(\""+j.id+"\")'>Rejouer</button></div></div>");
-      return;
-    }
-    var q=qs[idx];
-    // Format: q contient "___" à remplacer, ans = mot attendu
-    var phrase=(q.q||"").replace(/___/g,"<input id='trouInp' class='fi' style='display:inline-block;width:120px;max-width:180px;padding:4px 8px;margin:0 6px;font-size:14px;border:2px solid #142554;border-radius:6px' placeholder='...'>");
-    var h="<div class='vsec'><button class='back-btn' onclick='showJeuxEdu()'>← Jeux</button>";
-    h+="<div class='vsec-title'>"+j.emoji+" "+j.titre+"</div>";
-    h+="<div class='vcard' style='max-width:560px;margin:0 auto'>";
-    h+="<div style='font-size:12px;color:var(--ink4);margin-bottom:8px'>Question "+(idx+1)+"/"+qs.length+" · Score : "+score+"</div>";
-    h+="<div style='font-size:16px;line-height:2;color:#142554;font-family:Georgia,serif;margin-bottom:16px'>"+phrase+"</div>";
-    if(q.exp)h+="<div style='font-size:11px;color:var(--ink4);font-style:italic;margin-bottom:10px'>💡 Aide : "+q.exp+"</div>";
-    h+="<div id='trouFb' style='min-height:20px;margin-bottom:10px'></div>";
-    h+="<button class='btn bi' onclick='_trouCheck(\""+encodeURIComponent(String(q.ans))+"\")'>Valider</button>";
-    h+="</div></div>";
+    if(idx>=qs.length){_cqFin(j,bons,qs.length,points,ratees,function(){_lancerTrousCustom(j);});return;}
+    var q=qs[idx],fait=false;
+    var morceaux=String(q.q||'').split('___');
+    var phrase=morceaux.map(_cqEsc).join("<input id='trouInp' class='fi' autocomplete='off' style='display:inline-block;width:140px;max-width:200px;padding:4px 8px;margin:0 6px;font-size:15px;border:2px solid #142554;border-radius:6px' placeholder='…'>");
+    var h="<div class='vsec'><button class='back-btn' id='cqRetour'>← Jeux</button>";
+    h+="<div class='vsec-title'>"+_cqEsc(j.emoji||'')+" "+_cqEsc(j.titre)+"</div>";
+    h+="<div class='vcard' style='max-width:600px;margin:0 auto'>";
+    h+="<div style='display:flex;justify-content:space-between;font-size:13px;color:var(--ink4);margin-bottom:8px'><span>Phrase "+(idx+1)+"/"+qs.length+"</span><b style='color:#142554'>"+points+" pts"+(serie>=2?" · série ×"+serie:"")+"</b></div>";
+    h+="<div style='font-size:17px;line-height:2;color:#142554;font-family:Georgia,serif;margin-bottom:16px'>"+phrase+"</div>";
+    if(q.exp)h+="<details style='font-size:13px;color:var(--ink4);margin-bottom:10px'><summary style='cursor:pointer'>Besoin d'un indice ? (−3 pts)</summary><div style='margin-top:6px;font-style:italic'>"+_cqEsc(q.exp)+"</div></details>";
+    h+="<div id='trouFb' style='min-height:22px;margin-bottom:10px'></div>";
+    h+="<button class='btn bi' id='trouOk'>Valider</button></div></div>";
     _vc(h);
-    window._trouCheck=function(ansEnc){
-      var ans=decodeURIComponent(ansEnc).trim().toLowerCase();
-      var inp=document.getElementById("trouInp");
-      var val=(inp?inp.value:"").trim().toLowerCase();
-      var fb=document.getElementById("trouFb");
-      if(val===ans||ans.split("|").some(function(a){return val===a.trim();})){
-        score++;if(fb)fb.innerHTML="<span style='color:#059669;font-weight:800'>✅ Correct !</span>";
-      }else{
-        if(fb)fb.innerHTML="<span style='color:#AE5353;font-weight:800'>❌ Réponse : "+decodeURIComponent(ansEnc)+"</span>";
-      }
+    var aide=false,d=document.querySelector('details');if(d)d.addEventListener('toggle',function(){if(d.open)aide=true;});
+    var r=document.getElementById('cqRetour');if(r)r.onclick=function(){showJeuxEdu();};
+    var inp=document.getElementById('trouInp');
+    if(inp){try{inp.focus();}catch(_){}inp.onkeydown=function(e){if(e.key==='Enter')valider();};}
+    document.getElementById('trouOk').onclick=valider;
+    function valider(){
+      if(fait){idx++;render();return;}
+      var val=norme(inp?inp.value:'');if(!val)return;
+      fait=true;
+      var bonnes=String(q.ans).split('|'),ok=bonnes.some(function(a){return norme(a)===val;});
+      var fb=document.getElementById('trouFb');
+      if(ok){bons++;serie++;var g=10+Math.min(serie-1,5)*2-(aide?3:0);points+=g;if(fb)fb.innerHTML="<span style='color:#059669;font-weight:800'>Juste ! +"+g+" pts</span>";}
+      else{serie=0;ratees.push({q:String(q.q||'').replace(/___/g,'…'),rep:bonnes[0],exp:q.exp});if(fb)fb.innerHTML="<span style='color:#AE5353;font-weight:800'>Réponse : "+_cqEsc(bonnes[0])+"</span>";}
       if(inp)inp.disabled=true;
-      setTimeout(function(){idx++;render();},1400);
-    };
+      var b=document.getElementById('trouOk');if(b){b.textContent=idx+1<qs.length?'Suivant →':'Résultat';try{b.focus();}catch(_){}}
+    }
   }
   render();
 }
