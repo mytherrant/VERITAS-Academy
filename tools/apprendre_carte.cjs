@@ -79,15 +79,6 @@ exports.pages = [
     l:[["1re A,Tle A","francais",null,/commentaire compos/i]] },
   { id:"c_module1", t:"cours", ti:"Séquence 1 : Stances et poèmes de Sully Prudhomme", d:"Le module complet de la Terminale A : paratexte, lectures méthodiques, langue, production.", u:"/cours/module_1_tle_A.html",
     l:[["Tle A","francais",null,/stances et poèmes/i]] },
-  { id:"m_commentaire", t:"methode", ti:"Méthode du commentaire composé", d:"La méthode attendue à l'examen.", u:"/ressources/methode-commentaire-compose.html", l:[["1re A,Tle A","francais",null,/commentaire compos/i]] },
-  { id:"m_dissertation", t:"methode", ti:"Méthode de la dissertation littéraire", d:"Analyser le sujet, bâtir le plan, rédiger.", u:"/ressources/methode-dissertation-litteraire.html", l:[["2nde A,2nde C,"+TOUTES_1RE+","+TOUTES_TLE,"francais",null,/dissertation/i]] },
-  { id:"m_contraction", t:"methode", ti:"Méthode du résumé et de la contraction de texte", d:"Repérer la structure argumentative, réduire, rédiger.", u:"/ressources/methode-resume-contraction.html", l:[["2nde A,2nde C,"+TOUTES_1RE,"francais",null,/contraction de texte|résumé/i]] },
-  { id:"m_etude", t:"methode", ti:"Méthode de l'étude de texte", d:"Répondre aux questions de compréhension et de langue.", u:"/ressources/methode-etude-de-texte.html", l:[[COLLEGE,"francais"]] },
-  { id:"m_dictee", t:"methode", ti:"Méthode de la dictée", d:"Préparer, écouter, se relire.", u:"/ressources/methode-dictee.html", l:[[COLLEGE,"francais"]] },
-  { id:"m_redaction", t:"methode", ti:"Méthode de la rédaction", d:"Comprendre le sujet, organiser, rédiger.", u:"/ressources/methode-redaction.html", l:[[COLLEGE,"francais"]] },
-  { id:"p_bepc", t:"methode", ti:"Le BEPC de français", d:"Ce qui t'attend à l'épreuve.", u:"/ressources/bepc-francais.html", l:[["3e","francais"]] },
-  { id:"p_proba", t:"methode", ti:"Le Probatoire de français", d:"Ce qui t'attend à l'épreuve.", u:"/ressources/probatoire-francais.html", l:[[TOUTES_1RE,"francais"]] },
-  { id:"p_bac", t:"methode", ti:"Le Baccalauréat de français", d:"Ce qui t'attend à l'épreuve.", u:"/ressources/bac-francais.html", l:[[TOUTES_TLE,"francais"]] },
   { id:"e_bepc_ortho", t:"epreuve", ti:"BEPC blanc : correction orthographique", u:"/evaluations/BEPC_blanc_3e_correction_orthographique.html", l:[["3e","francais"]] },
   { id:"e_bepc_texte", t:"epreuve", ti:"BEPC blanc : étude de texte", u:"/evaluations/BEPC_blanc_3e_etude_de_texte.html", l:[["3e","francais"]] },
   { id:"e_bepc_expr", t:"epreuve", ti:"BEPC blanc : expression écrite", u:"/evaluations/BEPC_blanc_3e_expression_ecrite.html", l:[["3e","francais"]] },
@@ -97,6 +88,16 @@ exports.pages = [
   { id:"e_bac_fr", t:"epreuve", ti:"Évaluation BAC de langue française (interactive)", u:"/evaluations/evaluation_bac_langue_francaise.html", l:[["Tle A","francais"]] },
   { id:"e_bac_lit", t:"epreuve", ti:"Évaluation BAC de littérature (interactive)", u:"/evaluations/evaluation_bac_litterature.html", l:[["Tle A","francais"]] }
 ];
+
+// Méthodes et examens, par classe, série et matière : tools/methodes/_classement.json (lu aussi par
+// tools/methodes_examens.cjs pour l'index des ressources). Les méthodes de français gardent en plus
+// leur rattachement aux leçons de la progression qui les enseignent.
+const LECONS_METHODE = {
+  x_fr_commentaire: [["1re A,Tle A","francais",null,/commentaire compos/i]],
+  x_fr_dissertation: [["2nde A,2nde C,"+TOUTES_1RE+","+TOUTES_TLE,"francais",null,/dissertation/i]],
+  x_fr_contraction: [["2nde A,2nde C,"+TOUTES_1RE,"francais",null,/contraction de texte|résumé/i]]
+};
+require("./methodes/_classement.json").forEach(e => exports.pages.push({ id: e.id, t: "methode", ti: e.ti, d: e.d, u: e.u, l: e.l.concat(LECONS_METHODE[e.id] || []) }));
 
 // Œuvres au programme : fichier → [classes, recherche dans les titres]. N'kum-Wam : étudiée en 5e selon la progression.
 exports.oeuvres = [
