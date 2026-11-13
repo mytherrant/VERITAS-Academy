@@ -37,7 +37,7 @@ function _simLoop(){if(!window._sim.running)return;window._sim.t+=0.016;if(windo
 function _simUpdateControls(){var cw=document.getElementById('simControls');if(!cw||!window._sim.controlsDef)return;var a=document.activeElement;if(a&&cw.contains(a))return;var h=window._sim.controlsDef();if(window._sim._lastCtrlHtml===h)return;window._sim._lastCtrlHtml=h;cw.innerHTML=h;}
 if(typeof CanvasRenderingContext2D!=='undefined'&&!CanvasRenderingContext2D.prototype.roundRect){CanvasRenderingContext2D.prototype.roundRect=function(x,y,w,h,r){r=typeof r==='number'?r:5;this.moveTo(x+r,y);this.lineTo(x+w-r,y);this.quadraticCurveTo(x+w,y,x+w,y+r);this.lineTo(x+w,y+h-r);this.quadraticCurveTo(x+w,y+h,x+w-r,y+h);this.lineTo(x+r,y+h);this.quadraticCurveTo(x,y+h,x,y+h-r);this.lineTo(x,y+r);this.quadraticCurveTo(x,y,x+r,y);return this;};}
 </script>
-<script src="../chunks/labo.js?v=20261112b"></script>
+<script src="../chunks/labo.js?v=20261113b"></script>
 <script>
 (function(){
   "use strict";
