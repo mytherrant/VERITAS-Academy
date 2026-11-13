@@ -1,3 +1,18 @@
+## Tarifs, droits par formule, SMS, bulletins, classes virtuelles, jeux (12-13/11/2026)
+
+Session « Limiter les téléchargements PDF ». Tout est EN LIGNE (vérifié sur veritas-school.com le 13/11) ; ne pas refaire.
+
+- **Grille** (`vrt_plans_formules`, `api/_auth_lib.php` ; miroir `_formulesDefaut`, `app.js`) : Starter 1 200 / 10 000 F, Pro 1 600 / 13 500, Élite 2 000 / 16 500, Famille 6 000 / 50 000 ; enseignants Prof 3 classes 2 500 / 21 000, Prof 6 classes 4 000 / 33 500, Prof toutes classes 6 000 / 50 000. Clé `an` = prix de l'année.
+- **Une ligne de formule en base sans `grille` ≥ 20261112 ne fixe plus le prix** (`vrt_formule_ligne_base`) : le code s'applique. « Prix & calculs » pose la grille et permet de saisir le prix de l'année.
+- **Droits** : table unique `vrt_droits_formules` (classes, iaJour, fichesJour/Semaine, labos, labosEssai, bulletins, direct, orientation), réglable par `DB.elearning.droitsFormules`. Classes retenues par compte (`api/data/_classes/`, libérables après 30 j) ; Famille : 1 classe par enfant rattaché. Quota de fiches dans `api/content.php`, quotas IA dans `api/ia_proxy.php`.
+- **Labos premium** : protocole et quiz des 9 labos payants dans `api/_labos_premium.php` (généré par `tools/extraire_labos_premium.cjs`), servis par `apprendre.php?action=labo`. Ne pas les remettre dans `chunks/labo.js`.
+- **Bulletins blancs** (`api/examens.php`, Pro+) et **classes virtuelles** (`api/direct.php`, Élite/Famille ; séances dans E-Learning → « Séances en direct »).
+- **SMS** : activation avec « Inclus : … », rappels J-7 / veille / fin, file battue à chaque visite (`public_data.php`, `apprendre.php`).
+- **Jeux** : tous les jeux intégrés gratuits ; 17 jeux de réflexion `jr_*` à la fin de `chunks/jeux.js` (suites, mémoire, taquin, Hanoï, code, allumettes, couleurs, grille logique, anagrammes, mots croisés, morpion, terrain miné, séquence, cible, bataille navale, devine le nombre, vrai/faux). Audit du 13/11 : 52 jeux, 0 id, titre ou question en double.
+- **Apprendre** : `replier()` (`commun.js`) = 2 éléments puis « Voir plus » (actualités, ressources, scènes, badges, « Pour aller plus loin », en-tête des matières) ; badges et progression compacts.
+- ⚠️ `assets/veritas-habillage.css` est GÉNÉRÉ (`tools/habiller_pages.py` ← `tools/build_plan.py`) : modifier la source, puis relancer l'outil. Après toute modif de `vitrine.html` : `python3 tools/geo_vitrine.py`. Après tout changement de `app.js` ou d'un chunk : bump `app.js?v=` ET `sw.js` `CACHE_VERSION`, puis `habiller_pages.py`.
+- Tests ajoutés : `tests/droits_formules.php` (39), `tests/bulletins_direct.php` (20, HTTP), `banc_relance_echeance.php` (27).
+
 ## Leçons d'examen, séries 1 à 11 : aperçus payants en ligne (12/11/2026)
 
 Demande de Jacques : « Met déjà ceci en ligne et continue les autres leçons ».

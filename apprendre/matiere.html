@@ -146,6 +146,10 @@ a.lg:hover{background:var(--kp)}
     (sc.length?'<div class="scenes-m">'+sc.map(function(s){return '<a class="scene" href="/scenes/'+s+'.html"><span class="pl">'+A.pic("masques",30)+'</span><span><small>Scène vivante</small><strong>'+esc((window.VRT_SCENES_TITRES||{})[s]||s)+'</strong></span><span class="jouer">'+A.pic("lecture",30)+'</span></a>'}).join("")+'</div>':'')+
     (tot&&nred<tot?A.offre(c,M.id,'matiere'):'')+
     '<div id="liste"></div></div>';
+  /* En-tête de la matière : 2 ressources et 2 scènes, le reste derrière « Voir plus » (12/11/2026).
+     La liste des leçons (#liste), contenu même de la page, reste entière. */
+  [].forEach.call(document.querySelectorAll(".res-g"),function(g){ if(!g.closest("#liste")) A.replier(g,2,"ressources"); });
+  A.replier(document.querySelector(".scenes-m"),2,"scènes");
   rendu("");
   /* arrivée depuis l'Atelier (?seq=N) : on montre la séquence demandée */
   var sv=+(u.get("seq")||0); if(sv){var cs=document.getElementById("seq-"+sv); if(cs){cs.classList.add("cible");cs.scrollIntoView({block:"start"})}}
