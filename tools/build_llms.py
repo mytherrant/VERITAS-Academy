@@ -54,7 +54,7 @@ FAITS = """\
 - Œuvres au programme : 21 analyses complètes en accès libre (axes de lecture, personnages, citations expliquées, procédés, questions corrigées) : https://veritas-school.com/oeuvres/
 - Enseignants : l'Atelier de Français compose avec l'IA des épreuves conformes aux 23 structures officielles du MINESEC : https://veritas-school.com/decouvrir/atelier-de-francais.html
 - Apprendre : tout le programme MINESEC 2026-2027 de la 6e à la Terminale, classe par classe et matière par matière (8 903 leçons), cours illustrés, quiz, schémas animés : https://veritas-school.com/apprendre/programme/
-- Scènes vivantes : 101 scènes animées gratuites de la 6e à la Terminale (œuvres au programme avec extraits, histoire, géographie, ECM, philosophie, langues), avec ateliers et quiz : https://veritas-school.com/scenes/
+- Scènes vivantes : 115 scènes animées gratuites de la 6e à la Terminale (œuvres au programme avec extraits, histoire, géographie, ECM, philosophie, langues, mathématiques, SVT, physique-chimie, chimie, informatique, ESF, EPS, arts, latin, grec, travail manuel), avec ateliers et quiz : https://veritas-school.com/scenes/
 - Simulations : examen blanc chronométré (BEPC, Probatoire, BAC) et 30 laboratoires virtuels de sciences : https://veritas-school.com/decouvrir/examen-blanc-en-ligne.html · https://veritas-school.com/decouvrir/laboratoires-virtuels.html
 - Contact : WhatsApp +237 697 637 739 (https://wa.me/237697637739) · contact@veritas-school.com
 """

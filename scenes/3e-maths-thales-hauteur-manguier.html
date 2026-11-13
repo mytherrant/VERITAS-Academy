@@ -1,0 +1,185 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>La hauteur du manguier — Scènes vivantes | VÉRITAS</title>
+<meta name="description" content="Scène animée de mathématiques (3e) : la propriété de Thalès pour mesurer la hauteur d’un arbre grâce aux ombres, et sa réciproque pour prouver un parallélisme.">
+<link rel="icon" href="../VERITAS_favicon_512.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="scene.css?v=20261113a">
+<!-- scene-tete -->
+<link rel="canonical" href="https://veritas-school.com/scenes/3e-maths-thales-hauteur-manguier.html">
+<meta property="og:type" content="website">
+<meta property="og:title" content="La hauteur du manguier — Scènes vivantes | VÉRITAS">
+<meta property="og:description" content="Scène animée de mathématiques (3e) : la propriété de Thalès pour mesurer la hauteur d’un arbre grâce aux ombres, et sa réciproque pour prouver un parallélisme.">
+<meta property="og:url" content="https://veritas-school.com/scenes/3e-maths-thales-hauteur-manguier.html">
+<meta property="og:image" content="https://veritas-school.com/og-image.jpg">
+<meta property="og:locale" content="fr_FR">
+<meta name="twitter:card" content="summary_large_image">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"LearningResource","name":"La hauteur du manguier","description":"Scène animée de mathématiques (3e) : la propriété de Thalès pour mesurer la hauteur d’un arbre grâce aux ombres, et sa réciproque pour prouver un parallélisme.","url":"https://veritas-school.com/scenes/3e-maths-thales-hauteur-manguier.html","inLanguage":"fr","learningResourceType":"Simulation interactive","educationalLevel":"3ᵉ","about":"Mathématiques","teaches":"Utiliser la propriété de Thalès pour calculer une longueur inaccessible (la hauteur d’un arbre grâce aux ombres), puis sa réciproque pour démontrer que deux droites sont parallèles.","isAccessibleForFree":true,"interactivityType":"active","provider":{"@type":"EducationalOrganization","name":"Centre VÉRITAS","url":"https://veritas-school.com/"},"isPartOf":{"@type":"CollectionPage","name":"Scènes vivantes","url":"https://veritas-school.com/scenes/"}}</script>
+<!-- /scene-tete -->
+</head>
+<body>
+<noscript>Cette scène a besoin de JavaScript pour se jouer.</noscript>
+<script>
+window.SCENE = {
+  id: '3e-maths-thales',
+  discipline: 'Mathématiques', niveau: '3e',
+  titre: 'La hauteur du manguier',
+  decor: 'village', lieu: 'La cour de l’école publique, près d’Obala', moment: 'Une matinée ensoleillée',
+  objectif: 'Utiliser la propriété de Thalès pour calculer une longueur inaccessible (la hauteur d’un arbre grâce aux ombres), puis sa réciproque pour démontrer que deux droites sont parallèles.',
+  programme: 'Progression harmonisée 3e · Thalès dans le triangle, leçon 4 (propriété directe de Thalès), leçon 5 (propriété réciproque de Thalès)',
+  jauges: [
+    { id: 'precision', nom: 'Précision de la mesure', val: 30, couleur: '#1E499B' },
+    { id: 'confiance', nom: 'Confiance du groupe', val: 40, couleur: '#1F9D5B' }
+  ],
+  personnages: {
+    prof: { nom: 'Mme Abena, professeure de mathématiques', couleur: '#5A2E5A', look: { metier: 'enseignant', tenue: 'robe', peau: 'fonce', cheveux: 'chignon', habit: '#5A2E5A' } },
+    kevin: { nom: 'Kevin, élève de 3e', couleur: '#1E499B', look: { metier: 'eleve', peau: 'fonce', cheveux: 'ras' } },
+    brenda: { nom: 'Brenda, élève de 3e', couleur: '#B03A6E', look: { metier: 'eleve', tenue: 'jupe', peau: 'fonce', cheveux: 'tresses', objet: 'livre' } },
+    owona: { nom: 'Papa Owona, propriétaire du manguier', couleur: '#8A5A2B', look: { metier: 'paysan', peau: 'tresfonce', cheveux: 'court' } }
+  },
+  etapes: [
+    { t: 'recit', entre: ['owona', 'prof'], txt: 'Papa Owona veut abattre une grosse branche morte de son manguier avant la saison des pluies. Il doit savoir quelle échelle louer : quelle est la hauteur de l’arbre ?', objet: { i: 'aide', lib: 'Combien de mètres ?' } },
+    { t: 'dit', qui: 'owona', emo: 'doute', txt: 'Monter pour mesurer, à mon âge ? Jamais ! Il faudrait un géant avec un mètre ruban.' },
+    { t: 'dit', qui: 'prof', txt: 'Pas besoin de monter : le soleil va mesurer pour nous. Kevin, Brenda, apportez le bâton de 1,5 m et le décamètre.' },
+    { t: 'recit', entre: ['kevin', 'brenda'], txt: 'Kevin plante le bâton bien droit, de sorte que l’extrémité de son ombre tombe exactement sur l’extrémité de l’ombre du manguier, au point S.' },
+    { t: 'remarque', titre: 'La configuration de Thalès', txt: 'Les rayons du soleil passent par le sommet du bâton et par le sommet de l’arbre et aboutissent au même point S. Le bâton et l’arbre sont verticaux, donc parallèles. On obtient deux triangles emboîtés de sommet S : c’est une configuration de Thalès.' },
+    { t: 'dit', qui: 'brenda', txt: 'Mesures : du point S au pied du bâton, 2 m. Du point S au pied du manguier, 16 m.', jauges: { precision: 60 } },
+    { t: 'question', q: 'Le bâton (1,5 m) et l’arbre sont parallèles. Quelle égalité donne la propriété de Thalès ?',
+      options: [
+        { txt: 'hauteur de l’arbre / 1,5 = 16 / 2', ok: true, retour: 'Les longueurs des côtés correspondants sont proportionnelles : SA/SB = AA’/BB’.' },
+        { txt: 'hauteur de l’arbre / 1,5 = 2 / 16', retour: 'Les rapports sont inversés : le grand triangle doit être au numérateur des deux côtés.' },
+        { txt: 'hauteur de l’arbre = 1,5 + 16 + 2', retour: 'Thalès donne des rapports égaux, pas une somme.' }
+      ] },
+    { t: 'question', q: 'Quelle est donc la hauteur du manguier ?',
+      options: [
+        { txt: '12 m', ok: true, retour: '1,5 × 16 / 2 = 12. Le manguier mesure 12 mètres.' },
+        { txt: '24 m', retour: 'Reprends le calcul : 1,5 × 16 = 24, puis divise par 2.' },
+        { txt: '8 m', retour: 'Non : 16 / 2 = 8 est le rapport, il faut encore multiplier par 1,5.' }
+      ], jauges: { precision: 80 } },
+    { t: 'dit', qui: 'owona', emo: 'joie', txt: 'Douze mètres ! Et la branche morte est vers le milieu : une échelle de 7 m suffira avec le tabouret. Vous m’économisez une location !', jauges: { confiance: 70 } },
+    { t: 'atelier', mode: 'ordre', titre: 'Atelier · la méthode', consigne: 'Remets dans l’ordre les étapes pour mesurer une hauteur avec les ombres.',
+      items: [
+        'Planter un bâton vertical dont on connaît la hauteur.',
+        'Le placer pour que son ombre se termine au même point que celle de l’arbre.',
+        'Mesurer les distances du point S au bâton et du point S à l’arbre.',
+        'Écrire l’égalité des rapports donnée par Thalès.',
+        'Calculer la hauteur cherchée et vérifier l’ordre de grandeur.'
+      ],
+      bravo: 'C’est la méthode qu’on attribue à Thalès de Milet pour mesurer la hauteur d’une pyramide, il y a plus de 2 500 ans.', jauges: { precision: 90 } },
+    { t: 'dit', qui: 'kevin', txt: 'Madame, le portail de l’école a une barre en travers. Comment savoir si elle est vraiment parallèle au sol ?' },
+    { t: 'remarque', titre: 'La réciproque', txt: 'Dans un triangle SAB, si M est sur [SA], N sur [SB], dans le même ordre, et si SM/SA = SN/SB, alors (MN) est parallèle à (AB). La réciproque sert à DÉMONTRER un parallélisme ; la propriété directe sert à CALCULER une longueur.' },
+    { t: 'question', q: 'SM = 3, SA = 5, SN = 4,2 et SB = 7. Les droites (MN) et (AB) sont-elles parallèles ?',
+      options: [
+        { txt: 'Oui, car 3/5 = 0,6 et 4,2/7 = 0,6.', ok: true, retour: 'Les rapports sont égaux et les points sont dans le même ordre : d’après la réciproque de Thalès, (MN) ∥ (AB).' },
+        { txt: 'Non, car 3 ≠ 4,2.', retour: 'On compare des rapports, pas des longueurs.' }
+      ] },
+    { t: 'atelier', mode: 'tri', titre: 'Atelier · directe ou réciproque ?', consigne: 'Pour chaque problème, quelle propriété utilises-tu ?',
+      cats: ['Propriété directe', 'Réciproque'],
+      items: [
+        { txt: 'Calculer la hauteur d’un poteau grâce à son ombre.', cat: 0 },
+        { txt: 'Prouver qu’une étagère est parallèle au plancher.', cat: 1 },
+        { txt: 'Trouver la largeur d’une rivière sans la traverser.', cat: 0 },
+        { txt: 'Vérifier qu’une traverse de toit est parallèle à la base.', cat: 1 }
+      ],
+      bravo: 'Directe : on SAIT que c’est parallèle, on calcule. Réciproque : on CALCULE des rapports pour prouver que c’est parallèle.', jauges: { confiance: 90 } },
+    { t: 'dit', qui: 'prof', txt: 'Retenez-le : la géométrie n’est pas que dans le cahier. Elle sert aux maçons, aux géomètres, et même aux propriétaires de manguiers.' }
+  ],
+  labo: {
+    titre: 'Laboratoire · une mesure fiable',
+    intro: 'Règle la verticalité du bâton, l’alignement des ombres et la précision des mesures : la hauteur trouvée est-elle juste ?',
+    persos: ['prof', 'kevin', 'brenda', 'owona'],
+    curseurs: [
+      { id: 'verticalite', nom: 'Verticalité du bâton', val: 80, bas: 'penché', haut: 'bien droit' },
+      { id: 'alignement', nom: 'Alignement des ombres en S', val: 75, bas: 'décalées', haut: 'confondues' },
+      { id: 'mesure', nom: 'Soin des mesures', val: 70, bas: 'à vue d’œil', haut: 'au décamètre' }
+    ],
+    scenarios: [
+      { nom: 'Le groupe de Mme Abena', icone: 'soleil', valeurs: { verticalite: 85, alignement: 80, mesure: 80 } },
+      { nom: 'Bâton penché', icone: 'doute', valeurs: { verticalite: 15 } },
+      { nom: 'Ombres mal alignées', icone: 'nuage', valeurs: { alignement: 10 } }
+    ],
+    liens: [
+      { a: 'prof', b: 'kevin', type: 'confiance', lib: 'guide', base: .6 },
+      { a: 'kevin', b: 'brenda', type: 'alliance', lib: 'mesurent', base: .5, poids: { mesure: .4 } },
+      { a: 'owona', b: 'prof', type: 'confiance', lib: 'compte sur', base: .4, poids: { verticalite: .2, alignement: .2 } }
+    ],
+    issue: function(v){
+      if(v.verticalite < 35){ return { niveau: 'ko', badge: 'Le bâton penche', recit: 'Le bâton n’est plus parallèle à l’arbre : la configuration de Thalès n’existe plus, et le calcul donne une hauteur fausse.', apres: 'Sans droites parallèles, pas de Thalès.', themes: ['parallélisme'] }; }
+      if(v.alignement < 35){ return { niveau: 'ko', badge: 'Deux triangles différents', recit: 'Les ombres ne se terminent pas au même point : les deux triangles n’ont pas de sommet commun, les rapports ne veulent plus rien dire.', apres: 'La configuration doit être exacte avant tout calcul.', themes: ['configuration'] }; }
+      if(v.mesure > 60){ return { niveau: 'ok', badge: '12 mètres, au centimètre près', recit: 'Papa Owona loue la bonne échelle et coupe la branche morte en toute sécurité.', apres: 'Une méthode juste et des mesures soignées donnent un résultat fiable.', themes: ['Thalès', 'proportionnalité'] }; }
+      return { niveau: 'moyen', badge: 'À peu près 12 m', recit: 'Les mesures prises à vue d’œil donnent entre 10 et 14 m : l’ordre de grandeur est bon, mais l’échelle risque d’être trop courte.', apres: 'La précision des mesures se retrouve dans le résultat.', themes: ['précision'] };
+    }
+  },
+  quiz: [
+    { q: 'La propriété directe de Thalès permet de…', options: [
+      { txt: 'calculer une longueur quand on sait que deux droites sont parallèles.', ok: true, retour: 'Exact.' },
+      { txt: 'prouver que deux droites sont parallèles.', retour: 'C’est le rôle de la réciproque.' } ] },
+    { q: 'Un bâton de 2 m donne une ombre de 3 m ; au même moment, l’ombre d’un poteau mesure 12 m. Hauteur du poteau ?', options: [
+      { txt: '8 m', ok: true, retour: '2 × 12 / 3 = 8.' },
+      { txt: '18 m', retour: 'Rapports inversés.' } ] },
+    { q: 'Dans le triangle SAB, M ∈ [SA], N ∈ [SB], SM/SA = SN/SB. Alors…', options: [
+      { txt: '(MN) est parallèle à (AB).', ok: true, retour: 'C’est la réciproque de Thalès.' },
+      { txt: '(MN) est perpendiculaire à (AB).', retour: 'Non.' } ] },
+    { q: 'Pourquoi le bâton doit-il être vertical ?', options: [
+      { txt: 'Pour être parallèle à l’arbre, lui aussi vertical.', ok: true, retour: 'Le parallélisme est la condition de Thalès.' },
+      { txt: 'Pour faire plus d’ombre.', retour: 'Non.' } ] },
+    { q: 'SM = 2, SA = 6, SN = 3, SB = 8. (MN) et (AB) sont-elles parallèles ?', options: [
+      { txt: 'Non, car 2/6 ≈ 0,33 et 3/8 = 0,375.', ok: true, retour: 'Rapports différents : pas de parallélisme.' },
+      { txt: 'Oui.', retour: 'Compare les rapports.' } ] }
+  ],
+  bilan: {
+    retenir: [
+      'Propriété de Thalès : si (MN) ∥ (AB), avec M ∈ (SA) et N ∈ (SB), alors SM/SA = SN/SB = MN/AB.',
+      'Elle sert à calculer des longueurs inaccessibles : hauteur d’un arbre, largeur d’une rivière.',
+      'Réciproque : si SM/SA = SN/SB et si les points sont dans le même ordre, alors (MN) ∥ (AB).',
+      'Toujours vérifier la configuration (droites parallèles, sommet commun) avant de calculer.'
+    ],
+    ecrire: 'Mesurez la hauteur du mât du drapeau de votre établissement par la méthode des ombres. Rédigez la démonstration complète, avec un schéma codé.'
+  }
+};
+</script>
+<script src="decors.js?v=20261113c"></script>
+<script src="scene.js?v=20261113a"></script>
+<!-- scene-texte -->
+<details id="scene-texte" style="max-width:860px;margin:28px auto 40px;padding:0 16px;font:15px/1.6 Poppins,system-ui,sans-serif;color:#0C2A6A">
+<summary style="cursor:pointer;font-weight:600;padding:12px 0">Lire la scène en texte</summary>
+<article lang="fr">
+<h1>La hauteur du manguier</h1>
+<p><b>Mathématiques · 3ᵉ</b></p>
+<p><i>Dialogue fictif écrit pour la leçon. Les faits et les dates cités sont exacts.</i></p>
+<h3>Objectif</h3><p>Utiliser la propriété de Thalès pour calculer une longueur inaccessible (la hauteur d’un arbre grâce aux ombres), puis sa réciproque pour démontrer que deux droites sont parallèles.</p>
+<p>Programme : Progression harmonisée 3e · Thalès dans le triangle, leçon 4 (propriété directe de Thalès), leçon 5 (propriété réciproque de Thalès)</p>
+<p>Lieu : La cour de l’école publique, près d’Obala · Une matinée ensoleillée</p>
+<h3>Personnages</h3><ul><li>Mme Abena, professeure de mathématiques</li><li>Kevin, élève de 3e</li><li>Brenda, élève de 3e</li><li>Papa Owona, propriétaire du manguier</li></ul>
+<h3>La scène</h3>
+<p>Papa Owona veut abattre une grosse branche morte de son manguier avant la saison des pluies. Il doit savoir quelle échelle louer : quelle est la hauteur de l’arbre ?</p>
+<p><b>Papa Owona, propriétaire du manguier</b> : Monter pour mesurer, à mon âge ? Jamais ! Il faudrait un géant avec un mètre ruban.</p>
+<p><b>Mme Abena, professeure de mathématiques</b> : Pas besoin de monter : le soleil va mesurer pour nous. Kevin, Brenda, apportez le bâton de 1,5 m et le décamètre.</p>
+<p>Kevin plante le bâton bien droit, de sorte que l’extrémité de son ombre tombe exactement sur l’extrémité de l’ombre du manguier, au point S.</p>
+<h4>La configuration de Thalès</h4><p>Les rayons du soleil passent par le sommet du bâton et par le sommet de l’arbre et aboutissent au même point S. Le bâton et l’arbre sont verticaux, donc parallèles. On obtient deux triangles emboîtés de sommet S : c’est une configuration de Thalès.</p>
+<p><b>Brenda, élève de 3e</b> : Mesures : du point S au pied du bâton, 2 m. Du point S au pied du manguier, 16 m.</p>
+<p><b>Question :</b> Le bâton (1,5 m) et l’arbre sont parallèles. Quelle égalité donne la propriété de Thalès ?</p><ul><li>hauteur de l’arbre / 1,5 = 16 / 2 <b>(bonne réponse)</b></li><li>hauteur de l’arbre / 1,5 = 2 / 16</li><li>hauteur de l’arbre = 1,5 + 16 + 2</li></ul><p>Les longueurs des côtés correspondants sont proportionnelles : SA/SB = AA’/BB’.</p>
+<p><b>Question :</b> Quelle est donc la hauteur du manguier ?</p><ul><li>12 m <b>(bonne réponse)</b></li><li>24 m</li><li>8 m</li></ul><p>1,5 × 16 / 2 = 12. Le manguier mesure 12 mètres.</p>
+<p><b>Papa Owona, propriétaire du manguier</b> : Douze mètres ! Et la branche morte est vers le milieu : une échelle de 7 m suffira avec le tabouret. Vous m’économisez une location !</p>
+<h4>Atelier · la méthode</h4><p>Remets dans l’ordre les étapes pour mesurer une hauteur avec les ombres.</p>
+<ol><li>Planter un bâton vertical dont on connaît la hauteur.</li><li>Le placer pour que son ombre se termine au même point que celle de l’arbre.</li><li>Mesurer les distances du point S au bâton et du point S à l’arbre.</li><li>Écrire l’égalité des rapports donnée par Thalès.</li><li>Calculer la hauteur cherchée et vérifier l’ordre de grandeur.</li></ol>
+<p>C’est la méthode qu’on attribue à Thalès de Milet pour mesurer la hauteur d’une pyramide, il y a plus de 2 500 ans.</p>
+<p><b>Kevin, élève de 3e</b> : Madame, le portail de l’école a une barre en travers. Comment savoir si elle est vraiment parallèle au sol ?</p>
+<h4>La réciproque</h4><p>Dans un triangle SAB, si M est sur [SA], N sur [SB], dans le même ordre, et si SM/SA = SN/SB, alors (MN) est parallèle à (AB). La réciproque sert à DÉMONTRER un parallélisme ; la propriété directe sert à CALCULER une longueur.</p>
+<p><b>Question :</b> SM = 3, SA = 5, SN = 4,2 et SB = 7. Les droites (MN) et (AB) sont-elles parallèles ?</p><ul><li>Oui, car 3/5 = 0,6 et 4,2/7 = 0,6. <b>(bonne réponse)</b></li><li>Non, car 3 ≠ 4,2.</li></ul><p>Les rapports sont égaux et les points sont dans le même ordre : d’après la réciproque de Thalès, (MN) ∥ (AB).</p>
+<h4>Atelier · directe ou réciproque ?</h4><p>Pour chaque problème, quelle propriété utilises-tu ?</p>
+<ul><li><b>Propriété directe</b> : Calculer la hauteur d’un poteau grâce à son ombre. ; Trouver la largeur d’une rivière sans la traverser.</li><li><b>Réciproque</b> : Prouver qu’une étagère est parallèle au plancher. ; Vérifier qu’une traverse de toit est parallèle à la base.</li></ul>
+<p>Directe : on SAIT que c’est parallèle, on calcule. Réciproque : on CALCULE des rapports pour prouver que c’est parallèle.</p>
+<p><b>Mme Abena, professeure de mathématiques</b> : Retenez-le : la géométrie n’est pas que dans le cahier. Elle sert aux maçons, aux géomètres, et même aux propriétaires de manguiers.</p>
+<h3>Quiz</h3><ol><li>La propriété directe de Thalès permet de… — <b>calculer une longueur quand on sait que deux droites sont parallèles.</b> Exact.</li><li>Un bâton de 2 m donne une ombre de 3 m ; au même moment, l’ombre d’un poteau mesure 12 m. Hauteur du poteau ? — <b>8 m</b> 2 × 12 / 3 = 8.</li><li>Dans le triangle SAB, M ∈ [SA], N ∈ [SB], SM/SA = SN/SB. Alors… — <b>(MN) est parallèle à (AB).</b> C’est la réciproque de Thalès.</li><li>Pourquoi le bâton doit-il être vertical ? — <b>Pour être parallèle à l’arbre, lui aussi vertical.</b> Le parallélisme est la condition de Thalès.</li><li>SM = 2, SA = 6, SN = 3, SB = 8. (MN) et (AB) sont-elles parallèles ? — <b>Non, car 2/6 ≈ 0,33 et 3/8 = 0,375.</b> Rapports différents : pas de parallélisme.</li></ol>
+<h3>À retenir</h3><ul><li>Propriété de Thalès : si (MN) ∥ (AB), avec M ∈ (SA) et N ∈ (SB), alors SM/SA = SN/SB = MN/AB.</li><li>Elle sert à calculer des longueurs inaccessibles : hauteur d’un arbre, largeur d’une rivière.</li><li>Réciproque : si SM/SA = SN/SB et si les points sont dans le même ordre, alors (MN) ∥ (AB).</li><li>Toujours vérifier la configuration (droites parallèles, sommet commun) avant de calculer.</li></ul>
+<h3>À écrire</h3><p>Mesurez la hauteur du mât du drapeau de votre établissement par la méthode des ombres. Rédigez la démonstration complète, avec un schéma codé.</p>
+<p><a href="index.html">Toutes les Scènes vivantes</a> · <a href="3e-maths-thales-hauteur-manguier.html">Jouer la scène</a></p>
+</article>
+<!-- /scene-texte -->
+</body>
+</html>
