@@ -1,6 +1,48 @@
 [
  {
   "examen": "bepc",
+  "fiche": "ressources/bepc-francais.html",
+  "matiere": "Étude de texte",
+  "annee": 2026,
+  "u": "/ressources/annales/bepc-etude-de-texte-2026.html"
+ },
+ {
+  "examen": "bepc",
+  "fiche": "ressources/bepc-francais.html",
+  "matiere": "Étude de texte",
+  "annee": 2025,
+  "u": "/ressources/annales/bepc-etude-de-texte-2025.html"
+ },
+ {
+  "examen": "bepc",
+  "fiche": "ressources/bepc-francais.html",
+  "matiere": "Étude de texte",
+  "annee": 2024,
+  "u": "/ressources/annales/bepc-etude-de-texte-2024.html"
+ },
+ {
+  "examen": "bepc",
+  "fiche": "ressources/bepc-francais.html",
+  "matiere": "Expression écrite",
+  "annee": 2026,
+  "u": "/ressources/annales/bepc-expression-ecrite-2026.html"
+ },
+ {
+  "examen": "bepc",
+  "fiche": "ressources/bepc-francais.html",
+  "matiere": "Expression écrite",
+  "annee": 2025,
+  "u": "/ressources/annales/bepc-expression-ecrite-2025.html"
+ },
+ {
+  "examen": "bepc",
+  "fiche": "ressources/bepc-francais.html",
+  "matiere": "Expression écrite",
+  "annee": 2024,
+  "u": "/ressources/annales/bepc-expression-ecrite-2024.html"
+ },
+ {
+  "examen": "bepc",
   "fiche": "ressources/examen-mathematiques-bepc.html",
   "matiere": "Mathématiques",
   "annee": 2026,
