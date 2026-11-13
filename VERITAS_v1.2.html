@@ -1176,10 +1176,31 @@ function _refreshCitation(){
     {texte:'L\u2019avenir appartient \u00e0 ceux qui croient en la beaut\u00e9 de leurs r\u00eaves.',auteur:'Eleanor Roosevelt'},
     {texte:'Vis comme si tu devais mourir demain. Apprends comme si tu devais vivre toujours.',auteur:'Gandhi'}
   ];
-  var cits=(typeof DB!=='undefined'&&DB&&DB.citations&&DB.citations.length)?DB.citations:(window._VRT_CITATIONS||_defCit);
-  var q=cits[Math.floor(Math.random()*cits.length)];
+  var cits=_vCitations(_defCit);
+  var q=_vCitTirer(cits,'_vrtCitHero');
   var el=document.getElementById('vHeroQuote');
   if(el&&q) el.innerHTML='\u00ab '+q.texte+' \u00bb<span style="display:block;font-size:9px;color:#FFC93C;font-style:normal;margin-top:2px;letter-spacing:.5px">\u2014 '+q.auteur+'</span>';
+}
+/* 13/11/2026 — Une seule et même citation revenait : `DB.citations` reçoit
+   d'office les 7 citations par défaut (load), si bien que le répertoire
+   élargi `_VRT_CITATIONS` (20) n'était JAMAIS lu, et le tirage au hasard
+   pouvait redonner la même deux fois de suite. On réunit les deux listes
+   (celles de l'admin d'abord, sans doublon) et l'on écarte la dernière vue. */
+function _vCitations(repli){
+  var a=(typeof DB!=='undefined'&&DB&&DB.citations&&DB.citations.length)?DB.citations:[];
+  var b=window._VRT_CITATIONS||repli||[], vus={}, out=[];
+  a.concat(b).forEach(function(c){
+    var k=String((c&&c.texte)||'').toLowerCase().replace(/[^a-z\u00e0-\u00ff0-9]/g,'');
+    if(!k||vus[k])return; vus[k]=1; out.push(c);
+  });
+  return out.length?out:(repli||[]);
+}
+function _vCitTirer(cits,cle){
+  if(!cits||!cits.length) return null;
+  var der=window[cle], i=Math.floor(Math.random()*cits.length);
+  if(cits.length>1&&cits[i]&&der===cits[i].texte) i=(i+1)%cits.length;
+  window[cle]=cits[i]&&cits[i].texte;
+  return cits[i];
 }
 setTimeout(_refreshCitation,300);
 setInterval(_refreshCitation,15000);
@@ -1377,11 +1398,11 @@ function _vCitFloat(){
   function cacher(){ if(box) box.classList.remove('on'); clearTimeout(tmo); clearInterval(suivi); suivi=null; }
   function montrer(){
     if(conges()||!portailVisible()||modaleOuverte()) return;
-    var src=(typeof DB!=='undefined'&&DB&&DB.citations&&DB.citations.length)?DB.citations:window._VRT_CITATIONS;
+    var src=_vCitations(window._VRT_CITATIONS);
     if(!src||!src.length) return;
     if(!box) box=creer();
     if(!box) return;
-    var q=src[Math.floor(Math.random()*src.length)];
+    var q=_vCitTirer(src,'_vrtCitFlot');
     box.querySelector('.cit-txt').textContent='« '+q.texte+' »';
     box.querySelector('.cit-aut').textContent=q.auteur||'';
     placer();
