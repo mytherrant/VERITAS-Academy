@@ -1,0 +1,60 @@
+<!--meta
+{"about":"Informatique","variantes":{
+"bepc":{"page":"ressources/examen-informatique-bepc.html","titre":"L'informatique au BEPC : l'épreuve et des exemples traités","description":"Informatique au BEPC (3e) : 1 h, trois parties (matériel et réseaux, information et algorithmique, usages du numérique), conversion binaire et algorithme traités.","badge":"Examen · 3e","chapo":"Au BEPC, l'épreuve d'informatique dure <strong>1 heure</strong> et compte pour <strong>1</strong>. Elle a trois parties notées sur 8, 7 et 5.","objectifs":["connaître les trois parties","convertir un nombre binaire","écrire un petit algorithme"]},
+"probatoire":{"page":"ressources/examen-informatique-probatoire.html","titre":"L'informatique au Probatoire : l'épreuve et des exemples traités","description":"Informatique au Probatoire (1re C, D) : environnement numérique et sécurité, systèmes d'information, algorithmique et programmation (C, HTML, JavaScript), trace d'algorithme traitée.","badge":"Examen · 1re C, D","chapo":"Au Probatoire, l'épreuve d'informatique couvre l'<strong>environnement numérique</strong>, les <strong>systèmes d'information</strong> et l'<strong>algorithmique</strong>, avec un peu de programmation en C, HTML et JavaScript.","objectifs":["connaître les parties de l'épreuve","exécuter un algorithme pas à pas","éviter les erreurs de syntaxe"]},
+"bac":{"page":"ressources/examen-informatique-bac.html","titre":"L'informatique au BAC : l'épreuve et des exemples traités","description":"Informatique au BAC (Tle A, C, D) : épreuves théorique et pratique, formule de tableur et requête SQL du BAC 2025 traitées, barème de la pratique.","badge":"Examen · Tle A, C, D","chapo":"Au BAC, l'informatique a une épreuve <strong>théorique</strong> et une épreuve <strong>pratique</strong> sur machine. En séries A, la théorique dure 1 h 30 et compte pour 2.","objectifs":["connaître l'épreuve de ta série","écrire une formule de tableur et une requête SQL justes","réussir l'épreuve pratique"]}}}
+-->
+<h2 id="epreuve">L'épreuve</h2>
+<div class="mx-tbl"><table>
+<thead><tr><th>Épreuve</th><th>Durée · coef.</th><th>Parties</th></tr></thead>
+<tbody>
+<!--pour bepc--><tr><td>BEPC</td><td>1 h · coef. 1</td><td>I. Logiciels, matériel, réseaux (8) · II. Organisation et traitement de l'information, algorithmique (7) · III. Créativité et usages du numérique (5)</td></tr>
+<!--/pour--><!--pour probatoire--><tr><td>Probatoire C, D</td><td>voir l'en-tête ; arrêté : coef. 2</td><td>Environnement numérique et sécurité · systèmes d'information · algorithmique et programmation (langage C, HTML et JavaScript)</td></tr>
+<!--/pour--><!--pour bac--><tr><td>Théorique, séries A, ABI</td><td>1 h 30 · coef. 2</td><td>Production de contenus numériques (tableur, traitement de texte) · systèmes et réseaux · systèmes d'information et bases de données</td></tr>
+<tr><td>Théorique, séries C, D, E</td><td>voir l'en-tête ; arrêté : coef. 4 (C), 2 (D)</td><td>I. Systèmes informatiques · II. Systèmes d'information et bases de données · III. Algorithmique et programmation</td></tr>
+<tr><td>Pratique</td><td>sur machine</td><td>Travail effectué 17 · manipulations et aptitudes 3 (maîtrise du matériel et méthodologie)</td></tr>
+<!--/pour--></tbody></table></div>
+<h2 id="exemples">Exemples traités</h2>
+<!--pour bepc--><div class="mx-enc mx-ex"><strong>Conversion (BEPC 2021)</strong>Convertir en décimal (11010)₂.<br>1×2⁴ + 1×2³ + 0×2² + 1×2¹ + 0×2⁰ = 16 + 8 + 0 + 2 + 0 = <strong>26</strong>.</div>
+<div class="mx-enc mx-ex"><strong>Algorithme (définition demandée au BEPC 2021)</strong>Un algorithme est une suite finie et ordonnée d'instructions qui permet de résoudre un problème. Exemple : calculer l'aire d'un rectangle.<br><code>Algorithme Aire<br>Variables L, l, A : réels<br>Début<br>&nbsp;&nbsp;Lire(L, l)<br>&nbsp;&nbsp;A ← L * l<br>&nbsp;&nbsp;Écrire(A)<br>Fin</code></div>
+<!--/pour--><!--pour probatoire--><div class="mx-enc mx-ex"><strong>Exécuter un algorithme pas à pas</strong><code>S ← 0 ; Pour i allant de 1 à 4 faire S ← S + i ; FinPour ; Écrire(S)</code></div>
+<div class="mx-tbl"><table>
+<thead><tr><th>Tour</th><th>i</th><th>S</th></tr></thead>
+<tbody>
+<tr><td>avant la boucle</td><td>—</td><td>0</td></tr>
+<tr><td>1</td><td>1</td><td>1</td></tr>
+<tr><td>2</td><td>2</td><td>3</td></tr>
+<tr><td>3</td><td>3</td><td>6</td></tr>
+<tr><td>4</td><td>4</td><td>10</td></tr>
+</tbody></table></div>
+<p>Conclusion à écrire : l'algorithme affiche 10, la somme des entiers de 1 à 4.</p>
+<!--/pour--><!--pour bac--><div class="mx-enc mx-ex"><strong>Tableur (BAC 2025)</strong>« Donner de deux manières différentes la formule à saisir dans la cellule G2 permettant de trouver le total des ventes » (ventes du lundi au vendredi en B2 à F2).<br>1. <code>=SOMME(B2:F2)</code> · 2. <code>=B2+C2+D2+E2+F2</code>. N'oublie jamais le signe <code>=</code>.</div>
+<div class="mx-enc mx-ex"><strong>Base de données (BAC A 2025)</strong>« Écrire la requête SQL qui affiche toutes les informations sur les élèves de la Terminale A4 » (en supposant que la table Eleve possède un champ Classe).<br><code>SELECT * FROM Eleve WHERE Classe = 'Tle A4';</code><br>La clé primaire est le champ qui identifie chaque élève sans doublon : ici, le matricule.</div>
+<!--/pour--><h2 id="methode">La méthode</h2>
+<ol class="mx-etapes">
+<li>Définitions : le terme générique, puis la fonction (« Un onduleur est un appareil qui… »).</li>
+<li>Formules, requêtes, programmes : recopie les noms exactement comme dans le sujet.</li>
+<li>Algorithmes : déclare les variables et respecte la syntaxe du cours (Début, Fin, Pour, Tant que).</li>
+<li>Mises en situation (stage, cybercafé, salle informatique) : nomme le matériel ou le logiciel précis et justifie.</li>
+</ol>
+<h2 id="erreurs">Les erreurs fréquentes</h2>
+<ul>
+<!--pour bac--><li>Formule sans « = » ou plage mal écrite (B2-F2 au lieu de B2:F2).</li>
+<li>Oublier les guillemets autour d'un texte dans une requête SQL.</li>
+<!--/pour--><li>Confondre logiciel d'application et système d'exploitation.</li>
+<li>Trace d'algorithme incomplète : le dernier tour de boucle est souvent oublié.</li>
+</ul>
+<h2 id="jour-j">Check-list du jour J</h2>
+<ul class="mx-check">
+<li>Chaque partie traitée, numéros bien visibles.</li>
+<li>Formules et algorithmes relus caractère par caractère.</li>
+<li>Tableaux de trace propres.</li>
+<!--pour bac--><li>Pratique : enregistrer souvent, sous le nom demandé.</li>
+<!--/pour--></ul>
+<h2 id="sources">Sources</h2>
+<ul class="mx-sources">
+<!--pour bepc--><li>Sujets officiels du BEPC 2019 et 2021 (MINESEC-DECC) : 1 h, coef. 1, parties sur 8, 7 et 5 ; exercices cités.</li>
+<!--/pour--><!--pour probatoire--><li>Anciens sujets et corrigés de Probatoire C-D (recueil « Leader ») : parties de l'épreuve. Exemple de trace rédigé par VÉRITAS.</li>
+<li>Arrêté n° 92/22/MINESEC : coefficient 2 en 1re C et D. Durée : à confirmer sur l'en-tête.</li>
+<!--/pour--><!--pour bac--><li>Office du Baccalauréat du Cameroun, BAC ESG 2025 : informatique théorique A-ABI-SH-AC (1 h 30, coef. 2) et C-D-E ; épreuve pratique (barème 17 + 3) ; exercices cités.</li>
+<!--/pour--></ul>

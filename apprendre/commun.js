@@ -320,8 +320,8 @@
   var FAMILLES = [
     ["notes", "Notes et coefficients", "i-calculator", "Savoir où tu en es et ce qui compte vraiment.", "suivi"],
     ["orientation", "Orientation", "i-compass", "Choisir sa série, sa filière, son école.", "suivi"],
-    ["cours", "Cours rédigés", "i-book-open", "Les leçons complètes déjà disponibles pour ta classe.", "apprendre"],
     ["methode", "Méthodes et examens", "i-feather", "Les méthodes attendues le jour de l'épreuve.", "apprendre"],
+    ["cours", "Cours rédigés", "i-book-open", "Les leçons complètes déjà disponibles pour ta classe.", "apprendre"],
     ["oeuvre", "Œuvres au programme", "i-book", "Analyse, résumé, carte mentale et QCM.", "apprendre"],
     ["scene", "Scènes vivantes", "i-play", "Une situation courte où tu choisis la bonne réponse.", "apprendre"],
     ["cahier", "Mon cahier", "i-notebook", "Le cahier interactif de l'année.", "apprendre"],
@@ -398,7 +398,8 @@
   /* Le gratuit d'abord : l'élève goûte, l'envie vient, l'abonnement suit. Ordre stable sinon. */
   function gratuitDabord(ids) { var R0 = RES(); return ids.map(function (id, k) { return [id, k]; }).sort(function (a, b) { var x = (R0.items[a[0]] || {}).ab ? 1 : 0, y = (R0.items[b[0]] || {}).ab ? 1 : 0; return x - y || a[1] - b[1]; }).map(function (a) { return a[0]; }); }
   /* Une ressource gratuite par famille, dans l'ordre où elle donne envie. */
-  var ORDRE_GOUT = ["corrige", "oeuvre", "methode", "direct", "jeu", "labo", "epreuve", "scene", "defis", "cours", "orientation", "notes"];
+  /* 13/11/2026 : les méthodes d'examen d'abord (demande de Jacques) : c'est ce que l'élève de chaque classe doit voir en premier. */
+  var ORDRE_GOUT = ["methode", "corrige", "oeuvre", "direct", "jeu", "labo", "epreuve", "scene", "defis", "cours", "orientation", "notes"];
   function selectionGratuite(ids, n) {
     var R0 = RES(), vu = {}, o = [];
     ORDRE_GOUT.forEach(function (f) { if (o.length >= n) return; var id = ids.find(function (i) { var it = R0.items[i]; return it && !it.ab && it.t === f && !vu[i]; }); if (id) { vu[id] = 1; o.push(id); } });
