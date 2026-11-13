@@ -21564,7 +21564,7 @@ function _lancerPenduCustom(j){
         :"<div style='color:#AE5353;font-weight:800;font-size:14px;margin-bottom:8px'>Perdu ! Le mot était : <strong>"+_cqEsc(item.mot)+"</strong></div>";
       h+="<button class='btn bi' id='cqRejouer'>Rejouer</button>"+_cqInvitation();
     }else{
-      h+="<div style='display:flex;flex-wrap:wrap;gap:5px;justify-content:center;margin-top:8px'>";
+      h+="<div data-pas-onglets style='display:flex;flex-wrap:wrap;gap:5px;justify-content:center;margin-top:8px'>";
       "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("").forEach(function(c){
         var used=found.indexOf(c)>=0||wrong.indexOf(c)>=0;
         h+="<button type='button' data-l='"+c+"' style='width:34px;height:34px;border-radius:6px;border:1.5px solid "+(used?"#ccc":"#142554")+";background:"+(wrong.indexOf(c)>=0?"#FEE2E2":found.indexOf(c)>=0?"#D1FAE5":"#fff")+";color:"+(used?"#999":"#142554")+";font-weight:700;font-size:13px;cursor:"+(used?"default":"pointer")+"'"+(used?" disabled":"")+">"+c+"</button>";

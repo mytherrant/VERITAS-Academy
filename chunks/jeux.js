@@ -379,7 +379,14 @@ window._VRT_JEUX_OK = true;
       + NIV.map(function (n) {
           return "<button type='button' class='tab" + (n[0] === niv ? " on" : "") + "' onclick=\"" + id + "('" + n[0] + "')\" title='" + n[2] + "'>" + n[1] + "</button>";
         }).join("")
-      + "</div><div id='jrZone'>" + corps + "</div></div></div>");
+      + "</div><div id='jrZone' data-pas-onglets>" + corps + "</div></div></div>");
+    /* Les feuilles du site imposent aux <button> 44 px de large minimum : un
+       plateau de 7 à 10 cases débordait l'écran du téléphone. */
+    if (!document.getElementById("jrStyle")) {
+      var st = document.createElement("style"); st.id = "jrStyle";
+      st.textContent = "#jrZone button:not(.btn){min-width:0!important;min-height:0!important}";
+      document.head.appendChild(st);
+    }
   }
   function zone(h) { var z = document.getElementById("jrZone"); if (z) z.innerHTML = h; }
   function fin(titre, detail, rec, rejouer) {
@@ -901,7 +908,7 @@ window._VRT_JEUX_OK = true;
     }
     var COUL = ["", "#1E499B", "#047857", "#B42318", "#5B21B6", "#92400E", "#0E7C86", "#111", "#666"];
     function dessine() {
-      var taille = Math.min(40, Math.floor(320 / n)), drap = drapeau.filter(Boolean).length;
+      var taille = Math.min(40, Math.floor(Math.min(320, (window.innerWidth || 360) - 90) / n)), drap = drapeau.filter(Boolean).length;
       zone("<div style='font-size:13px;color:#8B93A6;margin-bottom:8px'>" + nbM + " mines · " + drap + " drapeau" + (drap > 1 ? "x" : "") + "</div>"
         + "<div style='display:inline-grid;grid-template-columns:repeat(" + n + "," + taille + "px);gap:2px'>" + mine.map(function (m, p) {
             var bg = vu[p] ? (m ? "#FCA5A5" : "#F1F5F9") : "#1E499B", ct = "";
@@ -1030,7 +1037,7 @@ window._VRT_JEUX_OK = true;
     var LET = "ABCDEFGH";
     function coule(id) { for (var p = 0; p < n * n; p++) if (navire[p] === id && !tir[p]) return false; return true; }
     function dessine(msg) {
-      var taille = Math.min(40, Math.floor(300 / n)), restants = flotte.filter(function (_, id) { return !coule(id); }).length;
+      var taille = Math.min(40, Math.floor(Math.min(300, (window.innerWidth || 360) - 90) / n)), restants = flotte.filter(function (_, id) { return !coule(id); }).length;
       var h = "<span></span>"; for (var c = 0; c < n; c++) h += "<span style='font-size:11px;color:#8B93A6;text-align:center'>" + (c + 1) + "</span>";
       for (var r = 0; r < n; r++) {
         h += "<span style='font-size:11px;color:#8B93A6;display:flex;align-items:center'>" + LET[r] + "</span>";
@@ -1181,7 +1188,7 @@ window._VRT_JEUX_OK = true;
         + "<div style='font-size:14px;color:#4D5163;margin:8px 0 14px'>Touche les événements <b>du plus ancien au plus récent</b>.</div>"
         + "<div style='display:grid;gap:8px;text-align:left'>" + tirage.map(function (e, i) {
             var rang = clics.indexOf(i);
-            return "<button type='button' data-e='" + i + "' style='display:flex;align-items:center;gap:10px;padding:12px 14px;border-radius:12px;font-size:15px;line-height:1.35;text-align:left;cursor:" + (rang >= 0 ? "default" : "pointer") + ";border:1.5px solid " + (rang >= 0 ? "#86C79A" : "#D7DBE3") + ";background:" + (rang >= 0 ? "#EAF7EE" : "#fff") + ";color:#142554'>"
+            return "<button type='button' data-e='" + i + "' style='display:flex;align-items:center;gap:10px;padding:12px 14px;border-radius:12px;font-size:15px;line-height:1.35;text-align:left;cursor:" + (rang >= 0 ? "default" : "pointer") + ";border:1.5px solid " + (rang >= 0 ? "#86C79A" : "#C9CFDB") + "!important;background:" + (rang >= 0 ? "#EAF7EE" : "#F7F8FB") + "!important;color:#142554!important'>"
               + "<span style='flex:0 0 30px;height:30px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-weight:800;background:" + (rang >= 0 ? "#047857;color:#fff" : "#EEF1F6;color:#8B93A6") + "'>" + (rang >= 0 ? rang + 1 : "?") + "</span>"
               + "<span style='flex:1'>" + esc(e[1]) + (fini || rang >= 0 ? " <b style='color:#C24E00;white-space:nowrap'>· " + e[0] + "</b>" : "") + "</span></button>";
           }).join("") + "</div>"
@@ -1230,8 +1237,9 @@ window._VRT_JEUX_OK = true;
       choixG = -1; faits = [];
     }
     function bouton(attr, i, txt, etat) {
-      var st = etat === "fait" ? "background:#EAF7EE;border-color:#86C79A;color:#047857;opacity:.75;cursor:default" : etat === "choisi" ? "background:#142554;border-color:#142554;color:#fff" : etat === "faux" ? "background:#FEE2E2;border-color:#F3A6A6;color:#B42318" : "background:#fff;border-color:#D7DBE3;color:#142554";
-      return "<button type='button' " + attr + "='" + i + "' style='display:block;width:100%;padding:11px 10px;border-radius:10px;border:1.5px solid;font-size:14px;font-weight:600;line-height:1.3;margin-bottom:8px;cursor:pointer;" + st + "'>" + esc(txt) + "</button>";
+      // [fond, bordure, texte] — en !important : le site met toute bordure à 0 et blanchit les fonds
+      var c = etat === "fait" ? ["#EAF7EE", "#86C79A", "#047857"] : etat === "choisi" ? ["#142554", "#142554", "#fff"] : etat === "faux" ? ["#FEE2E2", "#F3A6A6", "#B42318"] : ["#F7F8FB", "#C9CFDB", "#142554"];
+      return "<button type='button' " + attr + "='" + i + "' style='display:block;width:100%;padding:11px 10px;border-radius:10px;border:1.5px solid " + c[1] + "!important;background:" + c[0] + "!important;color:" + c[2] + "!important;font-size:14px;font-weight:600;line-height:1.3;margin-bottom:8px;cursor:" + (etat === "fait" ? "default;opacity:.75" : "pointer") + "'>" + esc(txt) + "</button>";
     }
     function dessine(faux) {
       var s = Math.floor((Date.now() - t0) / 1000);
@@ -1316,10 +1324,10 @@ window._VRT_JEUX_OK = true;
     }
     function dessine(msg) {
       var h = "<div style='font-size:14px;font-weight:700;color:#142554;min-height:22px;margin-bottom:10px'>" + (msg || (tour === 1 ? "À toi : choisis une colonne" : "L'ordinateur réfléchit…")) + "</div>"
-        + "<div style='display:inline-grid;grid-template-columns:repeat(7,1fr);gap:5px;padding:8px;border-radius:14px;background:#142554;max-width:100%'>";
+        + "<div style='display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:5px;padding:8px;border-radius:14px;background:#142554!important;width:100%;max-width:360px;margin:0 auto;box-sizing:border-box'>";
       for (var r = 0; r < L; r++) for (var c = 0; c < C; c++) {
         var v = g[r][c];
-        h += "<button type='button' data-c='" + c + "' aria-label='Colonne " + (c + 1) + "' style='width:min(11vw,46px);height:min(11vw,46px);border-radius:50%;border:0;padding:0;cursor:" + (fini || tour !== 1 ? "default" : "pointer") + ";background:" + (v === 1 ? "#E53935" : v === 2 ? "#FFC93C" : "#fff") + "'></button>";
+        h += "<button type='button' data-c='" + c + "' aria-label='Colonne " + (c + 1) + "' style='width:100%;height:auto;aspect-ratio:1;border-radius:50%!important;border:0;padding:0;cursor:" + (fini || tour !== 1 ? "default" : "pointer") + ";background:" + (v === 1 ? "#E53935" : v === 2 ? "#FFC93C" : "#fff") + "!important'></button>";
       }
       h += "</div>";
       if (fini) h += "<div style='margin-top:14px'><button class='btn bi' id='jrOk'>Rejouer</button></div>";
