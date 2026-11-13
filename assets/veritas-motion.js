@@ -49,6 +49,10 @@
      labos, des épreuves et des jeux, et laisse tranquilles les rangées
      d'action (.vfx-cta, .vp-tool), qui ont, elles, des classes. */
   function estBarreDeFiltres(rangee) {
+    // 13/11/2026 — Un plateau de jeu (Mémoire, Taquin, Morpion, Puissance 4,
+    // pendu…) est une rangée de boutons sans classe, à coins arrondis : il
+    // était promu en barre d'onglets défilante. Une zone peut s'en exclure.
+    if (rangee.closest && rangee.closest('[data-pas-onglets]')) return null;
     var enfants = [].slice.call(rangee.children);
     if (enfants.length < 3) return null;
     var boutons = [], intrus = 0;
