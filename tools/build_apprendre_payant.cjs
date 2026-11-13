@@ -39,6 +39,10 @@ global.VRT_SIT = (ids, o) => { for (const id of [].concat(ids)) { if (SIT[id]) e
    (a, b, c, d) d'une question à l'autre, pour une répartition équilibrée des lettres. */
 const QCM = {};
 global.VRT_QCM = (ids, liste) => { for (const id of [].concat(ids)) { if (QCM[id]) err.push(`${id} : QCM en double`); QCM[id] = liste; } };
+/* Schéma ou carte posé sur une partie : VRT_ILLUS(ids, partie, légende, svg). Une partie porte un
+   seul schéma ; fichier lu dans n'importe quel ordre (appliqué après la lecture de toutes les sources). */
+const ILLUS = [];
+global.VRT_ILLUS = (ids, partie, legende, svg) => { for (const id of [].concat(ids)) ILLUS.push([id, partie, legende, svg]); };
 const crc = s => { let h = 0; for (const c of s) h = (h * 31 + c.charCodeAt(0)) >>> 0; return h; };
 function poserQcm(id, liste) {
   if (!Array.isArray(liste) || liste.length !== 10) { err.push(`${id} : il faut exactement 10 QCM (${liste && liste.length})`); return null; }
@@ -62,6 +66,14 @@ for (const [id, o] of Object.entries(SIT)) {
   if (!APC[id]) { err.push(`${id} : situation réécrite pour une leçon sans fiche APC`); continue; }
   for (const k of ["situation", "tache", "resolution"]) if (!o[k]) err.push(`${id} : situation réécrite sans ${k}`);
   Object.assign(APC[id], o);
+}
+
+for (const [id, p, legende, svg] of ILLUS) {
+  const l = L[id], q = l && l.parties && l.parties[p];
+  if (!q) { err.push(`${id} : schéma pour une ${l ? "partie " + p + " inexistante" : "leçon inconnue"}`); continue; }
+  if (q.illus) { err.push(`${id} : la partie ${p} a déjà un schéma`); continue; }
+  if (!/^<svg[\s\S]*<\/svg>$/.test(svg) || !/aria-label='/.test(svg) || /<script|\son\w+=/i.test(svg)) { err.push(`${id} : schéma SVG invalide`); continue; }
+  q.illus = { legende, svg };
 }
 
 /* Types de labos réellement codés dans apprendre/labo.js */
@@ -118,7 +130,7 @@ for (const [id, l] of Object.entries(L)) {
       allemand: exam === "BEPC" ? ["Überprüfe dein Wissen", "Strukturen und Kommunikation (BEPC-Format)", "Leseverstehen, Mediation und Schriftlicher Ausdruck (BEPC-Format)", "Text", "Aufgabe"]
         : exam === "Probatoire" ? ["Überprüfen Sie Ihr Wissen", "Strukturen und Kommunikation (Format des Probatoire)", "Leseverstehen, Mediation und Schriftlicher Ausdruck (Format des Probatoire)", "Text", "Aufgabe"]
         : ["Überprüfen Sie Ihr Wissen", "Strukturen und Kommunikation (Format des Bac)", "Leseverstehen, Mediation und Schriftlicher Ausdruck (Format des Bac)", "Text", "Aufgabe"],
-      anglais: ["Check your knowledge", "Section A: Grammar (" + (exam === "BEPC" ? "BEPC" : exam === "Probatoire" ? "Probatoire" : "Bac") + " format)", "Section D: Composition (" + (exam === "BEPC" ? "BEPC" : exam === "Probatoire" ? "Probatoire" : "Bac") + " format)", "Situation", "Task"]
+      anglais: ["Check your knowledge", "Section A: Grammar (10 marks, " + (exam === "BEPC" ? "BEPC" : exam === "Probatoire" ? "Probatoire" : "Bac") + " format)", "Section D: Composition writing (10 marks, " + (exam === "BEPC" ? "BEPC" : exam === "Probatoire" ? "Probatoire" : "Bac") + " format)", "Situation", "Task"]
     }[l.m];
     l.parties = l.parties.concat([{ t: pre, html: "<div class='integ'><h3>" + T[0] + "</h3><p>" + esc(q0.q) + "</p><ol type='a'>" + q0.r.map(x => "<li>" + esc(x) + "</li>").join("") + "</ol><details><summary>Voir la réponse</summary><p><strong>" + esc(q0.r[q0.b] || "") + "</strong>. " + esc(q0.e) + "</p></details><h3>" + T[1] + "</h3>" + enonce + (mE ? "<details><summary>Voir la réponse</summary><p>" + mE[1] + "</p></details>" : "") + (ex ? "<h3>" + (ex.titre || T[2]) + "</h3><p><strong>" + (ex.etiquette || T[3]) + ".</strong> " + ex.situation + "</p>" + ex.consignes.map((c, k) => "<p><strong>" + T[4] + (ex.consignes.length > 1 ? " " + (k + 1) : "") + ".</strong> " + c + "</p>").join("") + "<details><summary>Voir une réponse attendue</summary><p>" + ex.reponse + "</p></details>" : "") + "</div>", retenir: "Savoir-être mobilisé : " + a.etre + "." }]);
   } else if (["histoire", "geo", "ecm", "philo"].includes(l.m)) {
@@ -142,6 +154,10 @@ function ligneProg(l) {
   for (const s of CARTE[l.m] || []) for (const ch of ((PROG[l.c] || {})[s] || [])) for (const x of ch[1]) if (x[0] === l.rang) return { officiel: x[1], chap: ch, s };
   return null;
 }
+/* Schéma offert (demande de Jacques : « sur certaines leçons tu mets les schémas gratuits pour inciter
+   à l'abonnement ») : une leçon payante sur deux (rang impair) garde dans son aperçu public les schémas
+   et cartes de ses parties fermées ; l.schemaOffert = true / false force le choix. */
+function schemaOffert(l) { return l.schemaOffert === true || (l.schemaOffert !== false && (+l.rang || 0) % 2 === 1); }
 function premierDuTrimestre(l) {
   const vus = new Set();
   for (const s of CARTE[l.m] || []) for (const ch of ((PROG[l.c] || {})[s] || [])) {
@@ -182,12 +198,14 @@ for (const f of fs.readdirSync(APP)) if (/^apercus-.*\.js$/.test(f)) fs.unlinkSy
 
 const parClasse = {}; let libres = 0, payantes = 0;
 for (const [id, l] of Object.entries(L)) {
-  const gratuit = !!l.gratuit || premierDuTrimestre(l);
+  // l.payant : force le verrou même pour la première leçon d'un trimestre (demande de Jacques :
+  // « Ne fais pas trop de leçons gratuites sinon ils ne vont pas vouloir s'abonner »).
+  const gratuit = !l.payant && (!!l.gratuit || premierDuTrimestre(l));
   let pub;
   if (gratuit) { pub = { ...l, gratuit: true }; libres++; }
   else {
     pub = { ...l, verrou: true, nq: l.quiz.length, revision: [], exo: "", quiz: [],
-      labo: l.parties.some(p => p.labo), parties: [l.parties[0]].concat(l.parties.slice(1).map(p => ({ t: p.t, verrou: true }))) };
+      labo: l.parties.some(p => p.labo), parties: [l.parties[0]].concat(l.parties.slice(1).map(p => Object.assign({ t: p.t, verrou: true }, p.illus && schemaOffert(l) ? { illus: p.illus } : {}))) };
     fs.writeFileSync(path.join(dest, id + ".json"), JSON.stringify({ parties: l.parties.slice(1), revision: l.revision, exo: l.exo, quiz: l.quiz }));
     payantes++;
   }

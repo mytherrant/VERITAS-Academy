@@ -12319,7 +12319,8 @@ const ANAV=[
   {s:"🎓 Abonnements & plateformes",i:[
     {k:"elearningmgmt",i:"🎓",l:"E-Learning"},
     {k:"paywall",i:"🔓",l:"Essais & abonnements"},
-    {k:"plateforme",i:"🧩",l:"Atelier de Français"}
+    {k:"plateforme",i:"🧩",l:"Atelier de Français"},
+    {k:"apprendre_admin",i:"📘",l:"Apprendre (cours en ligne)"}
   ]},
   {s:"📢 Communication",i:[
     {k:"announce",i:"◆",l:"Annonces"},
@@ -12457,6 +12458,7 @@ const PT={
   finance:"Bilan financier",
   // Communication & Portail
   accueil_cms:"Contenu du site public",
+  apprendre_admin:"Apprendre — cours en ligne",
   announce:"Annonces & Événements",
   send:"Centre WhatsApp",
   orientation_admin:"Orientation & Conseil",
@@ -12665,6 +12667,8 @@ function render(p){
        rend « page introuvable » au lieu de casser tout le routeur. */
     accueil_cms: (typeof pgAccueil==='function' ? pgAccueil : null),
     plateforme:  (typeof pgPlateforme==='function' ? pgPlateforme : null),
+    // Réglages d'Apprendre (apprendre/*.html) : classes, leçons, ressources, offres…
+    apprendre_admin: (typeof pgApprendreAdmin==='function' ? pgApprendreAdmin : null),
     // Émission manuelle des codes de cahier (règlement en espèces au centre).
     livret_codes: (typeof pgLivretCodes==='function' ? pgLivretCodes : null),
     // Catalogue des livrets : ajout, retrait de la vente, prix, promotions.
@@ -18735,26 +18739,25 @@ function _vheroToggleSound(ev){
 // ════════════════════════════════════════════════════════════════════
 // v2.7 — SYSTÈME DE QUOTAS IA PAR PLAN D'ABONNEMENT
 // ════════════════════════════════════════════════════════════════════
-// Stratégie freemium :
-// - Visiteur anonyme : 2 essais TOTAL (lifetime, localStorage)
-// - Visiteur inscrit gratuit : 3 essais / SEMAINE (reset lundi)
-// - Plan Starter : 5 / jour
-// - Plan Pro : 30 / jour
-// - Plan Elite : illimité
-// - Enseignant : 50 / jour
-// - Admin / Super-admin : illimité
+// Stratégie freemium (alignée sur le serveur le 13/11/2026 — ia_proxy.php compte
+// PAR JOUR, ce tableau ne sert qu'à prévenir l'utilisateur avant l'appel) :
+// - Visiteur anonyme : 2 / jour
+// - Compte gratuit (« découverte ») et Starter : 5 / jour
+// - Pro : 30 / jour · Élite et Famille : 100 / jour
+// - Prof 3 / 6 / toutes classes : 40 / 80 / 150 par jour
+// - Enseignant de l'établissement : 120 / jour · Admin : illimité
 
 /* Quotas alignés sur la table des droits (vrt_droits_formules, api/_auth_lib.php)
    le 12/11/2026 : Élite = 100 / jour (plus « illimité » : le serveur bornait à 100),
    et les formules Famille et enseignant ont leur colonne. */
 window.AI_QUOTAS = {
-  // [type d'action] : { anonyme, gratuit_sem, starter_j, pro_j, élite_j, famille_j, prof3_j, prof6_j, proftout_j, enseignant_j, admin }
-  default:  { anon:2, free:3, starter:5, pro:30, elite:100, famille:100, prof3:40, prof6:80, proftout:150, teach:50, admin:-1 },
-  ambassa:  { anon:2, free:3, starter:5, pro:30, elite:100, famille:100, prof3:40, prof6:80, proftout:150, teach:50, admin:-1 },
-  devoir:   { anon:2, free:3, starter:5, pro:30, elite:100, famille:100, prof3:40, prof6:80, proftout:150, teach:50, admin:-1 },
+  // [type d'action] : { anonyme_j, gratuit_j, starter_j, pro_j, élite_j, famille_j, prof3_j, prof6_j, proftout_j, enseignant_j, admin }
+  default:  { anon:2, free:5, starter:5, pro:30, elite:100, famille:100, prof3:40, prof6:80, proftout:150, teach:120, admin:-1 },
+  ambassa:  { anon:2, free:5, starter:5, pro:30, elite:100, famille:100, prof3:40, prof6:80, proftout:150, teach:120, admin:-1 },
+  devoir:   { anon:2, free:5, starter:5, pro:30, elite:100, famille:100, prof3:40, prof6:80, proftout:150, teach:120, admin:-1 },
   photo_ia: { anon:1, free:2, starter:3, pro:15, elite:50,  famille:50,  prof3:20, prof6:40, proftout:75,  teach:20, admin:-1 },
   orient:   { anon:1, free:2, starter:3, pro:10, elite:30,  famille:30,  prof3:10, prof6:20, proftout:30,  teach:20, admin:-1 },
-  correct:  { anon:2, free:3, starter:5, pro:30, elite:100, famille:100, prof3:40, prof6:80, proftout:150, teach:50, admin:-1 }
+  correct:  { anon:2, free:5, starter:5, pro:30, elite:100, famille:100, prof3:40, prof6:80, proftout:150, teach:120, admin:-1 }
 };
 
 // Helper : déterminer le tier de l'utilisateur courant
@@ -18793,7 +18796,8 @@ window._aiTier = function(){
     if(mg) t=mg[1];
     else if(p==='plan4') t='famille';
     else if(p==='plan2') t='starter';                            // INTERMÉDIAIRE
-    else t='pro';                                                // EXAMEN(plan1)/ENSEIGNANT(plan3)/TECHNIQUE(plan5)/GCE(plan6)/inconnu payant
+    else if(/^plan(1|3|5|6|7|10)$/.test(p)) t='pro';             // EXAMEN/ENSEIGNANT/TECHNIQUE/GCE/E-LEARNING ENSEIGNANT/SUIVI EN LIGNE
+    else return;                                                 // Atelier, prestations, packs : aucun palier IA (même règle que vrt_groupe_droits)
     if(_rank[t] > _bestR){ _bestR = _rank[t]; _best = t; }
   });
   if(_bestR >= 0) return _best;
@@ -18844,8 +18848,8 @@ window._requirePlan = function(feature, labelFeature){
 
 // Période de comptage selon tier (lifetime, semaine, jour)
 window._aiPeriod = function(tier){
-  if(tier==='anon') return 'lifetime';
-  if(tier==='free') return 'week';
+  // Tout se compte au JOUR, comme ia_proxy.php (13/11/2026) : l'ancien « 2 à vie »
+  // et « 3 par semaine » contredisaient le serveur et les cartes de prix.
   return 'day';
 };
 
@@ -19037,7 +19041,7 @@ window._showQuotaExceeded = function(action, tier, used, limit){
       +'<div style="background:linear-gradient(135deg,#FFC93C,#F59E0B);color:#142554;padding:16px;border-radius:14px;margin-bottom:14px;text-align:left">'
         +'<div style="font-weight:900;font-size:15px;margin-bottom:6px">✨ Inscrivez-vous GRATUITEMENT et recevez :</div>'
         +'<ul style="margin:0;padding-left:20px;font-size:13px;line-height:1.8">'
-        +'<li>3 essais Ambassa / semaine</li>'
+        +'<li>'+(((AI_QUOTAS[action]||AI_QUOTAS.default).free)||5)+' questions par jour à Ambassa</li>'
         +'<li>Sauvegarde de votre progression</li>'
         +'<li>500 FCFA de crédit par ami parrainé</li>'
         +'<li>Badges + Genome + Wrapped annuel</li>'
@@ -21412,61 +21416,140 @@ function _lancerCustomQuiz(id){
   else if(j.type==="trous") _lancerTrousCustom(j);
   else _lancerQCMCustom(j); // qcm ou vf
 }
-function _lancerQCMCustom(j){
-  var qs=j.questions.slice();var idx=0;var score=0;var isVF=j.type==="vf";
-  function render(){
-    if(idx>=qs.length){
-      _vc("<div class='vsec'><button class='back-btn' onclick='showJeuxEdu()'>← Jeux</button>"
-        +"<div class='vcard' style='text-align:center'><div style='font-size:52px;margin-bottom:16px'>🎉</div>"
-        +"<div style='font-family:Montserrat,sans-serif;font-size:20px;font-weight:800;color:#142554;margin-bottom:8px'>"+j.titre+" — Terminé !</div>"
-        +"<div style='font-size:16px;color:var(--ink3)'>Score : "+score+"/"+qs.length+"</div>"
-        +"<button class='btn bi mt16' onclick='_lancerCustomQuiz(\""+j.id+"\")'>Rejouer</button></div></div>");
-      return;
-    }
-    var q=qs[idx];var opts=isVF?["Vrai","Faux"]:q.opts||[];
-    var h="<div class='vsec'><button class='back-btn' onclick='showJeuxEdu()'>← Jeux</button>";
-    h+="<div class='vsec-title'>"+j.emoji+" "+j.titre+"</div>";
-    h+="<div class='quiz-container'><div class='quiz-header'><h3>"+j.titre+"</h3>";
-    h+="<p>Question "+(idx+1)+"/"+qs.length+"</p></div>";
-    h+="<div class='quiz-progress'><div class='quiz-progress-fill' style='width:"+Math.round((idx/qs.length)*100)+"%'></div></div>";
-    h+="<div class='quiz-q'><div class='quiz-q-text'>"+q.q+"</div>";
-    h+="<div class='quiz-opts'>";
-    opts.forEach(function(o,oi){
-      h+="<button class='quiz-opt' onclick='_cqCheck("+oi+","+q.ans+",this,\""+encodeURIComponent(q.exp||"")+"\")'>"+String.fromCharCode(65+oi)+". "+o+"</button>";
+/* 13/11/2026 — MOTEUR DES QUIZ RÉÉCRIT. « Uncaught SyntaxError: Invalid or
+   unexpected token » au premier clic sur « Auteurs camerounais » : l'explication
+   (« jeune 'boy' camerounais ») partait dans un onclick='…' ; encodeURIComponent
+   laisse passer l'apostrophe, qui refermait l'attribut. Plus AUCUNE donnée de
+   jeu ne transite par un attribut : les boutons portent un indice (data-i) et
+   les gestionnaires sont posés en JS. Les textes sont échappés (_esc).
+   Et pour captiver : questions et réponses mélangées à chaque partie, chrono
+   par question, série de bonnes réponses (bonus), étoiles, record personnel,
+   corrigé des erreurs en fin de partie, touches A-D / 1-4 / V-F au clavier. */
+function _cqEsc(s){return (typeof _esc==='function')?_esc(String(s==null?'':s)):String(s==null?'':s).replace(/[&<>"']/g,function(c){return '&#'+c.charCodeAt(0)+';';});}
+function _cqMelange(t){t=t.slice();for(var i=t.length-1;i>0;i--){var k=Math.floor(Math.random()*(i+1)),x=t[i];t[i]=t[k];t[k]=x;}return t;}
+function _cqSansAccent(s){return String(s||'').normalize?String(s||'').normalize('NFD').replace(/[̀-ͯ]/g,''):String(s||'');}
+function _cqRecord(id,val){var cle='vrt_jq_'+id,r=null;try{r=JSON.parse(localStorage.getItem(cle)||'null');}catch(e){}
+  var neuf=r===null||val>r;if(neuf){try{localStorage.setItem(cle,JSON.stringify(val));}catch(e){}}return {neuf:neuf,ancien:r};}
+function _cqInvitation(){
+  try{var t=typeof _aiTier==='function'?_aiTier():'anon';if(t!=='anon'&&t!=='free')return '';}catch(e){}
+  return "<div style='margin-top:18px;padding:14px 16px;border-radius:14px;background:#FFF6DC;border:1px solid #F3DFA6;text-align:left;font-size:14px;color:#4D3B00'>"
+    +"<b>Envie d'aller plus loin ?</b> Avec une formule VÉRITAS, tu as les leçons complètes de ta classe, le tuteur IA et les examens blancs notés."
+    +"<div style='margin-top:10px'><button class='btn bi' data-cq='formules'>Voir les formules</button></div></div>";
+}
+/* Écran de fin commun : étoiles, record, corrigé des erreurs. */
+function _cqFin(j,bons,total,points,ratees,relancer){
+  var pc=total?bons/total:0,et=pc>=0.9?3:pc>=0.6?2:pc>=0.3?1:0;
+  var rec=_cqRecord(j.id,points);
+  var msg=et===3?'Excellent !':et===2?'Bien joué !':et===1?'Pas mal, on recommence ?':'Courage, rejoue pour progresser !';
+  var h="<div class='vsec'><button class='back-btn' data-cq='retour'>← Jeux</button>"
+    +"<div class='vcard' style='max-width:620px;margin:0 auto;text-align:center'>"
+    +"<div style='font-size:40px;letter-spacing:6px;margin-bottom:6px' aria-label='"+et+" étoile(s) sur 3'>"
+    +[0,1,2].map(function(i){return "<span style='color:"+(i<et?"#F5B301":"#D7DBE3")+"'>★</span>";}).join("")+"</div>"
+    +"<div style='font:800 22px Montserrat,sans-serif;color:#142554'>"+msg+"</div>"
+    +"<div style='color:#4D5163;margin-top:6px'>"+_cqEsc(j.titre)+" : <b>"+bons+"/"+total+"</b> · "+points+" points</div>"
+    +"<div style='margin-top:6px;font-weight:700;color:"+(rec.neuf?"#047857'>Nouveau record !":"#5B6170'>Record : "+rec.ancien+" points")+"</div>";
+  if(ratees.length){
+    h+="<div style='text-align:left;margin-top:18px'><div style='font-weight:800;color:#142554;margin-bottom:8px'>À retenir</div>";
+    ratees.forEach(function(r){
+      h+="<div style='padding:10px 12px;border:1px solid #E6E9F0;border-radius:10px;margin-bottom:8px;font-size:14px'>"
+        +"<div style='color:#142554;font-weight:600'>"+_cqEsc(r.q)+"</div>"
+        +"<div style='color:#047857;margin-top:4px'>✓ "+_cqEsc(r.rep)+"</div>"
+        +(r.exp?"<div style='color:#5B6170;margin-top:4px'>"+_cqEsc(r.exp)+"</div>":"")+"</div>";
     });
-    h+="</div><div id='cqExp' style='display:none;margin-top:12px;padding:10px;background:#FEF3C7;border-radius:0 8px 8px 0;font-size:12px'></div>"
-    +"</div><div class='quiz-nav'><span style='font-size:13px;color:var(--ink4)'>Score : "+score+"/"+qs.length+"</span>"
-    +"<button id='cqNext' class='btn bi xs' style='display:none' onclick='window._cqNext()'>Suivant →</button></div></div></div>";
-    _vc(h);
-    window._cqNext=function(){idx++;render();};
-    window._cqCheck=function(chosen,ans,btn,exp){
-      document.querySelectorAll(".quiz-opt").forEach(function(b,bi){
-        b.disabled=true;
-        if(bi===ans)b.classList.add("correct");
-        else if(b===btn)b.classList.add("wrong");
-      });
-      if(chosen===ans)score++;
-      var expEl=document.getElementById("cqExp");
-      if(expEl&&exp){expEl.style.display="block";expEl.textContent=decodeURIComponent(exp);}
-      var nxt=document.getElementById("cqNext");if(nxt)nxt.style.display="inline-flex";
-    };
+    h+="</div>";
   }
+  h+="<div style='margin-top:14px;display:flex;gap:8px;justify-content:center;flex-wrap:wrap'><button class='btn bi' data-cq='rejouer'>Rejouer</button><button class='btn bo' data-cq='retour'>Autres jeux</button></div>"
+    +_cqInvitation()+"</div></div>";
+  _vc(h);
+  [].forEach.call(document.querySelectorAll('[data-cq]'),function(b){
+    var a=b.getAttribute('data-cq');
+    b.onclick=a==='rejouer'?relancer:a==='retour'?function(){showJeuxEdu();}:function(){if(typeof vShowSec==='function')vShowSec('elearning',null);};
+  });
+}
+function _lancerQCMCustom(j){
+  var isVF=j.type==="vf";
+  var DUREE=isVF?15:30;
+  var qs=_cqMelange(j.questions).map(function(q){
+    var opts=isVF?["Vrai","Faux"]:(q.opts||[]);
+    var ans=isVF?((q.ans===true||q.ans===0||String(q.ans).toLowerCase()==='vrai')?0:1):(+q.ans||0);
+    var ordre=isVF?[0,1]:_cqMelange(opts.map(function(_,i){return i;}));
+    return {q:q.q,exp:q.exp||'',opts:ordre.map(function(i){return opts[i];}),ans:ordre.indexOf(ans)};
+  });
+  var idx=0,bons=0,points=0,serie=0,meilleure=0,ratees=[],repondu=false,chrono=null,partie=(window._cqPartie=(window._cqPartie||0)+1);
+  function stop(){if(chrono){clearInterval(chrono);chrono=null;}}
+  function render(){
+    stop();
+    if(idx>=qs.length){document.onkeydown=null;_cqFin(j,bons,qs.length,points,ratees,function(){_lancerQCMCustom(j);});return;}
+    var q=qs[idx];repondu=false;
+    var h="<div class='vsec'><button class='back-btn' id='cqRetour'>← Jeux</button>";
+    h+="<div class='vsec-title'>"+_cqEsc(j.emoji||'')+" "+_cqEsc(j.titre)+"</div>";
+    h+="<div class='quiz-container'><div class='quiz-header' style='display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap'>"
+      +"<p style='margin:0'>Question "+(idx+1)+"/"+qs.length+"</p>"
+      +"<p style='margin:0;font-weight:700;color:#142554'>"+points+" pts"+(serie>=2?" · <span style='color:#C24E00'>série ×"+serie+"</span>":"")+"</p></div>";
+    h+="<div class='quiz-progress'><div class='quiz-progress-fill' style='width:"+Math.round((idx/qs.length)*100)+"%'></div></div>";
+    h+="<div style='height:6px;border-radius:3px;background:#EEF1F6;margin:10px 0 4px;overflow:hidden'><div id='cqTemps' style='height:100%;width:100%;background:#2E7D32;transition:width .25s linear'></div></div>";
+    h+="<div class='quiz-q'><div class='quiz-q-text'>"+_cqEsc(q.q)+"</div><div class='quiz-opts'>";
+    q.opts.forEach(function(o,oi){
+      h+="<button type='button' class='quiz-opt' data-i='"+oi+"'>"+(isVF?"":String.fromCharCode(65+oi)+". ")+_cqEsc(o)+"</button>";
+    });
+    h+="</div><div id='cqExp' style='display:none;margin-top:12px;padding:10px 12px;background:#FEF3C7;border-radius:0 8px 8px 0;font-size:13px'></div>"
+      +"</div><div class='quiz-nav'><span style='font-size:13px;color:var(--ink4)'>"+bons+" bonne"+(bons>1?"s":"")+" réponse"+(bons>1?"s":"")+"</span>"
+      +"<button id='cqNext' class='btn bi xs' style='display:none'>"+(idx+1<qs.length?"Suivant →":"Résultat")+"</button></div></div></div>";
+    _vc(h);
+    var r=document.getElementById('cqRetour');if(r)r.onclick=function(){stop();document.onkeydown=null;showJeuxEdu();};
+    [].forEach.call(document.querySelectorAll('.quiz-opt[data-i]'),function(b){b.onclick=function(){repond(+b.getAttribute('data-i'));};});
+    var n=document.getElementById('cqNext');if(n)n.onclick=suivant;
+    document.onkeydown=function(e){
+      if(!document.getElementById('cqTemps')&&!document.getElementById('cqNext')){document.onkeydown=null;return;}
+      var k=(e.key||'').toLowerCase();
+      if(repondu){if(k==='enter'||k===' '){e.preventDefault();suivant();}return;}
+      var i=isVF?(k==='v'?0:k==='f'?1:-1):'abcd'.indexOf(k);
+      if(i<0&&/^[1-4]$/.test(k))i=+k-1;
+      if(i>=0&&i<q.opts.length)repond(i);
+    };
+    var debut=Date.now();
+    chrono=setInterval(function(){
+      var t=document.getElementById('cqTemps');
+      if(!t||window._cqPartie!==partie){stop();return;}
+      var reste=DUREE-(Date.now()-debut)/1000;
+      t.style.width=Math.max(0,reste/DUREE*100)+'%';
+      t.style.background=reste<DUREE/4?'#B42318':reste<DUREE/2?'#E59E00':'#2E7D32';
+      if(reste<=0)repond(-1);
+    },250);
+    function repond(choisi){
+      if(repondu)return;repondu=true;stop();
+      var reste=Math.max(0,DUREE-(Date.now()-debut)/1000);
+      [].forEach.call(document.querySelectorAll('.quiz-opt[data-i]'),function(b){
+        var bi=+b.getAttribute('data-i');b.disabled=true;
+        if(bi===q.ans)b.classList.add('correct');else if(bi===choisi)b.classList.add('wrong');
+      });
+      var ok=choisi===q.ans,gain=0;
+      if(ok){bons++;serie++;meilleure=Math.max(meilleure,serie);gain=10+Math.round(reste/DUREE*5)+Math.min(serie-1,5)*2;points+=gain;}
+      else{serie=0;ratees.push({q:q.q,rep:q.opts[q.ans],exp:q.exp});}
+      var e=document.getElementById('cqExp');
+      if(e){e.style.display='block';
+        e.innerHTML=(ok?"<b style='color:#047857'>Juste ! +"+gain+" pts"+(serie>=3?" — série de "+serie+" !":"")+"</b>"
+          :"<b style='color:#B42318'>"+(choisi<0?"Temps écoulé.":"Raté.")+"</b> Bonne réponse : "+_cqEsc(q.opts[q.ans]))
+          +(q.exp?"<div style='margin-top:4px'>"+_cqEsc(q.exp)+"</div>":"");}
+      var nx=document.getElementById('cqNext');if(nx){nx.style.display='inline-flex';try{nx.focus();}catch(_){}}
+    }
+  }
+  function suivant(){idx++;render();}
   render();
 }
 function _lancerPenduCustom(j){
-  var mots=j.questions.map(function(q){return{mot:(q.mot||q.q||"VERITAS").toUpperCase(),ind:q.exp||q.q||""};});
-  var midx=Math.floor(Math.random()*mots.length);var item=mots[midx];
-  var tries=0;var maxT=7;var found=[];var wrong=[];
+  var mots=j.questions.map(function(q){return{mot:_cqSansAccent(q.mot||q.q||"VERITAS").toUpperCase(),ind:q.ind||q.exp||(q.mot?q.q:"")||""};});
+  var item=mots[Math.floor(Math.random()*mots.length)];
+  var tries=0,maxT=7,found=[],wrong=[];
+  function lettre(c){return c>='A'&&c<='Z';}
   function render(){
-    var display=item.mot.split("").map(function(c){return(c===" "?"&nbsp;":found.indexOf(c)>=0?c:"_");}).join(" ");
-    var won=item.mot.split("").every(function(c){return c===" "||found.indexOf(c)>=0;});
+    var display=item.mot.split("").map(function(c){return c===" "?"&nbsp;":!lettre(c)?_cqEsc(c):found.indexOf(c)>=0?c:"_";}).join(" ");
+    var won=item.mot.split("").every(function(c){return !lettre(c)||found.indexOf(c)>=0;});
     var lost=tries>=maxT;
-    var ALPHA="ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-    var h="<div class='vsec'><button class='back-btn' onclick='showJeuxEdu()'>← Jeux</button>";
-    h+="<div class='vsec-title'><span class='vsec-ico'><svg class='vico vico-21' aria-hidden='true'><use href='#lc-pencil'/></svg></span>"+j.titre+"</div>";
+    var h="<div class='vsec'><button class='back-btn' id='cqRetour'>← Jeux</button>";
+    h+="<div class='vsec-title'><span class='vsec-ico'><svg class='vico vico-21' aria-hidden='true'><use href='#lc-pencil'/></svg></span>"+_cqEsc(j.titre)+"</div>";
     h+="<div class='vcard' style='max-width:560px;margin:0 auto;text-align:center'>";
-    if(item.ind)h+="<div style='font-size:12px;color:var(--ink4);margin-bottom:10px;font-style:italic'>💡 "+item.ind+"</div>";
-    // Bonhomme pendu SVG simplifié
+    if(item.ind)h+="<div style='font-size:13px;color:var(--ink4);margin-bottom:10px;font-style:italic'>💡 "+_cqEsc(item.ind)+"</div>";
     var parts=["<circle cx='100' cy='30' r='18' fill='none' stroke='#AE5353' stroke-width='3'/>",
       "<line x1='100' y1='48' x2='100' y2='110' stroke='#AE5353' stroke-width='3'/>",
       "<line x1='100' y1='65' x2='70' y2='95' stroke='#AE5353' stroke-width='3'/>",
@@ -21474,66 +21557,71 @@ function _lancerPenduCustom(j){
       "<line x1='100' y1='110' x2='75' y2='145' stroke='#AE5353' stroke-width='3'/>",
       "<line x1='100' y1='110' x2='125' y2='145' stroke='#AE5353' stroke-width='3'/>",
       "<line x1='40' y1='0' x2='40' y2='160' stroke='#142554' stroke-width='3'/><line x1='40' y1='0' x2='100' y2='0' stroke='#142554' stroke-width='3'/><line x1='100' y1='0' x2='100' y2='12' stroke='#142554' stroke-width='3'/>"];
-    h+="<svg viewBox='0 0 200 170' style='width:160px;height:130px;margin:0 auto;display:block'>"
-      +parts.slice(Math.max(0,7-tries)).join("")
-      +"</svg>";
-    h+="<div style='font-size:26px;font-family:\"Fira Code\",monospace;letter-spacing:8px;color:#142554;margin:14px 0'>"+display+"</div>";
-    if(won){h+="<div style='color:#059669;font-weight:800;font-size:16px;margin-bottom:12px'>🎉 Bravo ! Mot trouvé !</div><button class='btn bi' onclick='_lancerPenduCustom("+JSON.stringify(j).replace(/'/g,"&#39;")+")'>Rejouer</button>";}
-    else if(lost){h+="<div style='color:#AE5353;font-weight:800;font-size:14px;margin-bottom:8px'>❌ Perdu ! Le mot était : <strong>"+item.mot+"</strong></div><button class='btn bi' onclick='_lancerPenduCustom("+JSON.stringify(j).replace(/'/g,"&#39;")+")'>Rejouer</button>";}
-    else{
-      h+="<div style='display:flex;flex-wrap:wrap;gap:5px;justify-content:center;margin-top:8px'>";
-      ALPHA.split("").forEach(function(c){
+    h+="<svg viewBox='0 0 200 170' style='width:160px;height:130px;margin:0 auto;display:block'>"+parts.slice(Math.max(0,7-tries)).join("")+"</svg>";
+    h+="<div style='font-size:26px;font-family:\"Fira Code\",monospace;letter-spacing:8px;color:#142554;margin:14px 0;word-break:break-word'>"+display+"</div>";
+    if(won||lost){
+      h+=won?"<div style='color:#059669;font-weight:800;font-size:16px;margin-bottom:12px'>🎉 Bravo ! Mot trouvé avec "+tries+" erreur"+(tries>1?"s":"")+" !</div>"
+        :"<div style='color:#AE5353;font-weight:800;font-size:14px;margin-bottom:8px'>Perdu ! Le mot était : <strong>"+_cqEsc(item.mot)+"</strong></div>";
+      h+="<button class='btn bi' id='cqRejouer'>Rejouer</button>"+_cqInvitation();
+    }else{
+      h+="<div data-pas-onglets style='display:flex;flex-wrap:wrap;gap:5px;justify-content:center;margin-top:8px'>";
+      "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("").forEach(function(c){
         var used=found.indexOf(c)>=0||wrong.indexOf(c)>=0;
-        h+="<button style='width:32px;height:32px;border-radius:6px;border:1.5px solid "+(used?"#ccc":"#142554")+";background:"+(wrong.indexOf(c)>=0?"#FEE2E2":found.indexOf(c)>=0?"#D1FAE5":"#fff")+";color:"+(used?"#999":"#142554")+";font-weight:700;font-size:13px;cursor:"+(used?"default":"pointer")+";transition:.15s'"
-          +(used?"disabled":"")+(!used?" onclick='_phLetter(\""+c+"\")'":"")+" >"+c+"</button>";
+        h+="<button type='button' data-l='"+c+"' style='width:34px;height:34px;border-radius:6px;border:1.5px solid "+(used?"#ccc":"#142554")+";background:"+(wrong.indexOf(c)>=0?"#FEE2E2":found.indexOf(c)>=0?"#D1FAE5":"#fff")+";color:"+(used?"#999":"#142554")+";font-weight:700;font-size:13px;cursor:"+(used?"default":"pointer")+"'"+(used?" disabled":"")+">"+c+"</button>";
       });
-      h+="</div><div style='font-size:12px;color:var(--ink4);margin-top:10px'>Essais restants : "+(maxT-tries)+" / "+maxT+"</div>";
+      h+="</div><div style='font-size:12px;color:var(--ink4);margin-top:10px'>Essais restants : "+(maxT-tries)+" / "+maxT+" · tape les lettres au clavier</div>";
     }
     h+="</div></div>";
     _vc(h);
-    window._phLetter=function(c){
-      if(item.mot.indexOf(c)>=0){found.push(c);}else{wrong.push(c);tries++;}
-      render();
+    var r=document.getElementById('cqRetour');if(r)r.onclick=function(){document.onkeydown=null;showJeuxEdu();};
+    var rj=document.getElementById('cqRejouer');if(rj)rj.onclick=function(){_lancerPenduCustom(j);};
+    [].forEach.call(document.querySelectorAll('[data-l]'),function(b){if(!b.disabled)b.onclick=function(){joue(b.getAttribute('data-l'));};});
+    [].forEach.call(document.querySelectorAll('[data-cq]'),function(b){b.onclick=function(){if(typeof vShowSec==='function')vShowSec('elearning',null);};});
+    document.onkeydown=(won||lost)?null:function(e){
+      if(!document.querySelector('[data-l]')){document.onkeydown=null;return;}
+      var k=(e.key||'').toUpperCase();if(k.length===1&&lettre(k))joue(k);
     };
+  }
+  function joue(c){
+    if(found.indexOf(c)>=0||wrong.indexOf(c)>=0)return;
+    if(item.mot.indexOf(c)>=0)found.push(c);else{wrong.push(c);tries++;}
+    render();
   }
   render();
 }
 function _lancerTrousCustom(j){
-  var qs=j.questions.slice();var idx=0;var score=0;
+  var qs=_cqMelange(j.questions),idx=0,bons=0,points=0,serie=0,ratees=[];
+  function norme(s){return _cqSansAccent(String(s||'')).toLowerCase().replace(/[’`]/g,"'").replace(/\s+/g,' ').trim();}
   function render(){
-    if(idx>=qs.length){
-      _vc("<div class='vsec'><button class='back-btn' onclick='showJeuxEdu()'>← Jeux</button>"
-        +"<div class='vcard' style='text-align:center'><div style='font-size:48px;margin-bottom:12px'>✍️</div>"
-        +"<div style='font-size:20px;font-weight:800;color:#142554'>Score : "+score+"/"+qs.length+"</div>"
-        +"<button class='btn bi mt14' onclick='_lancerCustomQuiz(\""+j.id+"\")'>Rejouer</button></div></div>");
-      return;
-    }
-    var q=qs[idx];
-    // Format: q contient "___" à remplacer, ans = mot attendu
-    var phrase=(q.q||"").replace(/___/g,"<input id='trouInp' class='fi' style='display:inline-block;width:120px;max-width:180px;padding:4px 8px;margin:0 6px;font-size:14px;border:2px solid #142554;border-radius:6px' placeholder='...'>");
-    var h="<div class='vsec'><button class='back-btn' onclick='showJeuxEdu()'>← Jeux</button>";
-    h+="<div class='vsec-title'>"+j.emoji+" "+j.titre+"</div>";
-    h+="<div class='vcard' style='max-width:560px;margin:0 auto'>";
-    h+="<div style='font-size:12px;color:var(--ink4);margin-bottom:8px'>Question "+(idx+1)+"/"+qs.length+" · Score : "+score+"</div>";
-    h+="<div style='font-size:16px;line-height:2;color:#142554;font-family:Georgia,serif;margin-bottom:16px'>"+phrase+"</div>";
-    if(q.exp)h+="<div style='font-size:11px;color:var(--ink4);font-style:italic;margin-bottom:10px'>💡 Aide : "+q.exp+"</div>";
-    h+="<div id='trouFb' style='min-height:20px;margin-bottom:10px'></div>";
-    h+="<button class='btn bi' onclick='_trouCheck(\""+encodeURIComponent(String(q.ans))+"\")'>Valider</button>";
-    h+="</div></div>";
+    if(idx>=qs.length){_cqFin(j,bons,qs.length,points,ratees,function(){_lancerTrousCustom(j);});return;}
+    var q=qs[idx],fait=false;
+    var morceaux=String(q.q||'').split('___');
+    var phrase=morceaux.map(_cqEsc).join("<input id='trouInp' class='fi' autocomplete='off' style='display:inline-block;width:140px;max-width:200px;padding:4px 8px;margin:0 6px;font-size:15px;border:2px solid #142554;border-radius:6px' placeholder='…'>");
+    var h="<div class='vsec'><button class='back-btn' id='cqRetour'>← Jeux</button>";
+    h+="<div class='vsec-title'>"+_cqEsc(j.emoji||'')+" "+_cqEsc(j.titre)+"</div>";
+    h+="<div class='vcard' style='max-width:600px;margin:0 auto'>";
+    h+="<div style='display:flex;justify-content:space-between;font-size:13px;color:var(--ink4);margin-bottom:8px'><span>Phrase "+(idx+1)+"/"+qs.length+"</span><b style='color:#142554'>"+points+" pts"+(serie>=2?" · série ×"+serie:"")+"</b></div>";
+    h+="<div style='font-size:17px;line-height:2;color:#142554;font-family:Georgia,serif;margin-bottom:16px'>"+phrase+"</div>";
+    if(q.exp)h+="<details style='font-size:13px;color:var(--ink4);margin-bottom:10px'><summary style='cursor:pointer'>Besoin d'un indice ? (−3 pts)</summary><div style='margin-top:6px;font-style:italic'>"+_cqEsc(q.exp)+"</div></details>";
+    h+="<div id='trouFb' style='min-height:22px;margin-bottom:10px'></div>";
+    h+="<button class='btn bi' id='trouOk'>Valider</button></div></div>";
     _vc(h);
-    window._trouCheck=function(ansEnc){
-      var ans=decodeURIComponent(ansEnc).trim().toLowerCase();
-      var inp=document.getElementById("trouInp");
-      var val=(inp?inp.value:"").trim().toLowerCase();
-      var fb=document.getElementById("trouFb");
-      if(val===ans||ans.split("|").some(function(a){return val===a.trim();})){
-        score++;if(fb)fb.innerHTML="<span style='color:#059669;font-weight:800'>✅ Correct !</span>";
-      }else{
-        if(fb)fb.innerHTML="<span style='color:#AE5353;font-weight:800'>❌ Réponse : "+decodeURIComponent(ansEnc)+"</span>";
-      }
+    var aide=false,d=document.querySelector('details');if(d)d.addEventListener('toggle',function(){if(d.open)aide=true;});
+    var r=document.getElementById('cqRetour');if(r)r.onclick=function(){showJeuxEdu();};
+    var inp=document.getElementById('trouInp');
+    if(inp){try{inp.focus();}catch(_){}inp.onkeydown=function(e){if(e.key==='Enter')valider();};}
+    document.getElementById('trouOk').onclick=valider;
+    function valider(){
+      if(fait){idx++;render();return;}
+      var val=norme(inp?inp.value:'');if(!val)return;
+      fait=true;
+      var bonnes=String(q.ans).split('|'),ok=bonnes.some(function(a){return norme(a)===val;});
+      var fb=document.getElementById('trouFb');
+      if(ok){bons++;serie++;var g=10+Math.min(serie-1,5)*2-(aide?3:0);points+=g;if(fb)fb.innerHTML="<span style='color:#059669;font-weight:800'>Juste ! +"+g+" pts</span>";}
+      else{serie=0;ratees.push({q:String(q.q||'').replace(/___/g,'…'),rep:bonnes[0],exp:q.exp});if(fb)fb.innerHTML="<span style='color:#AE5353;font-weight:800'>Réponse : "+_cqEsc(bonnes[0])+"</span>";}
       if(inp)inp.disabled=true;
-      setTimeout(function(){idx++;render();},1400);
-    };
+      var b=document.getElementById('trouOk');if(b){b.textContent=idx+1<qs.length?'Suivant →':'Résultat';try{b.focus();}catch(_){}}
+    }
   }
   render();
 }
@@ -56994,6 +57082,783 @@ window._cmsEdit           = _cmsEdit;
 window._cmsReset          = _cmsReset;
 window._cmsViser          = _cmsViser;
 window._cmsRemplacerImage = _cmsRemplacerImage;
+
+/* ══════════════════════════════════════════════════════════════════════════
+   APPRENDRE — écran d'administration (13/11/2026)
+   ──────────────────────────────────────────────────────────────────────────
+   Demande de Jacques : « Configure Apprendre dans le dashboard admin avec
+   tout éditable ».
+
+   Apprendre (apprendre/*.html) est fait de pages STATIQUES qui ne chargent ni
+   app.js ni DB. Les réglages faits ici sont rangés dans DB.apprendreCfg,
+   partent au serveur par la synchronisation habituelle, et redescendent par
+   /api/apprendre_config.php (window.VRT_APP_CFG), que chaque page charge AVANT
+   apprendre/commun.js. commun.js et calendrier.js les appliquent.
+
+   Ce qui se règle :
+   · Général      : fermeture temporaire, bandeau d'annonce, numéro WhatsApp ;
+   · Classes      : classes ouvertes, nom / couleur / visibilité des matières ;
+   · Rubriques    : les quatre rubriques et les familles de ressources ;
+   · Offres       : formules (nom, prix de repli, avantages), carte « Avec un
+                    professeur », note, lien enseignants, cahiers ;
+   · Leçons       : corriger, masquer, ajouter (contenu, quiz, révision…) ;
+   · Ressources   : corriger, masquer, ajouter et rattacher à une classe ;
+   · Calendrier   : dates d'examen, échéances ajoutées / masquées, salons ;
+   · Textes       : remplacer n'importe quel texte affiché.
+
+   Un réglage RECOUVRE, il n'efface pas : vider un champ rend la valeur
+   d'origine (affichée en grisé dans le champ). Les valeurs d'origine sont lues
+   dans les fichiers d'Apprendre eux-mêmes, chargés dans un cadre invisible.
+   ══════════════════════════════════════════════════════════════════════════ */
+
+var _APA = {
+  d: null,               // brouillon (copie de DB.apprendreCfg)
+  onglet: 'general',
+  src: null,             // données d'origine lues dans les fichiers d'Apprendre
+  charge: false,
+  erreur: '',
+  fl: { c:'', m:'', q:'', pay:true, modif:false },   // filtres des leçons
+  fr: { c:'', m:'', q:'', t:'' },                    // filtres des ressources
+  ed: null               // leçon ou ressource en cours d'édition (fenêtre)
+};
+var _APA_ONGLETS = [
+  ['general','⚙️ Général'], ['classes','🏫 Classes & matières'], ['rubriques','🗂️ Rubriques'],
+  ['offre','💳 Formules & offres'], ['lecons','📖 Leçons'], ['ressources','🧩 Ressources'],
+  ['calendrier','📅 Calendrier'], ['textes','✏️ Textes']
+];
+var _APA_CLASSES = ["6e","5e","4e","3e","2nde A","2nde C","1re A","1re C","1re D","Tle A","Tle C","Tle D"];
+var _APA_APERCUS = ["3e","1re-a","1re-c","1re-d","tle-a","tle-c","tle-d"];
+
+function _apaE(s){ return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];}); }
+/* Chaîne sûre dans un attribut onclick="f('…')". */
+function _apaQ(s){ return _apaE(String(s==null?'':s).replace(/\\/g,'\\\\').replace(/'/g,"\\'").replace(/\n/g,'\\n')); }
+function _apaCfg(){
+  if(!DB.apprendreCfg || typeof DB.apprendreCfg!=='object' || Array.isArray(DB.apprendreCfg)) DB.apprendreCfg = {};
+  return DB.apprendreCfg;
+}
+function _apaD(){ if(!_APA.d) _APA.d = JSON.parse(JSON.stringify(_apaCfg())); return _APA.d; }
+function _apaGet(path){
+  var o = _apaD(), p = path.split('/');
+  for(var i=0;i<p.length;i++){ if(o==null || typeof o!=='object') return undefined; o = o[p[i]]; }
+  return o;
+}
+function _apaPut(path, v){
+  var o = _apaD(), p = path.split('/');
+  for(var i=0;i<p.length-1;i++){
+    if(o[p[i]]==null || typeof o[p[i]]!=='object') o[p[i]] = /^\d+$/.test(p[i+1]) ? [] : {};
+    o = o[p[i]];
+  }
+  var k = p[p.length-1];
+  if(v===undefined){ if(Array.isArray(o)) o[k] = undefined; else delete o[k]; }
+  else o[k] = v;
+}
+/* Saisie d'un champ. type : txt (vide ⇒ valeur d'origine), num, bool, vis
+   (case « visible » : cochée ⇒ rien d'enregistré), lines (une valeur par ligne), raw. */
+function _apaSet(path, v, type){
+  if(type==='bool') v = !!v;
+  else if(type==='vis') v = v ? undefined : false;
+  else if(type==='num'){ v = String(v).trim()==='' ? undefined : +v; if(v!==undefined && !isFinite(v)) v = undefined; }
+  else if(type==='lines'){ v = String(v||'').split('\n').map(function(x){return x.trim();}).filter(Boolean); if(!v.length) v = undefined; }
+  else if(type==='raw'){ v = String(v==null?'':v); }
+  else { v = String(v==null?'':v).trim(); if(v==='') v = undefined; }
+  _apaPut(path, v);
+  _apaEtat();
+}
+function _apaSetR(path, v, type){ _apaSet(path, v, type); _apaRendre(); }
+
+/* Nettoyage avant enregistrement : ni undefined, ni objets vides. */
+function _apaNet(x){
+  if(Array.isArray(x)) return x.filter(function(v){return v!==undefined && v!==null;}).map(_apaNet);
+  if(x && typeof x==='object'){
+    var o = {}, n = 0;
+    Object.keys(x).forEach(function(k){
+      if(k==='maj') return;
+      var v = _apaNet(x[k]);
+      if(v===undefined || v===null) return;
+      if(v && typeof v==='object' && !Array.isArray(v) && !Object.keys(v).length) return;
+      o[k] = v; n++;
+    });
+    return o;
+  }
+  return x;
+}
+function _apaSale(){ return JSON.stringify(_apaNet(_apaD())) !== JSON.stringify(_apaNet(_apaCfg())); }
+function _apaEtatHTML(){
+  return _apaSale()
+    ? '<span class="s" style="color:#B45309;font-weight:700">● Modifications non enregistrées</span>'
+    : '<span class="s mut">Tout est enregistré' + (_apaCfg().maj ? ' · publié le ' + _apaE(new Date(_apaCfg().maj).toLocaleString('fr-FR')) : '') + '</span>';
+}
+function _apaEtat(){ var b = _ge('apaEtat'); if(b) b.innerHTML = _apaEtatHTML(); }
+
+/* ── Données d'origine : les fichiers d'Apprendre, chargés dans un cadre
+   invisible SANS réglage (VRT_APP_CFG vide), donc tels que livrés. ── */
+function _apaCharger(force){
+  if(_APA.charge && !force) return;
+  _APA.charge = true; _APA.erreur = '';
+  var ancien = _ge('apaSrcFrame'); if(ancien) ancien.parentNode.removeChild(ancien);
+  var f = document.createElement('iframe');
+  f.id = 'apaSrcFrame'; f.setAttribute('aria-hidden','true'); f.tabIndex = -1;
+  f.style.cssText = 'position:absolute;width:1px;height:1px;left:-9999px;top:0;border:0;visibility:hidden';
+  var v = '?j=' + new Date().toISOString().slice(0,10);
+  var s = ['progressions.js','lecons.js','ressources.js']
+    .concat(_APA_APERCUS.map(function(c){ return 'apercus-' + c + '.js'; }))
+    .concat(['commun.js','calendrier.js']);
+  f.srcdoc = '<!doctype html><html><head><meta charset="utf-8"></head><body>'
+    + '<script>window.VRT_APP_CFG={};try{sessionStorage.removeItem("vrt_app_apercu")}catch(e){}<\/script>'
+    + s.map(function(n){ return '<script src="apprendre/' + n + v + '"><\/script>'; }).join('')
+    + '<script>try{parent._apaRecu(window)}catch(e){}<\/script></body></html>';
+  setTimeout(function(){ if(!_APA.src){ _APA.erreur = 'Les fichiers d\'Apprendre ne se chargent pas (connexion lente ou fichiers absents).'; _apaRendre(); } }, 30000);
+  document.body.appendChild(f);
+}
+function _apaRecu(w){
+  try{
+    var A = w.VRT && w.VRT.app;
+    if(!A){ _APA.erreur = 'apprendre/commun.js ne s\'est pas chargé.'; _apaRendre(); return; }
+    var src = { A:A, LE:w.VRT_LECONS||{}, RES:w.VRT_RES||{items:{},lec:{},mat:{},cl:{}}, PROG:w.VRT_PROG||{}, AN:(w.VRT && w.VRT.annee)||null, rattache:{} };
+    // Où chaque ressource est rattachée (classes, matières) : pour filtrer.
+    var R = src.RES, idx = {};
+    function noter(id, c, m){ var x = idx[id] = idx[id] || {c:{}, m:{}}; if(c) x.c[c] = 1; if(m) x.m[m] = 1; }
+    Object.keys(R.lec||{}).forEach(function(k){ var p = k.split('|'); (R.lec[k]||[]).forEach(function(id){ noter(id, p[0], p[1]); }); });
+    Object.keys(R.mat||{}).forEach(function(k){ var p = k.split('|'); (R.mat[k]||[]).forEach(function(id){ noter(id, p[0], p[1]); }); });
+    Object.keys(R.cl||{}).forEach(function(c){ (R.cl[c]||[]).forEach(function(id){ noter(id, c, ''); }); });
+    src.rattache = idx;
+    _APA.src = src;
+  }catch(e){ _APA.erreur = 'Lecture impossible : ' + e.message; }
+  _apaRendre();
+}
+
+/* ── Champs ── */
+function _apaVal(path){ var v = _apaGet(path); return Array.isArray(v) ? v.join('\n') : (v==null ? '' : String(v)); }
+function _apaIn(path, ph, type, extra){
+  return '<input class="fi" ' + (extra||'') + ' value="' + _apaE(_apaVal(path)) + '" placeholder="' + _apaE(ph||'') + '" oninput="_apaSet(\'' + _apaQ(path) + '\',this.value,\'' + (type||'txt') + '\')">';
+}
+function _apaTa(path, ph, type, rows){
+  return '<textarea class="fi" rows="' + (rows||3) + '" style="font-size:13px;line-height:1.5" placeholder="' + _apaE(ph||'') + '" oninput="_apaSet(\'' + _apaQ(path) + '\',this.value,\'' + (type||'txt') + '\')">' + _apaE(_apaVal(path)) + '</textarea>';
+}
+function _apaCk(path, label, vis){
+  var v = _apaGet(path), on = vis ? v!==false : !!v;
+  return '<label class="fl2 fic g6" style="cursor:pointer"><input type="checkbox"' + (on?' checked':'') + ' onchange="_apaSetR(\'' + _apaQ(path) + '\',this.checked,\'' + (vis?'vis':'bool') + '\')"><span>' + label + '</span></label>';
+}
+function _apaSel(path, opts, def){
+  var v = _apaGet(path); if(v==null) v = def;
+  return '<select class="fi" onchange="_apaSetR(\'' + _apaQ(path) + '\',this.value,\'txt\')">'
+    + opts.map(function(o){ return '<option value="' + _apaE(o[0]) + '"' + (String(o[0])===String(v)?' selected':'') + '>' + _apaE(o[1]) + '</option>'; }).join('') + '</select>';
+}
+function _apaLab(t, aide){ return '<div class="xs2 semi mt10 mb4">' + t + (aide ? ' <span class="mut" style="font-weight:400">— ' + _apaE(aide) + '</span>' : '') + '</div>'; }
+function _apaCarte(titre, corps, aide){
+  return '<div class="card mb12"><div class="semi mb6" style="font-size:15px">' + titre + '</div>' + (aide ? '<div class="xs2 mut mb8">' + aide + '</div>' : '') + corps + '</div>';
+}
+function _apaAttente(){
+  if(_APA.erreur) return '<div class="empty"><div class="empty-ico">⚠️</div><div class="semi">' + _apaE(_APA.erreur) + '</div><button class="btn sm bi mt10" onclick="_apaCharger(true)">Réessayer</button></div>';
+  return '<div class="empty"><div class="empty-ico">⏳</div><div class="semi">Lecture des fichiers d\'Apprendre…</div><div class="s mut">Leçons, ressources et progressions officielles (quelques secondes la première fois).</div></div>';
+}
+function _apaMatieres(){ return _APA.src ? Object.keys(_APA.src.A.PAR_ID).map(function(k){ return _APA.src.A.PAR_ID[k]; }) : []; }
+function _apaNomM(id){ var o = _apaGet('matieres/' + id + '/nom'); var m = _APA.src && _APA.src.A.PAR_ID[id]; return o || (m ? m.nom : id); }
+function _apaOptsClasses(vide){ return (vide ? [['', vide]] : []).concat(_APA_CLASSES.map(function(c){ return [c, c]; })); }
+function _apaOptsMatieres(vide){ return (vide ? [['', vide]] : []).concat(_apaMatieres().map(function(m){ return [m.id, _apaNomM(m.id)]; })); }
+
+/* ═══════════ Onglets ═══════════ */
+function _apaGeneral(){
+  return _apaCarte('🚧 Ouverture',
+      _apaCk('ferme', '<b>Fermer Apprendre au public</b> (maintenance) — l\'aperçu reste accessible à l\'administration')
+      + _apaLab('Titre du message') + _apaIn('fermeTitre', 'Apprendre revient très vite')
+      + _apaLab('Texte du message', '**gras** possible') + _apaTa('fermeTexte', 'Nous mettons à jour les cours. Reviens dans quelques instants.', 'txt', 2))
+    + _apaCarte('📣 Bandeau d\'annonce',
+      _apaCk('bandeau/actif', 'Afficher un bandeau en haut de toutes les pages d\'Apprendre')
+      + _apaLab('Texte', '**gras** possible') + _apaTa('bandeau/texte', 'Ex. : **Nouveau** : les sujets du BEPC blanc sont en ligne !', 'txt', 2)
+      + '<div class="g2 g10" style="display:grid;grid-template-columns:2fr 1fr;gap:10px">'
+      + '<div>' + _apaLab('Lien (facultatif)') + _apaIn('bandeau/lien', '/corriges/ ou https://…') + '</div>'
+      + '<div>' + _apaLab('Couleur') + _apaSel('bandeau/ton', [['info','Bleu'],['or','Or'],['vert','Vert'],['alerte','Rouge']], 'info') + '</div></div>')
+    + _apaCarte('💬 Contact',
+      _apaLab('Numéro WhatsApp des demandes de devis', 'indicatif compris, sans + ni espace')
+      + _apaIn('whatsapp', (_APA.src && _APA.src.A.WA) || '237697637739', 'txt', 'inputmode="tel" style="max-width:260px"'))
+    + _apaCarte('💾 Sauvegarde',
+      '<div class="fl2 g8 fw"><button class="btn sm bo" onclick="_apaExporter()">⬇ Exporter les réglages (JSON)</button>'
+      + '<button class="btn sm bo" onclick="_apaImporter()">⬆ Importer</button>'
+      + '<button class="btn sm bo" style="color:var(--re,#DC2626)" onclick="_apaToutRendre()">↺ Revenir à l\'Apprendre d\'origine</button></div>',
+      'Les réglages partent au serveur avec la synchronisation habituelle, puis s\'appliquent aux pages d\'Apprendre en une minute environ.');
+}
+
+function _apaClasses(){
+  if(!_APA.src) return _apaAttente();
+  var cl = '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:8px">'
+    + _APA_CLASSES.map(function(c){ return '<div class="card" style="padding:8px 10px">' + _apaCk('classes/' + c + '/visible', '<b>' + _apaE(c) + '</b>', true) + '</div>'; }).join('') + '</div>';
+  var mats = _apaMatieres().map(function(m){
+    var p = 'matieres/' + m.id, coul = _apaGet(p + '/couleur') || m.t[0];
+    return '<tr><td style="width:34px"><span style="display:inline-block;width:22px;height:22px;border-radius:50%;background:' + _apaE(coul) + '"></span></td>'
+      + '<td>' + _apaIn(p + '/nom', m.nom) + '<div class="xs2 mut">' + _apaE(m.id) + ' · MINESEC : ' + _apaE(m.minesec.join(', ')) + '</div></td>'
+      + '<td style="width:120px"><input type="color" value="' + _apaE(coul) + '" onchange="_apaSetR(\'' + _apaQ(p + '/couleur') + '\',this.value,\'txt\')" style="width:44px;height:30px;border:0;background:none;vertical-align:middle">'
+      + (_apaGet(p + '/couleur') ? ' <button class="btn xs bo" title="Couleur d\'origine" onclick="_apaSetR(\'' + _apaQ(p + '/couleur') + '\',\'\',\'txt\')">↺</button>' : '') + '</td>'
+      + '<td style="width:110px">' + _apaCk(p + '/visible', 'Visible', true) + '</td></tr>';
+  }).join('');
+  return _apaCarte('🏫 Classes ouvertes', cl, 'Une classe décochée disparaît du choix de classe, et ses leçons ne sont plus proposées.')
+    + _apaCarte('🎨 Matières', '<div style="overflow:auto"><table class="tbl" style="width:100%"><tbody>' + mats + '</tbody></table></div>',
+      'Nom affiché, couleur de l\'icône (les teintes claires et foncées en découlent) et visibilité. Une matière masquée retire aussi ses leçons.');
+}
+
+function _apaRubriques(){
+  if(!_APA.src) return _apaAttente();
+  var A = _APA.src.A;
+  var gr = A.GROUPES.map(function(g){
+    return '<div class="card mb8" style="padding:10px"><div class="xs2 mut mb4">Rubrique « ' + _apaE(g[0]) + ' »</div>'
+      + '<div style="display:grid;grid-template-columns:1fr 2fr;gap:8px">' + _apaIn('groupes/' + g[0] + '/nom', g[1]) + _apaIn('groupes/' + g[0] + '/desc', g[3]) + '</div></div>';
+  }).join('');
+  var optsG = A.GROUPES.map(function(g){ return [g[0], _apaGet('groupes/' + g[0] + '/nom') || g[1]]; });
+  var fam = A.FAMILLES.map(function(f){
+    var p = 'familles/' + f[0];
+    return '<div class="card mb8" style="padding:10px"><div class="fl2 fic fsb mb4"><span class="xs2 mut">Famille « ' + _apaE(f[0]) + ' »</span>' + _apaCk(p + '/visible', 'Visible', true) + '</div>'
+      + '<div style="display:grid;grid-template-columns:1fr 2fr 1fr;gap:8px">' + _apaIn(p + '/nom', f[1]) + _apaIn(p + '/desc', f[3]) + _apaSel(p + '/groupe', optsG, f[4]) + '</div></div>';
+  }).join('');
+  return _apaCarte('🗂️ Les rubriques de « Tout pour progresser »', gr, 'Nom et sous-titre des quatre rubriques de l\'accueil d\'Apprendre.')
+    + _apaCarte('🧩 Familles de ressources', fam, 'Nom, description, rubrique de rangement. Une famille masquée retire toutes ses ressources.');
+}
+
+function _apaOffre(){
+  if(!_APA.src) return _apaAttente();
+  var A = _APA.src.A, H = A.HUMAIN || {};
+  var optsF = A.FORMULES.map(function(f){ return [f.g, f.nom]; });
+  var forms = A.FORMULES.map(function(f){
+    var p = 'formules/' + f.g;
+    return '<div class="card mb10" style="padding:12px"><div class="fl2 fic fsb mb6"><b>' + _apaE(f.nom) + '</b> <span class="xs2 mut">(abo_' + f.g + '_m / abo_' + f.g + '_a)</span>' + _apaCk(p + '/masquer', 'Masquer cette formule') + '</div>'
+      + '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px">'
+      + '<div>' + _apaLab('Nom') + _apaIn(p + '/nom', f.nom) + '</div>'
+      + '<div>' + _apaLab('Pour qui') + _apaIn(p + '/pour', f.pour) + '</div>'
+      + '<div>' + _apaLab('Prix / mois', 'repli') + _apaIn(p + '/mois', f.mois) + '</div>'
+      + '<div>' + _apaLab('Prix / an', 'repli') + _apaIn(p + '/an', f.an) + '</div></div>'
+      + '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">'
+      + '<div>' + _apaLab('Inclus', 'un par ligne') + _apaTa(p + '/av', f.av.join('\n'), 'lines', 5) + '</div>'
+      + '<div>' + _apaLab('Non inclus', 'un par ligne, barré') + _apaTa(p + '/non', f.non.join('\n'), 'lines', 5) + '</div></div></div>';
+  }).join('');
+  var pts = (H.points||[]).join('\n');
+  var tt = [['lecon','Fin de leçon','Pour aller plus loin'],['quiz','Sous le bilan du quiz','Continue sur ta lancée'],['matiere','Page matière','En attendant les prochaines leçons'],['accueil','Accueil','Aller plus loin avec VÉRITAS']];
+  return _apaCarte('💳 Bloc « Choisis ta formule »',
+      _apaCk('offre/actif', 'Afficher le bloc des offres dans Apprendre', true)
+      + '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:8px">'
+      + '<div>' + _apaLab('Titre') + _apaIn('offre/titre', 'Choisis ta formule') + '</div>'
+      + '<div>' + _apaLab('Conseillée aux classes d\'examen') + _apaSel('offre/conseilExamen', optsF, 'pro') + '</div>'
+      + '<div>' + _apaLab('Conseillée aux autres classes') + _apaSel('offre/conseilAutre', optsF, 'starter') + '</div></div>'
+      + _apaLab('Surtitre selon l\'endroit') + '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:8px">'
+      + tt.map(function(t){ return '<div><div class="xs2 mut">' + t[1] + '</div>' + _apaIn('offre/titres/' + t[0], t[2]) + '</div>'; }).join('') + '</div>'
+      + _apaLab('Note sous les formules', 'vide = texte d\'origine (prix annuels, formule Famille, moyens de paiement) ; **gras** possible')
+      + _apaTa('offre/note', 'Payer l\'année en une fois revient à un peu plus de huit mois… (texte d\'origine)', 'txt', 2),
+      'Les prix affichés sont ceux publiés par le serveur (Abonnements & plateformes → E-Learning). Les prix saisis ici ne servent que de repli si le serveur ne répond pas.')
+    + _apaCarte('📦 Formules', forms)
+    + _apaCarte('👩‍🏫 Carte « Avec un professeur »',
+      _apaCk('offre/humainActif', 'Afficher cette carte', true)
+      + '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">'
+      + '<div>' + _apaLab('Titre') + _apaIn('offre/humain/nom', H.nom) + '</div><div>' + _apaLab('Sous-titre') + _apaIn('offre/humain/pour', H.pour) + '</div></div>'
+      + _apaLab('Points', 'un par ligne, **gras** possible') + _apaTa('offre/humain/points', pts, 'lines', 3)
+      + '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:8px">'
+      + '<div>' + _apaLab('Ligne tarif') + _apaIn('offre/humain/tarif', H.tarif) + '</div><div>' + _apaLab('Bouton WhatsApp') + _apaIn('offre/humain/bouton', H.bouton) + '</div>'
+      + '<div>' + _apaLab('Lien « en savoir plus »') + _apaIn('offre/humain/lien', H.lien) + '</div><div>' + _apaLab('Texte du lien') + _apaIn('offre/humain/lienT', H.lienT) + '</div></div>')
+    + _apaCarte('🔑 Lien « Enseignant »',
+      _apaCk('offre/enseignant/actif', 'Afficher le lien vers les formules enseignants', true)
+      + '<div style="display:grid;grid-template-columns:1fr 2fr 1fr;gap:8px">' + _apaIn('offre/enseignant/t', 'Enseignant ? Les formules multi-classes')
+      + _apaIn('offre/enseignant/d', '3 classes, 6 classes ou toutes, dès 2 500 F par mois…') + _apaIn('offre/enseignant/h', '/app.html#tarifs') + '</div>')
+    + _apaCarte('📗 Cahiers proposés sous l\'offre', _apaCahiers(), 'Par défaut : cahier de français de chaque classe et livret de philosophie en 1re et Tle. Personnalisez une ligne pour la changer ou la masquer.');
+}
+function _apaCahiers(){
+  var A = _APA.src.A, L = _apaGet('cahiers') || [];
+  var h = _apaCk('offre/cahiers', 'Proposer les cahiers', true);
+  h += '<table class="tbl mt8" style="width:100%"><thead><tr><th>Classe</th><th>Matière</th><th>Titre</th><th>Lien</th><th></th></tr></thead><tbody>';
+  _APA_CLASSES.forEach(function(c){ ['francais','philo'].forEach(function(m){
+    var dft = A.cahierDefaut(c, m), i = -1;
+    L.forEach(function(x,k){ if(x && x.c===c && x.m===m) i = k; });
+    if(i >= 0) return;
+    if(!dft) return;
+    h += '<tr><td>' + _apaE(c) + '</td><td>' + _apaE(_apaNomM(m)) + '</td><td>' + _apaE(dft.t) + '<div class="xs2 mut">' + _apaE(dft.d) + '</div></td><td class="xs2">' + _apaE(dft.h) + '</td>'
+      + '<td><button class="btn xs bo" onclick="_apaCahierPerso(\'' + _apaQ(c) + '\',\'' + m + '\')">Personnaliser</button></td></tr>';
+  }); });
+  h += '</tbody></table>';
+  L.forEach(function(x, k){
+    if(!x) return;
+    var p = 'cahiers/' + k;
+    h += '<div class="card mt8" style="padding:10px;border-color:var(--bl,#1E499B)"><div class="fl2 fic fsb g8 mb6"><div class="fl2 g8" style="flex:1">'
+      + _apaSel(p + '/c', _apaOptsClasses(), x.c) + _apaSel(p + '/m', _apaOptsMatieres(), x.m) + '</div>'
+      + _apaCk(p + '/masquer', 'Masquer') + '<button class="btn xs bo" title="Supprimer cette personnalisation" onclick="_apaSuppr(\'cahiers\',' + k + ')">✕</button></div>'
+      + '<div style="display:grid;grid-template-columns:1fr 2fr 1fr;gap:8px">' + _apaIn(p + '/t', 'Titre') + _apaIn(p + '/d', 'Description') + _apaIn(p + '/h', '/livrets/…') + '</div></div>';
+  });
+  h += '<button class="btn sm bo mt8" onclick="_apaAjout(\'cahiers\',{c:\'3e\',m:\'francais\',t:\'\',d:\'\',h:\'\'})">➕ Ajouter un cahier</button>';
+  return h;
+}
+function _apaCahierPerso(c, m){
+  var d = _APA.src.A.cahierDefaut(c, m) || {};
+  _apaAjout('cahiers', { c:c, m:m, t:d.t||'', d:d.d||'', h:d.h||'' });
+}
+function _apaAjout(cle, o){ var L = _apaGet(cle); if(!Array.isArray(L)){ L = []; _apaPut(cle, L); } L.push(o); _apaEtat(); _apaRendre(); }
+function _apaSuppr(cle, k){ var L = _apaGet(cle); if(Array.isArray(L)) L.splice(k, 1); _apaEtat(); _apaRendre(); }
+
+/* ── Leçons ── */
+function _apaVerrou(L){ return !!(L.verrou || (L.parties||[]).some(function(p){ return p && p.verrou; })); }
+function _apaLeconsListe(){
+  var LE = _APA.src.LE, mod = _apaGet('lecons') || {}, out = [];
+  Object.keys(LE).forEach(function(id){
+    var L = LE[id], o = mod[id] || {};
+    out.push({ id:id, c:L.c, m:L.m, titre:o.titre || L.titre, pay:_apaVerrou(L), modif:Object.keys(o).some(function(k){ return k!=='masquer'; }), masque:!!o.masquer, n:L.n, ajout:false });
+  });
+  (_apaGet('nouvelles') || []).forEach(function(N, k){
+    if(!N) return;
+    out.push({ id:N.id, c:N.c, m:N.m, titre:N.titre || '(sans titre)', pay:false, modif:true, masque:!!N.masquer, n:N.rang || 999, ajout:true, k:k });
+  });
+  var f = _APA.fl, q = f.q.toLowerCase();
+  return out.filter(function(x){
+    if(f.c && x.c !== f.c) return false;
+    if(f.m && x.m !== f.m) return false;
+    if(!f.pay && x.pay) return false;
+    if(f.modif && !(x.modif || x.masque || x.ajout)) return false;
+    if(q && (x.titre + ' ' + x.id).toLowerCase().indexOf(q) < 0) return false;
+    return true;
+  }).sort(function(a,b){ return _APA_CLASSES.indexOf(a.c) - _APA_CLASSES.indexOf(b.c) || String(a.m).localeCompare(String(b.m)) || (a.n||0) - (b.n||0); });
+}
+function _apaFiltre(quoi, k, v){ _APA[quoi][k] = v; _apaRendreListe(quoi); }
+function _apaRendreListe(quoi){ var el = _ge(quoi==='fl' ? 'apaListeL' : 'apaListeR'); if(el) el.innerHTML = quoi==='fl' ? _apaListeL() : _apaListeR(); }
+function _apaLecons(){
+  if(!_APA.src) return _apaAttente();
+  var f = _APA.fl;
+  return '<div class="card mb12"><div class="fl2 fic g8 fw">'
+    + '<select class="fi" style="max-width:130px" onchange="_apaFiltre(\'fl\',\'c\',this.value)">' + _apaOptsClasses('Toutes classes').map(function(o){ return '<option value="' + _apaE(o[0]) + '"' + (o[0]===f.c?' selected':'') + '>' + _apaE(o[1]) + '</option>'; }).join('') + '</select>'
+    + '<select class="fi" style="max-width:180px" onchange="_apaFiltre(\'fl\',\'m\',this.value)">' + _apaOptsMatieres('Toutes matières').map(function(o){ return '<option value="' + _apaE(o[0]) + '"' + (o[0]===f.m?' selected':'') + '>' + _apaE(o[1]) + '</option>'; }).join('') + '</select>'
+    + '<input class="fi" style="max-width:220px" placeholder="Chercher une leçon…" value="' + _apaE(f.q) + '" oninput="_apaFiltre(\'fl\',\'q\',this.value)">'
+    + '<label class="fl2 fic g6 s"><input type="checkbox"' + (f.pay?' checked':'') + ' onchange="_apaFiltre(\'fl\',\'pay\',this.checked)">payantes</label>'
+    + '<label class="fl2 fic g6 s"><input type="checkbox"' + (f.modif?' checked':'') + ' onchange="_apaFiltre(\'fl\',\'modif\',this.checked)">modifiées seulement</label>'
+    + '<button class="btn sm bi" style="margin-left:auto" onclick="_apaLecon(\'\')">➕ Nouvelle leçon</button>'
+    + '</div><div class="xs2 mut mt6">Leçon gratuite : tout se modifie (texte, parties, quiz, révision). Leçon payante 🔒 : titre, accroche, durée et visibilité ; sa suite vit sur le serveur.</div></div>'
+    + '<div id="apaListeL">' + _apaListeL() + '</div>';
+}
+function _apaListeL(){
+  var L = _apaLeconsListe(), MAX = 150;
+  if(!L.length) return '<div class="empty"><div class="empty-ico">🔍</div><div class="semi">Aucune leçon</div></div>';
+  return '<div class="s mut mb6"><b>' + L.length + '</b> leçon(s)' + (L.length > MAX ? ' — ' + MAX + ' premières affichées, affinez les filtres' : '') + '</div>'
+    + L.slice(0, MAX).map(function(x){
+      var tags = (x.ajout ? '<span class="xs2" style="color:#007E11;font-weight:700">ajoutée</span> ' : '')
+        + (x.pay ? '<span class="xs2" title="Leçon payante">🔒</span> ' : '')
+        + (x.modif && !x.ajout ? '<span class="xs2" style="color:var(--bl,#1E499B);font-weight:700">modifiée</span> ' : '')
+        + (x.masque ? '<span class="xs2" style="color:#B42318;font-weight:700">masquée</span> ' : '');
+      return '<div class="fl2 fic fsb g8" style="border:1px solid var(--bg3,#E2E8F0);border-radius:10px;padding:8px 10px;margin-bottom:6px;' + (x.masque ? 'opacity:.55' : '') + '">'
+        + '<div style="min-width:0"><div class="semi" style="font-size:13.5px">' + tags + _apaE(x.titre) + '</div>'
+        + '<div class="xs2 mut">' + _apaE(x.c) + ' · ' + _apaE(_apaNomM(x.m)) + (x.n && x.n < 900 ? ' · leçon ' + x.n : '') + ' · ' + _apaE(x.id) + '</div></div>'
+        + '<div class="fl2 g6" style="flex-shrink:0">'
+        + '<button class="btn xs bo" title="Voir avec le brouillon" onclick="_apaApercu(\'lecon.html?id=' + _apaQ(encodeURIComponent(x.id)) + '\')">👁</button>'
+        + '<button class="btn xs bo" onclick="_apaMasquerL(\'' + _apaQ(x.id) + '\',' + (x.ajout ? x.k : -1) + ')">' + (x.masque ? 'Afficher' : 'Masquer') + '</button>'
+        + '<button class="btn xs bi" onclick="_apaLecon(\'' + _apaQ(x.id) + '\')">Modifier</button></div></div>';
+    }).join('');
+}
+function _apaMasquerL(id, k){
+  if(k >= 0){ var N = _apaGet('nouvelles')[k]; N.masquer = !N.masquer; if(!N.masquer) delete N.masquer; }
+  else { var cur = _apaGet('lecons/' + id + '/masquer'); _apaPut('lecons/' + id + '/masquer', cur ? undefined : true); }
+  _apaEtat(); _apaRendreListe('fl');
+}
+/* Copie de travail d'une leçon : l'original recouvert par le réglage. */
+function _apaPartiesOrig(L){ return (L.parties||[]).map(function(p, i){ return { t:p.t||'', html:p.html||'', retenir:p.retenir||'', src:i, schema:!!(p.anim || p.illus) }; }); }
+function _apaLecon(id){
+  var LE = _APA.src.LE, nv = _apaGet('nouvelles') || [], k = -1;
+  nv.forEach(function(N, i){ if(N && N.id === id) k = i; });
+  var W;
+  if(!id || k >= 0){
+    var N = k >= 0 ? JSON.parse(JSON.stringify(nv[k])) : { c:_APA.fl.c || '3e', m:_APA.fl.m || 'maths', titre:'', duree:15, objectifs:[], parties:[{t:'',html:''}], revision:[], quiz:[], exo:'' };
+    W = { nouveau:true, k:k, id:id || '', L:N };
+  } else {
+    var O = LE[id]; if(!O){ toast('Leçon introuvable','warn'); return; }
+    var o = _apaGet('lecons/' + id) || {};
+    var L = { titre:O.titre, accroche:O.accroche||'', duree:O.duree||15, cle:O.cle||'', intro:O.intro||'', objectifs:(O.objectifs||[]).slice(),
+      parties:_apaPartiesOrig(O), revision:(O.revision||[]).slice(), exo:O.exo||'', quiz:JSON.parse(JSON.stringify(O.quiz||[])),
+      examen:O.examen ? { t:O.examen.t||'', href:O.examen.href||'' } : { t:'', href:'' } };
+    Object.keys(o).forEach(function(f){ if(f!=='masquer' && f!=='parties') L[f] = JSON.parse(JSON.stringify(o[f])); });
+    if(Array.isArray(o.parties)) L.parties = o.parties.map(function(p){ var b = (p.src >= 0 && L.parties[p.src]) || {}; return { t:p.t!=null?p.t:b.t||'', html:p.html!=null?p.html:b.html||'', retenir:p.retenir!=null?p.retenir:b.retenir||'', src:p.src, schema:!!b.schema }; });
+    W = { nouveau:false, id:id, L:L, pay:_apaVerrou(O) };
+  }
+  _APA.ed = W;
+  M(W.nouveau ? (id ? 'Modifier la leçon ajoutée' : 'Nouvelle leçon') : 'Modifier la leçon',
+    W.nouveau ? 'Leçon publique, rédigée ici' : _apaE(id) + (W.pay ? ' · payante : en-tête seulement' : ''),
+    '<div id="apaEd">' + _apaEdCorps() + '</div>',
+    (W.nouveau && k >= 0 ? '<button class="btn bo" style="color:var(--re,#DC2626);margin-right:auto" onclick="_apaEdSuppr()">Supprimer</button>' : '')
+    + (!W.nouveau ? '<button class="btn bo" style="margin-right:auto" onclick="_apaEdOrigine()">↺ Contenu d\'origine</button>' : '')
+    + '<button class="btn bo" onclick="cm()">Annuler</button><button class="btn bi" onclick="_apaEdOk()">✓ Valider</button>', true);
+}
+function _apaEdSet(f, v, type){
+  var L = _APA.ed.L;
+  if(type==='num') v = +v || 0;
+  else if(type==='lines') v = String(v||'').split('\n').map(function(x){ return x.trim(); }).filter(Boolean);
+  var p = f.split('/'), o = L;
+  for(var i=0;i<p.length-1;i++){ if(o[p[i]]==null) o[p[i]] = /^\d+$/.test(p[i+1]) ? [] : {}; o = o[p[i]]; }
+  o[p[p.length-1]] = v;
+}
+function _apaEdSetR(f, v, type){ _apaEdSet(f, v, type); _apaEdRendre(); }
+function _apaEdRendre(){ var el = _ge('apaEd'); if(el) el.innerHTML = _apaEdCorps(); }
+function _apaEdIn(f, ph, type, val){ return '<input class="fi" value="' + _apaE(val) + '" placeholder="' + _apaE(ph||'') + '" oninput="_apaEdSet(\'' + _apaQ(f) + '\',this.value,\'' + (type||'') + '\')">'; }
+function _apaEdTa(f, ph, rows, val, type){ return '<textarea class="fi" rows="' + (rows||3) + '" style="font-size:13px;line-height:1.5;font-family:inherit" placeholder="' + _apaE(ph||'') + '" oninput="_apaEdSet(\'' + _apaQ(f) + '\',this.value,\'' + (type||'') + '\')">' + _apaE(val) + '</textarea>'; }
+function _apaEdLignes(f, d){ var v = d && d[f.split('/').pop()]; return Array.isArray(v) ? v.join('\n') : ''; }
+function _apaRangs(c, m){
+  var P = (_APA.src.PROG || {})[c] || {}, M0 = _APA.src.A.PAR_ID[m], out = [];
+  var pris = {}; Object.keys(_APA.src.LE).forEach(function(k){ var L = _APA.src.LE[k]; if(L.c === c && L.m === m && L.n) pris[L.n] = 1; });
+  (M0 ? M0.minesec : []).forEach(function(s){ (P[s]||[]).forEach(function(ch){ ch[1].forEach(function(l){ out.push([l[0], l[0] + '. ' + String(l[1]).slice(0, 90) + (pris[l[0]] ? ' — déjà rédigée (serait remplacée)' : ''), ch[0]]); }); }); });
+  return out;
+}
+function _apaEdCorps(){
+  var W = _APA.ed, L = W.L, h = '';
+  if(W.nouveau){
+    var rangs = _apaRangs(L.c, L.m);
+    h += '<div style="display:grid;grid-template-columns:1fr 1fr 2fr;gap:8px">'
+      + '<div>' + _apaLab('Classe') + '<select class="fi" onchange="_apaEdSetR(\'c\',this.value)">' + _APA_CLASSES.map(function(c){ return '<option' + (c===L.c?' selected':'') + '>' + _apaE(c) + '</option>'; }).join('') + '</select></div>'
+      + '<div>' + _apaLab('Matière') + '<select class="fi" onchange="_apaEdSetR(\'m\',this.value)">' + _apaMatieres().map(function(m){ return '<option value="' + m.id + '"' + (m.id===L.m?' selected':'') + '>' + _apaE(_apaNomM(m.id)) + '</option>'; }).join('') + '</select></div>'
+      + '<div>' + _apaLab('Place dans la progression officielle', 'MINESEC') + '<select class="fi" onchange="_apaEdSetR(\'rang\',this.value,\'num\')"><option value="0">— hors progression (en fin de liste) —</option>'
+      + rangs.map(function(r){ return '<option value="' + r[0] + '"' + (+L.rang===r[0]?' selected':'') + '>' + _apaE(r[1]) + '</option>'; }).join('') + '</select></div></div>';
+  }
+  h += '<div style="display:grid;grid-template-columns:3fr 1fr;gap:8px"><div>' + _apaLab('Titre') + _apaEdIn('titre', 'Titre de la leçon', '', L.titre) + '</div>'
+    + '<div>' + _apaLab('Durée (min)') + _apaEdIn('duree', '15', 'num', L.duree) + '</div></div>'
+    + _apaLab('Accroche', 'une phrase qui donne envie') + _apaEdIn('accroche', '', '', L.accroche);
+  if(!W.nouveau){
+    h += _apaCk('lecons/' + W.id + '/masquer', 'Masquer cette leçon au public');
+  }
+  if(W.pay){
+    return h + '<div class="ib mt10"><span>🔒</span><span>Leçon payante : la suite est servie aux abonnés par le serveur (api/apprendre.php). Seul son en-tête se modifie ici.</span></div>';
+  }
+  h += _apaLab('Introduction') + _apaEdTa('intro', 'Situation de départ…', 2, L.intro)
+    + _apaLab('Objectifs', 'un par ligne') + _apaEdTa('objectifs', '', 3, (L.objectifs||[]).join('\n'), 'lines');
+  h += '<div class="semi mt14 mb6">Parties du cours</div>';
+  (L.parties||[]).forEach(function(p, i){
+    var n = (L.parties||[]).length;
+    h += '<div class="card mb8" style="padding:10px"><div class="fl2 fic fsb g8 mb6"><b class="s">Partie ' + (i+1) + (p.schema ? ' <span class="xs2 mut">· schéma/animation d\'origine conservé</span>' : '') + '</b><span class="fl2 g6">'
+      + (i > 0 ? '<button class="btn xs bo" onclick="_apaEdBouger(\'parties\',' + i + ',-1)">↑</button>' : '')
+      + (i < n-1 ? '<button class="btn xs bo" onclick="_apaEdBouger(\'parties\',' + i + ',1)">↓</button>' : '')
+      + '<button class="btn xs bo" onclick="_apaEdRetirer(\'parties\',' + i + ')">✕</button></span></div>'
+      + _apaEdIn('parties/' + i + '/t', 'Titre de la partie', '', p.t)
+      + _apaLab('Contenu', 'HTML : <p>, <strong>, <ul><li>, <div class=\'def\'><b>Définition</b>…</div>') + _apaEdTa('parties/' + i + '/html', '<p>…</p>', 6, p.html)
+      + _apaLab('À retenir', 'facultatif') + _apaEdTa('parties/' + i + '/retenir', '', 2, p.retenir) + '</div>';
+  });
+  h += '<button class="btn sm bo" onclick="_apaEdAjouter(\'parties\',{t:\'\',html:\'\',retenir:\'\',src:-1})">➕ Ajouter une partie</button>';
+  h += _apaLab('Révision express', 'une idée par ligne, HTML léger possible') + _apaEdTa('revision', '', 4, (L.revision||[]).join('\n'), 'lines')
+    + _apaLab('Exercice', 'HTML ; la réponse en <em>(Réponse : …)</em>') + _apaEdTa('exo', '<p>…</p>', 3, L.exo);
+  h += '<div class="semi mt14 mb6">Quiz</div>';
+  (L.quiz||[]).forEach(function(q, i){
+    h += '<div class="card mb8" style="padding:10px"><div class="fl2 fic fsb mb6"><b class="s">Question ' + (i+1) + '</b><button class="btn xs bo" onclick="_apaEdRetirer(\'quiz\',' + i + ')">✕</button></div>'
+      + _apaEdIn('quiz/' + i + '/q', 'Question', '', q.q)
+      + '<div style="display:grid;grid-template-columns:3fr 1fr;gap:8px"><div>' + _apaLab('Réponses', 'une par ligne') + _apaEdTa('quiz/' + i + '/r', '', 3, (q.r||[]).join('\n'), 'lines') + '</div>'
+      + '<div>' + _apaLab('Bonne réponse', 'n° de ligne') + '<input class="fi" type="number" min="1" value="' + ((+q.b||0)+1) + '" oninput="_apaEdSet(\'quiz/' + i + '/b\',Math.max(0,(+this.value||1)-1),\'num\')"></div></div>'
+      + _apaLab('Explication') + _apaEdIn('quiz/' + i + '/e', '', '', q.e) + '</div>';
+  });
+  h += '<button class="btn sm bo" onclick="_apaEdAjouter(\'quiz\',{q:\'\',r:[],b:0,e:\'\'})">➕ Ajouter une question</button>';
+  var ex = L.examen || {};
+  h += _apaLab('Lien « vers l\'examen »', 'facultatif') + '<div style="display:grid;grid-template-columns:2fr 1fr;gap:8px">'
+    + _apaEdIn('examen/t', 'Ex. : Thalès au BEPC : sujets corrigés', '', ex.t) + _apaEdIn('examen/href', '/corriges/', '', ex.href) + '</div>';
+  return h;
+}
+function _apaEdBouger(f, i, d){ var a = _APA.ed.L[f], t = a[i]; a[i] = a[i+d]; a[i+d] = t; _apaEdRendre(); }
+function _apaEdRetirer(f, i){ _APA.ed.L[f].splice(i, 1); _apaEdRendre(); }
+function _apaEdAjouter(f, o){ (_APA.ed.L[f] = _APA.ed.L[f] || []).push(o); _apaEdRendre(); }
+function _apaEdOrigine(){
+  var W = _APA.ed; if(!W || W.nouveau) return;
+  if(!confirm('Rendre à cette leçon son contenu d\'origine ?')) return;
+  var m = _apaGet('lecons/' + W.id + '/masquer');
+  _apaPut('lecons/' + W.id, m ? { masquer:true } : undefined);
+  _apaEtat(); cm(); _apaRendreListe('fl'); toast('Leçon rendue à son état d\'origine — pensez à enregistrer');
+}
+function _apaEdSuppr(){
+  var W = _APA.ed; if(!W || W.k < 0) return;
+  if(!confirm('Supprimer cette leçon ajoutée ?')) return;
+  _apaGet('nouvelles').splice(W.k, 1); _apaEtat(); cm(); _apaRendreListe('fl');
+}
+function _apaEdOk(){
+  var W = _APA.ed, L = W.L;
+  if(!String(L.titre||'').trim()){ toast('Le titre est obligatoire','warn'); return; }
+  L.quiz = (L.quiz||[]).filter(function(q){ return String(q.q||'').trim() && (q.r||[]).length > 1; });
+  if(W.nouveau){
+    var N = JSON.parse(JSON.stringify(L));
+    N.parties = (N.parties||[]).filter(function(p){ return String(p.t||'').trim() || String(p.html||'').trim(); }).map(function(p){ var o = { t:p.t||'', html:p.html||'' }; if(String(p.retenir||'').trim()) o.retenir = p.retenir; return o; });
+    if(!N.rang) delete N.rang;
+    if(N.examen && !(N.examen.t && N.examen.href)) delete N.examen;
+    if(!N.id) N.id = 'v-' + String(N.c).toLowerCase().replace(/\s+/g,'-') + '-' + N.m + '-' + gid().slice(0,6);
+    var nv = _apaGet('nouvelles'); if(!Array.isArray(nv)){ nv = []; _apaPut('nouvelles', nv); }
+    if(W.k >= 0) nv[W.k] = N; else nv.push(N);
+  } else {
+    var O = _APA.src.LE[W.id], o = {}, ori = {
+      titre:O.titre, accroche:O.accroche||'', duree:O.duree||15, cle:O.cle||'', intro:O.intro||'', objectifs:O.objectifs||[],
+      revision:O.revision||[], exo:O.exo||'', quiz:O.quiz||[], examen:O.examen ? { t:O.examen.t||'', href:O.examen.href||'' } : { t:'', href:'' } };
+    var champs = W.pay ? ['titre','accroche','duree'] : ['titre','accroche','duree','intro','objectifs','revision','exo','quiz','examen'];
+    champs.forEach(function(f){ if(JSON.stringify(L[f]) !== JSON.stringify(ori[f])) o[f] = JSON.parse(JSON.stringify(L[f])); });
+    if(!W.pay){
+      var pOri = _apaPartiesOrig(O).map(function(p){ return { t:p.t, html:p.html, retenir:p.retenir, src:p.src }; });
+      var pNv = (L.parties||[]).map(function(p){ return { t:p.t||'', html:p.html||'', retenir:p.retenir||'', src:(p.src >= 0 ? p.src : -1) }; });
+      if(JSON.stringify(pOri) !== JSON.stringify(pNv)) o.parties = pNv;
+    }
+    if(o.examen && !(o.examen.t && o.examen.href)) o.examen = false;   // lien retiré
+    if(_apaGet('lecons/' + W.id + '/masquer')) o.masquer = true;
+    _apaPut('lecons/' + W.id, Object.keys(o).length ? o : undefined);
+  }
+  _apaEtat(); cm(); _apaRendreListe('fl');
+  toast('✓ Leçon mise à jour dans le brouillon — enregistrez pour publier');
+}
+
+/* ── Ressources ── */
+function _apaLibF(t){ var f = _APA.src.A.FAMILLES.filter(function(x){ return x[0]===t; })[0]; return f ? (_apaGet('familles/' + t + '/nom') || f[1]) : t; }
+function _apaRessources(){
+  if(!_APA.src) return _apaAttente();
+  var f = _APA.fr, fam = _APA.src.A.FAMILLES.map(function(x){ return [x[0], _apaLibF(x[0])]; });
+  function sel(k, opts){ return '<select class="fi" style="max-width:180px" onchange="_apaFiltre(\'fr\',\'' + k + '\',this.value)">' + opts.map(function(o){ return '<option value="' + _apaE(o[0]) + '"' + (o[0]===f[k]?' selected':'') + '>' + _apaE(o[1]) + '</option>'; }).join('') + '</select>'; }
+  return '<div class="card mb12"><div class="fl2 fic g8 fw">'
+    + sel('c', _apaOptsClasses('Toutes classes')) + sel('m', _apaOptsMatieres('Toutes matières')) + sel('t', [['','Toutes familles']].concat(fam))
+    + '<input class="fi" style="max-width:220px" placeholder="Chercher…" value="' + _apaE(f.q) + '" oninput="_apaFiltre(\'fr\',\'q\',this.value)">'
+    + '<button class="btn sm bi" style="margin-left:auto" onclick="_apaRes(\'\',-1)">➕ Nouvelle ressource</button></div>'
+    + '<div class="xs2 mut mt6">Labos, jeux, épreuves, méthodes… proposés dans Apprendre. Modifiez le titre, la description, le lien ou l\'accès (gratuit / abonnement), masquez-les, ou ajoutez les vôtres.</div></div>'
+    + '<div id="apaListeR">' + _apaListeR() + '</div>';
+}
+function _apaListeR(){
+  var R = _APA.src.RES, mod = _apaGet('ressources') || {}, f = _APA.fr, q = f.q.toLowerCase(), out = [];
+  Object.keys(R.items||{}).forEach(function(id){
+    var it = R.items[id], o = mod[id] || {}, at = _APA.src.rattache[id] || {c:{}, m:{}};
+    out.push({ id:id, t:it.t, ti:o.ti || it.ti, d:o.d || it.d, u:o.u || it.u, ab:(o.ab===0||o.ab===1) ? o.ab : it.ab, masque:!!o.masquer, modif:Object.keys(o).some(function(k){ return k!=='masquer'; }), cs:Object.keys(at.c), ms:Object.keys(at.m), k:-1 });
+  });
+  (_apaGet('ressourcesAjout') || []).forEach(function(n, k){ if(n) out.push({ id:n.id, t:n.t, ti:n.ti||'(sans titre)', d:n.d, u:n.u, ab:n.ab?1:0, masque:!!n.masquer, ajout:true, cs:n.classes||[], ms:n.m ? [n.m] : [], k:k }); });
+  out = out.filter(function(x){
+    if(f.c && x.cs.indexOf(f.c) < 0) return false;
+    if(f.m && x.ms.indexOf(f.m) < 0) return false;
+    if(f.t && x.t !== f.t) return false;
+    if(q && (x.ti + ' ' + x.d + ' ' + x.id).toLowerCase().indexOf(q) < 0) return false;
+    return true;
+  });
+  var MAX = 150;
+  if(!out.length) return '<div class="empty"><div class="empty-ico">🔍</div><div class="semi">Aucune ressource</div></div>';
+  return '<div class="s mut mb6"><b>' + out.length + '</b> ressource(s)' + (out.length > MAX ? ' — ' + MAX + ' premières affichées' : '') + '</div>'
+    + out.slice(0, MAX).map(function(x){
+      return '<div class="fl2 fic fsb g8" style="border:1px solid var(--bg3,#E2E8F0);border-radius:10px;padding:8px 10px;margin-bottom:6px;' + (x.masque ? 'opacity:.55' : '') + '">'
+        + '<div style="min-width:0"><div class="semi" style="font-size:13.5px">'
+        + (x.ajout ? '<span class="xs2" style="color:#007E11;font-weight:700">ajoutée</span> ' : '') + (x.modif ? '<span class="xs2" style="color:var(--bl,#1E499B);font-weight:700">modifiée</span> ' : '')
+        + (x.masque ? '<span class="xs2" style="color:#B42318;font-weight:700">masquée</span> ' : '') + _apaE(x.ti) + '</div>'
+        + '<div class="xs2 mut">' + _apaE(_apaLibF(x.t)) + ' · ' + (x.ab ? '🔒 abonnement' : 'gratuit') + ' · ' + _apaE((x.cs.slice(0,4).join(', ') || 'aucune classe') + (x.cs.length > 4 ? '…' : '')) + ' · <span style="font-family:ui-monospace,monospace">' + _apaE(String(x.u||'').slice(0,60)) + '</span></div></div>'
+        + '<div class="fl2 g6" style="flex-shrink:0"><button class="btn xs bo" onclick="_apaMasquerR(\'' + _apaQ(x.id) + '\',' + x.k + ')">' + (x.masque ? 'Afficher' : 'Masquer') + '</button>'
+        + '<button class="btn xs bi" onclick="_apaRes(\'' + _apaQ(x.id) + '\',' + x.k + ')">Modifier</button></div></div>';
+    }).join('');
+}
+function _apaMasquerR(id, k){
+  if(k >= 0){ var n = _apaGet('ressourcesAjout')[k]; n.masquer = !n.masquer; if(!n.masquer) delete n.masquer; }
+  else { var cur = _apaGet('ressources/' + id + '/masquer'); _apaPut('ressources/' + id + '/masquer', cur ? undefined : true); }
+  _apaEtat(); _apaRendreListe('fr');
+}
+function _apaRes(id, k){
+  var ajout = !id || k >= 0, R = _APA.src.RES, it;
+  if(ajout){
+    it = k >= 0 ? JSON.parse(JSON.stringify(_apaGet('ressourcesAjout')[k])) : { t:'methode', ti:'', d:'', u:'', ab:0, classes:_APA.fr.c ? [_APA.fr.c] : [], m:_APA.fr.m || '', n:0, debut:false };
+  } else {
+    var o = _apaGet('ressources/' + id) || {}, b = R.items[id];
+    it = { t:b.t, ti:o.ti || b.ti, d:o.d || b.d || '', u:o.u || b.u, ab:(o.ab===0||o.ab===1) ? o.ab : b.ab };
+  }
+  _APA.ed = { res:true, ajout:ajout, id:id, k:k, L:it };
+  M(ajout ? (k >= 0 ? 'Modifier la ressource ajoutée' : 'Nouvelle ressource') : 'Modifier la ressource', ajout ? '' : _apaE(id),
+    '<div id="apaEd">' + _apaResCorps() + '</div>',
+    (ajout && k >= 0 ? '<button class="btn bo" style="color:var(--re,#DC2626);margin-right:auto" onclick="_apaSuppr(\'ressourcesAjout\',' + k + ');cm()">Supprimer</button>' : '')
+    + (!ajout ? '<button class="btn bo" style="margin-right:auto" onclick="_apaPut(\'ressources/' + _apaQ(id) + '\',undefined);_apaEtat();cm();_apaRendreListe(\'fr\')">↺ D\'origine</button>' : '')
+    + '<button class="btn bo" onclick="cm()">Annuler</button><button class="btn bi" onclick="_apaResOk()">✓ Valider</button>');
+}
+function _apaResCorps(){
+  var W = _APA.ed, L = W.L, h = '';
+  if(W.ajout){
+    h += '<div>' + _apaLab('Famille') + '<select class="fi" onchange="_apaEdSet(\'t\',this.value)">' + _APA.src.A.FAMILLES.map(function(f){ return '<option value="' + f[0] + '"' + (f[0]===L.t?' selected':'') + '>' + _apaE(_apaLibF(f[0])) + '</option>'; }).join('') + '</select></div>';
+  }
+  h += _apaLab('Titre') + _apaEdIn('ti', '', '', L.ti) + _apaLab('Description') + _apaEdTa('d', '', 2, L.d)
+    + _apaLab('Lien', 'adresse de la page, du jeu, du PDF…') + _apaEdIn('u', '/app.html#… ou https://…', '', L.u)
+    + _apaLab('Accès') + '<select class="fi" onchange="_apaEdSet(\'ab\',+this.value)"><option value="0"' + (!L.ab?' selected':'') + '>Gratuit</option><option value="1"' + (L.ab?' selected':'') + '>Abonnement</option></select>';
+  if(W.ajout){
+    h += _apaLab('Classes concernées') + '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(90px,1fr));gap:6px">'
+      + _APA_CLASSES.map(function(c){ return '<label class="fl2 fic g6 s"><input type="checkbox"' + ((L.classes||[]).indexOf(c) >= 0 ? ' checked' : '') + ' onchange="_apaResClasse(\'' + _apaQ(c) + '\',this.checked)">' + _apaE(c) + '</label>'; }).join('') + '</div>'
+      + '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px"><div>' + _apaLab('Matière', 'vide = toute la classe') + '<select class="fi" onchange="_apaEdSetR(\'m\',this.value)">' + _apaOptsMatieres('— Toute la classe —').map(function(o){ return '<option value="' + _apaE(o[0]) + '"' + (o[0]===(L.m||'')?' selected':'') + '>' + _apaE(o[1]) + '</option>'; }).join('') + '</select></div>'
+      + '<div>' + _apaLab('Leçon n°', 'facultatif : rang dans la progression') + _apaEdIn('n', '0', 'num', L.n || '') + '</div></div>'
+      + '<label class="fl2 fic g6 s mt10"><input type="checkbox"' + (L.debut ? ' checked' : '') + ' onchange="_apaEdSet(\'debut\',this.checked)">Placer en tête de liste</label>';
+  }
+  return h;
+}
+function _apaResClasse(c, on){ var L = _APA.ed.L; L.classes = (L.classes||[]).filter(function(x){ return x !== c; }); if(on) L.classes.push(c); }
+function _apaResOk(){
+  var W = _APA.ed, L = W.L;
+  if(!String(L.ti||'').trim() || !String(L.u||'').trim()){ toast('Titre et lien obligatoires','warn'); return; }
+  if(W.ajout){
+    if(!(L.classes||[]).length){ toast('Choisissez au moins une classe','warn'); return; }
+    var N = { id:L.id || ('r-' + gid().slice(0,8)), t:L.t, ti:String(L.ti).trim(), d:String(L.d||'').trim(), u:String(L.u).trim(), ab:L.ab ? 1 : 0, classes:L.classes, m:L.m || '', n:+L.n || 0 };
+    if(L.debut) N.debut = true; if(L.masquer) N.masquer = true;
+    var A = _apaGet('ressourcesAjout'); if(!Array.isArray(A)){ A = []; _apaPut('ressourcesAjout', A); }
+    if(W.k >= 0) A[W.k] = N; else A.push(N);
+  } else {
+    var b = _APA.src.RES.items[W.id], o = {};
+    ['ti','d','u'].forEach(function(f){ var v = String(L[f]||'').trim(); if(v && v !== String(b[f]||'')) o[f] = v; });
+    if((L.ab ? 1 : 0) !== (b.ab ? 1 : 0)) o.ab = L.ab ? 1 : 0;
+    if(_apaGet('ressources/' + W.id + '/masquer')) o.masquer = true;
+    _apaPut('ressources/' + W.id, Object.keys(o).length ? o : undefined);
+  }
+  _apaEtat(); cm(); _apaRendreListe('fr'); toast('✓ Ressource mise à jour dans le brouillon — enregistrez pour publier');
+}
+
+/* ── Calendrier ── */
+function _apaCalendrier(){
+  if(!_APA.src) return _apaAttente();
+  var AN = _APA.src.AN, S = (AN && AN.SESSION) || {};
+  var ses = Object.keys(S).map(function(nom){
+    var o = S[nom], p = 'calendrier/session/' + nom;
+    function dt(k, def){ return '<input class="fi" type="date" value="' + _apaE(_apaGet(p + '/' + k) || def || '') + '" onchange="_apaSet(\'' + _apaQ(p + '/' + k) + '\',this.value===\'' + (def||'') + '\'?\'\':this.value,\'txt\')">'; }
+    return '<div class="card mb8" style="padding:10px"><b>' + _apaE(nom) + '</b>'
+      + '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:8px">'
+      + '<div>' + _apaLab('Écrits : du') + dt('ecritDe', o.ecrit[0]) + '</div><div>' + _apaLab('au') + dt('ecritA', o.ecrit[1]) + '</div>'
+      + '<div>' + _apaLab('Facultatives / oral') + dt('facDe', o.fac[0]) + '</div>'
+      + '<div>' + _apaLab('Résultats : du') + dt('finDe', o.fin[0]) + '</div><div>' + _apaLab('au') + dt('finA', o.fin[1]) + '</div></div>'
+      + '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">' + _apaIn(p + '/facT', o.fac[1]) + _apaIn(p + '/finT', o.fin[2]) + '</div></div>';
+  }).join('');
+  var titres = {};
+  if(AN) _APA_CLASSES.forEach(function(c){ AN.echeances(c).forEach(function(e){ titres[e.t] = 1; }); });
+  var masq = _apaGet('calendrier/masquer') || [];
+  var lm = Object.keys(titres).map(function(t){
+    return '<label class="fl2 fic g6 s"><input type="checkbox"' + (masq.indexOf(t) < 0 ? ' checked' : '') + ' onchange="_apaCalMasq(\'' + _apaQ(t) + '\',!this.checked)">' + _apaE(t) + '</label>';
+  }).join('');
+  var aj = (_apaGet('calendrier/ajout') || []).map(function(e, k){
+    if(!e) return '';
+    var p = 'calendrier/ajout/' + k;
+    return '<div class="card mb8" style="padding:10px"><div class="fl2 fic fsb g8"><div style="flex:1">' + _apaIn(p + '/t', 'Intitulé de l\'échéance') + '</div><button class="btn xs bo" onclick="_apaSuppr(\'calendrier/ajout\',' + k + ')">✕</button></div>'
+      + '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:8px">'
+      + '<div>' + _apaLab('Le / du') + '<input class="fi" type="date" value="' + _apaE(e.de||'') + '" onchange="_apaSet(\'' + p + '/de\',this.value,\'txt\')"></div>'
+      + '<div>' + _apaLab('au', 'facultatif') + '<input class="fi" type="date" value="' + _apaE(e.a||'') + '" onchange="_apaSet(\'' + p + '/a\',this.value,\'txt\')"></div>'
+      + '<div>' + _apaLab('Pour') + _apaSel(p + '/q', [['tous','Toutes les classes'],['examen','Classes d\'examen'],['inter','Autres classes']], 'tous') + '</div>'
+      + '<div>' + _apaLab('Classes précises', 'séparées par des virgules') + '<input class="fi" value="' + _apaE((e.classes||[]).join(', ')) + '" placeholder="vide = selon « Pour »" oninput="_apaSet(\'' + p + '/classes\',this.value.split(\',\').join(\'\\n\'),\'lines\')"></div></div>'
+      + _apaCk(p + '/vac', 'Ce sont des vacances') + '</div>';
+  }).join('');
+  return _apaCarte('🎓 Dates des examens officiels', ses, 'Vide ou date d\'origine = date de la décision ministérielle livrée avec Apprendre.')
+    + _apaCarte('➕ Échéances ajoutées', aj + '<button class="btn sm bo" onclick="_apaAjout(\'calendrier/ajout\',{t:\'\',de:\'\',q:\'tous\'})">➕ Ajouter une échéance</button>', 'Ex. : examen blanc du centre, journée portes ouvertes, composition harmonisée.')
+    + _apaCarte('👁 Échéances affichées', '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:6px">' + lm + '</div>', 'Décochez une échéance pour la retirer du calendrier de toutes les classes.')
+    + _apaCarte('👥 Classe virtuelle',
+      _apaCk('calendrier/cvMasquer', 'Masquer l\'encart « Classe virtuelle »')
+      + _apaLab('Salons affichés', 'un par ligne') + _apaTa('calendrier/salons', 'Général\nAnnonces\nFrançais\nMathématiques\nSciences', 'lines', 5));
+}
+function _apaCalMasq(t, masquer){
+  var L = (_apaGet('calendrier/masquer') || []).filter(function(x){ return x !== t; });
+  if(masquer) L.push(t);
+  _apaPut('calendrier/masquer', L.length ? L : undefined); _apaEtat();
+}
+
+/* ── Textes ── */
+function _apaTextes(){
+  var L = _apaGet('textes') || [];
+  var h = L.map(function(r, k){
+    if(!r) return '';
+    var p = 'textes/' + k;
+    return '<div class="card mb8" style="padding:10px"><div class="fl2 fic fsb g8 mb6">' + _apaCk(p + '/actif', 'Actif', true) + '<button class="btn xs bo" onclick="_apaSuppr(\'textes\',' + k + ')">✕</button></div>'
+      + '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px"><div>' + _apaLab('Texte affiché aujourd\'hui') + _apaTa(p + '/de', 'Ex. : Que veux-tu apprendre', 'txt', 2) + '</div>'
+      + '<div>' + _apaLab('Remplacer par', 'vide = effacer ce texte') + _apaTa(p + '/vers', '', 'raw', 2) + '</div></div></div>';
+  }).join('');
+  return _apaCarte('✏️ Remplacer un texte',
+    h + '<button class="btn sm bo" onclick="_apaAjout(\'textes\',{de:\'\',vers:\'\'})">➕ Ajouter un remplacement</button>',
+    'Pour tout texte d\'Apprendre qui n\'a pas son propre réglage (titres de l\'accueil, boutons, messages…) : copiez-le tel qu\'il s\'affiche, écrivez le nouveau. Il est remplacé sur toutes les pages, y compris dans les blocs affichés après coup. Vérifiez avec 👁 Aperçu.');
+}
+
+/* ═══════════ Page ═══════════ */
+function _apaCorps(){
+  var o = _APA.onglet;
+  return o==='classes' ? _apaClasses() : o==='rubriques' ? _apaRubriques() : o==='offre' ? _apaOffre()
+    : o==='lecons' ? _apaLecons() : o==='ressources' ? _apaRessources() : o==='calendrier' ? _apaCalendrier()
+    : o==='textes' ? _apaTextes() : _apaGeneral();
+}
+function _apaOnglet(o){ _APA.onglet = o; _apaRendre(); }
+function _apaRendre(){
+  var el = _ge('apaCorps'); if(!el) return;
+  var y = window.scrollY;
+  el.innerHTML = _apaCorps();
+  var t = _ge('apaOnglets'); if(t) t.innerHTML = _apaOngletsHTML();
+  _apaEtat();
+  try{ window.scrollTo(0, y); }catch(e){}
+}
+function _apaOngletsHTML(){
+  return _APA_ONGLETS.map(function(o){ return '<button class="btn sm ' + (o[0]===_APA.onglet ? 'bi' : 'bo') + '" onclick="_apaOnglet(\'' + o[0] + '\')">' + o[1] + '</button>'; }).join('');
+}
+function _apaEnregistrer(){
+  if(!iA()){ toast('Réservé à l\'administration','warn'); return; }
+  var c = _apaNet(_apaD());
+  c.maj = new Date().toISOString();
+  DB.apprendreCfg = c;
+  _APA.d = JSON.parse(JSON.stringify(c));
+  save();
+  _apaEtat();
+  toast('✓ Apprendre enregistré — en ligne d\'ici une minute environ');
+}
+function _apaAnnuler(){
+  if(!_apaSale()){ toast('Rien à annuler','warn'); return; }
+  if(!confirm('Abandonner les modifications non enregistrées ?')) return;
+  _APA.d = null; _apaRendre(); toast('Modifications abandonnées');
+}
+function _apaToutRendre(){
+  if(!confirm('Revenir à l\'Apprendre d\'origine ?\n\nTous les réglages (leçons ajoutées comprises) seront retirés du brouillon. Rien n\'est publié avant « Enregistrer ».')) return;
+  _APA.d = {}; _apaRendre(); toast('Brouillon vidé — enregistrez pour publier');
+}
+function _apaApercu(page){
+  try{ localStorage.setItem('vrt_app_cfg_apercu', JSON.stringify(_apaNet(_apaD()))); }
+  catch(e){ toast('Aperçu impossible : stockage du navigateur plein','err'); return; }
+  page = page || 'index.html';
+  window.open('apprendre/' + page + (page.indexOf('?') >= 0 ? '&' : '?') + 'apercu=1', '_blank', 'noopener');
+}
+function _apaExporter(){
+  var b = new Blob([JSON.stringify(_apaNet(_apaD()), null, 2)], { type:'application/json' });
+  var a = document.createElement('a'); a.href = URL.createObjectURL(b); a.download = 'apprendre-reglages-' + new Date().toISOString().slice(0,10) + '.json';
+  document.body.appendChild(a); a.click(); setTimeout(function(){ URL.revokeObjectURL(a.href); a.remove(); }, 1500);
+}
+function _apaImporter(){
+  var i = document.createElement('input'); i.type = 'file'; i.accept = 'application/json,.json';
+  i.onchange = function(){
+    var f = i.files && i.files[0]; if(!f) return;
+    var r = new FileReader();
+    r.onload = function(){
+      try{ var o = JSON.parse(r.result); if(!o || typeof o !== 'object' || Array.isArray(o)) throw 0; _APA.d = o; _apaRendre(); toast('Réglages importés dans le brouillon — enregistrez pour publier'); }
+      catch(e){ toast('Fichier illisible (JSON attendu)','err'); }
+    };
+    r.readAsText(f);
+  };
+  i.click();
+}
+function pgApprendreAdmin(){
+  if(!iA()) return na();
+  _apaD();
+  if(!_APA.src) setTimeout(function(){ _apaCharger(); }, 0);
+  return '<div class="vrt-cfg">'
+    + '<div class="pgt">Apprendre — cours en ligne</div>'
+    + '<div class="ib ibg mb12"><span>📘</span><span>Tout ce que voient les élèves dans <a href="apprendre/" target="_blank" rel="noopener">Apprendre</a> se règle ici : classes, matières, leçons, ressources, offres, calendrier et textes. '
+    + 'Un champ vide reprend la valeur d\'origine (en grisé). Vérifiez avec <b>👁 Aperçu</b>, puis <b>Enregistrer</b>.</span></div>'
+    + '<div class="card mb12" style="position:sticky;top:0;z-index:5"><div class="fl2 fic fsb fw g8">'
+    + '<span id="apaEtat">' + _apaEtatHTML() + '</span>'
+    + '<div class="fl2 g8 fw"><button class="btn sm bo" onclick="_apaApercu()">👁 Aperçu</button>'
+    + '<button class="btn sm bo" onclick="_apaAnnuler()">Annuler</button>'
+    + '<button class="btn sm bi" onclick="_apaEnregistrer()">✓ Enregistrer et publier</button></div></div>'
+    + '<div class="fl2 g6 fw mt10" id="apaOnglets">' + _apaOngletsHTML() + '</div></div>'
+    + '<div id="apaCorps">' + _apaCorps() + '</div></div>'
+    + '<style>.vrt-cfg .mt4{margin-top:4px}.vrt-cfg .mt6{margin-top:6px}.vrt-cfg .mt8{margin-top:8px}.vrt-cfg .mt10{margin-top:10px}.vrt-cfg .mt14{margin-top:14px}.vrt-cfg .mb4{margin-bottom:4px}.vrt-cfg .mb6{margin-bottom:6px}.vrt-cfg .mb8{margin-bottom:8px}.vrt-cfg .mb10{margin-bottom:10px}.vrt-cfg .g6{gap:6px}</style>';
+}
+
+window.pgApprendreAdmin = pgApprendreAdmin;
+window._apaRecu = _apaRecu;
+window._apaCharger = _apaCharger;
+window._apaSet = _apaSet;
+window._apaSetR = _apaSetR;
+window._apaOnglet = _apaOnglet;
+window._apaFiltre = _apaFiltre;
+window._apaEnregistrer = _apaEnregistrer;
+window._apaAnnuler = _apaAnnuler;
+window._apaToutRendre = _apaToutRendre;
+window._apaApercu = _apaApercu;
+window._apaExporter = _apaExporter;
+window._apaImporter = _apaImporter;
+window._apaCahierPerso = _apaCahierPerso;
+window._apaAjout = _apaAjout;
+window._apaSuppr = _apaSuppr;
+window._apaMasquerL = _apaMasquerL;
+window._apaLecon = _apaLecon;
+window._apaEdSet = _apaEdSet;
+window._apaEdSetR = _apaEdSetR;
+window._apaEdBouger = _apaEdBouger;
+window._apaEdRetirer = _apaEdRetirer;
+window._apaEdAjouter = _apaEdAjouter;
+window._apaEdOrigine = _apaEdOrigine;
+window._apaEdSuppr = _apaEdSuppr;
+window._apaEdOk = _apaEdOk;
+window._apaMasquerR = _apaMasquerR;
+window._apaRes = _apaRes;
+window._apaResClasse = _apaResClasse;
+window._apaResOk = _apaResOk;
+window._apaCalMasq = _apaCalMasq;
+window._apaPut = _apaPut;
+window._apaEtat = _apaEtat;
+window._apaRendreListe = _apaRendreListe;
 window._cmsEnregistrer    = _cmsEnregistrer;
 window._cmsAnnuler        = _cmsAnnuler;
 window._cmsResetTout      = _cmsResetTout;

@@ -9,7 +9,7 @@
 <link rel="icon" href="../VERITAS_favicon_512.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="apprendre.css?v=20261113a">
+<link rel="stylesheet" href="apprendre.css?v=20261113z">
 <link rel="stylesheet" href="jeu.css?v=20261112v">
 <style>
 /* ── Vue Enseignant, français : évaluer la leçon dans l'Atelier (10/11/2026) ── */
@@ -47,16 +47,18 @@
   </div>
 </dialog>
 
+<script src="/api/apprendre_config.php"></script>
 <script src="scenes.js?v=20261112a"></script>
 <script src="progressions.js?v=20261110g"></script>
 <script src="lecons.js?v=20261110g"></script>
 <script src="ressources.js?v=20261113m"></script>
 <script src="atelier.js?v=20261110a"></script>
-<script src="charge.js?v=89d26a23"></script>
-<script src="commun.js?v=20261113m"></script>
+<script src="charge.js?v=2ff148ec"></script>
+<script src="commun.js?v=20261113n"></script>
 <script src="jeu.js?v=20261110g"></script>
 <script src="labo.js?v=20261111c"></script>
-<script src="verrou.js?v=20261112a"></script>
+<script src="verrou.js?v=20261113a"></script>
+<script src="tuteur.js?v=20261113b"></script>
 <script>
 (function(){
   "use strict";
@@ -102,7 +104,7 @@
      (L.intro?'<p class="info">'+L.intro+'</p>':'')+
      (L.apc?'<aside class="apc"><h2>Situation de vie</h2><p>'+esc(L.apc.situation)+'</p><p class="apc-t"><b>Ta tâche :</b> '+esc(L.apc.tache)+'</p></aside>':'')+
      (L.objectifs?'<div class="objectifs"><b>À la fin de la leçon, tu sauras :</b><ul>'+L.objectifs.map(function(o){return '<li>'+o+'</li>'}).join("")+'</ul></div>':'')+
-     parties+plus+(mur?VRT.verrou.mur(L,mur,A):scenesHtml+appel+A.offre(L.c,L.m,'lecon'))+nav+'</article></section>'+
+     parties+plus+(mur?VRT.verrou.mur(L,mur,A):scenesHtml+appel+A.offre(L.c,L.m,'lecon'))+'<div id="tuteurLecon"></div>'+nav+'</article></section>'+
    '<section class="grille" data-panneau="revision" hidden><aside class="sommaire"><p>L\'essentiel</p></aside><article class="carte">'+
      ''+(mur?'<p class="vide">La fiche de révision de cette leçon est réservée aux abonnés. <a href="#" data-retour-cours>Voir comment la débloquer</a>.</p>':'<div class="partie"><h2><span class="num">'+A.pic("coche",20)+'</span><span class="txt">Ce que tu dois retenir</span></h2><ul>'+L.revision.map(function(r){return '<li>'+r+'</li>'}).join("")+'</ul></div>')+
      (L.exo?'<div class="partie"><h2><span class="num">'+A.pic("crayon",18)+'</span><span class="txt">À toi de jouer</span></h2>'+L.exo+'</div>':'')+
@@ -113,6 +115,9 @@
   if(mur){ VRT.verrou.brancher(boite,L); $$("[data-retour-cours]").forEach(function(a){a.addEventListener("click",function(e){e.preventDefault();$('[data-f=cours]').click();var m=$(".mur");if(m)m.scrollIntoView({block:"center"})})}); }
 
   A.noterJour(); A.chiffreSerie($("#serie"));
+
+  /* Tuteur IA (Prof. Ambassa) : questions sur la leçon, quota fixé par le serveur selon la formule. */
+  if(VRT.tuteur){ try{ VRT.tuteur.monter($("#tuteurLecon"),L,M,A) }catch(e){ if(window.console) console.warn("Tuteur", e) } }
 
   /* Kalao, la mascotte : un mot d'accueil adapté (déjà lue ? quiz déjà réussi ?) */
   if(VRT.jeu&&!mur){ var dejaLu=A.lire("lus",{})[id], qq=A.lire("quiz",{})[id];
@@ -211,5 +216,6 @@
   if(L.verrou&&window.VRT&&VRT.verrou){ boite.innerHTML='<p class="vide">Chargement de la leçon…</p>'; VRT.verrou.ouvrir(L,demarrer); } else demarrer(null);
 })();
 </script>
+<script src="zoom.js?v=20261113a" defer></script>
 </body>
 </html>

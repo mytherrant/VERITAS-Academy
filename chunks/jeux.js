@@ -338,7 +338,7 @@ window._VRT_JEUX_OK = true;
    (intelligence, stratégie, réflexion, éveil, stimulation) pour rendre plus
    captivant et pousser à l'abonnement » (Jacques).
 
-   Neuf jeux, chacun en trois niveaux (Facile 6ᵉ-5ᵉ, Moyen 4ᵉ-2nde,
+   Vingt jeux (neuf au départ, onze ajoutés depuis), chacun en trois niveaux (Facile 6ᵉ-5ᵉ, Moyen 4ᵉ-2nde,
    Difficile 1ʳᵉ-Tˡᵉ), générés à chaque partie : on ne les épuise pas.
    Record par jeu et par niveau (localStorage, facultatif). En fin de partie,
    un visiteur non abonné voit une invitation discrète vers les formules.
@@ -379,7 +379,14 @@ window._VRT_JEUX_OK = true;
       + NIV.map(function (n) {
           return "<button type='button' class='tab" + (n[0] === niv ? " on" : "") + "' onclick=\"" + id + "('" + n[0] + "')\" title='" + n[2] + "'>" + n[1] + "</button>";
         }).join("")
-      + "</div><div id='jrZone'>" + corps + "</div></div></div>");
+      + "</div><div id='jrZone' data-pas-onglets>" + corps + "</div></div></div>");
+    /* Les feuilles du site imposent aux <button> 44 px de large minimum : un
+       plateau de 7 à 10 cases débordait l'écran du téléphone. */
+    if (!document.getElementById("jrStyle")) {
+      var st = document.createElement("style"); st.id = "jrStyle";
+      st.textContent = "#jrZone button:not(.btn){min-width:0!important;min-height:0!important}";
+      document.head.appendChild(st);
+    }
   }
   function zone(h) { var z = document.getElementById("jrZone"); if (z) z.innerHTML = h; }
   function fin(titre, detail, rec, rejouer) {
@@ -901,7 +908,7 @@ window._VRT_JEUX_OK = true;
     }
     var COUL = ["", "#1E499B", "#047857", "#B42318", "#5B21B6", "#92400E", "#0E7C86", "#111", "#666"];
     function dessine() {
-      var taille = Math.min(40, Math.floor(320 / n)), drap = drapeau.filter(Boolean).length;
+      var taille = Math.min(40, Math.floor(Math.min(320, (window.innerWidth || 360) - 90) / n)), drap = drapeau.filter(Boolean).length;
       zone("<div style='font-size:13px;color:#8B93A6;margin-bottom:8px'>" + nbM + " mines · " + drap + " drapeau" + (drap > 1 ? "x" : "") + "</div>"
         + "<div style='display:inline-grid;grid-template-columns:repeat(" + n + "," + taille + "px);gap:2px'>" + mine.map(function (m, p) {
             var bg = vu[p] ? (m ? "#FCA5A5" : "#F1F5F9") : "#1E499B", ct = "";
@@ -1030,7 +1037,7 @@ window._VRT_JEUX_OK = true;
     var LET = "ABCDEFGH";
     function coule(id) { for (var p = 0; p < n * n; p++) if (navire[p] === id && !tir[p]) return false; return true; }
     function dessine(msg) {
-      var taille = Math.min(40, Math.floor(300 / n)), restants = flotte.filter(function (_, id) { return !coule(id); }).length;
+      var taille = Math.min(40, Math.floor(Math.min(300, (window.innerWidth || 360) - 90) / n)), restants = flotte.filter(function (_, id) { return !coule(id); }).length;
       var h = "<span></span>"; for (var c = 0; c < n; c++) h += "<span style='font-size:11px;color:#8B93A6;text-align:center'>" + (c + 1) + "</span>";
       for (var r = 0; r < n; r++) {
         h += "<span style='font-size:11px;color:#8B93A6;display:flex;align-items:center'>" + LET[r] + "</span>";
@@ -1115,6 +1122,239 @@ window._VRT_JEUX_OK = true;
     }, 250);
   };
 
+
+  /* ══ 13/11/2026 — TROIS JEUX DE PLUS (« fais-en d'autres aussi captivants », Jacques) ══
+     Frise chronologique, Associations express, Puissance 4. Mêmes règles que les
+     autres : trois niveaux, générés à chaque partie, record par niveau, aucune
+     donnée dans un attribut onclick (indices data-* + gestionnaires posés en JS). */
+
+  /* ── 18. FRISE CHRONOLOGIQUE (histoire, sciences, littérature) ─────────── */
+  var FRISE = [
+    [1472, "Des navigateurs portugais nomment l'estuaire du Wouri « Rio dos Camarões »"],
+    [1492, "Christophe Colomb atteint l'Amérique"],
+    [1543, "Copernic publie sa théorie : la Terre tourne autour du Soleil"],
+    [1637, "Corneille fait jouer « Le Cid »"],
+    [1664, "Molière fait jouer « Tartuffe » pour la première fois"],
+    [1687, "Newton publie la loi de la gravitation universelle"],
+    [1759, "Voltaire publie « Candide »"],
+    [1789, "Début de la Révolution française"],
+    [1848, "La France abolit définitivement l'esclavage"],
+    [1859, "Darwin publie « L'Origine des espèces »"],
+    [1862, "Victor Hugo publie « Les Misérables »"],
+    [1884, "Traité germano-douala : le Cameroun devient protectorat allemand"],
+    [1885, "Fin de la conférence de Berlin sur le partage de l'Afrique"],
+    [1905, "Einstein publie la relativité restreinte"],
+    [1914, "Début de la Première Guerre mondiale"],
+    [1916, "Les troupes allemandes sont chassées du Cameroun"],
+    [1919, "Le Cameroun est partagé entre la France et le Royaume-Uni"],
+    [1928, "Fleming découvre la pénicilline"],
+    [1939, "Début de la Seconde Guerre mondiale"],
+    [1942, "Camus publie « L'Étranger »"],
+    [1944, "Conférence de Brazzaville"],
+    [1945, "Création de l'Organisation des Nations unies"],
+    [1948, "Création de l'UPC (Union des populations du Cameroun)"],
+    [1953, "Watson et Crick décrivent la double hélice de l'ADN"],
+    [1954, "Eza Boto (Mongo Beti) publie « Ville cruelle »"],
+    [1956, "Ferdinand Oyono publie « Une vie de boy »"],
+    [1957, "Le Ghana devient indépendant"],
+    [1958, "Chinua Achebe publie « Things Fall Apart »"],
+    [1960, "Le Cameroun sous administration française devient indépendant"],
+    [1961, "Réunification du Cameroun (1er octobre)"],
+    [1963, "Création de l'Organisation de l'unité africaine (OUA)"],
+    [1969, "Premiers pas de l'homme sur la Lune"],
+    [1972, "Naissance de l'État unitaire au Cameroun (20 mai)"],
+    [1979, "Mariama Bâ publie « Une si longue lettre »"],
+    [1982, "Paul Biya devient président de la République"],
+    [1989, "Chute du mur de Berlin"],
+    [1994, "Nelson Mandela devient président de l'Afrique du Sud"],
+    [2002, "Création de l'Union africaine"]
+  ];
+  W.lancerJrFrise = function (niv) {
+    niv = niv || "facile";
+    var nb = niv === "facile" ? 3 : niv === "moyen" ? 4 : 5, ecartMin = niv === "facile" ? 40 : niv === "moyen" ? 8 : 1;
+    var manche = 0, MANCHES = 5, pts = 0, erreurs = 0, tirage, attendu, clics;
+    function tire() {
+      var t, essai = 0;
+      do {
+        t = melange(FRISE).slice(0, nb).sort(function (a, b) { return a[0] - b[0]; });
+        var ok = true; for (var i = 1; i < t.length; i++) if (t[i][0] - t[i - 1][0] < ecartMin) ok = false;
+        essai++;
+      } while (!ok && essai < 200);
+      attendu = t; tirage = melange(t); clics = [];
+    }
+    function dessine(msg) {
+      var fini = clics.length === attendu.length;
+      zone("<div style='font-size:13px;color:#8B93A6'>Manche " + (manche + 1) + " sur " + MANCHES + " · " + pts + " point" + (pts > 1 ? "s" : "") + "</div>"
+        + "<div style='font-size:14px;color:#4D5163;margin:8px 0 14px'>Touche les événements <b>du plus ancien au plus récent</b>.</div>"
+        + "<div style='display:grid;gap:8px;text-align:left'>" + tirage.map(function (e, i) {
+            var rang = clics.indexOf(i);
+            return "<button type='button' data-e='" + i + "' style='display:flex;align-items:center;gap:10px;padding:12px 14px;border-radius:12px;font-size:15px;line-height:1.35;text-align:left;cursor:" + (rang >= 0 ? "default" : "pointer") + ";border:1.5px solid " + (rang >= 0 ? "#86C79A" : "#C9CFDB") + "!important;background:" + (rang >= 0 ? "#EAF7EE" : "#F7F8FB") + "!important;color:#142554!important'>"
+              + "<span style='flex:0 0 30px;height:30px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-weight:800;background:" + (rang >= 0 ? "#047857;color:#fff" : "#EEF1F6;color:#8B93A6") + "'>" + (rang >= 0 ? rang + 1 : "?") + "</span>"
+              + "<span style='flex:1'>" + esc(e[1]) + (fini || rang >= 0 ? " <b style='color:#C24E00;white-space:nowrap'>· " + e[0] + "</b>" : "") + "</span></button>";
+          }).join("") + "</div>"
+        + "<div id='jrFb' style='min-height:24px;margin-top:12px;font-weight:700'>" + (msg || "") + "</div>"
+        + (fini ? "<button class='btn bi' id='jrOk'>" + (manche + 1 < MANCHES ? "Manche suivante →" : "Résultat") + "</button>" : ""));
+      [].forEach.call(document.querySelectorAll("#jrZone [data-e]"), function (b) { b.onclick = function () { clic(+b.getAttribute("data-e")); }; });
+      var ok = document.getElementById("jrOk"); if (ok) ok.onclick = suite;
+    }
+    function clic(i) {
+      if (clics.indexOf(i) >= 0 || clics.length === attendu.length) return;
+      if (tirage[i] === attendu[clics.length]) {
+        clics.push(i); pts += 2;
+        dessine(clics.length === attendu.length ? "<span style='color:#047857'>Frise complète !</span>" : "");
+      } else {
+        erreurs++; pts = Math.max(0, pts - 1);
+        dessine("<span style='color:#B42318'>Pas encore : un autre événement est plus ancien.</span>");
+      }
+    }
+    function suite() {
+      manche++;
+      if (manche >= MANCHES) { zone(fin(pts + " points", MANCHES + " frises remises en ordre, " + erreurs + " erreur" + (erreurs > 1 ? "s" : ""), record("frise_" + niv, pts, "haut"), "lancerJrFrise('" + niv + "')")); return; }
+      tire(); dessine();
+    }
+    ecran("lancerJrFrise", "Frise chronologique", "🕰️", "Histoire du Cameroun et du monde, sciences, littérature : remets les événements dans l'ordre. +2 par bon choix, −1 par erreur.", niv, "");
+    tire(); dessine();
+  };
+
+  /* ── 19. ASSOCIATIONS EXPRESS (relier deux colonnes, contre la montre) ──── */
+  var ASSOC = [
+    ["Régions du Cameroun et chefs-lieux", [["Centre", "Yaoundé"], ["Littoral", "Douala"], ["Ouest", "Bafoussam"], ["Nord-Ouest", "Bamenda"], ["Sud-Ouest", "Buea"], ["Sud", "Ebolowa"], ["Est", "Bertoua"], ["Adamaoua", "Ngaoundéré"], ["Nord", "Garoua"], ["Extrême-Nord", "Maroua"]]],
+    ["Pays d'Afrique et capitales", [["Gabon", "Libreville"], ["Tchad", "N'Djamena"], ["Nigeria", "Abuja"], ["Sénégal", "Dakar"], ["Côte d'Ivoire", "Yamoussoukro"], ["Mali", "Bamako"], ["Congo", "Brazzaville"], ["RD Congo", "Kinshasa"], ["Guinée équatoriale", "Malabo"], ["Centrafrique", "Bangui"], ["Ghana", "Accra"], ["Kenya", "Nairobi"], ["Égypte", "Le Caire"], ["Maroc", "Rabat"], ["Burkina Faso", "Ouagadougou"], ["Niger", "Niamey"], ["Togo", "Lomé"], ["Éthiopie", "Addis-Abeba"]]],
+    ["Verbes anglais et prétérit", [["go", "went"], ["see", "saw"], ["take", "took"], ["buy", "bought"], ["think", "thought"], ["bring", "brought"], ["teach", "taught"], ["catch", "caught"], ["write", "wrote"], ["drink", "drank"], ["begin", "began"], ["swim", "swam"], ["eat", "ate"], ["give", "gave"], ["fly", "flew"], ["know", "knew"], ["speak", "spoke"], ["choose", "chose"]]],
+    ["Œuvres et auteurs", [["Une vie de boy", "Ferdinand Oyono"], ["Ville cruelle", "Eza Boto"], ["L'Enfant noir", "Camara Laye"], ["Les Bouts de bois de Dieu", "Sembène Ousmane"], ["L'Aventure ambiguë", "Cheikh Hamidou Kane"], ["Une si longue lettre", "Mariama Bâ"], ["Les Soleils des indépendances", "Ahmadou Kourouma"], ["Cahier d'un retour au pays natal", "Aimé Césaire"], ["Trois prétendants… un mari", "Guillaume Oyônô Mbia"], ["Le Pauvre Christ de Bomba", "Mongo Beti"], ["Antigone (1944)", "Jean Anouilh"], ["Huis clos", "Jean-Paul Sartre"], ["Tartuffe", "Molière"], ["Candide", "Voltaire"], ["L'Étranger", "Albert Camus"], ["Le Lion et la Perle", "Wole Soyinka"]]],
+    ["Éléments chimiques et symboles", [["Sodium", "Na"], ["Potassium", "K"], ["Fer", "Fe"], ["Cuivre", "Cu"], ["Argent", "Ag"], ["Or", "Au"], ["Plomb", "Pb"], ["Mercure", "Hg"], ["Étain", "Sn"], ["Calcium", "Ca"], ["Chlore", "Cl"], ["Azote", "N"], ["Soufre", "S"], ["Phosphore", "P"], ["Magnésium", "Mg"], ["Zinc", "Zn"], ["Hélium", "He"], ["Carbone", "C"]]],
+    ["Grandeurs physiques et unités", [["Force", "newton (N)"], ["Énergie", "joule (J)"], ["Puissance", "watt (W)"], ["Tension électrique", "volt (V)"], ["Intensité du courant", "ampère (A)"], ["Résistance", "ohm (Ω)"], ["Fréquence", "hertz (Hz)"], ["Pression", "pascal (Pa)"], ["Charge électrique", "coulomb (C)"], ["Quantité de matière", "mole (mol)"], ["Température absolue", "kelvin (K)"]]]
+  ];
+  W.lancerJrAssoc = function (niv) {
+    niv = niv || "facile";
+    var nb = niv === "facile" ? 4 : niv === "moyen" ? 5 : 6, MANCHES = 4, manche = 0, pts = 0, erreurs = 0, t0 = Date.now();
+    var themes = melange(ASSOC), gauche, droite, choixG = -1, faits, theme;
+    function prepare() {
+      theme = themes[manche % themes.length];
+      var paires = melange(theme[1]).slice(0, nb);
+      gauche = paires.map(function (p, i) { return { t: p[0], k: i }; });
+      droite = melange(paires.map(function (p, i) { return { t: p[1], k: i }; }));
+      choixG = -1; faits = [];
+    }
+    function bouton(attr, i, txt, etat) {
+      // [fond, bordure, texte] — en !important : le site met toute bordure à 0 et blanchit les fonds
+      var c = etat === "fait" ? ["#EAF7EE", "#86C79A", "#047857"] : etat === "choisi" ? ["#142554", "#142554", "#fff"] : etat === "faux" ? ["#FEE2E2", "#F3A6A6", "#B42318"] : ["#F7F8FB", "#C9CFDB", "#142554"];
+      return "<button type='button' " + attr + "='" + i + "' style='display:block;width:100%;padding:11px 10px;border-radius:10px;border:1.5px solid " + c[1] + "!important;background:" + c[0] + "!important;color:" + c[2] + "!important;font-size:14px;font-weight:600;line-height:1.3;margin-bottom:8px;cursor:" + (etat === "fait" ? "default;opacity:.75" : "pointer") + "'>" + esc(txt) + "</button>";
+    }
+    function dessine(faux) {
+      var s = Math.floor((Date.now() - t0) / 1000);
+      zone("<div style='font-size:13px;color:#8B93A6'>Manche " + (manche + 1) + " sur " + MANCHES + " · " + pts + " pts · " + s + " s</div>"
+        + "<div style='font:700 16px Montserrat,sans-serif;color:#142554;margin:8px 0 14px'>" + esc(theme[0]) + "</div>"
+        + "<div style='display:grid;grid-template-columns:1fr 1fr;gap:10px'>"
+        + "<div>" + gauche.map(function (g, i) { return bouton("data-g", i, g.t, faits.indexOf(g.k) >= 0 ? "fait" : i === choixG ? "choisi" : ""); }).join("") + "</div>"
+        + "<div>" + droite.map(function (d, i) { return bouton("data-d", i, d.t, faits.indexOf(d.k) >= 0 ? "fait" : i === faux ? "faux" : ""); }).join("") + "</div></div>"
+        + "<div style='font-size:13px;color:#5B6170;margin-top:6px'>Touche un élément à gauche, puis son partenaire à droite.</div>");
+      [].forEach.call(document.querySelectorAll("#jrZone [data-g]"), function (b) { b.onclick = function () { var i = +b.getAttribute("data-g"); if (faits.indexOf(gauche[i].k) < 0) { choixG = i; dessine(); } }; });
+      [].forEach.call(document.querySelectorAll("#jrZone [data-d]"), function (b) { b.onclick = function () { relie(+b.getAttribute("data-d")); }; });
+    }
+    function relie(i) {
+      var d = droite[i];
+      if (faits.indexOf(d.k) >= 0) return;
+      if (choixG < 0) { dessine(); return; }
+      if (gauche[choixG].k === d.k) {
+        faits.push(d.k); pts += 10; choixG = -1;
+        if (faits.length === nb) {
+          manche++;
+          if (manche >= MANCHES) {
+            var s = Math.floor((Date.now() - t0) / 1000), bonus = Math.max(0, 120 - s - erreurs * 10);
+            pts += bonus;
+            zone(fin(pts + " points", MANCHES + " thèmes en " + s + " s, " + erreurs + " erreur" + (erreurs > 1 ? "s" : "") + " (bonus de rapidité : " + bonus + ")", record("assoc_" + niv, pts, "haut"), "lancerJrAssoc('" + niv + "')"));
+            return;
+          }
+          prepare();
+        }
+        dessine();
+      } else { erreurs++; pts = Math.max(0, pts - 3); dessine(i); }
+    }
+    ecran("lancerJrAssoc", "Associations express", "🔗", "Relie chaque élément à son partenaire : régions, capitales, verbes anglais, œuvres, symboles chimiques, unités. +10 par paire, −3 par erreur, bonus de rapidité.", niv, "");
+    prepare(); dessine();
+  };
+
+  /* ── 20. PUISSANCE 4 (stratégie contre l'ordinateur) ───────────────────── */
+  W.lancerJrPuissance4 = function (niv) {
+    niv = niv || "facile";
+    var C = 7, L = 6, g = [], fini = false, tour = 1, partie = W._jrPartie;
+    for (var r0 = 0; r0 < L; r0++) { g.push([]); for (var c0 = 0; c0 < C; c0++) g[r0].push(0); }
+    function ligneLibre(gr, c) { for (var r = L - 1; r >= 0; r--) if (!gr[r][c]) return r; return -1; }
+    function gagnant(gr) {
+      var d = [[0, 1], [1, 0], [1, 1], [1, -1]];
+      for (var r = 0; r < L; r++) for (var c = 0; c < C; c++) { var v = gr[r][c]; if (!v) continue;
+        for (var k = 0; k < 4; k++) { var n = 1; while (n < 4) { var rr = r + d[k][0] * n, cc = c + d[k][1] * n; if (rr < 0 || rr >= L || cc < 0 || cc >= C || gr[rr][cc] !== v) break; n++; } if (n === 4) return v; } }
+      return 0;
+    }
+    function coups(gr) { var t = []; [3, 2, 4, 1, 5, 0, 6].forEach(function (c) { if (ligneLibre(gr, c) >= 0) t.push(c); }); return t; }
+    function evalue(gr) {   // + favorable à l'ordinateur (2)
+      var s = 0, d = [[0, 1], [1, 0], [1, 1], [1, -1]];
+      for (var r = 0; r < L; r++) for (var c = 0; c < C; c++) for (var k = 0; k < 4; k++) {
+        var a = 0, b = 0, ok = true;
+        for (var n = 0; n < 4; n++) { var rr = r + d[k][0] * n, cc = c + d[k][1] * n; if (rr < 0 || rr >= L || cc < 0 || cc >= C) { ok = false; break; } if (gr[rr][cc] === 2) a++; else if (gr[rr][cc] === 1) b++; }
+        if (!ok || (a && b)) continue;
+        s += a === 3 ? 5 : a === 2 ? 2 : 0; s -= b === 3 ? 6 : b === 2 ? 2 : 0;
+      }
+      for (var r2 = 0; r2 < L; r2++) { if (gr[r2][3] === 2) s += 3; else if (gr[r2][3] === 1) s -= 3; }
+      return s;
+    }
+    function minimax(gr, prof, al, be, maxi) {
+      var w = gagnant(gr); if (w === 2) return 1000 + prof; if (w === 1) return -1000 - prof;
+      var cs = coups(gr); if (!cs.length) return 0; if (!prof) return evalue(gr);
+      var best = maxi ? -1e9 : 1e9;
+      for (var i = 0; i < cs.length; i++) {
+        var r = ligneLibre(gr, cs[i]); gr[r][cs[i]] = maxi ? 2 : 1;
+        var v = minimax(gr, prof - 1, al, be, !maxi); gr[r][cs[i]] = 0;
+        if (maxi) { if (v > best) best = v; if (best > al) al = best; } else { if (v < best) best = v; if (best < be) be = best; }
+        if (al >= be) break;
+      }
+      return best;
+    }
+    function immediat(joueur) { var cs = coups(g); for (var i = 0; i < cs.length; i++) { var r = ligneLibre(g, cs[i]); g[r][cs[i]] = joueur; var w = gagnant(g) === joueur; g[r][cs[i]] = 0; if (w) return cs[i]; } return -1; }
+    function choixOrdi() {
+      var cs = coups(g);
+      if (niv === "facile") { var gagne = immediat(2); if (gagne >= 0 && Math.random() < 0.6) return gagne; return cs[alea(cs.length)]; }
+      if (niv === "moyen") { var a = immediat(2); if (a >= 0) return a; var b = immediat(1); if (b >= 0) return b;
+        var surs = cs.filter(function (c) { var r = ligneLibre(g, c); g[r][c] = 2; var p = immediat(1); g[r][c] = 0; return p < 0; });
+        var t = surs.length ? surs : cs; return Math.random() < 0.5 ? t[0] : t[alea(t.length)]; }
+      var meilleur = cs[0], mv = -1e9;
+      cs.forEach(function (c) { var r = ligneLibre(g, c); g[r][c] = 2; var v = minimax(g, 4, -1e9, 1e9, false); g[r][c] = 0; if (v > mv) { mv = v; meilleur = c; } });
+      return meilleur;
+    }
+    function dessine(msg) {
+      var h = "<div style='font-size:14px;font-weight:700;color:#142554;min-height:22px;margin-bottom:10px'>" + (msg || (tour === 1 ? "À toi : choisis une colonne" : "L'ordinateur réfléchit…")) + "</div>"
+        + "<div style='display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:5px;padding:8px;border-radius:14px;background:#142554!important;width:100%;max-width:360px;margin:0 auto;box-sizing:border-box'>";
+      for (var r = 0; r < L; r++) for (var c = 0; c < C; c++) {
+        var v = g[r][c];
+        h += "<button type='button' data-c='" + c + "' aria-label='Colonne " + (c + 1) + "' style='width:100%;height:auto;aspect-ratio:1;border-radius:50%!important;border:0;padding:0;cursor:" + (fini || tour !== 1 ? "default" : "pointer") + ";background:" + (v === 1 ? "#E53935" : v === 2 ? "#FFC93C" : "#fff") + "!important'></button>";
+      }
+      h += "</div>";
+      if (fini) h += "<div style='margin-top:14px'><button class='btn bi' id='jrOk'>Rejouer</button></div>";
+      zone(h);
+      [].forEach.call(document.querySelectorAll("#jrZone [data-c]"), function (b) { b.onclick = function () { joue(+b.getAttribute("data-c")); }; });
+      var ok = document.getElementById("jrOk"); if (ok) ok.onclick = function () { W.lancerJrPuissance4(niv); };
+    }
+    function termine(texte, rec) { fini = true; zone(fin(texte, "Puissance 4 · niveau " + niv, rec, "lancerJrPuissance4('" + niv + "')")); }
+    function joue(c) {
+      if (fini || tour !== 1) return;
+      var r = ligneLibre(g, c); if (r < 0) return;
+      g[r][c] = 1;
+      if (gagnant(g) === 1) { var vic = (lire("p4_" + niv) || 0) + 1; ecrire("p4_" + niv, vic); fini = true; zone(fin("Tu as gagné !", "Puissance 4 · " + vic + " victoire" + (vic > 1 ? "s" : "") + " à ce niveau", null, "lancerJrPuissance4('" + niv + "')")); return; }
+      if (!coups(g).length) { termine("Match nul", null); return; }
+      tour = 2; dessine();
+      setTimeout(function () {
+        if (!document.getElementById("jrZone") || W._jrPartie !== partie) return;
+        var co = choixOrdi(), ro = ligneLibre(g, co); g[ro][co] = 2;
+        if (gagnant(g) === 2) { dessine(); setTimeout(function () { if (W._jrPartie === partie) termine("L'ordinateur a gagné", null); }, 900); return; }
+        if (!coups(g).length) { termine("Match nul", null); return; }
+        tour = 1; dessine();
+      }, 350);
+    }
+    ecran("lancerJrPuissance4", "Puissance 4", "🔴", "Aligne quatre jetons rouges (ligne, colonne ou diagonale) avant l'ordinateur. Touche une colonne pour y lâcher ton jeton.", niv, "");
+    partie = W._jrPartie; dessine();
+  };
+
   /* Au catalogue : gratuits, tous niveaux, rangés sous « Réflexion ». */
   // [id, titre, emoji, description, lanceur, icône du site, genre affiché sur la carte]
   var JR = [
@@ -1134,7 +1374,10 @@ window._VRT_JEUX_OK = true;
     ["jr_cible", "Cible numérique", "🎯", "Calcul : combine les nombres pour atteindre la cible", "lancerJrCible", "target", "Calcul"],
     ["jr_navale", "Bataille navale", "🚢", "Stratégie : repère et coule la flotte cachée dans la grille", "lancerJrNavale", "compass", "Stratégie"],
     ["jr_devine", "Devine le nombre", "🔍", "Éveil : trouve le nombre caché en cherchant par moitiés", "lancerJrDevine", "brain", "Éveil"],
-    ["jr_vraifaux", "Vrai ou faux éclair", "⚡", "Rapidité : 45 secondes pour juger un maximum d'égalités", "lancerJrVraiFaux", "zap", "Réflexes"]
+    ["jr_vraifaux", "Vrai ou faux éclair", "⚡", "Rapidité : 45 secondes pour juger un maximum d'égalités", "lancerJrVraiFaux", "zap", "Réflexes"],
+    ["jr_frise", "Frise chronologique", "🕰️", "Histoire et culture : remets les grands événements dans l'ordre", "lancerJrFrise", "compass", "Histoire"],
+    ["jr_assoc", "Associations express", "🔗", "Mémoire : relie régions, capitales, verbes, œuvres et symboles contre la montre", "lancerJrAssoc", "brain", "Mémoire"],
+    ["jr_puissance4", "Puissance 4", "🔴", "Stratégie : aligne quatre jetons avant l'ordinateur", "lancerJrPuissance4", "target", "Stratégie"]
   ];
   if (W.JEUX_CATALOGUE) JR.forEach(function (x) {
     if (W.JEUX_CATALOGUE.some(function (j) { return j.id === x[0]; })) return;

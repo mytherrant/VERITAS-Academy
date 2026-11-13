@@ -120,6 +120,13 @@ jobs:
       - name: 🧮 Atelier — la synchro admin préserve-t-elle les compteurs de quotas ?
         run: php tests/banc_db_quotas.php
 
+      # Le quota du tuteur IA suit la formule du compte (table des droits).
+      - name: 🎓 Tuteur IA — le quota du jour suit-il la formule de l'abonné ?
+        run: php tests/banc_ia_paliers.php
+
+      - name: 🎓 Tuteur IA — le calibrage suit-il la classe, la série et la matière ?
+        run: php tests/banc_tuteur_calibrage.php
+
       - name: ✍️ Les écrans lisent-ils l'argent reçu ?
         run: node tests/banc_recettes_parts_auteur.cjs
 
