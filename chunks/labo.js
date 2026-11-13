@@ -425,14 +425,17 @@ window.LABO_DB=[
 
   {id:"lv7",titre:"Carte du Cameroun : les 10 régions",matiere:"Géographie",cat:"geo",
    classe:"6ème-3ème",ico:"🗺️",color:"#D97706",gratuit:true,
-   desc:"Situe les 10 régions et leurs chefs-lieux sur la vraie carte du Cameroun, avec les pays voisins et le Golfe de Guinée.",
-   theorie:"🗺️ Le Cameroun (475 442 km²) s'étire du Golfe de Guinée (≈2° N) au lac Tchad (≈13° N), entre ≈8,5° E et ≈16° E.\n\n🧭 Voisins (6) : Nigeria (ouest), Tchad (nord-est), République centrafricaine (est), Congo, Gabon et Guinée équatoriale (sud).\n\n🏛 10 régions (appelées « provinces » jusqu'en 2008) et leurs chefs-lieux :\n• Adamaoua — Ngaoundéré\n• Centre — Yaoundé (capitale politique)\n• Est — Bertoua\n• Extrême-Nord — Maroua\n• Littoral — Douala (capitale économique, port)\n• Nord — Garoua\n• Nord-Ouest — Bamenda\n• Ouest — Bafoussam\n• Sud — Ebolowa\n• Sud-Ouest — Buea\n\n🏔 Point culminant : le mont Cameroun (≈4 095 m), volcan actif près de Buea.\n\n🗣 Le Nord-Ouest et le Sud-Ouest sont les deux régions anglophones.",
+   desc:"Situe les 10 régions et leurs chefs-lieux sur la vraie carte du Cameroun, explore son relief et ses fleuves, relève le défi des chefs-lieux et calcule des distances à l'échelle.",
+   theorie:"🗺️ Le Cameroun (475 442 km²) s'étire du Golfe de Guinée (≈2° N) au lac Tchad (≈13° N), entre ≈8,5° E et ≈16° E.\n\n🧭 Voisins (6) : Nigeria (ouest), Tchad (nord-est), République centrafricaine (est), Congo, Gabon et Guinée équatoriale (sud).\n\n🏛 10 régions (appelées « provinces » jusqu'en 2008) et leurs chefs-lieux :\n• Adamaoua — Ngaoundéré\n• Centre — Yaoundé (capitale politique)\n• Est — Bertoua\n• Extrême-Nord — Maroua\n• Littoral — Douala (capitale économique, port)\n• Nord — Garoua\n• Nord-Ouest — Bamenda\n• Ouest — Bafoussam\n• Sud — Ebolowa\n• Sud-Ouest — Buea\n\n🏔 Point culminant : le mont Cameroun (≈4 095 m), volcan actif près de Buea.\n\n🗣 Le Nord-Ouest et le Sud-Ouest sont les deux régions anglophones.\n\n🏞 Relief : plaine côtière au sud-ouest ; hautes terres de l'Ouest (mont Oku, 3 011 m) ; plateau de l'Adamaoua (≈1 100 m), « château d'eau » du pays ; plateau sud-camerounais couvert de forêt ; plaines du Nord et monts Mandara à l'Extrême-Nord.\n\n🌊 4 bassins versants :\n• Atlantique — Sanaga (≈918 km, le plus long fleuve du pays) et ses affluents Mbam et Lom ; Wouri, Nyong\n• Congo — Dja, Boumba, Sangha\n• Niger — Bénoué\n• Lac Tchad — Logone et Chari\n\n📏 Échelle : sur une carte au 1/1 000 000, 1 cm représente 1 000 000 cm, soit 10 km. Distance réelle = distance mesurée sur la carte × dénominateur de l'échelle.",
    experience:[
      "1️⃣ OBSERVE la carte : repère le Golfe de Guinée et les 6 pays voisins. Dans quelle direction se trouve le lac Tchad ?",
      "2️⃣ CLIQUE sur chaque chef-lieu (ou sur la légende) et note sa région et ses coordonnées (latitude N, longitude E).",
      "3️⃣ COMPARE les latitudes : quel chef-lieu est le plus au nord ? le plus au sud ? Range-les du nord au sud.",
      "4️⃣ REPÈRE le mont Cameroun : près de quel chef-lieu se trouve-t-il ? Pourquoi Douala et Buea sont-ils si proches ?",
      "5️⃣ SANS LA CARTE : sur une feuille, dessine le contour du Cameroun et place de mémoire les 10 chefs-lieux. Vérifie ensuite avec le labo.",
+     "6️⃣ SCÈNE « Relief et fleuves » : clique sur chaque fleuve et note son bassin versant. Pourquoi dit-on que l'Adamaoua est le « château d'eau » du Cameroun ?",
+     "7️⃣ SCÈNE « Défi » : place les 10 chefs-lieux sur la carte sans étiquettes. Vise au moins 20 / 30, puis rejoue pour battre ton score.",
+     "8️⃣ SCÈNE « Distances et échelle » : mesure Yaoundé → Maroua. Calcule d'abord combien de centimètres ce trajet occupe sur une carte au 1/1 000 000, puis vérifie avec le labo.",
    ],
    quiz:[
      {q:"Combien de régions compte le Cameroun ?",opts:["8","10","12","58"],ans:1,exp:"10 régions (anciennes provinces, renommées en 2008). 58 est le nombre de départements."},
@@ -441,6 +444,11 @@ window.LABO_DB=[
      {q:"Quel chef-lieu est situé le plus au nord ?",opts:["Garoua","Ngaoundéré","Maroua","Bamenda"],ans:2,exp:"Maroua (≈10,6° N), chef-lieu de l'Extrême-Nord, est plus au nord que Garoua (≈9,3° N)."},
      {q:"Lequel de ces pays n'est PAS voisin du Cameroun ?",opts:["Tchad","Gabon","Ghana","Congo"],ans:2,exp:"Le Ghana est en Afrique de l'Ouest. Les voisins : Nigeria, Tchad, RCA, Congo, Gabon, Guinée équatoriale."},
      {q:"Les deux régions anglophones sont :",opts:["Nord et Extrême-Nord","Nord-Ouest et Sud-Ouest","Littoral et Ouest","Centre et Sud"],ans:1,exp:"Le Nord-Ouest (Bamenda) et le Sud-Ouest (Buea) sont les régions anglophones."},
+     {q:"Le plus long fleuve du Cameroun est :",opts:["le Wouri","la Sanaga","la Bénoué","le Logone"],ans:1,exp:"La Sanaga (≈918 km) traverse le pays d'est en ouest et se jette dans l'Atlantique. Ses barrages (Song Loulou, Édéa) produisent beaucoup d'électricité."},
+     {q:"La Bénoué appartient au bassin :",opts:["du Congo","du lac Tchad","du Niger","de la Sanaga"],ans:2,exp:"Née dans l'Adamaoua, la Bénoué passe à Garoua puis rejoint le Niger au Nigeria."},
+     {q:"Le Logone et le Chari se jettent dans :",opts:["l'océan Atlantique","le lac Tchad","le Niger","la Sanaga"],ans:1,exp:"Ils se rejoignent à N'Djamena, face à Kousséri, puis alimentent le lac Tchad."},
+     {q:"Pourquoi l'Adamaoua est-il appelé « château d'eau » du Cameroun ?",opts:["C'est la région la plus pluvieuse","Plusieurs grands cours d'eau y prennent leur source","Le lac Tchad s'y trouve","Il est entièrement couvert de forêt"],ans:1,exp:"Ce plateau élevé (≈1 100 m) donne naissance à la Bénoué et à plusieurs cours d'eau du bassin de la Sanaga."},
+     {q:"Sur une carte au 1/1 000 000, 20 cm représentent :",opts:["2 km","20 km","200 km","2 000 km"],ans:2,exp:"1 cm = 1 000 000 cm = 10 km, donc 20 cm = 200 km. C'est à peu près la distance Yaoundé–Douala à vol d'oiseau."},
    ],
    ressource:"https://minesec-distancelearning.cm",pack:null},
 
@@ -1149,8 +1157,8 @@ function _initLaboSim(lv){
   // projection équirectangulaire x=X0+(lon-LON0)·cos(7°)·K, y=Y0+(LAT0-lat)·K.
   // Les chefs-lieux sont placés par leurs vraies coordonnées avec la même projection.
   } else if(lv.id==="lv7"){
-    window._sim.params={highlight:-1};
-    window._sim.defaults={highlight:-1};
+    window._sim.params={scene:0,highlight:-1,info:-1,a:-1,b:-1,ordre:null,k:0,score:0,clic:null,fin:false};
+    window._sim.defaults={scene:0,highlight:-1,info:-1,a:-1,b:-1,ordre:null,k:0,score:0,clic:null,fin:false};
     var CM_K=27,CM_COS=Math.cos(7*Math.PI/180),CM_LON0=8.4,CM_LAT0=13.2,CM_X0=200,CM_Y0=12;
     var cmXY=function(lat,lon){return [CM_X0+(lon-CM_LON0)*CM_COS*CM_K, CM_Y0+(CM_LAT0-lat)*CM_K];};
     var cmPath=(typeof Path2D==='function')?new Path2D("M204.2 240.0L204.9 237.9L206.5 235.4L208.4 232.1L210.7 228.0L212.3 220.9L213.3 216.4L214.3 212.3L216.0 208.6L217.7 206.2L222.5 201.4L226.1 197.8L227.9 196.3L229.3 195.1L231.5 193.7L233.8 192.1L235.5 188.9L237.0 185.9L238.0 185.3L239.5 184.7L243.9 181.5L246.7 179.5L247.4 180.5L247.9 181.7L248.4 182.3L250.8 182.7L253.9 182.7L255.8 182.3L256.7 181.3L257.8 178.4L258.4 177.8L259.2 177.7L262.6 179.7L265.5 182.6L268.4 185.4L269.9 186.4L270.5 187.6L271.8 192.8L272.6 194.0L273.8 194.6L276.0 194.3L278.4 193.3L280.5 192.0L282.5 190.3L283.9 188.7L284.4 187.6L284.7 183.3L285.2 182.4L287.3 180.7L290.8 177.9L292.7 176.3L292.5 175.7L291.4 174.0L290.2 172.0L291.4 170.1L292.5 168.6L296.9 163.5L296.9 161.8L297.2 159.8L300.6 153.9L302.7 146.3L302.8 144.8L304.8 141.1L307.3 136.3L312.1 135.6L314.0 134.4L316.1 132.3L317.4 130.3L318.1 128.4L318.6 124.9L319.5 120.8L319.9 117.2L321.4 113.9L323.8 112.2L327.9 110.8L328.6 110.2L329.2 108.0L329.7 103.4L329.8 100.6L330.0 99.5L330.6 97.4L334.4 93.8L336.1 88.0L337.6 82.0L342.0 74.8L347.1 67.6L349.6 65.7L351.6 64.8L353.9 64.7L355.5 64.1L361.0 60.6L363.4 59.4L365.1 58.1L365.5 57.0L365.7 55.4L365.1 51.7L366.1 49.0L366.6 44.8L366.9 41.5L366.6 40.3L365.8 38.7L365.7 38.4L364.0 36.3L361.2 35.1L357.4 34.8L355.3 34.0L355.1 32.3L354.9 31.3L354.7 30.2L354.4 27.9L351.8 15.3L356.6 15.3L362.5 16.8L363.9 18.0L364.7 22.2L366.7 24.7L370.5 26.7L372.8 30.9L373.7 37.1L375.7 40.9L376.2 41.5L378.5 46.9L379.1 48.6L379.2 51.9L379.0 54.1L380.1 56.8L378.4 61.5L377.8 64.3L377.6 68.3L378.7 75.4L380.4 80.9L382.3 85.3L384.3 88.7L387.6 92.5L391.1 96.0L394.4 98.2L391.3 99.5L385.4 99.6L382.1 98.9L380.4 98.9L378.8 99.3L372.5 100.0L366.1 99.7L360.2 98.8L356.6 99.0L353.8 101.1L351.6 104.2L349.5 106.7L350.2 109.5L351.8 111.1L354.9 114.4L357.6 117.7L359.0 119.9L364.4 124.7L369.7 129.0L370.8 129.8L372.2 130.5L373.1 130.8L376.0 133.3L379.9 137.4L383.6 143.7L386.2 150.1L388.7 156.4L389.9 157.5L391.6 158.1L391.8 159.5L391.7 161.4L391.1 163.1L389.7 165.2L387.0 169.7L383.4 172.3L382.5 173.8L381.9 175.7L381.1 177.7L379.2 181.8L377.8 185.2L376.4 186.3L373.2 191.4L371.0 196.5L370.6 197.9L369.9 198.8L368.9 199.6L365.1 201.2L363.8 202.0L362.8 203.0L361.9 204.0L361.6 205.4L362.5 207.2L363.5 208.6L364.6 208.7L365.6 208.7L366.2 209.5L366.6 210.0L366.6 220.0L365.7 221.5L365.8 222.2L365.3 223.9L365.2 225.8L365.5 226.6L366.2 227.2L367.2 228.6L367.8 231.6L369.0 242.4L369.6 244.1L370.7 245.3L374.1 247.6L377.4 250.7L378.6 252.7L379.2 256.0L380.5 258.5L380.5 259.4L379.9 259.7L378.7 259.8L377.8 260.0L378.5 261.8L380.3 265.1L383.3 268.5L386.5 272.1L389.1 275.1L392.4 278.5L395.0 281.2L397.6 284.0L399.6 284.6L401.1 284.8L401.8 285.4L402.5 286.6L403.9 288.0L405.4 289.9L405.9 291.7L405.2 293.5L405.9 296.1L405.9 296.3L406.4 297.3L406.2 298.2L406.6 301.6L407.3 304.6L408.6 307.1L408.6 307.3L408.4 308.9L406.8 309.9L405.8 311.5L405.5 313.8L406.0 316.6L407.2 319.9L407.3 321.8L406.9 322.1L406.1 322.7L405.2 323.2L403.0 320.9L400.5 319.4L396.7 316.7L393.0 315.7L388.1 315.6L385.9 315.9L384.5 314.9L382.4 313.7L381.2 313.4L379.6 314.3L378.4 314.4L377.1 314.0L374.3 314.1L374.0 312.5L373.5 312.2L370.5 312.4L369.6 311.1L369.1 311.2L368.0 310.8L365.6 309.0L363.1 310.2L357.8 310.1L351.0 310.1L344.0 310.2L337.6 310.1L331.1 310.0L330.6 308.3L329.2 307.5L326.8 307.4L319.7 307.7L314.3 307.4L312.6 307.3L310.7 306.8L306.1 306.4L300.5 306.7L299.3 306.7L294.9 306.7L284.6 306.2L279.0 306.3L279.1 307.4L278.7 308.1L278.5 309.9L272.3 309.9L264.1 309.9L256.4 309.9L251.2 309.9L242.4 309.9L239.4 308.6L238.5 307.9L238.3 307.0L238.2 306.4L237.5 306.2L238.1 299.9L239.3 294.6L239.8 289.6L241.5 285.3L240.6 280.9L239.6 279.0L234.1 272.9L236.6 270.6L233.3 270.9L232.6 268.6L231.0 265.9L232.0 265.4L232.9 263.9L235.9 264.4L235.8 263.6L233.2 261.3L233.5 260.2L234.6 258.9L234.0 258.3L232.1 259.7L230.8 259.6L229.8 258.7L229.1 258.6L229.5 260.4L228.5 261.9L227.5 262.5L225.8 262.4L224.4 262.0L224.0 261.1L222.8 260.4L219.1 259.3L216.1 257.9L215.5 254.2L214.3 252.6L213.7 250.7L213.4 248.7L213.9 245.4L213.1 244.9L212.3 244.8L210.9 244.9L209.7 244.7L208.2 243.0L207.0 242.3L207.7 245.5L206.9 246.5L204.6 246.2L203.8 245.0L203.6 244.0L204.6 240.1L204.2 240.0Z"):null;
@@ -1171,35 +1179,149 @@ function _initLaboSim(lv){
     var mtCam=cmXY(4.20,9.17);
     var LG_X=468,LG_Y=58,LG_H=24;
     var fmtDeg=function(v,pos,neg){return Math.abs(v).toFixed(2).replace('.',',')+'° '+(v>=0?pos:neg);};
+    // Inverse de la projection (pixel → latitude, longitude), distance orthodromique, direction
+    var cmLL=function(x,y){return [CM_LAT0-(y-CM_Y0)/CM_K, CM_LON0+(x-CM_X0)/(CM_COS*CM_K)];};
+    var cmKm=function(la1,lo1,la2,lo2){
+      var r=Math.PI/180,dla=(la2-la1)*r,dlo=(lo2-lo1)*r;
+      var a=Math.sin(dla/2)*Math.sin(dla/2)+Math.cos(la1*r)*Math.cos(la2*r)*Math.sin(dlo/2)*Math.sin(dlo/2);
+      return 2*6371*Math.asin(Math.min(1,Math.sqrt(a)));
+    };
+    var cmDir=function(la1,lo1,la2,lo2){
+      var dx=(lo2-lo1)*Math.cos((la1+la2)/2*Math.PI/180), dy=la2-la1;
+      var ang=(Math.atan2(dx,dy)*180/Math.PI+360)%360;
+      return ['nord','nord-est','est','sud-est','sud','sud-ouest','ouest','nord-ouest'][Math.round(ang/45)%8];
+    };
+    var fmtKm=function(v){return String(Math.round(v)).replace(/\B(?=(\d{3})+(?!\d))/g,' ');};
+    var fmtDec=function(v){return (Math.round(v*10)/10).toFixed(1).replace('.',',');};
+
+    // ── Scène « Relief & fleuves » ──
+    // Fleuves : Natural Earth 1:10m (rivers_lake_centerlines, domaine public), lac Tchad :
+    // Natural Earth 1:50m (lakes), même projection que le contour. Le Wouri et le Nyong
+    // ne figurent pas dans ce jeu de données : ils ne sont pas dessinés plutôt qu'inventés.
+    var BASSINS={
+      atl:{nom:"Atlantique",col:"#38BDF8"},
+      congo:{nom:"Congo",col:"#34D399"},
+      niger:{nom:"Niger",col:"#C4B5FD"},
+      tchad:{nom:"Lac Tchad",col:"#FB923C"}
+    };
+    var mkP=function(d){return (typeof Path2D==='function')?new Path2D(d):null;};
+    var FL={"Bénoué":"M337.3 158.4L342.7 155.6L342 151.1L345 148.9L348.1 148L350 145L350.3 142.2L349.3 139.2L347.6 138L349.7 133.7L349.9 131.3L347.2 129.3L345.9 127.3L343.1 126.5L341.7 122.4L338.7 119.6L336.9 116.2L333.5 118.9L329.1 120L327.8 119.6L326.9 120.4L324.8 118.2L317.9 114.8L311.9 118.7L310.2 118.9L304.1 111.6L301.7 111.1L297.1 112.7L294.4 112.2M294.4 112.2L289.4 111.9L281.1 116.4L276.7 120L272 121.6L269.1 124.4L266.8 130.2L263 133L257.7 134.3L256.2 133.5L254.5 134.4L250.5 134.3L247.6 138.5L245.9 139L245.7 140.4L244.2 141.1L243.4 143.1L239.7 144.1L237.6 146.3L235.3 146.5L230.5 149.7L227.5 150.5L224.3 153.9L215.8 155.8L213.9 157.5L210.7 157.8L206.4 159.5L200.3 158.4","Chari":"M378 42.9L374.7 43.4L368.1 40.3L367.5 39.2L366.6 39.6L363.1 35.3L355.5 34.6L355 32.3M414.3 83.4L413.6 81.8L406.4 77.8L396.8 76.5L394.7 74.4L391.9 73.6L390.6 71.1L388.6 70L387.4 65.8L388.1 64.1L384.7 56L385.7 52.7L385.2 51.2L385.8 48.7L384.5 47.6L384.3 46.1L382.1 45.7L380.5 42.7L377.2 41.5L375.9 41.9L374.1 40.3L374.4 35.6L373.6 32.3L372.8 32.1L372.3 27.7L370.7 27.3L369.7 26L369.2 26.8L369.1 25L364.9 23.7L364.8 19.7L363.9 17.9","Lom":"M367.9 187.5L368.9 187.6L369.3 188.9L367.4 191L365.8 196.1L361.6 199.1L360.9 200.6L361.8 202L361.7 204.4L359.8 206.4L360 207.9L358.3 209.2L354 209.9L354.3 210.5L352.8 212.6L352.8 215.5L351.9 216.4L351.4 215.8L350.4 216.2L350.1 217.6L349.2 217.3L349.3 218.4L348.1 218.6L348.2 219.4L345.9 219.1L346.4 222.5L345.6 222.3L344.4 224.2L338.7 225.8L336.8 222.8L334.8 223.1L332.6 226.4L333.7 230.8L331.6 232.3L330.5 235L329 235.8L326.7 235.2","Sanaga":"M326.7 235.2L325.5 235.4L321.9 233.4L316.6 234.2L314.4 235.6L312.6 235.3L310.2 237.1L307.7 240.5L303.7 240.9L303.7 241.7L302 242.4L301.8 243.7L298.6 246.2L296.2 244.2L292 248.1L287.4 250.6L284.7 249.9L282.3 247.2L280 247L271.5 255.6L262 259L261.4 258.2L259.6 258.4L256.9 259.7L255.6 259.2L254.6 257.5L252.4 261.6L249.8 264.3L249.2 264.7L247.2 264L243.8 266.9L242.3 269.9L238 270.4","Mbam":"M296.1 176.6L296.6 186.8L297.2 188.9L300.4 191.8L299.7 194.1L298.3 195.5L298.1 197.1L294.8 200.1L290.8 201.2L286.2 204.5L277.1 206.9L277 211.3L278.1 212.1L275.3 214.9L274.8 216.6L275.3 218.2L274.4 221.3L275 221.8L271.8 224.7L271.7 227.6L273.3 231.7L272.4 233L273.1 233.7L272.6 235.7L273.4 237.2L275.1 236.8L274.8 238.1L275.9 238.2L275.7 239L278.3 239L280 240.7L280.6 243.4L277.2 249.5","Logone":"M390.2 158.6L394.5 159L397 156.9L397.5 154.2L399.5 150.9L400.1 141.2L407.6 136.3L413.4 134.9L414.2 133.7M413.8 119.3L409.5 111.1L404.5 108.4L401.3 105.7L398.9 105L398.4 101.7L389.6 94.8L384.9 90L382.7 85.2L380.6 84.3L380.9 81.6L378.6 77L379 74.1L377.8 71.5L377.4 66.5L378.5 63L378.5 60.2L380.5 57.1L378.6 53L379.8 50.3L378 47.7L378.2 45.4L379 45.2L378.2 44.1L378.2 42.1","Dja":"M340.8 270.4L340 272.7L337.7 273.9L336.9 275.6L329.1 275.8L326.6 278L323.5 276.9L320.1 277.3L319.4 276.5L318.8 277.7L317.8 277.7L318.1 277.1L317.2 277.6L315.7 276.5L314.9 277L314 275.8L311.4 276.9L310.8 276.5L307.7 279.6L308.4 284.7L311.5 286.7L316.6 288L318.9 290L322 290.8L322.5 290.2L326.1 291.6L326.9 290.9L329.1 291L330.8 293L330.8 291.4L334.8 293.2L336.8 293.1L336.8 291.6L337.8 291.9L337.5 291.3L341.6 288.9L345.1 288.9L346.9 290.2L352 291.7L354.9 300L354.5 303.3L357.4 305.1L358.8 304.2L360.2 304.7L360.9 303.4L361.3 304.7L362.5 305.2L362.8 307.1L364.9 307.8L365.3 308.8M405.5 323.7L404 320.6L400.7 320L395.8 316.2L389.8 315L385.9 316.5L382.6 313.3L380.9 313.3L378.9 315L376.3 313.5L374 314.2L374.4 312.8L373 311.3L372.6 312.3L370.6 312.6L370.5 311.7L369.6 311.7L370.1 311.3L369.2 311L369.4 311.7L367.4 310.8L365.1 308.8","lac":"M370 15.3L368.4 17.6L363.9 17.9L359.4 20.7L357.4 20L357 17.3L357.8 16.6L359.2 13L363.4 11L367.6 11.8L370 15.3Z","ancre":{"Bénoué":[341.7,122.4],"Chari":[382.1,45.7],"Lom":[350.4,216.2],"Sanaga":[284.7,249.9],"Mbam":[274.4,221.3],"Logone":[379,74.1],"Dja":[326.1,291.6]}};
+    var lacPath=mkP(FL.lac);
+    var reperes=[
+      {nom:"Mont Cameroun",type:"sommet",lat:4.20,lon:9.17,
+       info:"Volcan actif de 4 095 m, près de Buea : le plus haut sommet d'Afrique de l'Ouest et centrale. Dernière grande éruption en 2000."},
+      {nom:"Mont Oku",type:"sommet",lat:6.20,lon:10.50,
+       info:"3 011 m : point culminant des hautes terres de l'Ouest (région du Nord-Ouest). Un lac de cratère, le lac Oku, occupe ses flancs."},
+      {nom:"Monts Mandara",type:"sommet",lat:10.85,lon:13.75,
+       info:"Massif de l'Extrême-Nord, le long de la frontière avec le Nigeria ; il dépasse à peine 1 500 m."},
+      {nom:"Plateau de l'Adamaoua",type:"plateau",lat:6.95,lon:12.70,
+       info:"Altitude moyenne d'environ 1 100 m. « Château d'eau » du Cameroun : la Bénoué et plusieurs cours d'eau du bassin de la Sanaga y prennent leur source."},
+      {nom:"Lac Tchad",type:"lac",lat:12.98,lon:14.55,bassin:"tchad",
+       info:"Partagé par le Cameroun, le Tchad, le Niger et le Nigeria. Sa surface a fortement diminué depuis les années 1960."},
+      {nom:"Sanaga",type:"fleuve",bassin:"atl",tr:["Sanaga"],
+       info:"Plus long fleuve du Cameroun (≈ 918 km). Ses barrages de Song Loulou et d'Édéa produisent l'essentiel de l'électricité du pays ; il se jette dans l'Atlantique."},
+      {nom:"Mbam",type:"fleuve",bassin:"atl",tr:["Mbam"],
+       info:"Principal affluent de la Sanaga, qu'il rejoint au nord-ouest de Yaoundé."},
+      {nom:"Lom",type:"fleuve",bassin:"atl",tr:["Lom"],
+       info:"Affluent de la Sanaga, dans l'Est. Le barrage-réservoir de Lom Pangar régule le débit de la Sanaga en saison sèche."},
+      {nom:"Bénoué",type:"fleuve",bassin:"niger",tr:["Bénoué"],
+       info:"Naît dans l'Adamaoua, traverse Garoua (barrage de Lagdo en amont) puis rejoint le Niger au Nigeria."},
+      {nom:"Logone et Chari",type:"fleuve",bassin:"tchad",tr:["Logone","Chari"],
+       info:"Ils marquent la frontière avec le Tchad, se rejoignent à N'Djamena, face à Kousséri, et alimentent le lac Tchad."},
+      {nom:"Dja",type:"fleuve",bassin:"congo",tr:["Dja"],
+       info:"Coule vers le bassin du Congo. Sa boucle entoure la réserve du Dja, inscrite au patrimoine mondial de l'UNESCO en 1987."}
+    ];
+    // Décalage des étiquettes sur la carte [dx, dy, alignement]
+    var ETQ={"Mont Cameroun":[-8,3,'right'],"Mont Oku":[-8,3,'right'],"Monts Mandara":[-8,3,'right'],
+      "Plateau de l'Adamaoua":[0,-17,'center'],"Sanaga":[0,14,'center']};
+    reperes.forEach(function(rp){
+      if(rp.tr){
+        rp.paths=rp.tr.map(function(k){return mkP(FL[k]);});
+        rp.x=FL.ancre[rp.tr[0]][0];rp.y=FL.ancre[rp.tr[0]][1];
+      } else {var xy=cmXY(rp.lat,rp.lon);rp.x=xy[0];rp.y=xy[1];}
+    });
+
+    // ── Scène « Défi » : 10 manches, ordre tiré au hasard ──
+    var nouvellePartie=function(p){
+      var o=regions.map(function(r,i){return i;});
+      for(var i=o.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1)),tmp=o[i];o[i]=o[j];o[j]=tmp;}
+      p.ordre=o;p.k=0;p.score=0;p.clic=null;p.fin=false;
+    };
+    var pointsPour=function(km){return km<=50?3:km<=120?2:km<=250?1:0;};
+
+    var SCENES=["Régions","Relief et fleuves","Défi : trouve le chef-lieu","Distances et échelle"];
+    window._sim.lv7Scene=function(i){
+      var p=window._sim.params;
+      p.scene=i;p.highlight=-1;p.info=-1;p.a=-1;p.b=-1;
+      if(i===2)nouvellePartie(p);
+      var ae=document.activeElement;if(ae&&ae.blur)ae.blur();
+      _simUpdateControls();
+    };
+    window._sim.lv7Action=function(){
+      var p=window._sim.params;
+      if(p.scene===2)nouvellePartie(p);else{p.highlight=-1;p.info=-1;p.a=-1;p.b=-1;}
+      var ae=document.activeElement;if(ae&&ae.blur)ae.blur();
+      _simUpdateControls();
+    };
+    var btn=function(label,on,js){
+      return "<button type='button' onclick='"+js+"' aria-pressed='"+(on?"true":"false")+"' style='background:"+(on?"#142554":"#F0F4FF")+";color:"+(on?"#FFC93C":"#142554")+";border:none;border-radius:10px;padding:6px 12px;font-size:11px;font-weight:700;cursor:pointer'>"+label+"</button>";
+    };
     window._sim.controlsDef=function(){
-      return "<span style='font-size:11px;font-weight:700;color:#142554'>Clique sur un chef-lieu (carte ou légende)</span>"
-        +"<button onclick='window._sim.params.highlight=-1' style='background:#F0F4FF;color:#142554;border:none;border-radius:10px;padding:6px 12px;font-size:11px;font-weight:700;cursor:pointer'>Tout afficher</button>";
+      var p=window._sim.params;
+      var h=SCENES.map(function(n,i){return btn(n,p.scene===i,"window._sim.lv7Scene("+i+")");}).join('');
+      var act=p.scene===2?"Nouvelle partie":p.scene===3?"Effacer le trajet":"Tout afficher";
+      return h+btn(act,false,"window._sim.lv7Action()");
     };
     _simUpdateControls();
+
+    var plusProche=function(liste,mx,my,max){
+      var best=-1,minD=max;
+      liste.forEach(function(it,i){var d=Math.hypot(mx-it.x,my-it.y);if(d<minD){minD=d;best=i;}});
+      return best;
+    };
+    var ligneLegende=function(my,n){
+      var row=Math.floor((my-(LG_Y-14))/LG_H);
+      return (row>=0&&row<n)?row:-1;
+    };
     var cnvEl=document.getElementById('laboCnv');
     if(cnvEl)cnvEl.onclick=function(ev){
+      var p=window._sim.params;
       var rect=cnvEl.getBoundingClientRect();
       var mx=(ev.clientX-rect.left)*(W/rect.width);
       var my=(ev.clientY-rect.top)*(H/rect.height);
-      // Légende à droite
-      if(mx>=LG_X-8&&my>=LG_Y-14){
-        var row=Math.floor((my-(LG_Y-14))/LG_H);
-        if(row>=0&&row<regions.length){window._sim.params.highlight=row;return;}
+      var dansLegende=mx>=LG_X-8&&my>=LG_Y-14;
+      if(p.scene===1){
+        var r1=dansLegende?ligneLegende(my,reperes.length):plusProche(reperes,mx,my,18);
+        if(r1>=0)p.info=r1;
+        return;
       }
-      var closest=-1,minD=999;
-      regions.forEach(function(rg,i){
-        var d=Math.hypot(mx-rg.x,my-rg.y);
-        if(d<minD){minD=d;closest=i;}
-      });
-      if(minD<16)window._sim.params.highlight=closest;
+      if(p.scene===2){
+        if(!p.ordre)nouvellePartie(p);
+        if(p.fin){nouvellePartie(p);return;}
+        if(p.clic){p.k++;p.clic=null;if(p.k>=regions.length)p.fin=true;return;}
+        if(mx>=LG_X-16)return; // la carte seulement
+        var cible=regions[p.ordre[p.k]], ll=cmLL(mx,my);
+        var km=cmKm(ll[0],ll[1],cible.lat,cible.lon), pts=pointsPour(km);
+        p.clic={x:mx,y:my,km:km,pts:pts};p.score+=pts;
+        return;
+      }
+      var r=dansLegende?ligneLegende(my,regions.length):plusProche(regions,mx,my,16);
+      if(r<0)return;
+      if(p.scene===3){
+        if(p.a<0||p.b>=0){p.a=r;p.b=-1;}
+        else if(r!==p.a)p.b=r;
+        return;
+      }
+      p.highlight=r;
     };
-    window._sim._draw=function(){
-      var p=window._sim.params;var t=window._sim.t;
+
+    // ── Dessin ──
+    var dessinerFond=function(titre){
       // Fond peint sur le canevas : le dégradé du conteneur est écrasé par le thème clair
       var bg=ctx.createLinearGradient(0,0,W,H);bg.addColorStop(0,'#142554');bg.addColorStop(1,'#0F172A');
       ctx.fillStyle=bg;ctx.fillRect(0,0,W,H);
       ctx.fillStyle='rgba(255,255,255,.75)';ctx.font='bold 13px Montserrat';ctx.textAlign='left';
-      ctx.fillText('🗺️ CAMEROUN — 10 régions',20,25);
+      ctx.fillText(titre,20,25);
       // Pays voisins & océan (repères)
       ctx.fillStyle='rgba(255,255,255,.28)';ctx.font='italic 10px Montserrat';
       ctx.fillText('NIGERIA',110,150);ctx.fillText('TCHAD',410,118);ctx.fillText('RCA',405,215);
@@ -1210,13 +1332,28 @@ function _initLaboSim(lv){
         ctx.fillStyle='rgba(255,201,60,.08)';ctx.fill(cmPath);
         ctx.strokeStyle='rgba(255,201,60,.75)';ctx.lineWidth=1.6;ctx.lineJoin='round';ctx.stroke(cmPath);
       }
-      // Mont Cameroun
+    };
+    var dessinerFleuves=function(alpha,sel){
+      if(lacPath){ctx.fillStyle='rgba(56,189,248,'+(.55*alpha)+')';ctx.fill(lacPath);}
+      ctx.lineJoin='round';ctx.lineCap='round';
+      reperes.forEach(function(rp,i){
+        if(!rp.paths)return;
+        var on=sel===-1||sel===undefined||sel===i;
+        ctx.strokeStyle=BASSINS[rp.bassin].col;ctx.globalAlpha=alpha*(on?1:.3);
+        ctx.lineWidth=sel===i?3:1.6;
+        rp.paths.forEach(function(pa){if(pa)ctx.stroke(pa);});
+        ctx.globalAlpha=1;
+      });
+    };
+    var dessinerMontCameroun=function(){
       ctx.fillStyle='#FFC93C';ctx.beginPath();
       ctx.moveTo(mtCam[0]-3,mtCam[1]-4);ctx.lineTo(mtCam[0]+3,mtCam[1]-4);ctx.lineTo(mtCam[0],mtCam[1]-10);ctx.closePath();ctx.fill();
       ctx.font='9px Montserrat';ctx.textAlign='right';ctx.fillText('▲ Mt Cameroun 4 095 m',mtCam[0]-14,mtCam[1]-14);
-      // Chefs-lieux
+    };
+    var dessinerChefsLieux=function(actif,etiquettes,t){
       regions.forEach(function(rg,i){
-        var sel=p.highlight===i, active=sel||p.highlight===-1;
+        if(actif(i)<0)return; // défi : chef-lieu pas encore trouvé, rien ne doit le trahir
+        var sel=actif(i)===2, active=actif(i)>0;
         if(sel){
           var pr=9+Math.sin(t*3)*3;
           ctx.beginPath();ctx.arc(rg.x,rg.y,pr,0,Math.PI*2);
@@ -1225,15 +1362,17 @@ function _initLaboSim(lv){
         ctx.beginPath();ctx.arc(rg.x,rg.y,rg.capitale?5.5:4.5,0,Math.PI*2);
         ctx.fillStyle=active?rg.col:'rgba(140,140,140,.45)';ctx.fill();
         ctx.strokeStyle=active?'#fff':'rgba(255,255,255,.2)';ctx.lineWidth=rg.capitale?2:1.2;ctx.stroke();
+        if(!etiquettes)return;
         ctx.fillStyle=active?'#fff':'rgba(255,255,255,.35)';
         ctx.font=(sel?'bold ':'')+'10px Montserrat';ctx.textAlign=rg.la;
         ctx.fillText(rg.chef+(rg.capitale?' ★':''),rg.x+rg.lx,rg.y+rg.ly);
       });
-      // Légende cliquable
+    };
+    var dessinerLegendeRegions=function(actif){
       ctx.fillStyle='rgba(255,255,255,.55)';ctx.font='bold 10px Montserrat';ctx.textAlign='left';
       ctx.fillText('RÉGION · CHEF-LIEU',LG_X,LG_Y-22);
       regions.forEach(function(rg,i){
-        var y=LG_Y+i*LG_H, sel=p.highlight===i, active=sel||p.highlight===-1;
+        var y=LG_Y+i*LG_H, sel=actif(i)===2, active=actif(i)>0;
         if(sel){ctx.fillStyle='rgba(255,255,255,.1)';ctx.fillRect(LG_X-8,y-14,W-LG_X,LG_H-2);}
         ctx.beginPath();ctx.arc(LG_X,y-4,5,0,Math.PI*2);ctx.fillStyle=active?rg.col:'rgba(140,140,140,.45)';ctx.fill();
         ctx.fillStyle=active?'#fff':'rgba(255,255,255,.4)';ctx.font=(sel?'bold ':'')+'11px Montserrat';
@@ -1241,6 +1380,162 @@ function _initLaboSim(lv){
         ctx.fillStyle=active?'rgba(255,201,60,.9)':'rgba(255,255,255,.3)';ctx.font='10px Montserrat';
         ctx.fillText('· '+rg.chef,LG_X+100,y);
       });
+    };
+    // Texte sur plusieurs lignes dans le panneau de droite
+    var paragraphe=function(txt,x,y,larg,interligne){
+      var mots=txt.split(' '),ligne='';
+      mots.forEach(function(m){
+        var essai=ligne?ligne+' '+m:m;
+        if(ctx.measureText(essai).width>larg&&ligne){ctx.fillText(ligne,x,y);y+=interligne;ligne=m;}
+        else ligne=essai;
+      });
+      if(ligne)ctx.fillText(ligne,x,y);
+      return y;
+    };
+
+    window._sim._draw=function(){
+      var p=window._sim.params;var t=window._sim.t;
+      _simUpdateControls();
+
+      // Scène 1 : relief et fleuves
+      if(p.scene===1){
+        dessinerFond('CAMEROUN — relief et fleuves');
+        dessinerFleuves(1,p.info>=0&&reperes[p.info].paths?p.info:-1);
+        // Clé des bassins
+        ctx.font='10px Montserrat';ctx.textAlign='left';
+        ctx.fillStyle='rgba(255,255,255,.55)';ctx.fillText('Bassins versants :',20,48);
+        ['atl','congo','niger','tchad'].forEach(function(k,i){
+          var y=64+i*15;ctx.strokeStyle=BASSINS[k].col;ctx.lineWidth=2.5;
+          ctx.beginPath();ctx.moveTo(20,y-3);ctx.lineTo(34,y-3);ctx.stroke();
+          ctx.fillStyle='rgba(255,255,255,.75)';ctx.fillText(BASSINS[k].nom,40,y);
+        });
+        // Sommets, plateau, lac
+        reperes.forEach(function(rp,i){
+          if(rp.paths)return;
+          var sel=p.info===i;
+          if(sel){ctx.beginPath();ctx.arc(rp.x,rp.y,9+Math.sin(t*3)*3,0,Math.PI*2);ctx.strokeStyle='#FFC93C';ctx.lineWidth=2;ctx.stroke();}
+          ctx.fillStyle=rp.type==='lac'?'#38BDF8':'#FFC93C';
+          if(rp.type==='plateau'){ctx.globalAlpha=.25;ctx.beginPath();ctx.ellipse(rp.x,rp.y,34,13,0,0,Math.PI*2);ctx.fill();ctx.globalAlpha=1;}
+          ctx.beginPath();
+          if(rp.type==='sommet'){ctx.moveTo(rp.x-4,rp.y+3);ctx.lineTo(rp.x+4,rp.y+3);ctx.lineTo(rp.x,rp.y-5);ctx.closePath();}
+          else ctx.arc(rp.x,rp.y,3.5,0,Math.PI*2);
+          ctx.fill();
+        });
+        // Étiquettes des repères sur la carte
+        reperes.forEach(function(rp,i){
+          var o=ETQ[rp.nom]||[7,3,'left'];
+          ctx.fillStyle=rp.bassin?BASSINS[rp.bassin].col:'#FFC93C';ctx.globalAlpha=p.info<0||p.info===i?1:.45;
+          ctx.font=(p.info===i?'bold ':'')+(rp.type==='fleuve'?'italic ':'')+'9px Montserrat';ctx.textAlign=o[2];
+          ctx.fillText(rp.nom,rp.x+o[0],rp.y+o[1]);ctx.globalAlpha=1;
+        });
+        // Légende cliquable des repères
+        ctx.fillStyle='rgba(255,255,255,.55)';ctx.font='bold 10px Montserrat';ctx.textAlign='left';
+        ctx.fillText('REPÈRE · TYPE',LG_X,LG_Y-22);
+        reperes.forEach(function(rp,i){
+          var y=LG_Y+i*LG_H, sel=p.info===i;
+          if(sel){ctx.fillStyle='rgba(255,255,255,.1)';ctx.fillRect(LG_X-8,y-14,W-LG_X,LG_H-2);}
+          var col=rp.bassin?BASSINS[rp.bassin].col:'#FFC93C';
+          ctx.beginPath();ctx.arc(LG_X,y-4,5,0,Math.PI*2);ctx.fillStyle=col;ctx.fill();
+          ctx.fillStyle=sel||p.info<0?'#fff':'rgba(255,255,255,.55)';ctx.font=(sel?'bold ':'')+'11px Montserrat';
+          ctx.fillText(rp.nom,LG_X+12,y);
+          ctx.fillStyle='rgba(255,201,60,.8)';ctx.font='9px Montserrat';ctx.textAlign='right';
+          ctx.fillText(rp.type,W-10,y);ctx.textAlign='left';
+        });
+        if(p.info>=0){
+          var rp=reperes[p.info];
+          var bas=rp.bassin?" · bassin "+(rp.bassin==='tchad'?"du lac Tchad":rp.bassin==='atl'?"de l'Atlantique":"du "+BASSINS[rp.bassin].nom):"";
+          setVal("<span style='font-weight:700'>"+rp.nom+bas+"</span><span>"+rp.info+"</span>");
+        } else {
+          setVal("<span>4 bassins versants : Atlantique, Congo, Niger, lac Tchad</span><span>Clique sur un fleuve, un sommet ou la légende</span>");
+        }
+        return;
+      }
+
+      // Scène 2 : défi
+      if(p.scene===2){
+        if(!p.ordre)nouvellePartie(p);
+        dessinerFond('DÉFI — place les chefs-lieux');
+        dessinerFleuves(.35);
+        var fait=function(i){var pos=p.ordre.indexOf(i);return pos<p.k||(pos===p.k&&p.clic);};
+        dessinerChefsLieux(function(i){return fait(i)||p.fin?1:-1;},false,t);
+        regions.forEach(function(rg,i){
+          if(!(fait(i)||p.fin))return;
+          ctx.fillStyle='rgba(255,255,255,.8)';ctx.font='10px Montserrat';ctx.textAlign=rg.la;
+          ctx.fillText(rg.chef,rg.x+rg.lx,rg.y+rg.ly);
+        });
+        var px=LG_X-8;
+        ctx.textAlign='left';
+        if(p.fin){
+          ctx.fillStyle='#FFC93C';ctx.font='bold 14px Montserrat';ctx.fillText('Partie terminée',px,60);
+          ctx.fillStyle='#fff';ctx.font='bold 26px Montserrat';ctx.fillText(p.score+' / 30',px,100);
+          var appr=p.score>=26?'Excellent : tu connais la carte par cœur.':p.score>=18?'Bien joué : encore quelques chefs-lieux à fixer.':p.score>=10?'Pas mal : revois la scène Régions puis rejoue.':'Commence par la scène Régions, puis retente le défi.';
+          ctx.font='11px Montserrat';ctx.fillStyle='rgba(255,255,255,.8)';paragraphe(appr,px,130,W-px-12,16);
+          ctx.fillStyle='rgba(255,201,60,.8)';ctx.font='10px Montserrat';ctx.fillText('Clique sur la carte pour rejouer',px,200);
+          setVal("<span>Score : "+p.score+" / 30</span><span>3 points à moins de 50 km · 2 à moins de 120 km · 1 à moins de 250 km</span>");
+          return;
+        }
+        var cible=regions[p.ordre[p.k]];
+        ctx.fillStyle='rgba(255,255,255,.55)';ctx.font='bold 10px Montserrat';
+        ctx.fillText('MANCHE '+(p.k+1)+' / '+regions.length+'  ·  SCORE '+p.score,px,40);
+        ctx.fillStyle='#fff';ctx.font='12px Montserrat';ctx.fillText('Où se trouve',px,70);
+        ctx.fillStyle='#FFC93C';ctx.font='bold 18px Montserrat';ctx.fillText(cible.chef+' ?',px,94);
+        ctx.fillStyle='rgba(255,255,255,.7)';ctx.font='11px Montserrat';ctx.fillText('chef-lieu de la région '+(/^[AEÉIOU]/.test(cible.nom)?"de l'":"du ")+cible.nom,px,114);
+        if(p.clic){
+          var c=p.clic;
+          ctx.setLineDash([4,4]);ctx.strokeStyle='rgba(255,255,255,.7)';ctx.lineWidth=1.4;
+          ctx.beginPath();ctx.moveTo(c.x,c.y);ctx.lineTo(cible.x,cible.y);ctx.stroke();ctx.setLineDash([]);
+          ctx.strokeStyle='#F87171';ctx.lineWidth=2;
+          ctx.beginPath();ctx.moveTo(c.x-5,c.y-5);ctx.lineTo(c.x+5,c.y+5);ctx.moveTo(c.x+5,c.y-5);ctx.lineTo(c.x-5,c.y+5);ctx.stroke();
+          ctx.beginPath();ctx.arc(cible.x,cible.y,9+Math.sin(t*3)*3,0,Math.PI*2);ctx.strokeStyle=cible.col;ctx.stroke();
+          var verdict=c.pts===3?'En plein dans le mille !':c.pts===2?'Tout près.':c.pts===1?'Dans la bonne zone.':'Trop loin.';
+          ctx.fillStyle=c.pts>=2?'#34D399':c.pts===1?'#FFC93C':'#F87171';ctx.font='bold 13px Montserrat';
+          ctx.fillText(verdict+' +'+c.pts,px,150);
+          ctx.fillStyle='#fff';ctx.font='11px Montserrat';ctx.fillText('Écart : '+fmtKm(c.km)+' km',px,170);
+          ctx.fillStyle='rgba(255,201,60,.8)';ctx.font='10px Montserrat';ctx.fillText('Clique pour continuer',px,200);
+          setVal("<span>"+cible.chef+" · région "+cible.nom+"</span><span>Écart : "+fmtKm(c.km)+" km</span><span>"+fmtDeg(cible.lat,'N','S')+" · "+fmtDeg(cible.lon,'E','O')+"</span>");
+        } else {
+          ctx.fillStyle='rgba(255,201,60,.8)';ctx.font='10px Montserrat';ctx.fillText('Clique sur la carte à l’endroit choisi',px,150);
+          setVal("<span>Manche "+(p.k+1)+" / "+regions.length+"</span><span>Score : "+p.score+"</span><span>Aide : les fleuves sont tracés en fond</span>");
+        }
+        return;
+      }
+
+      // Scène 3 : distances et échelle
+      if(p.scene===3){
+        dessinerFond('CAMEROUN — distances et échelle');
+        var etat=function(i){return i===p.a||i===p.b?2:(p.a<0?1:(p.b<0?1:.5));};
+        if(p.a>=0&&p.b>=0){
+          var A=regions[p.a],B=regions[p.b];
+          var avance=Math.min(1,(t%3)/1.5);
+          ctx.strokeStyle='#FFC93C';ctx.lineWidth=2;ctx.setLineDash([6,5]);
+          ctx.beginPath();ctx.moveTo(A.x,A.y);ctx.lineTo(B.x,B.y);ctx.stroke();ctx.setLineDash([]);
+          ctx.fillStyle='#FFC93C';ctx.beginPath();
+          ctx.arc(A.x+(B.x-A.x)*avance,A.y+(B.y-A.y)*avance,3.5,0,Math.PI*2);ctx.fill();
+          var d=cmKm(A.lat,A.lon,B.lat,B.lon);
+          var mxl=(A.x+B.x)/2,myl=(A.y+B.y)/2;
+          ctx.font='bold 11px Montserrat';ctx.textAlign='center';
+          var lab=fmtKm(d)+' km',lw=ctx.measureText(lab).width+12;
+          ctx.fillStyle='rgba(15,23,42,.85)';ctx.fillRect(mxl-lw/2,myl-20,lw,17);
+          ctx.fillStyle='#FFC93C';ctx.fillText(lab,mxl,myl-7);
+          setVal("<span>"+A.chef+" → "+B.chef+" : "+fmtKm(d)+" km à vol d'oiseau, vers "+(function(dir){return (/^[eo]/.test(dir)?"l'":"le ")+dir;})(cmDir(A.lat,A.lon,B.lat,B.lon))+"</span>"
+            +"<span>Carte au 1/1 000 000 (1 cm = 10 km) : "+fmtDec(d/10)+" cm</span>"
+            +"<span>Carte au 1/5 000 000 (1 cm = 50 km) : "+fmtDec(d/50)+" cm</span>");
+        } else if(p.a>=0){
+          setVal("<span>Départ : "+regions[p.a].chef+"</span><span>Choisis maintenant la ville d'arrivée</span>");
+        } else {
+          setVal("<span>Clique sur deux chefs-lieux (carte ou légende)</span><span>La distance est calculée à vol d'oiseau, puis convertie à l'échelle</span>");
+        }
+        dessinerChefsLieux(etat,true,t);
+        dessinerLegendeRegions(etat);
+        return;
+      }
+
+      // Scène 0 : régions et chefs-lieux
+      dessinerFond('🗺️ CAMEROUN — 10 régions');
+      dessinerMontCameroun();
+      var etat0=function(i){return p.highlight===i?2:(p.highlight===-1?1:0);};
+      dessinerChefsLieux(etat0,true,t);
+      dessinerLegendeRegions(etat0);
       if(p.highlight>=0){
         var s=regions[p.highlight];
         setVal("<span style='color:"+s.col+"'>📍 Région "+s.nom+"</span><span>🏛 Chef-lieu : "+s.chef+(s.capitale?" (capitale politique)":"")+"</span><span>🧭 "+fmtDeg(s.lat,'N','S')+" · "+fmtDeg(s.lon,'E','O')+"</span>");
