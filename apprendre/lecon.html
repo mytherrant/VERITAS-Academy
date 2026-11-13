@@ -111,6 +111,8 @@
      L.quiz.map(function(q0,k){var q=A.melanger(q0);q.q=q0.q;q.e=q0.e;return '<div class="q" data-bonne="'+q.b+'"><p>'+(k+1)+'. '+q.q+'</p>'+q.r.map(function(r){return '<button type="button">'+r+'</button>'}).join("")+'<div class="expl" hidden>'+(q.e||"")+'</div></div>'}).join("")+
      (mur?'<p class="vide">Le quiz de cette leçon est réservé aux abonnés. <a href="#" data-retour-cours>Voir comment le débloquer</a>.</p>':'')+'<div class="bilan" id="bilan" hidden></div></article></section>';
   if(mur){ VRT.verrou.brancher(boite,L); $$("[data-retour-cours]").forEach(function(a){a.addEventListener("click",function(e){e.preventDefault();$('[data-f=cours]').click();var m=$(".mur");if(m)m.scrollIntoView({block:"center"})})}); }
+  /* « Pour aller plus loin » : 2 ressources, le reste derrière « Voir plus » (12/11/2026). */
+  A.replier(document.querySelector(".res-lecon .res-g"),2,"ressources");
 
   A.noterJour(); A.chiffreSerie($("#serie"));
 
