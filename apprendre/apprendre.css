@@ -664,6 +664,19 @@ h2 .num .pic{vertical-align:middle}
 .labo-sim-b{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:8px 12px;font:500 13px var(--sans);color:#fff}
 .labo-sim-b button{background:#fff;color:#001136;border:0;border-radius:999px;padding:4px 12px;font:600 13px var(--sans);cursor:pointer}
 .labo-sim canvas{display:block;width:100%;height:auto}
+/* 13/11/2026 « simulation trop petite » : pleine largeur sur téléphone, bouton Plein écran (paysage). */
+.labo-sim-b>span:last-child{display:flex;flex-wrap:wrap;gap:6px;justify-content:flex-end}
+.labo-agr{display:block;width:100%;margin:-6px 0 14px;padding:12px;border:0;border-radius:12px;background:#142554;color:#FFC93C;font:600 15px var(--sans);cursor:pointer}
+.labo-scene:fullscreen,.labo-scene.plein{background:#fff;overflow:auto;padding:8px;display:flex;flex-direction:column;gap:8px}
+.labo-scene.plein{position:fixed;inset:0;z-index:1000}
+.labo-scene:fullscreen .labo-sim,.labo-scene.plein .labo-sim{margin:0;border-radius:10px;flex:0 0 auto}
+.labo-scene:fullscreen canvas,.labo-scene.plein canvas{width:auto;max-width:100%;height:calc(100vh - 80px);min-height:240px;margin:0 auto;aspect-ratio:2/1}
+.labo-scene:fullscreen #simControls,.labo-scene.plein #simControls{margin:0}
+.labo-scene:fullscreen .labo-agr,.labo-scene.plein .labo-agr{display:none}
+@media (max-width:640px){
+  .labo-c .labo-sim{margin-left:-34px;margin-right:-34px;border-radius:0}
+  .labo-c.carte{overflow:visible}
+}
 #simValues{display:flex;flex-wrap:wrap;gap:14px;padding:8px 12px;font:500 13px var(--sans);color:#FFC93C}
 #simControls{display:flex;flex-wrap:wrap;gap:10px;margin:0 0 16px;padding:12px;background:#F5F7FB;border-radius:12px;font-size:14px}
 .labo-h2{font:600 19px var(--sans);color:#001136;margin:18px 0 8px}

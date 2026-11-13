@@ -9,7 +9,7 @@
 <link rel="icon" href="../VERITAS_favicon_512.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="apprendre.css?v=20261113z">
+<link rel="stylesheet" href="apprendre.css?v=20261114a">
 <link rel="stylesheet" href="jeu.css?v=20261112v">
 <style>
 /* ── Page matière (refonte 07/11) : en-tête teinté, filtres en pastilles, chapitres en cartes colorées ── */
@@ -75,10 +75,10 @@ a.lg:hover{background:var(--kp)}
 <script src="scenes.js?v=20261112a"></script>
 <script src="progressions.js?v=20261110g"></script>
 <script src="lecons.js?v=20261110g"></script>
-<script src="ressources.js?v=20261113m"></script>
+<script src="ressources.js?v=20261114a"></script>
 <script src="atelier.js?v=20261110a"></script>
 <script src="charge.js?v=2ff148ec"></script>
-<script src="commun.js?v=20261113n"></script>
+<script src="commun.js?v=20261114a"></script>
 <script src="jeu.js?v=20261110g"></script>
 <script>
 (function(){
@@ -121,6 +121,8 @@ a.lg:hover{background:var(--kp)}
       var ls=filtre==="red"?ch[1].filter(function(l){return red[l[0]]}):ch[1], hr=hors.length&&i===0, num=i+1-(hors.length?1:0);
       var ix=i-(hors.length?1:0), sq=hr?0:seqDe(ix), prem=sq&&(ix===0||seqDe(ix-1)!==sq);
       return '<section class="chap"'+(prem?' id="seq-'+sq+'"':'')+' style="'+teinte(PAL[(n++)%PAL.length])+'"><div class="chap-t"><span class="chap-n">'+(hr?A.pic("etoile",20):num)+'</span><div><small>'+(ch[2]?esc(ch[2])+' · ':'')+(hr?'Leçons rédigées':'Chapitre '+num)+'</small><h3>'+esc(ch[0]||"Leçons")+'</h3></div><span class="nb">'+ls.length+' leçon'+(ls.length>1?'s':'')+'</span>'+(sq?'<a class="atelier-l" href="'+lienAtelier(sq,'composer')+'" title="Professeurs : composer l’évaluation de la séquence '+sq+' dans l’Atelier de français">'+A.pic("plume",14)+'Évaluer · séquence '+sq+'</a>':'')+'</div><div class="lst">'+ls.map(ligne).join("")+'</div></section>'}).join("")||'<p class="vide">Rien à afficher ici pour l\'instant.</p>';
+    /* « trop touffu » : 5 leçons par chapitre, le reste derrière « Voir plus » (sauf arrivée sur une leçon précise) */
+    if(!/^#l\d+$/.test(location.hash)&&!filtre) $$("#liste .lst").forEach(function(l){A.replier(l,5,"leçons")});
   }
   $("#zone").innerHTML='<div class="mpage"><p class="ariane"><a href="index.html">Apprendre</a><span>›</span><a href="index.html?c='+encodeURIComponent(c)+'">'+esc(c)+'</a><span>›</span>'+esc(M.nom)+'</p>'+
     '<header class="mtete"><span class="pas">'+A.icoM(M,58)+'</span><div><h1>'+esc(M.nom)+' <span>· '+esc(c)+'</span></h1><div class="chiffres">'+
@@ -143,10 +145,9 @@ a.lg:hover{background:var(--kp)}
       (nred?'<button type="button" aria-pressed="false" data-f="red" style="--k:#9A6F00;--kp:#FFF3CC">Cours rédigés<span class="cpt">'+nred+'</span></button>':'')+
       trims.map(function(t){return '<button type="button" aria-pressed="false" data-f="'+esc(t)+'" style="'+teinte(TRIM[t]||PAL[3])+'">'+esc(t)+'</button>'}).join("")+
     '</nav>'+
-    (function(){var ids=A.resDeMatiere(c,M.id);if(!ids.length)return "";var n=ids.length;return '<section class="res-mat"><div class="sec-t" style="margin-top:0"><h2>Pour cette matière</h2><a href="ressources.html?c='+encodeURIComponent(c)+'&m='+M.id+'">Voir les '+n+' ressources ›</a></div></section>'})()+
     (sc.length?'<div class="scenes-m">'+sc.map(function(s){return '<a class="scene" href="/scenes/'+s+'.html"><span class="pl">'+A.pic("masques",30)+'</span><span><small>Scène vivante</small><strong>'+esc((window.VRT_SCENES_TITRES||{})[s]||s)+'</strong></span><span class="jouer">'+A.pic("lecture",30)+'</span></a>'}).join("")+'</div>':'')+
-    (tot&&nred<tot?A.offre(c,M.id,'matiere'):'')+
-    '<div id="liste"></div></div>';
+    /* 13/11/2026 : les leçons d'abord, l'offre payante après (elle coupait la page en deux). */
+    '<div id="liste"></div>'+(tot&&nred<tot?A.offre(c,M.id,'matiere'):'')+'</div>';
   rendu("");
   /* arrivée depuis l'Atelier (?seq=N) : on montre la séquence demandée */
   var sv=+(u.get("seq")||0); if(sv){var cs=document.getElementById("seq-"+sv); if(cs){cs.classList.add("cible");cs.scrollIntoView({block:"start"})}}

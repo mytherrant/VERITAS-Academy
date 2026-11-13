@@ -61,8 +61,8 @@ CARTE.oeuvres.forEach(([f, ti, cs, mot]) => {
   // La version interactive : fiche, carte mentale, QCM, citations.
   const k = f.replace(/-/g, "_");
   if (!LITT.includes('"' + k + '"') && !new RegExp("\\b" + k + "\\s*:").test(LITT)) err("œuvre interactive absente : " + k);
-  const idi = "oi_" + k; items[idi] = { t: "oeuvre", ti: ti + " : carte mentale, QCM, citations", d: "La version interactive de l'œuvre.", u: "/app.html#oeuvre?k=" + k, ab: 0 };
-  classesDe(cs).forEach(c => ajoute(mat, c + "|francais", idi));
+  // 13/11/2026 : plus de seconde carte « version interactive » (doublon) : la page de l'œuvre y renvoie.
+  items[id].d = "Analyse, résumé, carte mentale, QCM et citations.";
 });
 
 // Courants littéraires : frise rattachée aux leçons « contexte »
@@ -123,6 +123,29 @@ CARTE.outils.forEach(o => {
 const pc = lire("parcours/index.html"), dbt = pc.indexOf("var SERIES = {"), fin = pc.indexOf("var GCE", dbt);
 if (dbt < 0 || fin < 0) err("tableau SERIES introuvable dans parcours/index.html");
 const coefs = vm.runInNewContext("(function(){" + pc.slice(dbt, fin) + ";return {A4:SERIES.A4,C:SERIES.C,D:SERIES.D,college:SERIES.college}})()");
+// Annales officielles (ressources/annales/*.html) : les anciens sujets d'abord (demande de Jacques, 13/11/2026).
+const MAT_AN = { allemand: ["allemand"], anglais: ["anglais"], ecm: ["ecm"], espagnol: ["espagnol"], "etude-de-texte": ["francais"], "expression-ecrite": ["francais"],
+  geographie: ["geo"], histoire: ["histoire"], informatique: ["info"], mathematiques: ["maths"], pct: ["pct"], svt: ["svt"] };
+const NOM_AN = { allemand: "Allemand", anglais: "Anglais", ecm: "ECM", espagnol: "Espagnol", "etude-de-texte": "Français, étude de texte", "expression-ecrite": "Français, expression écrite",
+  geographie: "Géographie", histoire: "Histoire", informatique: "Informatique", mathematiques: "Mathématiques", pct: "PCT", svt: "SVTEEHB" };
+const EXAM_AN = { bepc: ["BEPC", ["3e"]] };
+const annales = fs.readdirSync(path.join(R, "ressources/annales")).map(f => /^([a-z]+)-([a-z-]+)-(\d{4})\.html$/.exec(f)).filter(Boolean)
+  .sort((x, y) => y[3] - x[3] || x[2].localeCompare(y[2]));   // la session la plus récente d'abord
+annales.forEach(([f, ex, m, an]) => {
+  const E = EXAM_AN[ex], ms = MAT_AN[m]; if (!E || !ms) return err("annale non rattachée : " + f);
+  const id = "an_" + ex + "_" + m.replace(/-/g, "_") + "_" + an;
+  items[id] = { t: "epreuve", ti: E[0] + " " + an + " · " + NOM_AN[m] + " (sujet officiel)", d: "L'ancien sujet de l'examen et son corrigé, barème inclus.", u: "/ressources/annales/" + f, ab: 0, an: 1 };
+  E[1].forEach(c => ms.forEach(x => { if (!leconsDe(c, x).length) return err(id + " : rien en " + c + "/" + x); const k = c + "|" + x;
+    mat[k] = mat[k] || []; const fin = mat[k].filter(i => items[i] && items[i].an).length; mat[k].splice(fin, 0, id); }));
+});
+items.an_index = { t: "epreuve", ti: "Toutes les annales corrigées", d: "Les derniers sujets officiels, par matière et par session.", u: "/ressources/annales/", ab: 0, an: 1 };
+(cl["3e"] = cl["3e"] || []).unshift("an_index");
+
+// Doublons (même adresse sous deux identifiants) : on garde le premier, partout (13/11/2026, « ne garder que l'essentiel »).
+const parU = {};
+Object.keys(items).forEach(id => { const u = items[id].u; if (parU[u]) { const g = parU[u];
+  [lec, mat, cl].forEach(T => Object.keys(T).forEach(k => { T[k] = T[k].map(x => x === id ? g : x).filter((x, i, a) => a.indexOf(x) === i); }));
+  delete items[id]; } else parU[u] = id; });
 const nbLec = Object.values(lec).reduce((n, v) => n + v.length, 0);
 const sortie = "/* Ressources du site rattachées à la progression MINESEC 2026-2027.\n   Fichier GÉNÉRÉ par tools/build_apprendre_ressources.cjs : ne pas modifier à la main. */\n" +
   "window.VRT_RES=" + JSON.stringify({ items, lec, mat, cl, coefs }) + ";\n";

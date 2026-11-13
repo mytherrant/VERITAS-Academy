@@ -8,7 +8,7 @@
 <link rel="icon" href="../VERITAS_favicon_512.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="apprendre.css?v=20261113z">
+<link rel="stylesheet" href="apprendre.css?v=20261114a">
 <link rel="stylesheet" href="jeu.css?v=20261112v">
 </head>
 <body class="eleve">
@@ -24,8 +24,8 @@
 <script src="/api/apprendre_config.php"></script>
 <script src="progressions.js?v=20261110g"></script>
 <script src="lecons.js?v=20261110g"></script>
-<script src="ressources.js?v=20261113m"></script>
-<script src="commun.js?v=20261113n"></script>
+<script src="ressources.js?v=20261114a"></script>
+<script src="commun.js?v=20261114a"></script>
 <script src="jeu.js?v=20261110g"></script>
 <script>
 /* Moteur de simulation : les quatre fonctions qu'attend chunks/labo.js (mêmes qu'app.js). */
@@ -70,12 +70,46 @@ if(typeof CanvasRenderingContext2D!=='undefined'&&!CanvasRenderingContext2D.prot
   function para(s){nTon=0;return net(s).split(/\n{2,}/).map(function(b){return '<p style="'+A.ton(nTon++)+'">'+b.split("\n").map(titre).join("<br>")+'</p>'}).join("")}
   function theorie(){stop();P.innerHTML=para(lv.theorie)}
   function experience(){
-    P.innerHTML='<div class="labo-sim"><div class="labo-sim-b"><span>Simulation</span><span><button type="button" id="simPlayBtn">Pause</button> <button type="button" id="simRaz">Recommencer</button></span></div><canvas id="laboCnv" width="680" height="340"></canvas><div id="simValues"></div></div><div id="simControls"></div>'+
+    P.innerHTML='<div class="labo-scene" id="laboScene"><div class="labo-sim"><div class="labo-sim-b"><span>Simulation</span><span><button type="button" id="simPlayBtn">Pause</button><button type="button" id="simRaz">Recommencer</button><button type="button" id="simPlein" aria-label="Afficher la simulation en plein écran">Plein écran</button></span></div><canvas id="laboCnv" width="680" height="340"></canvas><div id="simValues"></div></div><div id="simControls"></div></div>'+
+      '<button type="button" class="labo-agr" id="simAgr">Agrandir la simulation (plein écran, téléphone à l\'horizontale)</button>'+
       '<h2 class="labo-h2">Protocole</h2><ol class="labo-ol">'+lv.experience.map(function(e,i){return '<li style="'+A.ton(i)+'">'+titre(net(e).replace(/^\d+[.)]?\s*/,""))+'</li>'}).join("")+'</ol>';
     $("#simPlayBtn").onclick=_simToggle; $("#simRaz").onclick=_simReset;
     window._sim.running=true; window._sim._lastCtrlHtml=null;
     if(window._initLaboSim) window._initLaboSim(lv);
+    nettete();
+    $("#simPlein").onclick=$("#simAgr").onclick=pleinEcran;
   }
+  /* 13/11/2026 « simulation trop petite ». Les 31 simulations dessinent dans un repère fixe de
+     680 × 340 : on garde ce repère, mais la surface du canevas suit la taille réelle à l'écran
+     (densité du téléphone comprise), avec une mise à l'échelle unique. Texte net, sans rien redessiner. */
+  function nettete(){
+    var cnv=$("#laboCnv"); if(!cnv) return;
+    var k=Math.min(3,Math.max(1,(window.devicePixelRatio||1)*cnv.clientWidth/680));
+    k=Math.round(k*4)/4; if(cnv._k===k) return; cnv._k=k;
+    cnv.width=680*k; cnv.height=340*k;
+    var ctx=cnv.getContext("2d"); if(!ctx) return; ctx.setTransform(k,0,0,k,0,0);
+    if(window._sim&&window._sim._draw) try{window._sim._draw()}catch(e){}
+  }
+  function enPlein(){return document.fullscreenElement||document.webkitFullscreenElement||($("#laboScene")&&$("#laboScene").classList.contains("plein"))}
+  function pleinEcran(){
+    var s=$("#laboScene"); if(!s) return;
+    if(enPlein()){
+      if(document.fullscreenElement&&document.exitFullscreen) document.exitFullscreen();
+      else if(document.webkitFullscreenElement&&document.webkitExitFullscreen) document.webkitExitFullscreen();
+      s.classList.remove("plein"); majPlein(); return;
+    }
+    var f=s.requestFullscreen||s.webkitRequestFullscreen, p=null;
+    if(f){try{p=f.call(s)}catch(e){p=null}}
+    function paysage(){try{if(screen.orientation&&screen.orientation.lock) screen.orientation.lock("landscape").catch(function(){})}catch(e){}}
+    if(p&&p.then) p.then(paysage,function(){s.classList.add("plein");majPlein()});
+    else if(f) paysage();
+    else s.classList.add("plein");   /* iPhone : pas de plein écran d'élément, la scène couvre la page */
+    majPlein();
+  }
+  function majPlein(){var b=$("#simPlein"); if(b) b.textContent=enPlein()?"Quitter":"Plein écran"; setTimeout(nettete,250)}
+  document.addEventListener("fullscreenchange",majPlein); document.addEventListener("webkitfullscreenchange",majPlein);
+  window.addEventListener("resize",function(){clearTimeout(window._nt);window._nt=setTimeout(nettete,200)});
+  document.addEventListener("keydown",function(e){var s=$("#laboScene");if(e.key==="Escape"&&s&&s.classList.contains("plein")){s.classList.remove("plein");majPlein()}});
   function quiz(){
     stop(); var qi=0, bons=0, qs=lv.quiz.map(function(q){return A.melanger({q:q.q,r:q.opts,b:q.ans})});
     function q(){
