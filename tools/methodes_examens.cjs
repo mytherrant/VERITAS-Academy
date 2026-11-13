@@ -45,7 +45,19 @@ function lireSources(f) {
   }).filter(Boolean);
 }
 
+// Annales corrigées (tools/annales.cjs → _liste.json) : liées depuis la fiche de leur matière.
+const ANNALES = (() => { try { return JSON.parse(fs.readFileSync(path.join(__dirname, "annales/_liste.json"), "utf8")); } catch (e) { return []; } })();
+function avecAnnales(meta, corps) {
+  const xs = ANNALES.filter(a => a.fiche === meta.page); if (!xs.length) return corps;
+  const parMat = {}; xs.forEach(a => { (parMat[a.matiere] = parMat[a.matiere] || []).push(a); });
+  const h = '<h2 id="annales">Les annales corrigées</h2>\n<p>Les derniers sujets officiels, à traiter en temps limité, chacun avec son corrigé :</p>\n<ul>' +
+    Object.keys(parMat).map(m => "<li><strong>" + esc(m) + "</strong> : " + parMat[m].map(a => '<a href="' + a.u + '">' + a.annee + "</a>").join(" · ") + "</li>").join("") +
+    '</ul>\n<p><a href="/ressources/annales/">Toutes les annales corrigées</a></p>\n';
+  return corps.includes('<h2 id="sources">') ? corps.replace('<h2 id="sources">', () => h + '<h2 id="sources">') : corps + h;
+}
+
 function lireSource(f, meta, corps) {
+  corps = avecAnnales(meta, corps);
   ["page", "titre", "description", "badge"].forEach(k => { if (!meta[k]) err(f + " : champ " + k + " manquant"); });
   if (/<!--\/?pour/.test(corps)) err(f + " : marqueur <!--pour--> imbriqué ou mal fermé");
   if (!/id="sources"/.test(corps)) err(f + " : section des sources (id=\"sources\") manquante");
@@ -156,7 +168,7 @@ fs.readdirSync(path.join(R, "ressources")).filter(x => /\.html$/.test(x)).forEac
     if (!tuiles.length) return;
     h += '<h2 id="' + slug(nom) + '">' + nom + (examen ? " · " + examen : "") + '</h2><div class="grid">' + tuiles.join("") + "</div>\n";
   });
-  h += '<h2>Autres examens</h2><div class="grid"><a class="tile" href="/ressources/gce-francais-anglais.html"><strong>GCE O/A Level</strong><span>Le sous-système anglophone</span></a><a class="tile" href="/ressources/programme-francais-minesec.html"><strong>Programme de français</strong><span>De la 6e à la Terminale</span></a></div>\n<!--/mx-index-->';
+  h += '<h2>Autres examens</h2><div class="grid">' + (ANNALES.length ? '<a class="tile" href="/ressources/annales/"><strong>Annales corrigées</strong><span>Les derniers sujets officiels et leurs corrigés</span></a>' : '') + '<a class="tile" href="/ressources/gce-francais-anglais.html"><strong>GCE O/A Level</strong><span>Le sous-système anglophone</span></a><a class="tile" href="/ressources/programme-francais-minesec.html"><strong>Programme de français</strong><span>De la 6e à la Terminale</span></a></div>\n<!--/mx-index-->';
   let html = fs.readFileSync(f, "utf8");
   if (/<!--mx-index-->[\s\S]*?<!--\/mx-index-->/.test(html)) html = html.replace(/<!--mx-index-->[\s\S]*?<!--\/mx-index-->/, () => h);
   else {
@@ -178,8 +190,10 @@ fs.readdirSync(path.join(R, "ressources")).filter(x => /\.html$/.test(x)).forEac
 (function sitemap() {
   const f = path.join(R, "ressources/sitemap-ressources.xml");
   const pagesDossier = fs.readdirSync(path.join(R, "ressources")).filter(x => /\.html$/.test(x) && x !== "index.html").sort();
+  const dA = path.join(R, "ressources/annales");
+  const pagesAnnales = fs.existsSync(dA) ? [""].concat(fs.readdirSync(dA).filter(x => /\.html$/.test(x) && x !== "index.html").sort()) : [];
   const u = (loc, fr, pr) => "<url><loc>https://veritas-school.com/ressources/" + loc + "</loc><changefreq>" + fr + "</changefreq><priority>" + pr + "</priority></url>";
-  const xml = '<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n' + [u("", "weekly", "0.8")].concat(pagesDossier.map(x => u(x, "monthly", "0.7"))).join("\n") + "\n</urlset>\n";
+  const xml = '<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n' + [u("", "weekly", "0.8")].concat(pagesDossier.map(x => u(x, "monthly", "0.7")), pagesAnnales.map(x => u("annales/" + x, "monthly", "0.7"))).join("\n") + "\n</urlset>\n";
   if (fs.existsSync(f) && fs.readFileSync(f, "utf8") === xml) { identiques++; return; }
   if (CONTROLE) { err("ressources/sitemap-ressources.xml : à régénérer"); return; }
   fs.writeFileSync(f, xml); ecrites++;

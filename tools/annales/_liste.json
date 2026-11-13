@@ -1,0 +1,205 @@
+[
+ {
+  "examen": "bepc",
+  "fiche": "ressources/bepc-francais.html",
+  "matiere": "Étude de texte",
+  "annee": 2026,
+  "u": "/ressources/annales/bepc-etude-de-texte-2026.html"
+ },
+ {
+  "examen": "bepc",
+  "fiche": "ressources/bepc-francais.html",
+  "matiere": "Étude de texte",
+  "annee": 2025,
+  "u": "/ressources/annales/bepc-etude-de-texte-2025.html"
+ },
+ {
+  "examen": "bepc",
+  "fiche": "ressources/bepc-francais.html",
+  "matiere": "Étude de texte",
+  "annee": 2024,
+  "u": "/ressources/annales/bepc-etude-de-texte-2024.html"
+ },
+ {
+  "examen": "bepc",
+  "fiche": "ressources/bepc-francais.html",
+  "matiere": "Expression écrite",
+  "annee": 2026,
+  "u": "/ressources/annales/bepc-expression-ecrite-2026.html"
+ },
+ {
+  "examen": "bepc",
+  "fiche": "ressources/bepc-francais.html",
+  "matiere": "Expression écrite",
+  "annee": 2025,
+  "u": "/ressources/annales/bepc-expression-ecrite-2025.html"
+ },
+ {
+  "examen": "bepc",
+  "fiche": "ressources/bepc-francais.html",
+  "matiere": "Expression écrite",
+  "annee": 2024,
+  "u": "/ressources/annales/bepc-expression-ecrite-2024.html"
+ },
+ {
+  "examen": "bepc",
+  "fiche": "ressources/examen-mathematiques-bepc.html",
+  "matiere": "Mathématiques",
+  "annee": 2026,
+  "u": "/ressources/annales/bepc-mathematiques-2026.html"
+ },
+ {
+  "examen": "bepc",
+  "fiche": "ressources/examen-mathematiques-bepc.html",
+  "matiere": "Mathématiques",
+  "annee": 2025,
+  "u": "/ressources/annales/bepc-mathematiques-2025.html"
+ },
+ {
+  "examen": "bepc",
+  "fiche": "ressources/examen-mathematiques-bepc.html",
+  "matiere": "Mathématiques",
+  "annee": 2024,
+  "u": "/ressources/annales/bepc-mathematiques-2024.html"
+ },
+ {
+  "examen": "bepc",
+  "fiche": "ressources/examen-pct-bepc.html",
+  "matiere": "Physique, chimie et technologie",
+  "annee": 2026,
+  "u": "/ressources/annales/bepc-pct-2026.html"
+ },
+ {
+  "examen": "bepc",
+  "fiche": "ressources/examen-pct-bepc.html",
+  "matiere": "Physique, chimie et technologie",
+  "annee": 2025,
+  "u": "/ressources/annales/bepc-pct-2025.html"
+ },
+ {
+  "examen": "bepc",
+  "fiche": "ressources/examen-pct-bepc.html",
+  "matiere": "Physique, chimie et technologie",
+  "annee": 2024,
+  "u": "/ressources/annales/bepc-pct-2024.html"
+ },
+ {
+  "examen": "bepc",
+  "fiche": "ressources/examen-svt-bepc.html",
+  "matiere": "SVTEEHB",
+  "annee": 2026,
+  "u": "/ressources/annales/bepc-svt-2026.html"
+ },
+ {
+  "examen": "bepc",
+  "fiche": "ressources/examen-svt-bepc.html",
+  "matiere": "SVTEEHB",
+  "annee": 2025,
+  "u": "/ressources/annales/bepc-svt-2025.html"
+ },
+ {
+  "examen": "bepc",
+  "fiche": "ressources/examen-svt-bepc.html",
+  "matiere": "SVTEEHB",
+  "annee": 2024,
+  "u": "/ressources/annales/bepc-svt-2024.html"
+ },
+ {
+  "examen": "bepc",
+  "fiche": "ressources/examen-histoire-geographie-bepc.html",
+  "matiere": "Histoire",
+  "annee": 2025,
+  "u": "/ressources/annales/bepc-histoire-2025.html"
+ },
+ {
+  "examen": "bepc",
+  "fiche": "ressources/examen-histoire-geographie-bepc.html",
+  "matiere": "Géographie",
+  "annee": 2026,
+  "u": "/ressources/annales/bepc-geographie-2026.html"
+ },
+ {
+  "examen": "bepc",
+  "fiche": "ressources/examen-ecm-bepc.html",
+  "matiere": "Éducation à la citoyenneté et à la morale",
+  "annee": 2026,
+  "u": "/ressources/annales/bepc-ecm-2026.html"
+ },
+ {
+  "examen": "bepc",
+  "fiche": "ressources/examen-ecm-bepc.html",
+  "matiere": "Éducation à la citoyenneté et à la morale",
+  "annee": 2025,
+  "u": "/ressources/annales/bepc-ecm-2025.html"
+ },
+ {
+  "examen": "bepc",
+  "fiche": "ressources/examen-ecm-bepc.html",
+  "matiere": "Éducation à la citoyenneté et à la morale",
+  "annee": 2024,
+  "u": "/ressources/annales/bepc-ecm-2024.html"
+ },
+ {
+  "examen": "bepc",
+  "fiche": "ressources/examen-anglais-bepc.html",
+  "matiere": "Anglais",
+  "annee": 2025,
+  "u": "/ressources/annales/bepc-anglais-2025.html"
+ },
+ {
+  "examen": "bepc",
+  "fiche": "ressources/examen-langues-vivantes-bepc.html",
+  "matiere": "Espagnol",
+  "annee": 2026,
+  "u": "/ressources/annales/bepc-espagnol-2026.html"
+ },
+ {
+  "examen": "bepc",
+  "fiche": "ressources/examen-langues-vivantes-bepc.html",
+  "matiere": "Espagnol",
+  "annee": 2025,
+  "u": "/ressources/annales/bepc-espagnol-2025.html"
+ },
+ {
+  "examen": "bepc",
+  "fiche": "ressources/examen-langues-vivantes-bepc.html",
+  "matiere": "Espagnol",
+  "annee": 2024,
+  "u": "/ressources/annales/bepc-espagnol-2024.html"
+ },
+ {
+  "examen": "bepc",
+  "fiche": "ressources/examen-langues-vivantes-bepc.html",
+  "matiere": "Allemand",
+  "annee": 2025,
+  "u": "/ressources/annales/bepc-allemand-2025.html"
+ },
+ {
+  "examen": "bepc",
+  "fiche": "ressources/examen-langues-vivantes-bepc.html",
+  "matiere": "Allemand",
+  "annee": 2024,
+  "u": "/ressources/annales/bepc-allemand-2024.html"
+ },
+ {
+  "examen": "bepc",
+  "fiche": "ressources/examen-informatique-bepc.html",
+  "matiere": "Informatique",
+  "annee": 2026,
+  "u": "/ressources/annales/bepc-informatique-2026.html"
+ },
+ {
+  "examen": "bepc",
+  "fiche": "ressources/examen-informatique-bepc.html",
+  "matiere": "Informatique",
+  "annee": 2025,
+  "u": "/ressources/annales/bepc-informatique-2025.html"
+ },
+ {
+  "examen": "bepc",
+  "fiche": "ressources/examen-informatique-bepc.html",
+  "matiere": "Informatique",
+  "annee": 2024,
+  "u": "/ressources/annales/bepc-informatique-2024.html"
+ }
+]

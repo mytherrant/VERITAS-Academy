@@ -1065,6 +1065,7 @@ jobs:
       - name: 🔎 GEO — œuvres, Atelier, simulations, llms.txt et vitrine sont-ils à jour ?
         run: |
           node tools/oeuvres_statiques.js --controle
+          node tools/annales.cjs --controle
           node tools/methodes_examens.cjs --controle
           node tools/scenes_statiques.js --controle
           # Chaque leçon citée par une scène existe-t-elle sous ce numéro dans la progression officielle ?
