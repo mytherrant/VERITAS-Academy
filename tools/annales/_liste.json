@@ -1,0 +1,23 @@
+[
+ {
+  "examen": "bepc",
+  "fiche": "ressources/examen-mathematiques-bepc.html",
+  "matiere": "Mathématiques",
+  "annee": 2026,
+  "u": "/ressources/annales/bepc-mathematiques-2026.html"
+ },
+ {
+  "examen": "bepc",
+  "fiche": "ressources/examen-mathematiques-bepc.html",
+  "matiere": "Mathématiques",
+  "annee": 2025,
+  "u": "/ressources/annales/bepc-mathematiques-2025.html"
+ },
+ {
+  "examen": "bepc",
+  "fiche": "ressources/examen-mathematiques-bepc.html",
+  "matiere": "Mathématiques",
+  "annee": 2024,
+  "u": "/ressources/annales/bepc-mathematiques-2024.html"
+ }
+]

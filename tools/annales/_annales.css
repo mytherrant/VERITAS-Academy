@@ -1,0 +1,31 @@
+/* Annales : sujet officiel + corrigé, même dessin que les fiches de méthode (_methode.css). */
+.ax-sujet,.ax-corrige{font-size:16px;line-height:1.7}
+.ax-sujet p,.ax-corrige p{margin:0 0 10px}
+.ax-sujet table,.ax-corrige table{border-collapse:collapse;margin:10px 0 16px;max-width:100%;display:block;overflow-x:auto}
+.ax-sujet td,.ax-sujet th,.ax-corrige td,.ax-corrige th{border:1px solid #D8D2C4;padding:6px 10px;vertical-align:top;font-size:15px}
+.ax-sujet img,.ax-corrige img{display:block;max-width:100%;height:auto;margin:12px auto;border:1px solid #E6E0D4;border-radius:6px;background:#fff}
+.ax-fr{display:inline-flex;flex-direction:column;vertical-align:middle;text-align:center;margin:0 2px;font-size:.92em;line-height:1.25}
+.ax-fr>span:first-child{border-bottom:1px solid currentColor;padding:0 3px}
+.ax-fr>span:last-child{padding:0 3px}
+.ax-rad{border-top:1px solid currentColor;padding:0 2px}
+.ax-ang{position:relative;display:inline-block}
+.ax-ang::before{content:"^";position:absolute;left:0;right:0;top:-.72em;text-align:center;font-size:.9em}
+.ax-vec{position:relative;display:inline-block}
+.ax-vec::before{content:"→";position:absolute;left:0;right:0;top:-.95em;text-align:center;font-size:.8em}
+.ax-meta{display:flex;flex-wrap:wrap;gap:8px 18px;margin:0 0 20px;font-size:14px;color:#636A80}
+.ax-meta b{color:#2B3550;font-weight:600}
+.ax-avert{border:1px solid #E6E0D4;border-left:3px solid #C9A227;border-radius:8px;padding:12px 16px;margin:0 0 18px;font-size:15px}
+.ax-cache{border:1px solid #E6E0D4;border-radius:10px;padding:0;margin:0 0 18px}
+.ax-cache>summary{cursor:pointer;padding:14px 18px;font-weight:600;color:#1E499B;list-style:none}
+.ax-cache>summary::-webkit-details-marker{display:none}
+.ax-cache>summary::before{content:"▸ ";}
+.ax-cache[open]>summary::before{content:"▾ ";}
+.ax-cache>.ax-corrige{padding:4px 18px 14px}
+.ax-annees{display:flex;flex-wrap:wrap;gap:8px;margin:6px 0 0}
+.ax-annees a,.ax-annees span{border:1px solid #E6E0D4;border-radius:999px;padding:5px 14px;font-size:14px;text-decoration:none;color:#1E499B}
+.ax-annees span{background:#1E499B;color:#fff;border-color:#1E499B}
+.ax-tbl{width:100%;border-collapse:collapse;margin:8px 0 22px}
+.ax-tbl td,.ax-tbl th{border-bottom:1px solid #E6E0D4;padding:9px 8px;text-align:left;font-size:15px}
+.ax-tbl a{color:#1E499B}
+.ax-col{display:inline-flex;flex-direction:column;vertical-align:middle;text-align:center;line-height:1.2;margin:0 2px}
+.ax-col{padding:0 5px;border-left:1.5px solid currentColor;border-right:1.5px solid currentColor;border-radius:9px}
