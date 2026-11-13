@@ -128,13 +128,25 @@
       + '<rect x="560" y="130" width="190" height="46" fill="#7A2E2E"/><rect x="560" y="122" width="190" height="10" fill="#E9E3CF"/><path d="M560 122 L655 96 L750 122 Z" fill="#E9E3CF"/>'
       + '<ellipse cx="400" cy="232" rx="170" ry="20" fill="none" stroke="#fff" stroke-width="5" stroke-dasharray="14 8"/>'); },
     // Salon du XVIIe siècle : rideaux, lustre, table nappée, porte
-    salon17: function(){ return svg(ciel('cS', '#3B2A4D', '#5E4A6E'),
-      '<rect width="800" height="260" fill="url(#cS)"/><rect x="0" y="200" width="800" height="60" fill="#3A2618"/>'
-      + '<g opacity=".9"><rect x="90" y="30" width="110" height="150" fill="#9DB4D6"/><path d="M80 24 Q120 110 96 190 L70 190 L70 24 Z M210 24 Q170 110 194 190 L220 190 L220 24 Z" fill="#8E2A3C"/>'
-      + '<rect x="600" y="30" width="110" height="150" fill="#9DB4D6"/><path d="M590 24 Q630 110 606 190 L580 190 L580 24 Z M720 24 Q680 110 704 190 L730 190 L730 24 Z" fill="#8E2A3C"/></g>'
-      + '<g class="an-tangage" style="animation-duration:6s"><path d="M400 0 L400 26" stroke="#C9982E" stroke-width="2"/><path d="M360 40 Q400 26 440 40 Q400 52 360 40 Z" fill="#C9982E"/>' + [366, 383, 400, 417, 434].map(function(x){ return '<ellipse class="an-flamme" cx="' + x + '" cy="32" rx="2.5" ry="5" fill="#FFE08A"/>'; }).join('') + '</g>'
-      + '<rect x="250" y="150" width="300" height="12" rx="3" fill="#6B3E1E"/><path d="M240 150 L560 150 L580 236 L220 236 Z" fill="#7E1F2E"/><path d="M240 150 L560 150 L566 162 L234 162 Z" fill="#C9982E" opacity=".7"/>'
-      + '<rect x="745" y="70" width="52" height="135" fill="#5A3A22"/><circle cx="756" cy="140" r="3" fill="#C9982E"/>'); },
+    salon17: function(){
+      function fenetre(x){ return '<rect x="' + (x - 4) + '" y="26" width="118" height="158" fill="#D9C08A"/><rect x="' + x + '" y="30" width="110" height="150" fill="#8FA9CF"/><rect x="' + x + '" y="30" width="110" height="60" fill="#B9CBE4"/>'
+        + '<path d="M' + (x + 55) + ' 30 V180 M' + x + ' 80 H' + (x + 110) + ' M' + x + ' 130 H' + (x + 110) + '" stroke="#D9C08A" stroke-width="3"/>'
+        + '<path d="M' + (x - 14) + ' 22 Q' + (x + 26) + ' 108 ' + (x + 6) + ' 194 L' + (x - 22) + ' 194 L' + (x - 22) + ' 22 Z" fill="#8E2A3C"/><path d="M' + (x + 124) + ' 22 Q' + (x + 84) + ' 108 ' + (x + 104) + ' 194 L' + (x + 132) + ' 194 L' + (x + 132) + ' 22 Z" fill="#7A2233"/>'
+        + '<path d="M' + (x - 22) + ' 22 Q' + (x + 26) + ' 108 ' + (x + 6) + ' 194" stroke="#C9982E" stroke-width="2" fill="none" opacity=".6"/><rect x="' + (x - 28) + '" y="16" width="166" height="9" rx="3" fill="#C9982E"/>'
+        + '<path d="M' + (x + 110) + ' 60 L' + (x + 230) + ' 205 L' + (x + 150) + ' 205 L' + x + ' 150 Z" fill="#FFF0C8" opacity=".09"/>'; }
+      var lames = [-300, -150, 0, 150, 300, 450, 600, 750, 900, 1050].map(function(xb){ var x2 = 400 + (xb - 400) * .55; return '<path d="M' + x2.toFixed(0) + ' 200 L' + xb + ' 260" stroke="#2A170C" stroke-width="1.2" opacity=".35"/>'; }).join('');
+      var boiserie = [0, 1, 2, 3, 4, 5, 6, 7].map(function(k){ return '<rect x="' + (12 + k * 100) + '" y="152" width="80" height="40" fill="none" stroke="#C9A86A" stroke-width="1.6" opacity=".45"/>'; }).join('');
+      return svg('<linearGradient id="cSm" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#4A3658"/><stop offset="1" stop-color="#6A5277"/></linearGradient><linearGradient id="cSp" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#5A3820"/><stop offset="1" stop-color="#3A2212"/></linearGradient><linearGradient id="cSn" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#8E2234"/><stop offset="1" stop-color="#6A1626"/></linearGradient>',
+      '<rect width="800" height="200" fill="url(#cSm)"/><rect y="146" width="800" height="54" fill="#5A3F2A"/>' + boiserie + '<rect y="144" width="800" height="5" fill="#C9A86A" opacity=".6"/><rect width="800" height="14" fill="#C9A86A" opacity=".35"/>'
+      + fenetre(90) + fenetre(600)
+      + '<rect x="350" y="62" width="100" height="76" fill="#C9982E"/><rect x="357" y="69" width="86" height="62" fill="#3A2A22"/><ellipse cx="400" cy="96" rx="20" ry="24" fill="#6A5040"/><path d="M372 131 Q400 104 428 131 Z" fill="#2A1A14"/>'
+      + '<rect width="800" height="60" y="200" fill="url(#cSp)"/>' + lames + '<rect y="198" width="800" height="4" fill="#2A170C" opacity=".4"/>'
+      + '<rect x="0" y="0" width="800" height="260" fill="#FFD98A" opacity=".04"/><circle cx="400" cy="40" r="120" fill="#FFE2A0" opacity=".12"/>'
+      + '<g class="an-tangage" style="animation-duration:6s"><path d="M400 0 L400 26" stroke="#C9982E" stroke-width="2"/><path d="M356 40 Q400 24 444 40 Q400 54 356 40 Z" fill="#C9982E"/><path d="M370 44 Q400 60 430 44" stroke="#E8C66A" stroke-width="1.5" fill="none"/>' + [366, 383, 400, 417, 434].map(function(x){ return '<rect x="' + (x - 1.5) + '" y="33" width="3" height="6" fill="#F4EBD8"/><ellipse class="an-flamme" cx="' + x + '" cy="29" rx="2.5" ry="5" fill="#FFE08A"/>'; }).join('') + '</g>'
+      + ombre(400, 238, 200, 10, .9) + '<rect x="250" y="150" width="300" height="12" rx="3" fill="#6B3E1E"/><path d="M240 150 L560 150 L580 236 L220 236 Z" fill="url(#cSn)"/>'
+      + '<path d="M240 150 L560 150 L566 164 L234 164 Z" fill="#C9982E" opacity=".75"/><path d="M300 166 Q310 200 296 236 M400 166 Q406 200 400 236 M500 166 Q490 200 504 236" stroke="#000" stroke-width="2" opacity=".14" fill="none"/>'
+      + '<path d="M384 150 L388 136 L392 150 Z" fill="#E8E2D2"/><rect x="398" y="140" width="8" height="10" fill="#C9982E"/><ellipse class="an-flamme" cx="402" cy="136" rx="2.2" ry="4.5" fill="#FFE08A"/>'
+      + '<rect x="741" y="66" width="60" height="139" fill="#C9A86A" opacity=".5"/><rect x="745" y="70" width="52" height="135" fill="#5A3A22"/><rect x="751" y="78" width="40" height="52" fill="none" stroke="#3A2414" stroke-width="2"/><rect x="751" y="140" width="40" height="56" fill="none" stroke="#3A2414" stroke-width="2"/><circle cx="756" cy="140" r="3" fill="#C9982E"/>'); },
     // Village yorouba : arbre odan, cases, mur de l'école
     village: function(){ return svg(ciel3('cV', '#6FB6E2', '#BFE1EF', '#EEF2DC'),
       '<rect width="800" height="260" fill="url(#cV)"/>' + soleil(705, 46) + nuages(.75) + oiseaux('#2A3A55')
@@ -156,19 +168,50 @@
       + '<g class="an-tangage"><rect x="300" y="168" width="200" height="22" rx="6" fill="#E9E3CF"/><rect x="340" y="146" width="110" height="22" fill="#C9C1A6"/><rect x="420" y="112" width="14" height="36" fill="#3A3A3A"/><path d="M296 190 L504 190 L490 202 L310 202 Z" fill="#3A2A1A"/></g>'
       + '<circle class="an-fumee" cx="427" cy="104" r="10" fill="#ddd"/><circle class="an-fumee" style="animation-delay:-1.7s" cx="427" cy="104" r="10" fill="#ccc"/>'); },
     // Salon de deuil, Europe : fenêtre au crépuscule, piano, bougie
-    deuil: function(){ return svg(ciel('cD', '#1C1A2A', '#2E2A3E'),
-      '<rect width="800" height="260" fill="url(#cD)"/><rect x="520" y="30" width="150" height="160" fill="#3E4A78"/><rect x="590" y="30" width="6" height="160" fill="#1C1A2A"/><rect x="520" y="105" width="150" height="6" fill="#1C1A2A"/>'
-      + '<rect x="0" y="205" width="800" height="55" fill="#141220"/><path d="M80 150 L300 150 Q320 150 320 170 L320 186 L80 186 Z" fill="#0A0A10"/><rect x="92" y="186" width="8" height="30" fill="#0A0A10"/><rect x="300" y="186" width="8" height="30" fill="#0A0A10"/>'
-      + '<rect x="380" y="60" width="70" height="90" fill="none" stroke="#C9982E" stroke-width="4"/><circle cx="415" cy="96" r="16" fill="#555"/>' + lampe(470, 150)); },
+    deuil: function(){
+      return svg('<linearGradient id="cDm" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#1C1A2A"/><stop offset="1" stop-color="#2C283C"/></linearGradient><linearGradient id="cDf" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#3E4E86"/><stop offset=".7" stop-color="#7A6A9A"/><stop offset="1" stop-color="#C98A6A"/></linearGradient>',
+      '<rect width="800" height="260" fill="url(#cDm)"/><rect y="170" width="800" height="35" fill="#22202E"/>'
+      + '<rect x="514" y="24" width="162" height="172" fill="#3A3448"/><rect x="520" y="30" width="150" height="160" fill="url(#cDf)"/>' + '<path d="M520 170 Q556 150 596 166 Q636 146 670 166 L670 190 L520 190 Z" fill="#2A2840"/>'
+      + '<rect x="590" y="30" width="6" height="160" fill="#2A2638"/><rect x="520" y="105" width="150" height="6" fill="#2A2638"/><path d="M670 60 L760 205 L640 205 L520 140 Z" fill="#8E86B8" opacity=".07"/>'
+      + '<path d="M500 18 Q540 100 526 200 L504 200 Z M690 18 Q650 100 664 200 L686 200 Z" fill="#14121C"/>'
+      + '<rect x="372" y="54" width="86" height="104" fill="#8A6A2A"/><rect x="380" y="62" width="70" height="88" fill="#4A4652"/><ellipse cx="415" cy="96" rx="17" ry="21" fill="#6E6A74"/><path d="M392 150 Q415 118 438 150 Z" fill="#33303A"/>'
+      + '<path d="M372 54 L398 54 L372 80 Z M458 54 L432 54 L458 80 Z" fill="#0A0A0E"/><path d="M405 54 Q415 66 425 54" stroke="#0A0A0E" stroke-width="4" fill="none"/>'
+      + '<rect y="205" width="800" height="55" fill="#17151F"/>' + [-200, 0, 200, 400, 600, 800, 1000].map(function(xb){ return '<path d="M' + (400 + (xb - 400) * .5) + ' 205 L' + xb + ' 260" stroke="#000" opacity=".35"/>'; }).join('')
+      + ombre(250, 214, 140, 7, .9) + '<rect x="110" y="166" width="280" height="10" fill="#2A2032"/><path d="M116 176 L384 176 L376 212 L124 212 Z" fill="#1E1826"/><rect x="128" y="176" width="244" height="5" fill="#E8E2D2" opacity=".85"/>'
+      + '<g transform="translate(250 166)"><path d="M-14 0 L-10 -18 L10 -18 L14 0 Z" fill="#3A3448"/><circle cx="-8" cy="-26" r="7" fill="#E8E2D2"/><circle cx="4" cy="-30" r="8" fill="#F2EEE4"/><circle cx="10" cy="-22" r="6" fill="#D9D2E4"/><path d="M-2 -18 L-6 -30 M4 -18 L6 -32" stroke="#3E5E3A" stroke-width="1.5"/></g>'
+      + lampe(160, 146) + lampe(340, 146)); },
     // Intérieur d'une maison douala, la nuit : lampe-tempête, fenêtre, lune
-    case_nuit: function(){ return svg(ciel('cC', '#3A2516', '#5A3A22'),
-      '<rect width="800" height="260" fill="url(#cC)"/>' + [0, 1, 2, 3, 4, 5, 6, 7, 8, 9].map(function(k){ return '<rect x="' + k * 80 + '" y="0" width="3" height="200" fill="#2A190E"/>'; }).join('')
-      + '<rect x="560" y="40" width="130" height="100" fill="#0F1A3A"/><circle cx="640" cy="80" r="18" fill="#F4F1D0"/>' + '<g opacity=".8">' + etoiles(6).replace(/cx="(\d+)"/g, function(m, x){ return 'cx="' + (565 + (+x % 120)) + '"'; }).replace(/cy="(\d+)"/g, function(m, y){ return 'cy="' + (45 + (+y % 90)) + '"'; }) + '</g>'
-      + '<rect x="0" y="200" width="800" height="60" fill="#2A190E"/><rect x="120" y="210" width="200" height="16" rx="3" fill="#B98A4A"/>' + lampe(220, 180)); },
+    case_nuit: function(){
+      var r = hasard(151), planches = '', k;
+      for(k = 0; k < 20; k++){ planches += '<rect x="' + (k * 40) + '" y="0" width="40" height="204" fill="' + ['#4A2E1A', '#55361F', '#4E3220', '#5A3A22'][k % 4] + '"/><rect x="' + (k * 40) + '" y="0" width="2" height="204" fill="#22140A"/>'
+        + '<path d="M' + (k * 40 + 12 + r() * 14) + ' ' + (r() * 150).toFixed(0) + ' q4 10 0 22" stroke="#2E1C0E" stroke-width="1.2" fill="none" opacity=".6"/>'; }
+      return svg('<radialGradient id="cCl" cx=".5" cy=".5" r=".5"><stop offset="0" stop-color="#FFC24A" stop-opacity=".55"/><stop offset=".45" stop-color="#FF9A2A" stop-opacity=".18"/><stop offset="1" stop-color="#FF9A2A" stop-opacity="0"/></radialGradient>',
+      planches + '<rect width="800" height="204" fill="#0A0604" opacity=".35"/>'
+      + '<rect x="552" y="32" width="146" height="116" fill="#2A190E"/><rect x="560" y="40" width="130" height="100" fill="#0F1A3A"/><circle cx="640" cy="80" r="18" fill="#F4F1D0"/><circle cx="640" cy="80" r="34" fill="#F4F1D0" opacity=".12"/>'
+      + '<g opacity=".8">' + etoiles(6).replace(/cx="(\d+)"/g, function(m, x){ return 'cx="' + (565 + (+x % 120)) + '"'; }).replace(/cy="(\d+)"/g, function(m, y){ return 'cy="' + (45 + (+y % 90)) + '"'; }) + '</g>'
+      + '<path d="M560 40 V140 M690 40 V140" stroke="#3A2414" stroke-width="10"/><path d="M690 140 L760 204 L700 204 L640 140 Z" fill="#C9D6F0" opacity=".05"/>'
+      + '<rect x="70" y="60" width="64" height="44" fill="#E8DCC0" opacity=".85"/><rect x="74" y="64" width="56" height="10" fill="#B0302A"/><path d="M76 82 H128 M76 90 H128 M76 98 H128" stroke="#4A3A2A" stroke-width="1" opacity=".5"/>'
+      + '<rect y="204" width="800" height="56" fill="#24160C"/><rect y="204" width="800" height="3" fill="#000" opacity=".4"/>'
+      + '<path d="M60 248 L380 248 L360 218 L80 218 Z" fill="#A8864A" opacity=".55"/><path d="M80 218 L360 218 M70 233 L370 233" stroke="#6E5428" stroke-width="1" opacity=".6"/>'
+      + ombre(220, 228, 120, 8, 1) + '<rect x="120" y="208" width="200" height="14" rx="3" fill="#B98A4A"/><rect x="120" y="208" width="200" height="4" rx="2" fill="#D9AA6A"/><path d="M130 222 V236 M310 222 V236" stroke="#6B4425" stroke-width="5"/>'
+      + '<ellipse cx="160" cy="207" rx="16" ry="4" fill="#E8E2D8"/><ellipse cx="160" cy="206" rx="11" ry="2.4" fill="#C9C2B4"/><ellipse cx="272" cy="207" rx="13" ry="4" fill="#3E7AB8"/>'
+      + '<circle cx="220" cy="170" r="150" fill="url(#cCl)"/>' + lampe(220, 186)
+      + '<rect x="0" y="0" width="800" height="260" fill="#FF9A2A" opacity=".04"/>'); },
     // Tribunal colonial
-    tribunal: function(){ return svg(ciel('cT', '#2A2A30', '#45454F'),
-      '<rect width="800" height="260" fill="url(#cT)"/><rect x="230" y="70" width="340" height="110" fill="#4A2E1A"/><rect x="220" y="62" width="360" height="12" fill="#6B4425"/>'
-      + '<rect x="330" y="50" width="40" height="14" fill="#EDE6D6"/><rect x="380" y="52" width="40" height="12" fill="#EDE6D6"/><rect x="0" y="200" width="800" height="60" fill="#1E1E24"/>' + lampe(600, 60)); },
+    tribunal: function(){
+      var fen = [70, 640].map(function(x){ return '<rect x="' + (x - 4) + '" y="20" width="98" height="168" fill="#5A3A22"/><rect x="' + x + '" y="24" width="90" height="160" fill="#9DB0C8"/><path d="M' + x + ' 64 Q' + (x + 45) + ' 20 ' + (x + 90) + ' 64" fill="#5A3A22"/><path d="M' + (x + 45) + ' 24 V184 M' + x + ' 104 H' + (x + 90) + ' M' + x + ' 144 H' + (x + 90) + '" stroke="#5A3A22" stroke-width="3"/>'
+        + '<path d="M' + (x + 90) + ' 60 L' + (x + 240) + ' 210 L' + (x + 170) + ' 210 L' + x + ' 140 Z" fill="#F4EAD0" opacity=".08"/>'; }).join('');
+      var lambris = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9].map(function(k){ return '<rect x="' + (6 + k * 80) + '" y="140" width="68" height="56" fill="none" stroke="#2A1A0E" stroke-width="2" opacity=".5"/>'; }).join('');
+      var balustre = ''; for(var x = 30; x < 780; x += 18){ if(x > 330 && x < 470){ continue; } balustre += '<rect x="' + x + '" y="206" width="6" height="22" rx="2" fill="#6B4425"/>'; }
+      return svg('<linearGradient id="cTm" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#4E4A44"/><stop offset="1" stop-color="#6A645A"/></linearGradient><linearGradient id="cTb" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#6B4425"/><stop offset="1" stop-color="#3E2614"/></linearGradient>',
+      '<rect width="800" height="200" fill="url(#cTm)"/><rect y="136" width="800" height="64" fill="#4A2E1A"/>' + lambris + '<rect y="134" width="800" height="4" fill="#8A6A3A"/>' + fen
+      + '<circle cx="400" cy="46" r="26" fill="#8A6A3A"/><circle cx="400" cy="46" r="21" fill="#5A3A22"/><path d="M400 30 V62 M386 36 H414" stroke="#C9A86A" stroke-width="2"/><path d="M386 36 L380 50 Q386 54 392 50 Z M414 36 L408 50 Q414 54 420 50 Z" fill="#C9A86A"/>'
+      + '<rect y="200" width="800" height="60" fill="#2E2A26"/>' + [-200, 0, 200, 400, 600, 800, 1000].map(function(xb){ return '<path d="M' + (400 + (xb - 400) * .5) + ' 200 L' + xb + ' 260" stroke="#000" opacity=".3"/>'; }).join('')
+      + ombre(400, 186, 210, 9, .9) + '<rect x="220" y="62" width="360" height="12" fill="#7A5030"/><rect x="230" y="74" width="340" height="110" fill="url(#cTb)"/>'
+      + [0, 1, 2, 3].map(function(k){ return '<rect x="' + (246 + k * 82) + '" y="92" width="70" height="78" fill="none" stroke="#2A1A0E" stroke-width="2" opacity=".55"/><rect x="' + (250 + k * 82) + '" y="96" width="62" height="70" fill="#fff" opacity=".04"/>'; }).join('')
+      + '<rect x="330" y="50" width="40" height="14" fill="#EDE6D6"/><rect x="380" y="52" width="40" height="12" fill="#EDE6D6"/><path d="M332 54 H366 M332 58 H360" stroke="#555" stroke-width=".8" opacity=".5"/><rect x="430" y="54" width="10" height="9" rx="1" fill="#2A1A0E"/>'
+      + '<rect x="24" y="200" width="756" height="8" fill="#7A5030"/>' + balustre + '<rect x="24" y="226" width="306" height="6" fill="#5A3A22"/><rect x="470" y="226" width="310" height="6" fill="#5A3A22"/>'
+      + lampe(600, 60)); },
     // Agora grecque : colonnes, olivier, soleil
     agora: function(){ return svg(ciel('cA', '#8EC5E8', '#F3EBD6'),
       '<rect width="800" height="260" fill="url(#cA)"/><circle class="an-soleil" cx="120" cy="50" r="26" fill="#FFF1B8"/>' + nuages(.7) + collines(186, 14, '#B9B48A', 131, .7)
@@ -230,15 +273,38 @@
       + etal(40, '#C0392B', 0) + etal(300, '#1F6F78', 1) + etal(590, '#E8A413', 2)
       + '<g transform="translate(250 214)">' + ombre(0, 2, 18, 3, .7) + '<path d="M-14 0 L-11 -18 L11 -18 L14 0 Z" fill="#B88A4A"/><path d="M-11 -12 H11 M-12 -6 H12" stroke="#7A5428" stroke-width="1.2"/></g>'); },
     // Couloir d'école
-    couloir: function(){ return svg(ciel('cO', '#E6E1D6', '#F4F0E8'),
-      '<rect width="800" height="260" fill="url(#cO)"/><path d="M0 200 L800 200 L800 260 L0 260 Z" fill="#B8AFA0"/>' + [80, 300, 520].map(function(x, k){ return '<rect x="' + x + '" y="70" width="80" height="130" fill="#6B4A2E"/><rect x="' + (x + 8) + '" y="44" width="64" height="20" rx="3" fill="#142554"/><text x="' + (x + 40) + '" y="58" text-anchor="middle" font-size="10" fill="#FFC93C" font-weight="700">' + ['AULA 3', 'INFORMÁTICA', 'BIBLIOTECA'][k] + '</text>'; }).join('')
-      + '<path d="M690 200 L690 180 L715 180 L715 160 L740 160 L740 140 L765 140 L765 120 L800 120 L800 200 Z" fill="#9C9384"/>'); },
+    couloir: function(){
+      var VP = [400, 120], lignes = [-400, -150, 100, 300, 500, 700, 950, 1200].map(function(xb){ var x2 = VP[0] + (xb - VP[0]) * (200 - VP[1]) / (260 - VP[1]); return '<path d="M' + x2.toFixed(0) + ' 200 L' + xb + ' 260" stroke="#7E7668" stroke-width="1" opacity=".35"/>'; }).join('');
+      return svg('<linearGradient id="cOm" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#E9E4D8"/><stop offset="1" stop-color="#F3EFE6"/></linearGradient><linearGradient id="cOs" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#C9C0B0"/><stop offset="1" stop-color="#A89E8C"/></linearGradient>',
+      '<rect width="800" height="200" fill="url(#cOm)"/><rect y="150" width="800" height="50" fill="#9EB8C4"/><rect y="148" width="800" height="3" fill="#7E98A6"/>'
+      + '<rect width="800" height="12" fill="#D8D2C4"/>' + [140, 400, 660].map(function(x){ return '<rect x="' + (x - 40) + '" y="3" width="80" height="5" rx="2" fill="#FFFDF2"/><ellipse cx="' + x + '" cy="12" rx="80" ry="14" fill="#FFFBE6" opacity=".3"/>'; }).join('')
+      + '<rect width="800" height="60" y="200" fill="url(#cOs)"/>' + lignes + [214, 232, 254].map(function(y){ return '<path d="M0 ' + y + ' H800" stroke="#7E7668" stroke-width="1" opacity=".25"/>'; }).join('')
+      + '<ellipse cx="400" cy="222" rx="300" ry="10" fill="#fff" opacity=".18"/>'
+      + [80, 300, 520].map(function(x, k){ return ombre(x + 50, 202, 60, 4, .6) + '<rect x="' + (x - 6) + '" y="64" width="92" height="136" fill="#D8D0BE"/><rect x="' + x + '" y="70" width="80" height="130" fill="#6B4A2E"/><rect x="' + x + '" y="70" width="40" height="130" fill="#fff" opacity=".05"/>'
+        + '<rect x="' + (x + 14) + '" y="84" width="22" height="36" fill="#BFD6E2" opacity=".85"/><rect x="' + (x + 44) + '" y="84" width="22" height="36" fill="#BFD6E2" opacity=".85"/><rect x="' + (x + 8) + '" y="134" width="64" height="56" fill="none" stroke="#4E341E" stroke-width="2"/><rect x="' + (x + 64) + '" y="136" width="10" height="4" rx="2" fill="#C9A15A"/>'
+        + '<rect x="' + (x - 6) + '" y="44" width="92" height="20" rx="3" fill="#142554"/><text x="' + (x + 40) + '" y="58" text-anchor="middle" font-size="10" fill="#FFC93C" font-family="Arial" font-weight="bold">' + ['AULA 3', 'INFORMÁTICA', 'BIBLIOTECA'][k] + '</text>'; }).join('')
+      + '<rect x="196" y="96" width="62" height="44" fill="#C9A86A"/><rect x="200" y="100" width="54" height="36" fill="#E9DCC0"/><rect x="204" y="104" width="18" height="12" fill="#F2F2F2" transform="rotate(-4 213 110)"/><rect x="228" y="106" width="20" height="14" fill="#FFE9A8" transform="rotate(5 238 113)"/><rect x="206" y="120" width="22" height="12" fill="#CFE4F2"/>'
+      + ombre(450, 202, 50, 4, .7) + '<rect x="410" y="174" width="84" height="6" fill="#8A6A44"/><path d="M416 180 V200 M488 180 V200" stroke="#3A3A3A" stroke-width="3"/>'
+      + '<g transform="translate(624 200)">' + ombre(4, 1, 18, 3, .7) + '<path d="M-10 0 L-8 -18 L8 -18 L10 0 Z" fill="#A85A3A"/><g class="an-feuille"><path d="M0 -18 Q-20 -46 -16 -62 M0 -18 Q-4 -50 4 -70 M0 -18 Q14 -44 22 -58 M0 -18 Q-12 -36 -24 -40 M0 -18 Q12 -32 26 -34" stroke="#3E7A2E" stroke-width="5" stroke-linecap="round" fill="none"/></g></g>'
+      + '<path d="M690 200 L690 180 L715 180 L715 160 L740 160 L740 140 L765 140 L765 120 L800 120 L800 200 Z" fill="#B0A898"/><path d="M690 180 H715 M715 160 H740 M740 140 H765 M765 120 H800" stroke="#8A8272" stroke-width="2"/><path d="M684 160 L800 90" stroke="#6B6B6B" stroke-width="3"/>'); },
     // Bar de Douala, années 1970 : comptoir, bouteilles, ventilateur
-    bar: function(){ return svg(ciel('cB', '#3A1F2E', '#5A2E3E'),
-      '<rect width="800" height="260" fill="url(#cB)"/><rect x="560" y="26" width="150" height="40" rx="8" fill="none" stroke="#FFC93C" stroke-width="3"/><text x="635" y="54" text-anchor="middle" font-size="20" fill="#FFC93C" font-family="Georgia" class="an-etoile" style="animation-duration:1.8s">BAR</text>'
-      + '<rect x="60" y="60" width="380" height="8" fill="#6B4425"/><rect x="60" y="110" width="380" height="8" fill="#6B4425"/>' + [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(function(k){ return '<rect x="' + (72 + k * 34) + '" y="' + (k % 2 ? 76 : 80) + '" width="12" height="' + (k % 2 ? 34 : 30) + '" rx="3" fill="' + ['#3E7A3A', '#8A3B2E', '#C9982E'][k % 3] + '"/>'; }).join('')
-      + '<g transform="translate(300 20)"><g class="an-tourne"><rect x="-50" y="-3" width="100" height="6" rx="3" fill="#ccc"/><rect x="-3" y="-50" width="6" height="100" rx="3" fill="#ccc" opacity=".0"/></g></g>'
-      + '<rect x="0" y="170" width="800" height="90" fill="#2A1520"/><rect x="40" y="150" width="520" height="30" fill="#6B4425"/>'); },
+    bar: function(){
+      var bouteilles = ''; [0, 1].forEach(function(e){ for(var k = 0; k < 11; k++){ var x = 72 + k * 34, h = 26 + (k * 7 + e * 3) % 9, y = (e ? 110 : 60) - h, c = ['#2E6A34', '#7A2E22', '#B88A2A', '#3A4E7A', '#5A3A1A'][(k + e * 2) % 5];
+        bouteilles += '<rect x="' + x + '" y="' + y + '" width="13" height="' + h + '" rx="3" fill="' + c + '"/><rect x="' + (x + 4) + '" y="' + (y - 8) + '" width="5" height="9" fill="' + c + '"/><rect x="' + (x + 2) + '" y="' + (y + 4) + '" width="3" height="' + (h - 8) + '" rx="1.5" fill="#fff" opacity=".28"/><rect x="' + (x + 1) + '" y="' + (y + h * .45) + '" width="11" height="7" fill="#EDE2C8" opacity=".85"/>'; } });
+      var tabouret = function(x){ return ombre(x, 222, 18, 3, .9) + '<rect x="' + (x - 14) + '" y="186" width="28" height="6" rx="3" fill="#9A2A2A"/><path d="M' + (x - 10) + ' 192 L' + (x - 13) + ' 222 M' + (x + 10) + ' 192 L' + (x + 13) + ' 222 M' + (x - 11) + ' 208 H' + (x + 11) + '" stroke="#B8B8B8" stroke-width="2.4"/>'; };
+      var suspension = function(x){ return '<path d="M' + x + ' 0 V40" stroke="#222" stroke-width="1.5"/><path d="M' + (x - 14) + ' 52 L' + (x - 6) + ' 40 L' + (x + 6) + ' 40 L' + (x + 14) + ' 52 Z" fill="#C97A2A"/><ellipse cx="' + x + '" cy="53" rx="7" ry="3" fill="#FFE6A0"/><path d="M' + (x - 14) + ' 53 L' + (x - 70) + ' 190 L' + (x + 70) + ' 190 L' + (x + 14) + ' 53 Z" fill="#FFD27A" opacity=".08"/>'; };
+      return svg('<linearGradient id="cBm" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#3A1F2E"/><stop offset="1" stop-color="#5A2E3E"/></linearGradient><linearGradient id="cBc" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#8A5A30"/><stop offset="1" stop-color="#4E2E16"/></linearGradient>',
+      '<rect width="800" height="260" fill="url(#cBm)"/><rect y="118" width="800" height="52" fill="#4A2434"/>' + [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15].map(function(k){ return '<rect x="' + (k * 52) + '" y="118" width="26" height="52" fill="#fff" opacity=".03"/>'; }).join('')
+      + '<rect x="54" y="18" width="392" height="104" fill="#2A1520" opacity=".6"/><rect x="60" y="60" width="380" height="8" fill="#6B4425"/><rect x="60" y="110" width="380" height="8" fill="#6B4425"/>' + bouteilles
+      + '<rect x="560" y="26" width="150" height="40" rx="8" fill="none" stroke="#FFC93C" stroke-width="3"/><rect x="560" y="26" width="150" height="40" rx="8" fill="#FFC93C" opacity=".08"/><text x="635" y="54" text-anchor="middle" font-size="20" fill="#FFC93C" font-family="Georgia" class="an-etoile" style="animation-duration:1.8s">BAR</text>'
+      + '<rect x="560" y="84" width="60" height="80" fill="#E8D8B4" opacity=".9" transform="rotate(-3 590 124)"/><rect x="566" y="92" width="48" height="40" fill="#2E6A8A" transform="rotate(-3 590 112)"/><rect x="650" y="90" width="56" height="70" fill="#C9302A" opacity=".85" transform="rotate(2 678 125)"/>'
+      + '<g transform="translate(300 20)"><circle r="5" fill="#888"/><g class="an-tourne"><path d="M0 0 L-52 -6 Q-56 0 -52 6 Z M0 0 L52 6 Q56 0 52 -6 Z" fill="#B8B0A0"/></g></g>'
+      + suspension(130) + suspension(470)
+      + '<rect y="170" width="800" height="90" fill="#2A1520"/>' + [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16].map(function(k){ return '<path d="M' + (k * 50) + ' 170 L' + (k * 50 - 60 + k * 7) + ' 260" stroke="#000" opacity=".22"/>'; }).join('') + [190, 214, 246].map(function(y){ return '<path d="M0 ' + y + ' H800" stroke="#000" opacity=".2"/>'; }).join('')
+      + ombre(300, 184, 280, 8, .9) + '<rect x="40" y="146" width="520" height="8" fill="#B07A44"/><rect x="40" y="154" width="520" height="30" fill="url(#cBc)"/>' + [0, 1, 2, 3, 4, 5].map(function(k){ return '<rect x="' + (52 + k * 86) + '" y="158" width="74" height="22" fill="none" stroke="#2A1608" stroke-width="1.5" opacity=".5"/>'; }).join('')
+      + '<rect x="40" y="181" width="520" height="3" fill="#C9A15A" opacity=".6"/><path d="M120 146 L124 134 L132 134 L136 146 Z" fill="#D9E8F0" opacity=".7"/><rect x="420" y="130" width="10" height="16" rx="2" fill="#2E6A34"/>'
+      + tabouret(150) + tabouret(260) + tabouret(370) + tabouret(480)
+      + ombre(690, 222, 50, 4, .9) + '<ellipse cx="690" cy="176" rx="46" ry="8" fill="#B07A44"/><path d="M690 184 V222 M672 222 H708" stroke="#3A2A1A" stroke-width="4"/><rect x="676" y="164" width="9" height="12" rx="2" fill="#B88A2A"/><path d="M700 168 L703 176 L697 176 Z" fill="#D9E8F0"/>'); },
     // Aube sur la mer : le soleil se lève, les étoiles s'effacent
     aube: function(){ return svg(ciel('cU', '#1B2A55', '#F2A65A'),
       '<rect width="800" height="260" fill="url(#cU)"/><g opacity=".7">' + etoiles(20) + '</g><g class="an-lever"><circle cx="400" cy="190" r="46" fill="#FFD27A"/><circle cx="400" cy="190" r="80" fill="#FFD27A" opacity=".25"/></g>'
