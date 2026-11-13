@@ -1,3 +1,16 @@
+## Apprendre allégé : doublons retirés, annales en tête, simulation agrandie (13/11/2026)
+
+Demandes de Jacques : « Organisation des leçons gratuites trop touffue, trop de pages redondantes, regroupe et supprime les inutiles », « Simulation trop petite », « Mets les annales au début (anciens sujets) », « Range-les selon les classes et matières ».
+
+- **Ressources (`tools/apprendre_carte.cjs`, `build_apprendre_ressources.cjs`)** : 15 entrées retirées (doublons ou portails : calcul rapide de moyenne, comment se calcule mon année, orientation avec Ambassa, coaching, toutes les évaluations, étudier en groupe, tous les jeux, classement junior, badges, catalogue e-learning, espace élève, programme de français MINESEC, analyse interactive des œuvres, Constellation, Flash) ; plus de seconde carte « version interactive » par œuvre (la page de l'œuvre y renvoie) ; dédoublonnage par adresse au build. Aucun fichier de page supprimé.
+- **Annales officielles** (`ressources/annales/*.html`, 29 sujets du BEPC 2024-2026 + index) : désormais dans Apprendre, en tête de chaque matière de 3e, la session la plus récente d'abord (`an:1`). Rubrique « M'entraîner » et famille « Annales et épreuves » en premier ; sélection gratuite : une annale d'abord. Famille rangée par matière. Il n'existe pas encore de pages d'annales pour le Probatoire et le Bac.
+- **Familles fusionnées** (`commun.js`, `FUSION`) : orientation → « Notes et orientation », cahier → « Mon cahier et ses corrigés », défis → « Jeux et défis ».
+- **ressources.html** : une rubrique ouverte à la fois (par défaut M'entraîner) ; listes repliées (4 cartes, 2 par matière) derrière « Voir plus ». 3e : 20 660 px → 7 340 px sur téléphone.
+- **matiere.html** : lien doublon « Pour cette matière » retiré ; l'offre payante passe après les leçons ; 5 leçons par chapitre puis « Voir plus » (14 578 → 7 481 px).
+- **index.html** : « Mes matières » remonté sous l'en-tête ; carte « Les scènes vivantes » (doublon) et bloc « Faisons connaissance » retirés.
+- **labo.html** : canevas net (surface ajustée à la taille réelle × densité, repère 680 × 340 conservé via `setTransform`), simulation pleine largeur sur téléphone, bouton « Plein écran » (paysage via `screen.orientation.lock`, repli plein-page sur iPhone).
+- Versions : `apprendre.css`, `commun.js`, `ressources.js` en `?v=20261114a`. Bancs : réglages 29/29, verrou 18/18, gabarits 54/54, calendrier 51/51, empreintes 22/22 ; 0 erreur JS sur les pages contrôlées.
+
 ## Histoire de 1re (A, C, D) et géographie de 1re A complètes (13/11/2026)
 
 - **Histoire de 1re, 13 leçons × 3 classes** (rangs 4, 7, 13, 16 à 20, 22 à 26 ; source privée `serie13/27-1re-histoire.js`) : conférence de Berlin, autres puissances coloniales (Adoua), l'Afrique dans la Grande Guerre, sortie de la crise de 1929, migrations des peuples, premières entités politiques, TD chefferie (décret n° 77/245 du 15 juillet 1977), TD patrimoine, formation du Kamerun (1884-1911), les Camerounais face à l'administration allemande (rang 23, gratuit), partition (1916-1922), vie sous administration française et anglaise. Labos, « Le savais-tu ? », scènes existantes rattachées (Berlin, crise de 1929 et cacao, Douala 1884, Foumban, Um Nyobè).

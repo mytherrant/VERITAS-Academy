@@ -428,23 +428,21 @@
   }
 
   /* ---------- ressources du site reliées à la progression (ressources.js) ---------- */
-  var GROUPES = [["suivi", "Où j'en suis", "i-gauge", "Notes, coefficients, orientation"], ["apprendre", "Comprendre et apprendre", "i-book-open", "Cours, œuvres, méthodes, corrigés"],
-                 ["entrainer", "M'entraîner", "i-target", "Labos, épreuves, compositions, jeux"], ["aide", "Besoin d'aide", "i-message", "Questions, repères, calendrier"]];
+  /* 13/11/2026 « Mets les annales au début (anciens sujets) » : M'entraîner d'abord, les annales en tête. */
+  var GROUPES = [["entrainer", "M'entraîner", "i-target", "Annales, épreuves, labos, compositions, jeux"], ["apprendre", "Comprendre et apprendre", "i-book-open", "Cours, œuvres, méthodes, corrigés"],
+                 ["suivi", "Où j'en suis", "i-gauge", "Notes, coefficients, orientation"], ["aide", "Besoin d'aide", "i-message", "Questions, repères, calendrier"]];
   var FAMILLES = [
-    ["notes", "Notes et coefficients", "i-calculator", "Savoir où tu en es et ce qui compte vraiment.", "suivi"],
-    ["orientation", "Orientation", "i-compass", "Choisir sa série, sa filière, son école.", "suivi"],
+    ["epreuve", "Annales et épreuves", "i-pen", "Les anciens sujets de l'examen, corrigés, puis des sujets complets pour t'entraîner.", "entrainer"],
+    ["notes", "Notes et orientation", "i-calculator", "Où tu en es, ce qui compte vraiment, la série qui t'attend.", "suivi"],
     ["methode", "Méthodes et examens", "i-feather", "Les méthodes attendues le jour de l'épreuve.", "apprendre"],
     ["cours", "Cours rédigés", "i-book-open", "Les leçons complètes déjà disponibles pour ta classe.", "apprendre"],
     ["oeuvre", "Œuvres au programme", "i-book", "Analyse, résumé, carte mentale et QCM.", "apprendre"],
     ["scene", "Scènes vivantes", "i-play", "Une situation courte où tu choisis la bonne réponse.", "apprendre"],
-    ["cahier", "Mon cahier", "i-notebook", "Le cahier interactif de l'année.", "apprendre"],
-    ["corrige", "Corrigés du cahier", "i-clipboard-check", "Séquence par séquence, exercice par exercice.", "apprendre"],
+    ["corrige", "Mon cahier et ses corrigés", "i-clipboard-check", "Le cahier de l'année, corrigé séquence par séquence.", "apprendre"],
     ["fichier", "Documents du catalogue", "i-file-text", "Les documents déposés par le centre pour ta classe.", "apprendre"],
     ["labo", "Laboratoires", "i-flask", "Manipuler, observer, conclure : l'expérience reliée à ta leçon.", "entrainer"],
     ["direct", "Compositions en direct", "i-clock", "Chronométrées, corrigées dès la remise.", "entrainer"],
-    ["epreuve", "Épreuves et annales", "i-pen", "T'entraîner sur des sujets complets.", "entrainer"],
-    ["jeu", "Jeux", "i-gamepad", "Réviser en jouant, sur les notions de ta classe.", "entrainer"],
-    ["defis", "Battles et défis", "i-award", "Se mesurer aux élèves de son cycle, travailler à plusieurs.", "entrainer"],
+    ["jeu", "Jeux et défis", "i-gamepad", "Réviser en jouant, se mesurer aux élèves de son cycle.", "entrainer"],
     ["aide", "Aide et repères", "i-message", "Pour poser une question ou situer ce que tu apprends.", "aide"]
   ];
   var TONS = [["#1E499B", "#EDF2FB"], ["#0E7C86", "#E9F5F6"], ["#5B4FA8", "#F0EDF9"], ["#B03A6E", "#FBEFF4"], ["#007E11", "#EAF6EC"], ["#C24E00", "#FDF1E8"]];
@@ -453,6 +451,9 @@
   var RE_EMO = /[\u{1F000}-\u{1FAFF}\u{2190}-\u{21FF}\u{2300}-\u{23FF}\u{2460}-\u{24FF}\u{25A0}-\u{27BF}\u{2900}-\u{297F}\u{2B00}-\u{2BFF}\u{3030}\u{303D}\u{FE0F}\u{20E3}\u{200D}]/gu;
   function net(s) { return String(s == null ? "" : s).replace(RE_EMO, "").replace(/\s{2,}/g, " ").trim(); }
   var LIB_F = {}; FAMILLES.forEach(function (f, i) { f[5] = ton(i); LIB_F[f[0]] = f; });
+  /* 13/11/2026 « regroupe les pages » : trois petites familles fondues dans leur voisine. */
+  var FUSION = { orientation: "notes", cahier: "corrige", defis: "jeu" };
+  function famDe(t) { return FUSION[t] || t; }
   /* Rubriques, familles et ressources réglées dans l'admin (13/11/2026). */
   var FAM_MASQ = {};
   (function reglerFamilles() {
@@ -486,7 +487,7 @@
         else poser(R0.cl, c);
       });
     });
-    Object.keys(R0.items).forEach(function (id) { if (FAM_MASQ[R0.items[id].t]) parti[id] = 1; });
+    Object.keys(R0.items).forEach(function (id) { var it = R0.items[id]; it.t = famDe(it.t); if (FAM_MASQ[it.t]) parti[id] = 1; });
     Object.keys(parti).forEach(function (id) { delete R0.items[id]; });
     ["lec", "mat", "cl"].forEach(function (k) {
       Object.keys(R0[k]).forEach(function (cle) { R0[k][cle] = R0[k][cle].filter(function (id) { return R0.items[id]; }); });
@@ -548,13 +549,15 @@
   /* 11/11/2026 : le gratuit se voit (pastille verte), le payant garde son cadenas. */
   function marque(it) { return it.ab ? '<span class="res-tag ab">' + si("i-lock", 12) + 'Abonnement</span>' : it.compte ? '<span class="res-tag gr">Gratuit · avec un compte</span>' : '<span class="res-tag gr">Gratuit</span>'; }
   /* Le gratuit d'abord : l'élève goûte, l'envie vient, l'abonnement suit. Ordre stable sinon. */
-  function gratuitDabord(ids) { var R0 = RES(); return ids.map(function (id, k) { return [id, k]; }).sort(function (a, b) { var x = (R0.items[a[0]] || {}).ab ? 1 : 0, y = (R0.items[b[0]] || {}).ab ? 1 : 0; return x - y || a[1] - b[1]; }).map(function (a) { return a[0]; }); }
+  function gratuitDabord(ids) { var R0 = RES(); function r(id) { var it = R0.items[id] || {}; return it.an ? 0 : it.ab ? 2 : 1; }   /* annales, puis gratuit, puis payant */
+    function an(id) { var m = /_(\d{4})$/.exec(id); return R0.items[id] && R0.items[id].an ? (m ? +m[1] : 9999) : 0; }   /* session la plus récente d'abord */
+    return ids.map(function (id, k) { return [id, k]; }).sort(function (a, b) { return r(a[0]) - r(b[0]) || an(b[0]) - an(a[0]) || a[1] - b[1]; }).map(function (a) { return a[0]; }); }
   /* Une ressource gratuite par famille, dans l'ordre où elle donne envie. */
   /* 13/11/2026 : les méthodes d'examen d'abord (demande de Jacques) : c'est ce que l'élève de chaque classe doit voir en premier. */
-  var ORDRE_GOUT = ["methode", "corrige", "oeuvre", "direct", "jeu", "labo", "epreuve", "scene", "defis", "cours", "orientation", "notes"];
+  var ORDRE_GOUT = ["epreuve", "methode", "corrige", "oeuvre", "direct", "jeu", "labo", "scene", "cours", "notes"];
   function selectionGratuite(ids, n) {
     var R0 = RES(), vu = {}, o = [];
-    ORDRE_GOUT.forEach(function (f) { if (o.length >= n) return; var id = ids.find(function (i) { var it = R0.items[i]; return it && !it.ab && it.t === f && !vu[i]; }); if (id) { vu[id] = 1; o.push(id); } });
+    ORDRE_GOUT.forEach(function (f) { if (o.length >= n) return; var ok = function (i) { var it = R0.items[i]; return it && !it.ab && it.t === f && !vu[i]; }, id = ids.find(function (i) { return ok(i) && R0.items[i].an; }) || ids.find(ok); if (id) { vu[id] = 1; o.push(id); } });
     return o;
   }
   function carteRes(id) {
@@ -650,7 +653,7 @@
     if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", habiller); else habiller();
   }
 
-  W.VRT.app = { cfg: CFG, FORMULES: FORMULES, HUMAIN: HUMAIN, WA: WA_VERITAS, cahierDefaut: cahierDefaut, replier: replier, titreL: titreL, si: si, net: net, ton: ton, GROUPES: GROUPES, chargerCatalogue: chargerCatalogue, FAMILLES: FAMILLES, resLecon: resLecon, resDeMatiere: resDeMatiere, resClasse: resClasse, gratuitDabord: gratuitDabord, selectionGratuite: selectionGratuite, leconsDeRes: leconsDeRes, carteRes: carteRes, pastilles: pastilles, MATIERES: MATIERES, PAR_ID: PAR_ID, CLASSES: CLASSES, lire: lire, ecrire: ecrire, noterJour: noterJour, serie: serie,
+  W.VRT.app = { cfg: CFG, FORMULES: FORMULES, HUMAIN: HUMAIN, WA: WA_VERITAS, cahierDefaut: cahierDefaut, replier: replier, titreL: titreL, si: si, net: net, ton: ton, GROUPES: GROUPES, chargerCatalogue: chargerCatalogue, FAMILLES: FAMILLES, famDe: famDe, resLecon: resLecon, resDeMatiere: resDeMatiere, resClasse: resClasse, gratuitDabord: gratuitDabord, selectionGratuite: selectionGratuite, leconsDeRes: leconsDeRes, carteRes: carteRes, pastilles: pastilles, MATIERES: MATIERES, PAR_ID: PAR_ID, CLASSES: CLASSES, lire: lire, ecrire: ecrire, noterJour: noterJour, serie: serie,
     marquerLu: marquerLu, noterQuiz: noterQuiz, teinter: teinter, ico: ico, icoM: icoM, pic: pic, etoiles: etoiles, esc: esc, slug: slug, rail: rail, chiffreSerie: chiffreSerie, scenesPour: scenesPour, jour: jour,
     exporterImage: exporterImage, offre: offre, cahierPour: cahierPour, melanger: melanger, boutonsImage: boutonsImage, filigraneCanvas: filigraneCanvas };
 })(window);
