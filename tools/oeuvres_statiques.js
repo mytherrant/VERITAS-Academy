@@ -94,6 +94,13 @@ const STYLE = '<!-- oeuvre-style -->\n<style>'
   + '.envie .defi{background:#fff;border-radius:12px;padding:12px 14px}'
   + ':root[data-vrt-theme="sombre"] .lecon,:root[data-vrt-theme="sombre"] .envie,:root[data-vrt-theme="sombre"] .envie .defi{background:#132241}'
   + ':root[data-vrt-theme="sombre"] .lecon strong{color:#F2F5FC}'
+  // Personnages en couleur, titres en italique bleu, auteur surligné (13/11/2026)
+  + '.r-perso{color:#B03A6E;font-weight:700}'
+  + '.r-titre{color:#1E499B;font-style:italic;font-weight:600}'
+  + '.r-auteur{color:#001136;font-weight:700;background:linear-gradient(transparent 60%,#FFE08A 60%);padding:0 2px;border-radius:2px}'
+  + ':root[data-vrt-theme="sombre"] .r-perso{color:#F49AC1}'
+  + ':root[data-vrt-theme="sombre"] .r-titre{color:#9DBBF5}'
+  + ':root[data-vrt-theme="sombre"] .r-auteur{color:#FFE08A;background:none}'
   + '</style>\n<!-- /oeuvre-style -->';
 
 function examen(classe) {
@@ -120,7 +127,7 @@ function analyseHtml(contenu) {
   }).join('\n');
 }
 
-function bloc(o) {
+function bloc(o, cle) {
   const f = o.fiche || {};
   const out = ['<!-- oeuvre-statique -->', '<section class="oeuvre-statique" aria-label="Analyse de l’œuvre" style="text-align:left">'];
 
@@ -146,12 +153,12 @@ function bloc(o) {
   const an = o.analyse || {};
   if (an.contenu) {
     out.push(h2('analyse', 'bookopen', an.angle ? 'L’analyse : ' + net(an.angle) : 'L’analyse VÉRITAS'));
-    out.push(analyseHtml(an.contenu));
+    out.push(valoriser(analyseHtml(an.contenu), o, cle, false));
   }
 
   if ((o.morales || []).length) {
     out.push(h2('lecons', 'heart', 'Les leçons de vie'));
-    out.push('<div class="lecons">' + o.morales.map(m => '<div class="lecon"><strong>' + esc(m.t) + '</strong><p>' + esc(m.d) + '</p></div>').join('') + '</div>');
+    out.push('<div class="lecons">' + o.morales.map(m => '<div class="lecon"><strong>' + esc(m.t) + '</strong><p>' + valoriser(esc(m.d), o, cle, false) + '</p></div>').join('') + '</div>');
   }
 
   if ((o.citations || []).length) {
@@ -186,7 +193,7 @@ function bloc(o) {
   const ev = o.envie;
   if (ev && ev.accroche) {
     out.push(h2('envie', 'compass', 'Envie de lire la suite ?'));
-    out.push('<div class="envie"><p>' + esc(ev.accroche) + '</p>'
+    out.push('<div class="envie"><p>' + valoriser(esc(ev.accroche), o, cle, false) + '</p>'
       + ((ev.questions || []).length ? '<p><strong>Les questions que tu vas te poser :</strong></p><ul>' + ev.questions.map(q => '<li>' + esc(q) + '</li>').join('') + '</ul>' : '')
       + (ev.defi ? '<p class="defi">' + esc(ev.defi) + '</p>' : '') + '</div>');
   }
@@ -233,14 +240,82 @@ function remplacer(page, debut, fin, neuf, avant) {
   return page.slice(0, i) + neuf + '\n' + page.slice(i);
 }
 
+/* 13/11/2026 — « personnages en couleur, titre de l'œuvre, auteur en évidence »
+   (Jacques, capture du résumé des Bimanes). Les noms sont listés ici plutôt que
+   balisés dans litt-oeuvres.js : le résumé reste du texte brut pour l'application,
+   l'index de recherche et les données structurées. */
+const PERSONNAGES = {
+  '6e_bimanes': ['Tchakarias', 'Ana', 'Nomo', 'Dany', 'Ambombo', 'Serge', 'Mbah', 'Ahanda', 'Towa', 'Etoundi', 'Garba'],
+  '6e_chants_foret': ['Kulu', 'Zee', 'Ndoe', 'Berne', 'Nkaa', 'Dzungo\'o', 'Mvomo', 'Zameyo Mebenga'],
+  '6e_contes_korotoumou': ['Korotoumou', 'Lièvre', 'Hyène', 'Mamoung', 'Maï'],
+  '5e_arbre_fetiche': ['Paul Lanta', 'Paul'],
+  '5e_nkum_wam': ['N\'koum-wam', 'N\'koum Epié'],
+  '5e_pere_inconnu': ['Frérot'],
+  '4e_trois_pretendants': ['Juliette', 'Ndi', 'Mbia', 'Tchetgen', 'Abessôlô', 'Atangana'],
+  '4e_coeur_sahel': ['Faydé', 'Kondem'],
+  '3e_ville_cruelle': ['Banda'],
+  '3e_marmite_koka': ['Bintsamou', 'Lemba'],
+  '2nde_tribus_capitoline': ['Mathieu', 'Sophie Mbezele', 'Jacqueline', 'Médard'],
+  '2nde_poemes_sauvages': ['Henrike Grohs'],
+  '2nde_tartuffe': ['Tartuffe', 'Orgon', 'Elmire', 'Dorine', 'Cléante'],
+  '1ere_coeur_tenebres': ['Marlow', 'Kurtz'],
+  '1ere_lion_perle': ['Sidi', 'Lakunlé', 'Baroka'],
+  'tle_vieux_negro': ['Meka'],
+  'tle_ngum_jemea': ['Rudolph Dualla Manga Bell', 'Dualla Manga Bell', 'Manga Bell', 'Von Roehm'],
+};
+/* Entre guillemets mais PAS des titres : surnoms (couleur des personnages) et
+   paroles citées (laissées telles quelles). */
+const SURNOMS = new Set(['Manos', 'Song\' Lina', 'Moitié d\'homme', 'Tortue Aux-Cent-Astuces']);
+const PAROLES = new Set(['Va-t\'en au bout de la queue', 'J\'aime mon pays']);
+const reEsc = s => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+function auteurs(o) {
+  const a = String(o.auteur || ''), v = new Set();
+  const sans = a.replace(/\s*\(.*?\)\s*/g, ' ').trim();
+  v.add(sans);
+  (a.match(/\(([^)]+)\)/g) || []).forEach(p => v.add(p.slice(1, -1).trim()));
+  const mots = sans.split(/\s+/);
+  if (mots.length > 2) v.add(mots.slice(-2).join(' '));
+  if (mots.length > 1 && mots[mots.length - 1].length > 3) v.add(mots[mots.length - 1]);
+  return [...v].filter(Boolean);
+}
+/* Met en valeur un texte DÉJÀ échappé. Avec titres : « Titre court » (majuscule,
+   au plus 6 mots, sans ponctuation finale) = titre de nouvelle, conte ou poème. */
+function valoriser(html, o, cle, titres) {
+  const classe = {};
+  const ajoute = (txt, cls) => { const t = esc(txt); if (t && !(t in classe)) classe[t] = cls; };
+  (PERSONNAGES[cle] || []).forEach(p => ajoute(p, 'r-perso'));
+  auteurs(o).forEach(a => ajoute(a, 'r-auteur'));
+  ajoute(o.titre, 'r-titre');
+  const t0 = String(o.titre || '');
+  ajoute(t0.charAt(0) + t0.slice(1).toLowerCase(), 'r-titre');   // « Ville Cruelle » écrit « Ville cruelle »
+  const noms = Object.keys(classe).sort((x, y) => y.length - x.length);
+  const L = '[A-Za-zÀ-ÖØ-öø-ÿ0-9]';
+  const motif = (titres ? '«\\s?([^«»<>]{2,60}?)\\s?»|' : '')
+    + '(?<!' + L + ')(' + noms.map(reEsc).join('|') + ')(?!' + L + ')';
+  // Sensible à la casse : « balafon » (l'instrument) n'est pas « Balafon » (le recueil).
+  return html.replace(new RegExp(motif, 'g'), (m, g1, g2) => {
+    // Sans le groupe des titres, le nom est le PREMIER groupe capturé.
+    const cite = titres ? g1 : undefined, nom = titres ? g2 : g1;
+    if (cite !== undefined) {
+      const c = cite.trim();
+      const brut = c.replace(/&#x27;/g, '\'');
+      if (PAROLES.has(brut)) return m;
+      if (SURNOMS.has(brut)) return '« <span class="r-perso">' + c + '</span> »';
+      const ok = /^[A-ZÀ-ÖØ-Þ]/.test(c) && c.split(/\s+/).length <= 6 && !/[.!?…,;:]$/.test(c);
+      return ok ? '« <cite class="r-titre">' + c + '</cite> »' : m;
+    }
+    return '<span class="' + classe[nom] + '">' + nom + '</span>';
+  });
+}
+
 /* Le haut de la page (résumé, thèmes) avait été écrit une fois pour toutes :
    il suit désormais la fiche, comme le reste. Les pictogrammes manquants
    rejoignent le sprite de la page. */
-function haut(page, o) {
+function haut(page, o, cle) {
   const f = o.fiche || {};
   const titre = '(?:' + LIB.resume.map(t => t.replace(/[.*+?^${}()|[\]\\&’]/g, '.')).join('|') + '|Résumé &amp; présentation)';
-  const reR = new RegExp('(<h2>' + '<svg class="vi"[^>]*><use href="#lc-bookopen"></use></svg> )' + titre + '</h2>\\s*<p>[\\s\\S]*?</p>');
-  if (f.resume && reR.test(page)) page = page.replace(reR, (_, d) => d + esc(lib(o, 'resume')) + '</h2>\n<p>' + esc(net(f.resume)) + '</p>');
+  const reR = new RegExp('(<h2>' + '<svg class="vi"[^>]*><use href="#lc-bookopen"></use></svg> )' + titre + '</h2>\\s*<p(?: class="r-resume")?>[\\s\\S]*?</p>');
+  if (f.resume && reR.test(page)) page = page.replace(reR, (_, d) => d + esc(lib(o, 'resume')) + '</h2>\n<p class="r-resume">' + valoriser(esc(net(f.resume)), o, cle, true) + '</p>');
   const titreT = '(?:' + LIB.themes.map(t => t.replace(/[.*+?^${}()|[\]\\&’]/g, '.')).join('|') + ')';
   const reT = new RegExp('(<h2><svg class="vi"[^>]*><use href="#lc-target"></use></svg> )' + titreT + '</h2><ul>[\\s\\S]*?</ul>');
   if ((f.themes || []).length && reT.test(page)) page = page.replace(reT, (_, d) => d + esc(lib(o, 'themes')) + '</h2><ul>' + f.themes.map(t => '<li>' + esc(t) + '</li>').join('') + '</ul>');
@@ -262,10 +337,10 @@ for (const nom of fs.readdirSync(DOSSIER).filter(n => n.endsWith('.html') && n !
   if (!o) { manquantes.push(nom); continue; }
   vues++;
   const url = BASE + 'oeuvres/' + nom;
-  let neuf = remplacer(page, '<!-- oeuvre-statique -->', '<!-- /oeuvre-statique -->', bloc(o), '<a class="cta"');
+  let neuf = remplacer(page, '<!-- oeuvre-statique -->', '<!-- /oeuvre-statique -->', bloc(o, m[1]), '<a class="cta"');
   if (neuf) neuf = remplacer(neuf, '<!-- oeuvre-ld -->', '<!-- /oeuvre-ld -->', ld(o, url), '</head>');
   if (neuf) neuf = remplacer(neuf, '<!-- oeuvre-style -->', '<!-- /oeuvre-style -->', STYLE, '</head>');
-  if (neuf) neuf = haut(neuf, o);
+  if (neuf) neuf = haut(neuf, o, m[1]);
   if (!neuf) { manquantes.push(nom + ' (gabarit)'); continue; }
   if (neuf !== page) {
     changees++;
