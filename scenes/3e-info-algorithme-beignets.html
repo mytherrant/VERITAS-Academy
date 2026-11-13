@@ -1,0 +1,188 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>L’algorithme des beignets — Scènes vivantes | VÉRITAS</title>
+<meta name="description" content="Scène animée d’informatique (3e) : structure d’un algorithme, structures alternative et itérative, algorigramme, appliqués à une vendeuse de beignets.">
+<link rel="icon" href="../VERITAS_favicon_512.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="scene.css?v=20261113a">
+<!-- scene-tete -->
+<link rel="canonical" href="https://veritas-school.com/scenes/3e-info-algorithme-beignets.html">
+<meta property="og:type" content="website">
+<meta property="og:title" content="L’algorithme des beignets — Scènes vivantes | VÉRITAS">
+<meta property="og:description" content="Scène animée d’informatique (3e) : structure d’un algorithme, structures alternative et itérative, algorigramme, appliqués à une vendeuse de beignets.">
+<meta property="og:url" content="https://veritas-school.com/scenes/3e-info-algorithme-beignets.html">
+<meta property="og:image" content="https://veritas-school.com/og-image.jpg">
+<meta property="og:locale" content="fr_FR">
+<meta name="twitter:card" content="summary_large_image">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"LearningResource","name":"L’algorithme des beignets","description":"Scène animée d’informatique (3e) : structure d’un algorithme, structures alternative et itérative, algorigramme, appliqués à une vendeuse de beignets.","url":"https://veritas-school.com/scenes/3e-info-algorithme-beignets.html","inLanguage":"fr","learningResourceType":"Simulation interactive","educationalLevel":"3ᵉ","about":"Informatique","teaches":"Écrire un algorithme simple (variables, entrée, traitement, sortie), utiliser une structure alternative (Si… Alors… Sinon) et une structure itérative (Pour), et le représenter par un algorigramme.","isAccessibleForFree":true,"interactivityType":"active","provider":{"@type":"EducationalOrganization","name":"Centre VÉRITAS","url":"https://veritas-school.com/"},"isPartOf":{"@type":"CollectionPage","name":"Scènes vivantes","url":"https://veritas-school.com/scenes/"}}</script>
+<!-- /scene-tete -->
+</head>
+<body>
+<noscript>Cette scène a besoin de JavaScript pour se jouer.</noscript>
+<script>
+window.SCENE = {
+  id: '3e-info-algorithme',
+  discipline: 'Informatique', niveau: '3e',
+  titre: 'L’algorithme des beignets',
+  decor: 'marche', lieu: 'Le marché Mokolo, Yaoundé', moment: 'Un samedi matin',
+  objectif: 'Écrire un algorithme simple (variables, entrée, traitement, sortie), utiliser une structure alternative (Si… Alors… Sinon) et une structure itérative (Pour), et le représenter par un algorigramme.',
+  programme: 'Progression harmonisée 3e · Langage de définition des algorithmes, leçon 24 (structure de base d’un algorithme) ; structures de contrôle, leçon 25 (écriture d’un algorithme simple), leçon 26 (structures alternatives et itératives), leçon 27 (algorigramme)',
+  jauges: [
+    { id: 'algo', nom: 'Algorithme correct', val: 10, couleur: '#1E499B' },
+    { id: 'clients', nom: 'Clients satisfaits', val: 40, couleur: '#1F9D5B' }
+  ],
+  personnages: {
+    mama: { nom: 'Mama Etoundi, vendeuse de beignets-haricots', couleur: '#C2551F', look: { metier: 'commercant', tenue: 'robe', peau: 'fonce', coiffe: 'foulard', couleurCoiffe: '#C2551F' } },
+    arnold: { nom: 'Arnold, élève de 3e, son neveu', couleur: '#1E499B', look: { metier: 'eleve', peau: 'fonce', cheveux: 'ras', objet: 'livre' } },
+    sandrine: { nom: 'Sandrine, élève de 3e', couleur: '#5B4FA8', look: { metier: 'eleve', tenue: 'jupe', peau: 'fonce', cheveux: 'queue' } }
+  },
+  etapes: [
+    { t: 'recit', entre: ['mama', 'arnold'], txt: 'Le beignet coûte 25 francs. Le samedi, la file est longue et Mama Etoundi se trompe parfois dans les comptes. Pour fidéliser ses clients, elle offre 10 % de réduction à partir de 10 beignets.', objet: { i: 'pieces', lib: '25 F le beignet' } },
+    { t: 'dit', qui: 'mama', emo: 'colere', txt: 'Hier, j’ai rendu 500 francs de trop ! Il me faut une méthode qui ne se trompe jamais.' },
+    { t: 'dit', qui: 'arnold', txt: 'C’est exactement ce qu’est un algorithme, Mama : une suite finie d’instructions, dans un ordre précis, qui résout un problème.' },
+    { t: 'remarque', titre: 'La structure d’un algorithme', txt: 'Un algorithme a un NOM, une partie DÉCLARATION (les variables : nombre, prix…), puis un CORPS entre Début et Fin : on LIT les données (entrée), on les TRAITE (calculs, tests), on ÉCRIT le résultat (sortie).' },
+    { t: 'atelier', mode: 'ordre', titre: 'Atelier · écrire l’algorithme', consigne: 'Remets les lignes de l’algorithme « PrixBeignets » dans l’ordre.',
+      items: [
+        'Variables : n, prix : réels',
+        'Début',
+        'Lire(n)',
+        'prix ← n × 25',
+        'Si n ≥ 10 Alors prix ← prix × 0,9 FinSi',
+        'Écrire(prix)',
+        'Fin'
+      ],
+      bravo: 'Déclaration, début, entrée, traitement, test, sortie, fin : la structure complète.', jauges: { algo: 50 } },
+    { t: 'recit', entre: ['sandrine'], txt: 'Sandrine, la camarade d’Arnold, vient acheter 12 beignets pour sa famille.' },
+    { t: 'question', q: 'On exécute l’algorithme avec n = 12. Que s’affiche-t-il ?',
+      options: [
+        { txt: '270', ok: true, retour: '12 × 25 = 300 ; 12 ≥ 10 donc 300 × 0,9 = 270 francs.' },
+        { txt: '300', retour: 'Tu as oublié le test : 12 ≥ 10, la réduction s’applique.' },
+        { txt: '30', retour: 'Non : 10 % de 300 vaut 30, c’est la réduction, pas le prix.' }
+      ], jauges: { algo: 65, clients: 60 } },
+    { t: 'question', q: 'Et avec n = 4 ?',
+      options: [
+        { txt: '100', ok: true, retour: '4 × 25 = 100 ; 4 < 10, la condition est fausse : pas de réduction.' },
+        { txt: '90', retour: 'La condition n ≥ 10 est fausse : on ne passe pas dans le Alors.' }
+      ] },
+    { t: 'remarque', titre: 'Alternative et itération', txt: 'La structure ALTERNATIVE (Si… Alors… Sinon… FinSi) exécute des instructions seulement si une condition est vraie. La structure ITÉRATIVE répète des instructions : Pour i de 1 à N… FinPour (nombre connu de répétitions), ou TantQue condition… FinTantQue.' },
+    { t: 'dit', qui: 'sandrine', txt: 'Et pour faire le total de toute la matinée, client après client ?' },
+    { t: 'dit', qui: 'arnold', txt: 'Une boucle ! Pour chaque client de 1 à N : lire son nombre de beignets, calculer son prix, l’ajouter au total. À la fin, écrire le total.' },
+    { t: 'atelier', mode: 'tri', titre: 'Atelier · quelle structure ?', consigne: 'Classe chaque instruction.',
+      cats: ['Séquence simple', 'Alternative', 'Itérative'],
+      items: [
+        { txt: 'prix ← n × 25', cat: 0 },
+        { txt: 'Si n ≥ 10 Alors…', cat: 1 },
+        { txt: 'Pour i de 1 à N Faire…', cat: 2 },
+        { txt: 'TantQue il reste des clients Faire…', cat: 2 },
+        { txt: 'Si le client paie en billet Alors rendre la monnaie Sinon…', cat: 1 },
+        { txt: 'Écrire(total)', cat: 0 }
+      ],
+      bravo: 'Trois structures suffisent pour écrire tous les algorithmes : séquence, alternative, itération.', jauges: { algo: 85 } },
+    { t: 'remarque', titre: 'L’algorigramme', txt: 'On peut dessiner un algorithme : ovale pour Début et Fin, parallélogramme pour une entrée ou une sortie, rectangle pour un traitement, losange pour une condition avec deux sorties, Oui et Non.' },
+    { t: 'choix', qui: 'arnold', q: 'Mama veut aussi rendre la monnaie automatiquement. Quelle condition ajoutes-tu ?',
+      options: [
+        { txt: 'Si somme_donnée ≥ prix Alors rendre somme_donnée − prix Sinon Écrire(« Montant insuffisant »).', consequence: 'L’algorithme gère tous les cas : plus d’erreur de monnaie.', jauges: { algo: 10, clients: 20 } },
+        { txt: 'Rendre toujours somme_donnée − prix.', consequence: 'Si le client donne moins que le prix, l’algorithme « rend » un montant négatif !', jauges: { algo: -20 } }
+      ],
+      oeuvre: 'Un bon algorithme prévoit tous les cas, même ceux qui semblent impossibles.' },
+    { t: 'dit', qui: 'mama', emo: 'joie', txt: 'Arnold, écris-moi ça au propre sur un carton. Ce soir, mes comptes tomberont juste !', jauges: { clients: 90 } }
+  ],
+  labo: {
+    titre: 'Laboratoire · un algorithme fiable',
+    intro: 'Règle la clarté des variables, le soin des conditions et les tests : l’algorithme de Mama ne se trompe-t-il plus ?',
+    persos: ['mama', 'arnold', 'sandrine'],
+    curseurs: [
+      { id: 'variables', nom: 'Variables bien déclarées', val: 70, bas: 'floues', haut: 'claires' },
+      { id: 'conditions', nom: 'Conditions prévues', val: 50, bas: 'cas oubliés', haut: 'tous les cas' },
+      { id: 'tests', nom: 'Tests avec des exemples', val: 40, bas: 'aucun', haut: 'nombreux' }
+    ],
+    scenarios: [
+      { nom: 'L’algorithme d’Arnold', icone: 'livre', valeurs: { variables: 85, conditions: 85, tests: 80 } },
+      { nom: 'Sans test', icone: 'doute', valeurs: { tests: 5, conditions: 40 } },
+      { nom: 'Condition oubliée', icone: 'nuage', valeurs: { conditions: 10, tests: 60 } }
+    ],
+    liens: [
+      { a: 'arnold', b: 'mama', type: 'confiance', lib: 'programme pour', base: .5, poids: { conditions: .3 } },
+      { a: 'sandrine', b: 'arnold', type: 'alliance', lib: 'teste', base: .4, poids: { tests: .4 } },
+      { a: 'sandrine', b: 'mama', type: 'confiance', lib: 'cliente', base: .5 }
+    ],
+    issue: function(v){
+      if(v.conditions < 30){ return { niveau: 'ko', badge: 'Monnaie négative', recit: 'Un client donne 100 F pour 6 beignets : l’algorithme « rend » −50 F. La file s’énerve.', apres: 'Une alternative oubliée laisse passer les cas imprévus.', themes: ['alternative'] }; }
+      if(v.tests < 30){ return { niveau: 'moyen', badge: 'Une erreur cachée', recit: 'Sans essais, personne ne remarque que la réduction s’applique à 9 beignets au lieu de 10.', apres: 'Tester avec des exemples, c’est la vérification de l’algorithme.', themes: ['test'] }; }
+      if(v.variables > 60){ return { niveau: 'ok', badge: 'Des comptes justes', recit: 'Toute la matinée, chaque prix et chaque monnaie tombent juste.', apres: 'Variables claires, conditions complètes, tests : un algorithme fiable.', themes: ['algorithme'] }; }
+      return { niveau: 'moyen', badge: 'Presque fiable', recit: 'L’algorithme marche, mais personne d’autre ne le comprend.', apres: 'Des noms de variables clairs rendent un algorithme lisible.', themes: ['lisibilité'] };
+    }
+  },
+  quiz: [
+    { q: 'Un algorithme est…', options: [
+      { txt: 'une suite finie et ordonnée d’instructions qui résout un problème.', ok: true, retour: 'Exact.' },
+      { txt: 'un ordinateur.', retour: 'Non : on peut l’exécuter à la main.' } ] },
+    { q: 'Que fait l’instruction prix ← n × 25 ?', options: [
+      { txt: 'Elle range dans la variable prix le résultat de n × 25.', ok: true, retour: 'C’est une affectation.' },
+      { txt: 'Elle affiche 25.', retour: 'Non.' } ] },
+    { q: 'Quelle structure répète des instructions ?', options: [
+      { txt: 'La structure itérative (Pour, TantQue).', ok: true, retour: 'Exact.' },
+      { txt: 'La structure alternative (Si).', retour: 'Elle choisit, elle ne répète pas.' } ] },
+    { q: 'Dans un algorigramme, une condition se dessine dans…', options: [
+      { txt: 'un losange.', ok: true, retour: 'Avec deux sorties : Oui et Non.' },
+      { txt: 'un ovale.', retour: 'L’ovale marque Début et Fin.' } ] },
+    { q: 'Avec n = 10, l’algorithme PrixBeignets affiche…', options: [
+      { txt: '225', ok: true, retour: '250 × 0,9 = 225 : 10 ≥ 10 est vrai.' },
+      { txt: '250', retour: 'La condition est n ≥ 10 : elle est vraie pour 10.' } ] }
+  ],
+  bilan: {
+    retenir: [
+      'Un algorithme : nom, déclaration des variables, puis Début… Fin avec entrée (Lire), traitement, sortie (Écrire).',
+      'Structure alternative : Si condition Alors… Sinon… FinSi.',
+      'Structures itératives : Pour i de 1 à N… FinPour ; TantQue condition… FinTantQue.',
+      'Algorigramme : ovale (début/fin), parallélogramme (entrée/sortie), rectangle (traitement), losange (condition).'
+    ],
+    ecrire: 'Écrivez l’algorithme qui calcule le total d’une matinée de vente pour N clients, avec la réduction de 10 % dès 10 beignets, puis dessinez son algorigramme.'
+  }
+};
+</script>
+<script src="decors.js?v=20261113b"></script>
+<script src="scene.js?v=20261113a"></script>
+<!-- scene-texte -->
+<details id="scene-texte" style="max-width:860px;margin:28px auto 40px;padding:0 16px;font:15px/1.6 Poppins,system-ui,sans-serif;color:#0C2A6A">
+<summary style="cursor:pointer;font-weight:600;padding:12px 0">Lire la scène en texte</summary>
+<article lang="fr">
+<h1>L’algorithme des beignets</h1>
+<p><b>Informatique · 3ᵉ</b></p>
+<p><i>Dialogue fictif écrit pour la leçon. Les faits et les dates cités sont exacts.</i></p>
+<h3>Objectif</h3><p>Écrire un algorithme simple (variables, entrée, traitement, sortie), utiliser une structure alternative (Si… Alors… Sinon) et une structure itérative (Pour), et le représenter par un algorigramme.</p>
+<p>Programme : Progression harmonisée 3e · Langage de définition des algorithmes, leçon 24 (structure de base d’un algorithme) ; structures de contrôle, leçon 25 (écriture d’un algorithme simple), leçon 26 (structures alternatives et itératives), leçon 27 (algorigramme)</p>
+<p>Lieu : Le marché Mokolo, Yaoundé · Un samedi matin</p>
+<h3>Personnages</h3><ul><li>Mama Etoundi, vendeuse de beignets-haricots</li><li>Arnold, élève de 3e, son neveu</li><li>Sandrine, élève de 3e</li></ul>
+<h3>La scène</h3>
+<p>Le beignet coûte 25 francs. Le samedi, la file est longue et Mama Etoundi se trompe parfois dans les comptes. Pour fidéliser ses clients, elle offre 10 % de réduction à partir de 10 beignets.</p>
+<p><b>Mama Etoundi, vendeuse de beignets-haricots</b> : Hier, j’ai rendu 500 francs de trop ! Il me faut une méthode qui ne se trompe jamais.</p>
+<p><b>Arnold, élève de 3e, son neveu</b> : C’est exactement ce qu’est un algorithme, Mama : une suite finie d’instructions, dans un ordre précis, qui résout un problème.</p>
+<h4>La structure d’un algorithme</h4><p>Un algorithme a un NOM, une partie DÉCLARATION (les variables : nombre, prix…), puis un CORPS entre Début et Fin : on LIT les données (entrée), on les TRAITE (calculs, tests), on ÉCRIT le résultat (sortie).</p>
+<h4>Atelier · écrire l’algorithme</h4><p>Remets les lignes de l’algorithme « PrixBeignets » dans l’ordre.</p>
+<ol><li>Variables : n, prix : réels</li><li>Début</li><li>Lire(n)</li><li>prix ← n × 25</li><li>Si n ≥ 10 Alors prix ← prix × 0,9 FinSi</li><li>Écrire(prix)</li><li>Fin</li></ol>
+<p>Déclaration, début, entrée, traitement, test, sortie, fin : la structure complète.</p>
+<p>Sandrine, la camarade d’Arnold, vient acheter 12 beignets pour sa famille.</p>
+<p><b>Question :</b> On exécute l’algorithme avec n = 12. Que s’affiche-t-il ?</p><ul><li>270 <b>(bonne réponse)</b></li><li>300</li><li>30</li></ul><p>12 × 25 = 300 ; 12 ≥ 10 donc 300 × 0,9 = 270 francs.</p>
+<p><b>Question :</b> Et avec n = 4 ?</p><ul><li>100 <b>(bonne réponse)</b></li><li>90</li></ul><p>4 × 25 = 100 ; 4 &lt; 10, la condition est fausse : pas de réduction.</p>
+<h4>Alternative et itération</h4><p>La structure ALTERNATIVE (Si… Alors… Sinon… FinSi) exécute des instructions seulement si une condition est vraie. La structure ITÉRATIVE répète des instructions : Pour i de 1 à N… FinPour (nombre connu de répétitions), ou TantQue condition… FinTantQue.</p>
+<p><b>Sandrine, élève de 3e</b> : Et pour faire le total de toute la matinée, client après client ?</p>
+<p><b>Arnold, élève de 3e, son neveu</b> : Une boucle ! Pour chaque client de 1 à N : lire son nombre de beignets, calculer son prix, l’ajouter au total. À la fin, écrire le total.</p>
+<h4>Atelier · quelle structure ?</h4><p>Classe chaque instruction.</p>
+<ul><li><b>Séquence simple</b> : prix ← n × 25 ; Écrire(total)</li><li><b>Alternative</b> : Si n ≥ 10 Alors… ; Si le client paie en billet Alors rendre la monnaie Sinon…</li><li><b>Itérative</b> : Pour i de 1 à N Faire… ; TantQue il reste des clients Faire…</li></ul>
+<p>Trois structures suffisent pour écrire tous les algorithmes : séquence, alternative, itération.</p>
+<h4>L’algorigramme</h4><p>On peut dessiner un algorithme : ovale pour Début et Fin, parallélogramme pour une entrée ou une sortie, rectangle pour un traitement, losange pour une condition avec deux sorties, Oui et Non.</p>
+<p><b>À toi de décider :</b> Mama veut aussi rendre la monnaie automatiquement. Quelle condition ajoutes-tu ?</p><ul><li>Si somme_donnée ≥ prix Alors rendre somme_donnée − prix Sinon Écrire(« Montant insuffisant »). — L’algorithme gère tous les cas : plus d’erreur de monnaie.</li><li>Rendre toujours somme_donnée − prix. — Si le client donne moins que le prix, l’algorithme « rend » un montant négatif !</li></ul>
+<p><b>Mama Etoundi, vendeuse de beignets-haricots</b> : Arnold, écris-moi ça au propre sur un carton. Ce soir, mes comptes tomberont juste !</p>
+<h3>Quiz</h3><ol><li>Un algorithme est… — <b>une suite finie et ordonnée d’instructions qui résout un problème.</b> Exact.</li><li>Que fait l’instruction prix ← n × 25 ? — <b>Elle range dans la variable prix le résultat de n × 25.</b> C’est une affectation.</li><li>Quelle structure répète des instructions ? — <b>La structure itérative (Pour, TantQue).</b> Exact.</li><li>Dans un algorigramme, une condition se dessine dans… — <b>un losange.</b> Avec deux sorties : Oui et Non.</li><li>Avec n = 10, l’algorithme PrixBeignets affiche… — <b>225</b> 250 × 0,9 = 225 : 10 ≥ 10 est vrai.</li></ol>
+<h3>À retenir</h3><ul><li>Un algorithme : nom, déclaration des variables, puis Début… Fin avec entrée (Lire), traitement, sortie (Écrire).</li><li>Structure alternative : Si condition Alors… Sinon… FinSi.</li><li>Structures itératives : Pour i de 1 à N… FinPour ; TantQue condition… FinTantQue.</li><li>Algorigramme : ovale (début/fin), parallélogramme (entrée/sortie), rectangle (traitement), losange (condition).</li></ul>
+<h3>À écrire</h3><p>Écrivez l’algorithme qui calcule le total d’une matinée de vente pour N clients, avec la réduction de 10 % dès 10 beignets, puis dessinez son algorigramme.</p>
+<p><a href="index.html">Toutes les Scènes vivantes</a> · <a href="3e-info-algorithme-beignets.html">Jouer la scène</a></p>
+</article>
+<!-- /scene-texte -->
+</body>
+</html>

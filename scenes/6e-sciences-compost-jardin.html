@@ -1,0 +1,180 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Le compost du jardin scolaire — Scènes vivantes | VÉRITAS</title>
+<meta name="description" content="Scène animée de sciences (6e) : l’influence du sol sur la production végétale et la fabrication du compost au jardin du collège.">
+<link rel="icon" href="../VERITAS_favicon_512.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="scene.css?v=20261113a">
+<!-- scene-tete -->
+<link rel="canonical" href="https://veritas-school.com/scenes/6e-sciences-compost-jardin.html">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Le compost du jardin scolaire — Scènes vivantes | VÉRITAS">
+<meta property="og:description" content="Scène animée de sciences (6e) : l’influence du sol sur la production végétale et la fabrication du compost au jardin du collège.">
+<meta property="og:url" content="https://veritas-school.com/scenes/6e-sciences-compost-jardin.html">
+<meta property="og:image" content="https://veritas-school.com/og-image.jpg">
+<meta property="og:locale" content="fr_FR">
+<meta name="twitter:card" content="summary_large_image">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"LearningResource","name":"Le compost du jardin scolaire","description":"Scène animée de sciences (6e) : l’influence du sol sur la production végétale et la fabrication du compost au jardin du collège.","url":"https://veritas-school.com/scenes/6e-sciences-compost-jardin.html","inLanguage":"fr","learningResourceType":"Simulation interactive","educationalLevel":"6ᵉ","about":"Sciences","teaches":"Comprendre l’influence du sol sur la production végétale et fabriquer un compost : quels déchets utiliser, comment monter le tas, quel rôle jouent les êtres vivants du sol.","isAccessibleForFree":true,"interactivityType":"active","provider":{"@type":"EducationalOrganization","name":"Centre VÉRITAS","url":"https://veritas-school.com/"},"isPartOf":{"@type":"CollectionPage","name":"Scènes vivantes","url":"https://veritas-school.com/scenes/"}}</script>
+<!-- /scene-tete -->
+</head>
+<body>
+<noscript>Cette scène a besoin de JavaScript pour se jouer.</noscript>
+<script>
+window.SCENE = {
+  id: '6e-sciences-compost',
+  discipline: 'Sciences', niveau: '6e',
+  titre: 'Le compost du jardin scolaire',
+  decor: 'village', lieu: 'Le jardin du collège, près de Bafia', moment: 'Début de la saison des pluies',
+  objectif: 'Comprendre l’influence du sol sur la production végétale et fabriquer un compost : quels déchets utiliser, comment monter le tas, quel rôle jouent les êtres vivants du sol.',
+  programme: 'Progression harmonisée 6e · Améliorer la production végétale, séance 2 (influence du sol sur la production végétale, TP choix des sols), séance 6 (sols et production végétale, TP fabrication du compost)',
+  jauges: [
+    { id: 'compost', nom: 'Qualité du compost', val: 10, couleur: '#6B4425' },
+    { id: 'recolte', nom: 'Récolte du jardin', val: 30, couleur: '#1F9D5B' }
+  ],
+  personnages: {
+    fouda: { nom: 'M. Fouda, professeur de sciences', couleur: '#2E6B3A', look: { metier: 'enseignant', peau: 'fonce', cheveux: 'ras' } },
+    ali: { nom: 'Ali, élève de 6e', couleur: '#1E499B', look: { metier: 'eleve', peau: 'fonce', cheveux: 'ras' } },
+    grace: { nom: 'Grâce, élève de 6e', couleur: '#B03A6E', look: { metier: 'eleve', tenue: 'jupe', peau: 'fonce', cheveux: 'tresses' } },
+    elise: { nom: 'Maman Élise, cultivatrice', couleur: '#8A5A2B', look: { metier: 'paysan', tenue: 'robe', peau: 'tresfonce', coiffe: 'foulard', couleurCoiffe: '#8A5A2B' } }
+  },
+  etapes: [
+    { t: 'recit', entre: ['fouda', 'ali', 'grace'], txt: 'Au jardin du collège, les plants de gombo et de tomate restent petits et jaunissent. La terre de la parcelle est pauvre et sableuse.', objet: { i: 'fruit', lib: 'Récolte maigre' } },
+    { t: 'dit', qui: 'ali', emo: 'triste', txt: 'Monsieur, on arrose tous les jours, et pourtant ça ne pousse pas !' },
+    { t: 'dit', qui: 'fouda', txt: 'L’eau ne suffit pas. Une plante tire du sol l’eau ET les sels minéraux. Comparons deux terres.' },
+    { t: 'recit', txt: 'M. Fouda remplit deux pots : l’un avec la terre sableuse du jardin, l’autre avec la terre noire de la lisière de la forêt, riche en humus. Il y sème des haricots.' },
+    { t: 'question', q: 'Dans quel pot les haricots pousseront-ils le mieux ?',
+      options: [
+        { txt: 'Dans la terre noire riche en humus.', ok: true, retour: 'L’humus retient l’eau et libère les sels minéraux dont la plante a besoin.' },
+        { txt: 'Dans le sable : l’eau y passe plus vite.', retour: 'Justement : l’eau et les sels minéraux s’en échappent trop vite.' }
+      ], jauges: { recolte: 35 } },
+    { t: 'remarque', titre: 'Le sol et la plante', txt: 'Un sol fertile contient de l’humus : de la matière organique décomposée (feuilles, débris végétaux et animaux). Il retient l’eau, aère la terre et fournit les sels minéraux. On peut enrichir un sol pauvre avec du COMPOST.' },
+    { t: 'recit', entre: ['elise'], txt: 'Maman Élise, la mère de Grâce, cultive un grand champ. Elle est venue aider.' },
+    { t: 'dit', qui: 'elise', txt: 'Au village, rien ne se perd : épluchures, feuilles, herbes, crottes de chèvres… tout redevient de la bonne terre.' },
+    { t: 'atelier', mode: 'tri', titre: 'Atelier · dans le compost ou pas ?', consigne: 'Classe chaque déchet.',
+      cats: ['Va au compost', 'N’y va pas'],
+      items: [
+        { txt: 'Épluchures de plantain et de manioc', cat: 0 },
+        { txt: 'Feuilles mortes et herbes coupées', cat: 0 },
+        { txt: 'Fumier de chèvre', cat: 0 },
+        { txt: 'Sachet plastique', cat: 1 },
+        { txt: 'Boîte de conserve', cat: 1 },
+        { txt: 'Pile usagée', cat: 1 }
+      ],
+      bravo: 'Seuls les déchets organiques se décomposent. Plastique, métal et piles ne se décomposent pas, et les piles polluent le sol.', jauges: { compost: 35 } },
+    { t: 'atelier', mode: 'ordre', titre: 'Atelier · monter le tas de compost', consigne: 'Remets les étapes dans l’ordre.',
+      items: [
+        'Choisir un endroit ombragé et creuser une fosse peu profonde.',
+        'Poser une couche de branchages pour aérer le fond.',
+        'Alterner couches de déchets verts (frais) et de matières sèches (feuilles mortes).',
+        'Arroser pour garder le tas humide, sans le noyer.',
+        'Retourner le tas régulièrement pour l’aérer.'
+      ],
+      bravo: 'Le tas est monté. Au bout de quelques mois, il deviendra une terre sombre qui sent le sous-bois.', jauges: { compost: 60 } },
+    { t: 'dit', qui: 'grace', txt: 'Mais qui transforme les épluchures en terre ?' },
+    { t: 'dit', qui: 'fouda', txt: 'Des êtres vivants ! Des microorganismes, bactéries et champignons, que l’on ne voit qu’au microscope, et des petits animaux comme les vers de terre et les cloportes. Ils décomposent la matière organique.' },
+    { t: 'choix', qui: 'ali', q: 'Le tas sent mauvais et reste tout mouillé. Que fais-tu ?',
+      options: [
+        { txt: 'J’ajoute des feuilles sèches et je retourne le tas pour l’aérer.', consequence: 'L’air revient, la mauvaise odeur disparaît, la décomposition repart.', jauges: { compost: 25 } },
+        { txt: 'J’arrose encore plus.', consequence: 'Le tas pourrit sans air : l’odeur empire.', jauges: { compost: -20 } }
+      ],
+      oeuvre: 'Les êtres vivants du compost ont besoin d’air et d’humidité, sans excès d’eau.' },
+    { t: 'recit', txt: 'Trois mois plus tard, le compost mûr est mélangé à la terre du jardin. Les nouveaux plants de tomate sont verts et vigoureux.', jauges: { compost: 90, recolte: 85 } }
+  ],
+  labo: {
+    titre: 'Laboratoire · un bon compost',
+    intro: 'Règle l’humidité, l’aération et le mélange des déchets : le compost sera-t-il réussi ?',
+    persos: ['fouda', 'ali', 'grace', 'elise'],
+    curseurs: [
+      { id: 'humidite', nom: 'Humidité', val: 50, bas: 'sec', haut: 'détrempé' },
+      { id: 'aeration', nom: 'Aération (retournement)', val: 60, bas: 'jamais', haut: 'régulière' },
+      { id: 'melange', nom: 'Mélange vert / sec', val: 60, bas: 'que du vert', haut: 'équilibré' }
+    ],
+    scenarios: [
+      { nom: 'Le tas du collège', icone: 'fruit', valeurs: { humidite: 50, aeration: 70, melange: 75 } },
+      { nom: 'Tas noyé', icone: 'vagues', valeurs: { humidite: 95, aeration: 10 } },
+      { nom: 'Tas desséché', icone: 'soleil', valeurs: { humidite: 5 } }
+    ],
+    liens: [
+      { a: 'fouda', b: 'ali', type: 'confiance', lib: 'explique', base: .5 },
+      { a: 'elise', b: 'grace', type: 'amour', lib: 'sa fille', base: .7 },
+      { a: 'ali', b: 'grace', type: 'alliance', lib: 'jardinent', base: .5, poids: { aeration: .3 } }
+    ],
+    issue: function(v){
+      if(v.humidite > 80 && v.aeration < 40){ return { niveau: 'ko', badge: 'Le tas pourrit', recit: 'Trop d’eau, pas d’air : le tas sent mauvais et la décomposition s’arrête.', apres: 'Les décomposeurs ont besoin d’air.', themes: ['aération'] }; }
+      if(v.humidite < 20){ return { niveau: 'ko', badge: 'Rien ne bouge', recit: 'Sans eau, les microorganismes ne travaillent plus : les épluchures sèchent sans se décomposer.', apres: 'Il faut un tas humide comme une éponge essorée.', themes: ['humidité'] }; }
+      if(v.aeration > 50 && v.melange > 50){ return { niveau: 'ok', badge: 'Un compost mûr', recit: 'Une terre sombre, légère, qui sent le sous-bois : le jardin reverdit.', apres: 'Le compost recycle les déchets et nourrit le sol.', themes: ['compost', 'fertilité'] }; }
+      return { niveau: 'moyen', badge: 'Compost lent', recit: 'La décomposition avance, mais lentement.', apres: 'Retournez et équilibrez vert et sec.', themes: ['décomposition'] };
+    }
+  },
+  quiz: [
+    { q: 'Qu’est-ce que l’humus ?', options: [
+      { txt: 'La matière organique décomposée du sol.', ok: true, retour: 'Il rend le sol fertile.' },
+      { txt: 'Un engrais chimique.', retour: 'Non.' } ] },
+    { q: 'Qui décompose les déchets dans le compost ?', options: [
+      { txt: 'Des microorganismes et de petits animaux comme les vers de terre.', ok: true, retour: 'Ce sont les décomposeurs.' },
+      { txt: 'Le soleil seul.', retour: 'Non.' } ] },
+    { q: 'Lequel ne va pas au compost ?', options: [
+      { txt: 'Un sachet plastique.', ok: true, retour: 'Il ne se décompose pas.' },
+      { txt: 'Des feuilles mortes.', retour: 'Elles y ont toute leur place.' } ] },
+    { q: 'Pourquoi retourner le tas ?', options: [
+      { txt: 'Pour l’aérer : les décomposeurs ont besoin d’air.', ok: true, retour: 'Exact.' },
+      { txt: 'Pour le faire sécher complètement.', retour: 'Non : il doit rester humide.' } ] },
+    { q: 'Que tire la plante du sol ?', options: [
+      { txt: 'L’eau et les sels minéraux.', ok: true, retour: 'Par ses racines.' },
+      { txt: 'Seulement de l’air.', retour: 'Non.' } ] }
+  ],
+  bilan: {
+    retenir: [
+      'Un sol fertile contient de l’humus, qui retient l’eau et fournit les sels minéraux aux plantes.',
+      'Le compost transforme les déchets organiques en terre fertile.',
+      'Les décomposeurs (bactéries, champignons, vers de terre) ont besoin d’humidité et d’air.',
+      'Plastique, métal et piles ne vont jamais au compost.'
+    ],
+    ecrire: 'Rédigez le compte rendu du TP « fabrication du compost » : matériel, étapes, observations semaine après semaine, conclusion.'
+  }
+};
+</script>
+<script src="decors.js?v=20261113b"></script>
+<script src="scene.js?v=20261113a"></script>
+<!-- scene-texte -->
+<details id="scene-texte" style="max-width:860px;margin:28px auto 40px;padding:0 16px;font:15px/1.6 Poppins,system-ui,sans-serif;color:#0C2A6A">
+<summary style="cursor:pointer;font-weight:600;padding:12px 0">Lire la scène en texte</summary>
+<article lang="fr">
+<h1>Le compost du jardin scolaire</h1>
+<p><b>Sciences · 6ᵉ</b></p>
+<p><i>Dialogue fictif écrit pour la leçon. Les faits et les dates cités sont exacts.</i></p>
+<h3>Objectif</h3><p>Comprendre l’influence du sol sur la production végétale et fabriquer un compost : quels déchets utiliser, comment monter le tas, quel rôle jouent les êtres vivants du sol.</p>
+<p>Programme : Progression harmonisée 6e · Améliorer la production végétale, séance 2 (influence du sol sur la production végétale, TP choix des sols), séance 6 (sols et production végétale, TP fabrication du compost)</p>
+<p>Lieu : Le jardin du collège, près de Bafia · Début de la saison des pluies</p>
+<h3>Personnages</h3><ul><li>M. Fouda, professeur de sciences</li><li>Ali, élève de 6e</li><li>Grâce, élève de 6e</li><li>Maman Élise, cultivatrice</li></ul>
+<h3>La scène</h3>
+<p>Au jardin du collège, les plants de gombo et de tomate restent petits et jaunissent. La terre de la parcelle est pauvre et sableuse.</p>
+<p><b>Ali, élève de 6e</b> : Monsieur, on arrose tous les jours, et pourtant ça ne pousse pas !</p>
+<p><b>M. Fouda, professeur de sciences</b> : L’eau ne suffit pas. Une plante tire du sol l’eau ET les sels minéraux. Comparons deux terres.</p>
+<p>M. Fouda remplit deux pots : l’un avec la terre sableuse du jardin, l’autre avec la terre noire de la lisière de la forêt, riche en humus. Il y sème des haricots.</p>
+<p><b>Question :</b> Dans quel pot les haricots pousseront-ils le mieux ?</p><ul><li>Dans la terre noire riche en humus. <b>(bonne réponse)</b></li><li>Dans le sable : l’eau y passe plus vite.</li></ul><p>L’humus retient l’eau et libère les sels minéraux dont la plante a besoin.</p>
+<h4>Le sol et la plante</h4><p>Un sol fertile contient de l’humus : de la matière organique décomposée (feuilles, débris végétaux et animaux). Il retient l’eau, aère la terre et fournit les sels minéraux. On peut enrichir un sol pauvre avec du COMPOST.</p>
+<p>Maman Élise, la mère de Grâce, cultive un grand champ. Elle est venue aider.</p>
+<p><b>Maman Élise, cultivatrice</b> : Au village, rien ne se perd : épluchures, feuilles, herbes, crottes de chèvres… tout redevient de la bonne terre.</p>
+<h4>Atelier · dans le compost ou pas ?</h4><p>Classe chaque déchet.</p>
+<ul><li><b>Va au compost</b> : Épluchures de plantain et de manioc ; Feuilles mortes et herbes coupées ; Fumier de chèvre</li><li><b>N’y va pas</b> : Sachet plastique ; Boîte de conserve ; Pile usagée</li></ul>
+<p>Seuls les déchets organiques se décomposent. Plastique, métal et piles ne se décomposent pas, et les piles polluent le sol.</p>
+<h4>Atelier · monter le tas de compost</h4><p>Remets les étapes dans l’ordre.</p>
+<ol><li>Choisir un endroit ombragé et creuser une fosse peu profonde.</li><li>Poser une couche de branchages pour aérer le fond.</li><li>Alterner couches de déchets verts (frais) et de matières sèches (feuilles mortes).</li><li>Arroser pour garder le tas humide, sans le noyer.</li><li>Retourner le tas régulièrement pour l’aérer.</li></ol>
+<p>Le tas est monté. Au bout de quelques mois, il deviendra une terre sombre qui sent le sous-bois.</p>
+<p><b>Grâce, élève de 6e</b> : Mais qui transforme les épluchures en terre ?</p>
+<p><b>M. Fouda, professeur de sciences</b> : Des êtres vivants ! Des microorganismes, bactéries et champignons, que l’on ne voit qu’au microscope, et des petits animaux comme les vers de terre et les cloportes. Ils décomposent la matière organique.</p>
+<p><b>À toi de décider :</b> Le tas sent mauvais et reste tout mouillé. Que fais-tu ?</p><ul><li>J’ajoute des feuilles sèches et je retourne le tas pour l’aérer. — L’air revient, la mauvaise odeur disparaît, la décomposition repart.</li><li>J’arrose encore plus. — Le tas pourrit sans air : l’odeur empire.</li></ul>
+<p>Trois mois plus tard, le compost mûr est mélangé à la terre du jardin. Les nouveaux plants de tomate sont verts et vigoureux.</p>
+<h3>Quiz</h3><ol><li>Qu’est-ce que l’humus ? — <b>La matière organique décomposée du sol.</b> Il rend le sol fertile.</li><li>Qui décompose les déchets dans le compost ? — <b>Des microorganismes et de petits animaux comme les vers de terre.</b> Ce sont les décomposeurs.</li><li>Lequel ne va pas au compost ? — <b>Un sachet plastique.</b> Il ne se décompose pas.</li><li>Pourquoi retourner le tas ? — <b>Pour l’aérer : les décomposeurs ont besoin d’air.</b> Exact.</li><li>Que tire la plante du sol ? — <b>L’eau et les sels minéraux.</b> Par ses racines.</li></ol>
+<h3>À retenir</h3><ul><li>Un sol fertile contient de l’humus, qui retient l’eau et fournit les sels minéraux aux plantes.</li><li>Le compost transforme les déchets organiques en terre fertile.</li><li>Les décomposeurs (bactéries, champignons, vers de terre) ont besoin d’humidité et d’air.</li><li>Plastique, métal et piles ne vont jamais au compost.</li></ul>
+<h3>À écrire</h3><p>Rédigez le compte rendu du TP « fabrication du compost » : matériel, étapes, observations semaine après semaine, conclusion.</p>
+<p><a href="index.html">Toutes les Scènes vivantes</a> · <a href="6e-sciences-compost-jardin.html">Jouer la scène</a></p>
+</article>
+<!-- /scene-texte -->
+</body>
+</html>

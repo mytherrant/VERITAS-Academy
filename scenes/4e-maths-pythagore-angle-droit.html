@@ -1,0 +1,185 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>L’angle droit du maçon — Scènes vivantes | VÉRITAS</title>
+<meta name="description" content="Scène animée de mathématiques (4e) : la propriété de Pythagore et sa réciproque sur un chantier, avec la corde 3-4-5 du maçon et le contrôle des diagonales.">
+<link rel="icon" href="../VERITAS_favicon_512.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="scene.css?v=20261113a">
+<!-- scene-tete -->
+<link rel="canonical" href="https://veritas-school.com/scenes/4e-maths-pythagore-angle-droit.html">
+<meta property="og:type" content="website">
+<meta property="og:title" content="L’angle droit du maçon — Scènes vivantes | VÉRITAS">
+<meta property="og:description" content="Scène animée de mathématiques (4e) : la propriété de Pythagore et sa réciproque sur un chantier, avec la corde 3-4-5 du maçon et le contrôle des diagonales.">
+<meta property="og:url" content="https://veritas-school.com/scenes/4e-maths-pythagore-angle-droit.html">
+<meta property="og:image" content="https://veritas-school.com/og-image.jpg">
+<meta property="og:locale" content="fr_FR">
+<meta name="twitter:card" content="summary_large_image">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"LearningResource","name":"L’angle droit du maçon","description":"Scène animée de mathématiques (4e) : la propriété de Pythagore et sa réciproque sur un chantier, avec la corde 3-4-5 du maçon et le contrôle des diagonales.","url":"https://veritas-school.com/scenes/4e-maths-pythagore-angle-droit.html","inLanguage":"fr","learningResourceType":"Simulation interactive","educationalLevel":"4ᵉ","about":"Mathématiques","teaches":"Utiliser la propriété de Pythagore pour calculer une longueur dans un triangle rectangle, et sa réciproque pour vérifier qu’un angle est droit, comme le font les maçons avec la corde 3-4-5.","isAccessibleForFree":true,"interactivityType":"active","provider":{"@type":"EducationalOrganization","name":"Centre VÉRITAS","url":"https://veritas-school.com/"},"isPartOf":{"@type":"CollectionPage","name":"Scènes vivantes","url":"https://veritas-school.com/scenes/"}}</script>
+<!-- /scene-tete -->
+</head>
+<body>
+<noscript>Cette scène a besoin de JavaScript pour se jouer.</noscript>
+<script>
+window.SCENE = {
+  id: '4e-maths-pythagore',
+  discipline: 'Mathématiques', niveau: '4e',
+  titre: 'L’angle droit du maçon',
+  decor: 'rue', lieu: 'Un chantier au quartier Biyem-Assi, Yaoundé', moment: 'Pendant les grandes vacances',
+  objectif: 'Utiliser la propriété de Pythagore pour calculer une longueur dans un triangle rectangle, et sa réciproque pour vérifier qu’un angle est droit, comme le font les maçons avec la corde 3-4-5.',
+  programme: 'Progression harmonisée 4e · Triangles, leçon 18 (propriété directe de Pythagore), leçon 19 (propriété réciproque de Pythagore)',
+  jauges: [
+    { id: 'equerre', nom: 'Angles bien droits', val: 30, couleur: '#1E499B' },
+    { id: 'chantier', nom: 'Avancement du chantier', val: 10, couleur: '#D98E04' }
+  ],
+  personnages: {
+    tchamba: { nom: 'Maître Tchamba, chef maçon', couleur: '#C2551F', look: { metier: 'ouvrier', peau: 'tresfonce', cheveux: 'ras' } },
+    junior: { nom: 'Junior, élève de 4e, apprenti pour l’été', couleur: '#1E499B', look: { metier: 'eleve', peau: 'fonce', cheveux: 'court' } },
+    ngo: { nom: 'Mme Ngo, propriétaire du terrain', couleur: '#5A2E5A', look: { tenue: 'robe', peau: 'fonce', coiffe: 'foulard', couleurCoiffe: '#5A2E5A', habit: '#5A2E5A', objet: 'dossier' } }
+  },
+  etapes: [
+    { t: 'recit', entre: ['tchamba', 'junior'], txt: 'Sur le terrain de Mme Ngo, il faut implanter les fondations d’une maison rectangulaire de 6 m sur 8 m. Les quatre coins doivent être parfaitement droits.', objet: { i: 'ecole', lib: 'Plan : 6 m × 8 m' } },
+    { t: 'dit', qui: 'junior', txt: 'Maître, on n’a pas de grande équerre. Comment faire un angle droit de plusieurs mètres ?' },
+    { t: 'dit', qui: 'tchamba', txt: 'Avec une corde et trois nombres : 3, 4, 5. Mon propre maître me l’a appris, et les bâtisseurs s’en servent depuis très longtemps.' },
+    { t: 'recit', txt: 'Le maçon fait des nœuds sur une corde pour marquer 3 m, puis 4 m, puis 5 m, et la tend en triangle entre trois piquets.', jauges: { chantier: 25 } },
+    { t: 'remarque', titre: 'La réciproque de Pythagore', txt: 'Si, dans un triangle, le carré du plus grand côté est égal à la somme des carrés des deux autres, alors ce triangle est rectangle. Ici : 5² = 25 et 3² + 4² = 9 + 16 = 25. Le triangle 3-4-5 est donc rectangle : l’angle entre les côtés de 3 m et de 4 m est droit.' },
+    { t: 'question', q: 'Un triangle a pour côtés 6 m, 8 m et 10 m. Est-il rectangle ?',
+      options: [
+        { txt: 'Oui, car 10² = 100 et 6² + 8² = 36 + 64 = 100.', ok: true, retour: 'C’est le triangle 3-4-5 agrandi deux fois.' },
+        { txt: 'Non, car 6 + 8 ≠ 10.', retour: 'Pythagore compare des CARRÉS, pas des longueurs.' }
+      ], jauges: { equerre: 60 } },
+    { t: 'atelier', mode: 'tri', titre: 'Atelier · rectangle ou pas ?', consigne: 'Classe chaque triangle (longueurs en mètres).',
+      cats: ['Rectangle', 'Pas rectangle'],
+      items: [
+        { txt: '5 ; 12 ; 13', cat: 0 },
+        { txt: '4 ; 5 ; 6', cat: 1 },
+        { txt: '9 ; 12 ; 15', cat: 0 },
+        { txt: '2 ; 3 ; 4', cat: 1 },
+        { txt: '7 ; 24 ; 25', cat: 0 }
+      ],
+      bravo: '13² = 25 + 144 ; 15² = 81 + 144 ; 25² = 49 + 576. Les autres ne vérifient pas l’égalité.', jauges: { equerre: 80 } },
+    { t: 'recit', entre: ['ngo'], txt: 'Mme Ngo arrive, inquiète, son plan à la main.' },
+    { t: 'dit', qui: 'ngo', emo: 'doute', txt: 'Comment être sûre que ma maison ne sera pas de travers ? J’ai vu des murs tordus chez ma voisine.' },
+    { t: 'dit', qui: 'tchamba', txt: 'Dernière vérification : on mesure les diagonales. Dans un rectangle de 6 m sur 8 m, elles doivent mesurer exactement la même longueur.' },
+    { t: 'question', q: 'Quelle doit être la longueur de chaque diagonale ?',
+      options: [
+        { txt: '10 m', ok: true, retour: 'Propriété directe : d² = 6² + 8² = 100, donc d = 10 m.' },
+        { txt: '14 m', retour: '6 + 8 = 14 : on n’additionne pas les longueurs.' },
+        { txt: '48 m', retour: 'C’est l’aire en m², pas une longueur.' }
+      ], jauges: { equerre: 95, chantier: 50 } },
+    { t: 'dit', qui: 'junior', emo: 'joie', txt: 'Les deux diagonales font 10 m pile ! La maison sera bien d’équerre.' },
+    { t: 'choix', qui: 'tchamba', q: 'Une diagonale mesure 10,30 m et l’autre 9,70 m. Que fais-tu ?',
+      options: [
+        { txt: 'Je continue : 30 cm, ce n’est rien.', consequence: 'Les murs seront de travers : carrelage, toiture et portes poseront problème.', jauges: { equerre: -40 } },
+        { txt: 'Je reprends l’implantation avec la corde 3-4-5 jusqu’à avoir deux diagonales de 10 m.', consequence: 'Une demi-heure de plus aujourd’hui évite des mois de problèmes.', jauges: { equerre: 5, chantier: 10 } }
+      ],
+      oeuvre: 'Des diagonales égales prouvent que le quadrilatère est un rectangle ; leur longueur se calcule avec Pythagore.' },
+    { t: 'atelier', mode: 'ordre', titre: 'Atelier · tracer un angle droit à la corde', consigne: 'Remets les gestes du maçon dans l’ordre.',
+      items: [
+        'Planter un premier piquet au coin de la maison.',
+        'Tendre 3 m de corde le long du premier mur.',
+        'Tendre 4 m dans la direction approximative du second mur.',
+        'Ajuster jusqu’à ce que les deux extrémités soient à 5 m l’une de l’autre.',
+        'Contrôler en mesurant les deux diagonales.'
+      ],
+      bravo: 'Les fondations sont implantées. Le chantier peut commencer !', jauges: { chantier: 70 } },
+    { t: 'dit', qui: 'ngo', emo: 'joie', txt: 'Junior, tu raconteras à ton professeur que Pythagore travaille sur les chantiers de Biyem-Assi !' }
+  ],
+  labo: {
+    titre: 'Laboratoire · des fondations d’équerre',
+    intro: 'Règle la tension de la corde, la précision des nœuds et le contrôle des diagonales : les murs seront-ils droits ?',
+    persos: ['tchamba', 'junior', 'ngo'],
+    curseurs: [
+      { id: 'tension', nom: 'Tension de la corde', val: 75, bas: 'molle', haut: 'bien tendue' },
+      { id: 'noeuds', nom: 'Précision des nœuds 3-4-5', val: 70, bas: 'approximatifs', haut: 'au centimètre' },
+      { id: 'controle', nom: 'Contrôle des diagonales', val: 60, bas: 'aucun', haut: 'systématique' }
+    ],
+    scenarios: [
+      { nom: 'Maître Tchamba', icone: 'diplome', valeurs: { tension: 85, noeuds: 85, controle: 90 } },
+      { nom: 'Corde molle', icone: 'nuage', valeurs: { tension: 10 } },
+      { nom: 'Sans contrôle', icone: 'doute', valeurs: { controle: 5, noeuds: 40 } }
+    ],
+    liens: [
+      { a: 'tchamba', b: 'junior', type: 'confiance', lib: 'transmet', base: .6 },
+      { a: 'ngo', b: 'tchamba', type: 'confiance', lib: 'fait confiance', base: .4, poids: { controle: .4 } },
+      { a: 'junior', b: 'ngo', type: 'alliance', lib: 'rassure', base: .3, poids: { noeuds: .3 } }
+    ],
+    issue: function(v){
+      if(v.tension < 30){ return { niveau: 'ko', badge: 'Triangle déformé', recit: 'Une corde molle ne forme pas de vrai triangle : les longueurs 3, 4 et 5 ne sont plus respectées et l’angle n’est pas droit.', apres: 'Une mesure n’a de sens que si l’instrument est fiable.', themes: ['précision'] }; }
+      if(v.controle < 30){ return { niveau: 'moyen', badge: 'Un coin de travers', recit: 'Sans contrôle des diagonales, une erreur de quelques centimètres passe inaperçue… jusqu’à la pose du carrelage.', apres: 'Vérifier, c’est aussi faire des mathématiques.', themes: ['vérification'] }; }
+      if(v.noeuds > 60){ return { niveau: 'ok', badge: 'Une maison d’équerre', recit: 'Diagonales de 10 m pile : murs, portes et toiture s’ajustent parfaitement.', apres: 'La réciproque de Pythagore garantit l’angle droit.', themes: ['Pythagore', 'angle droit'] }; }
+      return { niveau: 'moyen', badge: 'Presque droit', recit: 'Les nœuds approximatifs donnent un angle de 88 ou 92 degrés : il faudra rattraper au mortier.', apres: 'Le 3-4-5 ne pardonne pas l’à-peu-près.', themes: ['précision'] };
+    }
+  },
+  quiz: [
+    { q: 'Dans un triangle rectangle, l’hypoténuse est…', options: [
+      { txt: 'le côté opposé à l’angle droit, le plus long.', ok: true, retour: 'Exact.' },
+      { txt: 'le plus petit côté.', retour: 'Non.' } ] },
+    { q: 'Un triangle rectangle a des côtés de l’angle droit de 5 cm et 12 cm. Hypoténuse ?', options: [
+      { txt: '13 cm', ok: true, retour: '25 + 144 = 169 = 13².' },
+      { txt: '17 cm', retour: 'On n’additionne pas les longueurs.' } ] },
+    { q: 'Une échelle de 5 m est posée contre un mur, son pied à 3 m du mur. À quelle hauteur touche-t-elle le mur ?', options: [
+      { txt: '4 m', ok: true, retour: '25 − 9 = 16 = 4².' },
+      { txt: '2 m', retour: 'Non : 5 − 3 = 2 ne tient pas compte des carrés.' } ] },
+    { q: 'Le triangle 8 ; 15 ; 17 est-il rectangle ?', options: [
+      { txt: 'Oui : 64 + 225 = 289 = 17².', ok: true, retour: 'Réciproque de Pythagore.' },
+      { txt: 'Non.', retour: 'Calcule les carrés.' } ] },
+    { q: 'À quoi sert la réciproque de Pythagore ?', options: [
+      { txt: 'À démontrer qu’un triangle est rectangle.', ok: true, retour: 'Comme la corde 3-4-5 du maçon.' },
+      { txt: 'À calculer une aire.', retour: 'Non.' } ] }
+  ],
+  bilan: {
+    retenir: [
+      'Propriété directe : dans un triangle rectangle, le carré de l’hypoténuse est égal à la somme des carrés des deux autres côtés.',
+      'Réciproque : si le carré du plus grand côté est égal à la somme des carrés des deux autres, le triangle est rectangle.',
+      'La corde 3-4-5 (ou 6-8-10) permet de tracer un angle droit sur le terrain.',
+      'On compare des carrés, jamais des sommes de longueurs.'
+    ],
+    ecrire: 'Expliquez à un maçon, en dix lignes et avec un schéma, pourquoi la corde 3-4-5 donne un angle droit et comment contrôler un rectangle par ses diagonales.'
+  }
+};
+</script>
+<script src="decors.js?v=20261113b"></script>
+<script src="scene.js?v=20261113a"></script>
+<!-- scene-texte -->
+<details id="scene-texte" style="max-width:860px;margin:28px auto 40px;padding:0 16px;font:15px/1.6 Poppins,system-ui,sans-serif;color:#0C2A6A">
+<summary style="cursor:pointer;font-weight:600;padding:12px 0">Lire la scène en texte</summary>
+<article lang="fr">
+<h1>L’angle droit du maçon</h1>
+<p><b>Mathématiques · 4ᵉ</b></p>
+<p><i>Dialogue fictif écrit pour la leçon. Les faits et les dates cités sont exacts.</i></p>
+<h3>Objectif</h3><p>Utiliser la propriété de Pythagore pour calculer une longueur dans un triangle rectangle, et sa réciproque pour vérifier qu’un angle est droit, comme le font les maçons avec la corde 3-4-5.</p>
+<p>Programme : Progression harmonisée 4e · Triangles, leçon 18 (propriété directe de Pythagore), leçon 19 (propriété réciproque de Pythagore)</p>
+<p>Lieu : Un chantier au quartier Biyem-Assi, Yaoundé · Pendant les grandes vacances</p>
+<h3>Personnages</h3><ul><li>Maître Tchamba, chef maçon</li><li>Junior, élève de 4e, apprenti pour l’été</li><li>Mme Ngo, propriétaire du terrain</li></ul>
+<h3>La scène</h3>
+<p>Sur le terrain de Mme Ngo, il faut implanter les fondations d’une maison rectangulaire de 6 m sur 8 m. Les quatre coins doivent être parfaitement droits.</p>
+<p><b>Junior, élève de 4e, apprenti pour l’été</b> : Maître, on n’a pas de grande équerre. Comment faire un angle droit de plusieurs mètres ?</p>
+<p><b>Maître Tchamba, chef maçon</b> : Avec une corde et trois nombres : 3, 4, 5. Mon propre maître me l’a appris, et les bâtisseurs s’en servent depuis très longtemps.</p>
+<p>Le maçon fait des nœuds sur une corde pour marquer 3 m, puis 4 m, puis 5 m, et la tend en triangle entre trois piquets.</p>
+<h4>La réciproque de Pythagore</h4><p>Si, dans un triangle, le carré du plus grand côté est égal à la somme des carrés des deux autres, alors ce triangle est rectangle. Ici : 5² = 25 et 3² + 4² = 9 + 16 = 25. Le triangle 3-4-5 est donc rectangle : l’angle entre les côtés de 3 m et de 4 m est droit.</p>
+<p><b>Question :</b> Un triangle a pour côtés 6 m, 8 m et 10 m. Est-il rectangle ?</p><ul><li>Oui, car 10² = 100 et 6² + 8² = 36 + 64 = 100. <b>(bonne réponse)</b></li><li>Non, car 6 + 8 ≠ 10.</li></ul><p>C’est le triangle 3-4-5 agrandi deux fois.</p>
+<h4>Atelier · rectangle ou pas ?</h4><p>Classe chaque triangle (longueurs en mètres).</p>
+<ul><li><b>Rectangle</b> : 5 ; 12 ; 13 ; 9 ; 12 ; 15 ; 7 ; 24 ; 25</li><li><b>Pas rectangle</b> : 4 ; 5 ; 6 ; 2 ; 3 ; 4</li></ul>
+<p>13² = 25 + 144 ; 15² = 81 + 144 ; 25² = 49 + 576. Les autres ne vérifient pas l’égalité.</p>
+<p>Mme Ngo arrive, inquiète, son plan à la main.</p>
+<p><b>Mme Ngo, propriétaire du terrain</b> : Comment être sûre que ma maison ne sera pas de travers ? J’ai vu des murs tordus chez ma voisine.</p>
+<p><b>Maître Tchamba, chef maçon</b> : Dernière vérification : on mesure les diagonales. Dans un rectangle de 6 m sur 8 m, elles doivent mesurer exactement la même longueur.</p>
+<p><b>Question :</b> Quelle doit être la longueur de chaque diagonale ?</p><ul><li>10 m <b>(bonne réponse)</b></li><li>14 m</li><li>48 m</li></ul><p>Propriété directe : d² = 6² + 8² = 100, donc d = 10 m.</p>
+<p><b>Junior, élève de 4e, apprenti pour l’été</b> : Les deux diagonales font 10 m pile ! La maison sera bien d’équerre.</p>
+<p><b>À toi de décider :</b> Une diagonale mesure 10,30 m et l’autre 9,70 m. Que fais-tu ?</p><ul><li>Je continue : 30 cm, ce n’est rien. — Les murs seront de travers : carrelage, toiture et portes poseront problème.</li><li>Je reprends l’implantation avec la corde 3-4-5 jusqu’à avoir deux diagonales de 10 m. — Une demi-heure de plus aujourd’hui évite des mois de problèmes.</li></ul>
+<h4>Atelier · tracer un angle droit à la corde</h4><p>Remets les gestes du maçon dans l’ordre.</p>
+<ol><li>Planter un premier piquet au coin de la maison.</li><li>Tendre 3 m de corde le long du premier mur.</li><li>Tendre 4 m dans la direction approximative du second mur.</li><li>Ajuster jusqu’à ce que les deux extrémités soient à 5 m l’une de l’autre.</li><li>Contrôler en mesurant les deux diagonales.</li></ol>
+<p>Les fondations sont implantées. Le chantier peut commencer !</p>
+<p><b>Mme Ngo, propriétaire du terrain</b> : Junior, tu raconteras à ton professeur que Pythagore travaille sur les chantiers de Biyem-Assi !</p>
+<h3>Quiz</h3><ol><li>Dans un triangle rectangle, l’hypoténuse est… — <b>le côté opposé à l’angle droit, le plus long.</b> Exact.</li><li>Un triangle rectangle a des côtés de l’angle droit de 5 cm et 12 cm. Hypoténuse ? — <b>13 cm</b> 25 + 144 = 169 = 13².</li><li>Une échelle de 5 m est posée contre un mur, son pied à 3 m du mur. À quelle hauteur touche-t-elle le mur ? — <b>4 m</b> 25 − 9 = 16 = 4².</li><li>Le triangle 8 ; 15 ; 17 est-il rectangle ? — <b>Oui : 64 + 225 = 289 = 17².</b> Réciproque de Pythagore.</li><li>À quoi sert la réciproque de Pythagore ? — <b>À démontrer qu’un triangle est rectangle.</b> Comme la corde 3-4-5 du maçon.</li></ol>
+<h3>À retenir</h3><ul><li>Propriété directe : dans un triangle rectangle, le carré de l’hypoténuse est égal à la somme des carrés des deux autres côtés.</li><li>Réciproque : si le carré du plus grand côté est égal à la somme des carrés des deux autres, le triangle est rectangle.</li><li>La corde 3-4-5 (ou 6-8-10) permet de tracer un angle droit sur le terrain.</li><li>On compare des carrés, jamais des sommes de longueurs.</li></ul>
+<h3>À écrire</h3><p>Expliquez à un maçon, en dix lignes et avec un schéma, pourquoi la corde 3-4-5 donne un angle droit et comment contrôler un rectangle par ses diagonales.</p>
+<p><a href="index.html">Toutes les Scènes vivantes</a> · <a href="4e-maths-pythagore-angle-droit.html">Jouer la scène</a></p>
+</article>
+<!-- /scene-texte -->
+</body>
+</html>

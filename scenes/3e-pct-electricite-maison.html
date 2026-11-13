@@ -1,0 +1,186 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>La multiprise de Tonton — Scènes vivantes | VÉRITAS</title>
+<meta name="description" content="Scène animée de physique-chimie (3e) : puissance électrique P = U × I, installation domestique, tournevis testeur, dangers du courant et dispositifs de sécurité.">
+<link rel="icon" href="../VERITAS_favicon_512.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="scene.css?v=20261113a">
+<!-- scene-tete -->
+<link rel="canonical" href="https://veritas-school.com/scenes/3e-pct-electricite-maison.html">
+<meta property="og:type" content="website">
+<meta property="og:title" content="La multiprise de Tonton — Scènes vivantes | VÉRITAS">
+<meta property="og:description" content="Scène animée de physique-chimie (3e) : puissance électrique P = U × I, installation domestique, tournevis testeur, dangers du courant et dispositifs de sécurité.">
+<meta property="og:url" content="https://veritas-school.com/scenes/3e-pct-electricite-maison.html">
+<meta property="og:image" content="https://veritas-school.com/og-image.jpg">
+<meta property="og:locale" content="fr_FR">
+<meta name="twitter:card" content="summary_large_image">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"LearningResource","name":"La multiprise de Tonton","description":"Scène animée de physique-chimie (3e) : puissance électrique P = U × I, installation domestique, tournevis testeur, dangers du courant et dispositifs de sécurité.","url":"https://veritas-school.com/scenes/3e-pct-electricite-maison.html","inLanguage":"fr","learningResourceType":"Simulation interactive","educationalLevel":"3ᵉ","about":"Physique-Chimie","teaches":"Calculer une puissance électrique (P = U × I), reconnaître les éléments d’une installation domestique (phase, neutre, terre), utiliser un tournevis testeur, et connaître les dangers du courant et les dispositifs de sécurité.","isAccessibleForFree":true,"interactivityType":"active","provider":{"@type":"EducationalOrganization","name":"Centre VÉRITAS","url":"https://veritas-school.com/"},"isPartOf":{"@type":"CollectionPage","name":"Scènes vivantes","url":"https://veritas-school.com/scenes/"}}</script>
+<!-- /scene-tete -->
+</head>
+<body>
+<noscript>Cette scène a besoin de JavaScript pour se jouer.</noscript>
+<script>
+window.SCENE = {
+  id: '3e-pct-electricite',
+  discipline: 'Physique-Chimie', niveau: '3e',
+  titre: 'La multiprise de Tonton',
+  decor: 'case_nuit', lieu: 'Une maison du quartier Mvog-Ada, Yaoundé', moment: 'Un soir de coupure… puis de retour du courant',
+  objectif: 'Calculer une puissance électrique (P = U × I), reconnaître les éléments d’une installation domestique (phase, neutre, terre), utiliser un tournevis testeur, et connaître les dangers du courant et les dispositifs de sécurité.',
+  programme: 'Progression harmonisée 3e · Énergie et puissance électriques, séance 19 (définitions, unités, instruments de mesure), séance 20 (puissance d’un résistor) ; circuits domestiques, séance 29 (parties d’une installation), séance 30 (bornes d’une prise, tournevis testeur), séance 32 (définitions et dangers), séance 33 (risques et dispositifs de sécurité)',
+  jauges: [
+    { id: 'risque', nom: 'Risque électrique', val: 70, couleur: '#C0392B' },
+    { id: 'savoir', nom: 'Compréhension', val: 20, couleur: '#1E499B' }
+  ],
+  personnages: {
+    tonton: { nom: 'Tonton Bekolo, bricoleur', couleur: '#8A5A2B', look: { tenue: 'pantalon', peau: 'fonce', cheveux: 'court', habit: '#8A5A2B' } },
+    laure: { nom: 'Laure, élève de 3e', couleur: '#1E499B', look: { metier: 'eleve', tenue: 'jupe', peau: 'fonce', cheveux: 'tresses' } },
+    ndjock: { nom: 'Mme Ndjock, électricienne', couleur: '#D97706', look: { metier: 'ouvrier', tenue: 'pantalon', peau: 'fonce', cheveux: 'chignon' } }
+  },
+  etapes: [
+    { t: 'recit', entre: ['tonton', 'laure'], txt: 'Le courant revient après la coupure. Tonton Bekolo branche tout sur une seule multiprise : le fer à repasser, le congélateur, la télévision et la plaque chauffante.', objet: { i: 'flamme', lib: 'Ça chauffe…' } },
+    { t: 'dit', qui: 'laure', emo: 'peur', txt: 'Tonton, la multiprise est brûlante et ça sent le plastique fondu !' },
+    { t: 'dit', qui: 'tonton', txt: 'Bah ! C’est du 220 volts partout, la prise tiendra.' },
+    { t: 'remarque', titre: 'Puissance et intensité', txt: 'La puissance électrique P (en watts, W) d’un appareil vaut P = U × I, où U est la tension (en volts, V : 220 V au Cameroun) et I l’intensité (en ampères, A), mesurée avec un ampèremètre. Pour un résistor, P = R × I². Une multiprise supporte une intensité maximale, souvent 10 A ou 16 A.' },
+    { t: 'question', q: 'Le fer à repasser a une puissance de 1 100 W sous 220 V. Quelle intensité le traverse ?',
+      options: [
+        { txt: '5 A', ok: true, retour: 'I = P / U = 1 100 / 220 = 5 A.' },
+        { txt: '242 000 A', retour: 'Tu as multiplié : I = P / U, il faut diviser.' },
+        { txt: '0,2 A', retour: 'C’est U / P : le rapport est inversé.' }
+      ], jauges: { savoir: 40 } },
+    { t: 'question', q: 'Fer 1 100 W + plaque 1 500 W + congélateur 150 W + télévision 100 W = 2 850 W. Quelle intensité totale traverse la multiprise ?',
+      options: [
+        { txt: 'Environ 13 A : au-delà des 10 A de cette multiprise.', ok: true, retour: '2 850 / 220 ≈ 13 A. La multiprise surchauffe : c’est une surcharge.' },
+        { txt: 'Environ 1 A : aucun problème.', retour: 'Refais le calcul I = P / U.' }
+      ], jauges: { savoir: 55 } },
+    { t: 'recit', entre: ['ndjock'], txt: 'La voisine, Mme Ndjock, électricienne, accourt avec son tournevis testeur.' },
+    { t: 'dit', qui: 'ndjock', txt: 'Débranchez la plaque tout de suite ! Et cette prise murale est fendue : on va la changer. Laure, sais-tu repérer la phase ?' },
+    { t: 'remarque', titre: 'Phase, neutre, terre', txt: 'Une prise a trois bornes : la PHASE (dangereuse, elle est au potentiel de 220 V), le NEUTRE et la TERRE (fil vert-jaune, qui évacue vers le sol un courant de fuite). Le tournevis testeur s’allume quand sa pointe touche la phase et que l’on pose le doigt sur son capuchon.' },
+    { t: 'atelier', mode: 'ordre', titre: 'Atelier · changer une prise en sécurité', consigne: 'Remets les étapes dans l’ordre.',
+      items: [
+        'Couper le disjoncteur général.',
+        'Vérifier au tournevis testeur qu’il n’y a plus de phase.',
+        'Démonter l’ancienne prise.',
+        'Raccorder phase, neutre et terre aux bonnes bornes de la nouvelle prise.',
+        'Remettre le courant et tester.'
+      ],
+      bravo: 'On ne travaille jamais sous tension : on coupe, puis on vérifie.', jauges: { risque: 40, savoir: 70 } },
+    { t: 'dit', qui: 'tonton', emo: 'doute', txt: 'Électrisé, électrocuté… c’est pareil, non ?' },
+    { t: 'dit', qui: 'ndjock', txt: 'Non. Électrisé : le courant traverse le corps, provoque brûlures et contractions. Électrocuté : on en meurt. Un courant de quelques dizaines de milliampères à travers le cœur peut suffire.' },
+    { t: 'atelier', mode: 'tri', titre: 'Atelier · geste sûr ou dangereux ?', consigne: 'Classe chaque situation.',
+      cats: ['Geste sûr', 'Geste dangereux'],
+      items: [
+        { txt: 'Installer un disjoncteur différentiel 30 mA.', cat: 0 },
+        { txt: 'Toucher un appareil électrique les mains mouillées.', cat: 1 },
+        { txt: 'Brancher plusieurs multiprises les unes sur les autres.', cat: 1 },
+        { txt: 'Relier les prises à la terre.', cat: 0 },
+        { txt: 'Remplacer un fusible par un fil de cuivre.', cat: 1 },
+        { txt: 'Couper le courant avant toute réparation.', cat: 0 }
+      ],
+      bravo: 'Disjoncteur, fusible, prise de terre, différentiel : chacun protège contre un risque.', jauges: { risque: 15, savoir: 90 } },
+    { t: 'choix', qui: 'laure', q: 'Que proposes-tu pour le repassage ?',
+      options: [
+        { txt: 'Brancher le fer seul, sur une prise murale en bon état.', consequence: 'Le fer tire 5 A, sans surcharge. La maison est en sécurité.', jauges: { risque: -10 } },
+        { txt: 'Garder la même multiprise, en espérant qu’elle tienne.', consequence: 'La surcharge continue : risque d’incendie.', jauges: { risque: 30 } }
+      ],
+      oeuvre: 'Une installation protège les biens (fusible, disjoncteur) et les personnes (prise de terre, disjoncteur différentiel).' },
+    { t: 'dit', qui: 'tonton', emo: 'joie', txt: 'Désormais, une prise, un gros appareil. Et je fais installer un différentiel !' }
+  ],
+  labo: {
+    titre: 'Laboratoire · une maison sûre',
+    intro: 'Règle la charge des prises, la protection de l’installation et l’état des fils : la maison est-elle sûre ?',
+    persos: ['tonton', 'laure', 'ndjock'],
+    curseurs: [
+      { id: 'charge', nom: 'Charge sur une même prise', val: 80, bas: 'un appareil', haut: 'tout branché' },
+      { id: 'protection', nom: 'Protections (terre, différentiel)', val: 20, bas: 'aucune', haut: 'complètes' },
+      { id: 'etat', nom: 'État des fils et des prises', val: 40, bas: 'fendus, dénudés', haut: 'neufs' }
+    ],
+    scenarios: [
+      { nom: 'Le soir du retour du courant', icone: 'flamme', valeurs: { charge: 90, protection: 15, etat: 35 } },
+      { nom: 'Après Mme Ndjock', icone: 'diplome', valeurs: { charge: 25, protection: 85, etat: 85 } },
+      { nom: 'Fils dénudés', icone: 'peur', valeurs: { etat: 10, charge: 30 } }
+    ],
+    liens: [
+      { a: 'ndjock', b: 'tonton', type: 'confiance', lib: 'conseille', base: .4, poids: { protection: .4 } },
+      { a: 'laure', b: 'tonton', type: 'alliance', lib: 'alerte', base: .5 },
+      { a: 'laure', b: 'ndjock', type: 'confiance', lib: 'apprend', base: .5, poids: { etat: .2 } }
+    ],
+    issue: function(v){
+      if(v.charge > 70 && v.protection < 40){ return { niveau: 'ko', badge: 'Départ de feu', recit: 'La multiprise surchargée fond ; sans disjoncteur adapté, rien ne coupe le courant à temps.', apres: 'Surcharge + absence de protection = incendie.', themes: ['surcharge'] }; }
+      if(v.etat < 30){ return { niveau: 'ko', badge: 'Électrisation', recit: 'Un fil dénudé touche la main de Laure. Sans différentiel, le courant traverse son bras.', apres: 'Des fils en bon état et un différentiel 30 mA protègent les personnes.', themes: ['électrisation'] }; }
+      if(v.protection > 60 && v.charge < 50){ return { niveau: 'ok', badge: 'Une maison sûre', recit: 'Chaque gros appareil a sa prise ; terre et différentiel veillent.', apres: 'Calculer P = U × I évite les surcharges.', themes: ['sécurité', 'puissance'] }; }
+      return { niveau: 'moyen', badge: 'Sous surveillance', recit: 'Pas d’accident ce soir, mais l’installation reste fragile.', apres: 'La sécurité électrique ne se joue pas au hasard.', themes: ['prévention'] };
+    }
+  },
+  quiz: [
+    { q: 'Quelle est la tension du secteur au Cameroun ?', options: [
+      { txt: '220 V', ok: true, retour: 'Tension alternative de fréquence 50 Hz.' },
+      { txt: '12 V', retour: 'C’est la tension d’une batterie de voiture.' } ] },
+    { q: 'Une ampoule de 60 W sous 220 V est traversée par…', options: [
+      { txt: 'environ 0,27 A.', ok: true, retour: '60 / 220 ≈ 0,27 A.' },
+      { txt: '13 200 A.', retour: 'On divise P par U.' } ] },
+    { q: 'Le tournevis testeur s’allume sur…', options: [
+      { txt: 'la phase.', ok: true, retour: 'La borne dangereuse.' },
+      { txt: 'le neutre.', retour: 'Non, normalement pas.' } ] },
+    { q: 'Quel dispositif protège surtout les PERSONNES ?', options: [
+      { txt: 'Le disjoncteur différentiel 30 mA (avec la prise de terre).', ok: true, retour: 'Il coupe dès qu’un courant fuit, par exemple à travers un corps.' },
+      { txt: 'La multiprise.', retour: 'Non.' } ] },
+    { q: 'Remplacer un fusible grillé par un fil de cuivre est…', options: [
+      { txt: 'dangereux : le circuit n’est plus protégé contre les surintensités.', ok: true, retour: 'Risque d’incendie.' },
+      { txt: 'une bonne astuce.', retour: 'Surtout pas.' } ] }
+  ],
+  bilan: {
+    retenir: [
+      'P = U × I (W, V, A) ; pour un résistor P = R × I². Au Cameroun, U = 220 V.',
+      'Une prise comporte la phase (dangereuse), le neutre et la terre ; le tournevis testeur repère la phase.',
+      'Dangers : électrisation, électrocution, incendie par surcharge ou court-circuit.',
+      'Protections : fusible et disjoncteur (biens), prise de terre et disjoncteur différentiel (personnes).'
+    ],
+    ecrire: 'Faites le bilan des puissances des appareils de votre maison. Lesquels ne doivent jamais partager une multiprise ? Justifiez par le calcul de l’intensité.'
+  }
+};
+</script>
+<script src="decors.js?v=20261113b"></script>
+<script src="scene.js?v=20261113a"></script>
+<!-- scene-texte -->
+<details id="scene-texte" style="max-width:860px;margin:28px auto 40px;padding:0 16px;font:15px/1.6 Poppins,system-ui,sans-serif;color:#0C2A6A">
+<summary style="cursor:pointer;font-weight:600;padding:12px 0">Lire la scène en texte</summary>
+<article lang="fr">
+<h1>La multiprise de Tonton</h1>
+<p><b>Physique-Chimie · 3ᵉ</b></p>
+<p><i>Dialogue fictif écrit pour la leçon. Les faits et les dates cités sont exacts.</i></p>
+<h3>Objectif</h3><p>Calculer une puissance électrique (P = U × I), reconnaître les éléments d’une installation domestique (phase, neutre, terre), utiliser un tournevis testeur, et connaître les dangers du courant et les dispositifs de sécurité.</p>
+<p>Programme : Progression harmonisée 3e · Énergie et puissance électriques, séance 19 (définitions, unités, instruments de mesure), séance 20 (puissance d’un résistor) ; circuits domestiques, séance 29 (parties d’une installation), séance 30 (bornes d’une prise, tournevis testeur), séance 32 (définitions et dangers), séance 33 (risques et dispositifs de sécurité)</p>
+<p>Lieu : Une maison du quartier Mvog-Ada, Yaoundé · Un soir de coupure… puis de retour du courant</p>
+<h3>Personnages</h3><ul><li>Tonton Bekolo, bricoleur</li><li>Laure, élève de 3e</li><li>Mme Ndjock, électricienne</li></ul>
+<h3>La scène</h3>
+<p>Le courant revient après la coupure. Tonton Bekolo branche tout sur une seule multiprise : le fer à repasser, le congélateur, la télévision et la plaque chauffante.</p>
+<p><b>Laure, élève de 3e</b> : Tonton, la multiprise est brûlante et ça sent le plastique fondu !</p>
+<p><b>Tonton Bekolo, bricoleur</b> : Bah ! C’est du 220 volts partout, la prise tiendra.</p>
+<h4>Puissance et intensité</h4><p>La puissance électrique P (en watts, W) d’un appareil vaut P = U × I, où U est la tension (en volts, V : 220 V au Cameroun) et I l’intensité (en ampères, A), mesurée avec un ampèremètre. Pour un résistor, P = R × I². Une multiprise supporte une intensité maximale, souvent 10 A ou 16 A.</p>
+<p><b>Question :</b> Le fer à repasser a une puissance de 1 100 W sous 220 V. Quelle intensité le traverse ?</p><ul><li>5 A <b>(bonne réponse)</b></li><li>242 000 A</li><li>0,2 A</li></ul><p>I = P / U = 1 100 / 220 = 5 A.</p>
+<p><b>Question :</b> Fer 1 100 W + plaque 1 500 W + congélateur 150 W + télévision 100 W = 2 850 W. Quelle intensité totale traverse la multiprise ?</p><ul><li>Environ 13 A : au-delà des 10 A de cette multiprise. <b>(bonne réponse)</b></li><li>Environ 1 A : aucun problème.</li></ul><p>2 850 / 220 ≈ 13 A. La multiprise surchauffe : c’est une surcharge.</p>
+<p>La voisine, Mme Ndjock, électricienne, accourt avec son tournevis testeur.</p>
+<p><b>Mme Ndjock, électricienne</b> : Débranchez la plaque tout de suite ! Et cette prise murale est fendue : on va la changer. Laure, sais-tu repérer la phase ?</p>
+<h4>Phase, neutre, terre</h4><p>Une prise a trois bornes : la PHASE (dangereuse, elle est au potentiel de 220 V), le NEUTRE et la TERRE (fil vert-jaune, qui évacue vers le sol un courant de fuite). Le tournevis testeur s’allume quand sa pointe touche la phase et que l’on pose le doigt sur son capuchon.</p>
+<h4>Atelier · changer une prise en sécurité</h4><p>Remets les étapes dans l’ordre.</p>
+<ol><li>Couper le disjoncteur général.</li><li>Vérifier au tournevis testeur qu’il n’y a plus de phase.</li><li>Démonter l’ancienne prise.</li><li>Raccorder phase, neutre et terre aux bonnes bornes de la nouvelle prise.</li><li>Remettre le courant et tester.</li></ol>
+<p>On ne travaille jamais sous tension : on coupe, puis on vérifie.</p>
+<p><b>Tonton Bekolo, bricoleur</b> : Électrisé, électrocuté… c’est pareil, non ?</p>
+<p><b>Mme Ndjock, électricienne</b> : Non. Électrisé : le courant traverse le corps, provoque brûlures et contractions. Électrocuté : on en meurt. Un courant de quelques dizaines de milliampères à travers le cœur peut suffire.</p>
+<h4>Atelier · geste sûr ou dangereux ?</h4><p>Classe chaque situation.</p>
+<ul><li><b>Geste sûr</b> : Installer un disjoncteur différentiel 30 mA. ; Relier les prises à la terre. ; Couper le courant avant toute réparation.</li><li><b>Geste dangereux</b> : Toucher un appareil électrique les mains mouillées. ; Brancher plusieurs multiprises les unes sur les autres. ; Remplacer un fusible par un fil de cuivre.</li></ul>
+<p>Disjoncteur, fusible, prise de terre, différentiel : chacun protège contre un risque.</p>
+<p><b>À toi de décider :</b> Que proposes-tu pour le repassage ?</p><ul><li>Brancher le fer seul, sur une prise murale en bon état. — Le fer tire 5 A, sans surcharge. La maison est en sécurité.</li><li>Garder la même multiprise, en espérant qu’elle tienne. — La surcharge continue : risque d’incendie.</li></ul>
+<p><b>Tonton Bekolo, bricoleur</b> : Désormais, une prise, un gros appareil. Et je fais installer un différentiel !</p>
+<h3>Quiz</h3><ol><li>Quelle est la tension du secteur au Cameroun ? — <b>220 V</b> Tension alternative de fréquence 50 Hz.</li><li>Une ampoule de 60 W sous 220 V est traversée par… — <b>environ 0,27 A.</b> 60 / 220 ≈ 0,27 A.</li><li>Le tournevis testeur s’allume sur… — <b>la phase.</b> La borne dangereuse.</li><li>Quel dispositif protège surtout les PERSONNES ? — <b>Le disjoncteur différentiel 30 mA (avec la prise de terre).</b> Il coupe dès qu’un courant fuit, par exemple à travers un corps.</li><li>Remplacer un fusible grillé par un fil de cuivre est… — <b>dangereux : le circuit n’est plus protégé contre les surintensités.</b> Risque d’incendie.</li></ol>
+<h3>À retenir</h3><ul><li>P = U × I (W, V, A) ; pour un résistor P = R × I². Au Cameroun, U = 220 V.</li><li>Une prise comporte la phase (dangereuse), le neutre et la terre ; le tournevis testeur repère la phase.</li><li>Dangers : électrisation, électrocution, incendie par surcharge ou court-circuit.</li><li>Protections : fusible et disjoncteur (biens), prise de terre et disjoncteur différentiel (personnes).</li></ul>
+<h3>À écrire</h3><p>Faites le bilan des puissances des appareils de votre maison. Lesquels ne doivent jamais partager une multiprise ? Justifiez par le calcul de l’intensité.</p>
+<p><a href="index.html">Toutes les Scènes vivantes</a> · <a href="3e-pct-electricite-maison.html">Jouer la scène</a></p>
+</article>
+<!-- /scene-texte -->
+</body>
+</html>
