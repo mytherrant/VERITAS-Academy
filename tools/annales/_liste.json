@@ -103,5 +103,40 @@
   "matiere": "SVTEEHB",
   "annee": 2024,
   "u": "/ressources/annales/bepc-svt-2024.html"
+ },
+ {
+  "examen": "bepc",
+  "fiche": "ressources/examen-histoire-geographie-bepc.html",
+  "matiere": "Histoire",
+  "annee": 2025,
+  "u": "/ressources/annales/bepc-histoire-2025.html"
+ },
+ {
+  "examen": "bepc",
+  "fiche": "ressources/examen-histoire-geographie-bepc.html",
+  "matiere": "Géographie",
+  "annee": 2026,
+  "u": "/ressources/annales/bepc-geographie-2026.html"
+ },
+ {
+  "examen": "bepc",
+  "fiche": "ressources/examen-ecm-bepc.html",
+  "matiere": "Éducation à la citoyenneté et à la morale",
+  "annee": 2026,
+  "u": "/ressources/annales/bepc-ecm-2026.html"
+ },
+ {
+  "examen": "bepc",
+  "fiche": "ressources/examen-ecm-bepc.html",
+  "matiere": "Éducation à la citoyenneté et à la morale",
+  "annee": 2025,
+  "u": "/ressources/annales/bepc-ecm-2025.html"
+ },
+ {
+  "examen": "bepc",
+  "fiche": "ressources/examen-ecm-bepc.html",
+  "matiere": "Éducation à la citoyenneté et à la morale",
+  "annee": 2024,
+  "u": "/ressources/annales/bepc-ecm-2024.html"
  }
 ]
