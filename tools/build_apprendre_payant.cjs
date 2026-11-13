@@ -102,13 +102,17 @@ for (const [id, l] of Object.entries(L)) {
      annales du dépôt pour l'anglais et la philosophie). L'histoire et la géographie GARDENT
      « évaluation des ressources / évaluation des compétences » : c'est le format de leurs épreuves
      APC (Probatoire de géographie 2023, BEPC blancs d'histoire). */
-  const LETTRES = { francais: 1, anglais: 1 };
+  const LETTRES = { francais: 1, anglais: 1, espagnol: 1 };
   if (LETTRES[l.m]) {
     const exam = /^3e/.test(l.c) ? "BEPC" : /^1re/.test(l.c) ? "Probatoire" : /^Tle/.test(l.c) ? "Baccalauréat" : "examen";
     const pre = exam === "examen" ? "Vers l'examen" : "Vers le " + exam;
     const T = {
       francais: exam === "BEPC" ? ["Je vérifie mes acquis", "Connaissance et maniement de la langue (format du BEPC)", "Expression écrite (format du BEPC)", "Situation-problème", "Consigne"]
         : ["Je vérifie mes acquis", "Exercice de langue (format de l'épreuve : a. identification, b. analyse)", "Sujet d'entraînement (format de l'épreuve)", "Sujet", "Consigne"],
+      /* Espagnol : intitulés des sujets officiels (BEPC 2025, Probatoire A4 2025, Bac A4 2024). */
+      espagnol: exam === "BEPC" ? ["Compruebo mis conocimientos", "Estructuras o comunicación (formato del BEPC)", "Comprensión y redacción (formato del BEPC)", "Texto", "Consigna"]
+        : exam === "Probatoire" ? ["Compruebo mis conocimientos", "Competencias lingüísticas (formato del Probatoire)", "Comentario dirigido y producción de textos (formato del Probatoire)", "Texto", "Consigna"]
+        : ["Compruebo mis conocimientos", "Producción de textos : traducción (formato del Bac)", "Recepción y producción de textos (formato del Bac)", "Texto", "Consigna"],
       anglais: ["Check your knowledge", "Section A: Grammar (" + (exam === "BEPC" ? "BEPC" : exam === "Probatoire" ? "Probatoire" : "Bac") + " format)", "Section D: Composition (" + (exam === "BEPC" ? "BEPC" : exam === "Probatoire" ? "Probatoire" : "Bac") + " format)", "Situation", "Task"]
     }[l.m];
     l.parties = l.parties.concat([{ t: pre, html: "<div class='integ'><h3>" + T[0] + "</h3><p>" + esc(q0.q) + "</p><ol type='a'>" + q0.r.map(x => "<li>" + esc(x) + "</li>").join("") + "</ol><details><summary>Voir la réponse</summary><p><strong>" + esc(q0.r[q0.b] || "") + "</strong>. " + esc(q0.e) + "</p></details><h3>" + T[1] + "</h3>" + enonce + (mE ? "<details><summary>Voir la réponse</summary><p>" + mE[1] + "</p></details>" : "") + (ex ? "<h3>" + (ex.titre || T[2]) + "</h3><p><strong>" + (ex.etiquette || T[3]) + ".</strong> " + ex.situation + "</p>" + ex.consignes.map((c, k) => "<p><strong>" + T[4] + (ex.consignes.length > 1 ? " " + (k + 1) : "") + ".</strong> " + c + "</p>").join("") + "<details><summary>Voir une réponse attendue</summary><p>" + ex.reponse + "</p></details>" : "") + "</div>", retenir: "Savoir-être mobilisé : " + a.etre + "." }]);
