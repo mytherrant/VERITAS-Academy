@@ -151,4 +151,5 @@ exports.outils = [
   { id:"o_correction", t:"aide", ti:"Faire corriger ma copie", d:"Une correction détaillée par l'IA.", u:"/app.html#correction-ia", compte:1 },
   { id:"o_ambassa", t:"aide", ti:"Poser une question au Professeur Ambassa", d:"Une explication sur le programme.", u:"/app.html#ambassa" },
   { id:"o_calendrier", t:"aide", ti:"Calendrier scolaire", d:"Examens, vacances, conseils de classe.", u:"/app.html#calendrier" },
+  { id:"o_flash", t:"aide", ti:"VÉRITAS Flash", d:"Scanne le QR de ta séquence, les ressources s'ouvrent.", u:"/flash/" },   // gardé : seul chemin vers flash/ (banc_menu_rubriques)
 ];
