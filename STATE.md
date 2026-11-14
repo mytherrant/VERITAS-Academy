@@ -1,3 +1,16 @@
+## Histoire-géographie : cartes, frises et schémas sur 210 leçons (14/11/2026)
+
+Demandes de Jacques : « Fais le point, poursuis et enrichis les autres leçons : carte, schémas, simulations, labo », « Comble ce déséquilibre ».
+
+- **Constat** (leçons payantes avec au moins un schéma) : SVT, physique-chimie, géographie équipées ; **histoire 1/126**, géographie 34/118, et 0 en maths, ECM, français, philosophie, informatique, langues.
+- **Histoire-géographie** : source privée `63-hg-illustrations.js` (`VRT_ILLUS`, 248 poses sur 210 leçons) :
+  - 5 cartes nouvelles (fond Natural Earth, États actuels comme repères, signalé sur la carte) : l'Afrique partagée vers 1914, les indépendances africaines, l'Asie coloniale vers 1914, la décolonisation de l'Asie, le monde de la guerre froide ;
+  - 47 frises chronologiques (dates établies uniquement) pour les leçons d'histoire de 3e, 1re et Tle A ;
+  - 12 schémas : transition démographique, pyramides des âges, cercle vicieux du sous-développement, facteurs des migrations, administration directe ou indirecte, chefferie, circuits de commercialisation, ville africaine, diagramme circulaire, commerce équitable, patrimoine, villes-campagnes ;
+  - cartes existantes réutilisées là où l'espace étudié est le même (relief, population, flux, agriculture, élevage, industrie, artisanat, mondialisation, campagne du Cameroun 1914-1916).
+- Aperçus : visibles en partie 0, dans les leçons gratuites et en « schéma offert » des rangs impairs ; le reste chez les abonnés après dépôt des JSON.
+- **Reste chez Jacques** : copier `63-hg-illustrations.js` dans `apprendre_prive\sources`, puis reconstruire et déposer les JSON.
+
 ## Apprendre : cinq vraies simulations, leçons gratuites de 3e enrichies (14/11/2026)
 
 Demande de Jacques : « Continue l'enrichissement des leçons, la conformité des schémas, simulations, Labo… ».
