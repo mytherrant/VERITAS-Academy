@@ -75,6 +75,34 @@ for (const [id, p, legende, svg] of ILLUS) {
   if (!/^<svg[\s\S]*<\/svg>$/.test(svg) || !/aria-label='/.test(svg) || /<script|\son\w+=/i.test(svg)) { err.push(`${id} : schéma SVG invalide`); continue; }
   q.illus = { legende, svg };
 }
+/* 14/11/2026 — audit « schémas bien affectés aux leçons concernées », puis « corrige tous les
+   décalages » : un schéma posé sur la leçon (ou la partie) voisine de celle qu'il illustre est
+   DÉPLACÉ vers la bonne ; un schéma hors sujet sans bonne cible est retiré ; une carte qui manque
+   est reprise d'une autre leçon. Appliqué à chaque build tant que la source privée
+   (62-svt-pct-schemas.js) n'est pas corrigée ; une ligne devenue inutile ne fait rien.
+   [de, partie, vers, partie, motif] — vers = null : retrait ; une cible déjà illustrée est laissée. */
+const ILLUS_DECALAGES = [
+  ["3e-svt-r21", 1, "3e-svt-r22", 1, "phagocytose : de « La peau » vers « La réaction inflammatoire et la phagocytose › La phagocytose »"],
+  ["3e-pct-r23", 1, "3e-pct-r22", 1, "distillation : de « Les pollutions » vers « Les pétroles › La distillation fractionnée »"],
+  ["tle-d-physique-r11", 1, "tle-d-physique-r12", 1, "projectile : de « Mouvement rectiligne › Plan incliné » vers « Mouvement plan › Trajectoire » (rang de Tle C repris)"],
+  ["1re-c-svt-r25", 1, "1re-c-svt-r24", 1, "circulation atmosphérique : des mouvements océaniques vers « Les mouvements atmosphériques › Circulation générale »"],
+  ["3e-svt-r46", 0, "3e-svt-r46", 1, "Ligne du Cameroun : de « La répartition mondiale » vers « Au Cameroun »"],
+  ["3e-svt-r37", 1, null, 0, "coupe du cœur hors sujet sur « Premiers secours › Donner l'alerte » (déjà en r32 et r33)"],
+  ["3e-svt-r49", 1, null, 0, "Ligne du Cameroun hors sujet sur « Mouvements de terrain › Occuper le sol autrement »"]
+];
+for (const [de, p, vers, q, motif] of ILLUS_DECALAGES) {
+  const a = L[de] && L[de].parties && L[de].parties[p];
+  if (!a || !a.illus) continue;
+  const b = vers && L[vers] && L[vers].parties && L[vers].parties[q];
+  if (b && !b.illus) b.illus = a.illus;
+  delete a.illus;
+  console.log(`schéma ${vers ? "déplacé" : "retiré"} : ${de} p${p}${vers ? " → " + vers + " p" + q : ""} — ${motif}`);
+}
+/* [source, partie, cible, partie] : la répartition mondiale des séismes prend la carte des plaques de 1re. */
+for (const [src, p, vers, q] of [["1re-c-svt-r37", 1, "3e-svt-r46", 0]]) {
+  const a = L[src] && L[src].parties && L[src].parties[p], b = L[vers] && L[vers].parties && L[vers].parties[q];
+  if (a && a.illus && b && !b.illus) { b.illus = a.illus; console.log(`schéma repris : ${src} p${p} → ${vers} p${q}`); }
+}
 
 /* Types de labos réellement codés dans apprendre/labo.js */
 global.window.VRT = {}; global.document = {};

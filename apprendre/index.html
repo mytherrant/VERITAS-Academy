@@ -9,7 +9,7 @@
 <link rel="icon" href="../VERITAS_favicon_512.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="apprendre.css?v=20261114a">
+<link rel="stylesheet" href="apprendre.css?v=20261114c">
 <link rel="stylesheet" href="jeu.css?v=20261112v">
 <style>
 .hero{background:linear-gradient(90deg,#EDF2FB,#F7F9FE 70%);color:#001136;border:1px solid #DCE5F5;border-radius:10px;padding:34px 34px 28px;position:relative;overflow:hidden;margin-bottom:26px}
@@ -240,8 +240,8 @@
 <script src="progressions.js?v=20261110g"></script>
 <script src="lecons.js?v=20261110g"></script>
 <script src="ressources.js?v=20261114a"></script>
-<script src="charge.js?v=2ff148ec"></script>
-<script src="commun.js?v=20261114a"></script>
+<script src="charge.js?v=a91b4dad"></script>
+<script src="commun.js?v=20261114c"></script>
 <script src="jeu.js?v=20261110g"></script>
 <script src="calendrier.js?v=20261113a"></script>
 <script>
@@ -297,6 +297,8 @@
       return '<a class="mat" style="--c:'+m.t[0]+';--cp:'+m.t[1]+';--cm:'+m.t[2]+'" href="matiere.html?c='+encodeURIComponent(classe)+'&m='+m.id+'"><div class="h"><span class="pas">'+A.icoM(m,30)+'</span><div><b>'+esc(m.nom)+'</b><br><span>'+(tot?tot+' leçons au programme':'Programme à venir')+'</span></div></div>'+
         (red.length?'<span><span class="badge">'+red.length+' rédigée'+(red.length>1?'s':'')+'</span>'+(lu?' · '+lu+' lue'+(lu>1?'s':''):'')+'</span><div class="barre-p" aria-hidden="true"><i style="width:'+Math.round(lu/red.length*100)+'%"></i></div>':'')+'</a>';
     }).join("") || '<p class="vide">La progression de cette classe arrive bientôt.</p>';
+    /* 14/11/2026 « plus fluide » : les matières qui ont des leçons rédigées d'abord, les autres repliées. */
+    (function(){var nr=mats.filter(function(m){return nRed(m)}).length; if(nr&&nr<mats.length) A.replier($("#mats"),nr,"matières",function(e){return !!e.querySelector(".badge")});})();
 
     /* tout ce que le site offre à cette classe, par usage */
     var tous=A.gratuitDabord(A.resClasse(classe)), parT={};
@@ -305,7 +307,7 @@
     (function(){var g=$("#goutA"),gr=tous.filter(function(i){return !VRT_RES.items[i].ab}),sel=A.selectionGratuite(tous,6),nr=lecs(classe).length;
       if(!g)return; if(!sel.length){g.hidden=true;return;}
       g.innerHTML='<div class="gout-t"><span class="gout-eb">'+A.pic("cadeau",16)+'Gratuit · sans abonnement</span><h2 id="goutAT">Gratuit pour commencer en '+esc(classe)+'</h2>'+
-        '<p><b>'+gr.length+' ressource'+(gr.length>1?'s':'')+' gratuite'+(gr.length>1?'s':'')+'</b> pour ta classe'+(nr?', et le début de chacun des <b>'+nr+' cours rédigés</b>':'')+'. Essaie, et passe à la formule quand tu en veux plus.</p></div>'+
+        '<p><b>'+gr.length+' ressource'+(gr.length>1?'s':'')+' gratuite'+(gr.length>1?'s':'')+'</b> pour ta classe'+(function(){var lib=lecs(classe).filter(function(k){return !LE[k].verrou}).length, ver=nr-lib; return (lib?', <b>'+lib+' leçon'+(lib>1?'s':'')+' entière'+(lib>1?'s':'')+'</b>':'')+(ver?', et le début de <b>'+ver+' autres leçons</b>':'');})()+'. Essaie, et passe à la formule quand tu en veux plus.</p></div>'+
         '<div class="res-g">'+sel.map(A.carteRes).join("")+'</div>'+
         '<a class="gout-l" href="ressources.html?c='+encodeURIComponent(classe)+'">Voir les '+gr.length+' ressources gratuites ›</a>';
       g.hidden=false; A.replier(g.querySelector(".res-g"),2,"ressources");})(); tous.forEach(function(i){var t=VRT_RES.items[i].t;parT[t]=(parT[t]||0)+1});

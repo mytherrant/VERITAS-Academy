@@ -108,6 +108,11 @@ if (!chromium) {
       const SEL = '.wrap .grid > .card';
       const n = await p.evaluate((s) => document.querySelectorAll(s).length, SEL);
       if (n < 2) throw new Error('moins de 2 cartes sur /corriges/');
+      /* 14/11/2026 : la rangée tombait au bas de l'écran (top ≈ 924 px sur 985), en pleine
+         animation d'apparition (opacité 0,72) : le banc mesurait l'entrée, pas le survol.
+         On amène la rangée dans la vue, comme le fait un visiteur, avant de mesurer. */
+      await p.evaluate((s) => document.querySelector(s).scrollIntoView({ block: 'center' }), SEL);
+      await p.waitForTimeout(800);
 
       titre('② Pendant le survol, la carte reste visible et se soulève');
       const lire = (k) => p.evaluate(([s, i]) => {

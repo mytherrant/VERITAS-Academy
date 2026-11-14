@@ -338,7 +338,7 @@
     }).catch(function () {});
   } catch (e) { }
   function lienOffre(h, t, d, picto, cl) {
-    return '<a class="offre-l' + (cl ? " " + cl : "") + '" href="' + h + '">' + picto + '<span><b>' + esc(t) + '</b><small>' + esc(d) + '</small></span><span class="chev" aria-hidden="true">›</span></a>';
+    return '<a class="offre-l' + (cl ? " " + cl : "") + '" href="' + h + '"' + (/^https?:/.test(h) ? ' target="_blank" rel="noopener"' : '') + '>' + picto + '<span><b>' + esc(t) + '</b><small>' + esc(d) + '</small></span><span class="chev" aria-hidden="true">›</span></a>';
   }
   /* ════════ OFFRES (grille du 12/11/2026) ════════
      Trois formules côte à côte, chacune avec ce qu'elle apporte, pour que
@@ -347,15 +347,18 @@
      Prix : ceux publiés par le serveur (data-vrt-prix), repli sur le catalogue.
      ctx : "lecon" (fin du cours), "quiz" (sous le bilan), "matiere", "accueil" */
   /* Avantages = table des droits du serveur (vrt_droits_formules, 12/11/2026). */
+  /* 14/11/2026 « panneaux bien structurés et différenciés » : chaque formule dit ce qu'elle AJOUTE
+     à la précédente (base), une ligne-clé la résume (version compacte), plus de contradiction
+     avantage / manque (Starter annonçait les labos premium des deux côtés). */
   var FORMULES = [
-    { g: "starter", nom: "Starter", pour: "Pour suivre l'année", mois: "1 200", an: "10 000",
-      av: ["Toutes les leçons de 1 classe", "Épreuves, annales et examens blancs", "5 questions par jour au tuteur", "10 fiches PDF par semaine", "2 labos premium à l'essai par semaine"],
-      non: ["Labos premium (2 à l'essai)", "Bulletins blancs notés"] },
-    { g: "pro", nom: "Pro", pour: "Pour l'année d'examen", mois: "1 600", an: "13 500",
-      av: ["Toutes les leçons de 1 classe", "30 questions par jour au tuteur", "20 fiches PDF par semaine", "Tous les labos virtuels premium", "Bulletins blancs : copies notées sur 20"],
+    { g: "starter", nom: "Starter", pour: "Pour suivre l'année", mois: "1 200", an: "10 000", cle: "Les leçons, épreuves et annales de ta classe",
+      av: ["Toutes les leçons de ta classe, en entier", "Épreuves, annales et examens blancs corrigés", "Tuteur : 5 questions par jour", "10 fiches PDF par semaine", "Labos premium : 2 à l'essai par semaine"],
+      non: ["Bulletins blancs notés", "Classes virtuelles en direct"] },
+    { g: "pro", nom: "Pro", pour: "Pour l'année d'examen", mois: "1 600", an: "13 500", base: "Tout Starter, plus :", cle: "Starter + tous les labos et des copies notées sur 20",
+      av: ["Tous les labos premium, sans limite", "Bulletins blancs : copies notées sur 20", "Tuteur : 30 questions par jour", "20 fiches PDF par semaine"],
       non: ["Classes virtuelles en direct"] },
-    { g: "elite", nom: "Élite", pour: "Pour viser la mention", mois: "2 000", an: "16 500",
-      av: ["2 classes : la tienne + celle d'avant", "100 questions par jour au tuteur", "40 fiches PDF par semaine", "Classes virtuelles en direct", "Entretien d'orientation sur rendez-vous"],
+    { g: "elite", nom: "Élite", pour: "Pour viser la mention", mois: "2 000", an: "16 500", base: "Tout Pro, plus :", cle: "Pro + 2 classes et les classes virtuelles en direct",
+      av: ["2 classes : la tienne et celle d'avant", "Classes virtuelles en direct", "Entretien d'orientation sur rendez-vous", "Tuteur : 100 questions par jour", "40 fiches PDF par semaine"],
       non: [] }
   ];
   /* Formules : nom, public, prix de repli, avantages, masquage — réglés dans l'admin. */
@@ -363,7 +366,7 @@
     var cf = obj(CFG.formules);
     FORMULES.forEach(function (f) {
       var o = obj(cf[f.g]);
-      ["nom", "pour", "mois", "an"].forEach(function (k) { if (txt(o[k])) f[k] = txt(o[k]); });
+      ["nom", "pour", "mois", "an", "base", "cle"].forEach(function (k) { if (txt(o[k])) f[k] = txt(o[k]); });
       if (Array.isArray(o.av)) f.av = o.av.map(txt).filter(Boolean);
       if (Array.isArray(o.non)) f.non = o.non.map(txt).filter(Boolean);
       f.masque = o.masquer === true;
@@ -384,14 +387,24 @@
     ["nom", "pour", "tarif", "bouton", "lien", "lienT"].forEach(function (k) { if (txt(h[k])) HUMAIN[k] = txt(h[k]); });
     if (Array.isArray(h.points) && h.points.length) HUMAIN.points = h.points.map(txt).filter(Boolean);
   })();
-  function carteFormule(f, conseillee) {
+  /* Classes dont les leçons complètes sont réservées aux abonnés (aperçus publics) : ailleurs,
+     les leçons sont déjà libres, l'abonnement n'en promet pas. */
+  var CL_PAYANTES = ["3e", "1re A", "1re C", "1re D", "Tle A", "Tle C", "Tle D"];
+  function avantages(f, c) {
+    if (!c || CL_PAYANTES.indexOf(c) >= 0) return f.av;
+    return f.av.map(function (x) { return /^Toutes les leçons de ta classe/.test(x) ? "Les leçons de ta classe sont déjà libres : l'abonnement ouvre le reste" : x; });
+  }
+  function carteFormule(f, conseillee, c, mini) {
     var idM = "abo_" + f.g + "_m", idA = "abo_" + f.g + "_a";
+    if (mini) return '<div class="fo fo-mini"><p class="fo-nom">' + esc(f.nom) + ' <span class="fo-pm"><b data-vrt-prix="' + idM + '">' + prixConnu(idM, f.mois) + '</b> F / mois</span></p>' +
+      '<p class="fo-cle">' + esc(f.cle || f.pour) + '</p><a class="fo-btn" href="/app.html#abonnement?plan=' + idM + '">Choisir ' + esc(f.nom) + '</a></div>';
     return '<div class="fo' + (conseillee ? " fo-c" : "") + '">' +
       (conseillee ? '<span class="fo-badge">Conseillée pour toi</span>' : "") +
       '<p class="fo-nom">' + esc(f.nom) + '</p><p class="fo-pour">' + esc(f.pour) + '</p>' +
       '<p class="fo-prix"><b data-vrt-prix="' + idM + '">' + prixConnu(idM, f.mois) + '</b> F<small> / mois</small></p>' +
       '<p class="fo-an">ou <a href="/app.html#abonnement?plan=' + idA + '"><b><span data-vrt-prix="' + idA + '">' + prixConnu(idA, f.an) + '</span> F l\'année</b></a>, payée en une fois</p>' +
-      '<ul class="fo-av">' + f.av.map(function (x) { return "<li>" + esc(x) + "</li>"; }).join("") +
+      (f.base ? '<p class="fo-base">' + esc(f.base) + '</p>' : '') +
+      '<ul class="fo-av">' + avantages(f, c).map(function (x) { return "<li>" + esc(x) + "</li>"; }).join("") +
         f.non.map(function (x) { return '<li class="fo-non">' + esc(x) + "</li>"; }).join("") + '</ul>' +
       '<a class="fo-btn" href="/app.html#abonnement?plan=' + idM + '">Choisir ' + esc(f.nom) + '</a></div>';
   }
@@ -409,10 +422,20 @@
     var cah = cahierPour(c, m), ex = examen(c), tt = obj(oc.titres);
     var titre = txt(tt[ctx]) || { lecon: "Pour aller plus loin", quiz: "Continue sur ta lancée", matiere: "En attendant les prochaines leçons", accueil: "Aller plus loin avec VÉRITAS" }[ctx] || "Pour aller plus loin";
     var conseil = ex ? (txt(oc.conseilExamen) || "pro") : (txt(oc.conseilAutre) || "starter"), ens = obj(oc.enseignant);
+    /* Accueil : la vitrine complète. Leçon, matière, quiz : la formule conseillée en entier, les deux
+       autres résumées en une ligne, le professeur en un lien (le mur d'une leçon passait 2 800 px). */
+    var compact = ctx !== "accueil", fc = FORMULES.filter(function (f) { return f.g === conseil; })[0] || FORMULES[0];
+    if (compact) return '<aside class="offre offre-' + ctx + ' offre-compacte" aria-label="' + esc(titre) + '"><p class="offre-t">' + esc(titre) + '</p>' +
+      '<h2 class="offre-h">' + esc(txt(oc.titre) || "Choisis ta formule") + '</h2>' +
+      carteFormule(fc, true, c) +
+      '<div class="offre-autres">' + FORMULES.filter(function (f) { return f !== fc; }).map(function (f) { return carteFormule(f, false, c, true); }).join("") + '</div>' +
+      '<p class="offre-n">Paiement Orange Money ou MTN MoMo, sans engagement. L\'année payée en une fois revient à un peu plus de huit mois. <a href="/app.html#abonnement?plan=abo_famille_m">Formule Famille</a> : jusqu\'à 4 enfants.</p>' +
+      (oc.humainActif === false ? "" : lienOffre("https://wa.me/" + WA_VERITAS + "?text=" + encodeURIComponent("Bonjour VÉRITAS, je souhaite un devis pour un accompagnement" + (c ? " en " + c : "") + " : suivi particulier en ligne / répétitions à domicile. Ville et quartier : "), "Besoin d'un professeur à côté de toi ?", HUMAIN.tarif + " Suivi en ligne ou répétitions à domicile.", PICTO_CLE)) +
+      (cah ? lienOffre(cah.h, cah.t, cah.d, PICTO_LIVRE) : "") + '</aside>';
     return '<aside class="offre offre-' + ctx + '" aria-label="' + esc(titre) + '"><p class="offre-t">' + esc(titre) + '</p>' +
       '<h2 class="offre-h">' + esc(txt(oc.titre) || "Choisis ta formule") + '</h2>' +
       '<div class="offre-grille"><div class="offre-plans">' +
-      FORMULES.map(function (f) { return carteFormule(f, f.g === conseil); }).join("") +
+      FORMULES.map(function (f) { return carteFormule(f, f.g === conseil, c); }).join("") +
       '</div>' + (oc.humainActif === false ? "" : carteHumain(c, m)) + '</div>' +
       (txt(oc.note) ? '<p class="offre-n">' + gras(txt(oc.note)) + '</p>' : '<p class="offre-n">Payer l\'année en une fois revient à un peu plus de huit mois (Starter : 10 000 F au lieu de 14 400 F). Plusieurs enfants ? La <a href="/app.html#abonnement?plan=abo_famille_m">formule Famille</a> couvre jusqu\'à 4 enfants au niveau Élite pour <span data-vrt-prix="abo_famille_m">' + prixConnu("abo_famille_m", "6 000") + '</span> F par mois. Paiement Orange Money ou MTN MoMo, sans engagement.</p>') +
       (cah ? lienOffre(cah.h, cah.t, cah.d, PICTO_LIVRE) : "") +
@@ -435,7 +458,7 @@
     ["epreuve", "Annales et épreuves", "i-pen", "Les anciens sujets de l'examen, corrigés, puis des sujets complets pour t'entraîner.", "entrainer"],
     ["notes", "Notes et orientation", "i-calculator", "Où tu en es, ce qui compte vraiment, la série qui t'attend.", "suivi"],
     ["methode", "Méthodes et examens", "i-feather", "Les méthodes attendues le jour de l'épreuve.", "apprendre"],
-    ["cours", "Cours rédigés", "i-book-open", "Les leçons complètes déjà disponibles pour ta classe.", "apprendre"],
+    ["cours", "Fiches de cours", "i-book-open", "Des cours complets sur une page, en complément des leçons.", "apprendre"],
     ["oeuvre", "Œuvres au programme", "i-book", "Analyse, résumé, carte mentale et QCM.", "apprendre"],
     ["scene", "Scènes vivantes", "i-play", "Une situation courte où tu choisis la bonne réponse.", "apprendre"],
     ["corrige", "Mon cahier et ses corrigés", "i-clipboard-check", "Le cahier de l'année, corrigé séquence par séquence.", "apprendre"],
@@ -579,19 +602,23 @@
      replier(liste, n) : n premiers enfants visibles, les autres derrière un
      bouton « Voir plus (k) » qui les déplie (et « Voir moins » les replie).
      Idempotent : rappelé après un nouveau rendu, il remplace son bouton. */
-  function replier(liste, n, nom) {
+  /* garder(e) (14/11/2026, facultatif) : les n premiers éléments QUI LE VÉRIFIENT restent visibles,
+     dans l'ordre (ex. les leçons rédigées d'un chapitre, pas les lignes vides du programme). */
+  function replier(liste, n, nom, garder) {
     if (!liste) return;
-    var enf = [].slice.call(liste.children), reste = enf.length - n;
+    var enf = [].slice.call(liste.children), vu = 0;
+    var vis = enf.map(function (e) { var ok = (!garder || garder(e)) && vu < n; if (ok) vu++; return ok; });
+    var reste = vis.filter(function (v) { return !v; }).length;
     if (liste._vpBtn && liste._vpBtn.parentNode) liste._vpBtn.parentNode.removeChild(liste._vpBtn);
-    enf.forEach(function (e, i) { e.hidden = i >= n; });
+    enf.forEach(function (e, i) { e.hidden = !vis[i]; });
     if (reste <= 0) return;
     var b = document.createElement("button");
     b.type = "button"; b.className = "voir-plus"; b.setAttribute("aria-expanded", "false");
-    var lib = function (ouvert) { return ouvert ? "Voir moins" : "Voir plus" + (nom ? " de " + nom : "") + " (" + reste + ")"; };
+    var lib = function (ouvert) { return (ouvert ? "Voir moins" : nom === "chapitre" ? "Voir tout le chapitre" : garder && nom ? "Voir les autres " + nom : "Voir plus" + (nom ? " de " + nom : "")) + (ouvert ? "" : " (" + reste + ")"); };
     b.textContent = lib(false);
     b.onclick = function () {
       var ouvert = b.getAttribute("aria-expanded") !== "true";
-      enf.forEach(function (e, i) { if (i >= n) e.hidden = !ouvert; });
+      enf.forEach(function (e, i) { if (!vis[i]) e.hidden = !ouvert; });
       b.setAttribute("aria-expanded", String(ouvert)); b.textContent = lib(ouvert);
     };
     liste.parentNode.insertBefore(b, liste.nextSibling);
