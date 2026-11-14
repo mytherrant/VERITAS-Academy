@@ -1,3 +1,19 @@
+## Apprendre : cinq vraies simulations, leçons gratuites de 3e enrichies (14/11/2026)
+
+Demande de Jacques : « Continue l'enrichissement des leçons, la conformité des schémas, simulations, Labo… ».
+
+- **Contrôle des 31 simulations** (`chunks/labo.js`, rendues une à une dans Chromium : erreurs, encre du canevas, contrôles) : aucune erreur JS ; 16 vraies simulations interactives ; **15 labos n'étaient qu'un diaporama de texte** dans un cadre vide (moteur « FALLBACK GÉNÉRIQUE », ta capture « ADN, Gènes & Hérédité »). Les 4 « Étape 1/0 » (lv30, lv33, lv42, lv45) sont des labos payants dont les étapes arrivent du serveur : pas de défaut public.
+- **Cinq vraies simulations** pour les labos gratuits reliés à la progression :
+  - **lv28 ADN, gènes et hérédité** (3e, 1re D, Tle C) : choix des génotypes des parents (LL, Ll, ll), échiquier de croisement avec pois lisses et ridés, proportions attendues, bouton « Semer 100 graines » pour comparer l'observé au calcul (3 : 1, uniformité, croisement-test).
+  - **lv27 Système immunitaire et vaccination** : vacciné ou non, jour de contamination ; courbes des anticorps et des microbes, seuil de la maladie ; réponse primaire lente et faible, réponse secondaire rapide et forte.
+  - **lv29 Probabilités conditionnelles et Bayes** (Tle C/D) : prévalence, sensibilité, spécificité ; 1 000 personnes en grille colorée (vrais et faux positifs), P(malade | +) par la formule de Bayes.
+  - **lv31 Synthèse d'ester** (Tle C/D) : excès d'alcool, classe de l'alcool, eau retirée ou non ; courbe du rendement jusqu'à l'équilibre (K = 4, 2,25, 0,005), quantités de matière.
+  - **lv32 Climat mondial** (6e, 2nde A) : CO₂ de 280 à 1 000 ppm, rétroaction de la glace ; forçage 5,35 ln(C/280), température, banquise, rayonnements.
+  - Restent en diaporama : lv40, lv41, lv43, lv44 (gratuits, hors progression d'Apprendre : GCE et enseignement technique) et lv30, lv33, lv42, lv45 (payants).
+- **Leçons gratuites de 3e** : nouveau fichier source `apprendre/_src/07-enrichissement-3e.js` (fonction `VRT_PLUS`, rien de retiré) : les 16 leçons des matières du BEPC (français, maths, PCT, SVT, histoire, géographie, ECM, anglais) passent de 3-4 à **10 questions corrigées** (103 questions nouvelles, chacune avec son explication) et reçoivent une **situation de vie APC** (situation et tâche, ancrées au Cameroun : palmier et Thalès, sièges du conseil des délégués, mangrove de Youpwé, jardin et racine carrée…). `lecons.js` reconstruit par `tools/build_apprendre.py` ; `?v=20261114a`.
+- Reste (lots suivants) : langues de 3e (allemand, espagnol, grec, arts) et les leçons gratuites des autres classes (quiz à 3-4 questions, sans situation) ; labo intégré aux leçons gratuites.
+- Contrôles : 0 erreur JS sur les 5 simulations et les leçons enrichies ; bancs du déploiement au vert ; réglages 29/29, verrou 18/18, gabarits 54/54.
+
 ## Apprendre : audit de structure, icônes sobres, formules différenciées, schémas recalés (14/11/2026)
 
 Demandes de Jacques : « Audit plus profond pour mieux structurer, rendre l'utilisation plus fluide ; icônes internes plus subtiles ; contenus bien affectés selon les classes et les abonnements ; panneaux d'abonnement bien structurés et différenciés », « Vérifie que les schémas et cartes sont bien affectés aux leçons concernées », « Corrige tous les décalages et incohérences ».
