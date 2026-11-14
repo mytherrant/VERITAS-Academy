@@ -242,7 +242,8 @@ for (const [id, l] of Object.entries(L)) {
 
 const empreintes = {};
 for (const [c, lignes] of Object.entries(parClasse)) {
-  const corps = "/* Fichier GÉNÉRÉ par tools/build_apprendre_payant.cjs : début public des leçons. */\n" + lignes.join("\n") + "\n";
+  let corps = "/* Fichier GÉNÉRÉ par tools/build_apprendre_payant.cjs : début public des leçons. */\n" + lignes.join("\n") + "\n";
+  corps = require("./compacter_apercus.cjs").compacter(corps); /* une figure par fichier, référencée par les leçons */
   fs.writeFileSync(path.join(APP, `apercus-${slug(c)}.js`), corps);
   empreintes[c] = crypto.createHash("sha1").update(corps).digest("hex").slice(0, 8);
 }
