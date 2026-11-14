@@ -9,7 +9,7 @@
 <link rel="icon" href="../VERITAS_favicon_512.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="apprendre.css?v=20261114a">
+<link rel="stylesheet" href="apprendre.css?v=20261114c">
 <link rel="stylesheet" href="jeu.css?v=20261112v">
 <style>
 /* ── Page matière (refonte 07/11) : en-tête teinté, filtres en pastilles, chapitres en cartes colorées ── */
@@ -77,8 +77,8 @@ a.lg:hover{background:var(--kp)}
 <script src="lecons.js?v=20261110g"></script>
 <script src="ressources.js?v=20261114a"></script>
 <script src="atelier.js?v=20261110a"></script>
-<script src="charge.js?v=2ff148ec"></script>
-<script src="commun.js?v=20261114a"></script>
+<script src="charge.js?v=a91b4dad"></script>
+<script src="commun.js?v=20261114c"></script>
 <script src="jeu.js?v=20261110g"></script>
 <script>
 (function(){
@@ -95,6 +95,8 @@ a.lg:hover{background:var(--kp)}
   var hors=Object.keys(red).filter(function(n){return !connus[n]}).map(function(n){return [+n,LE[red[n]].titre]});
   if(hors.length) chaps.unshift([LE[red[hors[0][0]]].chap||"Leçons rédigées",hors]);
   var trims=[], tot=0, nred=Object.keys(red).length;
+  /* 14/11/2026 : « libres » = leçons entières sans abonnement ; les autres n'offrent que leur début. */
+  var nlib=Object.keys(red).filter(function(n){return !LE[red[n]].verrou}).length, nver=nred-nlib;
   chaps.forEach(function(ch){tot+=ch[1].length; if(ch[2]&&trims.indexOf(ch[2])<0) trims.push(ch[2])});
   var sc=A.scenesPour({m:M.id,c:c});
   /* Français : chaque chapitre ouvre l'évaluation de SA séquence dans l'Atelier
@@ -108,7 +110,7 @@ a.lg:hover{background:var(--kp)}
   var TRIM={"Premier trimestre":PAL[0],"Deuxième trimestre":PAL[1],"Troisième trimestre":PAL[2]};
   function teinte(p){return '--k:'+p[0]+';--kp:'+p[1]}
   var chev='<span class="chev" aria-hidden="true"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 6 6 6-6 6"/></svg></span>';
-  function ligne(l){var k=red[l[0]]; var et=k?(lus[k]?'<span class="et lu">'+(qz[k]?'Quiz '+qz[k][0]+'/'+qz[k][1]:'Lue')+'</span>':'<span class="et red">'+(LE[k].verrou?'Début offert':LE[k].gratuit?'Gratuit':'Cours rédigé')+'</span>'):'<span class="et av">Bientôt</span>';
+  function ligne(l){var k=red[l[0]]; var et=k?(lus[k]?'<span class="et lu">'+(qz[k]?'Quiz '+qz[k][0]+'/'+qz[k][1]:'Lue')+'</span>':(LE[k].verrou?'<span class="et red">Début offert</span>':'<span class="et libre">Gratuit</span>')):'<span class="et av">Bientôt</span>';
     var rs=A.resLecon(c,M.id,l[0]); if(!k&&rs.length) et='';
     var tl=A.titreL(l[1]); if(!tl) return '';
     var corps='<span class="n">'+(l[0]||"")+'</span><span class="t">'+esc(tl)+'</span>'+et;
@@ -122,13 +124,16 @@ a.lg:hover{background:var(--kp)}
       var ix=i-(hors.length?1:0), sq=hr?0:seqDe(ix), prem=sq&&(ix===0||seqDe(ix-1)!==sq);
       return '<section class="chap"'+(prem?' id="seq-'+sq+'"':'')+' style="'+teinte(PAL[(n++)%PAL.length])+'"><div class="chap-t"><span class="chap-n">'+(hr?A.pic("etoile",20):num)+'</span><div><small>'+(ch[2]?esc(ch[2])+' · ':'')+(hr?'Leçons rédigées':'Chapitre '+num)+'</small><h3>'+esc(ch[0]||"Leçons")+'</h3></div><span class="nb">'+ls.length+' leçon'+(ls.length>1?'s':'')+'</span>'+(sq?'<a class="atelier-l" href="'+lienAtelier(sq,'composer')+'" title="Professeurs : composer l’évaluation de la séquence '+sq+' dans l’Atelier de français">'+A.pic("plume",14)+'Évaluer · séquence '+sq+'</a>':'')+'</div><div class="lst">'+ls.map(ligne).join("")+'</div></section>'}).join("")||'<p class="vide">Rien à afficher ici pour l\'instant.</p>';
     /* « trop touffu » : 5 leçons par chapitre, le reste derrière « Voir plus » (sauf arrivée sur une leçon précise) */
-    if(!/^#l\d+$/.test(location.hash)&&!filtre) $$("#liste .lst").forEach(function(l){A.replier(l,5,"leçons")});
+    if(!/^#l\d+$/.test(location.hash)&&!filtre) $$("#liste .lst").forEach(function(l){
+      /* 14/11/2026 : on montre d'abord ce qui s'ouvre (leçon rédigée, ressource liée) ; un chapitre sans rien d'ouvrable garde ses 3 premières lignes. */
+      var ouv=function(e){return !!e.querySelector("a")}, n=[].filter.call(l.children,ouv).length;
+      A.replier(l,n?5:3,"chapitre",n?ouv:null)});
   }
   $("#zone").innerHTML='<div class="mpage"><p class="ariane"><a href="index.html">Apprendre</a><span>›</span><a href="index.html?c='+encodeURIComponent(c)+'">'+esc(c)+'</a><span>›</span>'+esc(M.nom)+'</p>'+
     '<header class="mtete"><span class="pas">'+A.icoM(M,58)+'</span><div><h1>'+esc(M.nom)+' <span>· '+esc(c)+'</span></h1><div class="chiffres">'+
       (tot?'<span style="--k:#1E499B"><b>'+tot+'</b> leçons au programme</span>':'<span>Progression à venir</span>')+
       '<span style="--k:#0E7C86"><b>'+chaps.length+'</b> chapitre'+(chaps.length>1?'s':'')+'</span>'+
-      (nred?'<span style="--k:#C24E00"><b>'+nred+'</b> cours rédigé'+(nred>1?'s':'')+'</span>':'')+
+      (nred?'<span style="--k:#C24E00"><b>'+nred+'</b> leçon'+(nred>1?'s':'')+' rédigée'+(nred>1?'s':'')+'</span>':'')+
       '<span style="--k:#5B4FA8">MINESEC 2026-2027</span></div></div></header>'+
     /* 11/11/2026 — « mettre les ressources gratuites au début ou en évidence :
        il goûte, l'envie est suscitée et l'abonnement peut suivre » (Jacques).
@@ -136,18 +141,19 @@ a.lg:hover{background:var(--kp)}
     (function(){var ids=A.gratuitDabord(A.resDeMatiere(c,M.id)),gr=ids.filter(function(i){return !VRT_RES.items[i].ab}),sel=A.selectionGratuite(ids,4);
       if(!gr.length&&!nred)return "";
       return '<section class="gout" aria-labelledby="goutT"><div class="gout-t"><span class="gout-eb">'+A.pic("cadeau",16)+'Gratuit · sans abonnement</span><h2 id="goutT">Commence gratuitement</h2>'+
-        '<p>'+(nred?'Le début de chacun des <b>'+nred+' cours rédigés</b> est en libre accès. ':'')+(gr.length?'<b>'+gr.length+' ressource'+(gr.length>1?'s':'')+' gratuite'+(gr.length>1?'s':'')+'</b> en '+esc(M.nom)+' : corrigés, méthodes, entraînements.':'')+'</p></div>'+
+        '<p>'+(nlib?'<b>'+nlib+' leçon'+(nlib>1?'s':'')+' entière'+(nlib>1?'s':'')+'</b> en libre accès. ':'')+(nver?'Le début des <b>'+nver+' autres</b> est offert. ':'')+(gr.length?'<b>'+gr.length+' ressource'+(gr.length>1?'s':'')+' gratuite'+(gr.length>1?'s':'')+'</b> en '+esc(M.nom)+' : corrigés, méthodes, entraînements.':'')+'</p></div>'+
         (sel.length?'<div class="res-g">'+sel.map(A.carteRes).join("")+'</div>':'')+
         (gr.length>sel.length?'<a class="gout-l" href="ressources.html?c='+encodeURIComponent(c)+'&m='+M.id+'">Voir les '+gr.length+' ressources gratuites ›</a>':'')+'</section>';})()+
-    (AT?'<section class="prof-fr" aria-label="Professeurs de français">'+A.pic("plume",30)+'<div><b>Vous enseignez le français en '+esc(c)+' ?</b><span>Chaque chapitre ouvre l’évaluation de sa séquence dans l’Atelier de français : texte du corpus, questions, barème et corrigé conformes au MINESEC, relecture par vos collègues.</span></div><a href="'+lienAtelier(0,'progressions')+'">Ouvrir l’Atelier</a></section>':'')+
     '<nav class="filtres" aria-label="Filtrer le programme">'+
       '<button type="button" aria-pressed="true" data-f="">Tout le programme<span class="cpt">'+tot+'</span></button>'+
-      (nred?'<button type="button" aria-pressed="false" data-f="red" style="--k:#9A6F00;--kp:#FFF3CC">Cours rédigés<span class="cpt">'+nred+'</span></button>':'')+
+      (nred?'<button type="button" aria-pressed="false" data-f="red" style="--k:#9A6F00;--kp:#FFF3CC">Leçons rédigées<span class="cpt">'+nred+'</span></button>':'')+
       trims.map(function(t){return '<button type="button" aria-pressed="false" data-f="'+esc(t)+'" style="'+teinte(TRIM[t]||PAL[3])+'">'+esc(t)+'</button>'}).join("")+
     '</nav>'+
     (sc.length?'<div class="scenes-m">'+sc.map(function(s){return '<a class="scene" href="/scenes/'+s+'.html"><span class="pl">'+A.pic("masques",30)+'</span><span><small>Scène vivante</small><strong>'+esc((window.VRT_SCENES_TITRES||{})[s]||s)+'</strong></span><span class="jouer">'+A.pic("lecture",30)+'</span></a>'}).join("")+'</div>':'')+
     /* 13/11/2026 : les leçons d'abord, l'offre payante après (elle coupait la page en deux). */
-    '<div id="liste"></div>'+(tot&&nred<tot?A.offre(c,M.id,'matiere'):'')+'</div>';
+    '<div id="liste"></div>'+
+    /* l'encart des professeurs passe sous les leçons (14/11/2026) */
+    (AT?'<section class="prof-fr" aria-label="Professeurs de français">'+A.pic("plume",30)+'<div><b>Vous enseignez le français en '+esc(c)+' ?</b><span>Chaque chapitre ouvre l’évaluation de sa séquence dans l’Atelier de français : texte du corpus, questions, barème et corrigé conformes au MINESEC, relecture par vos collègues.</span></div><a href="'+lienAtelier(0,'progressions')+'">Ouvrir l’Atelier</a></section>':'')+(tot&&nred<tot?A.offre(c,M.id,'matiere'):'')+'</div>';
   rendu("");
   /* arrivée depuis l'Atelier (?seq=N) : on montre la séquence demandée */
   var sv=+(u.get("seq")||0); if(sv){var cs=document.getElementById("seq-"+sv); if(cs){cs.classList.add("cible");cs.scrollIntoView({block:"start"})}}

@@ -955,3 +955,56 @@ h2 .num .pic{vertical-align:middle}
 .tuteur-pied{margin:8px 0 0!important;font-size:12px;color:var(--gris)}
 .tuteur-att{color:var(--gris)}
 @media print{.tuteur{display:none}}
+
+/* ════════ Sobriété (14/11/2026) : « icônes internes plus subtiles, éviter les surcharges visuelles » ════════
+   Les pictos restent (repères), mais sans pastille, plus petits, en teinte adoucie ;
+   les étiquettes deviennent du texte discret ; la couleur est réservée à ce qui est actif. */
+.res-p,.res-sm .res-c .res-p{flex:0 0 22px!important;height:22px!important;background:none!important;border:0!important;box-shadow:none!important;color:var(--k,#1E499B);opacity:.55;margin-top:1px}
+.res-p svg{width:18px!important;height:18px!important}
+.res-c{gap:10px;box-shadow:0 1px 2px rgba(0,17,54,.05);border:1px solid #EEF1F6}
+.res-fam>h2 .res-p,.porte .res-p{opacity:.7}
+.res-tag,.res-tag.gr,.res-tag.ab{background:none!important;padding:0!important;margin-top:4px;font:500 12px var(--sans)}
+.res-tag.gr{color:#2E7D3A}.res-tag.ab{color:#8A6A00}
+.res-tag svg{opacity:.7}
+.res-pa{gap:4px 12px}
+.res-pa a,.res-pa a:hover{background:none!important;padding:2px 0!important;color:#6B7287!important;font-size:12px}
+.res-pa a svg:first-child{display:none}
+.res-pa a:hover{color:var(--k,#1E499B)!important;text-decoration:underline}
+.lg .et{font:500 11.5px var(--sans)!important;padding:0!important;background:none!important}
+.et.red{color:#8A6A00!important}.et.lu{color:#2E7D3A!important}.et.av{color:#8A93A6!important}
+.et.libre{color:#2E7D3A!important}
+.lg .n{opacity:.8}
+.rail a.rm:not([aria-current]) svg{filter:grayscale(1);opacity:.5}
+.rail a.rm:hover svg{filter:none;opacity:.85}
+.offre-l>svg{width:20px;height:20px;opacity:.6}
+.porte em{font-style:normal;opacity:.6}
+/* Offre compacte (leçon, matière, quiz) : la formule conseillée, puis les deux autres en une ligne. */
+.offre-compacte{max-width:560px}
+.offre-compacte>.fo{margin:14px 0 12px}
+.fo-base{margin:0;padding-top:10px;border-top:1px solid #EEF1F6;font:600 13px var(--sans);color:#1E499B}
+.fo-base+.fo-av{border-top:0;padding-top:6px}
+.offre-autres{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:0 0 12px}
+.fo-mini{padding:12px 14px;box-shadow:none}
+.fo-mini .fo-nom{font-size:16px;display:flex;justify-content:space-between;align-items:baseline;gap:8px;flex-wrap:wrap}
+.fo-pm{font:400 12.5px var(--sans);color:#4D5163}.fo-pm b{font-size:15px;color:#001136}
+.fo-cle{flex:1;margin:4px 0 10px;font:400 13px/1.45 var(--sans);color:#4D5163}
+.fo-mini .fo-btn{padding:8px 10px;font-size:13.5px}
+@media (max-width:520px){.offre-autres{grid-template-columns:1fr}}
+.mur-cx{margin:12px 0 18px;border:1px solid #E6EAF2;border-radius:12px;padding:10px 14px;background:#fff}
+.mur-cx summary{cursor:pointer;font:600 14px var(--sans);color:#1E499B}
+.mur-cx[open] summary{margin-bottom:10px}
+/* Titre de chapitre lisible sur téléphone : le lien « Évaluer · séquence » (professeurs) passe dessous. */
+@media (max-width:640px){.chap-t{flex-wrap:wrap}.chap-t .atelier-l{order:3;margin-left:60px}}
+/* Accueil : matières sur deux colonnes au téléphone, cartes resserrées (14/11/2026). */
+@media (max-width:640px){
+  .mats{grid-template-columns:1fr 1fr!important;gap:10px!important}
+  .mat{padding:12px!important;gap:6px!important}
+  .mat .h{flex-direction:column;align-items:flex-start;gap:6px!important}
+  .mat .pas{flex:0 0 30px!important;height:30px!important}.mat .pas svg{width:28px!important;height:28px!important}
+  .mat b{font-size:15px}.mat span{font-size:12px}
+}
+/* Tuiles « Tout pour progresser » : picto sans anneau coloré. */
+.tp-i{flex:none!important;width:auto!important;height:auto!important;background:none!important;border:0!important;box-shadow:none!important;opacity:.6}
+.tp-i svg{width:20px!important;height:20px!important}
+.tp-c small,.tp-t small{background:none!important;padding:0!important;color:#6B7287!important}
+.tp-c .res-p svg{width:20px!important;height:20px!important}
