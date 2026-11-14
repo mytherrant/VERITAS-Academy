@@ -61,6 +61,18 @@ try { build(lecon("4e-maths-zz04", 4, "Hors lot"), "5e"); } catch (e) { refus = 
 verifie(/hors du lot/.test(refus), "une leçon d'une classe absente de --ajout est refusée");
 verifie(/2nde-\[ac\]/.test(lire("charge.js")) && /\(6e\|5e\|4e\|3e/.test(lire("charge.js")), "charge.js reconnaît les identifiants de 6e à la 2nde");
 
+console.log("\n\x1b[1m④ Schémas VRT_ILLUS (13/11/2026)\x1b[0m");
+const SVG_OK = "<svg viewBox='0 0 440 200' role='img' aria-label='Schéma de contrôle du banc'><path class='sv-trace' pathLength='1' d='M0 0 L10 10' stroke='#000'/><text x='10' y='20' font-size='16'>ok</text></svg>";
+build(lecon("4e-maths-zz02", 2, "Leçon A") + `VRT_ILLUS("4e-maths-zz02", 1, { legende: "Légende de contrôle du banc.", svg: ${JSON.stringify(SVG_OK)} });\n`, "4e");
+const j = JSON.parse(fs.readFileSync(path.join(FTP, "uploads/protected/apprendre/4e-maths-zz02.json"), "utf8"));
+verifie(JSON.stringify(j).includes("Schéma de contrôle du banc"), "un schéma posé sur une partie payante voyage dans le JSON protégé");
+const refuse = (svg, k) => { try { build(lecon("4e-maths-zz02", 2, "Leçon A") + `VRT_ILLUS("4e-maths-zz02", ${k == null ? 1 : k}, { legende: "Légende de contrôle du banc.", svg: ${JSON.stringify(svg)} });\n`, "4e"); return ""; } catch (e) { return String(e.stderr || e.message); } };
+verifie(/sans viewBox/.test(refuse(SVG_OK.replace("viewBox='0 0 440 200' ", "")) ), "un schéma sans viewBox est refusé");
+verifie(/largeur fixe ou avec du script/.test(refuse(SVG_OK.replace("<svg ", "<svg width='440' "))), "un schéma à largeur fixe est refusé");
+verifie(/largeur fixe ou avec du script/.test(refuse(SVG_OK.replace("<text ", "<text onclick='x()' "))), "un schéma avec un gestionnaire d'événement est refusé");
+verifie(/sans pathLength/.test(refuse(SVG_OK.replace(" pathLength='1'", ""))), "un tracé animé sans pathLength='1' est refusé");
+verifie(/partie inconnue/.test(refuse(SVG_OK, 9)), "un schéma visant une partie inexistante est refusé");
+
 fs.rmSync(T, { recursive: true, force: true });
 console.log("\n" + (ko ? `\x1b[31m${ko} échec(s) sur ${ok + ko}\x1b[0m` : `\x1b[32m${ok} vérification(s) au vert\x1b[0m`));
 process.exit(ko ? 1 : 0);

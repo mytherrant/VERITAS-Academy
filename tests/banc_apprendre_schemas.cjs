@@ -42,6 +42,7 @@ verifie(labos.length > 0 && inconnus.length === 0, `${labos.length} labos visibl
 const commun = fs.readFileSync(path.join(APP, "commun.js"), "utf8"), css = fs.readFileSync(path.join(APP, "apprendre.css"), "utf8");
 verifie(/function lisible\(/.test(commun) && /LISIBLE_PX = 11/.test(commun), "mise à l'échelle lisible des schémas (texte ≥ 11 px)");
 verifie(/function agrandir\(/.test(commun) && /btn-zoom/.test(css), "bouton « Agrandir » et fenêtre de zoom");
+verifie(/\.illus \.sv-trace\{[^}]*backwards/.test(css) && /\.illus \.sv-app\{[^}]*backwards/.test(css), "schémas animés : l'état final est l'état par défaut (rien de caché sans animation)");
 verifie(/\.carte pre\{[^}]*overflow-x:auto/.test(css), "les blocs de code défilent dans la carte (pas de débordement de page)");
 
 console.log("\n" + (ko ? `\x1b[31m${ko} échec(s) sur ${ok + ko}\x1b[0m` : `\x1b[32m${ok} vérification(s) au vert\x1b[0m`));

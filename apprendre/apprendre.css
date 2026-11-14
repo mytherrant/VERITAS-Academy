@@ -110,6 +110,16 @@ figure.illus{margin:20px 0;background:#FBFAF7;border:1px solid var(--trait);bord
 figure.illus svg{width:100%;height:auto;max-height:340px}
 figure.illus figcaption{font-size:13px;color:var(--gris);text-align:center;margin-top:8px}
 .illus text{font-family:var(--sans)}
+/* schémas animés sans script (13/11/2026) : l'état final est l'état par défaut, l'animation
+   ne fait que le « jouer » (fill-mode backwards). Sans CSS (export d'image) ou avec « réduire
+   les animations », le schéma reste donc complet. pathLength='1' sur le tracé animé. */
+.illus .sv-trace{stroke-dasharray:1;animation:svTrace 1.8s ease-out backwards}
+.illus .sv-app{animation:svApp .7s ease-out backwards}
+.illus .sv-puls{transform-box:fill-box;transform-origin:center;animation:svPuls 2.2s ease-in-out infinite}
+.illus .d1{animation-delay:0.4s}.illus .d2{animation-delay:0.8s}.illus .d3{animation-delay:1.2s}.illus .d4{animation-delay:1.6s}.illus .d5{animation-delay:2s}.illus .d6{animation-delay:2.4s}.illus .d7{animation-delay:2.8s}.illus .d8{animation-delay:3.2s}
+@keyframes svTrace{from{stroke-dashoffset:1}to{stroke-dashoffset:0}}
+@keyframes svApp{from{opacity:0}to{opacity:1}}
+@keyframes svPuls{0%,100%{transform:scale(1)}50%{transform:scale(1.25)}}
 
 /* scène vivante liée */
 .scene{display:flex;gap:16px;align-items:center;margin:28px 0 0;padding:16px 18px;border-radius:var(--r);background:var(--ink);color:#fff;text-decoration:none;position:relative;overflow:hidden}

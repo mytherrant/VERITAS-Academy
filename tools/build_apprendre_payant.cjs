@@ -49,6 +49,12 @@ global.VRT_SIT = (ids, o) => { for (const id of [].concat(ids)) { if (SIT[id]) e
    (a, b, c, d) d'une question à l'autre, pour une répartition équilibrée des lettres. */
 const QCM = {};
 global.VRT_QCM = (ids, liste) => { for (const id of [].concat(ids)) { if (QCM[id]) err.push(`${id} : QCM en double`); QCM[id] = liste; } };
+/* Schéma (13/11/2026) : VRT_ILLUS(id, partie, { legende, svg }) pose un schéma SVG dans une partie
+   de la leçon (champ illus, rendu en <figure class="illus"> zoomable). Il voyage dans le JSON
+   protégé comme le reste de la partie. Les animations passent par des classes CSS (sv-trace,
+   sv-app, sv-puls) : aucune fonction à transporter, et « réduire les animations » est respecté. */
+const ILLUS = [];
+global.VRT_ILLUS = (id, k, o) => { ILLUS.push([id, k, o]); };
 const crc = s => { let h = 0; for (const c of s) h = (h * 31 + c.charCodeAt(0)) >>> 0; return h; };
 function poserQcm(id, liste) {
   if (!Array.isArray(liste) || liste.length !== 10) { err.push(`${id} : il faut exactement 10 QCM (${liste && liste.length})`); return null; }
@@ -171,6 +177,18 @@ function balise(id, html) {
 }
 
 if (AJOUT) for (const [id, l] of Object.entries(L)) if (!AJOUT.has(l.c)) err.push(`${id} : classe ${l.c} hors du lot --ajout=${OPT_AJOUT}`);
+for (const [id, k, o] of ILLUS) {
+  const l = L[id], p = l && (l.parties || [])[k];
+  if (!p) { err.push(`${id} : schéma pour une partie inconnue (${k})`); continue; }
+  if (p.illus) { err.push(`${id} : la partie ${k} a déjà un schéma`); continue; }
+  const svg = String((o || {}).svg || "");
+  if (!(o && String(o.legende || "").length >= 15)) err.push(`${id} : schéma ${k} sans légende suffisante`);
+  if (!/^<svg [^>]*viewBox='[^']+'[^>]*role='img'[^>]*aria-label='[^']{10,}'/.test(svg)) err.push(`${id} : schéma ${k} sans viewBox, role='img' ou aria-label`);
+  if (/<svg[^>]*\swidth=/.test(svg) || /<script|\son[a-z]+=/i.test(svg)) err.push(`${id} : schéma ${k} à largeur fixe ou avec du script`);
+  for (const m of svg.matchAll(/<[a-z]+ [^>]*class='[^']*sv-trace[^>]*>/g)) if (!/pathLength='1'/.test(m[0])) err.push(`${id} : schéma ${k}, tracé animé sans pathLength='1'`);
+  balise(id, svg);
+  p.illus = { legende: o.legende, svg };
+}
 for (const [id, l] of Object.entries(L)) {
   if (!/^[a-z0-9][a-z0-9-]{2,80}$/.test(id)) err.push(`${id} : identifiant invalide`);
   for (const k of ["c", "m", "rang", "titre", "accroche", "intro", "objectifs", "parties", "revision", "exo", "quiz"]) if (!l[k]) err.push(`${id} : ${k} manquant`);
