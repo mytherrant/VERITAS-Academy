@@ -84,6 +84,34 @@
   "u": "/ressources/annales/bepc-expression-ecrite-2024.html"
  },
  {
+  "id": "probatoire-langue-francaise-aabi-2025",
+  "examen": "probatoire",
+  "m": "langue-francaise",
+  "serie": "séries A et ABI",
+  "nomExamen": "Probatoire",
+  "fiche": "ressources/probatoire-francais.html",
+  "matiere": "Langue française (séries A et ABI)",
+  "mat": "francais",
+  "classes": "1re A",
+  "annee": 2025,
+  "national": true,
+  "u": "/ressources/annales/probatoire-langue-francaise-aabi-2025.html"
+ },
+ {
+  "id": "probatoire-langue-francaise-cdeti-2025",
+  "examen": "probatoire",
+  "m": "langue-francaise",
+  "serie": "séries C, D, E et TI",
+  "nomExamen": "Probatoire",
+  "fiche": "ressources/probatoire-francais.html",
+  "matiere": "Langue française (séries C, D, E et TI)",
+  "mat": "francais",
+  "classes": "1re C,1re D",
+  "annee": 2025,
+  "national": true,
+  "u": "/ressources/annales/probatoire-langue-francaise-cdeti-2025.html"
+ },
+ {
   "id": "bepc-mathematiques-2026",
   "examen": "bepc",
   "m": "mathematiques",
@@ -432,6 +460,34 @@
   "annee": 2024,
   "national": false,
   "u": "/ressources/annales/bepc-ecm-2024.html"
+ },
+ {
+  "id": "probatoire-philosophie-aabi-2025",
+  "examen": "probatoire",
+  "m": "philosophie",
+  "serie": "séries A et ABI",
+  "nomExamen": "Probatoire",
+  "fiche": "ressources/examen-philosophie-probatoire.html",
+  "matiere": "Philosophie (séries A et ABI)",
+  "mat": "philo",
+  "classes": "1re A",
+  "annee": 2025,
+  "national": true,
+  "u": "/ressources/annales/probatoire-philosophie-aabi-2025.html"
+ },
+ {
+  "id": "probatoire-philosophie-cdeti-2025",
+  "examen": "probatoire",
+  "m": "philosophie",
+  "serie": "séries C, D, E et TI",
+  "nomExamen": "Probatoire",
+  "fiche": "ressources/examen-philosophie-probatoire.html",
+  "matiere": "Philosophie (séries C, D, E et TI)",
+  "mat": "philo",
+  "classes": "1re C,1re D",
+  "annee": 2025,
+  "national": true,
+  "u": "/ressources/annales/probatoire-philosophie-cdeti-2025.html"
  },
  {
   "id": "bepc-anglais-2025",
