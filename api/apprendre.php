@@ -18,6 +18,8 @@
  * POST {action:"droits", token} → ce que la formule du compte ouvre (droits + classes).
  * POST {action:"liberer", classe, token} → libère une classe retenue depuis plus de 30 jours.
  * POST {action:"labo", id, token} → protocole et quiz d'un labo premium (droit « labos » ou essai).
+ * POST {action:"achat", id, ref, cle} → épreuve séquentielle / examen blanc achetée à l'unité,
+ *   sans compte (150 F) : raisons achat_invalide | achat_en_attente | achat_a_regler | non_depose.
  *   L'hébergeur bannit une IP à 6 réponses 401/403/429 par minute, et une classe
  *   entière partage une IP : un élève sans formule n'est pas une attaque.
  */
@@ -72,6 +74,34 @@ if (!is_array($in)) appr_rep(['ok' => false, 'error' => 'Requête illisible'], 4
 $id = (string) ($in['id'] ?? '');
 /* L'identifiant construit un chemin de fichier : liste blanche stricte, ni point ni barre. */
 if (!preg_match('/^[a-z0-9][a-z0-9-]{2,80}$/', $id)) appr_rep(['ok' => false, 'error' => 'Identifiant invalide'], 400);
+
+/* ÉPREUVE ACHETÉE À L'UNITÉ, SANS COMPTE (15/11/2026) — 150 F l'épreuve et son corrigé.
+   L'appareil qui a payé garde la référence et une clé secrète tirée au hasard ; le
+   paiement n'en a gardé que l'empreinte (payment_camerpay.php, init). Il faut les
+   deux, et un paiement « payé » ET « octroyé » (montant contrôlé) pour cette
+   épreuve-là : une référence se devine, la clé non. */
+if (($in['action'] ?? '') === 'achat') {
+    $refA = (string) ($in['ref'] ?? '');
+    $cleA = (string) ($in['cle'] ?? '');
+    if (!preg_match('/^[A-Za-z0-9_-]{4,64}$/', $refA) || !preg_match('/^[a-f0-9]{32,128}$/', $cleA)) appr_refus('achat_invalide');
+    $fA = __DIR__ . '/data/payments/camerpay_' . preg_replace('/[^a-zA-Z0-9_\-]/', '_', $refA) . '.json';
+    $st = is_file($fA) ? json_decode((string) @file_get_contents($fA), true) : null;
+    // L'état peut être en cours de réécriture (rappel, réconciliation) : une seconde lecture.
+    if (!is_array($st) && is_file($fA)) { usleep(150000); $st = json_decode((string) @file_get_contents($fA), true); }
+    if (!is_array($st) || ($st['intent'] ?? '') !== 'sequentielle' || (string) ($st['targetId'] ?? '') !== $id
+        || (string) ($st['cle_hash'] ?? '') === '' || !hash_equals((string) $st['cle_hash'], hash('sha256', $cleA))) {
+        appr_refus('achat_invalide');
+    }
+    if (($st['status'] ?? '') !== 'paid') appr_refus('achat_en_attente');
+    if (empty($st['granted']) || !empty($st['underpaid'])) appr_refus('achat_a_regler');
+    $fS = dirname(__DIR__) . '/uploads/protected/apprendre/' . $id . '.json';
+    $suiteA = is_file($fS) ? json_decode((string) file_get_contents($fS), true) : null;
+    if (!is_array($suiteA)) {
+        @file_put_contents(__DIR__ . '/data/_security_log.txt', date('c') . ' [APPRENDRE_NON_DEPOSE] id=' . $id . " (achat)\n", FILE_APPEND);
+        appr_refus('non_depose');
+    }
+    appr_rep(['ok' => true, 'suite' => $suiteA, 'achat' => true]);
+}
 
 $db = vrt_load_db();
 if (!is_array($db)) appr_rep(['ok' => false, 'error' => 'Base indisponible'], 503);
@@ -134,14 +164,17 @@ if (($in['action'] ?? '') === 'liberer') {
     appr_rep(['ok' => (bool) $okL, 'classes' => array_keys(vrt_classes_compte($acc))]);
 }
 
-if (!appr_a_une_formule($acc, $db)) appr_refus('abonnement', $nouveau);
+/* Épreuve achetée à l'unité et rattachée au compte (connecté au paiement, ou
+   retrouvé par le numéro qui a payé) : ouverte sans formule ni place de classe. */
+$achetee = in_array('sequentielle:' . $id, (array) ($acc['unlockedUnits'] ?? []), true);
+if (!$achetee && !appr_a_une_formule($acc, $db)) appr_refus('abonnement', $nouveau);
 
 /* CLASSES DE LA FORMULE (12/11/2026). Starter et Pro ouvrent 1 classe,
    Élite 2, Famille 4, les formules enseignant 3, 6 ou toutes. La classe se
    retient à la première leçon ouverte, APRÈS confirmation : un clic égaré
    ne doit pas consommer la place. */
 $classe = vrt_classe_de_lecon($id);
-$etat = vrt_classe_couverte($acc, $droits, $classe, !empty($in['retenir']));
+$etat = $achetee ? 'ok' : vrt_classe_couverte($acc, $droits, $classe, !empty($in['retenir']));
 if ($etat !== 'ok') {
     $r = ['ok' => false, 'raison' => $etat === 'complet' ? 'classe_hors_formule' : 'classe_a_choisir',
           'classe' => $classe, 'classes' => array_keys(vrt_classes_compte($acc)), 'max' => (int) $droits['classes']];
