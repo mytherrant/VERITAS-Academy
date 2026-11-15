@@ -124,22 +124,24 @@ const pc = lire("parcours/index.html"), dbt = pc.indexOf("var SERIES = {"), fin 
 if (dbt < 0 || fin < 0) err("tableau SERIES introuvable dans parcours/index.html");
 const coefs = vm.runInNewContext("(function(){" + pc.slice(dbt, fin) + ";return {A4:SERIES.A4,C:SERIES.C,D:SERIES.D,college:SERIES.college}})()");
 // Annales officielles (ressources/annales/*.html) : les anciens sujets d'abord (demande de Jacques, 13/11/2026).
-const MAT_AN = { allemand: ["allemand"], anglais: ["anglais"], ecm: ["ecm"], espagnol: ["espagnol"], "etude-de-texte": ["francais"], "expression-ecrite": ["francais"],
-  geographie: ["geo"], histoire: ["histoire"], informatique: ["info"], mathematiques: ["maths"], pct: ["pct"], svt: ["svt"] };
+// La classe et la matière d'Apprendre de chaque annale viennent de tools/annales/_liste.json (produit par
+// tools/annales.cjs) : au Probatoire et au BAC, une même matière se décline par série (maths C, maths D…).
 const NOM_AN = { allemand: "Allemand", anglais: "Anglais", ecm: "ECM", espagnol: "Espagnol", "etude-de-texte": "Français, étude de texte", "expression-ecrite": "Français, expression écrite",
-  geographie: "Géographie", histoire: "Histoire", informatique: "Informatique", mathematiques: "Mathématiques", pct: "PCT", svt: "SVTEEHB" };
-const EXAM_AN = { bepc: ["BEPC", ["3e"]] };
-const annales = fs.readdirSync(path.join(R, "ressources/annales")).map(f => /^([a-z]+)-([a-z-]+)-(\d{4})\.html$/.exec(f)).filter(Boolean)
-  .sort((x, y) => y[3] - x[3] || x[2].localeCompare(y[2]));   // la session la plus récente d'abord
-annales.forEach(([f, ex, m, an]) => {
-  const E = EXAM_AN[ex], ms = MAT_AN[m]; if (!E || !ms) return err("annale non rattachée : " + f);
-  const id = "an_" + ex + "_" + m.replace(/-/g, "_") + "_" + an;
-  items[id] = { t: "epreuve", ti: E[0] + " " + an + " · " + NOM_AN[m] + " (sujet officiel)", d: "L'ancien sujet de l'examen et son corrigé, barème inclus.", u: "/ressources/annales/" + f, ab: 0, an: 1 };
-  E[1].forEach(c => ms.forEach(x => { if (!leconsDe(c, x).length) return err(id + " : rien en " + c + "/" + x); const k = c + "|" + x;
-    mat[k] = mat[k] || []; const fin = mat[k].filter(i => items[i] && items[i].an).length; mat[k].splice(fin, 0, id); }));
+  "correction-orthographique": "Français, orthographe", litterature: "Français, littérature", "langue-francaise": "Français, langue française", geographie: "Géographie", histoire: "Histoire",
+  informatique: "Informatique", mathematiques: "Mathématiques", pct: "PCT", physique: "Physique", chimie: "Chimie", svt: "SVTEEHB", philosophie: "Philosophie" };
+const annales = require(path.join(R, "tools/annales/_liste.json")).slice()
+  .sort((x, y) => y.annee - x.annee || x.m.localeCompare(y.m));   // la session la plus récente d'abord
+const classesAn = {};
+annales.forEach(a => {
+  if (!NOM_AN[a.m]) return err("annale sans libellé court : " + a.id);
+  if (!fs.existsSync(path.join(R, a.u))) return err("annale introuvable : " + a.u);
+  const id = "an_" + a.id.replace(/-/g, "_");
+  items[id] = { t: "epreuve", ti: a.nomExamen + " " + a.annee + " · " + NOM_AN[a.m] + (a.serie ? ", " + a.serie : "") + " (sujet officiel)", d: "L'ancien sujet de l'examen et son corrigé, barème inclus.", u: a.u, ab: 0, an: 1 };
+  a.classes.split(",").forEach(c => { if (!leconsDe(c, a.mat).length) return err(id + " : rien en " + c + "/" + a.mat); const k = c + "|" + a.mat; classesAn[c] = 1;
+    mat[k] = mat[k] || []; const fin = mat[k].filter(i => items[i] && items[i].an).length; mat[k].splice(fin, 0, id); });
 });
 items.an_index = { t: "epreuve", ti: "Toutes les annales corrigées", d: "Les derniers sujets officiels, par matière et par session.", u: "/ressources/annales/", ab: 0, an: 1 };
-(cl["3e"] = cl["3e"] || []).unshift("an_index");
+Object.keys(classesAn).forEach(c => (cl[c] = cl[c] || []).unshift("an_index"));
 
 // Doublons (même adresse sous deux identifiants) : on garde le premier, partout (13/11/2026, « ne garder que l'essentiel »).
 const parU = {};

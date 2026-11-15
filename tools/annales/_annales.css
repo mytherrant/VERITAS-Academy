@@ -37,3 +37,5 @@
 #mx p,#mx li{line-height:1.5}
 #mx article li{margin-bottom:4px}
 .ax-sujet p,.ax-corrige p{margin:0 0 8px}
+.ax-fig{margin:14px auto;text-align:center;color:inherit}
+.ax-fig svg{max-width:100%;height:auto}
