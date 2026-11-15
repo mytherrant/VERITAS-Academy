@@ -1015,6 +1015,14 @@ if (!defined('VRT_AUTH_LIB')) {
             return $v > 0 ? $v : $microDef[$t];
         }
 
+        /* ÉPREUVE SÉQUENTIELLE OU EXAMEN BLANC À L'UNITÉ (15/11/2026) — sujet complet
+           + corrigé, sans compte ni abonnement : 150 FCFA (demande de Jacques).
+           Réglable en base (DB.tarifs.sequentielle) sans redéploiement. */
+        if ($intent === 'sequentielle') {
+            $v = (int) ($db['tarifs']['sequentielle'] ?? 0);
+            return $v > 0 ? $v : 150;
+        }
+
         /* FRAIS D'INSCRIPTION — 100 FCFA, et un prix de référence OBLIGATOIRE.
            Sans cette entrée, vrt_prix_catalogue rendrait null pour cet intent,
            le contrôle de prix serait sauté (c'est son comportement quand il ne
@@ -2352,6 +2360,71 @@ if (!defined('VRT_AUTH_LIB')) {
                 unset($acc);
             }
             return ['changed' => false, 'msg' => 'compte introuvable'];
+        }
+
+        /* ÉPREUVE SÉQUENTIELLE / EXAMEN BLANC À L'UNITÉ (15/11/2026) — sans compte.
+           Deux chemins d'accès, indépendants :
+           1. l'appareil qui a payé présente la référence et sa clé secrète
+              (api/apprendre.php, action « achat ») : rien à écrire ici, l'état
+              de paiement « payé + octroyé » suffit ;
+           2. un COMPTE porte « sequentielle:<id> » dans unlockedUnits, pour la
+              rouvrir ailleurs : compte connecté, sinon retrouvé ou créé par le
+              numéro qui a payé (code d'accès par SMS, comme un livre).
+           Sans compte ni numéro exploitable, l'achat reste valable par le chemin 1 :
+           ce n'est donc PAS un octroi bloqué. */
+        if ($intent === 'sequentielle') {
+            if (!preg_match('/^[a-z0-9][a-z0-9-]{2,80}$/', $targetId)) return ['changed' => false, 'msg' => 'épreuve invalide'];
+            /* Idempotent PAR RÉFÉRENCE : les passerelles rejouent leur rappel jusqu'au
+               200 ; sans ce registre, chaque rejeu renverrait un SMS. Le registre sert
+               aussi le suivi des ventes (DB.epreuveVentes). */
+            /* La file des SMS est un FICHIER par référence, hors de la base : une synchro
+               de l'administration, qui peut écraser ce que le serveur écrit dans la base,
+               ne l'efface pas. C'est elle qui fait foi pour ne jamais recréer un compte
+               (donc un second code d'accès, qui rendrait le premier faux). */
+            if (function_exists('vrt_notify_lire') && vrt_notify_lire($ref) !== null) {
+                return ['changed' => false, 'msg' => 'épreuve déjà débloquée (remise en file)'];
+            }
+            if (!isset($db['epreuveVentes']) || !is_array($db['epreuveVentes'])) $db['epreuveVentes'] = [];
+            foreach ($db['epreuveVentes'] as $ev) {
+                if (is_array($ev) && (string) ($ev['ref'] ?? '') === $ref) return ['changed' => false, 'msg' => 'épreuve déjà débloquée'];
+            }
+            $cle = 'sequentielle:' . $targetId;
+            $codeAcces = ''; $loginAcces = '';
+            $r = $accountId !== '' ? vrt_resoudre_compte($db, $accountId) : null;
+            if (!$r && $tel !== '') {
+                $r = vrt_compte_par_tel($db, $tel, $nom);
+                if ($r) {
+                    $codeAcces = $r['code']; $loginAcces = $r['login'];
+                    if ($codeAcces !== '') $db[$r['coll']][$r['idx']]['creeVia'] = 'achat_epreuve';
+                }
+            }
+            if (function_exists('vrt_notify_enfiler') && $tel !== '') {
+                $nq = vrt_notify_enfiler([
+                    'ref' => $ref, 'tel' => $tel, 'mail' => (string) ($state['clientEmail'] ?? ''),
+                    'type' => 'epreuve', 'kind' => 'epreuve', 'titre' => preg_replace('/^[^—]*—\s*/u', '', $label),
+                    'lien' => vrt_notify_site() . '/ressources/sequentielles/' . rawurlencode($targetId) . '.html',
+                    'login' => $loginAcces, 'code' => $codeAcces,
+                ]);
+                /* File illisible ou pleine : un compte créé à l'instant porterait un code que
+                   personne ne recevra. On le retire (il vient d'être ajouté en fin de liste) et
+                   on BLOQUE l'octroi : la réconciliation le rejouera, avec un code neuf qui,
+                   lui, partira. L'appareil qui a payé n'en dépend pas pour ouvrir l'épreuve. */
+                if ($nq === 'ecriture impossible') {
+                    if ($codeAcces !== '' && $r) { array_splice($db[$r['coll']], $r['idx'], 1); }
+                    vrt_pay_log('[EPREUVE_REMISE] ref=' . $ref . ' file des SMS illisible : octroi reporté');
+                    return ['changed' => false, 'bloque' => true, 'msg' => 'remise SMS impossible, octroi reporté'];
+                }
+                if ($nq !== '' && $nq !== 'deja en file') vrt_pay_log('[EPREUVE_REMISE] ref=' . $ref . ' non enfilee : ' . $nq);
+            }
+            if ($r) {
+                $acc = &$db[$r['coll']][$r['idx']];
+                if (!isset($acc['unlockedUnits']) || !is_array($acc['unlockedUnits'])) $acc['unlockedUnits'] = [];
+                if (!in_array($cle, $acc['unlockedUnits'], true)) $acc['unlockedUnits'][] = $cle;
+                unset($acc);
+            }
+            $db['epreuveVentes'][] = ['ref' => $ref, 'id' => $targetId, 'montant' => $montant, 'date' => date('c'),
+                                      'accountId' => $accountId, 'tel' => $tel !== '' ? substr($tel, 0, 3) . '…' . substr($tel, -3) : ''];
+            return ['changed' => true, 'msg' => 'Épreuve débloquée' . ($r ? '' : ' (appareil de l’acheteur)')];
         }
 
         $tiroirs = [

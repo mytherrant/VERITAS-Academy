@@ -128,7 +128,8 @@ if (!defined('VRT_PARR_LIB')) {
     function vrt_parr_intent_eligible(string $intent, bool $panierPhysique = false): bool {
         if ($intent === 'cart') return $panierPhysique;
         return $intent !== '' && !in_array($intent,
-            ['inscription', 'echeance', 'cagnotte', 'generic', 'livret_pack'], true);
+            // 'sequentielle' : épreuve à 150 F — ni remise ni commission sur un micro-achat (15/11/2026).
+            ['inscription', 'echeance', 'cagnotte', 'generic', 'livret_pack', 'sequentielle'], true);
     }
 
     /**

@@ -218,6 +218,20 @@ if (!defined('VRT_NOTIFY_LIB')) {
             return $accents ? $t : vrt_notify_sans_accents($t);
         }
 
+        /* ÉPREUVE À L'UNITÉ (15/11/2026) : sujet complet + corrigé. L'appareil qui a
+           payé l'ouvre tout seul ; le SMS sert à la rouvrir sur un autre. */
+        if ((string) ($v['type'] ?? 'code') === 'epreuve') {
+            $login = (string) ($v['login'] ?? '');
+            $t = 'VERITAS — paiement recu, votre epreuve est debloquee' . "\n"
+               . ($titre !== '' ? $titre . "\n" : '')
+               . 'Ouvrir : ' . ($lien !== '' ? $lien : vrt_notify_site()) . "\n"
+               . ($code !== ''
+                    ? 'Autre appareil : identifiant ' . $login . ', code d’accès ' . $code . "\n"
+                    : 'Autre appareil : connectez-vous avec votre compte VERITAS.' . "\n")
+               . 'Aide : ' . $aide;
+            return $accents ? $t : vrt_notify_sans_accents($t);
+        }
+
         // LIVRE NUMÉRIQUE : pas de code, l'accès est sur le compte de l'acheteur.
         if ((string) ($v['type'] ?? 'code') === 'livre') {
             $login = (string) ($v['login'] ?? '');

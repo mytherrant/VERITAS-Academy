@@ -64,8 +64,107 @@
       })
       .catch(function () { occupe(false); mur("reseau", suite); });
   }
+  /* ── Achat à l'unité, sans compte (150 F : l'épreuve et son corrigé) ──
+     Le navigateur tire une clé secrète ; le serveur de paiement n'en garde que
+     l'empreinte, et api/apprendre.php (action « achat ») ne rouvre l'épreuve qu'à
+     qui présente la référence ET la clé. Les deux restent sur cet appareil. */
+  var PRIX = +OUT.getAttribute("data-prix") || 150, PAY = "/api/payment_camerpay.php", K_ACHAT = "vrt_sq_achat_" + ID, SUIVI = null;
+  function achatLu() { try { var a = JSON.parse(lsGet(K_ACHAT) || "null"); return a && a.ref && a.cle ? a : null; } catch (e) { return null; } }
+  function cleNeuve() {
+    var b = new Uint8Array(24), h = "";
+    (W.crypto || W.msCrypto).getRandomValues(b);
+    for (var i = 0; i < b.length; i++) h += ("0" + b[i].toString(16)).slice(-2);
+    return h;
+  }
+  function refNeuve() {
+    var d = new Date(), p = function (n) { return (n < 10 ? "0" : "") + n; }, a = "ABCDEFGHJKMNPQRSTUVWXYZ23456789", s = "";
+    for (var i = 0; i < 6; i++) s += a.charAt(Math.floor(Math.random() * a.length));
+    return "SQ" + String(d.getFullYear()).slice(2) + p(d.getMonth() + 1) + p(d.getDate()) + "-" + s;
+  }
+  /* Rouvre l'épreuve achetée sur cet appareil. `silencieux` : au chargement de la page,
+     un achat encore en attente ne doit pas ouvrir de fenêtre. */
+  function reprendre(suite, silencieux) {
+    var a = achatLu(); if (!a) return false;
+    fetch(API, { method: "POST", headers: { "Content-Type": "application/json" }, credentials: "same-origin",
+      body: JSON.stringify({ action: "achat", id: ID, ref: a.ref, cle: a.cle }) })
+      .then(function (r) { return r.json(); })
+      .then(function (j) {
+        if (j && j.ok && j.suite) { arreterSuivi(); fermer(); injecter(j.suite); if (suite) suite(); return; }
+        var r = (j && j.raison) || "reseau";
+        /* Un paiement abandonné reste « en attente » : passé 30 minutes on l'oublie,
+           sinon il barrerait la route à l'abonné qui veut se connecter. */
+        if (r === "achat_en_attente" && Date.now() - (+a.t || 0) > 30 * 60 * 1000) {
+          lsSet(K_ACHAT, null); arreterSuivi(); if (!silencieux) mur("connexion", suite); return;
+        }
+        if (r === "achat_en_attente") { if (!silencieux) attente(a); suivre(suite); return; }
+        arreterSuivi();
+        if (r === "achat_invalide") { lsSet(K_ACHAT, null); if (!silencieux) mur("connexion", suite); return; }
+        if (!silencieux) fenetre("<h3>Paiement reçu</h3><p class=\"ax-fen-m\">" + esc(r === "non_depose" ? MSG.non_depose
+          : "Ton paiement doit être vérifié par notre équipe. Écris-nous sur WhatsApp au 697 63 77 39 avec ta référence " + a.ref + " : ton épreuve sera ouverte rapidement.") + "</p>");
+      })
+      .catch(function () { if (!silencieux) mur("reseau", suite); });
+    return true;
+  }
+  function suivre(suite) {
+    if (SUIVI) return;
+    var debut = Date.now();
+    SUIVI = setInterval(function () {
+      if (Date.now() - debut > 15 * 60 * 1000) { arreterSuivi(); return; }   // le payeur reviendra : la reprise se fait au chargement
+      reprendre(suite, true);
+    }, 6000);
+  }
+  function arreterSuivi() { if (SUIVI) { clearInterval(SUIVI); SUIVI = null; } }
+  function attente(a) {
+    fenetre("<h3>Paiement en cours</h3><p class=\"ax-fen-m\">Valide le paiement de " + PRIX + " F sur ton téléphone (MTN MoMo ou Orange Money). " +
+      "Cette page s'ouvrira toute seule dès qu'il sera confirmé.</p><p class=\"ax-fen-m\"><small>Référence : " + esc(a.ref) + "</small></p>");
+  }
+  function acheter(tel, bouton, suite) {
+    /* Onglet ouvert PENDANT le geste : après les allers-retours réseau, le
+       navigateur bloquerait la fenêtre (même leçon que les cahiers). */
+    var fen = null; try { fen = W.open("", "_blank"); } catch (e) { fen = null; }
+    var fermerFen = function () { if (fen) { try { fen.close(); } catch (e) { } fen = null; } };
+    var a = { ref: refNeuve(), cle: cleNeuve(), t: Date.now() };
+    bouton.disabled = true; bouton.textContent = "Préparation du paiement…";
+    fetch(PAY + "?action=config", { cache: "no-store" })
+      .then(function (r) { return r.json(); })
+      .then(function (c) {
+        if (!c || c.horsService || !c.selfService || !c.publicInitToken) throw new Error("Le paiement automatique est momentanément indisponible. Réessaie un peu plus tard, ou choisis une formule d'abonnement.");
+        return fetch(PAY + "?action=init", { method: "POST", headers: { "Content-Type": "application/json", "Authorization": "Bearer " + c.publicInitToken },
+          body: JSON.stringify({ montant: PRIX, ref: a.ref, label: "Épreuve — " + TITRE, intent: "sequentielle", targetId: ID, clientTel: tel, cle: a.cle,
+            accountId: "" }) });
+      })
+      .then(function (r) { return r.json(); })
+      .then(function (j) {
+        if (!j || !j.pay_url) throw new Error((j && j.error) || "Le paiement n'a pas pu démarrer. Réessaie.");
+        lsSet(K_ACHAT, JSON.stringify(a));
+        var ouverte = false;
+        if (fen) { try { fen.location.replace(j.pay_url); ouverte = fen.closed === false; } catch (e) { ouverte = false; } }
+        if (!ouverte) { fermerFen(); location.href = j.pay_url; return; }   // au retour, la page reprend l'achat toute seule
+        attente(a); suivre(suite);
+      })
+      .catch(function (e) {
+        fermerFen(); bouton.disabled = false; bouton.textContent = "Acheter pour " + PRIX + " F";
+        var m = bouton.parentNode.querySelector(".sq-achat-err"); if (m) m.textContent = e && e.message ? e.message : MSG.reseau;
+      });
+  }
+  function achatHtml() {
+    return '<form class="sq-achat"><p><b>Sans abonnement :</b> cette épreuve complète et son corrigé pour <b>' + PRIX + " F</b>, par MTN MoMo ou Orange Money.</p>" +
+      '<input name="t" inputmode="tel" autocomplete="tel" placeholder="Ton numéro (6XX XX XX XX)" required>' +
+      '<button class="ax-btn ax-plein" type="submit">Acheter pour ' + PRIX + ' F</button><p class="sq-achat-err" role="alert"></p></form>';
+  }
+  function brancherAchat(f, suite) {
+    var fa = f.querySelector(".sq-achat"); if (!fa) return;
+    fa.addEventListener("submit", function (e) {
+      e.preventDefault();
+      var tel = String(this.t.value || "").replace(/\D/g, "").replace(/^237/, "");
+      var err = this.querySelector(".sq-achat-err");
+      if (!/^6\d{8}$/.test(tel)) { err.textContent = "Numéro attendu : 9 chiffres commençant par 6."; return; }
+      err.textContent = ""; acheter(tel, this.querySelector("button"), suite);
+    });
+  }
   function exiger(suite) {
     /* La suite servie par le serveur vaut preuve d'abonnement (formule active, classe couverte). */
+    if (SUITE && !CHARGEE && achatLu()) { reprendre(suite, false); return; }
     if (SUITE) { if (CHARGEE) { suite(); return; } var tj = jeton(); if (!tj) mur("connexion", suite); else charger({ token: tj }, suite); return; }
     var c = null; try { c = JSON.parse(ssGet(CACHE) || "null"); } catch (e) { }
     if (c && c.ok && Date.now() - c.t < 30 * 60 * 1000) { suite(); return; }
@@ -97,12 +196,14 @@
   }
   function fermer() { var f = D.getElementById("axFen"); if (f) f.parentNode.removeChild(f); }
   function mur(raison, suite) {
-    var m = SUITE && raison === "connexion" ? "La suite du sujet, son corrigé, le PDF et la composition en direct sont réservés aux abonnés. Déjà abonné ? Connecte-toi." : MSG[raison] || MSG.reseau;
-    var f = fenetre('<h3>Réservé aux abonnés</h3><p class="ax-fen-m">' + esc(m) + "</p>" +
-      '<a class="ax-btn ax-plein" href="/app.html#abonnement">Choisir une formule</a>' +
+    var m = SUITE && raison === "connexion" ? "La suite du sujet, son corrigé, le PDF et la composition en direct s'ouvrent avec un abonnement, ou en achetant cette seule épreuve." : MSG[raison] || MSG.reseau;
+    var f = fenetre('<h3>' + (SUITE ? "Abonnés ou achat à l'unité" : "Réservé aux abonnés") + '</h3><p class="ax-fen-m">' + esc(m) + "</p>" +
+      (SUITE ? achatHtml() : "") +
+      '<a class="ax-btn' + (SUITE ? "" : " ax-plein") + '" href="/app.html#abonnement">Choisir une formule</a>' +
       '<form class="ax-log"><p>Déjà abonné ?</p><input name="l" autocomplete="username" placeholder="Identifiant ou téléphone" required>' +
       '<input name="p" type="password" autocomplete="current-password" placeholder="Mot de passe" required><button class="ax-btn" type="submit">Me connecter</button></form>');
-    f.querySelector("form").addEventListener("submit", function (e) {
+    if (SUITE) brancherAchat(f, suite);
+    f.querySelector(".ax-log").addEventListener("submit", function (e) {
       e.preventDefault();
       var l = this.l.value.trim(), p = this.p.value, bt = this.querySelector("button");
       if (!l || !p) return;
@@ -234,7 +335,13 @@
   OUT.querySelector("[data-a=pdf]").addEventListener("click", function () { exiger(choixPdf); });
   OUT.querySelector("[data-a=direct]").addEventListener("click", function () { exiger(composer); });
   var LIB = D.querySelector("[data-a=suite]");
-  if (LIB) LIB.addEventListener("click", function () { exiger(function () { var x = D.querySelector(".sq-suite"); if (x && x.scrollIntoView) x.scrollIntoView({ behavior: "smooth", block: "start" }); }); });
+  var voir = function () { var x = D.querySelector(".sq-suite"); if (x && x.scrollIntoView) x.scrollIntoView({ behavior: "smooth", block: "start" }); };
+  if (LIB) LIB.addEventListener("click", function () { exiger(voir); });
+  var ACH = D.querySelector("[data-a=acheter]");
+  if (ACH) ACH.addEventListener("click", function () { if (CHARGEE) { voir(); return; } if (!reprendre(voir, false)) mur("connexion", voir); });
   D.addEventListener("keydown", function (e) { if (e.key === "Escape") fermer(); });
   maj();
+  /* Épreuve déjà achetée sur cet appareil (ou paiement qui vient d'aboutir, retour de la
+     page de paiement) : elle se rouvre sans rien demander. */
+  if (SUITE && achatLu()) reprendre(null, true);
 })(window, document);

@@ -547,6 +547,32 @@ if ($action === 'init' && $method === 'POST') {
         jsonRespCy(['error' => 'Numéro invalide — format attendu 6XXXXXXXX ou 2376XXXXXXXX'], 400);
     }
 
+    /* ── ÉPREUVE À L'UNITÉ (15/11/2026) : livrable AVANT le débit ───────────────
+       Le sujet complet et le corrigé vivent dans uploads/protected/apprendre/<id>.json,
+       déposé par FTP, à part de la page publique déployée par la CI. Entre les deux
+       gestes, l'épreuve est en vitrine sans être livrable : on refuse ici, comme
+       pour un livre non préparé. La clé secrète de l'acheteur (32 caractères ou
+       plus, tirée par son navigateur) n'est gardée qu'en empreinte : elle seule
+       rouvre l'épreuve sur cet appareil, sans compte (api/apprendre.php). */
+    $cleHash = '';
+    if ($intent === 'sequentielle') {
+        /* Même format de référence qu'à l'ouverture (api/apprendre.php, action « achat ») :
+           une référence acceptée ici mais refusée là-bas serait payée et jamais ouvrable. */
+        if (!preg_match('/^[A-Za-z0-9_-]{4,64}$/', $ref)) jsonRespCy(['error' => 'Référence de paiement invalide : actualisez la page.'], 400);
+        if (!preg_match('/^[a-z0-9][a-z0-9-]{2,80}$/', $targetId)
+            || !is_file(dirname(__DIR__) . '/uploads/protected/apprendre/' . $targetId . '.json')) {
+            vrt_pay_log('[EPREUVE_NON_LIVRABLE] refus init id=' . substr(preg_replace('/[^\x20-\x7E]/', '?', $targetId), 0, 80) . ' ref=' . $ref);
+            jsonRespCy(['error' => 'Cette épreuve n’est pas encore disponible. Réessayez plus tard, '
+                                 . 'ou écrivez à contact@veritas-school.com.'], 409);
+        }
+        $cleAch = (string) ($input['cle'] ?? '');
+        // Format ET variété : une clé « 0000… » passerait le format sans rien protéger.
+        if (!preg_match('/^[a-f0-9]{32,128}$/', $cleAch) || count(array_unique(str_split($cleAch))) < 8) {
+            jsonRespCy(['error' => 'Clé d’achat invalide : actualisez la page.'], 400);
+        }
+        $cleHash = hash('sha256', $cleAch);
+    }
+
     /* ── CODE AMI + CONTRÔLE DU PRIX, AVANT LE DÉBIT ─────────────────────────
        Le code saisi quittait jamais le navigateur : le serveur ne savait ni
        quelle remise honorer, ni qui rémunérer. Il est désormais évalué ICI,
@@ -731,6 +757,7 @@ if ($action === 'init' && $method === 'POST') {
             'clientNom'    => $clientNom,
             'clientTel'    => $payerNumber,
             'clientTelInit'=> $payerNumber,
+            'cle_hash'     => $cleHash,
             'clientEmail'  => (filter_var($clientMail, FILTER_VALIDATE_EMAIL) ? $clientMail : ''),
             'fundMessage'  => mb_substr(trim((string)($input['fundMessage'] ?? '')), 0, 140),
             'operator'     => camerpayOperatorLabel($methode),
@@ -860,6 +887,7 @@ if ($action === 'init' && $method === 'POST') {
         'accountId'      => $accountId,
         'clientNom'      => $clientNom,
         'clientTel'      => $payerNumber,
+        'cle_hash'       => $cleHash,
         /* L'adresse était transmise à CamerPay (customer_email) et perdue pour
            NOUS : l'état ne la gardait pas, donc l'octroi ne l'avait pas, donc la
            remise du code ne pouvait pas s'en servir. Elle n'est validée qu'une

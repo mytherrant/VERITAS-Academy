@@ -55,7 +55,11 @@ const MATIERES = {
   allemand: ["Allemand", ["Allemand"], "allemand"],
 };
 const ORDRE = Object.keys(MATIERES);
-const idDe = (classe, mat, seq) => CLASSES[classe] + "-seq" + seq + "-" + mat;
+// Examen blanc de fin d'année (seq = "blanc") : même chaîne, même verrou, au format de l'examen de la classe.
+const BLANC = s => s === "blanc";
+const idDe = (classe, mat, seq) => CLASSES[classe] + "-" + (BLANC(seq) ? "blanc" : "seq" + seq) + "-" + mat;
+const EXAMEN = c => /^3e/.test(c) ? "BEPC" : /^1re/.test(c) ? "Probatoire" : "Baccalauréat";
+const PRIX_UNITE = 150;   // achat à l'unité, sans compte (api : vrt_prix_catalogue « sequentielle »)
 const minutes = d => { const m = /(\d+)\s*h(?:\s*(\d+))?|(\d+)\s*min/.exec(String(d || "")); return m ? (m[1] ? +m[1] * 60 + (+m[2] || 0) : +m[3]) : 120; };
 
 // --- Progression découpée en séquences ---
@@ -100,7 +104,7 @@ const equilibre = (h, nom) => {
 const verifMeta = (meta, nom) => {
   if (!CLASSES[meta.classe]) err(nom + " : classe inconnue " + meta.classe);
   if (!MATIERES[meta.matiere]) err(nom + " : matière inconnue " + meta.matiere);
-  if (!(meta.seq >= 1 && meta.seq <= 6)) err(nom + " : séquence hors de 1..6");
+  if (!BLANC(meta.seq) && !(meta.seq >= 1 && meta.seq <= 6)) err(nom + " : séquence hors de 1..6 (ou « blanc »)");
   if (!meta.duree) err(nom + " : durée absente");
 };
 
@@ -111,7 +115,7 @@ if (PUBLIER) {
   const dFtp = path.join(ftp, "uploads/protected/apprendre"); fs.mkdirSync(dFtp, { recursive: true });
   let n = 0;
   for (const c of fs.readdirSync(src).filter(d => fs.statSync(path.join(src, d)).isDirectory())) {
-    for (const f of fs.readdirSync(path.join(src, c)).filter(f => /^[a-z]+-s\d\.html$/.test(f)).sort()) {
+    for (const f of fs.readdirSync(path.join(src, c)).filter(f => /^[a-z]+-(s\d|blanc)\.html$/.test(f)).sort()) {
       const nom = c + "/" + f, s = lireSource(fs.readFileSync(path.join(src, c, f), "utf8"), nom); if (!s) continue;
       const { meta, bloc } = s; verifMeta(meta, nom);
       const sujet = bloc("sujet"), corrige = bloc("corrige"), k = sujet.indexOf("<!--coupe-->");
@@ -122,7 +126,7 @@ if (PUBLIER) {
       if (corrige.length < 400) err(nom + " : corrigé vide ou tronqué");
       [["début", debut], ["suite", suite], ["corrigé", corrige]].forEach(([q, h]) => equilibre(h, nom + " (" + q + ")"));
       const id = idDe(meta.classe, meta.matiere, meta.seq);
-      if (f !== meta.matiere + "-s" + meta.seq + ".html" || CLASSES[meta.classe] !== c) err(nom + " : nom de fichier ou dossier ≠ méta");
+      if (f !== meta.matiere + "-" + (BLANC(meta.seq) ? "blanc" : "s" + meta.seq) + ".html" || CLASSES[meta.classe] !== c) err(nom + " : nom de fichier ou dossier ≠ méta");
       // Ce qui reste visible : combien d'exercices et de points attendent derrière le verrou.
       // Langues : « Exercise / Ejercicio / Übung » et « SECTION / Teil » comptent comme exercices et parties.
       const nEx = (suite.match(/<strong>(Exercice|Exercise|Ejercicio|Übung|Aufgabe)\b/g) || []).length;
@@ -155,7 +159,7 @@ const JS_V = crypto.createHash("sha1").update(fs.readFileSync(path.join(R, "tool
 const CSS = fs.readFileSync(path.join(R, "tools/methodes/_methode.css"), "utf8").trim() + "\n" + fs.readFileSync(path.join(__dirname, "annales/_annales.css"), "utf8").trim() + "\n" + fs.readFileSync(path.join(SRC, "_sequentielles.css"), "utf8").trim();
 
 const epreuves = [];
-for (const f of fs.readdirSync(SRC).filter(f => /^[a-z0-9-]+-seq\d-[a-z]+\.html$/.test(f)).sort()) {
+for (const f of fs.readdirSync(SRC).filter(f => /^[a-z0-9-]+-(seq\d|blanc)-[a-z]+\.html$/.test(f)).sort()) {
   const s = lireSource(fs.readFileSync(path.join(SRC, f), "utf8"), f); if (!s) continue;
   const { meta, bloc } = s; verifMeta(meta, f);
   const id = idDe(meta.classe, meta.matiere, meta.seq);
@@ -165,7 +169,10 @@ for (const f of fs.readdirSync(SRC).filter(f => /^[a-z0-9-]+-seq\d-[a-z]+\.html$
   equilibre(debut, f);
   // « lecons » (rangs de la progression) corrige une fiche mal datée, comme celle du français de 3e.
   const toutes = meta.lecons && leconsDe(meta.classe, meta.matiere, 0) !== null ? PROG[meta.classe][MATIERES[meta.matiere][1].find(n => PROG[meta.classe][n])].flatMap(c => c[1]) : null;
-  const lecons = toutes ? meta.lecons.map(r => toutes.find(l => l[0] === r) || (err(f + " : rang " + r + " absent de la progression"), null)).filter(Boolean) : leconsDe(meta.classe, meta.matiere, meta.seq);
+  // Examen blanc : tout le programme de l'année, présenté par chapitre (rang 0).
+  const chapitres = () => { const n = MATIERES[meta.matiere][1].find(x => PROG[meta.classe] && PROG[meta.classe][x]);
+    return n ? PROG[meta.classe][n].map(c => [0, c[0]]).filter((c, i, a) => c[1] && a.findIndex(y => y[1] === c[1]) === i) : null; };
+  const lecons = BLANC(meta.seq) ? chapitres() : toutes ? meta.lecons.map(r => toutes.find(l => l[0] === r) || (err(f + " : rang " + r + " absent de la progression"), null)).filter(Boolean) : leconsDe(meta.classe, meta.matiere, meta.seq);
   if (!lecons || !lecons.length) err(f + " : aucune leçon de la progression pour cette séquence");
   epreuves.push({ id, meta, debut, lecons: lecons || [], page: "ressources/sequentielles/" + id + ".html" });
 }
@@ -205,32 +212,44 @@ const ICO_PDF = '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" str
 const ICO_DIR = '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2.5 2.5M9 2h6"/></svg>';
 const ICO_CLE = '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>';
 
+// Ordre d'affichage : séquences 1 à 6, puis l'examen blanc.
+const rang = q => BLANC(q) ? 99 : +q;
+const nomSeq = q => BLANC(q) ? "Examen blanc" : "Séquence " + q;
 for (const e of epreuves) {
-  const { meta } = e, lib = MATIERES[meta.matiere][0];
-  const soeurs = epreuves.filter(x => x.meta.classe === meta.classe && x.meta.matiere === meta.matiere).sort((a, b) => a.meta.seq - b.meta.seq);
-  const seqs = '<div class="ax-annees">' + soeurs.map(x => x === e ? "<span>Séquence " + x.meta.seq + "</span>" : '<a href="/' + x.page + '">Séquence ' + x.meta.seq + "</a>").join("") + "</div>";
-  const titre = lib + ", " + meta.classe + " : épreuve de la séquence " + meta.seq;
-  const description = "Épreuve séquentielle de " + lib.toLowerCase() + " en " + meta.classe + " (Cameroun, séquence " + meta.seq + ", progression MINESEC 2026-2027) au format APC, avec corrigé et barème.";
-  const outils = '<div class="ax-outils" data-suite="1" data-id="' + esc(e.id) + '" data-titre="' + esc(titre) + '" data-min="' + minutes(meta.duree) + '" data-meta="' + esc(["Évaluation de la séquence " + meta.seq, meta.classe, "Durée : " + meta.duree, meta.coef ? "Coefficient : " + meta.coef : ""].filter(Boolean).join(" · ")) + '">' +
+  const { meta } = e, lib = MATIERES[meta.matiere][0], blanc = BLANC(meta.seq), exam = EXAMEN(meta.classe);
+  const soeurs = epreuves.filter(x => x.meta.classe === meta.classe && x.meta.matiere === meta.matiere).sort((a, b) => rang(a.meta.seq) - rang(b.meta.seq));
+  const seqs = '<div class="ax-annees">' + soeurs.map(x => x === e ? "<span>" + nomSeq(x.meta.seq) + "</span>" : '<a href="/' + x.page + '">' + nomSeq(x.meta.seq) + "</a>").join("") + "</div>";
+  const titre = blanc ? lib + ", " + meta.classe + " : examen blanc de fin d'année" : lib + ", " + meta.classe + " : épreuve de la séquence " + meta.seq;
+  const description = blanc
+    ? "Examen blanc de " + lib.toLowerCase() + " en " + meta.classe + " (Cameroun), au format du " + exam + ", sur le programme de l'année, avec corrigé et barème."
+    : "Épreuve séquentielle de " + lib.toLowerCase() + " en " + meta.classe + " (Cameroun, séquence " + meta.seq + ", progression MINESEC 2026-2027) au format APC, avec corrigé et barème.";
+  const outils = '<div class="ax-outils" data-suite="1" data-prix="' + PRIX_UNITE + '" data-id="' + esc(e.id) + '" data-titre="' + esc(titre) + '" data-min="' + minutes(meta.duree) + '" data-meta="' + esc([blanc ? "Examen blanc (format " + exam + ")" : "Évaluation de la séquence " + meta.seq, meta.classe, "Durée : " + meta.duree, meta.coef ? "Coefficient : " + meta.coef : ""].filter(Boolean).join(" · ")) + '">' +
     '<button type="button" class="ax-btn" data-a="pdf">' + ICO_PDF + "<span>Télécharger en PDF</span></button>" +
     '<button type="button" class="ax-btn ax-plein" data-a="direct">' + ICO_DIR + "<span>Composer en direct</span></button>" +
-    '<span class="ax-abo">Réservé aux abonnés</span></div>';
-  const fiche = '<div class="ax-meta"><span><b>Classe</b> ' + esc(meta.classe) + "</span><span><b>Séquence</b> " + meta.seq + "</span><span><b>Durée</b> " + esc(meta.duree) + "</span>" + (meta.coef ? "<span><b>Coefficient</b> " + esc(meta.coef) + "</span>" : "") + "</div>" +
-    "<p>Les leçons évaluées, dans l'ordre de la progression nationale 2026-2027 :</p><ul class=\"sq-lecons\">" + e.lecons.map(l => "<li>" + esc(l[1]) + "</li>").join("") + "</ul>" +
-    (soeurs.length > 1 ? "<p>Les autres séquences de l'année :</p>" + seqs : "");
+    '<span class="ax-abo">Abonnés, ou ' + PRIX_UNITE + ' F l\'épreuve</span></div>';
+  const fiche = '<div class="ax-meta"><span><b>Classe</b> ' + esc(meta.classe) + "</span><span><b>" + (blanc ? "Format" : "Séquence") + "</b> " + (blanc ? exam : meta.seq) + "</span><span><b>Durée</b> " + esc(meta.duree) + "</span>" + (meta.coef ? "<span><b>Coefficient</b> " + esc(meta.coef) + "</span>" : "") + "</div>" +
+    (blanc ? "<p>Le programme de l'année, chapitre par chapitre, comme à l'examen :</p>" : "<p>Les leçons évaluées, dans l'ordre de la progression nationale 2026-2027 :</p>") +
+    '<ul class="sq-lecons">' + e.lecons.map(l => "<li>" + esc(l[1]) + "</li>").join("") + "</ul>" +
+    (soeurs.length > 1 ? "<p>Les autres épreuves de l'année :</p>" + seqs : "");
   const reste = meta.reste || "la suite du sujet";
-  const verrou = '<div class="sq-verrou"><p><b>La suite est réservée aux abonnés :</b> ' + reste + ", le corrigé détaillé avec son barème, le téléchargement en PDF et la composition en direct.</p>" +
-    '<div class="sq-verrou-act"><button type="button" class="ax-btn ax-plein" data-a="suite">' + ICO_CLE + '<span>Voir la suite (abonnés)</span></button><a class="ax-btn" href="/app.html#abonnement">Choisir une formule</a></div></div>';
+  const verrou = '<div class="sq-verrou"><p><b>La suite :</b> ' + reste + ", le corrigé détaillé avec son barème, le téléchargement en PDF et la composition en direct. " +
+    "Elle s'ouvre avec un abonnement, ou sans compte pour <b>" + PRIX_UNITE + " F</b> l'épreuve et son corrigé (MTN MoMo, Orange Money).</p>" +
+    '<div class="sq-verrou-act"><button type="button" class="ax-btn ax-plein" data-a="acheter">' + ICO_CLE + '<span>Acheter cette épreuve : ' + PRIX_UNITE + ' F</span></button>' +
+    '<button type="button" class="ax-btn" data-a="suite"><span>Je suis abonné</span></button></div></div>';
   const parties = [
     ["epreuve", "L'épreuve", outils + fiche],
     ["sujet", "Le sujet", (meta.note ? '<div class="ax-avert">' + meta.note + "</div>" : "") + '<div class="ax-sujet">' + e.debut + "</div>" + verrou],
     ["corrige", "Le corrigé", '<div id="sqCorrige"><p class="sq-cadenas">Le corrigé s\'affiche ici dès que la suite du sujet est ouverte.</p></div>'],
-    ["sources", "Sources", "<ul><li>Leçons : progression harmonisée MINESEC 2026-2027, sous-système francophone</li><li>Sujet et corrigé : les enseignants de VÉRITAS, au format des évaluations APC</li></ul>"],
+    ["sources", "Sources", "<ul><li>" + (blanc ? "Programme : progression harmonisée MINESEC 2026-2027 ; format : épreuves officielles du " + exam : "Leçons : progression harmonisée MINESEC 2026-2027, sous-système francophone") +
+      "</li><li>Sujet et corrigé : les enseignants de VÉRITAS, " + (blanc ? "au format de l'examen" : "au format des évaluations APC") + "</li></ul>"],
   ];
-  const cta = '<a class="cta" href="/ressources/sequentielles/">Toutes les épreuves séquentielles<small>Par classe, par matière et par séquence</small></a>';
-  let html = GAB.replace(RE_ART, () => article("Épreuve séquentielle · " + meta.classe + " · Séquence " + meta.seq, titre, "Une épreuve de séquence sur les leçons de la progression nationale, au format des évaluations APC. Le premier exercice est ouvert à tous.", parties, cta));
+  const cta = '<a class="cta" href="/ressources/sequentielles/">Toutes les épreuves séquentielles et les examens blancs<small>Par classe, par matière et par séquence</small></a>';
+  const badge = blanc ? "Examen blanc · " + meta.classe + " · format " + exam : "Épreuve séquentielle · " + meta.classe + " · Séquence " + meta.seq;
+  const chapo = blanc ? "Un examen blanc complet de fin d'année, au format et au barème du " + exam + ". Le premier exercice est ouvert à tous."
+    : "Une épreuve de séquence sur les leçons de la progression nationale, au format des évaluations APC. Le premier exercice est ouvert à tous.";
+  let html = GAB.replace(RE_ART, () => article(badge, titre, chapo, parties, cta));
   html = html.replace(/(<script src="\/ressources\/methode\.js\?v=[0-9a-f]+" defer><\/script>)/, m => m + '<script src="/ressources/annales/annales.js?v=' + AX_V + '" defer></script>');
-  html = habiller(html, e.page, titre + " | VÉRITAS", description, { "@type": "LearningResource", name: titre, description, educationalLevel: meta.classe, learningResourceType: "Évaluation séquentielle", about: lib, isAccessibleForFree: false });
+  html = habiller(html, e.page, titre + " | VÉRITAS", description, { "@type": "LearningResource", name: titre, description, educationalLevel: meta.classe, learningResourceType: blanc ? "Examen blanc" : "Évaluation séquentielle", about: lib, isAccessibleForFree: false });
   ecrire(e.page, html);
 }
 
@@ -241,13 +260,20 @@ for (const e of epreuves) {
   const parties = Object.keys(CLASSES).map(c => {
     const xs = epreuves.filter(e => e.meta.classe === c); if (!xs.length) return null;
     const mats = [...new Set(xs.map(e => e.meta.matiere))].sort((a, b) => ORDRE.indexOf(a) - ORDRE.indexOf(b));
-    const lignes = mats.map(m => "<tr><th>" + esc(MATIERES[m][0]) + "</th><td>" + xs.filter(e => e.meta.matiere === m).sort((a, b) => a.meta.seq - b.meta.seq).map(e => '<a href="/' + e.page + '">Séq. ' + e.meta.seq + "</a>").join(" · ") + "</td></tr>").join("");
-    return [CLASSES[c], c, '<table class="ax-tbl"><thead><tr><th>Matière</th><th>Séquences</th></tr></thead><tbody>' + lignes + "</tbody></table>"];
+    const lignes = mats.map(m => {
+      const ys = xs.filter(e => e.meta.matiere === m).sort((a, b) => rang(a.meta.seq) - rang(b.meta.seq));
+      const seqL = ys.filter(e => !BLANC(e.meta.seq)).map(e => '<a href="/' + e.page + '">Séq. ' + e.meta.seq + "</a>").join(" · ");
+      const bl = ys.filter(e => BLANC(e.meta.seq)).map(e => '<a href="/' + e.page + '">Examen blanc</a>').join("");
+      return "<tr><th>" + esc(MATIERES[m][0]) + "</th><td>" + (seqL || "—") + "</td><td>" + (bl || "—") + "</td></tr>";
+    }).join("");
+    return [CLASSES[c], c, '<table class="ax-tbl"><thead><tr><th>Matière</th><th>Séquences</th><th>Fin d\'année</th></tr></thead><tbody>' + lignes + "</tbody></table>"];
   }).filter(Boolean);
-  parties.push(["methode", "Comment s'en servir", "<p>Chaque épreuve porte sur les leçons de la séquence, dans l'ordre de la progression nationale. Le premier exercice est ouvert à tous ; les abonnés ouvrent la suite, le corrigé avec son barème, le PDF à imprimer et la composition en direct, chronomètre à la durée de l'épreuve.</p>"]);
-  const titre = "Épreuves séquentielles corrigées";
-  const description = "Épreuves de séquence 1 à 6 au format APC (Cameroun, progression MINESEC 2026-2027) pour les classes d'examen : 3e, 1re et Tle, avec corrigé et barème.";
-  let html = GAB.replace(RE_ART, () => article("Épreuves séquentielles", titre, "Une épreuve par séquence, par classe et par matière, sur les leçons de la progression nationale.", parties, '<a class="cta" href="/ressources/annales/">Annales corrigées<small>Les derniers sujets officiels du BEPC, du Probatoire et du BAC</small></a>'));
+  parties.push(["methode", "Comment s'en servir", "<p>Chaque épreuve de séquence porte sur les leçons de la séquence, dans l'ordre de la progression nationale ; l'examen blanc de fin d'année reprend le format et le barème du BEPC, du Probatoire ou du BAC. " +
+    "Le premier exercice est ouvert à tous. La suite, le corrigé avec son barème, le PDF à imprimer et la composition en direct s'ouvrent avec un abonnement, ou sans compte pour " + PRIX_UNITE + " F l'épreuve.</p>" +
+    "<p>Les sujets officiels des années passées restent gratuits : voir les annales corrigées.</p>"]);
+  const titre = "Épreuves séquentielles et examens blancs corrigés";
+  const description = "Épreuves de séquence 1 à 6 et examens blancs de fin d'année (Cameroun, progression MINESEC 2026-2027) pour les classes d'examen : 3e, 1re et Tle, avec corrigé et barème.";
+  let html = GAB.replace(RE_ART, () => article("Épreuves séquentielles", titre, "Une épreuve par séquence, par classe et par matière, et un examen blanc de fin d'année au format de l'examen.", parties, '<a class="cta" href="/ressources/annales/">Annales corrigées (gratuites)<small>Les derniers sujets officiels du BEPC, du Probatoire et du BAC</small></a>'));
   html = habiller(html, page, titre + " | VÉRITAS", description, { "@type": "CollectionPage", name: titre, description });
   ecrire(page, html);
 })();
@@ -255,7 +281,7 @@ for (const e of epreuves) {
 // --- Liste pour Apprendre ---
 (function liste() {
   const f = path.join(SRC, "_liste.json");
-  const L = epreuves.slice().sort((a, b) => ORDRE.indexOf(a.meta.matiere) - ORDRE.indexOf(b.meta.matiere) || a.meta.seq - b.meta.seq)
+  const L = epreuves.slice().sort((a, b) => ORDRE.indexOf(a.meta.matiere) - ORDRE.indexOf(b.meta.matiere) || rang(a.meta.seq) - rang(b.meta.seq))
     .map(e => ({ id: e.id, classe: e.meta.classe, m: e.meta.matiere, mat: MATIERES[e.meta.matiere][2], matiere: MATIERES[e.meta.matiere][0], seq: e.meta.seq, rangs: e.lecons.map(l => l[0]), u: "/" + e.page }));
   const json = JSON.stringify(L, null, 1) + "\n";
   if (fs.existsSync(f) && fs.readFileSync(f, "utf8") === json) return;

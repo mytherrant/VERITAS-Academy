@@ -44,9 +44,13 @@ if (!defined('VRT_PRICE_ENFORCE')) define('VRT_PRICE_ENFORCE', 'strict');
 $__lvDir = sys_get_temp_dir() . '/vrt_livret_test_' . getmypid();
 @mkdir($__lvDir, 0700, true);
 define('VRT_LIVRET_DIR', $__lvDir);
+/* Même raison pour la file des SMS (api/data/notify) : l'achat d'épreuve s'en sert comme
+   registre d'idempotence. Sans bac à sable, un passage précédent ferait croire au suivant
+   que l'épreuve est déjà débloquée. */
+define('VRT_NOTIFY_DIR', $__lvDir);
 register_shutdown_function(function () use ($__lvDir) {
     foreach (glob($__lvDir . '/{,*/}*', GLOB_BRACE) ?: [] as $f) { if (is_file($f)) @unlink($f); }
-    @rmdir($__lvDir . '/livret_ventes'); @rmdir($__lvDir);
+    @rmdir($__lvDir . '/livret_ventes'); @rmdir($__lvDir . '/notify'); @rmdir($__lvDir);
 });
 
 require_once __DIR__ . '/../api/_auth_lib.php';
@@ -184,6 +188,12 @@ $surfaces = [
 
     // Les quatre micro-achats partagent UN tiroir : la clé DOIT être préfixée,
     // sinon la fiche n° 12 débloque le labo n° 12.
+    /* Épreuve séquentielle / examen blanc à l'unité (150 F) : le compte payeur
+       reçoit la clé préfixée ; l'appareil sans compte passe par la clé d'achat. */
+    'sequentielle' => ['cible' => '3e-seq1-mathematiques', 'prix' => 150, 'preuve' => function ($db) {
+        return in_array('sequentielle:3e-seq1-mathematiques', tiroir($db, 'unlockedUnits'), true);
+    }, 'attendu' => 'acc.unlockedUnits contient sequentielle:3e-seq1-mathematiques'],
+
     'micro_epreuve' => ['cible' => 'ct1', 'prix' => 200, 'preuve' => function ($db) {
         return in_array('micro_epreuve:ct1', tiroir($db, 'unlockedUnits'), true);
     }, 'attendu' => 'acc.unlockedUnits contient micro_epreuve:ct1'],
@@ -315,6 +325,7 @@ foreach ([
     ['digitalbook',  'bk1', 100,  2500,  'manuel numérique payé 100 FCFA'],
     ['contenu',      'ct1', 200,  1500,  'contenu e-learning sous-payé'],
     ['micro_epreuve','ct1', 50,   200,   'micro-achat sous-payé'],
+    ['sequentielle', '3e-seq1-mathematiques', 50, 150, 'épreuve séquentielle payée 50 FCFA'],
     ['ia',           'ia_credits', 100, 500, 'crédits IA sous-payés'],
     ['echeance',     'ech1:2', 5000, 30000, 'tranche de scolarité sous-payée'],
 ] as [$intent, $cible, $paye, $tarif, $libelle]) {
@@ -866,6 +877,30 @@ titre("9. Lecture du droit : l'echeance referme vraiment");
     ok('un second achat s\'ajoute au premier', count($ouverts2) === 2
        && in_array($achete, $ouverts2, true) && in_array($second, $ouverts2, true),
        'unlockedBooks = ' . json_encode($ouverts2));
+})();
+
+// ════════════════════════════════════════════════════════════════════════════
+// ÉPREUVE À L'UNITÉ SANS COMPTE (15/11/2026) — un seul compte, un seul code, un seul SMS
+// ════════════════════════════════════════════════════════════════════════════
+(function () {
+    titre('Épreuve achetée sans compte : un rejeu ne recrée ni compte ni code');
+    $etat = paiement('sequentielle', '3e-seq1-pct', 150, ['accountId' => '', 'clientTel' => '237677000111', 'ref' => 'SQBANC-ANON1']);
+    $db = baseDeTest();
+    $avant = count($db['visitorAccounts'] ?? []);
+    $r1 = vrt_grant_entitlement($db, $etat);
+    $cree = null;
+    foreach ($db['visitorAccounts'] ?? [] as $a) if (($a['user'] ?? '') === '677000111') $cree = $a;
+    ok('premier octroi : compte créé par le numéro, épreuve rattachée',
+       !empty($r1['changed']) && $cree && in_array('sequentielle:3e-seq1-pct', $cree['unlockedUnits'] ?? [], true)
+       && ($cree['creeVia'] ?? '') === 'achat_epreuve', json_encode($r1));
+    $fichiers = glob(vrt_notify_dir() . '/*.json') ?: [];
+    ok('un SMS en file pour cette référence', vrt_notify_lire('SQBANC-ANON1') !== null);
+    /* La synchro de l'administration peut écraser la base (registre epreuveVentes et compte
+       perdus) : la file des SMS, fichier à part, doit suffire à empêcher un second code. */
+    $db2 = baseDeTest();
+    $r2 = vrt_grant_entitlement($db2, $etat);
+    ok('rejeu après une base écrasée : aucun compte recréé', empty($r2['changed']) && count($db2['visitorAccounts'] ?? []) === $avant, json_encode($r2));
+    ok('rejeu : aucun SMS de plus', count(glob(vrt_notify_dir() . '/*.json') ?: []) === count($fichiers));
 })();
 
 // ════════════════════════════════════════════════════════════════════════════

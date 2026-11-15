@@ -146,8 +146,13 @@ const seqs = (() => { try { return require(path.join(R, "tools/sequentielles/_li
 seqs.forEach(s => {
   if (!fs.existsSync(path.join(R, s.u))) return err("épreuve séquentielle introuvable : " + s.u);
   const id = "sq_" + s.id.replace(/-/g, "_");
-  items[id] = { t: "epreuve", ti: "Épreuve de la séquence " + s.seq + " · " + s.matiere, d: "Au format APC, sur les leçons de la séquence, avec corrigé et barème. Premier exercice ouvert à tous.", u: s.u, ab: 1 };
-  rattacher(id, [s.classe, s.mat, s.rangs, /./]);
+  // Examen blanc de fin d'année : tout le programme, rattaché à la matière seulement.
+  if (s.seq === "blanc") {
+    items[id] = { t: "epreuve", ti: "Examen blanc de fin d'année · " + s.matiere, d: "Au format de l'examen, sur le programme de l'année, avec corrigé et barème. Premier exercice ouvert à tous ; 150 F sans abonnement.", u: s.u, ab: 1 };
+  } else {
+    items[id] = { t: "epreuve", ti: "Épreuve de la séquence " + s.seq + " · " + s.matiere, d: "Au format APC, sur les leçons de la séquence, avec corrigé et barème. Premier exercice ouvert à tous ; 150 F sans abonnement.", u: s.u, ab: 1 };
+    rattacher(id, [s.classe, s.mat, s.rangs, /./]);
+  }
   ajoute(mat, s.classe + "|" + s.mat, id);
 });
 items.an_index = { t: "epreuve", ti: "Toutes les annales corrigées", d: "Les derniers sujets officiels, par matière et par session.", u: "/ressources/annales/", ab: 0, an: 1 };
