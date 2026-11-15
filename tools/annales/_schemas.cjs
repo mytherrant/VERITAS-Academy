@@ -563,5 +563,39 @@ S["proba-2025-svt-d-serre"] = () => {
   g += L([320, 84], [346, 26], ' stroke-width="1.2" stroke-dasharray="4 3"') + fleche([348, 20], [345, 30], 7) + T([352, 34], "vers l'espace", fs);
   return svg(440, 240, g, "Effet de serre : le rayonnement solaire traverse l'atmosphère et réchauffe le sol ; le sol émet un rayonnement infrarouge ; les gaz à effet de serre en absorbent une partie et la renvoient vers le sol, le reste part vers l'espace.");
 };
+// Sciences A-ABI 2025, document 1 : caryotype d'une cellule reproductrice (un chromosome par numéro, 1 à 22 et Y),
+// en grille de cinq colonnes comme sur le scan. Tracés relevés sur le scan (repère 870 × 500, réduit à 60 %).
+S["proba-2025-sciences-caryotype"] = () => {
+  const C = [ // [numéro, épaisseur, points du tracé, position du numéro]
+    [1, 20, [[140, 32], [95, 60], [78, 95], [84, 120], [100, 130]], [62, 150]],
+    [2, 18, [[328, 45], [265, 78], [320, 125]], [272, 150]],
+    [3, 15, [[525, 45], [462, 72], [505, 102]], [465, 146]],
+    [4, 16, [[602, 40], [598, 85], [602, 118]], [628, 145]],
+    [5, 18, [[828, 42], [802, 62], [812, 92], [838, 108]], [805, 141]],
+    [6, 16, [[110, 180], [72, 192], [58, 212], [66, 232], [78, 235]], [50, 253]],
+    [7, 20, [[235, 172], [232, 200], [238, 230]], [262, 250]],
+    [8, 18, [[405, 178], [415, 205], [408, 232]], [440, 253]],
+    [9, 16, [[585, 175], [578, 200], [588, 225]], [612, 250]],
+    [10, 16, [[835, 178], [800, 188], [808, 208], [830, 220]], [805, 250]],
+    [11, 16, [[70, 277], [66, 300], [75, 325]], [72, 353]],
+    [12, 18, [[282, 277], [278, 300], [290, 328]], [258, 353]],
+    [13, 14, [[462, 293], [468, 325]], [445, 353]],
+    [14, 18, [[600, 288], [585, 310], [590, 328]], [615, 348]],
+    [15, 18, [[808, 285], [800, 305], [818, 325]], [805, 353]],
+    [16, 16, [[72, 368], [64, 385], [76, 402]], [55, 423]],
+    [17, 18, [[272, 372], [262, 388], [275, 405]], [250, 423]],
+    [18, 16, [[435, 378], [440, 398]], [465, 426]],
+    ["Y", 14, [[828, 410], [832, 397], [848, 395]], [862, 433]],
+    [19, 16, [[45, 445], [40, 462]], [70, 490]],
+    [20, 16, [[305, 450], [292, 460], [302, 472]], [285, 493]],
+    [21, 16, [[442, 452], [445, 468]], [470, 496]],
+    [22, 18, [[648, 450], [650, 462]], [628, 488]]];
+  let g = "";
+  C.forEach(([n, ep, pts, lab]) => {
+    g += '<polyline points="' + pts.map(p => p.join(",")).join(" ") + '" stroke-width="' + f(ep * 1.4) + '" stroke-linecap="round" stroke-linejoin="round"/>';
+    g += T(lab, String(n), ' font-size="22" font-weight="700" text-anchor="middle"');
+  });
+  return svg(522, 302, '<g transform="scale(0.6)">' + g + "</g>", "Document 1 : caryotype d'une cellule humaine : un seul chromosome de chaque numéro, de 1 à 22, et un chromosome Y, soit 23 chromosomes.");
+};
 
 module.exports = S;
