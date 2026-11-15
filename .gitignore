@@ -216,3 +216,6 @@ premier_cycle/_sources/
 # Photos de justificatifs des dépenses (données privées des centres, jamais dans le dépôt)
 /gestion/api/data/justificatifs/
 /gestion/api/data/.schema
+
+# Illustrations des annales (photos de documents des sujets)
+!/ressources/annales/img/*.jpg
