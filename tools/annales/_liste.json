@@ -322,6 +322,20 @@
   "u": "/ressources/annales/probatoire-physique-dti-2025.html"
  },
  {
+  "id": "bac-chimie-cde-2025",
+  "examen": "bac",
+  "m": "chimie",
+  "serie": "séries C, D et E",
+  "nomExamen": "Baccalauréat",
+  "fiche": "ressources/examen-physique-chimie-bac.html",
+  "matiere": "Chimie (séries C, D et E)",
+  "mat": "chimie",
+  "classes": "Tle C,Tle D",
+  "annee": 2025,
+  "national": true,
+  "u": "/ressources/annales/bac-chimie-cde-2025.html"
+ },
+ {
   "id": "probatoire-chimie-cde-2025",
   "examen": "probatoire",
   "m": "chimie",

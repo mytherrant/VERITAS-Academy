@@ -639,5 +639,36 @@ S["bac-2025-maths-dti-courbe"] = () => {
   g += T([X(4.6), Y(2.2)], "(C<tspan font-size=\"9\" dy=\"3\">f</tspan>)", ' font-size="12" font-style="italic"');
   return svg(R.W, R.H, g, "Courbe de f : part de l'origine avec une tangente verticale, descend jusqu'au minimum (1 ; −1) où la tangente est horizontale, remonte, coupe l'axe des abscisses en x = e ≈ 2,72, puis croît vers +∞.");
 };
+// Chimie C-D-E 2025, exercice 2.3 : acide 2-méthylbutanoïque (formule semi-développée du sujet).
+S["bac-2025-chimie-acide"] = () => {
+  const fs = ' font-size="14"', tiret = x => L([x, 45], [x + 12, 45], ' stroke-width="1.2"');
+  let g = F([4, 50], "CH3", fs) + tiret(34) + F([50, 50], "CH2", fs) + tiret(82) + T([98, 50], "CH", fs) + tiret(122) + T([138, 50], "C", fs);
+  g += L([107, 55], [107, 66], ' stroke-width="1.2"') + F([96, 82], "CH3", fs);
+  g += L([148, 38], [166, 18], ' stroke-width="1.2"') + L([152, 41], [170, 21], ' stroke-width="1.2"') + T([168, 16], "O", fs) + L([148, 52], [166, 70], ' stroke-width="1.2"') + T([164, 84], "OH", fs);
+  return svg(200, 92, g, "Acide 2-méthylbutanoïque : CH3–CH2–CH(CH3)–COOH.");
+};
+// Chimie C-D-E 2025, exercice 2.4 : anhydride éthanoïque + phénylamine → X + acide éthanoïque.
+S["bac-2025-chimie-anhydride"] = () => {
+  const fs = ' font-size="14"', v = (x, y1, y2) => L([x - 2, y1], [x - 2, y2], ' stroke-width="1.1"') + L([x + 2, y1], [x + 2, y2], ' stroke-width="1.1"');
+  let g = F([4, 52], "CH3 − C", fs) + T([60, 16], "O", fs) + L([64, 22], [56, 38], ' stroke-width="1.2"') + L([70, 22], [80, 38], ' stroke-width="1.2"') + F([76, 52], "C − CH3", fs);
+  g += v(56, 58, 72) + T([51, 88], "O", fs) + v(81, 58, 72) + T([76, 88], "O", fs);
+  g += F([150, 52], "+  C6H5 − NH2", fs) + L([262, 47], [298, 47], ' stroke-width="1.4"') + fleche([304, 47], [294, 47], 7) + T([330, 52], "X", fs) + F([372, 52], "+  CH3 − COOH", fs);
+  return svg(486, 96, g, "Anhydride éthanoïque CH3–CO–O–CO–CH3 + C6H5–NH2 → X + CH3–COOH.");
+};
+// Corrigé chimie 2025 : les deux énantiomères de l'acide 2-méthylbutanoïque (représentation de Cram), de part et d'autre d'un miroir.
+S["bac-2025-chimie-enantiomeres"] = () => {
+  const fs = ' font-size="13"';
+  const molecule = (cx, s) => {
+    const cy = 64, h = [cx + s * 34, cy + 6], e = [cx + s * 18, cy + 38], m = [cx - s * 30, cy + 28];
+    let g = L([cx, cy - 8], [cx, cy - 34], ' stroke-width="1.4"') + L([cx - s * 4, cy + 6], m, ' stroke-width="1.4"');
+    for (let k = 1; k <= 4; k++) { const t = k / 5; g += L([cx + s * (6 + 22 * t), cy + 2 + 4 * t - 3], [cx + s * (6 + 22 * t), cy + 2 + 4 * t + 3], ' stroke-width="1.2"'); }
+    g += '<path d="M' + f(cx + s * 3) + " " + f(cy + 6) + " L" + f(e[0] - 4) + " " + f(e[1] - 4) + " L" + f(e[0] + 4) + " " + f(e[1] - 6) + ' Z" fill="currentColor" stroke="none"/>';
+    g += T([cx, cy + 4], "C", fs + ' font-weight="700" text-anchor="middle"') + T([cx, cy - 40], s > 0 ? "COOH" : "HOOC", fs + ' text-anchor="middle"');
+    g += T([h[0] + s * 4, h[1] + 4], "H", fs + (s > 0 ? "" : ' text-anchor="end"')) + F([m[0] - (s > 0 ? 32 : -4), m[1] + 14], "CH3", fs) + F([e[0] - 14, e[1] + 18], "C2H5", fs);
+    return g;
+  };
+  return svg(360, 132, molecule(90, 1) + molecule(270, -1) + L([180, 4], [180, 104], ' stroke-width="1.4"') + T([180, 124], "miroir", ' font-size="12" text-anchor="middle"'),
+    "Les deux énantiomères de l'acide 2-méthylbutanoïque en représentation de Cram : autour du carbone asymétrique, COOH en haut, CH3 dans le plan, H en arrière (traits pointillés) et C2H5 en avant (triangle plein), images l'un de l'autre dans un miroir.");
+};
 
 module.exports = S;
