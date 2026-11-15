@@ -280,4 +280,80 @@ S["proba-2024-maths-a-courbe"] = () => {
   return svg(X(xb) + 24, Y(ya) + 12, g, "Courbe de f(x) = (x − 1)/(x + 2) : deux branches croissantes, de (−6 ; 7/4) vers +∞ à gauche de l'asymptote x = −2, puis de −∞ vers (4 ; 1/2) ; tangente (T) : y = 3x/4 − 1/2 au point (0 ; −1/2).");
 };
 
+// Probatoire C-E 2024 maths : tétraèdre régulier ABCD, I milieu de [BC], H projeté orthogonal de A sur (BCD) ; coordonnées relevées sur le scan.
+S["proba-2024-maths-ce-tetraedre"] = () => {
+  const k = 0.55, Q = (x, y) => [x * k, y * k], A = Q(230, 55), B = Q(55, 218), C = Q(145, 445), D = Q(415, 350), I = Q(100, 331), H = Q(233, 338);
+  const it = ' font-style="italic" font-family="Times New Roman,serif" font-size="15"', pt = ' stroke-dasharray="1.6 3" stroke-width="1.3"';
+  return svg(250, 262, L(A, B) + L(A, C) + L(A, D) + L(B, C) + L(C, D) + L(B, D, ' stroke-dasharray="6 4" stroke-width="1.4"') +
+    L(A, I, pt) + L(A, H, pt) + L(I, D, pt) + P([[H[0], H[1] - 7], [H[0] + 6, H[1] - 7], [H[0] + 6, H[1] - 1]], pt) +
+    T([A[0] - 5, A[1] - 7], "A", it) + T([B[0] - 16, B[1] + 4], "B", it) + T([C[0] - 4, C[1] + 18], "C", it) + T([D[0] + 6, D[1] + 6], "D", it) + T([I[0] - 13, I[1] + 6], "I", it) + T([H[0] - 5, H[1] + 17], "H", it),
+    "Tétraèdre régulier ABCD ; I milieu de [BC] ; H projeté orthogonal de A sur le plan (BCD), situé sur [ID] ; segments [AI], [AH] et [ID] en pointillés, arête [BD] cachée.");
+};
+// Corrigé C-E 2024 : courbe de g, restriction de f(x) = (4x² − 4x − 2)/(2x − 3) à [1 ; 3/2[ ∪ ]3/2 ; +∞[ ; asymptotes x = 3/2 et (D) : y = 2x + 1.
+S["proba-2024-maths-ce-courbe"] = () => {
+  const u = 26, xa = -3, xb = 5, ya = -2, yb = 9.5, X = x => 22 + (x - xa) * u, Y = y => 12 + (yb - y) * u, fs = ' font-size="11"';
+  let g = ""; for (let i = xa; i <= 4; i++) if (i) g += L([X(i), Y(0) - 3], [X(i), Y(0) + 3], ' stroke-width="1"'); for (let j = ya; j <= 9; j++) if (j) g += L([X(0) - 3, Y(j)], [X(0) + 3, Y(j)], ' stroke-width="1"');
+  g += L([X(xa), Y(0)], [X(xb) + 6, Y(0)], ' stroke-width="1.2"') + fleche([X(xb) + 8, Y(0)], [X(xb), Y(0)], 6) + L([X(0), Y(ya)], [X(0), Y(yb) - 4], ' stroke-width="1.2"') + fleche([X(0), Y(yb) - 6], [X(0), Y(9)], 6);
+  for (let i = xa; i <= 4; i++) if (i) g += T([X(i) - 3, Y(0) + 14], String(i).replace("-", "−"), fs);
+  for (let j = ya; j <= 9; j++) if (j) g += T([X(0) - 14, Y(j) + 4], String(j).replace("-", "−"), fs);
+  g += T([X(0) + 3, Y(0) + 14], "0", fs) + T([X(xb) - 2, Y(0) + 16], "x", fs) + T([X(0) - 12, Y(yb) + 6], "y", fs);
+  const fn = x => 2 * x + 1 + 1 / (2 * x - 3), b1 = [], b2 = [];
+  for (let x = 1; x < 1.5; x += 0.002) { const y = fn(x); if (y >= ya) b1.push([X(x), Y(y)]); }
+  for (let x = 1.502; x <= 4.3; x += 0.004) { const y = fn(x); if (y <= 9.3) b2.push([X(x), Y(y)]); }
+  g += L([X(1.5), Y(ya)], [X(1.5), Y(yb)], ' stroke-width="1.4"');
+  g += L([X(-1.5), Y(-2)], [X(4.15), Y(9.3)], ' stroke-width="1.5"') + T([X(2.05), Y(4.75)], "(D)", fs);
+  g += L([X(1), Y(0)], [X(1), Y(2)], POINTILLE + ' stroke-width="1"') + L([X(0), Y(6)], [X(1), Y(6)], POINTILLE + ' stroke-width="1"') + L([X(2), Y(0)], [X(2), Y(6)], POINTILLE + ' stroke-width="1"') +
+    L([X(0) + 2, Y(2)], [X(2) - 2, Y(2)], ' stroke-width="1"') + fleche([X(0), Y(2)], [X(1), Y(2)], 6) + fleche([X(2), Y(2)], [X(1), Y(2)], 6) +
+    L([X(1) + 2, Y(6)], [X(3) - 2, Y(6)], ' stroke-width="1"') + fleche([X(1), Y(6)], [X(2), Y(6)], 6) + fleche([X(3), Y(6)], [X(2), Y(6)], 6);
+  g += P(b1, ' stroke-width="2.2"') + P(b2, ' stroke-width="2.2"');
+  return svg(X(xb) + 20, Y(ya) + 10, g, "Courbe de g : branche de gauche partant de (1 ; 2) et descendant vers −∞ près de x = 3/2 ; branche de droite venant de +∞, de minimum (2 ; 6), puis se rapprochant de l'asymptote oblique (D) : y = 2x + 1.");
+};
+
+// Probatoire D-TI 2024 maths, situation : espace rectangulaire au bord de la rivière, clôture en pointillés sur trois côtés.
+S["proba-2024-maths-d-cloture"] = () => {
+  const pt = ' stroke-dasharray="2 3" stroke-width="2"';
+  return svg(300, 96, T([150, 14], "Clôture", ' font-size="12" font-style="italic" text-anchor="middle"') +
+    P([[118, 54], [118, 22], [182, 22], [182, 54]], pt) +
+    '<rect x="4" y="56" width="292" height="22" fill="currentColor" fill-opacity="0.28" stroke="none"/>' + T([86, 72], "Rivière", ' font-size="12" font-style="italic"'),
+    "Espace rectangulaire au bord d'une rivière rectiligne : la clôture, en pointillés, borde trois côtés ; le côté ouvert à l'eau n'a pas de clôture.");
+};
+// Corrigé D-TI 2024, exercice 1 : ABC rectangle en A (AB = 4 ; AC = 3 sur la figure du corrigé), I milieu de [BC], G milieu de [AI],
+// (Σ) cercle de centre G passant par A, (Σ') son image par la rotation de centre A et d'angle −π/2.
+S["proba-2024-maths-d-cercles"] = () => {
+  const u = 52, O = [70, 176], Q = (x, y) => [O[0] + x * u, O[1] - y * u], A = Q(0, 0), B = Q(4, 0), C = Q(0, 3), I = Q(2, 1.5), G = Q(1, 0.75), G2 = Q(0.75, -1), r = 1.25 * u;
+  const pt = p => '<circle cx="' + f(p[0]) + '" cy="' + f(p[1]) + '" r="2.6" fill="currentColor" stroke="none"/>';
+  return svg(300, 316, L(A, B) + L(A, C) + L(B, C) + L(A, I) +
+    '<circle cx="' + f(G[0]) + '" cy="' + f(G[1]) + '" r="' + r + '"/><circle cx="' + f(G2[0]) + '" cy="' + f(G2[1]) + '" r="' + r + '"/>' +
+    code(C, I, 2) + code(I, B, 2) + code(A, G, 1) + code(G, I, 1) + pt(A) + pt(G) + pt(I) + pt(G2) +
+    T([A[0] - 14, A[1] + 2], "A", ' font-size="12"') + T([B[0] + 4, B[1] + 12], "B", ' font-size="12"') + T([C[0] - 4, C[1] - 8], "C", ' font-size="12"') +
+    T([I[0] + 2, I[1] - 8], "I", ' font-size="12"') + T([G[0] - 12, G[1] - 8], "G", ' font-size="12"') + T([G2[0] + 2, G2[1] + 14], "G'", ' font-size="12"') +
+    T([12, 128], "(Σ)", ' font-size="13" font-style="italic"') + T([16, 258], "(Σ')", ' font-size="13" font-style="italic"'),
+    "Triangle ABC rectangle en A ; I milieu de [BC] ; G milieu de [AI] ; cercle (Σ) de centre G passant par A ; cercle (Σ') de centre G', image de G par la rotation de centre A et d'angle −π/2, de même rayon.");
+};
+// Corrigé D-TI 2024, exercice 2 : (Cf) : y = −x³ + 3x² en trait plein et (Cg), son image par la translation de vecteur i, en tirets.
+S["proba-2024-maths-d-courbes"] = () => {
+  const u = 34, xa = -2.5, xb = 5.5, ya = -2.5, yb = 5.5, X = x => 14 + (x - xa) * u, Y = y => 10 + (yb - y) * u, fs = ' font-size="10"';
+  let g = '<g stroke-width="0.6" opacity="0.35" stroke-dasharray="1.5 2.5">'; for (let i = xa; i <= xb; i += 0.5) g += L([X(i), Y(ya)], [X(i), Y(yb)]); for (let j = ya; j <= yb; j += 0.5) g += L([X(xa), Y(j)], [X(xb), Y(j)]); g += "</g>";
+  g += L([X(xa), Y(0)], [X(xb), Y(0)], ' stroke-width="1.2"') + L([X(0), Y(ya)], [X(0), Y(yb)], ' stroke-width="1.2"');
+  [-2, -1, 1, 2, 5].forEach(i => { g += T([X(i) - 3, Y(0) + 13], String(i).replace("-", "−"), fs); });
+  [-2, -1, 1, 2, 3, 4, 5].forEach(j => { g += T([X(0) - 13, Y(j) + 4], String(j).replace("-", "−"), fs); });
+  g += T([X(0) - 10, Y(0) + 13], "0", fs);
+  const cf = x => -x * x * x + 3 * x * x, b = d => { const p = []; for (let x = -1.25 + d; x <= 3.45 + d; x += 0.01) { const y = cf(x - d); if (y <= 5.2 && y >= ya) p.push([X(x), Y(y)]); } return p; };
+  g += P(b(1), ' stroke-dasharray="7 5" stroke-width="2"') + P(b(0), ' stroke-width="2.2"');
+  g += L([X(1.4), Y(4)], [X(2.6), Y(4)], ' stroke-width="1"') + fleche([X(1.4), Y(4)], [X(2), Y(4)], 6) + fleche([X(2.6), Y(4)], [X(2), Y(4)], 6);
+  g += T([X(-1.95), Y(2.4)], "(Cf)", ' font-size="11" font-style="italic"') + T([X(4.1), Y(2.05)], "(Cg)", ' font-size="11" font-style="italic"');
+  return svg(X(xb) + 12, Y(ya) + 10, g, "Courbes (Cf) d'équation y = −x³ + 3x², en trait plein, minimum 0 en x = 0 et maximum 4 en x = 2 ; et (Cg), en tirets, son image par la translation de vecteur i : minimum 0 en x = 1, maximum 4 en x = 3.");
+};
+// Corrigé D-TI 2024, exercice 4 : polygone des fréquences cumulées croissantes (en %).
+S["proba-2024-maths-d-polygone"] = () => {
+  const ux = 34, uy = 2.6, X = x => 34 + x * ux, Y = y => 12 + (102 - y) * uy, fs = ' font-size="9"';
+  let g = '<g stroke-width="0.6" opacity="0.35" stroke-dasharray="1.5 2.5">'; for (let i = 0; i <= 8.5; i += 0.5) g += L([X(i), Y(0)], [X(i), Y(102)]); for (let j = 0; j <= 100; j += 2.5) g += L([X(0), Y(j)], [X(8.5), Y(j)]); g += "</g>";
+  g += L([X(-0.3), Y(0)], [X(8.7), Y(0)], ' stroke-width="1.2"') + fleche([X(8.9), Y(0)], [X(8.7), Y(0)], 6) + L([X(0), Y(-2)], [X(0), Y(103)], ' stroke-width="1.2"') + fleche([X(0), Y(104)], [X(0), Y(103)], 6);
+  for (let i = 1; i <= 8; i++) g += T([X(i) - 3, Y(0) + 13], String(i), fs);
+  for (let j = 5; j <= 100; j += 5) g += T([X(0) - 20, Y(j) + 3], String(j), fs);
+  g += T([X(0) - 9, Y(0) + 13], "0", fs) + T([X(8.6), Y(0) + 14], "x", fs);
+  g += P([[0, 0], [1, 10], [2, 25], [3, 45], [4, 65], [8, 100]].map(([x, y]) => [X(x), Y(y)]), ' stroke-width="1.8"');
+  return svg(X(9) + 10, Y(0) + 22, g, "Polygone des fréquences cumulées croissantes : points (0 ; 0), (1 ; 10), (2 ; 25), (3 ; 45), (4 ; 65) et (8 ; 100), temps en heures en abscisse et fréquences cumulées en % en ordonnée.");
+};
+
 module.exports = S;
