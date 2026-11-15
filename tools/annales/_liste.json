@@ -392,6 +392,20 @@
   "u": "/ressources/annales/probatoire-svt-d-2025.html"
  },
  {
+  "id": "probatoire-sciences-aabi-2025",
+  "examen": "probatoire",
+  "m": "sciences",
+  "serie": "séries A et ABI",
+  "nomExamen": "Probatoire",
+  "fiche": "ressources/examen-svt-probatoire.html",
+  "matiere": "Sciences (séries A et ABI)",
+  "mat": "svt",
+  "classes": "1re A",
+  "annee": 2025,
+  "national": true,
+  "u": "/ressources/annales/probatoire-sciences-aabi-2025.html"
+ },
+ {
   "id": "bepc-histoire-2025",
   "examen": "bepc",
   "m": "histoire",
@@ -404,6 +418,34 @@
   "annee": 2025,
   "national": false,
   "u": "/ressources/annales/bepc-histoire-2025.html"
+ },
+ {
+  "id": "probatoire-histoire-aabi-2025",
+  "examen": "probatoire",
+  "m": "histoire",
+  "serie": "séries A et ABI",
+  "nomExamen": "Probatoire",
+  "fiche": "ressources/examen-histoire-geographie-probatoire.html",
+  "matiere": "Histoire (séries A et ABI)",
+  "mat": "histoire",
+  "classes": "1re A",
+  "annee": 2025,
+  "national": false,
+  "u": "/ressources/annales/probatoire-histoire-aabi-2025.html"
+ },
+ {
+  "id": "probatoire-histoire-cdti-2025",
+  "examen": "probatoire",
+  "m": "histoire",
+  "serie": "séries C, D et TI",
+  "nomExamen": "Probatoire",
+  "fiche": "ressources/examen-histoire-geographie-probatoire.html",
+  "matiere": "Histoire (séries C, D et TI)",
+  "mat": "histoire",
+  "classes": "1re C,1re D",
+  "annee": 2025,
+  "national": false,
+  "u": "/ressources/annales/probatoire-histoire-cdti-2025.html"
  },
  {
   "id": "bepc-geographie-2026",

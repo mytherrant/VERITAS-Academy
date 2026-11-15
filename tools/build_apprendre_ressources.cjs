@@ -128,11 +128,16 @@ const coefs = vm.runInNewContext("(function(){" + pc.slice(dbt, fin) + ";return 
 // tools/annales.cjs) : au Probatoire et au BAC, une même matière se décline par série (maths C, maths D…).
 const NOM_AN = { allemand: "Allemand", anglais: "Anglais", ecm: "ECM", espagnol: "Espagnol", "etude-de-texte": "Français, étude de texte", "expression-ecrite": "Français, expression écrite",
   "correction-orthographique": "Français, orthographe", litterature: "Français, littérature", "langue-francaise": "Français, langue française", geographie: "Géographie", histoire: "Histoire",
-  informatique: "Informatique", mathematiques: "Mathématiques", pct: "PCT", physique: "Physique", chimie: "Chimie", svt: "SVTEEHB", philosophie: "Philosophie" };
+  informatique: "Informatique", mathematiques: "Mathématiques", pct: "PCT", physique: "Physique", chimie: "Chimie", svt: "SVTEEHB", sciences: "Sciences", philosophie: "Philosophie" };
 const annales = require(path.join(R, "tools/annales/_liste.json")).slice()
   .sort((x, y) => y.annee - x.annee || x.m.localeCompare(y.m));   // la session la plus récente d'abord
 const classesAn = {};
+// Matières d'examen sans matière correspondante dans la progression d'Apprendre : l'annale reste
+// publiée (index des annales, fiche d'examen) mais n'est rattachée à aucune leçon. Les sciences
+// des séries littéraires (1re A) n'ont pas de matière « Sciences » dans la progression MINESEC.
+const HORS_APPRENDRE = { sciences: 1 };
 annales.forEach(a => {
+  if (HORS_APPRENDRE[a.m]) return;
   if (!NOM_AN[a.m]) return err("annale sans libellé court : " + a.id);
   if (!fs.existsSync(path.join(R, a.u))) return err("annale introuvable : " + a.u);
   const id = "an_" + a.id.replace(/-/g, "_");

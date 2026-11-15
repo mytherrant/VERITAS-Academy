@@ -37,6 +37,7 @@ const MATIERES = {
   "physique": ["Physique", { probatoire: P + "examen-physique-chimie-probatoire.html", bac: P + "examen-physique-chimie-bac.html" }, "physique"],
   "chimie": ["Chimie", { probatoire: P + "examen-physique-chimie-probatoire.html", bac: P + "examen-physique-chimie-bac.html" }, "chimie"],
   "svt": ["SVTEEHB", { bepc: P + "examen-svt-bepc.html", probatoire: P + "examen-svt-probatoire.html", bac: P + "examen-svt-bac.html" }, "svt"],
+  "sciences": ["Sciences", { probatoire: P + "examen-svt-probatoire.html" }, "svt"],
   "histoire": ["Histoire", { bepc: P + "examen-histoire-geographie-bepc.html", probatoire: P + "examen-histoire-geographie-probatoire.html", bac: P + "examen-histoire-geographie-bac.html" }, "histoire"],
   "geographie": ["Géographie", { bepc: P + "examen-histoire-geographie-bepc.html", probatoire: P + "examen-histoire-geographie-probatoire.html", bac: P + "examen-histoire-geographie-bac.html" }, "geo"],
   "ecm": ["Éducation à la citoyenneté et à la morale", { bepc: P + "examen-ecm-bepc.html", probatoire: P + "examen-ecm-probatoire.html", bac: P + "examen-ecm-bac.html" }, "ecm"],
