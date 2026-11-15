@@ -252,6 +252,48 @@
   "u": "/ressources/annales/bepc-pct-2024.html"
  },
  {
+  "id": "probatoire-physique-ce-2025",
+  "examen": "probatoire",
+  "m": "physique",
+  "serie": "séries C et E",
+  "nomExamen": "Probatoire",
+  "fiche": "ressources/examen-physique-chimie-probatoire.html",
+  "matiere": "Physique (séries C et E)",
+  "mat": "physique",
+  "classes": "1re C",
+  "annee": 2025,
+  "national": true,
+  "u": "/ressources/annales/probatoire-physique-ce-2025.html"
+ },
+ {
+  "id": "probatoire-physique-dti-2025",
+  "examen": "probatoire",
+  "m": "physique",
+  "serie": "séries D et TI",
+  "nomExamen": "Probatoire",
+  "fiche": "ressources/examen-physique-chimie-probatoire.html",
+  "matiere": "Physique (séries D et TI)",
+  "mat": "physique",
+  "classes": "1re D",
+  "annee": 2025,
+  "national": true,
+  "u": "/ressources/annales/probatoire-physique-dti-2025.html"
+ },
+ {
+  "id": "probatoire-chimie-cde-2025",
+  "examen": "probatoire",
+  "m": "chimie",
+  "serie": "séries C, D et E",
+  "nomExamen": "Probatoire",
+  "fiche": "ressources/examen-physique-chimie-probatoire.html",
+  "matiere": "Chimie (séries C, D et E)",
+  "mat": "chimie",
+  "classes": "1re C,1re D",
+  "annee": 2025,
+  "national": true,
+  "u": "/ressources/annales/probatoire-chimie-cde-2025.html"
+ },
+ {
   "id": "bepc-svt-2026",
   "examen": "bepc",
   "m": "svt",

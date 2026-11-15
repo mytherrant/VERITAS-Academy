@@ -356,4 +356,95 @@ S["proba-2024-maths-d-polygone"] = () => {
   return svg(X(9) + 10, Y(0) + 22, g, "Polygone des fréquences cumulées croissantes : points (0 ; 0), (1 ; 10), (2 ; 25), (3 ; 45), (4 ; 65) et (8 ; 100), temps en heures en abscisse et fréquences cumulées en % en ordonnée.");
 };
 
+// ——— Probatoire 2025, physique et chimie ———
+// Formule chimique en texte : les chiffres qui suivent une lettre ou « ) » passent en indice.
+const F = (p, s, x = "") => T(p, s.replace(/([A-Za-z)])(\d+)/g, '$1<tspan dy="4" font-size="10">$2</tspan><tspan dy="-4"></tspan>'), x);
+// Physique C-E 2025 : générateur U, diode D1 (tension U1), R1 et R2 en dérivation.
+S["proba-2025-physique-ce-circuit"] = () => {
+  const h = 30, b = 120, fs = ' font-size="13"';
+  let g = P([[40, 62], [40, h], [130, h]]) + P([[40, 86], [40, b], [270, b], [270, h], [176, h]]);
+  g += L([26, 62], [54, 62], ' stroke-width="1.4"') + L([33, 86], [47, 86], ' stroke-width="5"') + T([20, 58], "+", fs) + T([22, 102], "−", fs);
+  g += L([66, 108], [66, 52], ' stroke-width="1.2"') + fleche([66, 46], [66, 60], 7) + T([74, 84], "U", ' font-size="14" font-weight="700"');
+  g += L([60, h], [96, h]) + fleche([100, h], [90, h], 8) + T([84, 22], "I", fs);
+  g += '<path d="M130 18 L130 42 L162 30 Z" fill="none"/>' + L([162, 18], [162, 42]) + L([162, h], [176, h]) + T([136, 12], "D<tspan dy=\"4\" font-size=\"9\">1</tspan>", fs);
+  g += L([172, 50], [130, 50], ' stroke-width="1.2"') + fleche([124, 50], [134, 50], 7) + T([144, 68], "U<tspan dy=\"4\" font-size=\"9\">1</tspan>", ' font-size="13" font-style="italic"');
+  const zz = x => { let p = [[x, 52]], y = 52; for (let i = 0; i < 6; i++) { y += 5; p.push([x + (i % 2 ? -6 : 6), y]); } p.push([x, y + 4]); return L([x, h], [x, 52]) + P(p) + L([x, y + 4], [x, b]); };
+  g += zz(215) + zz(270) + T([224, 76], "R<tspan dy=\"4\" font-size=\"9\">1</tspan>", fs) + T([279, 76], "R<tspan dy=\"4\" font-size=\"9\">2</tspan>", fs);
+  return svg(300, 136, g, "Circuit : générateur de tension U ; diode D1 parcourue par le courant I, de tension U1 ; puis les résistors R1 et R2 montés en dérivation.");
+};
+// Physique C-E 2025 : treuil (poulie de rayon r sur l'axe (Δ) du moteur), charge suspendue au fil.
+S["proba-2025-physique-ce-treuil"] = () => {
+  const C = [110, 70], fs = ' font-size="12" font-style="italic"';
+  return svg(310, 236, L([18, 70], [236, 70], POINTILLE + ' stroke-width="1"') + '<ellipse cx="110" cy="70" rx="32" ry="56" stroke-width="2"/>' +
+    '<circle cx="110" cy="70" r="3.5" fill="currentColor" stroke="none"/>' + T([160, 64], "(Δ)", ' font-size="12"') +
+    '<rect x="238" y="60" width="62" height="20"/>' + T([244, 96], "Moteur", fs) +
+    '<path d="M40 56 A 10 14 0 1 0 40 84"/>' + fleche([40, 56], [34, 62], 6) +
+    L([78, 70], [78, 186]) + '<rect x="62" y="186" width="32" height="44" fill="currentColor" fill-opacity="0.75"/>' + T([102, 214], "Charge", fs),
+    "Treuil : poulie de rayon r montée sur l'axe (Δ) de l'arbre du moteur ; le fil enroulé sur la poulie soulève la charge.");
+};
+// Physique C-E 2025, document 1 : pendule sur un plan incliné (vue de côté et vue en perspective).
+S["proba-2025-physique-ce-pendule"] = () => {
+  const fs = ' font-size="12"', M = [118, 138];
+  let g = L([20, 22], [44, 10], ' stroke-width="3"') + L([32, 16], M) + '<circle cx="118" cy="138" r="6" fill="currentColor" stroke="none"/>' +
+    L(M, [136, 168], ' stroke-width="2"') + fleche([139, 173], [130, 158], 8) + T([142, 176], "P<tspan dy=\"4\" font-size=\"9\">1</tspan>", ' font-size="12" font-style="italic"') + L([140, 160], [150, 160], ' stroke-width="0.9"') +
+    T([96, 172], "α", fs) + T([76, 54], "Fil de longueur ℓ", fs) + T([6, 112], "Table inclinée", fs) + T([132, 136], "Mobile", fs);
+  const A = [196, 46], B = [356, 46], E = [196, 116], D = [236, 162], Cc = [416, 162], H = [356, 116];
+  g += P([A, B, Cc, D, A], ' stroke-width="1.8"') + L(A, E) + L(E, D) + L(E, H, POINTILLE + ' stroke-width="1"') + L(B, H, POINTILLE + ' stroke-width="1"') + L(H, Cc, POINTILLE + ' stroke-width="1"');
+  g += L([262, 56], [300, 124], ' stroke-width="1.6"') + '<circle cx="300" cy="126" r="6" fill="currentColor" stroke="none"/>' + L([262, 56], [276, 120], ' stroke-dasharray="2 3" stroke-width="1"');
+  g += T([282, 104], "θ", fs) + T([222, 132], "α", fs) + L([300, 126], [300, 166], ' stroke-width="2"') + fleche([300, 172], [300, 160], 8) + T([306, 180], "P", ' font-size="12" font-style="italic"') + L([306, 168], [314, 168], ' stroke-width="0.9"');
+  return svg(430, 186, g, "Document 1 : pendule de longueur ℓ posé sur une table inclinée d'un angle α ; écarté d'un angle θ de sa position d'équilibre ; poids P et sa composante P1 = P sin α le long du plan.");
+};
+// Physique C-E 2025, document 2 : profil spectral de l'étoile 71 Tauri (maximum vers 470 nm).
+S["proba-2025-physique-ce-spectre"] = () => {
+  const X = l => 34 + (l - 370) * 0.62, Y = v => 182 - v * 20, fs = ' font-size="10"';
+  let g = '<g stroke-width="0.7" opacity="0.5">'; for (let l = 400; l <= 750; l += 50) g += L([X(l), Y(0)], [X(l), Y(8.3)]); for (let v = 1; v <= 8; v++) g += L([X(370), Y(v)], [X(770), Y(v)]); g += "</g>";
+  g += L([X(370), Y(0)], [X(782), Y(0)], ' stroke-width="1.2"') + fleche([X(790), Y(0)], [X(780), Y(0)], 7) + L([X(370), Y(0)], [X(370), Y(8.7)], ' stroke-width="1.2"') + fleche([X(370), Y(9.1)], [X(370), Y(8.6)], 7);
+  for (let l = 400; l <= 750; l += 50) g += T([X(l) - 8, Y(0) + 13], String(l), fs);
+  g += T([X(372) + 4, 12], "Intensité lumineuse", ' font-size="11"') + T([X(745), Y(0) - 8], "λ(nm)", ' font-size="11"');
+  const pts = [[375, 0.3], [380, 1.0], [390, 2.6], [400, 3.8], [410, 4.5], [420, 5.4], [430, 6.1], [440, 6.6], [450, 6.9], [455, 5.6], [459, 6.9], [465, 7.6], [470, 8.0], [478, 7.5], [486, 6.1], [490, 4.6], [494, 6.4], [499, 5.2], [504, 6.1], [514, 5.3], [530, 5.0], [560, 4.6], [600, 3.9], [650, 3.2], [685, 2.9], [690, 2.5], [695, 2.9], [720, 2.6], [728, 2.2], [734, 2.6], [750, 2.3]];
+  g += P(pts.map(([l, v]) => [X(l), Y(v)]), ' stroke-width="1.6"');
+  return svg(X(790) + 12, Y(0) + 20, g, "Document 2 : profil spectral de l'étoile 71 Tauri, intensité lumineuse en fonction de la longueur d'onde de 400 à 750 nm ; l'intensité est maximale vers 470 nm puis décroît lentement vers le rouge.");
+};
+// Physique D-TI 2025 : barrage hydroélectrique, hauteur de chute h jusqu'à la turbine.
+S["proba-2025-physique-d-barrage"] = () => {
+  const fs = ' font-size="13" font-weight="700"';
+  let g = '<rect x="40" y="40" width="20" height="130" fill="currentColor" fill-opacity="0.75" stroke="none"/>' + L([60, 6], [60, 170]) + L([84, 6], [138, 116]) + L([20, 170], [320, 170]);
+  g += '<path d="M138 116 Q 200 104 250 110 T 320 104 L 320 170 L 138 170 Z" fill="currentColor" fill-opacity="0.18" stroke="none"/>';
+  g += L([28, 40], [28, 140], ' stroke-width="1.2"') + fleche([28, 36], [28, 48], 7) + fleche([28, 144], [28, 132], 7) + L([22, 40], [40, 40], POINTILLE + ' stroke-width="1"') + L([22, 140], [160, 140], POINTILLE + ' stroke-width="1"') + T([10, 96], "h", fs);
+  g += '<circle cx="180" cy="140" r="14"/><circle cx="180" cy="140" r="3" fill="currentColor" stroke="none"/>';
+  for (let k = 0; k < 10; k++) { const a = k * Math.PI / 5; g += L([180 + 14 * Math.cos(a), 140 + 14 * Math.sin(a)], [180 + 21 * Math.cos(a + 0.3), 140 + 21 * Math.sin(a + 0.3)], ' stroke-width="1.2"'); }
+  g += P([[262, 100], [272, 22], [282, 100]], ' stroke-width="1.2"') + L([264, 80], [280, 80]) + L([266, 60], [278, 60]) + L([268, 40], [276, 40]) + L([264, 80], [278, 60], ' stroke-width="0.8"') + L([280, 80], [266, 60], ' stroke-width="0.8"') + L([258, 22], [286, 22]);
+  g += '<path d="M258 22 Q 218 46 190 126" stroke-width="1"/><path d="M286 22 Q 304 18 320 14" stroke-width="1"/>';
+  return svg(330, 180, g, "Barrage hydroélectrique : l'eau de la retenue tombe d'une hauteur h jusqu'à la turbine, qui entraîne l'alternateur ; une ligne électrique part vers la ville.");
+};
+// Chimie C-D-E 2025, exercice 2, question 1 : composés à nommer.
+S["proba-2025-chimie-noms"] = () => {
+  const fs = ' font-size="14"';
+  let g = T([4, 46], "a)", fs) + T([44, 18], "H", fs) + T([96, 18], "H", fs) + L([52, 22], [62, 34], ' stroke-width="1.2"') + L([96, 22], [86, 34], ' stroke-width="1.2"') +
+    T([60, 46], "C=C", fs) + L([62, 50], [54, 60], ' stroke-width="1.2"') + F([36, 74], "CH3", fs) + L([90, 50], [98, 60], ' stroke-width="1.2"') + F([96, 74], "CH−CH3", fs) + L([104, 78], [104, 88], ' stroke-width="1.2"') + F([96, 102], "CH3", fs);
+  g += T([200, 46], "b)", fs) + F([222, 46], "CH3−CH−CH2−C−H", fs) + L([258, 52], [258, 62], ' stroke-width="1.2"') + F([250, 78], "CH3", fs) + T([318, 16], "O", fs) + L([321, 22], [321, 32]) + L([325, 22], [325, 32]);
+  return svg(400, 110, g, "a) H et H du même côté de la double liaison C=C, portée d'un côté par CH3, de l'autre par CH(CH3)–CH3. b) CH3–CH(CH3)–CH2–CHO.");
+};
+// Chimie C-D-E 2025, exercice 2, question 2 : classe des alcools.
+S["proba-2025-chimie-alcools"] = () => {
+  const fs = ' font-size="14"', v = (x, y1, y2) => L([x, y1], [x, y2], ' stroke-width="1.2"');
+  let g = T([4, 52], "a)", fs) + F([28, 52], "CH3−C−CH2−OH", fs) + F([66, 20], "CH3", fs) + v(74, 25, 38) + v(74, 57, 70) + F([66, 86], "CH3", fs);
+  g += T([226, 52], "b)", fs) + F([250, 52], "CH3−C−OH", fs) + F([288, 20], "CH3", fs) + v(296, 25, 38) + v(296, 57, 70) + F([288, 86], "CH3", fs);
+  return svg(380, 96, g, "a) CH3–C(CH3)2–CH2–OH. b) CH3–C(CH3)2–OH.");
+};
+// Chimie C-D-E 2025, situation : formule du 1,4-dichlorobenzène (PDB).
+S["proba-2025-chimie-pdb"] = () => {
+  const c = [110, 46], r = 30; let hex = []; for (let k = 0; k < 6; k++) { const a = k * Math.PI / 3; hex.push([c[0] + r * Math.cos(a), c[1] + r * Math.sin(a)]); }
+  hex.push(hex[0]);
+  return svg(220, 92, P(hex) + '<circle cx="110" cy="46" r="17"/>' + L([c[0] - r, 46], [58, 46]) + L([c[0] + r, 46], [162, 46]) +
+    T([38, 51], "Cl", ' font-size="14"') + T([164, 51], "Cl", ' font-size="14"'),
+    "1,4-dichlorobenzène : noyau benzénique portant deux atomes de chlore en positions opposées (para).");
+};
+// Corrigé chimie 2025 : conformation chaise du cyclohexane.
+S["proba-2025-chimie-chaise"] = () => {
+
+  return svg(200, 96, P([[30, 66], [74, 76], [118, 58], [170, 36], [126, 26], [82, 44], [30, 66]], ' stroke-width="1.8"'),
+    "Cyclohexane en conformation chaise : six atomes de carbone, deux sommets opposés hors du plan moyen, l'un vers le haut, l'autre vers le bas.");
+};
+
 module.exports = S;
