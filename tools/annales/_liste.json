@@ -448,6 +448,20 @@
   "u": "/ressources/annales/bepc-ecm-2025.html"
  },
  {
+  "id": "probatoire-ecm-2025",
+  "examen": "probatoire",
+  "m": "ecm",
+  "serie": "",
+  "nomExamen": "Probatoire",
+  "fiche": "ressources/examen-ecm-probatoire.html",
+  "matiere": "Éducation à la citoyenneté et à la morale",
+  "mat": "ecm",
+  "classes": "1re A,1re C,1re D",
+  "annee": 2025,
+  "national": true,
+  "u": "/ressources/annales/probatoire-ecm-2025.html"
+ },
+ {
   "id": "bepc-ecm-2024",
   "examen": "bepc",
   "m": "ecm",
@@ -502,6 +516,20 @@
   "annee": 2025,
   "national": false,
   "u": "/ressources/annales/bepc-anglais-2025.html"
+ },
+ {
+  "id": "probatoire-anglais-acdti-2025",
+  "examen": "probatoire",
+  "m": "anglais",
+  "serie": "séries A, C, D et TI",
+  "nomExamen": "Probatoire",
+  "fiche": "ressources/examen-anglais-probatoire.html",
+  "matiere": "Anglais (séries A, C, D et TI)",
+  "mat": "anglais",
+  "classes": "1re A,1re C,1re D",
+  "annee": 2025,
+  "national": true,
+  "u": "/ressources/annales/probatoire-anglais-acdti-2025.html"
  },
  {
   "id": "bepc-espagnol-2026",
