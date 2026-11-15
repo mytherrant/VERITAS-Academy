@@ -23,7 +23,7 @@ const esc = s => String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(
 let erreurs = 0; const err = m => { erreurs++; console.error("ERREUR : " + m); };
 
 // classes : classes d'Apprendre où l'annale est rangée quand la source ne précise pas sa série.
-const EXAMENS = { bepc: { nom: "BEPC", classe: "3e", classes: "3e" }, probatoire: { nom: "Probatoire", classe: "1re", classes: "1re A,1re C,1re D" }, bac: { nom: "Baccalauréat", classe: "Tle", classes: "Tle A,Tle C,Tle D" } };
+const EXAMENS = { bepc: { nom: "BEPC", classe: "3e", classes: "3e", org: "MINESEC / DECC" }, probatoire: { nom: "Probatoire", classe: "1re", classes: "1re A,1re C,1re D", org: "OBC" }, bac: { nom: "Baccalauréat", classe: "Tle", classes: "Tle A,Tle C,Tle D", org: "OBC" } };
 // Matières : libellé, fiche de méthode liée (par examen), matière d'Apprendre (apprendre/commun.js). L'ordre est celui de l'affichage.
 const P = "ressources/";
 const MATIERES = {
@@ -155,7 +155,6 @@ function ecrire(page, html) {
 }
 const GAB = fs.readFileSync(path.join(R, GABARIT), "utf8");
 if (!RE_ART.test(GAB)) err(GABARIT + " : article des fiches introuvable");
-const domaine = u => u.replace(/^https:\/\/(www\.)?/, "").replace(/\/.*$/, "");
 
 // --- Une page par épreuve ---
 for (const s of sources) {
@@ -176,8 +175,8 @@ for (const s of sources) {
     ["epreuve", "L'épreuve", epreuve],
     ["sujet", "Le sujet", (meta.note ? '<div class="ax-avert">' + meta.note + "</div>" : "") + '<div class="ax-sujet">' + s.sujet + "</div>"],
     ["corrige", "Le corrigé", '<details class="ax-cache"><summary>Afficher le corrigé (après avoir traité le sujet)</summary><div class="ax-corrige">' + corrigeTete + s.corrige + "</div></details>"],
-    ["sources", "Sources", "<ul><li>Sujet : épreuve officielle du " + E.nom + " " + meta.annee + " (MINESEC / DECC), transcription relue d'après <a href=\"" + esc(meta.sujet_source) + "\" rel=\"nofollow noopener\">" + domaine(meta.sujet_source) + "</a>.</li>" +
-      (national ? "<li>Corrigé : corrigé harmonisé national, d'après <a href=\"" + esc(meta.corrige_source) + "\" rel=\"nofollow noopener\">" + domaine(meta.corrige_source) + "</a>.</li>" : "<li>Corrigé : Centre VÉRITAS.</li>") + "</ul>"],
+    ["sources", "Sources", "<ul><li>Sujet : épreuve officielle du " + E.nom + " " + meta.annee + (s.serie ? ", " + s.serie : "") + " (" + E.org + ")</li>" +
+      "<li>Corrigé : " + (national ? "corrigé harmonisé national" : "les enseignants de VÉRITAS") + "</li></ul>"],
   ];
   const cta = '<a class="cta" href="/ressources/annales/">Toutes les annales corrigées<small>Par examen, par matière et par session</small></a>';
   let html = GAB.replace(RE_ART, () => article("Annales · " + E.nom + " " + meta.annee, titre, "Le sujet officiel de la session " + meta.annee + ", puis son corrigé, à ouvrir une fois ta copie terminée.", parties, cta));

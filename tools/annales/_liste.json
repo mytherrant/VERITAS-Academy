@@ -126,6 +126,34 @@
   "u": "/ressources/annales/bepc-mathematiques-2024.html"
  },
  {
+  "id": "probatoire-mathematiques-aabi-2025",
+  "examen": "probatoire",
+  "m": "mathematiques",
+  "serie": "séries A et ABI",
+  "nomExamen": "Probatoire",
+  "fiche": "ressources/examen-mathematiques-probatoire.html",
+  "matiere": "Mathématiques (séries A et ABI)",
+  "mat": "maths",
+  "classes": "1re A",
+  "annee": 2025,
+  "national": true,
+  "u": "/ressources/annales/probatoire-mathematiques-aabi-2025.html"
+ },
+ {
+  "id": "probatoire-mathematiques-aabi-2024",
+  "examen": "probatoire",
+  "m": "mathematiques",
+  "serie": "séries A et ABI",
+  "nomExamen": "Probatoire",
+  "fiche": "ressources/examen-mathematiques-probatoire.html",
+  "matiere": "Mathématiques (séries A et ABI)",
+  "mat": "maths",
+  "classes": "1re A",
+  "annee": 2024,
+  "national": false,
+  "u": "/ressources/annales/probatoire-mathematiques-aabi-2024.html"
+ },
+ {
   "id": "probatoire-mathematiques-ce-2025",
   "examen": "probatoire",
   "m": "mathematiques",
