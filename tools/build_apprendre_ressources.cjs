@@ -140,6 +140,16 @@ annales.forEach(a => {
   a.classes.split(",").forEach(c => { if (!leconsDe(c, a.mat).length) return err(id + " : rien en " + c + "/" + a.mat); const k = c + "|" + a.mat; classesAn[c] = 1;
     mat[k] = mat[k] || []; const fin = mat[k].filter(i => items[i] && items[i].an).length; mat[k].splice(fin, 0, id); });
 });
+// Épreuves séquentielles (tools/sequentielles.cjs → _liste.json, 15/11/2026) : rattachées aux leçons
+// de leur séquence et à leur matière. Premier exercice public, suite réservée aux abonnés (ab:1).
+const seqs = (() => { try { return require(path.join(R, "tools/sequentielles/_liste.json")); } catch (e) { return []; } })();
+seqs.forEach(s => {
+  if (!fs.existsSync(path.join(R, s.u))) return err("épreuve séquentielle introuvable : " + s.u);
+  const id = "sq_" + s.id.replace(/-/g, "_");
+  items[id] = { t: "epreuve", ti: "Épreuve de la séquence " + s.seq + " · " + s.matiere, d: "Au format APC, sur les leçons de la séquence, avec corrigé et barème. Premier exercice ouvert à tous.", u: s.u, ab: 1 };
+  rattacher(id, [s.classe, s.mat, s.rangs, /./]);
+  ajoute(mat, s.classe + "|" + s.mat, id);
+});
 items.an_index = { t: "epreuve", ti: "Toutes les annales corrigées", d: "Les derniers sujets officiels, par matière et par session.", u: "/ressources/annales/", ab: 0, an: 1 };
 Object.keys(classesAn).forEach(c => (cl[c] = cl[c] || []).unshift("an_index"));
 

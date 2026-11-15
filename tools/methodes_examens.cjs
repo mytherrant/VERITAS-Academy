@@ -192,8 +192,10 @@ fs.readdirSync(path.join(R, "ressources")).filter(x => /\.html$/.test(x)).forEac
   const pagesDossier = fs.readdirSync(path.join(R, "ressources")).filter(x => /\.html$/.test(x) && x !== "index.html").sort();
   const dA = path.join(R, "ressources/annales");
   const pagesAnnales = fs.existsSync(dA) ? [""].concat(fs.readdirSync(dA).filter(x => /\.html$/.test(x) && x !== "index.html").sort()) : [];
+  const dS = path.join(R, "ressources/sequentielles");
+  const pagesSeq = fs.existsSync(dS) ? [""].concat(fs.readdirSync(dS).filter(x => /\.html$/.test(x) && x !== "index.html").sort()) : [];
   const u = (loc, fr, pr) => "<url><loc>https://veritas-school.com/ressources/" + loc + "</loc><changefreq>" + fr + "</changefreq><priority>" + pr + "</priority></url>";
-  const xml = '<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n' + [u("", "weekly", "0.8")].concat(pagesDossier.map(x => u(x, "monthly", "0.7")), pagesAnnales.map(x => u("annales/" + x, "monthly", "0.7"))).join("\n") + "\n</urlset>\n";
+  const xml = '<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n' + [u("", "weekly", "0.8")].concat(pagesDossier.map(x => u(x, "monthly", "0.7")), pagesAnnales.map(x => u("annales/" + x, "monthly", "0.7")), pagesSeq.map(x => u("sequentielles/" + x, "monthly", "0.6"))).join("\n") + "\n</urlset>\n";
   if (fs.existsSync(f) && fs.readFileSync(f, "utf8") === xml) { identiques++; return; }
   if (CONTROLE) { err("ressources/sitemap-ressources.xml : à régénérer"); return; }
   fs.writeFileSync(f, xml); ecrites++;

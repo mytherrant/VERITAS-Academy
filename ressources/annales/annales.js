@@ -30,7 +30,43 @@
       })
       .catch(function () { cb("reseau"); });
   }
+  /* ── Épreuves séquentielles (data-suite="1") : la page ne porte que le premier exercice.
+     La suite du sujet et le corrigé viennent du serveur (api/apprendre.php, même verrou que
+     les leçons : formule active ET classe couverte), puis s'insèrent dans la page. ── */
+  var SUITE = OUT.getAttribute("data-suite") === "1", CHARGEE = false;
+  function injecter(s) {
+    var S = D.querySelector(".ax-sujet"), V = D.querySelector(".sq-verrou"), Z = D.getElementById("sqCorrige");
+    if (S && s && s.sujet) { var d = D.createElement("div"); d.className = "sq-suite"; d.innerHTML = s.sujet; S.appendChild(d); }
+    if (V) V.parentNode.removeChild(V);
+    if (Z && s && s.corrige) Z.innerHTML = '<details class="ax-cache"><summary>Afficher le corrigé (après avoir traité le sujet)</summary><div class="ax-corrige">' + s.corrige + "</div></details>";
+    CHARGEE = true;
+  }
+  function charger(corps, suite) {
+    occupe(true);
+    corps.id = ID;
+    fetch(API, { method: "POST", headers: { "Content-Type": "application/json" }, credentials: "same-origin", body: JSON.stringify(corps) })
+      .then(function (r) { return r.json(); })
+      .then(function (j) {
+        occupe(false);
+        if (j && j.token) lsSet(CLE, j.token);
+        if (j && j.raison === "connexion") lsSet(CLE, null);
+        if (j && j.ok && j.suite) { fermer(); injecter(j.suite); suite(); return; }
+        var r = (j && j.raison) || "reseau";
+        if (r === "classe_a_choisir") {
+          var f = fenetre("<h3>Choisir cette classe</h3><p class=\"ax-fen-m\">Ta formule ouvre " + esc(j.max) + " classe" + (j.max > 1 ? "s" : "") + ". Ouvrir cette épreuve retient la classe <b>" + esc(String(j.classe || "").replace(/^tle/, "Tle").replace(/-([a-z])$/, function (m, l) { return " " + l.toUpperCase(); })) + "</b> pour au moins 30 jours.</p>" +
+            '<button class="ax-btn ax-plein" type="button" data-ok="1">Retenir cette classe</button><button class="ax-btn" type="button" data-ok="0">Annuler</button>');
+          f.querySelector("[data-ok='1']").addEventListener("click", function () { corps.retenir = true; charger(corps, suite); });
+          f.querySelector("[data-ok='0']").addEventListener("click", fermer);
+          return;
+        }
+        if (r === "classe_hors_formule" || r === "non_depose") { fenetre("<h3>Réservé aux abonnés</h3><p class=\"ax-fen-m\">" + esc(MSG[r]) + "</p>"); return; }
+        mur(r, suite);
+      })
+      .catch(function () { occupe(false); mur("reseau", suite); });
+  }
   function exiger(suite) {
+    /* La suite servie par le serveur vaut preuve d'abonnement (formule active, classe couverte). */
+    if (SUITE) { if (CHARGEE) { suite(); return; } var tj = jeton(); if (!tj) mur("connexion", suite); else charger({ token: tj }, suite); return; }
     var c = null; try { c = JSON.parse(ssGet(CACHE) || "null"); } catch (e) { }
     if (c && c.ok && Date.now() - c.t < 30 * 60 * 1000) { suite(); return; }
     var t = jeton();
@@ -46,6 +82,8 @@
     identifiants: "Identifiant ou mot de passe incorrect. Vérifie-les puis réessaie.",
     abonnement: "Ton compte n'a pas encore de formule active. Choisis-en une pour télécharger les sujets et composer en direct.",
     debit: "Trop de demandes depuis ce réseau. Réessaie dans une minute.",
+    classe_hors_formule: "Ta formule ne couvre pas cette classe : toutes ses places de classe sont déjà prises. Change de formule pour ouvrir une classe de plus.",
+    non_depose: "Cette épreuve est en cours de mise en ligne. Réessaie un peu plus tard.",
     reseau: "La connexion a échoué. Vérifie ta connexion internet puis réessaie."
   };
   function fenetre(html) {
@@ -59,7 +97,8 @@
   }
   function fermer() { var f = D.getElementById("axFen"); if (f) f.parentNode.removeChild(f); }
   function mur(raison, suite) {
-    var f = fenetre('<h3>Réservé aux abonnés</h3><p class="ax-fen-m">' + esc(MSG[raison] || MSG.reseau) + "</p>" +
+    var m = SUITE && raison === "connexion" ? "La suite du sujet, son corrigé, le PDF et la composition en direct sont réservés aux abonnés. Déjà abonné ? Connecte-toi." : MSG[raison] || MSG.reseau;
+    var f = fenetre('<h3>Réservé aux abonnés</h3><p class="ax-fen-m">' + esc(m) + "</p>" +
       '<a class="ax-btn ax-plein" href="/app.html#abonnement">Choisir une formule</a>' +
       '<form class="ax-log"><p>Déjà abonné ?</p><input name="l" autocomplete="username" placeholder="Identifiant ou téléphone" required>' +
       '<input name="p" type="password" autocomplete="current-password" placeholder="Mot de passe" required><button class="ax-btn" type="submit">Me connecter</button></form>');
@@ -68,6 +107,7 @@
       var l = this.l.value.trim(), p = this.p.value, bt = this.querySelector("button");
       if (!l || !p) return;
       bt.disabled = true; bt.textContent = "Vérification…";
+      if (SUITE && !CHARGEE) { charger({ login: l, password: p }, suite); return; }
       verifier({ action: "droits", id: "annales", login: l, password: p }, function (r) {
         if (!r) { fermer(); suite(); return; }
         mur(r, suite);
@@ -193,6 +233,8 @@
   }
   OUT.querySelector("[data-a=pdf]").addEventListener("click", function () { exiger(choixPdf); });
   OUT.querySelector("[data-a=direct]").addEventListener("click", function () { exiger(composer); });
+  var LIB = D.querySelector("[data-a=suite]");
+  if (LIB) LIB.addEventListener("click", function () { exiger(function () { var x = D.querySelector(".sq-suite"); if (x && x.scrollIntoView) x.scrollIntoView({ behavior: "smooth", block: "start" }); }); });
   D.addEventListener("keydown", function (e) { if (e.key === "Escape") fermer(); });
   maj();
 })(window, document);
