@@ -97,3 +97,7 @@ html.ax-direct-on,html.ax-direct-on body{overflow:hidden}
   #axImp .ax-imp-p{margin-top:16px;font-size:9pt;text-align:center}
   @page{margin:14mm}
 }
+/* Prose justifiée, avec césure, demandée par Jacques le 15/11 pour les annales : textes, consignes et corrigés.
+   veritas-habillage.css remet tout le texte courant au fer à gauche par :is(…):not([style*="text-align"]), spécificité (0,3,2) ;
+   d'où le même :not() ici (0,4,1). Un alignement écrit en ligne (titres centrés des documents) reste prioritaire ; tableaux et figures ne sont pas touchés. */
+.card.mx .ax-sujet :is(p,li):not([style*="text-align"]),.card.mx .ax-corrige :is(p,li):not([style*="text-align"]){text-align:justify!important;hyphens:auto!important;-webkit-hyphens:auto!important}
