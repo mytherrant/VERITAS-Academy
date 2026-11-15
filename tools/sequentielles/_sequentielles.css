@@ -1,0 +1,10 @@
+/* Épreuves séquentielles : premier exercice public, suite derrière le verrou (annales.js, data-suite). */
+.sq-lecons{margin:0 0 16px;padding-left:20px}
+.sq-lecons li{margin-bottom:3px}
+.sq-verrou{margin:18px 0 6px;padding:18px;border:1px dashed #C9A227;border-radius:12px;background:#FFFBEF}
+.sq-verrou p{margin:0 0 12px;line-height:1.5}
+.sq-verrou-act{display:flex;flex-wrap:wrap;gap:10px}
+.sq-suite{margin-top:8px;padding-top:12px;border-top:1px solid #E6E0D4}
+.sq-cadenas{color:#636A80;font-style:italic}
+.ax-sujet h3{font-size:17px;margin:18px 0 8px;color:#1E499B}
+.ax-sujet .sq-entete{display:flex;flex-wrap:wrap;justify-content:space-between;gap:6px 18px;padding:10px 14px;margin:0 0 14px;border:1px solid #D8D2C4;border-radius:8px;font-size:14px}
