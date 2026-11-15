@@ -50,6 +50,10 @@ const MATIERES = {
 const nomSerie = s => { const t = s.toUpperCase().match(/TI|ABI|[A-Z]/g) || []; return (t.length > 1 ? "séries " + t.slice(0, -1).join(", ") + " et " + t[t.length - 1] : "série " + t[0]); };
 const ORDRE = Object.keys(MATIERES);
 const CSS = fs.readFileSync(path.join(R, "tools/methodes/_methode.css"), "utf8").trim() + "\n" + fs.readFileSync(path.join(SRC, "_annales.css"), "utf8").trim();
+const AX_JS = fs.readFileSync(path.join(SRC, "_annales.js"), "utf8").replace(/\r/g, "");
+const AX_V = require("crypto").createHash("sha1").update(AX_JS).digest("hex").slice(0, 8);
+// « 2 h », « 1 h 30 min », « 3 h 30 » → minutes (chronomètre du mode « composer en direct »).
+const minutes = d => { const m = /(\d+)\s*h(?:\s*(\d+))?|(\d+)\s*min/.exec(String(d || "")); return m ? (m[1] ? +m[1] * 60 + (+m[2] || 0) : +m[3]) : 120; };
 const JS_V = require("crypto").createHash("sha1").update(fs.readFileSync(path.join(R, "tools/methodes/_methode.js"), "utf8").replace(/\r/g, "")).digest("hex").slice(0, 8);
 
 // Formules : \( … \) en LaTeX simple (fractions, racines, angles, vecteurs, colonnes) → HTML.
@@ -171,8 +175,12 @@ for (const s of sources) {
   const corrigeTete = national
     ? '<div class="ax-avert"><strong>Corrigé harmonisé national.</strong> Grille officielle utilisée par les correcteurs ; toute réponse pertinente non prévue est prise en compte.</div>'
     : '<div class="ax-avert"><strong>Proposition de corrigé VÉRITAS.</strong> Ce n\'est pas le corrigé officiel : c\'est la réponse attendue, rédigée par nos enseignants selon le barème du sujet. Une autre démarche juste rapporte les mêmes points.</div>';
+  const outils = '<div class="ax-outils" data-id="' + esc(meta.examen + "-" + s.cle + "-" + meta.annee) + '" data-titre="' + esc(titre) + '" data-min="' + minutes(meta.duree || (sources.find(o => o.meta.examen === meta.examen && o.cle === s.cle && o.meta.duree) || { meta: {} }).meta.duree) + '" data-meta="' + esc([E.nom + " " + meta.annee, s.serie, meta.duree ? "Durée : " + meta.duree : "", meta.coef ? "Coefficient : " + meta.coef : ""].filter(Boolean).join(" · ")) + '">' +
+    '<button type="button" class="ax-btn" data-a="pdf"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12m0 0-4-4m4 4 4-4M5 21h14"/></svg><span>Télécharger en PDF</span></button>' +
+    '<button type="button" class="ax-btn ax-plein" data-a="direct"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2.5 2.5M9 2h6"/></svg><span>Composer en direct</span></button>' +
+    '<span class="ax-abo">Réservé aux abonnés</span></div>';
   const parties = [
-    ["epreuve", "L'épreuve", epreuve],
+    ["epreuve", "L'épreuve", outils + epreuve],
     ["sujet", "Le sujet", (meta.note ? '<div class="ax-avert">' + meta.note + "</div>" : "") + '<div class="ax-sujet">' + s.sujet + "</div>"],
     ["corrige", "Le corrigé", '<details class="ax-cache"><summary>Afficher le corrigé (après avoir traité le sujet)</summary><div class="ax-corrige">' + corrigeTete + s.corrige + "</div></details>"],
     ["sources", "Sources", "<ul><li>Sujet : épreuve officielle du " + E.nom + " " + meta.annee + (s.serie ? ", " + s.serie : "") + " (" + E.org + ")</li>" +
@@ -180,9 +188,13 @@ for (const s of sources) {
   ];
   const cta = '<a class="cta" href="/ressources/annales/">Toutes les annales corrigées<small>Par examen, par matière et par session</small></a>';
   let html = GAB.replace(RE_ART, () => article("Annales · " + E.nom + " " + meta.annee, titre, "Le sujet officiel de la session " + meta.annee + ", puis son corrigé, à ouvrir une fois ta copie terminée.", parties, cta));
+  html = html.replace("</body>", () => '<script src="/ressources/annales/annales.js?v=' + AX_V + '" defer></script>\n</body>');
   html = habiller(html, s.page, titre + " | VÉRITAS", description, { "@type": "LearningResource", name: titre, description, educationalLevel: s.classes, learningResourceType: "Annale d'examen", about: lib });
   ecrire(s.page, html);
 }
+
+// --- Script des outils abonnés (PDF, composer en direct) ---
+ecrire("ressources/annales/annales.js", AX_JS);
 
 // --- Index des annales ---
 (function index() {
