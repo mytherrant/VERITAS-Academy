@@ -598,4 +598,46 @@ S["proba-2025-sciences-caryotype"] = () => {
   return svg(522, 302, '<g transform="scale(0.6)">' + g + "</g>", "Document 1 : caryotype d'une cellule humaine : un seul chromosome de chaque numéro, de 1 à 22, et un chromosome Y, soit 23 chromosomes.");
 };
 
+// ——— BAC 2025 ———
+// Repère orthonormé quadrillé commun : unité u px, x de xa à xb, y de ya à yb ; renvoie {g, X, Y}.
+function repere(u, xa, xb, ya, yb, m = 24) {
+  const X = x => m + (x - xa) * u, Y = y => 10 + (yb - y) * u, fs = ' font-size="10"';
+  let g = '<g stroke-width="0.5" opacity="0.35">';
+  for (let i = Math.ceil(xa); i <= xb; i++) g += L([X(i), Y(ya)], [X(i), Y(yb)]);
+  for (let j = Math.ceil(ya); j <= yb; j++) g += L([X(xa), Y(j)], [X(xb), Y(j)]);
+  g += "</g>" + L([X(xa), Y(0)], [X(xb) + 4, Y(0)], ' stroke-width="1.2"') + fleche([X(xb) + 8, Y(0)], [X(xb), Y(0)], 6) +
+    L([X(0), Y(ya)], [X(0), Y(yb) - 4], ' stroke-width="1.2"') + fleche([X(0), Y(yb) - 8], [X(0), Y(yb)], 6);
+  for (let i = Math.ceil(xa); i <= xb; i++) if (i) g += T([X(i) - 3, Y(0) + 12], String(i).replace("-", "−"), fs);
+  for (let j = Math.ceil(ya); j <= yb; j++) if (j) g += T([X(0) - 13, Y(j) + 4], String(j).replace("-", "−"), fs);
+  g += T([X(0) - 10, Y(0) + 12], "O", fs);
+  return { g, X, Y, W: X(xb) + 14, H: Y(ya) + 12 };
+}
+const point = (X, Y, x, y, nom, dx = 5, dy = -5) => '<circle cx="' + f(X(x)) + '" cy="' + f(Y(y)) + '" r="2.6" fill="currentColor" stroke="none"/>' + T([X(x) + dx, Y(y) + dy], nom, ' font-size="12" font-style="italic"');
+// Corrigé maths D-TI 2025, exercice 3 : A, B, C, D, H et H' ; cercle (C2) de centre H'(1 ; −1), rayon 2√2 ; lieu : cercle de centre B, rayon 4.
+S["bac-2025-maths-dti-cercles"] = () => {
+  const R = repere(26, -6.5, 5.5, -4.5, 6.5), { X, Y } = R, u = 26, pt = ' stroke-width="1.1" stroke-dasharray="2 3"';
+  let g = R.g;
+  g += L([X(-1), Y(5)], [X(-1), Y(1)], ' stroke-width="1.4"') + L([X(-1), Y(5)], [X(3), Y(1)], ' stroke-width="1.4"') + L([X(-1), Y(1)], [X(3), Y(1)], ' stroke-width="1.4"');
+  g += L([X(-1), Y(1)], [X(3), Y(5)], pt) + L([X(-1), Y(1)], [X(1), Y(-1)], pt);
+  g += code([X(-1), Y(5)], [X(1), Y(3)], 2) + code([X(1), Y(3)], [X(3), Y(1)], 2) + code([X(-1), Y(1)], [X(1), Y(-1)], 2);
+  g += '<circle cx="' + f(X(1)) + '" cy="' + f(Y(3)) + '" r="' + f(2 * Math.SQRT2 * u) + '" stroke-width="1.2"/>';
+  g += '<circle cx="' + f(X(1)) + '" cy="' + f(Y(-1)) + '" r="' + f(2 * Math.SQRT2 * u) + '" stroke-width="1.8"/>';
+  g += '<circle cx="' + f(X(-1)) + '" cy="' + f(Y(1)) + '" r="' + f(4 * u) + '" stroke-width="1.8" stroke-dasharray="7 4"/>';
+  g += point(X, Y, -1, 5, "A", -14, -4) + point(X, Y, -1, 1, "B", -14, -4) + point(X, Y, 3, 1, "C", 6, 14) + point(X, Y, 3, 5, "D", 6, -5) + point(X, Y, 1, 3, "H", 6, -5) + point(X, Y, 1, -1, "H'", 6, 4);
+  g += T([X(3.9), Y(3.3)], "(C1)", ' font-size="12" font-style="italic"') + T([X(3.6), Y(-2.8)], "(C2)", ' font-size="12" font-style="italic"');
+  g += T([X(-6.3), Y(-3.7)], "Lieu géométrique des points M", ' font-size="11" font-style="italic"') + L([X(-4.6), Y(-3.3)], [X(-3.9), Y(-2.3)], ' stroke-width="0.8"');
+  return svg(R.W, R.H, g, "Triangle ABC rectangle isocèle en B, avec A(−1 ; 5), B(−1 ; 1), C(3 ; 1) ; D(3 ; 5) ; H(1 ; 3) milieu de [AC] et H'(1 ; −1) ; cercle (C1) de centre H, cercle (C2) de centre H' et de rayon 2√2, et lieu des points M : cercle de centre B et de rayon 4, en tirets.");
+};
+// Corrigé maths D-TI 2025, exercice 4 : courbe de f(x) = x ln x − x, f(0) = 0 ; minimum (1 ; −1), coupe l'axe en e ; tangente verticale en O.
+S["bac-2025-maths-dti-courbe"] = () => {
+  const R = repere(38, -0.6, 7.3, -1.6, 6.2), { X, Y } = R;
+  let g = R.g; const p = [[X(0), Y(0)]];
+  for (let x = 0.002; x <= 7.2; x += 0.01) { const y = x * Math.log(x) - x; if (y <= 6.1) p.push([X(x), Y(y)]); }
+  g += P(p, ' stroke-width="2.2"');
+  g += L([X(0.25), Y(-1)], [X(1.75), Y(-1)], ' stroke-width="1"') + fleche([X(0.2), Y(-1)], [X(1), Y(-1)], 6) + fleche([X(1.8), Y(-1)], [X(1), Y(-1)], 6) + L([X(1), Y(0)], [X(1), Y(-1)], POINTILLE + ' stroke-width="1"');
+  g += '<circle cx="' + f(X(Math.E)) + '" cy="' + f(Y(0)) + '" r="2.6" fill="currentColor" stroke="none"/>' + T([X(Math.E) - 4, Y(0) - 7], "e", ' font-size="12" font-style="italic"');
+  g += T([X(4.6), Y(2.2)], "(C<tspan font-size=\"9\" dy=\"3\">f</tspan>)", ' font-size="12" font-style="italic"');
+  return svg(R.W, R.H, g, "Courbe de f : part de l'origine avec une tangente verticale, descend jusqu'au minimum (1 ; −1) où la tangente est horizontale, remonte, coupe l'axe des abscisses en x = e ≈ 2,72, puis croît vers +∞.");
+};
+
 module.exports = S;
