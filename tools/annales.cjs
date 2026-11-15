@@ -188,7 +188,7 @@ for (const s of sources) {
   ];
   const cta = '<a class="cta" href="/ressources/annales/">Toutes les annales corrigées<small>Par examen, par matière et par session</small></a>';
   let html = GAB.replace(RE_ART, () => article("Annales · " + E.nom + " " + meta.annee, titre, "Le sujet officiel de la session " + meta.annee + ", puis son corrigé, à ouvrir une fois ta copie terminée.", parties, cta));
-  html = html.replace("</body>", () => '<script src="/ressources/annales/annales.js?v=' + AX_V + '" defer></script>\n</body>');
+  html = html.replace(/(<script src="\/ressources\/methode\.js\?v=[0-9a-f]+" defer><\/script>)/, (m) => m + '<script src="/ressources/annales/annales.js?v=' + AX_V + '" defer></script>');
   html = habiller(html, s.page, titre + " | VÉRITAS", description, { "@type": "LearningResource", name: titre, description, educationalLevel: s.classes, learningResourceType: "Annale d'examen", about: lib });
   ecrire(s.page, html);
 }
