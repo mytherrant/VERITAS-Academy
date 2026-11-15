@@ -442,9 +442,126 @@ S["proba-2025-chimie-pdb"] = () => {
 };
 // Corrigé chimie 2025 : conformation chaise du cyclohexane.
 S["proba-2025-chimie-chaise"] = () => {
-
   return svg(200, 96, P([[30, 66], [74, 76], [118, 58], [170, 36], [126, 26], [82, 44], [30, 66]], ' stroke-width="1.8"'),
     "Cyclohexane en conformation chaise : six atomes de carbone, deux sommets opposés hors du plan moyen, l'un vers le haut, l'autre vers le bas.");
+};
+
+// ——— Probatoire 2025, SVTEEHB ———
+const etoile = (x, y, r = 5) => { let p = ""; for (let k = 0; k < 8; k++) { const a = k * Math.PI / 4; p += L([x, y], [x + r * Math.cos(a), y + r * Math.sin(a)], ' stroke-width="1.2"'); } return p + '<circle cx="' + f(x) + '" cy="' + f(y) + '" r="2.2" fill="currentColor" stroke="none"/>'; };
+// SVT C-TI 2025 : le phénomène de subduction (plaque océanique sous plaque continentale).
+S["proba-2025-svt-c-subduction"] = () => {
+  const fs = ' font-size="10"', fb = ' font-size="11" font-weight="700"', f9 = ' font-size="9"';
+  // surface continentale : plateau vers y = 60, puis pente jusqu'au prisme d'accrétion
+  const surf = x => (x < 200 ? 60 : 64 + (x - 200) * 0.48);
+  let g = L([300, 62], [548, 62], ' stroke-width="1"');
+  g += '<path d="M40 60 L104 58 L116 40 L124 40 L136 58 L200 64 Q 250 70 280 100 L300 112"/>';
+  // croûte continentale (croix) entre la surface et le Moho, hors pluton, cheminée et chambre magmatique
+  for (let x = 52; x <= 262; x += 26) for (let y = 80; y <= 150; y += 22) {
+    if (y < surf(x) + 14) continue;
+    if (x > 56 && x < 104 && y < 130) continue;
+    if (x > 100 && x < 144) continue;
+    if (x > 232 && y > 132) continue;
+    g += T([x - 3, y], "+", f9);
+  }
+  g += L([40, 166], [292, 166], POINTILLE + ' stroke-width="1"');
+  g += '<path d="M66 82 Q 58 100 70 118 Q 84 126 92 110 Q 98 92 86 80 Q 76 72 66 82 Z" stroke-width="1.4"/>' + T([72, 104], "+", f9);
+  g += '<path d="M118 44 L118 92 Q 104 104 112 122 Q 122 134 116 150 L92 158 Q 82 176 96 186 L110 196 Q 70 210 86 226 Q 120 232 160 212 Q 186 196 170 176 Q 156 168 150 158 Q 132 150 132 124 Q 138 104 124 92 L124 44" stroke-width="1.4"/>';
+  g += '<rect x="118" y="160" width="44" height="14" fill="none" stroke-width="1"/>' + T([122, 171], "MAGMA", ' font-size="9" font-weight="700"');
+  // plaque plongeante : surface, Moho (tirets), base ; plus épaisse près de la dorsale
+  const haut = "M548 62 Q 420 64 340 104 Q 300 128 280 160 Q 250 220 222 330";
+  const moho = "M548 80 Q 430 96 360 126 Q 320 150 300 188 Q 276 244 252 330";
+  const bas = "M548 118 Q 440 130 380 150 Q 340 175 320 214 Q 300 270 280 330";
+  g += '<path d="' + haut + '" stroke-width="1.6"/><path d="' + bas + '" stroke-width="1.6"/><path d="' + moho + '"' + POINTILLE + ' stroke-width="1"/>';
+  g += '<path d="M296 112 L308 96 L330 98 L322 112" stroke-width="1"/>'; for (let k = 0; k < 4; k++) g += L([302 + k * 6, 110], [308 + k * 6, 98], ' stroke-width="0.8"');
+  g += '<path d="M528 62 L534 50 M528 62 L522 50 M528 62 L540 72 M528 62 L516 72" stroke-width="1"/>';
+  [[302, 140], [290, 160], [278, 180], [264, 206], [252, 236], [242, 266], [232, 300]].forEach(([x, y]) => { g += etoile(x, y); });
+  g += '<rect x="182" y="184" width="26" height="14" stroke-width="1"/>' + T([186, 195], "eau", f9) + L([256, 196], [212, 192], ' stroke-width="0.9"') + fleche([210, 192], [220, 193], 6) + '<path d="M182 196 Q 168 210 150 214" stroke-width="0.9"/>' + fleche([148, 215], [158, 212], 6);
+  // sens du mouvement de la plaque
+  [[470, 140, 448, 148], [356, 196, 346, 214], [318, 290, 312, 308]].forEach(([a, b, c, d]) => { g += L([a, b], [c, d], ' stroke-width="1"') + fleche([c, d], [a, b], 6); });
+  g += etoile(452, 296) + T([462, 300], "séismes", fs);
+  g += T([426, 178], "ASTHÉNOSPHÈRE", fb) + T([52, 250], "ASTHÉNOSPHÈRE", fb) + L([44, 236], [232, 236], ' stroke-width="0.8"');
+  g += T([436, 81], "croûte océanique", f9) + T([436, 112], "manteau supérieur", f9);
+  g += T([96, 12], "roches volcaniques", fs) + L([122, 16], [120, 38], ' stroke-width="0.7"') + T([270, 12], "prisme d'accrétion", fs) + L([316, 16], [316, 96], ' stroke-width="0.7"');
+  g += T([400, 12], "dorsale médio-océanique —", fs) + T([400, 26], "zone d'accrétion", fb) + L([528, 30], [528, 48], ' stroke-width="0.7"') + fleche([528, 56], [528, 46], 5);
+  g += T([356, 252], "plongement de la plaque", fs) + T([356, 263], "lithosphérique", fs) + L([354, 254], [318, 254], ' stroke-width="0.7"') + fleche([314, 254], [324, 254], 5);
+  g += T([132, 280], "lithosphère", fs) + T([132, 291], "océanique", fs) + L([228, 288], [276, 302], ' stroke-width="1.2"') + L([184, 286], [226, 288], ' stroke-width="0.7"');
+  g += T([150, 322], "Moho", fs) + L([178, 318], [246, 318], ' stroke-width="0.7"') + fleche([250, 318], [240, 318], 5);
+  // repère de la lithosphère continentale (accolade verticale) et légendes de gauche, dans une marge de 72 px
+  const M = 72;
+  g += L([30, 58], [30, 232], ' stroke-width="1"') + fleche([30, 54], [30, 64], 5) + fleche([30, 236], [30, 226], 5);
+  let marge = "";
+  [["pluton", "granitique", 92, 70], ["croûte", "continentale", 128, 50], ["Moho", "", 166, 40], ["manteau", "supérieur", 200, 40]].forEach(([a, b, y, x2]) => {
+    marge += T([0, b ? y - 2 : y + 3], a, f9) + (b ? T([0, y + 8], b, f9) : "") + L([58, y], [M + x2, y], ' stroke-width="0.7"');
+  });
+  marge += T([0, 252], "lithosphère", f9) + T([0, 262], "continentale", f9) + L([54, 250], [M + 26, 232], ' stroke-width="0.7"');
+  return svg(560 + M, 334, marge + '<g transform="translate(' + M + ' 0)">' + g + "</g>", "Subduction : la plaque océanique, formée à la dorsale médio-océanique, plonge sous la plaque continentale ; foyers des séismes le long du plan de plongement ; l'eau libérée par la plaque plongeante favorise la formation du magma qui alimente pluton granitique et volcan ; prisme d'accrétion au contact des deux plaques.");
+};
+// SVT D 2025, document 1 : étapes de la diagenèse (sédiment meuble → roche cohérente).
+S["proba-2025-svt-d-diagenese"] = () => {
+  const fs = ' font-size="11"', fb = ' font-size="11" font-weight="700"';
+  const grain = (x, y, sombre) => '<ellipse cx="' + f(x) + '" cy="' + f(y) + '" rx="14" ry="11"' + (sombre ? ' fill="currentColor" fill-opacity="0.55"' : "") + "/>";
+  let g = "";
+  for (let i = 0; i < 3; i++) for (let j = 0; j < 3; j++) g += grain(92 + i * 34, 34 + j * 28);
+  g += T([4, 70], "Sédiment", fb) + T([4, 82], "meuble", fs) + T([140, 12], "Grains de sable", ' font-size="10" font-weight="700"') + L([138, 12], [110, 30], ' stroke-width="0.7"') + L([150, 16], [128, 32], ' stroke-width="0.7"') + T([100, 124], "État 1", fb);
+  for (let i = 0; i < 3; i++) for (let j = 0; j < 3; j++) g += grain(326 + i * 26 + (j % 2) * 12, 52 + j * 20);
+  g += L([352, 6], [352, 22], ' stroke-width="3"') + fleche([352, 30], [352, 20], 8) + L([352, 132], [352, 116], ' stroke-width="3"') + fleche([352, 108], [352, 118], 8);
+  g += '<path d="M180 64 Q 240 58 300 76" stroke-width="1.2"/>' + T([228, 98], "Étape A", fb);
+  g += '<path d="M300 104 Q 270 136 236 150" stroke-width="1.2"/>' + fleche([230, 152], [242, 147], 7);
+  for (let i = 0; i < 3; i++) for (let j = 0; j < 3; j++) g += grain(150 + i * 26 + (j % 2) * 12, 164 + j * 20, j === 0);
+  [[96, 172], [96, 196]].forEach(([x, y]) => { g += '<path d="M' + x + " " + y + " q 6 -4 12 0 t 12 0 t 12 0" + '" stroke-width="1"/>' + fleche([x + 42, y], [x + 34, y], 6); });
+  [[234, 158], [234, 214]].forEach(([x, y]) => { g += '<path d="M' + x + " " + y + " q 6 -4 12 0 t 12 0 t 12 0" + '" stroke-width="1"/>' + fleche([x + 42, y], [x + 34, y], 6); });
+  g += T([236, 190], "circulation d'eau sursaturée", ' font-size="10" font-weight="700"') + T([150, 236], "État 2", fb);
+  g += L([196, 226], [262, 252], ' stroke-width="1.2"') + fleche([268, 254], [258, 250], 7) + T([200, 258], "Étape B", fb);
+  g += '<path d="M282 230 L404 226 L410 300 L280 304 Z" fill="currentColor" fill-opacity="0.3" stroke-width="1.2"/>';
+  for (let i = 0; i < 4; i++) for (let j = 0; j < 3; j++) g += grain(298 + i * 30 + (j % 2) * 8, 244 + j * 22, j === 0);
+  g += T([354, 220], "ciment", ' font-size="10" font-weight="700"') + L([366, 222], [372, 234], ' stroke-width="0.7"') + T([300, 320], "État 3", fb) + T([346, 320], "Roche cohérente", fs);
+  return svg(440, 326, g, "Diagenèse : état 1, sédiment meuble (grains de sable séparés) ; étape A, tassement sous pression ; état 2, grains rapprochés traversés par une eau sursaturée ; étape B ; état 3, grains liés par un ciment : roche cohérente.");
+};
+// SVT D 2025, document 5 : mouvements atmosphériques et océaniques dans les zones côtières.
+S["proba-2025-svt-d-oceans"] = () => {
+  const fb = ' font-size="12" font-weight="700"', fs = ' font-size="10" font-weight="700"';
+  let g = '<rect x="2" y="2" width="456" height="246" stroke-width="1.2"/>' + T([10, 20], "Région A", ' font-size="14" font-weight="700"') + T([376, 20], "Région B", ' font-size="14" font-weight="700"');
+  g += T([10, 40], "Basse pression", fb) + T([10, 54], "Climat humide", fb) + T([120, 38], "Précipitations", fs) + T([340, 40], "Haute pression", fb) + T([340, 54], "Climat sec", fb);
+  const nuage = (x, y) => '<path d="M' + x + " " + y + " q -2 -12 10 -12 q 4 -10 16 -6 q 10 -4 14 6 q 10 0 8 12 Z" + '" stroke-width="1.1"/>' + [0, 8, 16, 24].map(d => L([x + 4 + d, y + 4], [x + 2 + d, y + 12], ' stroke-width="0.8" stroke-dasharray="2 2"')).join("");
+  g += nuage(46, 82) + nuage(122, 76);
+  g += T([188, 66], "Vents alizés", ' font-size="13" font-weight="700"');
+  for (let x = 340; x > 160; x -= 50) g += L([x, 80], [x - 30, 80], ' stroke-width="1.2"') + fleche([x - 34, 80], [x - 26, 80], 6);
+  g += '<path d="M2 96 Q 30 88 60 96 L380 96 Q 410 92 420 70 Q 432 44 446 34" stroke-width="1.6"/>';
+  for (let x = 330; x > 110; x -= 50) g += L([x, 104], [x - 28, 104], ' stroke-width="1"') + fleche([x - 32, 104], [x - 24, 104], 5);
+  g += '<path d="M60 96 Q 70 110 72 140 L76 226 L80 140 Q 90 160 200 164 Q 260 162 290 150 Q 300 144 310 150 Q 340 162 356 160 L360 216 L364 140 Q 368 110 380 96" stroke-width="1.6"/>';
+  g += '<path d="M84 110 Q 96 138 120 144" stroke-width="1.4"/>' + fleche([126, 146], [114, 142], 6) + '<path d="M136 148 Q 200 150 290 132" stroke-width="1.4"/>' + fleche([296, 131], [284, 134], 6) + '<path d="M300 130 Q 344 132 366 104" stroke-width="1.4"/>' + fleche([369, 100], [362, 110], 6);
+  g += L([96, 140], [270, 124], ' stroke-dasharray="1.5 3" stroke-width="1"') + T([150, 128], "Thermocline", ' font-size="10" font-weight="700" transform="rotate(-6 150 128)"') + T([296, 124], "Upwelling", fs) + T([284, 176], "Dorsale", ' font-size="9" font-weight="700"');
+  g += T([52, 238], "Fosse", ' font-size="9" font-style="italic" font-weight="700"') + T([368, 214], "Fosse", ' font-size="9" font-style="italic" font-weight="700"') + L([68, 84], [68, 104], ' stroke-width="1"');
+  return svg(460, 250, g, "Mouvements atmosphériques et océaniques : les vents alizés soufflent de la région B (haute pression, climat sec) vers la région A (basse pression, climat humide, précipitations) ; ils entraînent les eaux de surface vers la région A ; les eaux profondes remontent près de la région B (upwelling) ; thermocline, dorsale et fosses.");
+};
+// Corrigé SVT D 2025 : courbes hodochrones des ondes P et S (données du document 2).
+S["proba-2025-svt-d-hodochrones"] = () => {
+  const X = d => 44 + d * 0.028, Y = t => 300 - t * 10.4, fs = ' font-size="10"';
+  let g = '<g stroke-width="0.6" opacity="0.4">'; for (let d = 2000; d <= 12000; d += 2000) g += L([X(d), Y(0)], [X(d), Y(27)]); for (let t = 5; t <= 25; t += 5) g += L([X(0), Y(t)], [X(12400), Y(t)]); g += "</g>";
+  g += L([X(0), Y(0)], [X(12600), Y(0)], ' stroke-width="1.2"') + fleche([X(12800), Y(0)], [X(12600), Y(0)], 7) + L([X(0), Y(0)], [X(0), Y(27.6)], ' stroke-width="1.2"') + fleche([X(0), Y(28.2)], [X(0), Y(27.6)], 7);
+  for (let d = 2000; d <= 12000; d += 2000) g += T([X(d) - 14, Y(0) + 14], String(d), fs);
+  for (let t = 5; t <= 25; t += 5) g += T([X(0) - 18, Y(t) + 4], String(t), fs);
+  g += T([X(0) - 6, Y(0) + 14], "0", fs) + T([X(7000), Y(0) + 30], "Distance à l'épicentre (km)", fs) + T([X(0) + 6, Y(28)], "Durée du trajet (min)", fs);
+  const P = [[0, 0], [1112, 2.4], [5049, 8 + 14 / 60], [11332, 13.8]], Sw = [[0, 0], [1112, 4 + 17 / 60], [5049, 14 + 49 / 60], [11332, 25 + 20 / 60]];
+  const courbe = pts => { const q = pts.map(([d, t]) => [X(d), Y(t)]); let c = "M" + f(q[0][0]) + " " + f(q[0][1]); for (let i = 0; i < q.length - 1; i++) { const a = q[Math.max(0, i - 1)], b = q[i], e = q[i + 1], n = q[Math.min(q.length - 1, i + 2)]; c += " C" + f(b[0] + (e[0] - a[0]) / 6) + " " + f(b[1] + (e[1] - a[1]) / 6) + " " + f(e[0] - (n[0] - b[0]) / 6) + " " + f(e[1] - (n[1] - b[1]) / 6) + " " + f(e[0]) + " " + f(e[1]); } return c; };
+  g += '<path d="' + courbe(Sw) + '" stroke-width="2"/><path d="' + courbe(P) + '" stroke-width="2" stroke-dasharray="7 4"/>';
+  [...P.slice(1), ...Sw.slice(1)].forEach(([d, t]) => { g += '<circle cx="' + f(X(d)) + '" cy="' + f(Y(t)) + '" r="3" fill="currentColor" stroke="none"/>'; });
+  g += T([X(11332) - 6, Y(25.33) - 8], "ondes S", ' font-size="11" font-weight="700"') + T([X(11332) - 6, Y(13.8) - 8], "ondes P", ' font-size="11" font-weight="700"');
+  return svg(X(12800) + 14, Y(0) + 36, g, "Courbes hodochrones : durée du trajet en fonction de la distance à l'épicentre ; ondes S (trait plein) passant par 4 min 17 s à 1 112 km, 14 min 49 s à 5 049 km, 25 min 20 s à 11 332 km ; ondes P (tirets) passant par 2 min 24 s, 8 min 14 s et 13 min 48 s ; les ondes P arrivent toujours les premières.");
+};
+// Corrigé SVT D 2025 : mécanisme de l'effet de serre.
+S["proba-2025-svt-d-serre"] = () => {
+  const fs = ' font-size="10"';
+  let g = '<circle cx="40" cy="36" r="20" stroke-width="1.6"/>'; for (let k = 0; k < 8; k++) { const a = k * Math.PI / 4; g += L([40 + 24 * Math.cos(a), 36 + 24 * Math.sin(a)], [40 + 31 * Math.cos(a), 36 + 31 * Math.sin(a)]); }
+  g += T([22, 82], "Soleil", ' font-size="11" font-weight="700"');
+  g += '<rect x="80" y="84" width="330" height="34" fill="currentColor" fill-opacity="0.12" stroke-dasharray="4 3" stroke-width="1"/>' + T([298, 106], "gaz à effet de serre", ' font-size="10" font-weight="700"') + T([168, 106], "atmosphère", fs);
+  g += '<path d="M60 210 Q 230 196 400 210 L400 236 L60 236 Z" fill="currentColor" fill-opacity="0.25" stroke-width="1.4"/>' + T([196, 230], "Terre", ' font-size="11" font-weight="700"');
+  g += L([64, 58], [150, 200], ' stroke-width="2"') + fleche([154, 206], [148, 196], 8) + T([30, 150], "rayonnement", fs) + T([30, 161], "solaire", fs);
+  g += L([90, 50], [128, 92], ' stroke-width="1.2"') + L([128, 92], [168, 52], ' stroke-width="1.2"') + fleche([172, 48], [164, 56], 7) + T([150, 40], "réfléchi", fs);
+  g += '<path d="M220 200 Q 230 150 250 96" stroke-width="1.6"/>' + fleche([252, 90], [249, 100], 7) + T([156, 146], "infrarouge", fs) + T([156, 157], "émis par le sol", fs);
+  g += '<path d="M262 96 Q 280 150 290 198" stroke-width="1.6"/>' + fleche([291, 204], [289, 194], 7) + T([298, 160], "infrarouge renvoyé", fs) + T([298, 171], "vers le sol", fs);
+  g += L([320, 84], [346, 26], ' stroke-width="1.2" stroke-dasharray="4 3"') + fleche([348, 20], [345, 30], 7) + T([352, 34], "vers l'espace", fs);
+  return svg(440, 240, g, "Effet de serre : le rayonnement solaire traverse l'atmosphère et réchauffe le sol ; le sol émet un rayonnement infrarouge ; les gaz à effet de serre en absorbent une partie et la renvoient vers le sol, le reste part vers l'espace.");
 };
 
 module.exports = S;
