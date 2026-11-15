@@ -126,6 +126,34 @@
   "u": "/ressources/annales/bepc-mathematiques-2024.html"
  },
  {
+  "id": "probatoire-mathematiques-ce-2025",
+  "examen": "probatoire",
+  "m": "mathematiques",
+  "serie": "séries C et E",
+  "nomExamen": "Probatoire",
+  "fiche": "ressources/examen-mathematiques-probatoire.html",
+  "matiere": "Mathématiques (séries C et E)",
+  "mat": "maths",
+  "classes": "1re C",
+  "annee": 2025,
+  "national": true,
+  "u": "/ressources/annales/probatoire-mathematiques-ce-2025.html"
+ },
+ {
+  "id": "probatoire-mathematiques-d-2025",
+  "examen": "probatoire",
+  "m": "mathematiques",
+  "serie": "série D",
+  "nomExamen": "Probatoire",
+  "fiche": "ressources/examen-mathematiques-probatoire.html",
+  "matiere": "Mathématiques (série D)",
+  "mat": "maths",
+  "classes": "1re D",
+  "annee": 2025,
+  "national": true,
+  "u": "/ressources/annales/probatoire-mathematiques-d-2025.html"
+ },
+ {
   "id": "bepc-pct-2026",
   "examen": "bepc",
   "m": "pct",

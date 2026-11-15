@@ -38,4 +38,4 @@
 #mx article li{margin-bottom:4px}
 .ax-sujet p,.ax-corrige p{margin:0 0 8px}
 .ax-fig{margin:14px auto;text-align:center;color:inherit}
-.ax-fig svg{max-width:100%;height:auto}
+.ax-fig{display:flex;flex-wrap:wrap;justify-content:center;gap:10px}.ax-fig svg{max-width:100%;height:auto}.ax-fig.ax-large{display:block;overflow-x:auto;-webkit-overflow-scrolling:touch}.ax-fig.ax-large svg{min-width:620px}
