@@ -60,7 +60,7 @@ function grp(s, i) { // lit {…} équilibré à partir de s[i]=='{' → [conten
 }
 function arg(s, i) { while (s[i] === ' ') i++; if (s[i] === '{') return grp(s, i); return [s[i] || '', i + 1]; }
 function tex(s) {
-  const SYM = { prec: '<', succ: '>', le: '≤', leq: '≤', ge: '≥', geq: '≥', times: '×', pi: 'π', in: '∈', notin: '∉', infty: '∞', cdot: '·', approx: '≈', ne: '≠', neq: '≠', Rightarrow: '⇒', Leftrightarrow: '⇔', rightarrow: '→', to: '→', alpha: 'α', Gamma: 'Γ', gamma: 'γ', Sigma: 'Σ', Pi: 'Π', phi: 'φ', varphi: 'φ', epsilon: 'ε', varepsilon: 'ε', tau: 'τ', Lambda: 'Λ', Theta: 'Θ', Rightarrow: '⇒', Longrightarrow: '⟹', mapsto: '↦', geqslant: '≥', leqslant: '≤', infty: '∞', prime: '′', ln: 'ln ', exp: 'exp', lim: 'lim', log: 'log ', 'times': '×', beta: 'β', Delta: 'Δ', delta: 'δ', Omega: 'Ω', omega: 'ω', mu: 'µ', theta: 'θ', lambda: 'λ', rho: 'ρ', sigma: 'σ', circ: '°', degree: '°', pm: '±', div: '÷', ldots: '…', cdots: '…', dots: '…', cup: '∪', cap: '∩', subset: '⊂', emptyset: '∅', cos: 'cos ', sin: 'sin ', tan: 'tan ', max: 'max', min: 'min', rm: '', sum: 'Σ', mathop: '', bf: '', it: '', varnothing: '∅', parallel: '//', perp: '⊥', mathbb: '', left: '', right: '', displaystyle: '', quad: ' ', qquad: '  ', ',': ' ', ';': ' ', ':': ' ', '!': '', ' ': ' ', '%': '%', '{': '{', '}': '}', '#': '#', '&': '&amp;', '_': '_', backslash: '\\', lt: '&lt;', gt: '&gt;' };
+  const SYM = { prec: '<', succ: '>', le: '≤', leq: '≤', ge: '≥', geq: '≥', times: '×', pi: 'π', in: '∈', notin: '∉', infty: '∞', cdot: '·', approx: '≈', ne: '≠', neq: '≠', Rightarrow: '⇒', Leftrightarrow: '⇔', rightarrow: '→', to: '→', alpha: 'α', det: 'det ', Gamma: 'Γ', gamma: 'γ', Sigma: 'Σ', Pi: 'Π', phi: 'φ', varphi: 'φ', epsilon: 'ε', varepsilon: 'ε', tau: 'τ', Lambda: 'Λ', Theta: 'Θ', Rightarrow: '⇒', Longrightarrow: '⟹', mapsto: '↦', geqslant: '≥', leqslant: '≤', infty: '∞', prime: '′', ln: 'ln ', exp: 'exp', lim: 'lim', log: 'log ', 'times': '×', beta: 'β', Delta: 'Δ', delta: 'δ', Omega: 'Ω', omega: 'ω', mu: 'µ', theta: 'θ', lambda: 'λ', rho: 'ρ', sigma: 'σ', circ: '°', degree: '°', pm: '±', div: '÷', ldots: '…', cdots: '…', dots: '…', cup: '∪', cap: '∩', subset: '⊂', emptyset: '∅', cos: 'cos ', sin: 'sin ', tan: 'tan ', max: 'max', min: 'min', rm: '', sum: 'Σ', mathop: '', bf: '', it: '', varnothing: '∅', parallel: '//', perp: '⊥', mathbb: '', left: '', right: '', displaystyle: '', quad: ' ', qquad: '  ', ',': ' ', ';': ' ', ':': ' ', '!': '', ' ': ' ', '%': '%', '{': '{', '}': '}', '#': '#', '&': '&amp;', '_': '_', backslash: '\\', lt: '&lt;', gt: '&gt;' };
   let r = '', i = 0;
   while (i < s.length) {
     const c = s[i];
@@ -84,7 +84,7 @@ function tex(s) {
 }
 // Schémas redessinés en SVG (tools/annales/_schemas.cjs) : <!--schema:nom--> dans une source.
 const SCHEMAS = require("./annales/_schemas.cjs");
-const schemas = (h, nom) => h.replace(/<!--schema:([a-z0-9-]+)-->/g, (_, k) => { if (!SCHEMAS[k]) { err(nom + " : schéma inconnu " + k); return ""; } return '<figure class="ax-fig">' + SCHEMAS[k]() + "</figure>"; });
+const schemas = (h, nom) => h.replace(/<!--schema:([a-z0-9-]+)-->/g, (_, k) => { if (!SCHEMAS[k]) { err(nom + " : schéma inconnu " + k); return ""; } const c = SCHEMAS[k](), larg = +((c.match(/viewBox="0 0 (\d+)/) || [])[1] || 0); return '<figure class="ax-fig' + (larg >= 600 && !c.includes("</svg><svg") ? " ax-large" : "") + '">' + c + "</figure>"; });
 const formules = h => h.replace(/\\\(([\s\S]*?)\\\)/g, (_, a) => tex(a));
 
 // --- Lecture et contrôle des sources ---
