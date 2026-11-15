@@ -146,7 +146,65 @@ ul.mx-check li::before{content:"";position:absolute;left:4px;top:9px;width:16px;
 #mx article li{margin-bottom:4px}
 .ax-sujet p,.ax-corrige p{margin:0 0 8px}
 .ax-fig{margin:14px auto;text-align:center;color:inherit}
-.ax-fig{display:flex;flex-wrap:wrap;justify-content:center;gap:10px}.ax-fig svg{max-width:100%;height:auto}.ax-fig.ax-large{display:block;overflow-x:auto;-webkit-overflow-scrolling:touch}.ax-fig.ax-large svg{min-width:620px}</style><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap"><link rel="stylesheet" href="/assets/veritas-tokens.css?v=1.19.25">
+.ax-fig{display:flex;flex-wrap:wrap;justify-content:center;gap:10px}.ax-fig svg{max-width:100%;height:auto}.ax-fig.ax-large{display:block;overflow-x:auto;-webkit-overflow-scrolling:touch}.ax-fig.ax-large svg{min-width:620px}
+/* Outils abonnés : PDF et composer en direct (ressources/annales/annales.js) */
+.ax-outils{display:flex;flex-wrap:wrap;align-items:center;gap:10px;margin:4px 0 18px;padding:14px;border:1px solid #DCE3EE;border-radius:12px;background:#F6F8FC}
+.ax-btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:44px;padding:10px 16px;border:1.5px solid #1E499B;border-radius:10px;background:#fff;color:#1E499B;font-family:inherit;font-weight:600;font-size:15px;line-height:1.2;cursor:pointer;text-decoration:none}
+.ax-btn:hover{background:#EEF3FB}.ax-btn:disabled{opacity:.55;cursor:wait}
+.ax-btn.ax-plein{background:#1E499B;color:#fff}.ax-btn.ax-plein:hover{background:#173B7E}
+.ax-abo{font-size:13px;color:#8A6A12;font-weight:600}
+.ax-fen{position:fixed;inset:0;z-index:2147483000;display:flex;align-items:center;justify-content:center;padding:16px;background:rgba(15,23,42,.55)}
+.ax-fen-b{position:relative;width:100%;max-width:420px;max-height:90vh;overflow:auto;padding:22px;border-radius:14px;background:#fff;color:#1A2233;box-shadow:0 20px 50px rgba(0,0,0,.25)}
+.ax-fen-b h3{margin:0 0 8px;font-size:19px}.ax-fen-m{margin:0 0 14px;line-height:1.5}
+.ax-fen-b .ax-btn{width:100%;margin-top:8px}
+.ax-x{position:absolute;top:8px;right:10px;width:36px;height:36px;border:0;background:none;font-size:26px;line-height:1;color:#5B6475;cursor:pointer}
+.ax-log{margin-top:16px;padding-top:14px;border-top:1px solid #E5E9F0}.ax-log p{margin:0 0 6px;font-weight:600}
+.ax-log input{display:block;width:100%;box-sizing:border-box;min-height:44px;margin-top:8px;padding:10px 12px;border:1px solid #C9D2E0;border-radius:9px;font:inherit;font-size:16px}
+/* Composer en direct : plein écran, sujet et copie côte à côte (onglets sur téléphone) */
+html.ax-direct-on,html.ax-direct-on body{overflow:hidden}
+.ax-direct{position:fixed;inset:0;z-index:2147482000;display:flex;flex-direction:column;background:#fff;color:#1A2233}
+.ax-d-barre{display:flex;flex-wrap:wrap;align-items:center;gap:10px 16px;padding:10px 16px;border-bottom:1px solid #DCE3EE;background:#F6F8FC}
+.ax-d-t{flex:1 1 220px;min-width:0}.ax-d-t b{display:block;font-size:15px;line-height:1.3}.ax-d-t small{color:#5B6475}
+.ax-d-chrono{text-align:center}.ax-d-chrono span{display:block;font-size:12px;color:#5B6475}.ax-d-chrono b{font-size:20px;font-variant-numeric:tabular-nums;color:#1E499B}
+.ax-d-chrono.ax-alerte b{color:#B42318}
+.ax-d-act{display:flex;gap:8px}
+.ax-d-onglets{display:none}
+.ax-d-corps{flex:1;display:grid;grid-template-columns:1fr 1fr;min-height:0}
+.ax-d-sujet,.ax-d-copie{min-height:0;overflow:auto;padding:16px 20px}
+.ax-d-sujet{border-right:1px solid #DCE3EE}
+.ax-d-sujet strong{color:#1E499B}
+.ax-d-copie{display:flex;flex-direction:column}
+.ax-d-copie label,.ax-d-lib{font-weight:700;margin:0 0 8px}.ax-d-copie label small{font-weight:400;color:#5B6475}
+.ax-d-copie textarea{flex:1;min-height:300px;width:100%;box-sizing:border-box;padding:12px;border:1px solid #C9D2E0;border-radius:10px;font-family:inherit;font-size:16px;line-height:1.6;resize:none}
+.ax-d-lue{white-space:pre-wrap;padding:12px;border:1px solid #E5E9F0;border-radius:10px;background:#FAFBFD;line-height:1.6}
+.ax-note{margin-top:16px}.ax-note label{display:block;font-weight:600;margin-bottom:6px}
+.ax-note div{display:flex;align-items:center;gap:8px}.ax-note input{width:90px;min-height:44px;padding:8px;border:1px solid #C9D2E0;border-radius:9px;font-size:16px}
+.ax-hist{color:#5B6475;font-size:14px}
+@media (max-width:760px){
+  .ax-d-barre{padding:8px 12px}.ax-d-t{flex-basis:100%}.ax-d-chrono{text-align:left}.ax-d-act{margin-left:auto}
+  .ax-d-act .ax-btn{min-height:40px;padding:8px 12px;font-size:14px}
+  .ax-d-onglets{display:flex;border-bottom:1px solid #DCE3EE}
+  .ax-d-onglets button{flex:1;min-height:44px;border:0;border-bottom:3px solid transparent;background:#fff;font-family:inherit;font-weight:600;font-size:15px;color:#5B6475}
+  .ax-d-onglets button.on{color:#1E499B;border-bottom-color:#1E499B}
+  .ax-d-corps{grid-template-columns:1fr}.ax-d-sujet{border-right:0}
+  .ax-d-corps .ax-d-copie{display:none}.ax-d-corps[data-vue="c"] .ax-d-copie{display:flex}.ax-d-corps[data-vue="c"] .ax-d-sujet{display:none}
+}
+/* PDF : seule la zone #axImp s'imprime, en noir sur blanc */
+#axImp{display:none}
+@media print{
+  html.ax-impression body>*:not(#axImp){display:none!important}
+  html.ax-impression #axImp{display:block;color:#000;font-size:11.5pt;line-height:1.45}
+  #axImp .ax-imp-t{display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 12px;padding-bottom:8px;margin-bottom:12px;border-bottom:1.5px solid #000}
+  #axImp .ax-imp-t b{font-size:14pt;letter-spacing:.06em}#axImp .ax-imp-t span{font-weight:700}#axImp .ax-imp-t small{flex-basis:100%}
+  #axImp h2{font-size:13pt;margin:14px 0 8px;color:#000;border:0}#axImp .ax-imp-t{display:flex!important}#axImp .ax-sujet strong,#axImp .ax-corrige strong,#axImp .ax-pts{color:#000}
+  #axImp .ax-imp-c{break-before:page}
+  #axImp .ax-imp-copie{white-space:pre-wrap}
+  #axImp table{border-collapse:collapse}#axImp td,#axImp th{border:1px solid #000;padding:3px 6px}
+  #axImp svg{max-width:100%;height:auto;break-inside:avoid}#axImp figure{break-inside:avoid}
+  #axImp strong{color:#000}#axImp .ax-avert{border:1px solid #000;padding:6px;margin:6px 0}
+  #axImp .ax-imp-p{margin-top:16px;font-size:9pt;text-align:center}
+  @page{margin:14mm}
+}</style><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap"><link rel="stylesheet" href="/assets/veritas-tokens.css?v=1.19.25">
 <link rel="stylesheet" href="/assets/veritas-refonte.css?v=1.19.25"><!-- seo-tete -->
 <meta property="og:image" content="https://veritas-school.com/og-image.jpg">
 <meta name="twitter:card" content="summary_large_image">
@@ -238,7 +296,7 @@ ul.mx-check li::before{content:"";position:absolute;left:4px;top:9px;width:16px;
 <h1>Histoire au BEPC 2025 : sujet et corrigé</h1>
 <p class="mx-chapo">Le sujet officiel de la session 2025, puis son corrigé, à ouvrir une fois ta copie terminée.</p>
 <nav class="mx-som" aria-label="Sommaire"><a href="#epreuve">L'épreuve</a><a href="#sujet">Le sujet</a><a href="#corrige">Le corrigé</a><a href="#sources">Sources</a></nav>
-<section class="partie" id="epreuve"><h2><span class="mx-num">1</span><span class="mx-txt">L'épreuve</span></h2><div class="ax-meta"><span><b>Examen</b> BEPC 2025</span><span><b>Durée</b> 2 h</span><span><b>Coefficient</b> 2</span></div><p>Traite le sujet dans les conditions de l'examen, montre en main, puis compare ta copie au corrigé. Les autres sessions :</p><div class="ax-annees"><span>2025</span></div><p style="margin-top:14px">La méthode de l'épreuve, le barème et les erreurs fréquentes : <a href="/ressources/examen-histoire-geographie-bepc.html">voir la fiche</a>.</p></section>
+<section class="partie" id="epreuve"><h2><span class="mx-num">1</span><span class="mx-txt">L'épreuve</span></h2><div class="ax-outils" data-id="bepc-histoire-2025" data-titre="Histoire au BEPC 2025 : sujet et corrigé" data-min="120" data-meta="BEPC 2025 · Durée : 2 h · Coefficient : 2"><button type="button" class="ax-btn" data-a="pdf"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12m0 0-4-4m4 4 4-4M5 21h14"/></svg><span>Télécharger en PDF</span></button><button type="button" class="ax-btn ax-plein" data-a="direct"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2.5 2.5M9 2h6"/></svg><span>Composer en direct</span></button><span class="ax-abo">Réservé aux abonnés</span></div><div class="ax-meta"><span><b>Examen</b> BEPC 2025</span><span><b>Durée</b> 2 h</span><span><b>Coefficient</b> 2</span></div><p>Traite le sujet dans les conditions de l'examen, montre en main, puis compare ta copie au corrigé. Les autres sessions :</p><div class="ax-annees"><span>2025</span></div><p style="margin-top:14px">La méthode de l'épreuve, le barème et les erreurs fréquentes : <a href="/ressources/examen-histoire-geographie-bepc.html">voir la fiche</a>.</p></section>
 <section class="partie" id="sujet"><h2><span class="mx-num">2</span><span class="mx-txt">Le sujet</span></h2><div class="ax-sujet"><p><strong>HISTOIRE</strong><br><em>Documents autorisés : aucun document en dehors de ceux remis aux candidats par les examinateurs n'est autorisé. N.B. : répondre à toutes les questions.</em></p>
 <p><strong>Partie A : LA VÉRIFICATION DES RESSOURCES (09 pts)</strong></p>
 <p><strong>A.1. La vérification des savoirs</strong><br>
@@ -422,4 +480,5 @@ c) Deux au choix : la montée des régimes totalitaires (arrivée de Hitler au p
 <script src="/assets/veritas-harmonie.js?v=1.19.25.34" defer></script>
 <script src="/assets/vitrine.js?v=1.19.25.34" defer></script>
 <!--/vrt-habillage:pied-->
+<script src="/ressources/annales/annales.js?v=1b4f7683" defer></script>
 </body></html>
