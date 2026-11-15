@@ -250,4 +250,34 @@ S["proba-2025-maths-ce-courbe"] = () => {
   return svg(300, 270, g, "Courbe de f sur ]1 ; +∞[ : elle descend de +∞ jusqu'au minimum (2 ; 2), puis remonte en se rapprochant de la droite (D) : y = x − 1 ; la droite (Δ) : x = 1 est asymptote verticale.");
 };
 
+// Probatoire A-ABI 2025 maths (corrigé) : courbes de f(x) = x² − 2x − 3 et de −f sur [−2 ; 4], unité 1 cm.
+S["proba-2025-maths-a-courbes"] = () => {
+  const u = 22, ox = 30 + 3 * u, oy = 20 + 6 * u, X = x => ox + x * u, Y = y => oy - y * u, fs = ' font-size="11"';
+  let g = '<g stroke-width="0.6" opacity="0.4">'; for (let i = -3; i <= 5; i++) g += L([X(i), Y(6)], [X(i), Y(-6)]); for (let j = -6; j <= 6; j++) g += L([X(-3), Y(j)], [X(5), Y(j)]); g += "</g>";
+  g += L([X(-3), Y(0)], [X(5.3), Y(0)], ' stroke-width="1.2"') + fleche([X(5.4), Y(0)], [X(5), Y(0)], 6) + L([X(0), Y(-6)], [X(0), Y(6.3)], ' stroke-width="1.2"') + fleche([X(0), Y(6.4)], [X(0), Y(6)], 6);
+  g += T([X(0) - 12, Y(0) + 14], "O", fs) + T([X(1) - 3, Y(0) + 14], "I", fs) + T([X(0) - 12, Y(1) + 4], "J", fs);
+  const fn = x => x * x - 2 * x - 3, p1 = [], p2 = [];
+  for (let x = -2; x <= 4.0001; x += 0.05) { p1.push([X(x), Y(fn(x))]); p2.push([X(x), Y(-fn(x))]); }
+  g += P(p1, ' stroke-width="2.2"') + P(p2, ' stroke-width="2"' + POINTILLE);
+  [[-2, 5], [1, -4], [4, 5]].forEach(([x, y]) => { g += '<circle cx="' + X(x) + '" cy="' + Y(y) + '" r="2.4" fill="currentColor"/><circle cx="' + X(x) + '" cy="' + Y(-y) + '" r="2.4" fill="currentColor"/>'; });
+  g += T([X(4.12), Y(5.55)], "(C<tspan font-size=\"8\" dy=\"3\">f</tspan>)", fs) + T([X(4.14), Y(-5.6)], "(C<tspan font-size=\"8\" dy=\"3\">−f</tspan>)", fs);
+  return svg(X(5.6) + 10, Y(-6) + 14, g, "Courbe de f, parabole de sommet (1 ; −4) passant par (−2 ; 5) et (4 ; 5), et courbe de −f, sa symétrique par rapport à l'axe des abscisses, de sommet (1 ; 4).");
+};
+
+// Probatoire A-ABI 2024 maths (corrigé) : f(x) = (x − 1)/(x + 2) sur [−6 ; −2[ ∪ ]−2 ; 4], asymptote x = −2, tangente (T) : y = 3x/4 − 1/2.
+S["proba-2024-maths-a-courbe"] = () => {
+  const u = 24, xa = -7, xb = 5, ya = -6, yb = 6, X = x => 14 + (x - xa) * u, Y = y => 10 + (yb - y) * u, fs = ' font-size="11"';
+  let g = '<g stroke-width="0.6" opacity="0.4">'; for (let i = xa; i <= xb; i++) g += L([X(i), Y(ya)], [X(i), Y(yb)]); for (let j = ya; j <= yb; j++) g += L([X(xa), Y(j)], [X(xb), Y(j)]); g += "</g>";
+  g += L([X(xa), Y(0)], [X(xb) + 8, Y(0)], ' stroke-width="1.2"') + fleche([X(xb) + 10, Y(0)], [X(xb), Y(0)], 6) + L([X(0), Y(ya)], [X(0), Y(yb) - 8], ' stroke-width="1.2"') + fleche([X(0), Y(yb) - 10], [X(0), Y(yb)], 6);
+  g += T([X(0) - 12, Y(0) - 4], "O", fs) + T([X(1) - 3, Y(0) + 14], "1", fs) + T([X(0) - 12, Y(1) + 4], "1", fs);
+  const fn = x => (x - 1) / (x + 2), b1 = [], b2 = [];
+  for (let x = -6; x < -2; x += 0.02) { const y = fn(x); if (y <= yb) b1.push([X(x), Y(y)]); }
+  for (let x = -1.98; x <= 4.0001; x += 0.02) { const y = fn(x); if (y >= ya) b2.push([X(x), Y(y)]); }
+  g += L([X(-2), Y(ya)], [X(-2), Y(yb)], POINTILLE + ' stroke-width="1.4"') + T([X(-2) + 4, Y(yb) + 14], "x = −2", fs);
+  g += L([X(xa), Y(0.75 * xa - 0.5)], [X(xb), Y(0.75 * xb - 0.5)], ' stroke-width="1.4"') + T([X(3.3), Y(2.4)], "(T)", fs);
+  g += P(b1, ' stroke-width="2.2"') + P(b2, ' stroke-width="2.2"') + T([X(-5.6), Y(2.6)], "(C)", fs) + T([X(2.2), Y(-0.6)], "(C)", fs);
+  [[-6, 7 / 4], [4, 0.5], [0, -0.5]].forEach(([x, y]) => { g += '<circle cx="' + f(X(x)) + '" cy="' + f(Y(y)) + '" r="2.4" fill="currentColor"/>'; });
+  return svg(X(xb) + 24, Y(ya) + 12, g, "Courbe de f(x) = (x − 1)/(x + 2) : deux branches croissantes, de (−6 ; 7/4) vers +∞ à gauche de l'asymptote x = −2, puis de −∞ vers (4 ; 1/2) ; tangente (T) : y = 3x/4 − 1/2 au point (0 ; −1/2).");
+};
+
 module.exports = S;
