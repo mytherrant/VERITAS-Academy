@@ -338,7 +338,7 @@
     }).catch(function () {});
   } catch (e) { }
   function lienOffre(h, t, d, picto, cl) {
-    return '<a class="offre-l' + (cl ? " " + cl : "") + '" href="' + h + '">' + picto + '<span><b>' + esc(t) + '</b><small>' + esc(d) + '</small></span><span class="chev" aria-hidden="true">›</span></a>';
+    return '<a class="offre-l' + (cl ? " " + cl : "") + '" href="' + h + '"' + (/^https?:/.test(h) ? ' target="_blank" rel="noopener"' : '') + '>' + picto + '<span><b>' + esc(t) + '</b><small>' + esc(d) + '</small></span><span class="chev" aria-hidden="true">›</span></a>';
   }
   /* ════════ OFFRES (grille du 12/11/2026) ════════
      Trois formules côte à côte, chacune avec ce qu'elle apporte, pour que
@@ -347,15 +347,18 @@
      Prix : ceux publiés par le serveur (data-vrt-prix), repli sur le catalogue.
      ctx : "lecon" (fin du cours), "quiz" (sous le bilan), "matiere", "accueil" */
   /* Avantages = table des droits du serveur (vrt_droits_formules, 12/11/2026). */
+  /* 14/11/2026 « panneaux bien structurés et différenciés » : chaque formule dit ce qu'elle AJOUTE
+     à la précédente (base), une ligne-clé la résume (version compacte), plus de contradiction
+     avantage / manque (Starter annonçait les labos premium des deux côtés). */
   var FORMULES = [
-    { g: "starter", nom: "Starter", pour: "Pour suivre l'année", mois: "1 200", an: "10 000",
-      av: ["Toutes les leçons de 1 classe", "Épreuves, annales et examens blancs", "5 questions par jour au tuteur", "10 fiches PDF par semaine", "2 labos premium à l'essai par semaine"],
-      non: ["Labos premium (2 à l'essai)", "Bulletins blancs notés"] },
-    { g: "pro", nom: "Pro", pour: "Pour l'année d'examen", mois: "1 600", an: "13 500",
-      av: ["Toutes les leçons de 1 classe", "30 questions par jour au tuteur", "20 fiches PDF par semaine", "Tous les labos virtuels premium", "Bulletins blancs : copies notées sur 20"],
+    { g: "starter", nom: "Starter", pour: "Pour suivre l'année", mois: "1 200", an: "10 000", cle: "Les leçons, épreuves et annales de ta classe",
+      av: ["Toutes les leçons de ta classe, en entier", "Épreuves, annales et examens blancs corrigés", "Tuteur : 5 questions par jour", "10 fiches PDF par semaine", "Labos premium : 2 à l'essai par semaine"],
+      non: ["Bulletins blancs notés", "Classes virtuelles en direct"] },
+    { g: "pro", nom: "Pro", pour: "Pour l'année d'examen", mois: "1 600", an: "13 500", base: "Tout Starter, plus :", cle: "Starter + tous les labos et des copies notées sur 20",
+      av: ["Tous les labos premium, sans limite", "Bulletins blancs : copies notées sur 20", "Tuteur : 30 questions par jour", "20 fiches PDF par semaine"],
       non: ["Classes virtuelles en direct"] },
-    { g: "elite", nom: "Élite", pour: "Pour viser la mention", mois: "2 000", an: "16 500",
-      av: ["2 classes : la tienne + celle d'avant", "100 questions par jour au tuteur", "40 fiches PDF par semaine", "Classes virtuelles en direct", "Entretien d'orientation sur rendez-vous"],
+    { g: "elite", nom: "Élite", pour: "Pour viser la mention", mois: "2 000", an: "16 500", base: "Tout Pro, plus :", cle: "Pro + 2 classes et les classes virtuelles en direct",
+      av: ["2 classes : la tienne et celle d'avant", "Classes virtuelles en direct", "Entretien d'orientation sur rendez-vous", "Tuteur : 100 questions par jour", "40 fiches PDF par semaine"],
       non: [] }
   ];
   /* Formules : nom, public, prix de repli, avantages, masquage — réglés dans l'admin. */
@@ -363,7 +366,7 @@
     var cf = obj(CFG.formules);
     FORMULES.forEach(function (f) {
       var o = obj(cf[f.g]);
-      ["nom", "pour", "mois", "an"].forEach(function (k) { if (txt(o[k])) f[k] = txt(o[k]); });
+      ["nom", "pour", "mois", "an", "base", "cle"].forEach(function (k) { if (txt(o[k])) f[k] = txt(o[k]); });
       if (Array.isArray(o.av)) f.av = o.av.map(txt).filter(Boolean);
       if (Array.isArray(o.non)) f.non = o.non.map(txt).filter(Boolean);
       f.masque = o.masquer === true;
@@ -384,14 +387,24 @@
     ["nom", "pour", "tarif", "bouton", "lien", "lienT"].forEach(function (k) { if (txt(h[k])) HUMAIN[k] = txt(h[k]); });
     if (Array.isArray(h.points) && h.points.length) HUMAIN.points = h.points.map(txt).filter(Boolean);
   })();
-  function carteFormule(f, conseillee) {
+  /* Classes dont les leçons complètes sont réservées aux abonnés (aperçus publics) : ailleurs,
+     les leçons sont déjà libres, l'abonnement n'en promet pas. */
+  var CL_PAYANTES = ["3e", "1re A", "1re C", "1re D", "Tle A", "Tle C", "Tle D"];
+  function avantages(f, c) {
+    if (!c || CL_PAYANTES.indexOf(c) >= 0) return f.av;
+    return f.av.map(function (x) { return /^Toutes les leçons de ta classe/.test(x) ? "Les leçons de ta classe sont déjà libres : l'abonnement ouvre le reste" : x; });
+  }
+  function carteFormule(f, conseillee, c, mini) {
     var idM = "abo_" + f.g + "_m", idA = "abo_" + f.g + "_a";
+    if (mini) return '<div class="fo fo-mini"><p class="fo-nom">' + esc(f.nom) + ' <span class="fo-pm"><b data-vrt-prix="' + idM + '">' + prixConnu(idM, f.mois) + '</b> F / mois</span></p>' +
+      '<p class="fo-cle">' + esc(f.cle || f.pour) + '</p><a class="fo-btn" href="/app.html#abonnement?plan=' + idM + '">Choisir ' + esc(f.nom) + '</a></div>';
     return '<div class="fo' + (conseillee ? " fo-c" : "") + '">' +
       (conseillee ? '<span class="fo-badge">Conseillée pour toi</span>' : "") +
       '<p class="fo-nom">' + esc(f.nom) + '</p><p class="fo-pour">' + esc(f.pour) + '</p>' +
       '<p class="fo-prix"><b data-vrt-prix="' + idM + '">' + prixConnu(idM, f.mois) + '</b> F<small> / mois</small></p>' +
       '<p class="fo-an">ou <a href="/app.html#abonnement?plan=' + idA + '"><b><span data-vrt-prix="' + idA + '">' + prixConnu(idA, f.an) + '</span> F l\'année</b></a>, payée en une fois</p>' +
-      '<ul class="fo-av">' + f.av.map(function (x) { return "<li>" + esc(x) + "</li>"; }).join("") +
+      (f.base ? '<p class="fo-base">' + esc(f.base) + '</p>' : '') +
+      '<ul class="fo-av">' + avantages(f, c).map(function (x) { return "<li>" + esc(x) + "</li>"; }).join("") +
         f.non.map(function (x) { return '<li class="fo-non">' + esc(x) + "</li>"; }).join("") + '</ul>' +
       '<a class="fo-btn" href="/app.html#abonnement?plan=' + idM + '">Choisir ' + esc(f.nom) + '</a></div>';
   }
@@ -409,10 +422,20 @@
     var cah = cahierPour(c, m), ex = examen(c), tt = obj(oc.titres);
     var titre = txt(tt[ctx]) || { lecon: "Pour aller plus loin", quiz: "Continue sur ta lancée", matiere: "En attendant les prochaines leçons", accueil: "Aller plus loin avec VÉRITAS" }[ctx] || "Pour aller plus loin";
     var conseil = ex ? (txt(oc.conseilExamen) || "pro") : (txt(oc.conseilAutre) || "starter"), ens = obj(oc.enseignant);
+    /* Accueil : la vitrine complète. Leçon, matière, quiz : la formule conseillée en entier, les deux
+       autres résumées en une ligne, le professeur en un lien (le mur d'une leçon passait 2 800 px). */
+    var compact = ctx !== "accueil", fc = FORMULES.filter(function (f) { return f.g === conseil; })[0] || FORMULES[0];
+    if (compact) return '<aside class="offre offre-' + ctx + ' offre-compacte" aria-label="' + esc(titre) + '"><p class="offre-t">' + esc(titre) + '</p>' +
+      '<h2 class="offre-h">' + esc(txt(oc.titre) || "Choisis ta formule") + '</h2>' +
+      carteFormule(fc, true, c) +
+      '<div class="offre-autres">' + FORMULES.filter(function (f) { return f !== fc; }).map(function (f) { return carteFormule(f, false, c, true); }).join("") + '</div>' +
+      '<p class="offre-n">Paiement Orange Money ou MTN MoMo, sans engagement. L\'année payée en une fois revient à un peu plus de huit mois. <a href="/app.html#abonnement?plan=abo_famille_m">Formule Famille</a> : jusqu\'à 4 enfants.</p>' +
+      (oc.humainActif === false ? "" : lienOffre("https://wa.me/" + WA_VERITAS + "?text=" + encodeURIComponent("Bonjour VÉRITAS, je souhaite un devis pour un accompagnement" + (c ? " en " + c : "") + " : suivi particulier en ligne / répétitions à domicile. Ville et quartier : "), "Besoin d'un professeur à côté de toi ?", HUMAIN.tarif + " Suivi en ligne ou répétitions à domicile.", PICTO_CLE)) +
+      (cah ? lienOffre(cah.h, cah.t, cah.d, PICTO_LIVRE) : "") + '</aside>';
     return '<aside class="offre offre-' + ctx + '" aria-label="' + esc(titre) + '"><p class="offre-t">' + esc(titre) + '</p>' +
       '<h2 class="offre-h">' + esc(txt(oc.titre) || "Choisis ta formule") + '</h2>' +
       '<div class="offre-grille"><div class="offre-plans">' +
-      FORMULES.map(function (f) { return carteFormule(f, f.g === conseil); }).join("") +
+      FORMULES.map(function (f) { return carteFormule(f, f.g === conseil, c); }).join("") +
       '</div>' + (oc.humainActif === false ? "" : carteHumain(c, m)) + '</div>' +
       (txt(oc.note) ? '<p class="offre-n">' + gras(txt(oc.note)) + '</p>' : '<p class="offre-n">Payer l\'année en une fois revient à un peu plus de huit mois (Starter : 10 000 F au lieu de 14 400 F). Plusieurs enfants ? La <a href="/app.html#abonnement?plan=abo_famille_m">formule Famille</a> couvre jusqu\'à 4 enfants au niveau Élite pour <span data-vrt-prix="abo_famille_m">' + prixConnu("abo_famille_m", "6 000") + '</span> F par mois. Paiement Orange Money ou MTN MoMo, sans engagement.</p>') +
       (cah ? lienOffre(cah.h, cah.t, cah.d, PICTO_LIVRE) : "") +
@@ -428,23 +451,21 @@
   }
 
   /* ---------- ressources du site reliées à la progression (ressources.js) ---------- */
-  var GROUPES = [["suivi", "Où j'en suis", "i-gauge", "Notes, coefficients, orientation"], ["apprendre", "Comprendre et apprendre", "i-book-open", "Cours, œuvres, méthodes, corrigés"],
-                 ["entrainer", "M'entraîner", "i-target", "Labos, épreuves, compositions, jeux"], ["aide", "Besoin d'aide", "i-message", "Questions, repères, calendrier"]];
+  /* 13/11/2026 « Mets les annales au début (anciens sujets) » : M'entraîner d'abord, les annales en tête. */
+  var GROUPES = [["entrainer", "M'entraîner", "i-target", "Annales, épreuves, labos, compositions, jeux"], ["apprendre", "Comprendre et apprendre", "i-book-open", "Cours, œuvres, méthodes, corrigés"],
+                 ["suivi", "Où j'en suis", "i-gauge", "Notes, coefficients, orientation"], ["aide", "Besoin d'aide", "i-message", "Questions, repères, calendrier"]];
   var FAMILLES = [
-    ["notes", "Notes et coefficients", "i-calculator", "Savoir où tu en es et ce qui compte vraiment.", "suivi"],
-    ["orientation", "Orientation", "i-compass", "Choisir sa série, sa filière, son école.", "suivi"],
+    ["epreuve", "Annales et épreuves", "i-pen", "Les anciens sujets de l'examen, corrigés, puis des sujets complets pour t'entraîner.", "entrainer"],
+    ["notes", "Notes et orientation", "i-calculator", "Où tu en es, ce qui compte vraiment, la série qui t'attend.", "suivi"],
     ["methode", "Méthodes et examens", "i-feather", "Les méthodes attendues le jour de l'épreuve.", "apprendre"],
-    ["cours", "Cours rédigés", "i-book-open", "Les leçons complètes déjà disponibles pour ta classe.", "apprendre"],
+    ["cours", "Fiches de cours", "i-book-open", "Des cours complets sur une page, en complément des leçons.", "apprendre"],
     ["oeuvre", "Œuvres au programme", "i-book", "Analyse, résumé, carte mentale et QCM.", "apprendre"],
     ["scene", "Scènes vivantes", "i-play", "Une situation courte où tu choisis la bonne réponse.", "apprendre"],
-    ["cahier", "Mon cahier", "i-notebook", "Le cahier interactif de l'année.", "apprendre"],
-    ["corrige", "Corrigés du cahier", "i-clipboard-check", "Séquence par séquence, exercice par exercice.", "apprendre"],
+    ["corrige", "Mon cahier et ses corrigés", "i-clipboard-check", "Le cahier de l'année, corrigé séquence par séquence.", "apprendre"],
     ["fichier", "Documents du catalogue", "i-file-text", "Les documents déposés par le centre pour ta classe.", "apprendre"],
     ["labo", "Laboratoires", "i-flask", "Manipuler, observer, conclure : l'expérience reliée à ta leçon.", "entrainer"],
     ["direct", "Compositions en direct", "i-clock", "Chronométrées, corrigées dès la remise.", "entrainer"],
-    ["epreuve", "Épreuves et annales", "i-pen", "T'entraîner sur des sujets complets.", "entrainer"],
-    ["jeu", "Jeux", "i-gamepad", "Réviser en jouant, sur les notions de ta classe.", "entrainer"],
-    ["defis", "Battles et défis", "i-award", "Se mesurer aux élèves de son cycle, travailler à plusieurs.", "entrainer"],
+    ["jeu", "Jeux et défis", "i-gamepad", "Réviser en jouant, se mesurer aux élèves de son cycle.", "entrainer"],
     ["aide", "Aide et repères", "i-message", "Pour poser une question ou situer ce que tu apprends.", "aide"]
   ];
   var TONS = [["#1E499B", "#EDF2FB"], ["#0E7C86", "#E9F5F6"], ["#5B4FA8", "#F0EDF9"], ["#B03A6E", "#FBEFF4"], ["#007E11", "#EAF6EC"], ["#C24E00", "#FDF1E8"]];
@@ -453,6 +474,9 @@
   var RE_EMO = /[\u{1F000}-\u{1FAFF}\u{2190}-\u{21FF}\u{2300}-\u{23FF}\u{2460}-\u{24FF}\u{25A0}-\u{27BF}\u{2900}-\u{297F}\u{2B00}-\u{2BFF}\u{3030}\u{303D}\u{FE0F}\u{20E3}\u{200D}]/gu;
   function net(s) { return String(s == null ? "" : s).replace(RE_EMO, "").replace(/\s{2,}/g, " ").trim(); }
   var LIB_F = {}; FAMILLES.forEach(function (f, i) { f[5] = ton(i); LIB_F[f[0]] = f; });
+  /* 13/11/2026 « regroupe les pages » : trois petites familles fondues dans leur voisine. */
+  var FUSION = { orientation: "notes", cahier: "corrige", defis: "jeu" };
+  function famDe(t) { return FUSION[t] || t; }
   /* Rubriques, familles et ressources réglées dans l'admin (13/11/2026). */
   var FAM_MASQ = {};
   (function reglerFamilles() {
@@ -486,7 +510,7 @@
         else poser(R0.cl, c);
       });
     });
-    Object.keys(R0.items).forEach(function (id) { if (FAM_MASQ[R0.items[id].t]) parti[id] = 1; });
+    Object.keys(R0.items).forEach(function (id) { var it = R0.items[id]; it.t = famDe(it.t); if (FAM_MASQ[it.t]) parti[id] = 1; });
     Object.keys(parti).forEach(function (id) { delete R0.items[id]; });
     ["lec", "mat", "cl"].forEach(function (k) {
       Object.keys(R0[k]).forEach(function (cle) { R0[k][cle] = R0[k][cle].filter(function (id) { return R0.items[id]; }); });
@@ -548,13 +572,15 @@
   /* 11/11/2026 : le gratuit se voit (pastille verte), le payant garde son cadenas. */
   function marque(it) { return it.ab ? '<span class="res-tag ab">' + si("i-lock", 12) + 'Abonnement</span>' : it.compte ? '<span class="res-tag gr">Gratuit · avec un compte</span>' : '<span class="res-tag gr">Gratuit</span>'; }
   /* Le gratuit d'abord : l'élève goûte, l'envie vient, l'abonnement suit. Ordre stable sinon. */
-  function gratuitDabord(ids) { var R0 = RES(); return ids.map(function (id, k) { return [id, k]; }).sort(function (a, b) { var x = (R0.items[a[0]] || {}).ab ? 1 : 0, y = (R0.items[b[0]] || {}).ab ? 1 : 0; return x - y || a[1] - b[1]; }).map(function (a) { return a[0]; }); }
+  function gratuitDabord(ids) { var R0 = RES(); function r(id) { var it = R0.items[id] || {}; return it.an ? 0 : it.ab ? 2 : 1; }   /* annales, puis gratuit, puis payant */
+    function an(id) { var m = /_(\d{4})$/.exec(id); return R0.items[id] && R0.items[id].an ? (m ? +m[1] : 9999) : 0; }   /* session la plus récente d'abord */
+    return ids.map(function (id, k) { return [id, k]; }).sort(function (a, b) { return r(a[0]) - r(b[0]) || an(b[0]) - an(a[0]) || a[1] - b[1]; }).map(function (a) { return a[0]; }); }
   /* Une ressource gratuite par famille, dans l'ordre où elle donne envie. */
   /* 13/11/2026 : les méthodes d'examen d'abord (demande de Jacques) : c'est ce que l'élève de chaque classe doit voir en premier. */
-  var ORDRE_GOUT = ["methode", "corrige", "oeuvre", "direct", "jeu", "labo", "epreuve", "scene", "defis", "cours", "orientation", "notes"];
+  var ORDRE_GOUT = ["epreuve", "methode", "corrige", "oeuvre", "direct", "jeu", "labo", "scene", "cours", "notes"];
   function selectionGratuite(ids, n) {
     var R0 = RES(), vu = {}, o = [];
-    ORDRE_GOUT.forEach(function (f) { if (o.length >= n) return; var id = ids.find(function (i) { var it = R0.items[i]; return it && !it.ab && it.t === f && !vu[i]; }); if (id) { vu[id] = 1; o.push(id); } });
+    ORDRE_GOUT.forEach(function (f) { if (o.length >= n) return; var ok = function (i) { var it = R0.items[i]; return it && !it.ab && it.t === f && !vu[i]; }, id = ids.find(function (i) { return ok(i) && R0.items[i].an; }) || ids.find(ok); if (id) { vu[id] = 1; o.push(id); } });
     return o;
   }
   function carteRes(id) {
@@ -576,19 +602,23 @@
      replier(liste, n) : n premiers enfants visibles, les autres derrière un
      bouton « Voir plus (k) » qui les déplie (et « Voir moins » les replie).
      Idempotent : rappelé après un nouveau rendu, il remplace son bouton. */
-  function replier(liste, n, nom) {
+  /* garder(e) (14/11/2026, facultatif) : les n premiers éléments QUI LE VÉRIFIENT restent visibles,
+     dans l'ordre (ex. les leçons rédigées d'un chapitre, pas les lignes vides du programme). */
+  function replier(liste, n, nom, garder) {
     if (!liste) return;
-    var enf = [].slice.call(liste.children), reste = enf.length - n;
+    var enf = [].slice.call(liste.children), vu = 0;
+    var vis = enf.map(function (e) { var ok = (!garder || garder(e)) && vu < n; if (ok) vu++; return ok; });
+    var reste = vis.filter(function (v) { return !v; }).length;
     if (liste._vpBtn && liste._vpBtn.parentNode) liste._vpBtn.parentNode.removeChild(liste._vpBtn);
-    enf.forEach(function (e, i) { e.hidden = i >= n; });
+    enf.forEach(function (e, i) { e.hidden = !vis[i]; });
     if (reste <= 0) return;
     var b = document.createElement("button");
     b.type = "button"; b.className = "voir-plus"; b.setAttribute("aria-expanded", "false");
-    var lib = function (ouvert) { return ouvert ? "Voir moins" : "Voir plus" + (nom ? " de " + nom : "") + " (" + reste + ")"; };
+    var lib = function (ouvert) { return (ouvert ? "Voir moins" : nom === "chapitre" ? "Voir tout le chapitre" : garder && nom ? "Voir les autres " + nom : "Voir plus" + (nom ? " de " + nom : "")) + (ouvert ? "" : " (" + reste + ")"); };
     b.textContent = lib(false);
     b.onclick = function () {
       var ouvert = b.getAttribute("aria-expanded") !== "true";
-      enf.forEach(function (e, i) { if (i >= n) e.hidden = !ouvert; });
+      enf.forEach(function (e, i) { if (!vis[i]) e.hidden = !ouvert; });
       b.setAttribute("aria-expanded", String(ouvert)); b.textContent = lib(ouvert);
     };
     liste.parentNode.insertBefore(b, liste.nextSibling);
@@ -650,7 +680,7 @@
     if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", habiller); else habiller();
   }
 
-  W.VRT.app = { cfg: CFG, FORMULES: FORMULES, HUMAIN: HUMAIN, WA: WA_VERITAS, cahierDefaut: cahierDefaut, replier: replier, titreL: titreL, si: si, net: net, ton: ton, GROUPES: GROUPES, chargerCatalogue: chargerCatalogue, FAMILLES: FAMILLES, resLecon: resLecon, resDeMatiere: resDeMatiere, resClasse: resClasse, gratuitDabord: gratuitDabord, selectionGratuite: selectionGratuite, leconsDeRes: leconsDeRes, carteRes: carteRes, pastilles: pastilles, MATIERES: MATIERES, PAR_ID: PAR_ID, CLASSES: CLASSES, lire: lire, ecrire: ecrire, noterJour: noterJour, serie: serie,
+  W.VRT.app = { cfg: CFG, FORMULES: FORMULES, HUMAIN: HUMAIN, WA: WA_VERITAS, cahierDefaut: cahierDefaut, replier: replier, titreL: titreL, si: si, net: net, ton: ton, GROUPES: GROUPES, chargerCatalogue: chargerCatalogue, FAMILLES: FAMILLES, famDe: famDe, resLecon: resLecon, resDeMatiere: resDeMatiere, resClasse: resClasse, gratuitDabord: gratuitDabord, selectionGratuite: selectionGratuite, leconsDeRes: leconsDeRes, carteRes: carteRes, pastilles: pastilles, MATIERES: MATIERES, PAR_ID: PAR_ID, CLASSES: CLASSES, lire: lire, ecrire: ecrire, noterJour: noterJour, serie: serie,
     marquerLu: marquerLu, noterQuiz: noterQuiz, teinter: teinter, ico: ico, icoM: icoM, pic: pic, etoiles: etoiles, esc: esc, slug: slug, rail: rail, chiffreSerie: chiffreSerie, scenesPour: scenesPour, jour: jour,
     exporterImage: exporterImage, offre: offre, cahierPour: cahierPour, melanger: melanger, boutonsImage: boutonsImage, filigraneCanvas: filigraneCanvas };
 })(window);

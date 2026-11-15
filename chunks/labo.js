@@ -2378,6 +2378,162 @@ function _initLaboSim(lv){
       _simUpdateControls();
     };
 
+  // ══ 14/11/2026 — cinq vraies simulations à la place du diaporama d'étapes (lv27, lv28, lv29, lv31, lv32) ══
+  // Contrôles communs : curseur et bouton au style des autres labos.
+  } else if(lv.id==="lv28"||lv.id==="lv27"||lv.id==="lv29"||lv.id==="lv31"||lv.id==="lv32"){
+    var LB_LAB="font-size:11px;font-weight:700;color:#142554;display:flex;align-items:center;gap:6px";
+    var lbCurseur=function(lib,cle,min,max,pas,unite){var v=window._sim.params[cle];return "<label style='"+LB_LAB+"'>"+lib+" <input type='range' min='"+min+"' max='"+max+"' step='"+pas+"' value='"+v+"' oninput='window._sim.params."+cle+"=+this.value' style='width:110px'><span>"+v+(unite||"")+"</span></label>";};
+    var lbBouton=function(lib,code,actif){return "<button onclick=\""+code+"\" style='background:"+(actif?"#142554":"#E6ECF7")+";color:"+(actif?"#FFC93C":"#142554")+";border:none;border-radius:10px;padding:6px 12px;font-size:11px;font-weight:700;cursor:pointer'>"+lib+"</button>";};
+    var txt=function(s,x,y,coul,taille,align,gras){ctx.fillStyle=coul||'#E2E8F0';ctx.font=(gras?'bold ':'')+(taille||12)+'px Montserrat';ctx.textAlign=align||'left';ctx.fillText(s,x,y);};
+    var fond=function(){ctx.clearRect(0,0,W,H);ctx.fillStyle='#0F172A';ctx.fillRect(0,0,W,H);};
+
+    // ── lv28 : croisements de Mendel (monohybridisme, dominance complète) ──
+    if(lv.id==="lv28"){
+      var GEN=["LL","Ll","ll"];
+      window._sim.params={p1:1,p2:1,n:0,tir:[0,0,0]}; window._sim.defaults={p1:1,p2:1,n:0,tir:[0,0,0]};
+      window._lbTirer=function(k){var p=window._sim.params,a=GEN[p.p1],b=GEN[p.p2];for(var i=0;i<k;i++){var g=a[Math.random()<.5?0:1]+b[Math.random()<.5?0:1];var c=(g==="LL")?0:(g==="ll")?2:1;p.tir[c]++;p.n++;}};
+      window._sim.controlsDef=function(){var p=window._sim.params,s="";
+        s+="<span style='"+LB_LAB+"'>Parent 1 :</span>"+GEN.map(function(g,i){return lbBouton(g,"window._sim.params.p1="+i+";window._sim.params.n=0;window._sim.params.tir=[0,0,0]",p.p1===i)}).join(" ");
+        s+="<span style='"+LB_LAB+"'>Parent 2 :</span>"+GEN.map(function(g,i){return lbBouton(g,"window._sim.params.p2="+i+";window._sim.params.n=0;window._sim.params.tir=[0,0,0]",p.p2===i)}).join(" ");
+        s+=lbBouton("Semer 100 graines","window._lbTirer(100)",true)+" "+lbBouton("Vider","window._sim.params.n=0;window._sim.params.tir=[0,0,0]",false);
+        return s;};
+      _simUpdateControls();
+      var pois=function(x,y,r,ride,coul){ctx.save();ctx.translate(x,y);ctx.beginPath();for(var a=0;a<=Math.PI*2+.01;a+=Math.PI/24){var rr=r*(ride?(1+.12*Math.sin(a*7)):1);ctx.lineTo(rr*Math.cos(a),rr*Math.sin(a));}ctx.closePath();ctx.fillStyle=coul;ctx.fill();ctx.strokeStyle='rgba(0,0,0,.35)';ctx.lineWidth=1;ctx.stroke();ctx.restore();};
+      window._sim._draw=function(){var p=window._sim.params,t=window._sim.t,a=GEN[p.p1],b=GEN[p.p2];fond();
+        txt("Échiquier de croisement (L lisse, dominant ; l ridé, récessif)",20,24,'#FFC93C',13,'left',true);
+        var x0=70,y0=70,c=62;
+        txt("gamètes P1",x0+c,y0-16,'#93C5FD',11,'center');txt("gamètes P2",x0-38,y0+c+4,'#F9A8D4',11,'center');
+        for(var i=0;i<2;i++){txt(a[i],x0+c*(i+.5)+c/2,y0+4,'#93C5FD',16,'center',true);txt(b[i],x0-8,y0+c*(i+.5)+c/2+18,'#F9A8D4',16,'center',true);}
+        var nb=[0,0,0];
+        for(var r=0;r<2;r++)for(var k=0;k<2;k++){var g=[a[k],b[r]].sort().join(""),X=x0+c*(k+.5),Y=y0+12+c*r,ride=(g==="ll");
+          nb[g==="LL"?0:g==="ll"?2:1]++;
+          var pulse=1+.05*Math.sin(t*3+r+k);
+          ctx.strokeStyle='rgba(255,255,255,.25)';ctx.strokeRect(X,Y,c,c);
+          pois(X+c/2,Y+c/2-6,15*pulse,ride,ride?'#9CA35A':'#8BC34A');txt(g,X+c/2,Y+c-8,'#E2E8F0',12,'center',true);}
+        // proportions attendues
+        var px=300;txt("Attendu (probabilités)",px,62,'#E2E8F0',12,'left',true);
+        var lis=nb[0]+nb[1],rid=nb[2];
+        [["lisses",lis/4,'#8BC34A'],["ridés",rid/4,'#9CA35A']].forEach(function(e,i){var y=78+i*30;ctx.fillStyle='rgba(255,255,255,.08)';ctx.fillRect(px,y,200,20);ctx.fillStyle=e[2];ctx.fillRect(px,y,200*e[1],20);txt(e[0]+" : "+Math.round(e[1]*100)+" %",px+208,y+15,'#E2E8F0',12);});
+        txt("Génotypes : LL "+nb[0]+"/4 · Ll "+nb[1]+"/4 · ll "+nb[2]+"/4",px,152,'#CBD5E1',12);
+        // tirage
+        txt("Observé sur "+p.n+" graines semées",px,190,'#E2E8F0',12,'left',true);
+        var ol=p.tir[0]+p.tir[1],or=p.tir[2];
+        if(p.n){[["lisses",ol/p.n,'#8BC34A'],["ridés",or/p.n,'#9CA35A']].forEach(function(e,i){var y=204+i*30;ctx.fillStyle='rgba(255,255,255,.08)';ctx.fillRect(px,y,200,20);ctx.fillStyle=e[2];ctx.fillRect(px,y,200*e[1],20);txt(e[0]+" : "+Math.round(e[1]*100)+" %",px+208,y+15,'#E2E8F0',12);});
+          txt(or?("Rapport lisses / ridés ≈ "+(ol/or).toFixed(2)+" : 1"):"Aucun ridé",px,282,'#FFC93C',13,'left',true);}
+        else txt("Clique « Semer 100 graines » pour comparer au calcul.",px,214,'#94A3B8',12);
+        txt(p.p1===1&&p.p2===1?"Ll × Ll : 3/4 lisses, 1/4 ridés (2e loi de Mendel, ségrégation)":p.p1+p.p2===2&&p.p1!==1?"LL × ll : F1 100 % Ll lisses (1re loi, uniformité)":(p.p1===2||p.p2===2)&&(p.p1===1||p.p2===1)?"Ll × ll : croisement-test, 1/2 lisses, 1/2 ridés":"",20,H-16,'#A5B4FC',12);
+        setVal('<span>P1 '+a+' × P2 '+b+'</span><span>Lisses attendus '+Math.round(lis/4*100)+' %</span><span>'+p.n+' graines</span>');
+        _simUpdateControls();};
+
+    // ── lv27 : réponse immunitaire primaire et secondaire, effet du vaccin ──
+    } else if(lv.id==="lv27"){
+      window._sim.params={vaccin:1,jour:30}; window._sim.defaults={vaccin:1,jour:30};
+      window._sim.controlsDef=function(){var p=window._sim.params;
+        return lbBouton("Vacciné","window._sim.params.vaccin=1",p.vaccin===1)+" "+lbBouton("Non vacciné","window._sim.params.vaccin=0",p.vaccin===0)+" "+lbCurseur("Contamination au jour","jour",10,80,1,"");};
+      _simUpdateControls();
+      // anticorps : primaire lente et faible (pic ~ 12 j), secondaire rapide et forte (pic ~ 5 j)
+      var bosse=function(t,t0,delai,haut,larg){var d=t-t0-delai;return d<-delai?0:haut*Math.exp(-d*d/(2*larg*larg))*(d<0?Math.exp(d/2):1);};
+      window._sim._draw=function(){var p=window._sim.params,T=100,x0=60,x1=W-30,y0=H-50,y1=40;fond();
+        var X=function(j){return x0+(x1-x0)*j/T},Y=function(v){return y0-(y0-y1)*v};
+        ctx.strokeStyle='rgba(255,255,255,.35)';ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(x0,y1);ctx.lineTo(x0,y0);ctx.lineTo(x1,y0);ctx.stroke();
+        for(var j=0;j<=T;j+=20)txt(j+" j",X(j),y0+16,'#94A3B8',10,'center');
+        txt("concentration",x0-6,y1-8,'#94A3B8',10,'left');
+        var seuil=.55;ctx.setLineDash([5,4]);ctx.strokeStyle='#F87171';ctx.beginPath();ctx.moveTo(x0,Y(seuil));ctx.lineTo(x1,Y(seuil));ctx.stroke();ctx.setLineDash([]);
+        txt("seuil de la maladie (charge en microbes)",x1,Y(seuil)-6,'#F87171',10,'right');
+        var an=function(j){var a=0;if(p.vaccin)a+=bosse(j,0,12,.22,6)+(j>12?.08*Math.exp(-(j-12)/60):0);if(j>=p.jour)a+=p.vaccin?bosse(j,p.jour,5,1,5):bosse(j,p.jour,12,.4,7);return Math.min(1.1,a);};
+        var mic=function(j){if(j<p.jour)return 0;var d=j-p.jour,croit=.06*Math.exp(d*.35),fin=p.vaccin?6:15;return Math.max(0,Math.min(1,croit)*(d<fin?1:Math.exp(-(d-fin)/3)));};
+        var tmax=Math.min(T,(window._sim.t*12)%(T+20));
+        [["anticorps",an,'#34D399'],["microbes",mic,'#F59E0B']].forEach(function(c){ctx.strokeStyle=c[2];ctx.lineWidth=2.5;ctx.beginPath();for(var j=0;j<=tmax;j+=.5){var yy=Y(c[1](j));j?ctx.lineTo(X(j),yy):ctx.moveTo(X(j),yy);}ctx.stroke();});
+        if(p.vaccin){ctx.fillStyle='#93C5FD';ctx.beginPath();ctx.moveTo(X(0),y0);ctx.lineTo(X(0)-6,y0+10);ctx.lineTo(X(0)+6,y0+10);ctx.fill();txt("vaccin",X(0)+8,y0-6,'#93C5FD',10);}
+        ctx.fillStyle='#F59E0B';ctx.beginPath();ctx.moveTo(X(p.jour),y0);ctx.lineTo(X(p.jour)-6,y0+10);ctx.lineTo(X(p.jour)+6,y0+10);ctx.fill();txt("contamination",X(p.jour)+8,y0-6,'#F59E0B',10);
+        var pic=0;for(var j=p.jour;j<T;j++)pic=Math.max(pic,mic(j));var malade=pic>seuil;
+        txt("anticorps",x1-150,y1+4,'#34D399',11,'left',true);txt("microbes",x1-70,y1+4,'#F59E0B',11,'left',true);
+        txt(p.vaccin?"Réponse SECONDAIRE : rapide et forte, grâce aux lymphocytes mémoire":"Réponse PRIMAIRE : lente (≈ 12 jours) et faible",x0,22,'#FFC93C',12,'left',true);
+        setVal('<span>'+(p.vaccin?'Vacciné':'Non vacciné')+'</span><span>Contamination au jour '+p.jour+'</span><span>'+(malade?'La maladie se déclare':'Pas de maladie : les microbes sont éliminés à temps')+'</span>');
+        _simUpdateControls();};
+
+    // ── lv29 : test de dépistage et formule de Bayes, sur 1 000 personnes ──
+    } else if(lv.id==="lv29"){
+      window._sim.params={prev:5,sens:95,spec:90}; window._sim.defaults={prev:5,sens:95,spec:90};
+      window._sim.controlsDef=function(){return lbCurseur("Malades dans la population","prev",1,50,1," %")+lbCurseur("Sensibilité","sens",50,100,1," %")+lbCurseur("Spécificité","spec",50,100,1," %");};
+      _simUpdateControls();
+      window._sim._draw=function(){var p=window._sim.params;fond();
+        var N=1000,M=Math.round(N*p.prev/100),VP=Math.round(M*p.sens/100),FN=M-VP,S=N-M,VN=Math.round(S*p.spec/100),FP=S-VN;
+        var cols=40,cel=7.2,gx=20,gy=34,k=0;
+        var cat=function(i){return i<VP?0:i<M?1:i<M+FP?2:3};
+        var coul=['#EF4444','#7F1D1D','#F59E0B','#334155'];
+        for(var i=0;i<N;i++){var x=gx+(i%cols)*cel,y=gy+Math.floor(i/cols)*cel;ctx.fillStyle=coul[cat(i)];ctx.fillRect(x,y,cel-1.4,cel-1.4);}
+        txt("1 000 personnes testées",gx,22,'#FFC93C',12,'left',true);
+        var lx=330,ly=40;[[0,"malades, test positif",VP],[1,"malades, test négatif",FN],[2,"sains, test positif (faux positifs)",FP],[3,"sains, test négatif",VN]].forEach(function(e,i){ctx.fillStyle=coul[e[0]];ctx.fillRect(lx,ly+i*22,12,12);txt(e[2]+" "+e[1],lx+18,ly+i*22+11,'#E2E8F0',12);});
+        var pp=VP+FP,ppv=pp?VP/pp:0;
+        txt("Si le test est positif :",lx,150,'#E2E8F0',13,'left',true);
+        txt("P(malade | +) = "+VP+" / ("+VP+" + "+FP+") = "+(ppv*100).toFixed(1)+" %",lx,172,'#FFC93C',14,'left',true);
+        txt("Formule de Bayes :",lx,206,'#CBD5E1',12);
+        txt("P(M|+) = P(+|M)·P(M) / P(+)",lx,226,'#CBD5E1',12);
+        txt("= "+(p.sens/100).toFixed(2)+" × "+(p.prev/100).toFixed(2)+" / "+(pp/N).toFixed(3),lx,246,'#CBD5E1',12);
+        txt(ppv<.5?"Peu de malades : la plupart des positifs sont… des faux positifs.":"La plupart des positifs sont vraiment malades.",lx,282,ppv<.5?'#F59E0B':'#34D399',12,'left',true);
+        setVal('<span>Prévalence '+p.prev+' %</span><span>Positifs : '+pp+'</span><span>P(malade | +) = '+(ppv*100).toFixed(1)+' %</span>');
+        _simUpdateControls();};
+
+    // ── lv31 : estérification, équilibre et rendement ──
+    } else if(lv.id==="lv31"){
+      window._sim.params={exces:1,classe:0,eau:0}; window._sim.defaults={exces:1,classe:0,eau:0};
+      window._sim.controlsDef=function(){var p=window._sim.params;
+        return lbCurseur("Alcool pour 1 mol d'acide","exces",1,5,.5," mol")+["primaire","secondaire","tertiaire"].map(function(c,i){return lbBouton("Alcool "+c,"window._sim.params.classe="+i+";window._sim.t=0",p.classe===i)}).join(" ")+" "+lbBouton(p.eau?"Eau retirée":"Eau laissée","window._sim.params.eau=1-window._sim.params.eau;window._sim.t=0",!!p.eau);};
+      _simUpdateControls();
+      var K=[4,2.25,.005];
+      // x²/((1−x)(n−x)) = K, racine dans [0, min(1,n)]
+      var rend=function(n,k){var lo=0,hi=Math.min(1,n);for(var i=0;i<60;i++){var m=(lo+hi)/2;(m*m/((1-m)*(n-m)+1e-12)<k)?lo=m:hi=m;}return lo;};
+      window._sim._draw=function(){var p=window._sim.params,t=window._sim.t;fond();
+        var xe=p.eau?Math.min(.99,p.classe===2?.35:.98):rend(p.exces,K[p.classe]);
+        var vit=[.35,.25,.08][p.classe],x=xe*(1-Math.exp(-vit*t*2));
+        var x0=50,x1=360,y0=H-50,y1=50,X=function(s){return x0+(x1-x0)*s/10},Y=function(v){return y0-(y0-y1)*v};
+        ctx.strokeStyle='rgba(255,255,255,.35)';ctx.beginPath();ctx.moveTo(x0,y1);ctx.lineTo(x0,y0);ctx.lineTo(x1,y0);ctx.stroke();
+        txt("rendement",x0-4,y1-10,'#94A3B8',10);txt("temps (h)",x1,y0+18,'#94A3B8',10,'right');
+        [0,.5,1].forEach(function(v){txt(Math.round(v*100)+" %",x0-6,Y(v)+4,'#94A3B8',10,'right');});
+        ctx.setLineDash([5,4]);ctx.strokeStyle='#FFC93C';ctx.beginPath();ctx.moveTo(x0,Y(xe));ctx.lineTo(x1,Y(xe));ctx.stroke();ctx.setLineDash([]);
+        txt("équilibre : "+Math.round(xe*100)+" %",x1,Y(xe)-6,'#FFC93C',11,'right',true);
+        ctx.strokeStyle='#34D399';ctx.lineWidth=2.5;ctx.beginPath();for(var s=0;s<=Math.min(10,t*2);s+=.1){var v=xe*(1-Math.exp(-vit*s));s?ctx.lineTo(X(s),Y(v)):ctx.moveTo(X(s),Y(v));}ctx.stroke();ctx.lineWidth=1;
+        // bilan en moles
+        var bx=420,mol=[["acide",1-x,'#F87171'],["alcool",p.exces-x,'#93C5FD'],["ester",x,'#34D399'],["eau",p.eau?0:x,'#38BDF8']];
+        txt("Quantités (mol)",bx,46,'#E2E8F0',12,'left',true);
+        mol.forEach(function(m,i){var y=62+i*40;ctx.fillStyle='rgba(255,255,255,.08)';ctx.fillRect(bx,y,180,22);ctx.fillStyle=m[2];ctx.fillRect(bx,y,180*Math.min(1,m[1]/Math.max(1,p.exces)),22);txt(m[0]+" : "+m[1].toFixed(2),bx+6,y+16,'#0F172A',12,'left',true);});
+        txt("R–COOH + R'–OH ⇌ R–COO–R' + H₂O",bx,240,'#CBD5E1',12);
+        txt(p.eau?"Retirer l'eau déplace l'équilibre vers l'ester.":p.exces>1?"Un excès d'alcool déplace l'équilibre.":"Mélange équimolaire : réaction limitée.",bx,266,'#A5B4FC',12);
+        setVal('<span>Alcool '+["primaire","secondaire","tertiaire"][p.classe]+'</span><span>'+p.exces+' mol d\'alcool</span><span>Rendement '+Math.round(x*100)+' % (équilibre '+Math.round(xe*100)+' %)</span>');
+        _simUpdateControls();};
+
+    // ── lv32 : effet de serre et température moyenne, rétroaction de la glace ──
+    } else {
+      window._sim.params={co2:420,glace:1}; window._sim.defaults={co2:420,glace:1};
+      window._sim.controlsDef=function(){var p=window._sim.params;return lbCurseur("CO₂ dans l'air","co2",280,1000,10," ppm")+" "+lbBouton(p.glace?"Rétroaction glace : oui":"Rétroaction glace : non","window._sim.params.glace=1-window._sim.params.glace",!!p.glace);};
+      _simUpdateControls();
+      window._sim._draw=function(){var p=window._sim.params,t=window._sim.t;fond();
+        var dF=5.35*Math.log(p.co2/280),dT=.8*dF*(p.glace?1.25:1),T=14+dT,glace=Math.max(0,1-dT/4.5);
+        // Terre
+        var cx=150,cy=H/2+10,R=95;
+        var g=ctx.createRadialGradient(cx-30,cy-30,10,cx,cy,R);g.addColorStop(0,'#3B82F6');g.addColorStop(1,'#1E3A8A');ctx.fillStyle=g;ctx.beginPath();ctx.arc(cx,cy,R,0,Math.PI*2);ctx.fill();
+        ctx.fillStyle='#22C55E';ctx.beginPath();ctx.ellipse(cx-25,cy+5,30,22,.4,0,Math.PI*2);ctx.fill();ctx.beginPath();ctx.ellipse(cx+30,cy-15,22,30,-.3,0,Math.PI*2);ctx.fill();
+        ctx.fillStyle='#B8C4D4';ctx.beginPath();ctx.ellipse(cx,cy-R+6,48*glace+4,14*glace+2,0,0,Math.PI*2);ctx.fill();ctx.beginPath();ctx.ellipse(cx,cy+R-6,52*glace+4,14*glace+2,0,0,Math.PI*2);ctx.fill();
+        // atmosphère : épaisseur selon le CO2
+        ctx.strokeStyle='rgba(248,113,113,'+(.15+.5*(p.co2-280)/720)+')';ctx.lineWidth=6+14*(p.co2-280)/720;ctx.beginPath();ctx.arc(cx,cy,R+14,0,Math.PI*2);ctx.stroke();ctx.lineWidth=1;
+        // rayonnement : soleil → sol, infrarouge renvoyé
+        for(var i=0;i<4;i++){var ph=(t*.6+i/4)%1,ax=cx+R+150-ph*130,ay=40+i*10+ph*40;ctx.strokeStyle='#FDE047';ctx.beginPath();ctx.moveTo(ax,ay);ctx.lineTo(ax-10,ay+4);ctx.stroke();}
+        for(var j=0;j<5;j++){var q=(t*.5+j/5)%1,rx=cx+50+j*8,ry=cy-R*.4-q*60,retour=q>.5&&j<1+Math.round(3*(p.co2-280)/720);ctx.strokeStyle=retour?'#F87171':'#FB923C';ctx.beginPath();ctx.moveTo(rx,retour?cy-R*.4-(1-q)*60:ry);ctx.lineTo(rx+4,(retour?cy-R*.4-(1-q)*60:ry)-6);ctx.stroke();}
+        // thermomètre
+        var tx=360,ty0=270,ty1=60,TT=function(v){return ty0-(ty0-ty1)*(v-10)/14};
+        ctx.fillStyle='rgba(255,255,255,.1)';ctx.fillRect(tx,ty1,18,ty0-ty1);ctx.fillStyle=T>16?'#EF4444':'#F59E0B';ctx.fillRect(tx,TT(T),18,ty0-TT(T));
+        [10,14,18,22].forEach(function(v){txt(v+" °C",tx+26,TT(v)+4,'#94A3B8',10);});
+        txt("Température moyenne : "+T.toFixed(1)+" °C",430,70,'#FFC93C',14,'left',true);
+        txt("Réchauffement : +"+dT.toFixed(1)+" °C depuis 1850",430,96,'#E2E8F0',12);
+        txt("Forçage radiatif : +"+dF.toFixed(2)+" W/m²",430,118,'#CBD5E1',12);
+        txt("Banquise : "+Math.round(glace*100)+" % de son étendue",430,140,'#E2E8F0',12);
+        txt(p.co2<=290?"Niveau préindustriel (≈ 280 ppm).":p.co2<=430?"Proche d'aujourd'hui (≈ 420 ppm).":"Au-delà de +2 °C : risques forts.",430,176,'#A5B4FC',12);
+        if(p.glace){txt("Moins de glace → moins de lumière renvoyée",430,198,'#A5B4FC',11);txt("→ encore plus de chaleur (rétroaction).",430,214,'#A5B4FC',11);}else txt("Sans rétroaction : réchauffement plus faible.",430,198,'#A5B4FC',11);
+        setVal('<span>CO₂ '+p.co2+' ppm</span><span>T = '+T.toFixed(1)+' °C</span><span>+'+dT.toFixed(1)+' °C</span>');
+        _simUpdateControls();};
+    }
+
   // ── FALLBACK GÉNÉRIQUE AMÉLIORÉ (slideshow des étapes d'expérience) ────
   } else {
     window._sim.params={stepIdx:0,autoPlay:true};

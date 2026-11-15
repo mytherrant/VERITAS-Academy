@@ -210,7 +210,7 @@ for (const s of sources) {
   const f = path.join(SRC, "_liste.json");
   // Lue par methodes_examens.cjs (fiches) et apprendre_carte.cjs (classe et matière d'Apprendre).
   const L = sources.slice().sort((a, b) => ORDRE.indexOf(a.meta.matiere) - ORDRE.indexOf(b.meta.matiere) || a.cle.localeCompare(b.cle) || b.meta.annee - a.meta.annee)
-    .map(s => ({ id: s.meta.examen + "-" + s.cle + "-" + s.meta.annee, examen: s.meta.examen, nomExamen: EXAMENS[s.meta.examen].nom, fiche: MATIERES[s.meta.matiere][1][s.meta.examen] || null, matiere: MATIERES[s.meta.matiere][0] + (s.serie ? " (" + s.serie + ")" : ""), mat: MATIERES[s.meta.matiere][2], classes: s.classes, annee: s.meta.annee, national: s.meta.corrige === "national", u: "/" + s.page }));
+    .map(s => ({ id: s.meta.examen + "-" + s.cle + "-" + s.meta.annee, examen: s.meta.examen, m: s.meta.matiere, serie: s.serie, nomExamen: EXAMENS[s.meta.examen].nom, fiche: MATIERES[s.meta.matiere][1][s.meta.examen] || null, matiere: MATIERES[s.meta.matiere][0] + (s.serie ? " (" + s.serie + ")" : ""), mat: MATIERES[s.meta.matiere][2], classes: s.classes, annee: s.meta.annee, national: s.meta.corrige === "national", u: "/" + s.page }));
   const json = JSON.stringify(L, null, 1) + "\n";
   if (fs.existsSync(f) && fs.readFileSync(f, "utf8") === json) return;
   if (CONTROLE) return err("tools/annales/_liste.json : à régénérer");

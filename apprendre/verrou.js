@@ -31,7 +31,7 @@
   }
 
   var MSG = {
-    connexion: "Connecte-toi pour lire la suite si tu as une formule, ou choisis-en une.",
+    connexion: "Choisis une formule pour lire la suite. Déjà abonné ? Connecte-toi juste en dessous.",
     identifiants: "Identifiant ou mot de passe incorrect. Vérifie-les puis réessaie.",
     abonnement: "Ton compte n'a pas encore de formule active. Choisis-en une pour lire la suite.",
     non_depose: "Ta formule est bien active, mais cette leçon n'est pas encore disponible sur le serveur. Reviens un peu plus tard.",
@@ -70,16 +70,17 @@
   function mur(L, etat, A) {
     var fermees = L.parties.filter(function (p) { return p.verrou; });
     var form = (etat.raison === "connexion" || etat.raison === "identifiants")
-      ? '<form class="mur-f" data-mur-form><label>Identifiant<input name="login" autocomplete="username" required></label>' +
+      ? '<details class="mur-cx"' + (etat.raison === "identifiants" ? " open" : "") + '><summary>Déjà abonné ? Je me connecte</summary>' +
+        '<form class="mur-f" data-mur-form><label>Identifiant<input name="login" autocomplete="username" required></label>' +
         '<label>Mot de passe<input name="password" type="password" autocomplete="current-password" required></label>' +
-        '<button type="submit" class="btn-l">Lire la suite</button></form>'
-      : "";
+        '<button type="submit" class="btn-l">Lire la suite</button></form></details>'
+      : "";   /* 14/11/2026 : replié sous l'offre, ouvert d'office après un identifiant refusé */
     return '<section class="mur" aria-label="Suite réservée aux abonnés"><p class="mur-t">' + CADENAS + (/^classe_/.test(etat.raison) ? 'Cette classe n\'est pas encore dans ta formule' : 'La suite de cette leçon est réservée aux abonnés') + '</p>' +
       (/^classe_/.test(etat.raison) ? blocClasse(etat, A) : '<p class="mur-m" data-mur-msg>' + A.esc(MSG[etat.raison] || MSG.reseau) + '</p>') +
       fermees.filter(function (p) { return p.illus; }).map(function (p) { return '<figure class="illus mur-schema">' + p.illus.svg + '<figcaption><b>Schéma offert</b> · ' + A.esc(p.t) + ' — ' + A.esc(p.illus.legende || "") + '</figcaption></figure>'; }).join("") +
       (fermees.length ? '<ol class="mur-l">' + fermees.map(function (p) { return '<li>' + CADENAS + A.esc(p.t) + '</li>'; }).join("") + '</ol>' : "") +
       '<p class="mur-p">Avec ' + (L.labo ? 'un labo à manipuler, ' : '') + 'un entraînement corrigé au format de l\'examen, la fiche de révision et un quiz de ' + (L.nq || 0) + ' questions corrigées.</p>' +
-      form + A.offre(L.c, L.m, "lecon") + '</section>';
+      (form ? form : "") + A.offre(L.c, L.m, "lecon") + '</section>';
   }
 
   /* Formulaire : un seul envoi à la fois, et rechargement une fois le jeton posé. */
