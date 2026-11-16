@@ -16,6 +16,8 @@
   function fusionner(L, s) {
     L.parties = [L.parties[0]].concat(s.parties || []);
     L.revision = s.revision || []; L.exo = s.exo || ""; L.quiz = s.quiz || []; L.verrou = false;
+    /* leçon approfondie (16/11/2026) : la situation résolue n'existe que dans la suite payante */
+    if (s.denouement) L.denouement = s.denouement;
   }
 
   /* cb(null) : leçon complète ; cb({raison}) : on affiche le début et le mur. */
