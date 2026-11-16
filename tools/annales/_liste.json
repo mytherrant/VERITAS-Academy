@@ -560,6 +560,20 @@
   "u": "/ressources/annales/bepc-ecm-2026.html"
  },
  {
+  "id": "bac-ecm-2025",
+  "examen": "bac",
+  "m": "ecm",
+  "serie": "",
+  "nomExamen": "Baccalauréat",
+  "fiche": "ressources/examen-ecm-bac.html",
+  "matiere": "Éducation à la citoyenneté et à la morale",
+  "mat": "ecm",
+  "classes": "Tle A,Tle C,Tle D",
+  "annee": 2025,
+  "national": true,
+  "u": "/ressources/annales/bac-ecm-2025.html"
+ },
+ {
   "id": "bepc-ecm-2025",
   "examen": "bepc",
   "m": "ecm",
@@ -656,6 +670,20 @@
   "annee": 2025,
   "national": true,
   "u": "/ressources/annales/probatoire-anglais-acdti-2025.html"
+ },
+ {
+  "id": "bac-anglais-cdeti-2025",
+  "examen": "bac",
+  "m": "anglais",
+  "serie": "séries C, D, E et TI",
+  "nomExamen": "Baccalauréat",
+  "fiche": "ressources/examen-anglais-bac.html",
+  "matiere": "Anglais (séries C, D, E et TI)",
+  "mat": "anglais",
+  "classes": "Tle C,Tle D",
+  "annee": 2025,
+  "national": true,
+  "u": "/ressources/annales/bac-anglais-cdeti-2025.html"
  },
  {
   "id": "bepc-espagnol-2026",
