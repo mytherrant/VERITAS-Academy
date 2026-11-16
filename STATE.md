@@ -1,3 +1,14 @@
+## Apprendre : statistiques à deux variables de Terminale C et D au gabarit approfondi (16/11/2026)
+
+Demande de Jacques : « Continue » (après #329).
+
+- **4 leçons payantes** (2 contenus partagés : Tle C r19-r20 = Tle D r10-r11), source privée `71-denombrement-approfondi.js` (31 leçons au total) ; aperçus `apercus-tle-c.js` et `apercus-tle-d.js` fusionnés en place. Données de la fiche APC (coopérative de café de Foumban : x = 1…5 sacs d'engrais, y = 2, 3, 5, 6, 9 t) :
+  - tableaux d'effectifs et nuage de points : nuage et point moyen G(3 ; 5), variances 2 et 6, tableau à double entrée (âge × rendement des caféiers) en relief 3D, séries marginales et fréquences conditionnelles ;
+  - ajustements linéaires : covariance 3,4, droite des moindres carrés y = 1,7x − 0,1 tracée avec ses écarts, prévision 10,1 t pour 6 sacs (contrat de 10 t), r ≈ 0,98, trois nuages de corrélations différentes, prudence sur l'extrapolation, corrélation n'est pas causalité.
+- Générateurs : `nuage` (repère, points, G, droite et résidus), `grille3D` (tableau à double entrée en colonnes 3D).
+- Contrôlé dans Chromium (abonné 1200 et 390 px, visiteur) : 0 erreur JS ; aucun texte payant dans les aperçus. Bancs : verrou 18/18, gabarits 54/54, planche mobile 23/23.
+- **Reste chez Jacques** : remplacer `71-denombrement-approfondi.js` dans `apprendre_prive\sources` et déposer les 31 JSON (`apprendre-maths-approfondies-pour-jacques.zip`). Labo « nuage » et exercices d'examen rédigés ici (éleveur de Mbalmayo, taxi-moto de Bafoussam).
+
 ## Apprendre : Probabilités de Terminale C et D au gabarit approfondi (16/11/2026)
 
 Demande de Jacques : « Déjà fusionné, continue » (après #328).
