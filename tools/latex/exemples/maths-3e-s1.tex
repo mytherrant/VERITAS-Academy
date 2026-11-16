@@ -1,0 +1,112 @@
+\documentclass{veritas-epreuve}
+\classe{3\textsuperscript{e}}
+\matiere{Mathématiques}
+\epreuve{Évaluation de la séquence 1}
+\duree{2 heures}
+\coefficient{4}
+\code{VRT-3E-MATHS-S1}
+
+\begin{document}
+\titreepreuve
+
+\begin{consignes}
+\textbf{La calculatrice non programmable est autorisée.} Le sujet comporte trois exercices
+indépendants, à traiter dans l'ordre de votre choix. La clarté des raisonnements et la
+qualité de la rédaction entrent pour une part importante dans l'appréciation des copies.\par
+\textbf{Barème} : exercice 1, 6 points ; exercice 2, 7 points ; exercice 3, 7 points.
+\end{consignes}
+
+\exercice[Calcul numérique]{6 points}
+On donne $A = \dfrac{3}{4} - \dfrac{5}{6} \times \dfrac{9}{10}$ et
+$B = \sqrt{75} - 2\sqrt{12} + \sqrt{27}$.
+\begin{enumerate}
+  \item Calculer $A$ et donner le résultat sous forme d'une fraction irréductible.
+  \begin{solution}
+    $A = \dfrac{3}{4} - \dfrac{45}{60} = \dfrac{3}{4} - \dfrac{3}{4} = 0$. \bareme{2 pts}
+  \end{solution}
+  \item Écrire $B$ sous la forme $a\sqrt{3}$, où $a$ est un entier relatif.
+  \begin{solution}
+    $\sqrt{75}=5\sqrt3$, $\sqrt{12}=2\sqrt3$, $\sqrt{27}=3\sqrt3$, donc
+    $B = 5\sqrt3 - 4\sqrt3 + 3\sqrt3 = 4\sqrt3$. \bareme{2 pts}
+  \end{solution}
+  \item Montrer que $B^2$ est un nombre entier.
+  \begin{solution}
+    $B^2 = (4\sqrt3)^2 = 16 \times 3 = 48$, qui est entier. \bareme{2 pts}
+  \end{solution}
+\end{enumerate}
+
+\exercice[Propriété de Thalès]{7 points}
+\begin{minipage}[t]{.55\linewidth}
+Sur la figure ci-contre, qui n'est pas en vraie grandeur, les points $A$, $M$, $B$ sont
+alignés, ainsi que les points $A$, $N$, $C$. On donne :
+$AM = 4$ cm, $AB = 10$ cm, $AN = 2{,}4$ cm, $AC = 6$ cm et $BC = 8$ cm.
+\begin{enumerate}
+  \item Démontrer que les droites $(MN)$ et $(BC)$ sont parallèles.
+  \item Calculer la longueur $MN$.
+  \item Le triangle $ABC$ est-il rectangle ? Justifier.
+\end{enumerate}
+\end{minipage}\hfill
+\begin{minipage}[t]{.4\linewidth}
+\vspace{-4mm}
+\centering
+\begin{tikzpicture}[figure,scale=.56]
+  \coordinate (A) at (0,0);
+  \coordinate (B) at (10,0);
+  \coordinate (C) at (3.6,4.8);
+  \coordinate (M) at ($(A)!.4!(B)$);
+  \coordinate (N) at ($(A)!.4!(C)$);
+  \draw (A)--(B)--(C)--cycle;
+  \draw[vrtbleu] (M)--(N);
+  \foreach \p/\pos in {A/below left,B/below right,C/above,M/below,N/above left}
+    \node[point,label={\pos:$\p$}] at (\p) {};
+\end{tikzpicture}
+\end{minipage}
+
+\begin{solution}
+\begin{enumerate}
+  \item On calcule
+  \[ \frac{AM}{AB} = \frac{4}{10} = 0{,}4 \qquad\text{et}\qquad \frac{AN}{AC} = \frac{2{,}4}{6} = 0{,}4. \]
+  Les points $A, M, B$ et $A, N, C$ sont alignés dans le même ordre et
+  $AM/AB = AN/AC$ : d'après la réciproque de la propriété de Thalès,
+  $(MN) \parallel (BC)$. \bareme{3 pts}
+  \item D'après la propriété de Thalès, $\dfrac{MN}{BC} = 0{,}4$, donc
+  $MN = 0{,}4 \times 8 = 3{,}2$ cm. \bareme{2 pts}
+  \item Le plus grand côté est $[AB]$. $AC^2 + BC^2 = 36 + 64 = 100$ et $AB^2 = 10^2 = 100$.
+  Comme $AB^2 = AC^2 + BC^2$, d'après la réciproque de la propriété de Pythagore, le triangle
+  $ABC$ est rectangle en $C$. \bareme{2 pts}
+\end{enumerate}
+\end{solution}
+
+\exercice[Fonction affine]{7 points}
+Un taxi-moto de Douala propose deux tarifs pour un trajet de $x$ kilomètres :
+\begin{itemize}
+  \item \textbf{tarif A} : 150 F par kilomètre ;
+  \item \textbf{tarif B} : une prise en charge de 300 F, puis 100 F par kilomètre.
+\end{itemize}
+\begin{enumerate}
+  \item Exprimer, en fonction de $x$, le prix $f(x)$ au tarif A et le prix $g(x)$ au tarif B.
+  \item Représenter $f$ et $g$ dans un même repère.
+  \item Pour quelle distance les deux tarifs sont-ils égaux ? Lequel choisir pour 10 km ?
+\end{enumerate}
+
+\begin{solution}
+\begin{enumerate}
+  \item $f(x) = 150x$ et $g(x) = 100x + 300$. \bareme{2 pts}
+  \item \hfill\begin{tikzpicture}[baseline=(current bounding box.north)]
+    \begin{axis}[width=8.5cm,height=5.6cm,xmin=0,xmax=10.5,ymin=0,ymax=1650,
+        xtick={0,2,...,10},ytick={0,300,...,1500},clip=false]
+      \node[anchor=south east,font=\footnotesize] at ([yshift=3pt]rel axis cs:1,0) {$x$ (km)};
+      \node[anchor=south west,font=\footnotesize] at (rel axis cs:0,1) {prix (F)};
+      \addplot[vrtbleu,very thick,domain=0:10] {150*x} node[pos=.92,above left]{$f$};
+      \addplot[vrtvert,very thick,domain=0:10] {100*x+300} node[pos=.92,below right]{$g$};
+      \addplot[only marks,mark=*,mark size=1.6pt] coordinates {(6,900)};
+      \draw[dashed,vrtcorps] (axis cs:6,0)--(axis cs:6,900)--(axis cs:0,900);
+    \end{axis}
+  \end{tikzpicture}\hfill\null \bareme{3 pts}
+  \item $150x = 100x + 300 \iff 50x = 300 \iff x = 6$ : les tarifs sont égaux pour 6 km
+  (900 F). Pour 10 km : $f(10) = 1\,500$ F et $g(10) = 1\,300$ F ; le tarif B est le
+  plus avantageux. \bareme{2 pts}
+\end{enumerate}
+\end{solution}
+
+\end{document}
