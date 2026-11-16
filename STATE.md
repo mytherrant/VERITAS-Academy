@@ -1,3 +1,40 @@
+## Apprendre : police Nunito hébergée, animations et tuiles d'icônes sur toutes les pages (16/11/2026)
+
+Demande de Jacques (capture de l'accueil d'Apprendre sur Android) : « Aligne sur le style de Dénombrement : mêmes effets, style, animations ; polices scolaires lisibles et captivantes ; belles icônes » ; puis capture du panneau des formules.
+
+- **Cause** : Trebuchet MS et Segoe UI n'existent que sous Windows ; sur Android, les titres retombaient sur la police du téléphone.
+- **Police** : **Nunito** (SIL OFL 1.1, `assets/polices/NUNITO-OFL.txt`), fichiers variables woff2 200-1000 hébergés (`assets/polices/nunito-latin(-ext)-wght-normal|italic.woff2`, 4 × ≈ 38 Ko). Déclarée dans `apprendre/modele.css` ; « Poppins » y désigne aussi Nunito, pour les feuilles qui la nomment en dur (planches.css, apprendre.css). Titres en 900, texte en 500, schémas SVG dans la même police. Les 7 pages d'Apprendre ne chargent plus Poppins depuis Google Fonts (une connexion tierce de moins) mais préchargent Nunito. Les pages statiques `apprendre/cours`, `programme` gardent Poppins (CI `polices_locales.py`).
+- **Icônes de matière** sur tuile douce de leur couleur (anneau et ombre teintés), qui pivote au survol ; alignement « rédigées » + barre corrigé (sous le nom ; sans retrait sur téléphone).
+- **Animations** (comme la leçon modèle) : cartes de matières, ressources, tuiles et chapitres qui montent en fondu en cascade, trait des titres de section qui se dessine, numéros qui « sautent », cartes qui se soulèvent au survol, boutons qui s'enfoncent au toucher ; coupées si « réduire les animations » et à l'impression.
+- **Formules et « Avec un professeur »** : titres et prix en Nunito 900, boutons arrondis animés, note sous les formules lisible (interligne 1,6, encadré doux), liens « Enseignant ? » et « Cahiers » avec pictogramme en tuile dégradée.
+- `modele.css?v=20261116e`. Contrôlé en émulation Pixel 7 (accueil, matière, leçon, ressources, offre) : Nunito chargée (200), 0 erreur JS, pas de débordement. Bancs : cartes au survol 4/4, charte 34/34, lisibilité 7/7, planche mobile 23/23, verrou 18/18, gabarits 54/54, réglages 29/29, calendrier 51/51, menu 19/19.
+
+## Apprendre : suites et calcul intégral de Terminale C et D, ajoutés à la même PR (16/11/2026)
+
+Demande de Jacques : « Je ne vois pas le lien de fusion. Continue » ; lot ajouté à la PR #331 (une seule fusion).
+
+- **17 leçons** (9 contenus partagés), source privée `71-denombrement-approfondi.js` (67 leçons au total) ; aperçus fusionnés en place :
+  - **suites** (Tle C r24-r27, Tle D r12-r14) : chaises de la cérémonie à Yaoundé (récurrence, 465 chaises), caisse de la tontine de Bafia (croissante majorée, limite 500 000 F), réservoir de Maroua (point fixe, escalier, suite auxiliaire, colonnes 3D), mesures du club de Bafang (gendarmes, Tle C seulement) ;
+  - **calcul intégral** (Tle C r53-r57, Tle D r34-r38) : pompe de Ngaoundéré (7 L, aire coloriée), motif de l'artisan de Bamenda (1/6 m², vase de révolution en tranches 3D), serre de Dschang (inégalité de la moyenne, 26,7 °C), panneau solaire de Maroua (intégration par parties, 1 kWh), parcelle de Kribi (rectangles 370 m², trapèzes 365 m²).
+- **Tle D r34** (première du 3e trimestre) : gratuite, entière dans l'aperçu.
+- Générateurs : `aire` (surface coloriée), `escalier` (toile d'une suite récurrente), `revolution3D`.
+- Contrôlé dans Chromium (abonné et visiteur, 1200 et 390 px) : 0 erreur JS. Bancs : verrou 18/18, gabarits 54/54, planche mobile 23/23, réglages 29/29.
+- **Reste chez Jacques** : remplacer `71-denombrement-approfondi.js` et déposer les 65 JSON (`apprendre-maths-approfondies-pour-jacques.zip`). Labos « suite » et « integrale », exercices d'examen rédigés ici.
+
+## Apprendre : analyse de Terminale C et D au gabarit approfondi, quatre chapitres d'une traite (16/11/2026)
+
+Demande de Jacques : « Continue. Fais plusieurs d'une traite pour ne pas fusionner à chaque fois. »
+
+- **19 leçons** (10 contenus partagés), source privée `71-denombrement-approfondi.js` (50 leçons au total), aperçus `apercus-tle-c.js` et `apercus-tle-d.js` fusionnés en place, fiches APC d'origine conservées :
+  - **primitives** (Tle C r36-r37, Tle D r21-r22) : car Douala-Édéa (famille t² + 3t + C, condition x(1) = 0), pompe de Garoua (forme u'u³, V(1) = 3,75 L) ;
+  - **logarithmes** (Tle C r38-r39, Tle D r23-r24) : micro-finance de Bafoussam (1,1ⁿ ≥ 2, 8 ans), pH d'une eau de source de Yaoundé (pH 4, échelle du pH), décibels ;
+  - **exponentielles** (Tle C r45-r47, Tle D r32-r33) : culture de Douala (doublement en 2 ln 2 h, colonnes 3D), médicament t e⁻ᵗ (maximum en 1 h), fonctions aˣ (mutuelle de Bafoussam, Tle C seulement) ;
+  - **équations différentielles** (Tle C r60-r62, Tle D r39-r41) : culture de Bertoua (C e^(2x)), bouillon de Bafia (refroidissement, 10 ln 2 min, colonnes 3D), sismographe de Limbé (y'' + 4y = 0, ressort 3D animé, période π).
+- **Tle D r21** est la première leçon du 2e trimestre : gratuite, entière dans l'aperçu (comme avant).
+- Générateurs : `courbes` (repère, quadrillage, courbes rognées au cadre, points et pointillés), `ressort3D`.
+- Contrôlé dans Chromium (abonné 1200 et 390 px, visiteur) : 0 erreur JS. Bancs : verrou 18/18, gabarits 54/54, planche mobile 23/23, réglages 29/29.
+- **Reste chez Jacques** : remplacer `71-denombrement-approfondi.js` dans `apprendre_prive\sources` et déposer les 49 JSON (`apprendre-maths-approfondies-pour-jacques.zip`). Labos choisis ici : intégrale, courbe, décroissance, pendule ; exercices d'examen rédigés ici.
+
 ## Apprendre : statistiques à deux variables de Terminale C et D au gabarit approfondi (16/11/2026)
 
 Demande de Jacques : « Continue » (après #329).

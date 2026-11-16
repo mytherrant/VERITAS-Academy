@@ -3,9 +3,24 @@
    dans Dénombrement »). Chargé en DERNIER par les 7 pages (index, matière, leçon, manuel, ressources,
    labo, notes). Polices : Segoe UI (texte), Trebuchet MS 800 (titres). Icônes : tuiles arrondies en
    dégradé de la couleur de la famille, pictogramme blanc ; numéros dans des cercles à halo. */
-:root{--sans:"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;--serif:"Trebuchet MS","Segoe UI",system-ui,sans-serif;--vm-titre:"Trebuchet MS","Segoe UI",system-ui,sans-serif;--vm-mag:#B2316E;--vm-gold:#FFC93C}
+/* Police d'Apprendre (16/11/2026) : Nunito (SIL Open Font License 1.1, assets/polices/NUNITO-OFL.txt), hébergée sur le site,
+   variable de 200 à 1000. Trebuchet MS et Segoe UI n'existent que sous Windows : sur Android, les titres retombaient sur
+   la police du téléphone. « Poppins » désigne aussi Nunito dans Apprendre, pour les feuilles qui la nomment en dur. */
+@font-face{font-family:'Nunito';font-style:normal;font-weight:200 1000;font-display:swap;src:url(/assets/polices/nunito-latin-ext-wght-normal.woff2) format('woff2');unicode-range:U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF}
+@font-face{font-family:'Nunito';font-style:normal;font-weight:200 1000;font-display:swap;src:url(/assets/polices/nunito-latin-wght-normal.woff2) format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
+@font-face{font-family:'Nunito';font-style:italic;font-weight:200 1000;font-display:swap;src:url(/assets/polices/nunito-latin-ext-wght-italic.woff2) format('woff2');unicode-range:U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF}
+@font-face{font-family:'Nunito';font-style:italic;font-weight:200 1000;font-display:swap;src:url(/assets/polices/nunito-latin-wght-italic.woff2) format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
+@font-face{font-family:'Poppins';font-style:normal;font-weight:200 1000;font-display:swap;src:url(/assets/polices/nunito-latin-ext-wght-normal.woff2) format('woff2');unicode-range:U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF}
+@font-face{font-family:'Poppins';font-style:normal;font-weight:200 1000;font-display:swap;src:url(/assets/polices/nunito-latin-wght-normal.woff2) format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
+@font-face{font-family:'Poppins';font-style:italic;font-weight:200 1000;font-display:swap;src:url(/assets/polices/nunito-latin-ext-wght-italic.woff2) format('woff2');unicode-range:U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF}
+@font-face{font-family:'Poppins';font-style:italic;font-weight:200 1000;font-display:swap;src:url(/assets/polices/nunito-latin-wght-italic.woff2) format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
+:root{--sans:"Nunito","Segoe UI",Roboto,Arial,sans-serif;--serif:"Nunito","Trebuchet MS",system-ui,sans-serif;--vm-titre:"Nunito","Trebuchet MS",system-ui,sans-serif;--vm-corps:"Nunito","Segoe UI",Roboto,Arial,sans-serif;--vm-mag:#B2316E;--vm-gold:#FFC93C}
+body{font-weight:500;-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
+b,strong{font-weight:800}
+/* textes des schémas et planches : même police que la page */
+figure svg text,.illus svg text,.p3d-svg text{font-family:var(--sans)!important}
 body,button,input,select,textarea{font-family:var(--sans)}
-h1,h2,h3,.sec-t h2,.bloc h2,.chap h3,.chap-t h3,.acc-g h2,.acc-d h3,.profils-z h2,.res-fam>h2,.tp-gt,.offre-t,.fo-nom,.mat b,.mtete h1,.bandeau h1{font-family:var(--vm-titre)!important;font-weight:800!important;letter-spacing:-.005em}
+h1,h2,h3,.sec-t h2,.bloc h2,.chap h3,.chap-t h3,.acc-g h2,.acc-d h3,.profils-z h2,.res-fam>h2,.tp-gt,.offre-t,.fo-nom,.mat b,.mtete h1,.bandeau h1{font-family:var(--vm-titre)!important;font-weight:900!important;letter-spacing:-.01em}
 h1{color:#0C1F55}
 
 /* titres de section : trait dégradé magenta → or, comme les titres du modèle */
@@ -41,3 +56,59 @@ h1{color:#0C1F55}
 /* spécificité renforcée : les cartes .res-c portaient encore « background:none » (règles 14/11) */
 html body .res-c .res-p,html body .res-sm .res-c .res-p,html body .porte .res-p,html body .res-fam>h2 .res-p,html body .tp-c .res-p{flex:0 0 40px!important;width:40px!important;height:40px!important;display:grid!important;place-items:center;border-radius:12px!important;background:linear-gradient(145deg,color-mix(in srgb,var(--k,#13307A) 62%,#fff),var(--k,#13307A))!important;box-shadow:0 5px 12px color-mix(in srgb,var(--k,#13307A) 28%,transparent),inset 0 1px 0 rgba(255,255,255,.35)!important;opacity:1!important}
 html body .res-sm .res-c .res-p{background:linear-gradient(145deg,color-mix(in srgb,var(--sk,var(--k,#13307A)) 62%,#fff),var(--sk,var(--k,#13307A)))!important}
+
+/* ── Icônes de matière : sur une tuile douce de leur couleur, comme les tuiles du modèle ── */
+html body .mat .pas,html body .mtete .pas{flex:0 0 54px!important;width:54px!important;height:54px!important;display:grid!important;place-items:center;border-radius:16px!important;background:linear-gradient(145deg,#fff,color-mix(in srgb,var(--c,#13307A) 14%,#fff))!important;border:0!important;box-shadow:inset 0 0 0 1.5px color-mix(in srgb,var(--c,#13307A) 22%,#fff),0 6px 14px color-mix(in srgb,var(--c,#13307A) 16%,transparent)!important;transition:transform .25s cubic-bezier(.34,1.56,.64,1)}
+html body .mat .pas svg{width:34px!important;height:34px!important}
+html body .mtete .pas svg{width:40px!important;height:40px!important}
+.mat{transition:transform .2s ease,box-shadow .2s ease!important}
+.mat:hover{transform:translateY(-3px)}
+.mat:hover .pas,.res-c:hover .res-p,.tp-c:hover .tp-i,.porte:hover .res-p{transform:rotate(-6deg) scale(1.08)!important}
+.mat b{font-weight:900!important}
+
+/* ── Animations d'apparition (comme dans la leçon modèle) : cartes qui montent en fondu, en cascade ── */
+@keyframes vm-monte{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}
+@keyframes vm-trait{from{width:0}to{width:72px}}
+@keyframes vm-pop{0%{transform:scale(.6);opacity:0}70%{transform:scale(1.08)}100%{transform:scale(1);opacity:1}}
+.mats>*,.res-g>*,.tp-gl>*,.portes>*,.chap,.goals,.objectifs,.jour,.blocs>*{animation:vm-monte .55s cubic-bezier(.2,.7,.2,1) both}
+.mats>*:nth-child(2),.res-g>*:nth-child(2),.tp-gl>*:nth-child(2),.portes>*:nth-child(2){animation-delay:.05s}
+.mats>*:nth-child(3),.res-g>*:nth-child(3),.tp-gl>*:nth-child(3),.portes>*:nth-child(3){animation-delay:.1s}
+.mats>*:nth-child(4),.res-g>*:nth-child(4),.tp-gl>*:nth-child(4),.portes>*:nth-child(4){animation-delay:.15s}
+.mats>*:nth-child(5),.res-g>*:nth-child(5),.tp-gl>*:nth-child(5){animation-delay:.2s}
+.mats>*:nth-child(6),.res-g>*:nth-child(6),.tp-gl>*:nth-child(6){animation-delay:.25s}
+.mats>*:nth-child(7),.res-g>*:nth-child(7),.tp-gl>*:nth-child(7){animation-delay:.3s}
+.mats>*:nth-child(8),.res-g>*:nth-child(8),.tp-gl>*:nth-child(8){animation-delay:.35s}
+.mats>*:nth-child(n+9),.res-g>*:nth-child(n+9),.tp-gl>*:nth-child(n+9){animation-delay:.4s}
+.sec-t h2::after{animation:vm-trait .7s .2s cubic-bezier(.2,.7,.2,1) both}
+.chap-n,.partie h2 .num{animation:vm-pop .5s cubic-bezier(.34,1.56,.64,1) both}
+.res-c,.tp-c,.porte,.btn-l,.filtres button{transition:transform .18s ease,box-shadow .18s ease,background .18s ease}
+.res-c:hover,.tp-c:hover{transform:translateY(-3px)}
+.btn-l:active,.filtres button:active,.tg:active{transform:scale(.97)}
+@media (prefers-reduced-motion:reduce){.mats>*,.res-g>*,.tp-gl>*,.portes>*,.chap,.goals,.objectifs,.jour,.blocs>*,.sec-t h2::after,.chap-n,.partie h2 .num{animation:none!important}.mat:hover,.res-c:hover,.tp-c:hover{transform:none}}
+@media print{.mats>*,.res-g>*,.chap,.partie h2 .num{animation:none!important}}
+
+/* ── Formules et panneau « Avec un professeur » (16/11/2026) : charte du modèle ── */
+.offre-h,.fo-nom,.offre-t{font-family:var(--vm-titre)!important;font-weight:900!important;letter-spacing:-.01em}
+.fo-nom{font-size:21px!important}
+.fo-pour{font-weight:600}
+.fo-prix{font-family:var(--vm-titre);font-weight:900}
+.fo-av li{font-size:15.5px;line-height:1.5}
+.fo-btn{font-family:var(--vm-titre)!important;font-weight:800!important;border-radius:14px!important;letter-spacing:.01em;transition:transform .15s ease,box-shadow .15s ease}
+.fo-btn:hover{transform:translateY(-2px);box-shadow:0 8px 18px rgba(0,17,54,.14)}
+.fo{border-radius:20px!important;animation:vm-monte .55s cubic-bezier(.2,.7,.2,1) both}
+.offre-plans>.fo:nth-child(2){animation-delay:.08s}.offre-plans>.fo:nth-child(3){animation-delay:.16s}
+/* note sous les formules : lisible (elle était serrée sur une ligne de 1) */
+.offre-n{font:500 14.5px/1.6 var(--sans)!important;color:#4D5163!important;margin:14px 2px 16px!important;padding:12px 14px;border-radius:14px;background:#F6F8FC}
+.offre-n a{color:var(--vm-mag);font-weight:800}
+/* liens « Enseignant ? », « Cahiers » : pictogramme en tuile dégradée, titre du modèle */
+.offre-l{border-radius:18px!important;padding:16px!important;gap:16px!important}
+.offre-l>svg{flex:0 0 44px!important;width:44px!important;height:44px!important;padding:11px;box-sizing:border-box;border-radius:14px;color:#fff!important;stroke:#fff;background:linear-gradient(145deg,#2C55C4,#0C1F55);box-shadow:0 6px 14px rgba(19,48,122,.28),inset 0 1px 0 rgba(255,255,255,.35)}
+.offre-l.or>svg{background:linear-gradient(145deg,#F39A45,#C2540A)}
+.offre-l b{font-family:var(--vm-titre)!important;font-weight:900!important;font-size:17px!important}
+.offre-l small{font-size:14.5px!important;line-height:1.55!important}
+.offre-l:hover>svg{transform:rotate(-6deg) scale(1.06);transition:transform .25s cubic-bezier(.34,1.56,.64,1)}
+/* cartes de matière : la ligne « rédigées » et la barre s'alignent sous le nom (tuile de 54 px + 14 px) ;
+   sur téléphone, la tuile passe au-dessus du nom : plus de retrait */
+.mat>.barre-p{margin-left:68px!important}
+.mat>span{margin-left:68px!important}
+@media (max-width:640px){.mat>.barre-p,.mat>span{margin-left:0!important}html body .mat .pas{flex-basis:46px!important;width:46px!important;height:46px!important;border-radius:14px!important}html body .mat .pas svg{width:28px!important;height:28px!important}}
