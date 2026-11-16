@@ -96,11 +96,12 @@
     var marge = M.etiquettes && M.etiquettes.length ? 190 : 0, cx = LARG / 2, cy = H / 2 + (M.dy || 0);
 
     boite.classList.add("p3d-boite");
-    boite.innerHTML = '<svg class="p3d-svg" viewBox="0 0 ' + LARG + ' ' + H + '" role="img" tabindex="0" aria-label="' + esc(M.alt || "Planche en trois dimensions") + ' — flèches du clavier pour tourner"></svg>' +
+    boite.innerHTML = '<div class="p3d-vue"><div class="p3d-zoom" role="group" aria-label="Zoom"><button type="button" data-p3d="moins" aria-label="Dézoomer">−</button><button type="button" data-p3d="plus" aria-label="Zoomer">+</button><button type="button" data-p3d="plein" aria-label="Plein écran" title="Plein écran"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg></button></div>' +
+      '<svg class="p3d-svg" viewBox="0 0 ' + LARG + ' ' + H + '" role="img" tabindex="0" aria-label="' + esc(M.alt || "Planche en trois dimensions") + ' — flèches du clavier pour tourner"></svg></div>' +
       '<div class="p3d-cmd"><button type="button" data-p3d="auto">Tourner tout seul</button><button type="button" data-p3d="face">Vue de départ</button>' +
       (M.eclate ? '<button type="button" data-p3d="jouer">' + esc(M.jouer || "Animer") + '</button>' : '') + (M.eclate ? '<label class="p3d-ecl"><span>' + esc(M.eclate) + '</span><input type="range" min="0" max="1" step="0.02" value="0"></label>' : '') +
       '<span class="p3d-aide">Fais glisser le dessin pour le tourner</span></div>';
-    var svg = boite.querySelector("svg");
+    var svg = boite.querySelector(".p3d-svg");
 
     function tourner(p, dec) {
       /* M.arc : les pièces déplacées décrivent une parabole (une boule sort de l'urne par le haut) */
@@ -111,7 +112,8 @@
       var y2 = y * cb - z1 * sb, z2 = y * sb + z1 * cb;        /* autour de x */
       return [x1, y2, z2];
     }
-    function proj(q) { var s = ech * 900 / (900 + q[2]); return [cx + q[0] * s, cy - q[1] * s]; }
+    var zoom = 1;   /* 16/11/2026 : zoom (boutons, molette en plein écran, pincement) */
+    function proj(q) { var s = ech * zoom * 900 / (900 + q[2]); return [cx + q[0] * s, cy - q[1] * s]; }
 
     function dessiner() {
       var liste = [];
@@ -129,7 +131,7 @@
           liste.push({ z: z, d: R.map(proj), c: teinteS(fc.coul, k, sp), op: fc.op, tr: fc.trait });
         });
         if (ob.sph) {
-          var o = ob.o, q = tourner(o.c, ob.ec), e = ech * 900 / (900 + q[2]), P = proj(q), r = o.r * e;
+          var o = ob.o, q = tourner(o.c, ob.ec), e = ech * zoom * 900 / (900 + q[2]), P = proj(q), r = o.r * e;
           var sol = tourner([o.c[0], o.c[1] - o.r, o.c[2]], ob.ec), Ps = proj(sol), ry = Math.max(2, r * 0.32 * Math.abs(Math.sin((rx || -20) * Math.PI / 180)) + r * 0.12);
           if (o.ombre !== false) liste.push({ z: q[2] + o.r * 0.9, html: '<ellipse cx="' + Ps[0].toFixed(1) + '" cy="' + (Ps[1] + 1).toFixed(1) + '" rx="' + (r * 0.95).toFixed(1) + '" ry="' + ry.toFixed(1) + '" fill="url(#' + uid + 'om)"/>' });
           liste.push({ z: q[2], html: '<circle cx="' + P[0].toFixed(1) + '" cy="' + P[1].toFixed(1) + '" r="' + r.toFixed(1) + '" fill="url(#' + degrade(o.coul || "#9DB4D8", o.op) + ')"/>' +
@@ -196,6 +198,23 @@
     boite.querySelector('[data-p3d=face]').addEventListener("click", function () { arreter(); rx = M.rx == null ? -24 : M.rx; ry = M.ry == null ? 32 : M.ry; dessiner(); });
     var cur = boite.querySelector(".p3d-ecl input");
     if (cur) cur.addEventListener("input", function () { ecl = +cur.value; dessiner(); });
+    function zoomer(f) { zoom = Math.max(0.6, Math.min(3, zoom * f)); dessiner(); }
+    boite.querySelector('[data-p3d=plus]').addEventListener("click", function () { zoomer(1.25); });
+    boite.querySelector('[data-p3d=moins]').addEventListener("click", function () { zoomer(1 / 1.25); });
+    var hote = boite.closest("figure") || boite, bPlein = boite.querySelector('[data-p3d=plein]');
+    function plein(on) {
+      hote.classList.toggle("p3d-plein", on); document.documentElement.classList.toggle("zoom-actif", on);
+      bPlein.setAttribute("aria-label", on ? "Quitter le plein écran" : "Plein écran"); bPlein.setAttribute("aria-pressed", on ? "true" : "false");
+      if (!on) zoom = 1; dessiner(); if (on) svg.focus();
+    }
+    bPlein.addEventListener("click", function () { plein(!hote.classList.contains("p3d-plein")); });
+    W.addEventListener("keydown", function (e) { if (e.key === "Escape" && hote.classList.contains("p3d-plein")) plein(false); });
+    svg.addEventListener("wheel", function (e) { if (!hote.classList.contains("p3d-plein") && !e.ctrlKey) return; e.preventDefault(); zoomer(e.deltaY < 0 ? 1.12 : 1 / 1.12); }, { passive: false });
+    /* pincement à deux doigts : zoom (la rotation au doigt reste à un doigt) */
+    var doigts = {}, d0 = 0, z0 = 1;
+    svg.addEventListener("pointerdown", function (e) { doigts[e.pointerId] = [e.clientX, e.clientY]; var k = Object.keys(doigts); if (k.length === 2) { var a = doigts[k[0]], b = doigts[k[1]]; d0 = Math.hypot(a[0] - b[0], a[1] - b[1]); z0 = zoom; tient = null; } });
+    svg.addEventListener("pointermove", function (e) { if (!doigts[e.pointerId]) return; doigts[e.pointerId] = [e.clientX, e.clientY]; var k = Object.keys(doigts); if (k.length === 2 && d0) { var a = doigts[k[0]], b = doigts[k[1]]; zoom = Math.max(0.6, Math.min(3, z0 * Math.hypot(a[0] - b[0], a[1] - b[1]) / d0)); tient = null; dessiner(); } }, true);
+    ["pointerup", "pointercancel"].forEach(function (t) { svg.addEventListener(t, function (e) { delete doigts[e.pointerId]; if (Object.keys(doigts).length < 2) d0 = 0; }); });
     var jouer = boite.querySelector('[data-p3d=jouer]');
     if (jouer) jouer.addEventListener("click", function () {
       arreter(); var de = ecl, vers = ecl > 0.5 ? 0 : 1, t0 = 0, D = W.matchMedia("(prefers-reduced-motion: reduce)").matches ? 1 : 1500;
