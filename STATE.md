@@ -1,3 +1,14 @@
+## Apprendre : police Nunito hébergée, animations et tuiles d'icônes sur toutes les pages (16/11/2026)
+
+Demande de Jacques (capture de l'accueil d'Apprendre sur Android) : « Aligne sur le style de Dénombrement : mêmes effets, style, animations ; polices scolaires lisibles et captivantes ; belles icônes » ; puis capture du panneau des formules.
+
+- **Cause** : Trebuchet MS et Segoe UI n'existent que sous Windows ; sur Android, les titres retombaient sur la police du téléphone.
+- **Police** : **Nunito** (SIL OFL 1.1, `assets/polices/NUNITO-OFL.txt`), fichiers variables woff2 200-1000 hébergés (`assets/polices/nunito-latin(-ext)-wght-normal|italic.woff2`, 4 × ≈ 38 Ko). Déclarée dans `apprendre/modele.css` ; « Poppins » y désigne aussi Nunito, pour les feuilles qui la nomment en dur (planches.css, apprendre.css). Titres en 900, texte en 500, schémas SVG dans la même police. Les 7 pages d'Apprendre ne chargent plus Poppins depuis Google Fonts (une connexion tierce de moins) mais préchargent Nunito. Les pages statiques `apprendre/cours`, `programme` gardent Poppins (CI `polices_locales.py`).
+- **Icônes de matière** sur tuile douce de leur couleur (anneau et ombre teintés), qui pivote au survol ; alignement « rédigées » + barre corrigé (sous le nom ; sans retrait sur téléphone).
+- **Animations** (comme la leçon modèle) : cartes de matières, ressources, tuiles et chapitres qui montent en fondu en cascade, trait des titres de section qui se dessine, numéros qui « sautent », cartes qui se soulèvent au survol, boutons qui s'enfoncent au toucher ; coupées si « réduire les animations » et à l'impression.
+- **Formules et « Avec un professeur »** : titres et prix en Nunito 900, boutons arrondis animés, note sous les formules lisible (interligne 1,6, encadré doux), liens « Enseignant ? » et « Cahiers » avec pictogramme en tuile dégradée.
+- `modele.css?v=20261116e`. Contrôlé en émulation Pixel 7 (accueil, matière, leçon, ressources, offre) : Nunito chargée (200), 0 erreur JS, pas de débordement. Bancs : cartes au survol 4/4, charte 34/34, lisibilité 7/7, planche mobile 23/23, verrou 18/18, gabarits 54/54, réglages 29/29, calendrier 51/51, menu 19/19.
+
 ## Apprendre : suites et calcul intégral de Terminale C et D, ajoutés à la même PR (16/11/2026)
 
 Demande de Jacques : « Je ne vois pas le lien de fusion. Continue » ; lot ajouté à la PR #331 (une seule fusion).
