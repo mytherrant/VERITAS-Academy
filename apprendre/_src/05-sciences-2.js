@@ -56,25 +56,6 @@ VRT_L("4e-pct-aimants", {
   ]
 });
 
-VRT_L("4e-svt-photosynthese", {
-  c: "4e", m: "svt", cle: "La production de la matière végétale", titre: "La production de la matière végétale", duree: 20,
-  accroche: "La plante fabrique sa nourriture avec de la lumière, de l'air et de l'eau.",
-  intro: "Un manguier grandit chaque année de plusieurs kilogrammes. D'où vient cette matière ? Pas du sol seulement : surtout de l'air, grâce à la lumière.",
-  objectifs: ["nommer les besoins d'un végétal chlorophyllien", "décrire la photosynthèse", "interpréter une expérience"],
-  parties: [
-    { t: "Ce dont la plante a besoin", html: "<p>Un végétal chlorophyllien prélève :</p><ul><li>de l'<strong>eau</strong> et des <strong>sels minéraux</strong> dans le sol, par ses racines ;</li><li>du <strong>dioxyde de carbone</strong> dans l'air, par ses feuilles ;</li><li>de l'<strong>énergie lumineuse</strong>, captée par la <strong>chlorophylle</strong> (pigment vert).</li></ul>", retenir: "Eau + sels minéraux + CO₂ + lumière." },
-    { t: "La photosynthèse", html: "<div class='def'><b>Définition</b>La photosynthèse est la fabrication de matière organique (sucres, amidon) par les parties vertes de la plante, à partir d'eau et de dioxyde de carbone, grâce à la lumière. Elle rejette du dioxygène.</div><p class='formule'>eau + dioxyde de carbone → (lumière, chlorophylle) → matière organique + dioxygène</p>", retenir: "La photosynthèse produit de la matière et rejette du dioxygène." },
-    { t: "L'expérience de l'élodée", html: "<p>Une plante aquatique, l'élodée, est placée sous une lampe. Des bulles de <strong>dioxygène</strong> se dégagent. Plus la lumière est forte, plus les bulles sont nombreuses ; dans l'obscurité, elles cessent.</p><div class='astuce'><b>Astuce</b>Pour prouver la fabrication d'amidon, on dépose de l'eau iodée sur une feuille décolorée : elle devient bleu-noir là où la feuille était éclairée.</div>", retenir: "Pas de lumière, pas de photosynthèse." }
-  ],
-  revision: ["Besoins : eau, sels minéraux, CO₂, lumière.", "Chlorophylle : capte la lumière.", "Photosynthèse : matière organique + dioxygène.", "Élodée : plus de lumière, plus de bulles.", "Eau iodée : bleu-noir en présence d'amidon."],
-  exo: "<p>Explique pourquoi un plant de maïs placé dans un placard pendant une semaine jaunit et ne grandit plus.</p>",
-  quiz: [
-    { q: "Quel gaz la plante rejette-t-elle à la lumière ?", r: ["Dioxyde de carbone", "Dioxygène", "Azote"], b: 1, e: "Ce sont les bulles de l'élodée." },
-    { q: "Quel pigment capte la lumière ?", r: ["L'hémoglobine", "La chlorophylle", "La mélanine"], b: 1, e: "Il donne la couleur verte." },
-    { q: "Dans l'obscurité, les bulles de l'élodée…", r: ["augmentent", "cessent", "changent de couleur"], b: 1, e: "Sans lumière, pas de photosynthèse." }
-  ]
-});
-
 VRT_L("tle-maths-binaire", {
   c: "Tle C", m: "maths", cle: "Numération binaire et numération décimale", titre: "Numération binaire et numération décimale", duree: 20,
   accroche: "Ton téléphone ne compte qu'avec 0 et 1. Apprends sa langue.",

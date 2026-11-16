@@ -78,7 +78,7 @@ function charger(cfg, avecCalendrier) {
   const T = LE['3e-maths-thales'];
   dire('leçon renommée', T && T.titre === 'Thalès réglé');
   dire('parties : modifiée, retirée, ajoutée', T && T.parties.length === 2 && T.parties[0].t === 'P1 réglée' && T.parties[1].t === 'Ajoutée');
-  dire('le schéma d\'origine de la partie 1 est conservé', T && !!(T.parties[0].illus || T.parties[0].anim));
+  dire('le schéma d\'origine de la partie 1 est conservé', T && !!(T.parties[0].illus || T.parties[0].anim || T.parties[0].planches) && !!T.parties[0].fil);
   const P = LE['3e-ecm-r02'];
   dire('leçon payante : titre modifié', P && P.titre === 'Payante renommée');
   dire('leçon payante : contenu intact (suite servie par le serveur)', P && P.intro !== 'NE DOIT PAS PASSER' && P.parties.some(p => p.verrou));

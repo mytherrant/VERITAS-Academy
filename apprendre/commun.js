@@ -281,7 +281,7 @@
   }
   /* Ajoute « Enregistrer l'image » sous chaque illustration et chaque schéma animé d'un conteneur. */
   function boutonsImage(racine) {
-    (racine || document).querySelectorAll("figure.illus, .anim").forEach(function (f) {
+    (racine || document).querySelectorAll("figure.illus, figure.p3d, .anim").forEach(function (f) {
       if (f.querySelector(".btn-img")) return;
       var svg = f.querySelector("svg:not(.pic)"); if (!svg) return;
       var cap = f.querySelector("figcaption"), titre = (cap && cap.textContent) || (f.querySelector(".anim-t") || {}).textContent || document.title.split(" | ")[0];

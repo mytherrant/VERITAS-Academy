@@ -1008,3 +1008,12 @@ h2 .num .pic{vertical-align:middle}
 .tp-i svg{width:20px!important;height:20px!important}
 .tp-c small,.tp-t small{background:none!important;padding:0!important;color:#6B7287!important}
 .tp-c .res-p svg{width:20px!important;height:20px!important}
+
+/* ── Prose justifiée partout (16/11/2026, demande de Jacques) : paragraphes, listes ET encadrés
+   (définition, attention, astuce, exemple, indices, situation-problème, dénouement), avec césure.
+   Les formules, légendes, titres de planches et réponses de quiz restent centrés ou alignés à gauche. ── */
+.carte p,.carte li,.carte .def,.carte .attention,.carte .astuce,.carte .savais,.carte .ex,.carte .fil,
+.carte .enq-r,.carte .enq-q,.carte .enq-tache,.carte .enq-doc,.carte .denouement,.carte .reponse,.carte .transfert,
+.carte .retenir span,.carte .info,.carte .apc{text-align:justify;hyphens:auto;-webkit-hyphens:auto}
+.carte p.formule,.carte figcaption,.carte .pl-t,.carte .enq-doc-t,.carte .enq-src,.carte .vide,.carte .q button,.carte .q > p,.carte .bilan,.carte .p3d-leg li,.carte .hyp li,.carte .enq-pistes li{text-align:left;hyphens:manual;-webkit-hyphens:manual}
+.carte p.formule,.carte figcaption{text-align:center}
