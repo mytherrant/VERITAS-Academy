@@ -1,3 +1,16 @@
+## Apprendre : retour aux pointillés, vraie hiérarchie des titres, pastilles, police Poppins (16/11/2026)
+
+Retour de Jacques (capture de la rubrique « Laboratoires ») : « Je préfère l'ancien système avec les pointillés. Mais conserve les icônes en diminuant la taille. Par hiérarchiser j'entendais distinguer les grands titres des sous-titres. Au niveau de l'objectif mets plutôt des puces, ou pastilles », puis « Garde aussi l'ancienne police ».
+
+- **Encadrés** : retour au rail en pointillés (ni cadre décalé, ni onglet) ; les icônes illustrées restent, en plus petit (42 px, 36 px sur téléphone).
+- **Titres en 3 niveaux**, comme « Laboratoires » / « Mathématiques » / titre de carte :
+  1. titre de partie : tuile carrée arrondie en dégradé bleu, avec le numéro, et grand titre bleu nuit ;
+  2. sous-titre (`h3`) : plus petit, en bleu ;
+  3. titre d'encadré : petit, de la couleur de l'encadré, avec sa petite icône.
+- **Objectifs** : pastilles rondes de couleur à la place des tuiles d'icônes.
+- **Police** : retour à **Poppins**, l'ancienne police d'Apprendre, désormais hébergée sur le site (`assets/polices/poppins-latin(-ext)-400|500|600|700-normal.woff2`, licence OFL `POPPINS-OFL.txt`, sans appel à Google Fonts) ; graisses ramenées à 700 pour les titres et 600 pour le gras. Les fichiers Nunito restent dans `assets/polices` mais ne sont plus utilisés.
+- `modele.css?v=20261116p`. Contrôles : aucun débordement sur les 10 vues de l'audit (téléphone et ordinateur), 0 erreur JS ; bancs gabarits 54/54, verrou 18/18, planche mobile 23/23, lisibilité 7/7, charte 34/34.
+
 ## Apprendre : nombres complexes de Terminale C et D, hiérarchie des icônes façon manuel, correctif lecon.html (16/11/2026)
 
 Demandes de Jacques : « Continue », puis « Hiérarchise les icônes. Utilise les modèles plus réalistes et originaux comme sur l'image » (page de manuel Hatier : grande icône illustrée qui chevauche un onglet de couleur, cartes à cadre pastel décalé, numéros d'exercice dans des cases rouges arrondies).
