@@ -228,6 +228,70 @@
   "u": "/ressources/sequentielles/3e-seq2-pct.html"
  },
  {
+  "id": "3e-seq3-pct",
+  "classe": "3e",
+  "m": "pct",
+  "mat": "pct",
+  "matiere": "Physique, chimie et technologie",
+  "seq": 3,
+  "rangs": [
+   14,
+   15,
+   16,
+   17
+  ],
+  "u": "/ressources/sequentielles/3e-seq3-pct.html"
+ },
+ {
+  "id": "3e-seq4-pct",
+  "classe": "3e",
+  "m": "pct",
+  "mat": "pct",
+  "matiere": "Physique, chimie et technologie",
+  "seq": 4,
+  "rangs": [
+   18,
+   19,
+   20,
+   21,
+   22,
+   23,
+   24
+  ],
+  "u": "/ressources/sequentielles/3e-seq4-pct.html"
+ },
+ {
+  "id": "3e-seq5-pct",
+  "classe": "3e",
+  "m": "pct",
+  "mat": "pct",
+  "matiere": "Physique, chimie et technologie",
+  "seq": 5,
+  "rangs": [
+   25,
+   26,
+   27,
+   28,
+   29
+  ],
+  "u": "/ressources/sequentielles/3e-seq5-pct.html"
+ },
+ {
+  "id": "3e-seq6-pct",
+  "classe": "3e",
+  "m": "pct",
+  "mat": "pct",
+  "matiere": "Physique, chimie et technologie",
+  "seq": 6,
+  "rangs": [
+   30,
+   31,
+   32,
+   33
+  ],
+  "u": "/ressources/sequentielles/3e-seq6-pct.html"
+ },
+ {
   "id": "3e-seq1-svt",
   "classe": "3e",
   "m": "svt",
@@ -272,6 +336,81 @@
    24
   ],
   "u": "/ressources/sequentielles/3e-seq2-svt.html"
+ },
+ {
+  "id": "3e-seq3-svt",
+  "classe": "3e",
+  "m": "svt",
+  "mat": "svt",
+  "matiere": "SVTEEHB",
+  "seq": 3,
+  "rangs": [
+   25,
+   26,
+   27,
+   28,
+   29,
+   30,
+   31,
+   32,
+   33,
+   34,
+   35,
+   36,
+   37
+  ],
+  "u": "/ressources/sequentielles/3e-seq3-svt.html"
+ },
+ {
+  "id": "3e-seq4-svt",
+  "classe": "3e",
+  "m": "svt",
+  "mat": "svt",
+  "matiere": "SVTEEHB",
+  "seq": 4,
+  "rangs": [
+   38,
+   39,
+   40,
+   41,
+   42,
+   43,
+   44
+  ],
+  "u": "/ressources/sequentielles/3e-seq4-svt.html"
+ },
+ {
+  "id": "3e-seq5-svt",
+  "classe": "3e",
+  "m": "svt",
+  "mat": "svt",
+  "matiere": "SVTEEHB",
+  "seq": 5,
+  "rangs": [
+   45,
+   46,
+   47,
+   48,
+   49,
+   50
+  ],
+  "u": "/ressources/sequentielles/3e-seq5-svt.html"
+ },
+ {
+  "id": "3e-seq6-svt",
+  "classe": "3e",
+  "m": "svt",
+  "mat": "svt",
+  "matiere": "SVTEEHB",
+  "seq": 6,
+  "rangs": [
+   51,
+   52,
+   53,
+   54,
+   55
+  ],
+  "u": "/ressources/sequentielles/3e-seq6-svt.html"
  },
  {
   "id": "3e-seq1-anglais",
@@ -324,6 +463,81 @@
   "u": "/ressources/sequentielles/3e-seq1-histoire.html"
  },
  {
+  "id": "3e-seq2-histoire",
+  "classe": "3e",
+  "m": "histoire",
+  "mat": "histoire",
+  "matiere": "Histoire",
+  "seq": 2,
+  "rangs": [
+   3,
+   4,
+   5,
+   6
+  ],
+  "u": "/ressources/sequentielles/3e-seq2-histoire.html"
+ },
+ {
+  "id": "3e-seq3-histoire",
+  "classe": "3e",
+  "m": "histoire",
+  "mat": "histoire",
+  "matiere": "Histoire",
+  "seq": 3,
+  "rangs": [
+   7,
+   8,
+   9
+  ],
+  "u": "/ressources/sequentielles/3e-seq3-histoire.html"
+ },
+ {
+  "id": "3e-seq4-histoire",
+  "classe": "3e",
+  "m": "histoire",
+  "mat": "histoire",
+  "matiere": "Histoire",
+  "seq": 4,
+  "rangs": [
+   10,
+   11
+  ],
+  "u": "/ressources/sequentielles/3e-seq4-histoire.html"
+ },
+ {
+  "id": "3e-seq5-histoire",
+  "classe": "3e",
+  "m": "histoire",
+  "mat": "histoire",
+  "matiere": "Histoire",
+  "seq": 5,
+  "rangs": [
+   12,
+   13,
+   14,
+   15,
+   16
+  ],
+  "u": "/ressources/sequentielles/3e-seq5-histoire.html"
+ },
+ {
+  "id": "3e-seq6-histoire",
+  "classe": "3e",
+  "m": "histoire",
+  "mat": "histoire",
+  "matiere": "Histoire",
+  "seq": 6,
+  "rangs": [
+   17,
+   18,
+   19,
+   20,
+   21,
+   22
+  ],
+  "u": "/ressources/sequentielles/3e-seq6-histoire.html"
+ },
+ {
   "id": "3e-seq1-geographie",
   "classe": "3e",
   "m": "geographie",
@@ -336,6 +550,83 @@
    3
   ],
   "u": "/ressources/sequentielles/3e-seq1-geographie.html"
+ },
+ {
+  "id": "3e-seq2-geographie",
+  "classe": "3e",
+  "m": "geographie",
+  "mat": "geo",
+  "matiere": "Géographie",
+  "seq": 2,
+  "rangs": [
+   4,
+   5,
+   6,
+   7
+  ],
+  "u": "/ressources/sequentielles/3e-seq2-geographie.html"
+ },
+ {
+  "id": "3e-seq3-geographie",
+  "classe": "3e",
+  "m": "geographie",
+  "mat": "geo",
+  "matiere": "Géographie",
+  "seq": 3,
+  "rangs": [
+   8,
+   9,
+   10,
+   11
+  ],
+  "u": "/ressources/sequentielles/3e-seq3-geographie.html"
+ },
+ {
+  "id": "3e-seq4-geographie",
+  "classe": "3e",
+  "m": "geographie",
+  "mat": "geo",
+  "matiere": "Géographie",
+  "seq": 4,
+  "rangs": [
+   12,
+   13,
+   14,
+   15
+  ],
+  "u": "/ressources/sequentielles/3e-seq4-geographie.html"
+ },
+ {
+  "id": "3e-seq5-geographie",
+  "classe": "3e",
+  "m": "geographie",
+  "mat": "geo",
+  "matiere": "Géographie",
+  "seq": 5,
+  "rangs": [
+   16,
+   17,
+   18,
+   19,
+   20
+  ],
+  "u": "/ressources/sequentielles/3e-seq5-geographie.html"
+ },
+ {
+  "id": "3e-seq6-geographie",
+  "classe": "3e",
+  "m": "geographie",
+  "mat": "geo",
+  "matiere": "Géographie",
+  "seq": 6,
+  "rangs": [
+   21,
+   22,
+   23,
+   24,
+   25
+  ],
+  "u": "/ressources/sequentielles/3e-seq6-geographie.html"
  },
  {
   "id": "3e-seq1-ecm",
@@ -351,6 +642,78 @@
    4
   ],
   "u": "/ressources/sequentielles/3e-seq1-ecm.html"
+ },
+ {
+  "id": "3e-seq2-ecm",
+  "classe": "3e",
+  "m": "ecm",
+  "mat": "ecm",
+  "matiere": "Éducation à la citoyenneté et à la morale",
+  "seq": 2,
+  "rangs": [
+   5,
+   6,
+   7
+  ],
+  "u": "/ressources/sequentielles/3e-seq2-ecm.html"
+ },
+ {
+  "id": "3e-seq3-ecm",
+  "classe": "3e",
+  "m": "ecm",
+  "mat": "ecm",
+  "matiere": "Éducation à la citoyenneté et à la morale",
+  "seq": 3,
+  "rangs": [
+   8,
+   9,
+   10,
+   11,
+   12,
+   13,
+   14
+  ],
+  "u": "/ressources/sequentielles/3e-seq3-ecm.html"
+ },
+ {
+  "id": "3e-seq4-ecm",
+  "classe": "3e",
+  "m": "ecm",
+  "mat": "ecm",
+  "matiere": "Éducation à la citoyenneté et à la morale",
+  "seq": 4,
+  "rangs": [
+   15,
+   16
+  ],
+  "u": "/ressources/sequentielles/3e-seq4-ecm.html"
+ },
+ {
+  "id": "3e-seq5-ecm",
+  "classe": "3e",
+  "m": "ecm",
+  "mat": "ecm",
+  "matiere": "Éducation à la citoyenneté et à la morale",
+  "seq": 5,
+  "rangs": [
+   17,
+   18,
+   19
+  ],
+  "u": "/ressources/sequentielles/3e-seq5-ecm.html"
+ },
+ {
+  "id": "3e-seq6-ecm",
+  "classe": "3e",
+  "m": "ecm",
+  "mat": "ecm",
+  "matiere": "Éducation à la citoyenneté et à la morale",
+  "seq": 6,
+  "rangs": [
+   20,
+   21
+  ],
+  "u": "/ressources/sequentielles/3e-seq6-ecm.html"
  },
  {
   "id": "3e-seq1-informatique",
@@ -370,6 +733,82 @@
    8
   ],
   "u": "/ressources/sequentielles/3e-seq1-informatique.html"
+ },
+ {
+  "id": "3e-seq2-informatique",
+  "classe": "3e",
+  "m": "informatique",
+  "mat": "info",
+  "matiere": "Informatique",
+  "seq": 2,
+  "rangs": [
+   9,
+   10,
+   11,
+   12,
+   13,
+   14
+  ],
+  "u": "/ressources/sequentielles/3e-seq2-informatique.html"
+ },
+ {
+  "id": "3e-seq3-informatique",
+  "classe": "3e",
+  "m": "informatique",
+  "mat": "info",
+  "matiere": "Informatique",
+  "seq": 3,
+  "rangs": [
+   15,
+   16,
+   17,
+   18,
+   19
+  ],
+  "u": "/ressources/sequentielles/3e-seq3-informatique.html"
+ },
+ {
+  "id": "3e-seq4-informatique",
+  "classe": "3e",
+  "m": "informatique",
+  "mat": "info",
+  "matiere": "Informatique",
+  "seq": 4,
+  "rangs": [
+   20,
+   21,
+   22,
+   23
+  ],
+  "u": "/ressources/sequentielles/3e-seq4-informatique.html"
+ },
+ {
+  "id": "3e-seq5-informatique",
+  "classe": "3e",
+  "m": "informatique",
+  "mat": "info",
+  "matiere": "Informatique",
+  "seq": 5,
+  "rangs": [
+   24,
+   25,
+   26,
+   27
+  ],
+  "u": "/ressources/sequentielles/3e-seq5-informatique.html"
+ },
+ {
+  "id": "3e-seq6-informatique",
+  "classe": "3e",
+  "m": "informatique",
+  "mat": "info",
+  "matiere": "Informatique",
+  "seq": 6,
+  "rangs": [
+   28,
+   29
+  ],
+  "u": "/ressources/sequentielles/3e-seq6-informatique.html"
  },
  {
   "id": "3e-seq1-espagnol",
