@@ -59,7 +59,7 @@
   });
 
   /* ---------- 4e : élodée, bulles selon la lumière ---------- */
-  VRT_A("4e-svt-photosynthese", 2, "Règle la lampe et compte les bulles", function (el) {
+  VRT_A("4e-svt-photosynthese", 4, "Règle la lampe et compte les bulles", function (el) {
     el.innerHTML = "<svg viewBox='0 0 460 240' class='an-svg'><circle data-lampe cx='70' cy='60' r='26' fill='#FFC93C'/><g data-rayons stroke='#FFC93C' stroke-width='3' stroke-linecap='round'><path d='M110 60h40M100 90l30 22M100 30l30-22'/></g><rect x='190' y='40' width='200' height='190' rx='12' fill='#EDF2FB' stroke='#9FBEEA' stroke-width='2'/><rect x='190' y='60' width='200' height='170' fill='#DBE8FE' opacity='.7'/><path d='M290 228 C285 190 300 160 290 120 C282 95 295 80 290 70' stroke='#007E11' stroke-width='5' fill='none'/><g fill='#86D094'><ellipse cx='278' cy='200' rx='12' ry='4'/><ellipse cx='303' cy='175' rx='12' ry='4'/><ellipse cx='279' cy='150' rx='12' ry='4'/><ellipse cx='302' cy='122' rx='12' ry='4'/><ellipse cx='281' cy='96' rx='12' ry='4'/></g><g data-b></g></svg>" + cur("Intensité lumineuse :", 0, 10, 1, 6) + "<div class='an-res'><span>Bulles de dioxygène : <b data-n>0</b> par minute</span></div>";
     var r = q(el, "input"), gb = q(el, "[data-b]"), t = null;
     function bulle() {

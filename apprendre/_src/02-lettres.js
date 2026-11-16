@@ -151,34 +151,6 @@ VRT_L("3e-geo-cameroun", {
   ]
 });
 
-VRT_L("3e-geo-mangrove", {
-  c: "3e", m: "geo", cle: "La mangrove", titre: "Dossier : la mangrove", duree: 15,
-  scenes: ["3e-geo-mangrove-douala"],
-  accroche: "Des arbres les pieds dans l'eau salée, une nurserie pour les poissons.",
-  intro: "Le long de la côte, autour de Douala, des forêts poussent les pieds dans l'eau salée. Cette mangrove est précieuse… et menacée.",
-  objectifs: ["décrire la mangrove", "expliquer son utilité", "proposer des solutions pour la protéger"],
-  parties: [
-    { t: "Une forêt entre terre et mer", html:
-      "<p>La <strong>mangrove</strong> est une forêt qui pousse dans les zones de balancement des marées, là où l'eau douce des fleuves rencontre l'eau salée. Ses arbres, les <strong>palétuviers</strong>, tiennent sur des <strong>racines-échasses</strong> et respirent grâce à des racines qui sortent de la vase.</p><p>Au Cameroun, on la trouve surtout dans l'estuaire du Wouri (Douala-Edéa) et vers Rio del Rey.</p>",
-      illus: { legende: "Les racines-échasses retiennent la vase et abritent les jeunes poissons.", svg:
-      "<svg viewBox='0 0 460 200' role='img' aria-label='Coupe d une mangrove'><rect x='0' y='120' width='460' height='80' fill='#DBE8FE'/><path d='M0 120 Q115 112 230 120 T460 120' fill='none' stroke='#1E499B' stroke-width='2'/><rect x='0' y='175' width='460' height='25' fill='#C9A97A'/><g fill='#7FCB8C' stroke='#00520B' stroke-width='2'><ellipse cx='120' cy='50' rx='70' ry='34'/><ellipse cx='320' cy='56' rx='80' ry='36'/></g><g stroke='#6B2A00' stroke-width='4' fill='none' stroke-linecap='round'><path d='M120 70v50'/><path d='M120 100 Q90 130 80 178M120 100 Q150 130 160 178M120 110 Q105 145 102 178M120 110 Q135 145 140 178'/><path d='M320 76v44'/><path d='M320 100 Q285 135 276 178M320 100 Q355 135 366 178M320 112 Q305 150 302 178M320 112 Q338 150 342 178'/></g><g fill='#FFC93C'><path d='M200 150 l12 -5 v10 z'/><ellipse cx='194' cy='150' rx='9' ry='4'/><path d='M240 160 l10 -4 v8 z'/><ellipse cx='235' cy='160' rx='7' ry='3'/></g><text x='12' y='140' font-size='12' fill='#1E499B'>eau saumâtre (marée)</text><text x='12' y='192' font-size='12' fill='#6B2A00'>vase</text><text x='170' y='110' font-size='12' fill='#00520B'>racines-échasses</text></svg>" },
-      retenir: "Palétuviers + racines-échasses + eau saumâtre = mangrove." },
-    { t: "Pourquoi la mangrove est précieuse", html:
-      "<ul><li><strong>Frayère</strong> : poissons, crevettes et crabes s'y reproduisent.</li><li><strong>Protection</strong> du littoral contre l'érosion et les tempêtes.</li><li><strong>Ressources</strong> pour les riverains : pêche, bois, plantes médicinales.</li><li>Elle stocke beaucoup de <strong>carbone</strong> et aide à lutter contre le réchauffement climatique.</li></ul>",
-      retenir: "Sans mangrove, moins de poissons et une côte plus fragile." },
-    { t: "Menaces et solutions", html:
-      "<p><strong>Menaces</strong> : coupe du bois pour fumer le poisson, extension de la ville de Douala, déchets plastiques, pollution industrielle et pétrolière.</p><p><strong>Solutions</strong> : reboisement de palétuviers, fumoirs améliorés qui consomment moins de bois, aires protégées, ramassage des déchets, sensibilisation des riverains.</p>",
-      retenir: "Protéger la mangrove, c'est protéger la pêche et les familles qui en vivent." }
-  ],
-  revision: ["Forêt littorale des zones de marée, eau saumâtre.", "Palétuviers à racines-échasses.", "Rôles : frayère, protection de la côte, ressources, carbone.", "Menaces : bois de fumage, urbanisation, pollution.", "Solutions : reboisement, fumoirs améliorés, aires protégées."],
-  exo: "<p>Rédige une affiche de sensibilisation (5 phrases) destinée aux pêcheurs de l'estuaire du Wouri.</p>",
-  quiz: [
-    { q: "Comment s'appellent les arbres de la mangrove ?", r: ["Palétuviers", "Baobabs", "Fromagers"], b: 0, e: "Ils supportent l'eau salée." },
-    { q: "Quel rôle joue la mangrove pour les poissons ?", r: ["Frayère", "Désert", "Barrage"], b: 0, e: "Les jeunes poissons y grandissent à l'abri." },
-    { q: "Une menace directe de la mangrove au Cameroun :", r: ["La coupe de bois pour le fumage", "La neige", "Le tourisme spatial"], b: 0, e: "Le fumage du poisson consomme beaucoup de bois." }
-  ]
-});
-
 VRT_L("3e-ecm-democratie", {
   c: "3e", m: "ecm", cle: "Les Fondements de la Démocratie", titre: "Les fondements de la démocratie", duree: 15,
   accroche: "Qui décide ? Le peuple. Comment ? C'est tout l'enjeu.",

@@ -1,39 +1,5 @@
 /* Leçons rédigées VÉRITAS — sciences (maths, PCT, SVT, informatique).
    cle = morceau du titre officiel de la progression MINESEC 2026-2027 (rattachement automatique). */
-VRT_L("3e-maths-thales", {
-  c: "3e", m: "maths", cle: "Propriété directe de Thalès", titre: "La propriété de Thalès dans le triangle", duree: 20,
-  accroche: "Mesurer la hauteur d'un arbre sans y grimper : c'est Thalès.",
-  intro: "Comment mesurer la hauteur d'un manguier de la cour sans grimper dedans ? Avec un bâton, son ombre et la propriété de Thalès.",
-  objectifs: ["reconnaître une configuration de Thalès", "écrire l'égalité des trois rapports", "calculer une longueur inconnue"],
-  parties: [
-    { t: "La configuration de Thalès", html:
-      "<p>On a un triangle <strong>ABC</strong>. Un point <strong>M</strong> est sur le côté [AB], un point <strong>N</strong> sur le côté [AC], et la droite (MN) est <strong>parallèle</strong> à (BC).</p>" +
-      "<div class='attention'><b>Condition indispensable</b>Sans le parallélisme de (MN) et (BC), on n'a pas le droit d'utiliser la propriété.</div>",
-      illus: { legende: "(MN) est parallèle à (BC) : le petit triangle AMN est une « réduction » du grand triangle ABC.", svg:
-      "<svg viewBox='0 0 420 250' role='img' aria-label='Triangle ABC coupé par la droite MN parallèle à BC'><path d='M60 220 L360 220 L150 30 Z' fill='#DBE8FE' stroke='#142554' stroke-width='2.5' stroke-linejoin='round'/><path d='M150 30 L96 138 L246 138 Z' fill='#FFC93C' fill-opacity='.45'/><line x1='60' y1='138' x2='330' y2='138' stroke='#1E499B' stroke-width='2.5' stroke-dasharray='7 6'/><g fill='#142554' font-size='18' font-weight='700'><text x='142' y='22'>A</text><text x='40' y='238'>B</text><text x='366' y='238'>C</text><text x='74' y='134'>M</text><text x='252' y='134'>N</text></g><g fill='#142554'><circle cx='96' cy='138' r='4'/><circle cx='246' cy='138' r='4'/></g><text x='334' y='133' fill='#1E499B' font-size='14'>(MN) // (BC)</text></svg>" } ,
-      retenir: "Deux points sur deux côtés + une parallèle au troisième côté : c'est la configuration de Thalès." },
-    { t: "La propriété directe", html:
-      "<div class='def'><b>Propriété</b>Si M ∈ [AB], N ∈ [AC] et (MN) // (BC), alors les longueurs des côtés des triangles AMN et ABC sont proportionnelles :</div>" +
-      "<p class='formule'>AM / AB = AN / AC = MN / BC</p>" +
-      "<div class='astuce'><b>Astuce</b>On écrit toujours le <strong>petit triangle en haut</strong> et le <strong>grand triangle en bas</strong>, en partant du sommet commun A.</div>" + "<div class='savais'><b>Le savais-tu ?</b>On raconte que Thalès de Milet, mathématicien grec du VIᵉ siècle avant J.-C., aurait mesuré la hauteur d'une pyramide d'Égypte grâce à son ombre.</div>",
-      retenir: "Petit triangle sur grand triangle, sommet commun en premier." },
-    { t: "Calculer une longueur", html:
-      "<div class='ex'><b>Exemple</b>AM = 3 cm, AB = 5 cm, BC = 8 cm et (MN) // (BC). Calculer MN.</div>" +
-      "<ol><li>On vérifie la configuration : M ∈ [AB], N ∈ [AC], (MN) // (BC).</li><li>On écrit l'égalité utile : AM / AB = MN / BC, soit 3 / 5 = MN / 8.</li><li>Produit en croix : MN = 3 × 8 ÷ 5 = <strong>4,8 cm</strong>.</li></ol>" +
-      "<h3>L'arbre et son ombre</h3><p>Un bâton de 1,5 m projette une ombre de 2 m ; au même moment, l'ombre du manguier mesure 12 m. Les rayons du soleil sont parallèles, donc : hauteur du manguier = 1,5 × 12 ÷ 2 = <strong>9 m</strong>.</p>",
-      retenir: "On n'écrit que les deux rapports qui contiennent la longueur cherchée et deux longueurs connues." }
-  ],
-  revision: ["Configuration : M sur [AB], N sur [AC], <strong>(MN) // (BC)</strong>.", "Égalité : <strong>AM/AB = AN/AC = MN/BC</strong>.", "Petit triangle en haut, grand en bas.", "On termine par un produit en croix.", "La réciproque sert à <strong>prouver</strong> que deux droites sont parallèles."],
-  exo: "<p>Dans un triangle EFG, R ∈ [EF] et S ∈ [EG] avec (RS) // (FG). ER = 4 cm, EF = 10 cm, EG = 15 cm. Calcule ES. <em>(Réponse : 6 cm.)</em></p>",
-  quiz: [
-    { q: "Quelle condition est obligatoire pour appliquer Thalès dans ABC avec M ∈ [AB] et N ∈ [AC] ?", r: ["AM = AN", "(MN) parallèle à (BC)", "ABC rectangle"], b: 1, e: "Sans parallélisme, les rapports ne sont pas égaux." },
-    { q: "AM = 2, AB = 6, BC = 9. Combien vaut MN ?", r: ["3", "4,5", "27"], b: 0, e: "2/6 = MN/9, donc MN = 9 × 2 ÷ 6 = 3." },
-    { q: "Quelle égalité est juste ?", r: ["AM/AB = AN/AC", "AM/AN = AB/BC", "AB/AM = AC/MN"], b: 0, e: "On compare les côtés correspondants : petit triangle sur grand triangle." },
-    { q: "Un bâton de 1 m fait une ombre de 0,5 m ; un poteau fait une ombre de 4 m. Sa hauteur ?", r: ["2 m", "8 m", "4,5 m"], b: 1, e: "1/0,5 = h/4, donc h = 8 m." }
-  ],
-  examen: { t: "Thalès au BEPC : sujets corrigés", href: "/corriges/" }
-});
-
 VRT_L("3e-maths-racines", {
   c: "3e", m: "maths", cle: "Racines carrées d", titre: "Racine carrée d'un nombre positif", duree: 15,
   accroche: "Quel côté pour un champ carré de 49 m² ? La racine carrée répond.",
