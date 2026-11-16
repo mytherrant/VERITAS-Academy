@@ -1,3 +1,15 @@
+## Apprendre : suites et calcul intégral de Terminale C et D, ajoutés à la même PR (16/11/2026)
+
+Demande de Jacques : « Je ne vois pas le lien de fusion. Continue » ; lot ajouté à la PR #331 (une seule fusion).
+
+- **17 leçons** (9 contenus partagés), source privée `71-denombrement-approfondi.js` (67 leçons au total) ; aperçus fusionnés en place :
+  - **suites** (Tle C r24-r27, Tle D r12-r14) : chaises de la cérémonie à Yaoundé (récurrence, 465 chaises), caisse de la tontine de Bafia (croissante majorée, limite 500 000 F), réservoir de Maroua (point fixe, escalier, suite auxiliaire, colonnes 3D), mesures du club de Bafang (gendarmes, Tle C seulement) ;
+  - **calcul intégral** (Tle C r53-r57, Tle D r34-r38) : pompe de Ngaoundéré (7 L, aire coloriée), motif de l'artisan de Bamenda (1/6 m², vase de révolution en tranches 3D), serre de Dschang (inégalité de la moyenne, 26,7 °C), panneau solaire de Maroua (intégration par parties, 1 kWh), parcelle de Kribi (rectangles 370 m², trapèzes 365 m²).
+- **Tle D r34** (première du 3e trimestre) : gratuite, entière dans l'aperçu.
+- Générateurs : `aire` (surface coloriée), `escalier` (toile d'une suite récurrente), `revolution3D`.
+- Contrôlé dans Chromium (abonné et visiteur, 1200 et 390 px) : 0 erreur JS. Bancs : verrou 18/18, gabarits 54/54, planche mobile 23/23, réglages 29/29.
+- **Reste chez Jacques** : remplacer `71-denombrement-approfondi.js` et déposer les 65 JSON (`apprendre-maths-approfondies-pour-jacques.zip`). Labos « suite » et « integrale », exercices d'examen rédigés ici.
+
 ## Apprendre : analyse de Terminale C et D au gabarit approfondi, quatre chapitres d'une traite (16/11/2026)
 
 Demande de Jacques : « Continue. Fais plusieurs d'une traite pour ne pas fusionner à chaque fois. »
