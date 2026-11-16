@@ -1,0 +1,43 @@
+/* VÉRITAS · Apprendre — charte de la leçon modèle « Dénombrement » sur TOUTES les pages d'Apprendre
+   (16/11/2026, demande de Jacques : « change aussi les polices, icônes dans Apprendre, exactement comme
+   dans Dénombrement »). Chargé en DERNIER par les 7 pages (index, matière, leçon, manuel, ressources,
+   labo, notes). Polices : Segoe UI (texte), Trebuchet MS 800 (titres). Icônes : tuiles arrondies en
+   dégradé de la couleur de la famille, pictogramme blanc ; numéros dans des cercles à halo. */
+:root{--sans:"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;--serif:"Trebuchet MS","Segoe UI",system-ui,sans-serif;--vm-titre:"Trebuchet MS","Segoe UI",system-ui,sans-serif;--vm-mag:#B2316E;--vm-gold:#FFC93C}
+body,button,input,select,textarea{font-family:var(--sans)}
+h1,h2,h3,.sec-t h2,.bloc h2,.chap h3,.chap-t h3,.acc-g h2,.acc-d h3,.profils-z h2,.res-fam>h2,.tp-gt,.offre-t,.fo-nom,.mat b,.mtete h1,.bandeau h1{font-family:var(--vm-titre)!important;font-weight:800!important;letter-spacing:-.005em}
+h1{color:#0C1F55}
+
+/* titres de section : trait dégradé magenta → or, comme les titres du modèle */
+.sec-t h2,.res-fam>h2{position:relative;padding-bottom:8px}
+.sec-t h2::after{content:"";position:absolute;left:0;bottom:0;width:72px;height:4px;border-radius:4px;background:linear-gradient(90deg,var(--vm-mag),var(--vm-gold))}
+
+/* icônes de ressources et tuiles « Tout pour progresser » : tuile en dégradé, pictogramme blanc */
+.res-p,.res-sm .res-c .res-p,.porte .res-p,.res-fam>h2 .res-p,.tp-c .res-p{flex:0 0 40px!important;width:40px!important;height:40px!important;display:grid!important;place-items:center;border-radius:12px!important;color:#fff!important;background:linear-gradient(145deg,color-mix(in srgb,var(--k,#13307A) 62%,#fff),var(--k,#13307A))!important;box-shadow:0 5px 12px color-mix(in srgb,var(--k,#13307A) 28%,transparent),inset 0 1px 0 rgba(255,255,255,.35);padding:0!important}
+.res-sm .res-c .res-p{background:linear-gradient(145deg,color-mix(in srgb,var(--sk,#13307A) 62%,#fff),var(--sk,#13307A))!important}
+.res-p svg,.tp-i svg{width:21px!important;height:21px!important;stroke:#fff}
+.tp-i{flex:0 0 46px!important;width:46px!important;height:46px!important;border-radius:14px!important;border:0!important;opacity:1!important;display:grid!important;place-items:center;color:#fff!important;background:linear-gradient(145deg,color-mix(in srgb,var(--k,#13307A) 62%,#fff),var(--k,#13307A))!important;box-shadow:0 6px 14px color-mix(in srgb,var(--k,#13307A) 28%,transparent),inset 0 1px 0 rgba(255,255,255,.35)!important}
+.res-c strong,.res-c b,.tp-c b,.tp-t b{font-family:var(--vm-titre);font-weight:800}
+
+/* matière : numéro de chapitre en tuile, numéro de leçon en cercle à halo */
+.chap-n{border-radius:14px!important;background:linear-gradient(145deg,color-mix(in srgb,var(--k) 62%,#fff),var(--k))!important;font:800 20px var(--vm-titre)!important;box-shadow:0 6px 14px color-mix(in srgb,var(--k) 30%,transparent),inset 0 1px 0 rgba(255,255,255,.35);position:relative}
+.chap-n::after{content:"";position:absolute;right:-3px;top:-3px;width:12px;height:12px;border-radius:50%;background:var(--vm-gold);border:2px solid #fff}
+.chap-t h3{font-size:19px!important}
+.lg .n{font:800 13px var(--vm-titre)!important;background:#fff!important;border:2px solid var(--k)!important;color:var(--k)!important;box-shadow:0 0 0 3px var(--kp)}
+.lg.r .n{background:var(--k)!important;color:#fff!important}
+.lg .t{font-size:15.5px}
+
+/* boutons et pastilles : même graisse que les boutons du modèle */
+.btn-l,.filtres button,.top-nav a,.offre .fo-btn,.voir-plus,.go{font-weight:700}
+
+/* cartes de matière : nom de matière en titre du modèle */
+.mat b{font-size:17px}
+/* l'ancienne règle « sobriété » (14/11) grisait et estompait ces icônes : la tuile du modèle prime */
+.res-p,.res-sm .res-c .res-p,.res-fam>h2 .res-p,.porte .res-p,.tp-i{opacity:1!important;border:0!important;margin-top:0!important}
+.res-c .res-p svg,.porte .res-p svg,.res-fam>h2 .res-p svg,.res-sm .res-c .res-p svg,.tp-c .res-p svg,.tp-i svg,.res-p .si,.tp-i .si{color:#fff!important;stroke:#fff!important;width:21px!important;height:21px!important}
+.res-c{align-items:flex-start}
+.res-c:hover .res-p,.tp-c:hover .tp-i{transform:translateY(-1px) scale(1.04)}
+.res-p,.tp-i{transition:transform .18s ease}
+/* spécificité renforcée : les cartes .res-c portaient encore « background:none » (règles 14/11) */
+html body .res-c .res-p,html body .res-sm .res-c .res-p,html body .porte .res-p,html body .res-fam>h2 .res-p,html body .tp-c .res-p{flex:0 0 40px!important;width:40px!important;height:40px!important;display:grid!important;place-items:center;border-radius:12px!important;background:linear-gradient(145deg,color-mix(in srgb,var(--k,#13307A) 62%,#fff),var(--k,#13307A))!important;box-shadow:0 5px 12px color-mix(in srgb,var(--k,#13307A) 28%,transparent),inset 0 1px 0 rgba(255,255,255,.35)!important;opacity:1!important}
+html body .res-sm .res-c .res-p{background:linear-gradient(145deg,color-mix(in srgb,var(--sk,var(--k,#13307A)) 62%,#fff),var(--sk,var(--k,#13307A)))!important}
