@@ -768,4 +768,50 @@ S["bac-2025-physique-c-laplace"] = () => {
   return svg(250, 200, g, "Force de Laplace sur la tige MN : le courant I descend de M vers N, le champ B sort du plan ; la force F, appliquée au milieu de la portion plongée dans le champ, est horizontale et dirigée vers la gauche, du côté du générateur.");
 };
 
+// SVT D 2025 (BAC), document 3 : étapes de la fécondation chez les Spermaphytes (A', B', C').
+S["bac-2025-svt-d-spermaphytes"] = () => {
+  const fs = ' font-size="11"', fin = ' stroke-width="0.8"', pt = (x, y, r = 2.2) => '<circle cx="' + f(x) + '" cy="' + f(y) + '" r="' + r + '" fill="currentColor" stroke="none"/>';
+  // A' : grain de pollen qui germe
+  let g = '<path d="M112 128 A 52 52 0 1 1 132 112" stroke-width="2.6"/>';
+  for (let k = 0; k < 15; k++) { const a = Math.PI * (0.78 + k * 0.1), c = [86 + 52 * Math.cos(a), 78 + 52 * Math.sin(a)], u = [Math.cos(a), Math.sin(a)];
+    g += P([[c[0] - u[1] * 3, c[1] + u[0] * 3], [c[0] + u[0] * 7, c[1] + u[1] * 7], [c[0] + u[1] * 3, c[1] - u[0] * 3]], ' fill="currentColor" stroke-width="0.6"'); }
+  g += '<path d="M112 128 C 116 150, 112 180, 114 222 Q 121 232 128 222 C 129 182, 133 150, 132 112" stroke-width="1.2"/>';
+  g += '<ellipse cx="119" cy="112" rx="5" ry="9" transform="rotate(-25 119 112)" fill="currentColor" fill-opacity="0.55" stroke-width="0.8"/>' + '<ellipse cx="121" cy="204" rx="5" ry="10" stroke-dasharray="2 2" stroke-width="1"/>';
+  g += L([125, 110], [178, 92], fin) + T([182, 88], "noyau", fs) + T([182, 101], "reproducteur", fs) + L([130, 150], [178, 150], fin) + T([182, 154], "tube pollinique", fs) + L([127, 204], [178, 204], fin) + T([182, 208], "noyau végétatif", fs) + T([96, 262], "A’", ' font-size="13"');
+  // B' : deux tubes polliniques, deux anthérozoïdes, noyau végétatif qui dégénère
+  const tube = x => '<path d="M' + (x - 11) + ' 34 L' + (x - 11) + ' 222 Q' + x + ' 236 ' + (x + 11) + ' 222 L' + (x + 11) + ' 34" stroke-width="1.2" stroke-dasharray="6 3"/>';
+  g += tube(310) + tube(410);
+  g += pt(309, 108, 2.6) + pt(311, 138, 2.6) + pt(408, 126, 2.6) + pt(410, 152, 2.6);
+  for (let k = 0; k < 22; k++) g += pt(302 + (k * 37 % 17), 196 + (k * 23 % 28), 1.5);
+  g += L([318, 108], [338, 122], fin) + L([400, 128], [384, 126], fin) + T([340, 124], "anthéro-", fs) + T([340, 137], "zoïdes", fs);
+  g += L([422, 70], [470, 70], fin) + T([474, 66], "tube", fs) + T([474, 79], "pollinique", fs) + L([418, 214], [470, 214], fin) + T([474, 210], "noyau", fs) + T([474, 223], "végétatif", fs) + T([352, 262], "B’", ' font-size="13"');
+  // C' : sac embryonnaire atteint par le tube pollinique
+  g += '<ellipse cx="610" cy="140" rx="48" ry="104" stroke-width="1.6"/>';
+  g += '<path d="M604 6 L604 52 M616 6 L616 52" stroke-width="1.2"/>' + '<rect x="604" y="6" width="12" height="40" fill="currentColor" fill-opacity="0.35" stroke="none"/>';
+  g += '<path d="M572 64 Q 590 46 608 66 Q 594 80 572 64 Z M612 66 Q 630 46 648 64 Q 626 80 612 66 Z" stroke-width="1"/>' + '<circle cx="610" cy="78" r="12" stroke-width="1"/>' + pt(610, 78, 4) + pt(590, 64, 1.8) + pt(630, 64, 1.8);
+  g += '<circle cx="610" cy="140" r="10" fill="currentColor" fill-opacity="0.5" stroke-width="1"/>' + pt(606, 137, 2.4) + pt(614, 143, 2.4);
+  g += '<path d="M572 206 L610 196 L648 206 M590 201 L596 236 M630 201 L624 236" stroke-width="1"/>' + pt(590, 216, 1.8) + pt(610, 222, 1.8) + pt(630, 216, 1.8);
+  g += L([618, 22], [668, 22], fin) + T([672, 26], "tube pollinique", fs) + L([620, 140], [668, 150], fin) + T([672, 154], "noyaux du sac", fs) + L([640, 172], [668, 182], fin) + T([672, 186], "sac embryonnaire", fs) + T([600, 262], "C’", ' font-size="13"');
+  return svg(770, 272, g, "Document 3 : A', un grain de pollen germe ; son tube pollinique contient le noyau végétatif en tête et le noyau reproducteur encore dans le grain. B', deux tubes polliniques allongés ; le noyau reproducteur a donné deux anthérozoïdes, le noyau végétatif dégénère au fond du tube. C', le tube pollinique atteint le sac embryonnaire, qui contient l'oosphère près du micropyle et les noyaux du sac au centre.");
+};
+// SVT D 2025 (BAC), corrigé : schéma d'interprétation du sarcomère au repos et contracté.
+const sarcomere = (y0, za, zb, titre) => {
+  const fs = ' font-size="11"', ma = 150, mb = 290, act = 100;
+  let g = T([12, y0 - 6], titre, ' font-size="12" font-weight="700"');
+  g += L([za, y0 + 4], [za, y0 + 96], ' stroke-width="2.6"') + L([zb, y0 + 4], [zb, y0 + 96], ' stroke-width="2.6"');
+  for (const y of [y0 + 14, y0 + 38, y0 + 62, y0 + 86]) g += L([za, y], [za + act, y], ' stroke-width="1.4"') + L([zb, y], [zb - act, y], ' stroke-width="1.4"');
+  for (const y of [y0 + 26, y0 + 50, y0 + 74]) { g += L([ma, y], [mb, y], ' stroke-width="4.5"'); for (let x = ma + 6; x <= mb - 6; x += 10) { if (Math.abs(x - 220) < 10) continue; const d = x < 220 ? -4 : 4; g += L([x, y - 2], [x + d, y - 7], ' stroke-width="1"') + L([x, y + 2], [x + d, y + 7], ' stroke-width="1"'); } }
+  const cote = (a, b, y, nom) => (b - a > 12 ? L([a + 2, y], [b - 2, y], ' stroke-width="0.9"') + fleche([a, y], [a + 6, y], 5) + fleche([b, y], [b - 6, y], 5) : "") + T([(a + b) / 2 - nom.length * 2.8, y - 4], nom, fs);
+  g += cote(ma, mb, y0 + 114, "bande A") + cote(za, ma, y0 + 114, "½ I") + cote(mb, zb, y0 + 114, "½ I");
+  g += cote(za + act, zb - act, y0 - 4, zb - za - 2 * act > 12 ? "zone H" : "");
+  g += cote(za, zb, y0 + 134, "sarcomère");
+  return g;
+};
+S["bac-2025-svt-d-sarcomeres"] = () => {
+  const fs = ' font-size="11"', fin = ' stroke-width="0.8"';
+  let g = sarcomere(24, 70, 370, "Au repos") + sarcomere(204, 115, 325, "En activité (contracté)");
+  g += L([372, 32], [420, 20], fin) + T([424, 22], "strie Z", fs) + L([340, 62], [420, 52], fin) + T([424, 54], "filament fin d'actine", fs) + L([284, 74], [420, 84], fin) + T([424, 88], "filament épais de myosine", fs);
+  return svg(560, 360, g, "Schéma d'interprétation d'un sarcomère, entre deux stries Z. Au repos : les filaments fins d'actine, fixés aux stries Z, laissent au centre une zone H ; la bande A a la longueur des filaments épais de myosine ; les demi-bandes I sont larges. En activité : les filaments d'actine ont glissé entre les filaments de myosine vers le centre ; le sarcomère est plus court, les bandes I sont réduites, la zone H a presque disparu, la bande A garde la même longueur.");
+};
+
 module.exports = S;

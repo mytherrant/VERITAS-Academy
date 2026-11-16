@@ -420,6 +420,20 @@
   "u": "/ressources/annales/bepc-svt-2024.html"
  },
  {
+  "id": "bac-svt-cti-2025",
+  "examen": "bac",
+  "m": "svt",
+  "serie": "séries C et TI",
+  "nomExamen": "Baccalauréat",
+  "fiche": "ressources/examen-svt-bac.html",
+  "matiere": "SVTEEHB (séries C et TI)",
+  "mat": "svt",
+  "classes": "Tle C",
+  "annee": 2025,
+  "national": true,
+  "u": "/ressources/annales/bac-svt-cti-2025.html"
+ },
+ {
   "id": "probatoire-svt-cti-2025",
   "examen": "probatoire",
   "m": "svt",
@@ -432,6 +446,20 @@
   "annee": 2025,
   "national": true,
   "u": "/ressources/annales/probatoire-svt-cti-2025.html"
+ },
+ {
+  "id": "bac-svt-d-2025",
+  "examen": "bac",
+  "m": "svt",
+  "serie": "série D",
+  "nomExamen": "Baccalauréat",
+  "fiche": "ressources/examen-svt-bac.html",
+  "matiere": "SVTEEHB (série D)",
+  "mat": "svt",
+  "classes": "Tle D",
+  "annee": 2025,
+  "national": true,
+  "u": "/ressources/annales/bac-svt-d-2025.html"
  },
  {
   "id": "probatoire-svt-d-2025",
