@@ -61,63 +61,6 @@ VRT_L("3e-pct-atome", {
   ]
 });
 
-VRT_L("3e-pct-ph", {
-  c: "3e", m: "pct", cle: "concentration molaire et de pH", titre: "Concentration molaire et pH d'une solution", duree: 20,
-  accroche: "Jus de citron, eau savonneuse : le pH dit qui est acide.",
-  intro: "Le jus de citron pique la langue, l'eau savonneuse glisse entre les doigts. Ces deux liquides n'ont pas le même pH. Apprends à le mesurer et à calculer une concentration.",
-  objectifs: ["calculer une concentration molaire", "classer une solution acide, neutre ou basique", "mesurer un pH en sécurité"],
-  parties: [
-    { t: "La concentration molaire", html:
-      "<p>Une solution est obtenue en dissolvant un <strong>soluté</strong> dans un <strong>solvant</strong> (souvent l'eau). La concentration molaire indique la quantité de soluté par litre de solution.</p><p class='formule'>C = n / V</p><ul><li>C : concentration molaire en mol/L</li><li>n : quantité de matière du soluté en mol</li><li>V : volume de la solution en L</li></ul>" +
-      "<div class='ex'><b>Exemple</b>On dissout 0,2 mol de sel dans de l'eau pour obtenir 0,5 L de solution : C = 0,2 ÷ 0,5 = <strong>0,4 mol/L</strong>.</div>",
-      retenir: "Le volume doit être en litres : 250 mL = 0,25 L." },
-    { t: "L'échelle de pH", html:
-      "<p>Le pH est un nombre, en général entre 0 et 14 :</p><ul><li>pH &lt; 7 : solution <strong>acide</strong> (jus de citron, vinaigre) ;</li><li>pH = 7 : solution <strong>neutre</strong> (eau pure) ;</li><li>pH &gt; 7 : solution <strong>basique</strong> (eau savonneuse, eau de javel).</li></ul>",
-      illus: { legende: "Plus le pH est petit, plus la solution est acide ; plus il est grand, plus elle est basique.", svg:
-      "<svg viewBox='0 0 440 150' role='img' aria-label='Échelle de pH de 0 à 14'><defs><linearGradient id='phg' x1='0' x2='1'><stop offset='0' stop-color='#D9472B'/><stop offset='.35' stop-color='#FFC93C'/><stop offset='.5' stop-color='#7FCB8C'/><stop offset='.75' stop-color='#8FB0EE'/><stop offset='1' stop-color='#5B4FA8'/></linearGradient></defs><rect x='20' y='50' width='400' height='28' rx='14' fill='url(#phg)'/><g font-size='12' fill='#142554' text-anchor='middle'><text x='20' y='96'>0</text><text x='220' y='96'>7</text><text x='420' y='96'>14</text></g><line x1='220' y1='42' x2='220' y2='86' stroke='#142554' stroke-width='2'/><g font-size='13' fill='#142554' font-weight='700' text-anchor='middle'><text x='90' y='36'>ACIDE</text><text x='220' y='36'>NEUTRE</text><text x='350' y='36'>BASIQUE</text></g><g font-size='12' fill='#636A80' text-anchor='middle'><text x='54' y='122'>citron ≈ 2</text><text x='128' y='140'>vinaigre ≈ 3</text><text x='220' y='122'>eau pure 7</text><text x='320' y='140'>savon ≈ 10</text><text x='392' y='122'>javel ≈ 12</text></g></svg>" },
-      retenir: "Acide sous 7, neutre à 7, basique au-dessus de 7." },
-    { t: "Mesurer le pH sans danger", html:
-      "<p>On utilise le <strong>papier pH</strong> : on dépose une goutte de solution avec un agitateur, puis on compare la couleur obtenue à l'échelle de la boîte. Le <strong>pH-mètre</strong> donne une mesure plus précise.</p><div class='attention'><b>Sécurité</b>Blouse, lunettes, gants. On ne goûte jamais une solution au laboratoire. On verse toujours l'acide dans l'eau, jamais l'inverse.</div>",
-      retenir: "Une goutte sur le papier pH, jamais le papier dans le flacon." }
-  ],
-  revision: ["C = n / V (mol/L).", "Volume toujours en litres.", "pH < 7 acide ; = 7 neutre ; > 7 basique.", "Papier pH : goutte déposée avec un agitateur.", "Sécurité : blouse, lunettes, gants."],
-  exo: "<p>On dissout 0,05 mol de soude dans 250 mL d'eau. Calcule la concentration. <em>(0,2 mol/L.)</em></p>",
-  quiz: [
-    { q: "Une solution a un pH de 3. Elle est…", r: ["basique", "neutre", "acide"], b: 2, e: "pH < 7 : acide." },
-    { q: "0,1 mol dans 0,5 L : quelle concentration ?", r: ["0,05 mol/L", "0,2 mol/L", "5 mol/L"], b: 1, e: "C = 0,1 ÷ 0,5 = 0,2 mol/L." },
-    { q: "Quel liquide est basique ?", r: ["Jus de citron", "Eau savonneuse", "Vinaigre"], b: 1, e: "Le savon a un pH vers 10." },
-    { q: "Pour diluer un acide, on verse…", r: ["l'eau dans l'acide", "l'acide dans l'eau", "les deux en même temps"], b: 1, e: "Cela évite les projections dangereuses." }
-  ]
-});
-
-VRT_L("3e-svt-adn", {
-  c: "3e", m: "svt", cle: "notions de chromosome et d", titre: "Chromosomes et ADN : le support de l'hérédité", duree: 20,
-  accroche: "Pourquoi as-tu les yeux de ta mère ? Réponse dans tes chromosomes.",
-  intro: "Tu ressembles à tes parents sans être leur copie. L'information qui se transmet de génération en génération est écrite dans une molécule : l'ADN.",
-  objectifs: ["situer l'information génétique dans la cellule", "décrire un chromosome", "relier chromosome, ADN et gène"],
-  parties: [
-    { t: "L'information génétique est dans le noyau", html:
-      "<p>Des expériences de transfert de noyau l'ont montré : quand on remplace le noyau d'une cellule par celui d'une autre, la cellule prend les caractères de l'individu qui a donné le noyau. L'information génétique est donc <strong>dans le noyau</strong>.</p>",
-      retenir: "Le noyau commande les caractères héréditaires." },
-    { t: "Les chromosomes", html:
-      "<p>Au moment où la cellule se divise, on voit dans le noyau des petits bâtonnets : les <strong>chromosomes</strong>. Chez l'être humain, chaque cellule (sauf les cellules reproductrices) en contient <strong>46</strong>, soit <strong>23 paires</strong>.</p><ul><li>22 paires sont identiques chez la fille et le garçon ;</li><li>la 23ᵉ paire, celle des <strong>chromosomes sexuels</strong>, est XX chez la fille et XY chez le garçon.</li></ul>",
-      illus: { legende: "Du noyau à l'ADN : le chromosome est un long filament d'ADN très enroulé ; un gène en est un petit segment.", svg:
-      "<svg viewBox='0 0 460 200' role='img' aria-label='Cellule, noyau, chromosome, ADN, gène'><circle cx='70' cy='100' r='58' fill='#E0F5E5' stroke='#00520B' stroke-width='2'/><circle cx='78' cy='96' r='24' fill='#7FCB8C' stroke='#00520B' stroke-width='2'/><path d='M70 86l14 20M86 86l-14 20' stroke='#00520B' stroke-width='3' stroke-linecap='round'/><text x='70' y='180' text-anchor='middle' font-size='13' fill='#142554'>cellule et noyau</text><path d='M134 100h30' stroke='#636A80' stroke-width='2' marker-end='url(#fl)'/><defs><marker id='fl' viewBox='0 0 10 10' refX='8' refY='5' markerWidth='7' markerHeight='7' orient='auto'><path d='M0 0l10 5-10 5z' fill='#636A80'/></marker></defs><g stroke='#007E11' stroke-width='14' stroke-linecap='round'><path d='M190 50 L230 150'/><path d='M230 50 L190 150'/></g><circle cx='210' cy='100' r='6' fill='#00520B'/><text x='210' y='180' text-anchor='middle' font-size='13' fill='#142554'>chromosome</text><path d='M252 100h30' stroke='#636A80' stroke-width='2' marker-end='url(#fl)'/><path d='M300 60 C320 80 340 40 360 60 S400 80 420 60' fill='none' stroke='#1E499B' stroke-width='3'/><path d='M300 140 C320 120 340 160 360 140 S400 120 420 140' fill='none' stroke='#1E499B' stroke-width='3'/><g stroke='#8FB0EE' stroke-width='2'><path d='M310 68v64M325 64v72M340 58v84M355 62v76M370 70v60M385 66v68M400 62v76M413 64v72'/></g><rect x='336' y='52' width='38' height='96' rx='6' fill='#FFC93C' fill-opacity='.35' stroke='#9A6F00'/><text x='355' y='170' text-anchor='middle' font-size='13' fill='#9A6F00' font-weight='700'>un gène</text><text x='360' y='190' text-anchor='middle' font-size='13' fill='#142554'>molécule d'ADN</text></svg>" },
-      retenir: "46 chromosomes, soit 23 paires ; XX chez la fille, XY chez le garçon." },
-    { t: "ADN et gènes", html:
-      "<p>Chaque chromosome est formé d'une très longue molécule d'<strong>ADN</strong> (acide désoxyribonucléique), en forme de double hélice. Un <strong>gène</strong> est un petit morceau d'ADN qui porte l'information d'un caractère (par exemple le groupe sanguin).</p><p>Un même gène peut exister sous plusieurs versions, appelées <strong>allèles</strong> : c'est pourquoi les individus d'une même espèce ne sont pas identiques.</p>",
-      retenir: "Chromosome → ADN → gène → caractère." }
-  ],
-  revision: ["L'information génétique est dans le noyau.", "Homme : 46 chromosomes (23 paires).", "Chromosomes sexuels : XX (fille), XY (garçon).", "Chromosome = ADN enroulé ; gène = segment d'ADN.", "Allèles : versions différentes d'un même gène."],
-  exo: "<p>Explique en trois lignes pourquoi deux frères n'ont pas exactement les mêmes caractères. Utilise les mots : chromosome, gène, allèle.</p>",
-  quiz: [
-    { q: "Combien de chromosomes dans une cellule humaine ordinaire ?", r: ["23", "46", "92"], b: 1, e: "23 paires, soit 46." },
-    { q: "Un garçon possède la paire sexuelle…", r: ["XX", "XY", "YY"], b: 1, e: "XX chez la fille, XY chez le garçon." },
-    { q: "Un gène est…", r: ["une cellule", "un segment d'ADN", "un chromosome entier"], b: 1, e: "Le gène est une portion de la molécule d'ADN." },
-    { q: "Où se trouve l'information génétique ?", r: ["Dans le noyau", "Dans la membrane", "Dans le sang seulement"], b: 0, e: "Les transferts de noyau le prouvent." }
-  ]
-});
-
 VRT_L("3e-svt-ressemblances", {
   c: "3e", m: "svt", cle: "Ressemblances entre les individus", titre: "Ressemblances entre les individus : les caractères de l'espèce humaine", duree: 15,
   accroche: "Nous sommes tous différents… et pourtant tous humains.",
