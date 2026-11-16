@@ -142,3 +142,46 @@ html body .mtete .pas svg{width:40px!important;height:40px!important}
 }
 .sec-t h2{margin-bottom:0}
 @media (max-width:640px){.sec-t>.lu{flex:1 1 100%;margin-top:2px}}
+
+/* ════════ Hiérarchie des icônes dans les leçons (16/11/2026) ════════
+   Demande de Jacques : « Hiérarchise les icônes ; modèles plus réalistes et originaux » (page de manuel en exemple).
+   Niveau 1 : titre de partie → grand médaillon orangé « PARTIE n ».
+   Niveau 2 : encadrés de cours (définition, propriété, méthode, exemple) → étiquette colorée et grande icône
+              illustrée multicolore qui déborde, sur une carte au cadre décalé.
+   Niveau 3 : post-it (astuce, attention, à retenir, le savais-tu) → icône illustrée moyenne dans le titre.
+   Niveau 4 : petites icônes au trait (objectifs, sommaire, puces). */
+:root{
+  --vm-ill-def:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cpath d='M6 18c8-5 17-5 26 1v34c-9-6-18-6-26-1z' fill='%234F86E0'/%3E%3Cpath d='M58 18c-8-5-17-5-26 1v34c9-6 18-6 26-1z' fill='%232C55C4'/%3E%3Cpath d='M9 20c7-3 14-3 20 1v28c-6-4-13-4-20-1z' fill='%23fff'/%3E%3Cpath d='M55 20c-7-3-14-3-20 1v28c6-4 13-4 20-1z' fill='%23EAF1FF'/%3E%3Cpath d='M13 27h11M13 32h11M13 37h9M40 27h11M40 32h11M40 37h8' stroke='%239CB4E0' stroke-width='2' stroke-linecap='round'/%3E%3Cpath d='M44 8h8v20l-4-3-4 3z' fill='%23E8394B'/%3E%3Cpath d='M32 19v34' stroke='%23163A8C' stroke-width='2'/%3E%3C/svg%3E");
+  --vm-ill-prop:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cpath d='M20 34 12 58l9-4 5 8 7-22z' fill='%23E8394B'/%3E%3Cpath d='M44 34l8 24-9-4-5 8-7-22z' fill='%232C55C4'/%3E%3Ccircle cx='32' cy='26' r='19' fill='%23F2C540'/%3E%3Ccircle cx='32' cy='26' r='14' fill='%23FFE07A' stroke='%23C48A0C' stroke-width='2'/%3E%3Cpath d='m32 16 3 6.5 7 .8-5.2 4.8 1.5 7-6.3-3.6-6.3 3.6 1.5-7L22 23.3l7-.8z' fill='%23C48A0C'/%3E%3C/svg%3E");
+  --vm-ill-methode:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cg transform='translate(24 26)'%3E%3Cpath d='M-3-18h6l1 5 4 2 4-3 4 4-3 4 2 4 5 1v6l-5 1-2 4 3 4-4 4-4-3-4 2-1 5h-6l-1-5-4-2-4 3-4-4 3-4-2-4-5-1v-6l5-1 2-4-3-4 4-4 4 3 4-2z' fill='%231FB3C0'/%3E%3Ccircle r='6' fill='%23fff'/%3E%3C/g%3E%3Cg transform='translate(45 44)'%3E%3Cpath d='M-2.5-14h5l.8 3.8 3 1.5 3.2-2.3 3.5 3.5-2.3 3.2 1.5 3 3.8.8v5l-3.8.8-1.5 3 2.3 3.2-3.5 3.5-3.2-2.3-3 1.5-.8 3.8h-5l-.8-3.8-3-1.5-3.2 2.3-3.5-3.5 2.3-3.2-1.5-3-3.8-.8v-5l3.8-.8 1.5-3-2.3-3.2 3.5-3.5 3.2 2.3 3-1.5z' fill='%23F39A45'/%3E%3Ccircle r='4.5' fill='%23fff'/%3E%3C/g%3E%3C/svg%3E");
+  --vm-ill-ex:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect x='8' y='8' width='34' height='44' rx='4' fill='%23fff' stroke='%238A5AD0' stroke-width='3'/%3E%3Cpath d='M15 19h20M15 26h20M15 33h12' stroke='%23CDB8EA' stroke-width='3' stroke-linecap='round'/%3E%3Cpath d='m44 18 10 10-22 22-12 3 3-12z' fill='%23F2C540'/%3E%3Cpath d='m44 18 10 10 4-4a3 3 0 0 0 0-4l-6-6a3 3 0 0 0-4 0z' fill='%23E8394B'/%3E%3Cpath d='m23 41 9 9-12 3z' fill='%23F4D9B5'/%3E%3Cpath d='m20 53 3-3-3-1z' fill='%233B3520'/%3E%3C/svg%3E");
+  --vm-ill-astuce:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cpath d='M32 6a17 17 0 0 0-10 30.7c2 1.6 3 3.6 3 6.3h14c0-2.7 1-4.7 3-6.3A17 17 0 0 0 32 6z' fill='%23FFD43B'/%3E%3Cpath d='M27 12a12 12 0 0 0-7 10' stroke='%23fff' stroke-width='3' stroke-linecap='round' opacity='.8'/%3E%3Crect x='24' y='44' width='16' height='5' rx='2' fill='%238A96A8'/%3E%3Crect x='25' y='50' width='14' height='5' rx='2' fill='%236B7287'/%3E%3Cpath d='M4 22h5M55 22h5M10 6l4 4M54 6l-4 4' stroke='%23F2C540' stroke-width='3' stroke-linecap='round'/%3E%3C/svg%3E");
+  --vm-ill-attention:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cpath d='M29 6a3.5 3.5 0 0 1 6 0l25 46a3.5 3.5 0 0 1-3 5H7a3.5 3.5 0 0 1-3-5z' fill='%23E8394B'/%3E%3Cpath d='M32 15 53 52H11z' fill='%23fff'/%3E%3Crect x='29' y='24' width='6' height='16' rx='3' fill='%233B3520'/%3E%3Ccircle cx='32' cy='46' r='3.5' fill='%233B3520'/%3E%3C/svg%3E");
+  --vm-ill-retiens:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cpath d='M24 6h16l-2 14 8 8v6H18v-6l8-8z' fill='%23E8394B'/%3E%3Cpath d='M27 9h4l-1 11-5 6' stroke='%23fff' stroke-width='2.5' opacity='.6' fill='none'/%3E%3Cpath d='M32 34v24' stroke='%236B7287' stroke-width='3' stroke-linecap='round'/%3E%3C/svg%3E");
+  --vm-ill-savais:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cpath d='M20 22a12 12 0 1 1 18.5 10C34 35 32 37.5 32 43' fill='none' stroke='%23B2316E' stroke-width='8' stroke-linecap='round'/%3E%3Ccircle cx='32' cy='54' r='5' fill='%23B2316E'/%3E%3Ccircle cx='47' cy='14' r='4' fill='%23FFC93C'/%3E%3C/svg%3E");
+}
+/* niveau 1 */
+.carte .partie>h2 .num{flex:0 0 64px!important;width:64px!important;height:64px!important;background:radial-gradient(circle at 35% 30%,#FF9466,#F0582B 55%,#D7263D)!important;color:#fff!important;border:4px solid #fff!important;box-shadow:0 0 0 3px #F6A27F,0 8px 18px rgba(215,38,61,.3)!important;font:900 27px/1 var(--vm-titre)!important;padding-top:11px;box-sizing:border-box}
+.carte .partie>h2 .num::before{content:"PARTIE";position:absolute;top:9px;left:0;right:0;text-align:center;font:800 7.5px/1 var(--vm-titre);letter-spacing:.08em;color:#FFE7DC}
+.carte .partie>h2 .num::after{display:none}
+.carte .partie>h2 .txt{font-size:clamp(25px,5vw,34px)!important}
+@media (max-width:560px){.carte .partie>h2 .num{flex-basis:54px!important;width:54px!important;height:54px!important;font-size:23px!important;padding-top:10px}.carte .partie>h2 .num::before{top:7px;font-size:6.5px}}
+/* niveau 2 : carte + étiquette + grande icône illustrée */
+.carte .def,.carte .prop,.carte .methode,.carte .ex{margin:44px 10px 28px 6px!important;padding:28px 18px 14px!important;background:#fff!important;border:2px solid color-mix(in srgb,var(--vm-c1) 38%,#fff)!important;border-radius:6px!important;box-shadow:8px 8px 0 color-mix(in srgb,var(--vm-c1) 15%,#fff)!important}
+.carte .def::after,.carte .prop::after,.carte .methode::after,.carte .ex::after{content:none!important}
+.carte .def::before,.carte .prop::before,.carte .methode::before,.carte .ex::before{top:-34px!important;left:-12px!important;width:60px!important;height:60px!important;border-radius:0!important;background:var(--vm-ill) center/contain no-repeat!important;box-shadow:none!important;filter:drop-shadow(0 3px 4px rgba(0,17,54,.22));z-index:1}
+.carte .def>b:first-child,.carte .prop>b:first-child,.carte .methode>b:first-child,.carte .ex>b:first-child{position:absolute;top:-16px;left:34px;max-width:calc(100% - 50px);min-height:0!important;margin:0!important;padding:5px 16px 5px 22px;border-radius:6px;background:linear-gradient(90deg,var(--vm-c2),var(--vm-c1));color:#fff!important;font:900 16px/1.25 var(--vm-titre)!important;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;box-shadow:0 4px 10px color-mix(in srgb,var(--vm-c2) 30%,transparent)}
+.carte .def{--vm-ill:var(--vm-ill-def)}.carte .prop{--vm-ill:var(--vm-ill-prop)}.carte .methode{--vm-ill:var(--vm-ill-methode)}.carte .ex{--vm-ill:var(--vm-ill-ex)}
+.carte .def{--vm-c1:#4F86E0;--vm-c2:#13307A}
+.carte .methode{--vm-c1:#F39A45;--vm-c2:#B5520A}
+@media (max-width:560px){.carte .def,.carte .prop,.carte .methode,.carte .ex{margin:40px 8px 24px 4px!important;padding:26px 14px 12px!important}.carte .def::before,.carte .prop::before,.carte .methode::before,.carte .ex::before{width:50px!important;height:50px!important;top:-30px!important;left:-8px!important}.carte .def>b:first-child,.carte .prop>b:first-child,.carte .methode>b:first-child,.carte .ex>b:first-child{left:30px;font-size:14.5px!important;padding:4px 12px 4px 18px}}
+/* niveau 3 : post-it avec icône illustrée */
+.carte .astuce>b:first-child,.carte .attention>b:first-child,.carte .retiens>b:first-child,.carte .savais>b:first-child{padding-left:42px!important;min-height:34px!important;line-height:34px!important;background-size:34px!important}
+.carte .astuce>b:first-child{--vm-i:var(--vm-ill-astuce)}.carte .attention>b:first-child{--vm-i:var(--vm-ill-attention)}.carte .retiens>b:first-child{--vm-i:var(--vm-ill-retiens)}.carte .savais>b:first-child{--vm-i:var(--vm-ill-savais)}
+/* repères dans les cartes de méthode : numéros en pastille rouge, comme les numéros d'exercice */
+.carte .methode li::before{border-radius:6px!important;background:linear-gradient(145deg,#F0582B,#D7263D)!important;box-shadow:0 3px 8px rgba(215,38,61,.3)!important;font-size:14px!important;width:28px!important;height:24px!important;top:11px!important}
+
+/* Vecteurs fléchés (16/11/2026) : Nunito n'a pas le combinant U+20D7, la flèche est dessinée en CSS. */
+.vec{position:relative;display:inline-block;padding-top:.32em;line-height:1;font-style:italic}
+.vec::after{content:"";position:absolute;left:.05em;right:-.05em;top:.08em;height:.09em;background:currentColor;border-radius:1px}
+.vec::before{content:"";position:absolute;right:-.12em;top:-.06em;border-left:.3em solid currentColor;border-top:.19em solid transparent;border-bottom:.19em solid transparent}

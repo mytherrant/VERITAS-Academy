@@ -1,3 +1,17 @@
+## Apprendre : nombres complexes de Terminale C et D, hiérarchie des icônes façon manuel, correctif lecon.html (16/11/2026)
+
+Demandes de Jacques : « Continue », puis « Hiérarchise les icônes. Utilise les modèles plus réalistes et originaux comme sur l'image » (page de manuel Hatier : grande icône illustrée qui chevauche un onglet de couleur, cartes à cadre pastel décalé, numéros d'exercice dans des cases rouges arrondies).
+
+- **Correctif important** : `apprendre/lecon.html` ne chargeait **pas** `modele.css` (le contrôle par grep confondait `modele.css` et `lecon-modele.css`, et les montées de version touchaient la mauvaise feuille). Les leçons en ligne n'avaient donc ni Nunito ni les corrections de mise en page, et retombaient sur la police système depuis le retrait de Poppins. Lien ajouté (`modele.css?v=20261116m`, chargée en dernier).
+- **Hiérarchie des icônes en 3 niveaux** (`apprendre/modele.css`) :
+  1. **Parties** : pastille ronde orange-rouge 64 px, liseré blanc, surtitre « PARTIE » (comme « CHAPITRE 2 » du manuel) ;
+  2. **Encadrés** (définition, propriété, méthode, exemple) : carte blanche, bord pastel, cadre décalé de 8 px ; grande icône illustrée multicolore (livre, médaille, engrenages, crayon) qui chevauche un onglet dégradé portant le titre ;
+  3. **Post-it** (astuce, attention, retiens, le savais-tu) : icônes illustrées de 34 px ; étapes de méthode numérotées dans des cases rouges arrondies.
+- **16 leçons de nombres complexes** (Tle C r07-r10, r30-r33 ; Tle D r01-r04, r17-r20), source privée `71-denombrement-approfondi.js` (83 leçons) ; aperçus fusionnés en place. **Tle D r01** gratuite, entière.
+- **Écriture mathématique** : la source convertit `e^(…)` en exposant, `z_A` en indice et `AB⃗` en vecteur fléché (`span.vec`, flèche dessinée en CSS : Nunito n'a pas le caractère combinant U+20D7, qui s'affichait en carré) ; titres et légendes écrivent « vecteur AB ».
+- Livraison : `apprendre-maths-approfondies-pour-jacques.zip`, 83 JSON à déposer dans `uploads/protected/apprendre/` (80 à verrou + 3 gratuites).
+- Bancs : verrou 18/18, gabarits 54/54, planche mobile 23/23, réglages 29/29, charte 34/34, lisibilité 7/7, cartes au survol 4/4 ; `node --check` sur `apprendre/*.js` ; 0 erreur JS sur les leçons contrôlées (1200 px et 390 px).
+
 ## Apprendre : corrections de mise en page (16/11/2026)
 
 Demande de Jacques : « Corrige la mise en page » (sans capture) : audit complet en émulation Pixel 7 et sur ordinateur 1280 px (accueil, matière, leçon gratuite, leçon à verrou, ressources), corrections dans `apprendre/modele.css?v=20261116h` :
