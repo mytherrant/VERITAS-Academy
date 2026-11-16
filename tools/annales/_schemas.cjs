@@ -671,4 +671,42 @@ S["bac-2025-chimie-enantiomeres"] = () => {
     "Les deux énantiomères de l'acide 2-méthylbutanoïque en représentation de Cram : autour du carbone asymétrique, COOH en haut, CH3 dans le plan, H en arrière (traits pointillés) et C2H5 en avant (triangle plein), images l'un de l'autre dans un miroir.");
 };
 
+// Physique D 2025 (BAC), exercice 2.1 : forces appliquées au corps (S) sur le plan horizontal.
+const vecteur = (p, nom, x = "") => T(p, nom, ' font-size="13" font-style="italic"' + x) + L([p[0] - 1, p[1] - 12], [p[0] + 9, p[1] - 12], ' stroke-width="0.9"') + fleche([p[0] + 11, p[1] - 12], [p[0] + 5, p[1] - 12], 4);
+S["bac-2025-physique-d-forces"] = () => {
+  let g = L([20, 50], [220, 50], ' stroke-width="1.8"');
+  for (let x = 30; x <= 214; x += 14) g += L([x, 51], [x - 9, 62], ' stroke-width="1.1"');
+  g += '<rect x="113" y="38" width="13" height="12" fill="currentColor" stroke="none"/>';
+  g += L([119.5, 38], [119.5, 12]) + fleche([119.5, 6], [119.5, 16], 7) + vecteur([126, 18], "R");
+  g += L([119.5, 50], [119.5, 72]) + fleche([119.5, 79], [119.5, 70], 7) + vecteur([126, 82], "P");
+  g += L([126, 44], [174, 44]) + fleche([181, 44], [172, 44], 7) + vecteur([160, 36], "F");
+  g += L([113, 44], [68, 44]) + fleche([61, 44], [70, 44], 7) + vecteur([70, 36], "f");
+  return svg(240, 90, g, "Le corps ponctuel (S) sur le plan horizontal : poids P vers le bas, réaction R vers le haut, force motrice F dans le sens du mouvement, force de frottement f en sens opposé.");
+};
+// Physique D 2025 (BAC), exercice 3.2 : plan incliné AB (β = 30°), saut à partir de B, sol en B'C.
+S["bac-2025-physique-d-plan"] = () => {
+  const A = [45, 205], B = [175, 130], u = unit(A, B), fs = ' font-size="14"';
+  let g = L(A, B, ' stroke-width="1.8"') + L(A, [175, 205], POINTILLE + ' stroke-width="1"');
+  g += L(B, [B[0] + u[0] * 70, B[1] + u[1] * 70], ' stroke-width="1.6"') + fleche([B[0] + u[0] * 80, B[1] + u[1] * 80], [B[0] + u[0] * 70, B[1] + u[1] * 70], 8);
+  g += '<path d="M73 205 A 28 28 0 0 0 69.2 191"/>' + T([78, 200], "β", fs);
+  g += L([175, 318], [175, 22]) + fleche([175, 14], [175, 24], 8) + T([156, 24], "y", fs);
+  g += L(B, [322, 130]) + fleche([330, 130], [320, 130], 8) + T([322, 152], "x", fs);
+  g += L([174, 318], [356, 318], ' stroke-width="1.8"'); for (let x = 184; x <= 356; x += 13) g += L([x, 319], [x - 9, 330], ' stroke-width="1.1"');
+  g += '<circle cx="105" cy="170" r="5" fill="currentColor" stroke="none"/>' + T([88, 156], "(S)", fs);
+  g += '<circle cx="300" cy="318" r="3" fill="currentColor" stroke="none"/>' + T([296, 308], "C", fs) + T([20, 210], "A", fs) + T([180, 152], "B", fs) + T([150, 314], "B’", fs);
+  g += vecteur([196, 102], "V<tspan dy=\"4\" font-size=\"9\">B</tspan>");
+  g += L([258, 28], [258, 54], ' stroke-width="1.4"') + fleche([258, 62], [258, 52], 7) + vecteur([266, 44], "g");
+  return svg(370, 340, g, "Le solide (S) monte le plan AB incliné de β sur l'horizontale passant par A ; en B il quitte le plan avec la vitesse VB ; repère (B, x, y) d'origine B ; il retombe en C sur le sol horizontal passant par B', à la verticale sous B.");
+};
+// Physique D 2025 (BAC), corrigé 2.3 : construction de Fresnel (1 cm pour 10 mm, ici 20 px par cm).
+S["bac-2025-physique-d-fresnel"] = () => {
+  const O = [40, 140], k = 20, fs = ' font-size="13"', M1 = [O[0] + 5 * k, O[1]], M = [O[0] + 5 * k, O[1] - 5 * k];
+  let g = L([20, 140], [200, 140], ' stroke-width="1"') + fleche([206, 140], [198, 140], 6) + T([190, 158], "Δ", fs);
+  g += L(O, [M1[0] - 6, M1[1]], ' stroke-width="2"') + fleche(M1, O, 9) + L(M1, [M[0], M[1] + 6], ' stroke-width="2"') + fleche(M, M1, 9);
+  g += L(O, [M[0] - 4.5, M[1] + 4.5], ' stroke-width="2.4"') + fleche(M, O, 10) + droit(M1, [-1, 0], [0, -1], 8);
+  g += '<path d="M66 140 A 26 26 0 0 0 58.4 121.6"/>' + T([70, 132], "π/4", ' font-size="11"');
+  g += T([24, 156], "O", fs) + T([56, 160], "OM₁ = 5 cm (x₁)", ' font-size="11"') + T([146, 92], "M₁M = 5 cm (x₂)", ' font-size="11"') + T([8, 64], "OM ≈ 7,1 cm (x)", ' font-size="11"') + T([144, 36], "M", fs) + T([144, 156], "M₁", fs);
+  return svg(260, 170, g, "Construction de Fresnel : le vecteur OM1 de 5 cm (x1, phase 0) sur l'axe origine des phases, puis M1M de 5 cm perpendiculaire (x2, avance de phase π/2) ; la résultante OM mesure environ 7,1 cm et fait un angle π/4 avec l'axe.");
+};
+
 module.exports = S;

@@ -308,6 +308,20 @@
   "u": "/ressources/annales/probatoire-physique-ce-2025.html"
  },
  {
+  "id": "bac-physique-d-2025",
+  "examen": "bac",
+  "m": "physique",
+  "serie": "série D",
+  "nomExamen": "Baccalauréat",
+  "fiche": "ressources/examen-physique-chimie-bac.html",
+  "matiere": "Physique (série D)",
+  "mat": "physique",
+  "classes": "Tle D",
+  "annee": 2025,
+  "national": true,
+  "u": "/ressources/annales/bac-physique-d-2025.html"
+ },
+ {
   "id": "probatoire-physique-dti-2025",
   "examen": "probatoire",
   "m": "physique",
