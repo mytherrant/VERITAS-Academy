@@ -83,7 +83,7 @@
   });
 
   /* ---------- ADN : zoom en 4 étapes + double hélice qui tourne ---------- */
-  VRT_A("3e-svt-adn", 2, "Zoome de la cellule jusqu'au gène", function (el) {
+  VRT_A("3e-svt-adn", 3, "Zoome de la cellule jusqu'au gène", function (el) {
     var ET = [
       ["Cellule", "Une cellule du corps : au centre, le noyau.", "<circle cx='210' cy='110' r='90' fill='#E0F5E5' stroke='#00520B' stroke-width='2.5'/><circle cx='222' cy='104' r='36' fill='#7FCB8C' stroke='#00520B' stroke-width='2.5'/><circle cx='150' cy='150' r='8' fill='#C7E8CE'/><circle cx='270' cy='160' r='6' fill='#C7E8CE'/>"],
       ["Noyau", "Dans le noyau, au moment de la division : 46 chromosomes.", "<circle cx='210' cy='110' r='96' fill='#7FCB8C' fill-opacity='.4' stroke='#00520B' stroke-width='2.5'/>" + (function () { var s = ""; for (var i = 0; i < 18; i++) { var a = i * 0.9, r = 18 + i * 3.6, x = 210 + r * Math.cos(a), y = 110 + r * Math.sin(a) * .8; s += "<g transform='translate(" + x + " " + y + ") rotate(" + (i * 37) + ")'><path d='M-4 -12 L4 12 M4 -12 L-4 12' stroke='#007E11' stroke-width='5' stroke-linecap='round'/></g>"; } return s; })()],
