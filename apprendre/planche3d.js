@@ -17,6 +17,9 @@
 
   function hex(c) { c = c.replace("#", ""); if (c.length === 3) c = c.replace(/./g, "$&$&"); var n = parseInt(c, 16); return [n >> 16 & 255, n >> 8 & 255, n & 255]; }
   function teinte(rgb, k) { return "rgb(" + rgb.map(function (v) { return Math.max(0, Math.min(255, Math.round(v * k))) }).join(",") + ")"; }
+  /* teinte éclairée + reflet spéculaire (mélange vers le blanc) */
+  function teinteS(rgb, k, sp) { return "rgb(" + rgb.map(function (v) { var c = Math.min(255, v * k); return Math.max(0, Math.min(255, Math.round(c + (255 - c) * sp))) }).join(",") + ")"; }
+  var UID = 0;
   function sous(a, b) { return [a[0] - b[0], a[1] - b[1], a[2] - b[2]]; }
   function vect(a, b) { return [a[1] * b[2] - a[2] * b[1], a[2] * b[0] - a[0] * b[2], a[0] * b[1] - a[1] * b[0]]; }
   function norm(a) { var l = Math.sqrt(a[0] * a[0] + a[1] * a[1] + a[2] * a[2]) || 1; return [a[0] / l, a[1] / l, a[2] / l]; }
@@ -71,18 +74,38 @@
   function monter(boite, M) {
     var H = M.h || 380, rx = M.rx == null ? -24 : M.rx, ry = M.ry == null ? 32 : M.ry, ech = M.echelle || 1, ecl = 0, auto = false, raf = 0;
     var LUM = norm(M.lumiere || [-0.4, 0.8, -0.6]);
-    var objets = M.objets.map(function (o) { return { o: o, F: faces(o), ec: o.ec || [0, 0, 0] } });
+    /* 16/11/2026 : rendu réaliste. Une sphère de rayon unique est dessinée lisse (dégradé radial,
+       reflet, ombre portée au sol) au lieu de facettes ; M.lisse = false garde les facettes. */
+    var uid = "p3d" + (++UID), GR = {};
+    var objets = M.objets.map(function (o) {
+      var lisse = M.lisse !== false && o.f === "sphere" && typeof o.r === "number" && o.lisse !== false;
+      return { o: o, F: lisse ? [] : faces(o), sph: lisse, ec: o.ec || [0, 0, 0] };
+    });
+    var VUE = [0, 0, -1], DEMI = norm([LUM[0] + VUE[0], LUM[1] + VUE[1], LUM[2] + VUE[2]]);
+    function degrade(coul, op) {
+      var cle = coul + "-" + (op == null ? 1 : op);
+      if (GR[cle]) return GR[cle].id;
+      var c = hex(coul), id = uid + "g" + Object.keys(GR).length;
+      var fx = (50 + DEMI[0] * 34).toFixed(0), fy = (50 - DEMI[1] * 34).toFixed(0), o = op == null ? 1 : op;
+      GR[cle] = { id: id, html: '<radialGradient id="' + id + '" cx="' + fx + '%" cy="' + fy + '%" r="78%" fx="' + fx + '%" fy="' + fy + '%">' +
+        '<stop offset="0" stop-color="#fff" stop-opacity="' + o + '"/><stop offset=".1" stop-color="' + teinteS(c, 1.18, .45) + '" stop-opacity="' + o + '"/>' +
+        '<stop offset=".42" stop-color="' + teinte(c, 1) + '" stop-opacity="' + o + '"/><stop offset=".82" stop-color="' + teinte(c, .62) + '" stop-opacity="' + o + '"/>' +
+        '<stop offset="1" stop-color="' + teinte(c, .4) + '" stop-opacity="' + o + '"/></radialGradient>' };
+      return id;
+    }
     var marge = M.etiquettes && M.etiquettes.length ? 190 : 0, cx = LARG / 2, cy = H / 2 + (M.dy || 0);
 
     boite.classList.add("p3d-boite");
     boite.innerHTML = '<svg class="p3d-svg" viewBox="0 0 ' + LARG + ' ' + H + '" role="img" tabindex="0" aria-label="' + esc(M.alt || "Planche en trois dimensions") + ' — flèches du clavier pour tourner"></svg>' +
       '<div class="p3d-cmd"><button type="button" data-p3d="auto">Tourner tout seul</button><button type="button" data-p3d="face">Vue de départ</button>' +
-      (M.eclate ? '<label class="p3d-ecl"><span>' + esc(M.eclate) + '</span><input type="range" min="0" max="1" step="0.02" value="0"></label>' : '') +
+      (M.eclate ? '<button type="button" data-p3d="jouer">' + esc(M.jouer || "Animer") + '</button>' : '') + (M.eclate ? '<label class="p3d-ecl"><span>' + esc(M.eclate) + '</span><input type="range" min="0" max="1" step="0.02" value="0"></label>' : '') +
       '<span class="p3d-aide">Fais glisser le dessin pour le tourner</span></div>';
     var svg = boite.querySelector("svg");
 
     function tourner(p, dec) {
-      var x = p[0] + dec[0] * ecl, y = p[1] + dec[1] * ecl, z = p[2] + dec[2] * ecl;
+      /* M.arc : les pièces déplacées décrivent une parabole (une boule sort de l'urne par le haut) */
+      var lv = M.arc && (dec[0] || dec[1] || dec[2]) ? M.arc * 4 * ecl * (1 - ecl) : 0;
+      var x = p[0] + dec[0] * ecl, y = p[1] + dec[1] * ecl + lv, z = p[2] + dec[2] * ecl;
       var a = ry * Math.PI / 180, b = rx * Math.PI / 180, ca = Math.cos(a), sa = Math.sin(a), cb = Math.cos(b), sb = Math.sin(b);
       var x1 = x * ca - z * sa, z1 = x * sa + z * ca;          /* autour de y */
       var y2 = y * cb - z1 * sb, z2 = y * sb + z1 * cb;        /* autour de x */
@@ -100,15 +123,25 @@
           if (fc.ferme && nrm[2] > 0.02) return;                      /* face cachée (on regarde vers +z) */
           if (!fc.ferme && nrm[2] > 0) nrm = [-nrm[0], -nrm[1], -nrm[2]];
           var l = nrm[0] * LUM[0] + nrm[1] * LUM[1] + nrm[2] * LUM[2];
-          var k = 0.62 + 0.48 * Math.max(0, l), z = 0;
+          var hv = -(nrm[0] * DEMI[0] + nrm[1] * DEMI[1] + nrm[2] * DEMI[2]), sp = Math.pow(Math.max(0, -hv), 30) * (fc.op < 1 ? 0.75 : 0.32);
+          var k = 0.58 + 0.5 * Math.max(0, l), z = 0;
           R.forEach(function (q) { z += q[2] }); z /= R.length;
-          liste.push({ z: z, d: R.map(proj), c: teinte(fc.coul, k), op: fc.op, tr: fc.trait });
+          liste.push({ z: z, d: R.map(proj), c: teinteS(fc.coul, k, sp), op: fc.op, tr: fc.trait });
         });
+        if (ob.sph) {
+          var o = ob.o, q = tourner(o.c, ob.ec), e = ech * 900 / (900 + q[2]), P = proj(q), r = o.r * e;
+          var sol = tourner([o.c[0], o.c[1] - o.r, o.c[2]], ob.ec), Ps = proj(sol), ry = Math.max(2, r * 0.32 * Math.abs(Math.sin((rx || -20) * Math.PI / 180)) + r * 0.12);
+          if (o.ombre !== false) liste.push({ z: q[2] + o.r * 0.9, html: '<ellipse cx="' + Ps[0].toFixed(1) + '" cy="' + (Ps[1] + 1).toFixed(1) + '" rx="' + (r * 0.95).toFixed(1) + '" ry="' + ry.toFixed(1) + '" fill="url(#' + uid + 'om)"/>' });
+          liste.push({ z: q[2], html: '<circle cx="' + P[0].toFixed(1) + '" cy="' + P[1].toFixed(1) + '" r="' + r.toFixed(1) + '" fill="url(#' + degrade(o.coul || "#9DB4D8", o.op) + ')"/>' +
+            (o.op == null || o.op >= 1 ? '<ellipse cx="' + (P[0] + DEMI[0] * r * 0.42).toFixed(1) + '" cy="' + (P[1] - DEMI[1] * r * 0.42).toFixed(1) + '" rx="' + (r * 0.22).toFixed(1) + '" ry="' + (r * 0.13).toFixed(1) + '" fill="#fff" opacity=".75" transform="rotate(-35 ' + (P[0] + DEMI[0] * r * 0.42).toFixed(1) + ' ' + (P[1] - DEMI[1] * r * 0.42).toFixed(1) + ')"/>' : '') });
+        }
       });
       liste.sort(function (a, b) { return b.z - a.z });
-      var h = liste.map(function (P) {
+      var h = '<defs><radialGradient id="' + uid + 'om"><stop offset="0" stop-color="#001136" stop-opacity=".32"/><stop offset="1" stop-color="#001136" stop-opacity="0"/></radialGradient>' +
+        Object.keys(GR).map(function (k) { return GR[k].html }).join("") + '</defs>' + liste.map(function (P) {
+        if (P.html) return P.html;
         return '<path d="M' + P.d.map(function (q) { return q[0].toFixed(1) + " " + q[1].toFixed(1) }).join("L") + 'Z" fill="' + P.c + '"' + (P.op < 1 ? ' fill-opacity="' + P.op + '"' : '') +
-          ' stroke="' + (P.tr || P.c) + '" stroke-width="' + (P.tr ? 0.8 : 0.6) + '" stroke-linejoin="round"/>';
+          (P.op < 1 && !P.tr ? ' stroke="none"/>' : ' stroke="' + (P.tr || P.c) + '" stroke-width="' + (P.tr ? 0.8 : 0.6) + '" stroke-linejoin="round"/>');
       }).join("");
       /* légendes : un trait de rappel vers la marge, espacées pour ne jamais se chevaucher */
       if (M.etiquettes && etroit()) {
@@ -163,6 +196,12 @@
     boite.querySelector('[data-p3d=face]').addEventListener("click", function () { arreter(); rx = M.rx == null ? -24 : M.rx; ry = M.ry == null ? 32 : M.ry; dessiner(); });
     var cur = boite.querySelector(".p3d-ecl input");
     if (cur) cur.addEventListener("input", function () { ecl = +cur.value; dessiner(); });
+    var jouer = boite.querySelector('[data-p3d=jouer]');
+    if (jouer) jouer.addEventListener("click", function () {
+      arreter(); var de = ecl, vers = ecl > 0.5 ? 0 : 1, t0 = 0, D = W.matchMedia("(prefers-reduced-motion: reduce)").matches ? 1 : 1500;
+      (function pas(t) { if (!t0) t0 = t; var u = Math.min(1, (t - t0) / D), e = u < .5 ? 2 * u * u : 1 - Math.pow(-2 * u + 2, 2) / 2;
+        ecl = de + (vers - de) * e; if (cur) cur.value = ecl; dessiner(); if (u < 1) raf = requestAnimationFrame(pas); })(performance.now());
+    });
     /* un tour de présentation quand la planche apparaît (sauf « réduire les animations ») */
     if ("IntersectionObserver" in W && !W.matchMedia("(prefers-reduced-motion: reduce)").matches) {
       var vu = new IntersectionObserver(function (es) { if (es[0].isIntersecting) { vu.disconnect(); var n = 0, d0 = ry; (function pas() { n++; ry = d0 + 40 * Math.sin(n / 60 * Math.PI); dessiner(); if (n < 60 && !tient) raf = requestAnimationFrame(pas); })(); } }, { threshold: 0.5 });

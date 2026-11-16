@@ -24,6 +24,12 @@ const CARTE = {};
 const slug = c => c.toLowerCase().replace(/\s+/g, "-");
 const L = {}, err = [], APC = {}, MODULES = {};
 global.VRT_L = (id, o) => { if (L[id]) err.push(`${id} : doublon`); L[id] = o; };
+/* Leçon RÉÉCRITE (16/11/2026) : VRT_LR(id, o) remplace la leçon de même identifiant, quel que soit
+   l'ordre de lecture des fichiers (une version approfondie remplace la version courte sans qu'il
+   faille la retirer de sa source d'origine). Les QCM, situations, exercices et schémas posés par
+   les autres sources s'appliquent ensuite à la nouvelle version. */
+const REMPL = {};
+global.VRT_LR = (ids, o) => { for (const id of [].concat(ids)) { if (REMPL[id]) err.push(`${id} : leçon réécrite en double`); REMPL[id] = JSON.parse(JSON.stringify(o)); } };
 global.VRT_APC = (id, o) => { APC[id] = o; };
 global.VRT_MODULES = (k, v) => { MODULES[k] = v; };
 /* Exercice d'examen propre à chaque leçon (partie B) : situation chiffrée, consignes, réponse. */
@@ -61,6 +67,7 @@ function poserQcm(id, liste) {
 for (const f of fs.readdirSync(src).filter(x => x.endsWith(".js")).sort()) {
   try { eval(fs.readFileSync(path.join(src, f), "utf8")); } catch (e) { err.push(`${f} : ${e.message}`); }
 }
+for (const [id, o] of Object.entries(REMPL)) { L[id] = o; if (o.quiz && QCM[id]) delete o.quiz; }
 for (const [id, liste] of Object.entries(QCM)) { if (!L[id]) { err.push(`${id} : QCM pour une leçon inconnue`); continue; } const q = poserQcm(id, liste); if (q) L[id].quiz = q; }
 for (const [id, o] of Object.entries(SIT)) {
   if (!APC[id]) { err.push(`${id} : situation réécrite pour une leçon sans fiche APC`); continue; }
@@ -185,6 +192,13 @@ function ligneProg(l) {
 /* Schéma offert (demande de Jacques : « sur certaines leçons tu mets les schémas gratuits pour inciter
    à l'abonnement ») : une leçon payante sur deux (rang impair) garde dans son aperçu public les schémas
    et cartes de ses parties fermées ; l.schemaOffert = true / false force le choix. */
+/* Le schéma offert d'une partie fermée : son schéma, sinon sa première planche 2D (une planche 3D
+   a besoin du moteur et reste aux abonnés). */
+function offert(p) {
+  if (p.illus) return p.illus;
+  const pl = (p.planches || []).find(x => x.type !== "3d" && x.svg);
+  return pl ? { legende: (pl.titre ? pl.titre + ". " : "") + (pl.legende || ""), svg: pl.svg } : null;
+}
 function schemaOffert(l) { return l.schemaOffert === true || (l.schemaOffert !== false && (+l.rang || 0) % 2 === 1); }
 function premierDuTrimestre(l) {
   const vus = new Set();
@@ -233,8 +247,10 @@ for (const [id, l] of Object.entries(L)) {
   if (gratuit) { pub = { ...l, gratuit: true }; libres++; }
   else {
     pub = { ...l, verrou: true, nq: l.quiz.length, revision: [], exo: "", quiz: [],
-      labo: l.parties.some(p => p.labo), parties: [l.parties[0]].concat(l.parties.slice(1).map(p => Object.assign({ t: p.t, verrou: true }, p.illus && schemaOffert(l) ? { illus: p.illus } : {}))) };
-    fs.writeFileSync(path.join(dest, id + ".json"), JSON.stringify({ parties: l.parties.slice(1), revision: l.revision, exo: l.exo, quiz: l.quiz }));
+      labo: l.parties.some(p => p.labo), parties: [l.parties[0]].concat(l.parties.slice(1).map(p => Object.assign({ t: p.t, verrou: true }, schemaOffert(l) && offert(p) ? { illus: offert(p) } : {}))) };
+    /* la situation-problème (enquete) reste publique : c'est l'accroche ; sa résolution est payante */
+    delete pub.denouement;
+    fs.writeFileSync(path.join(dest, id + ".json"), JSON.stringify(Object.assign({ parties: l.parties.slice(1), revision: l.revision, exo: l.exo, quiz: l.quiz }, l.denouement ? { denouement: l.denouement } : {})));
     payantes++;
   }
   (parClasse[l.c] = parClasse[l.c] || []).push(`VRT_L(${JSON.stringify(id)},${JSON.stringify(pub)});`);

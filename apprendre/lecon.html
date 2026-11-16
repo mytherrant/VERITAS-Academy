@@ -9,7 +9,7 @@
 <link rel="icon" href="../VERITAS_favicon_512.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="apprendre.css?v=20261116j">
+<link rel="stylesheet" href="apprendre.css?v=20261116k">
 <link rel="stylesheet" href="jeu.css?v=20261112v">
 <link rel="stylesheet" href="planches.css?v=20261116b">
 <style>
@@ -54,12 +54,12 @@
 <script src="lecons.js?v=20261116n"></script>
 <script src="ressources.js?v=20261115sq"></script>
 <script src="atelier.js?v=20261110a"></script>
-<script src="charge.js?v=b4d614a2"></script>
+<script src="charge.js?v=ed2142ce"></script>
 <script src="commun.js?v=20261116a"></script>
 <script src="jeu.js?v=20261110g"></script>
 <script src="labo.js?v=20261111c"></script>
-<script src="planche3d.js?v=20261116c"></script>
-<script src="verrou.js?v=20261114b"></script>
+<script src="planche3d.js?v=20261116d"></script>
+<script src="verrou.js?v=20261116a"></script>
 <script src="tuteur.js?v=20261113b"></script>
 <script>
 (function(){
@@ -127,7 +127,7 @@
      '<article class="carte"><div class="outils-pdf"><button type="button" class="btn-l" onclick="print()">⤓ PDF</button></div>'+
      '<div id="kalaoCours"></div>'+
      (L.intro?'<p class="info">'+L.intro+'</p>':'')+
-     (L.apc?'<aside class="apc"><h2>Situation de vie</h2><p>'+esc(L.apc.situation)+'</p><p class="apc-t"><b>Ta tâche :</b> '+esc(L.apc.tache)+'</p></aside>':'')+
+     (L.apc&&!L.enquete?'<aside class="apc"><h2>Situation de vie</h2><p>'+esc(L.apc.situation)+'</p><p class="apc-t"><b>Ta tâche :</b> '+esc(L.apc.tache)+'</p></aside>':'')+
      enquete+(L.objectifs?'<div class="objectifs"><b>À la fin de la leçon, tu sauras :</b><ul>'+L.objectifs.map(function(o){return '<li>'+o+'</li>'}).join("")+'</ul></div>':'')+
      parties+denouement+plus+(mur?VRT.verrou.mur(L,mur,A):scenesHtml+appel+A.offre(L.c,L.m,'lecon'))+'<div id="tuteurLecon"></div>'+nav+'</article></section>'+
    '<section class="grille" data-panneau="revision" hidden><aside class="sommaire"><p>L\'essentiel</p></aside><article class="carte">'+
