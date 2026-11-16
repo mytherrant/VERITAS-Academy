@@ -1,3 +1,18 @@
+## Apprendre : Probabilités de Terminale C et D au gabarit approfondi (16/11/2026)
+
+Demande de Jacques : « Déjà fusionné, continue » (après #328).
+
+- **Déploiement de #328** : toutes les vérifications passées (l'étape GEO qui bloquait #324 et #325 est au vert) ; transfert FTP lancé.
+- **Probabilités, 10 leçons payantes** (5 contenus partagés : Tle C r40-r44 = Tle D r25-r29), dans la source privée `71-denombrement-approfondi.js` ; aperçus `apercus-tle-c.js` et `apercus-tle-d.js` fusionnés en place (fiches APC d'origine conservées) :
+  - vocabulaire : tombola de Sangmélima (grille des 100 tickets, Venn, A ∪ B = 75) ;
+  - calcul : délégués du comité de Kumba (urne 3D, C(3, 2)/C(5, 2) = 0,3) ;
+  - conditionnelles : résultats du bac à Douala (arbre pondéré, P(R) = 0,62, P<sub>R</sub>(F) ≈ 0,68, indépendance ; transfert : test du paludisme) ;
+  - variables aléatoires : loterie de Bafang (loi en bâtons 2D et 3D, E(X) = −30 F, V(X) = 22 100) ;
+  - loi binomiale : semences de Dschang (arbre de 3 épreuves, loi B(5 ; 0,8) en 3D, P(X = 0) = 0,00032, E(X) = 4).
+- Nouveaux générateurs : `barres` (diagramme en bâtons), `barres3D`, `arbreP` (arbre pondéré). Notations conditionnelles en indice (P<sub>B</sub>(A)).
+- Contrôlé dans Chromium (abonné 1200 et 390 px, visiteur) : 0 erreur JS, pas de débordement. Bancs : verrou 18/18, gabarits 54/54, planche mobile 23/23, réglages 29/29.
+- **Reste chez Jacques** : remplacer `71-denombrement-approfondi.js` dans `apprendre_prive\sources` (27 leçons) et déposer les 27 JSON (`apprendre-denombrement-probabilites-pour-jacques.zip`). Les JSON ont été produits avec le labo « binomiale » et des exercices d'examen rédigés ici (roue de Bertoua, jetons, test du paludisme à Bamenda, stand de dés à Garoua, bouteilles à Douala).
+
 ## Apprendre : charte du modèle sur toutes les pages, Dénombrement de 1re A et 2nde A (16/11/2026)
 
 Demandes de Jacques : « Change aussi les polices, icônes dans Apprendre, exactement comme dans Dénombrement, et finalise » ; « Applique ce style dans Apprendre lui-même ».
