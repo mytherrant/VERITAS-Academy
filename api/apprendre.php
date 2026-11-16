@@ -22,6 +22,8 @@
  *   sans compte (150 F) : raisons achat_invalide | achat_en_attente | achat_a_regler | non_depose.
  *   L'hébergeur bannit une IP à 6 réponses 401/403/429 par minute, et une classe
  *   entière partage une IP : un élève sans formule n'est pas une attaque.
+ * Champ facultatif pdf:"enonce"|"corrige" (avec {id, token} ou l'achat) → le PDF de l'épreuve
+ *   (application/pdf), sous le même verrou que la suite ; refus en JSON comme ailleurs.
  */
 declare(strict_types=1);
 require_once __DIR__ . '/_json_boot.php';
@@ -39,6 +41,7 @@ if (in_array($__origin, $__allowed, true)) {
 }
 header('Access-Control-Allow-Methods: POST, OPTIONS');
 header('Access-Control-Allow-Headers: Content-Type');
+header('Access-Control-Expose-Headers: X-Vrt-Token');   // jeton renouvelé joint à un PDF (appli mobile)
 header('X-Content-Type-Options: nosniff');
 header('Referrer-Policy: no-referrer');
 header('Cache-Control: private, no-store');
@@ -58,6 +61,29 @@ function appr_refus(string $raison, string $jeton = ''): void {
     $r = ['ok' => false, 'raison' => $raison];
     if ($jeton !== '') $r['token'] = $jeton;
     appr_rep($r);
+}
+
+/* PDF DE L'ÉPREUVE (16/11/2026) — énoncé et corrigé compilés en LaTeX
+   (tools/latex/sequentielles_pdf.cjs), déposés par FTP à côté du .json :
+   uploads/protected/apprendre/<id>-enonce.pdf et <id>-corrige.pdf.
+   Servis sous le MÊME verrou que la suite du sujet : la fonction n'est appelée
+   qu'une fois l'abonnement ou l'achat vérifiés. */
+function appr_servir_pdf(string $id, string $nature, string $jeton = ''): void {
+    if (!in_array($nature, ['enonce', 'corrige'], true)) appr_rep(['ok' => false, 'error' => 'Document inconnu'], 400);
+    $f = dirname(__DIR__) . '/uploads/protected/apprendre/' . $id . '-' . $nature . '.pdf';
+    // Taille lue AVANT de vider le tampon : un fichier en cours de dépôt FTP se refuse en JSON.
+    $n = is_file($f) && is_readable($f) ? @filesize($f) : false;
+    if ($n === false || $n === 0) {
+        @file_put_contents(__DIR__ . '/data/_security_log.txt', date('c') . ' [APPRENDRE_PDF_NON_DEPOSE] id=' . $id . ' ' . $nature . "\n", FILE_APPEND);
+        appr_refus('non_depose', $jeton);
+    }
+    while (ob_get_level() > 0) { ob_end_clean(); }
+    header('Content-Type: application/pdf');
+    header('Content-Length: ' . $n);
+    header('Content-Disposition: inline; filename="' . $id . '-' . $nature . '.pdf"');
+    if ($jeton !== '') header('X-Vrt-Token: ' . $jeton);
+    readfile($f);
+    exit;
 }
 
 /** Toute formule élève ou enseignant active ouvre les cours : même règle que _aiTier() côté client. */
@@ -94,6 +120,7 @@ if (($in['action'] ?? '') === 'achat') {
     }
     if (($st['status'] ?? '') !== 'paid') appr_refus('achat_en_attente');
     if (empty($st['granted']) || !empty($st['underpaid'])) appr_refus('achat_a_regler');
+    if (isset($in['pdf'])) appr_servir_pdf($id, (string) $in['pdf']);
     $fS = dirname(__DIR__) . '/uploads/protected/apprendre/' . $id . '.json';
     $suiteA = is_file($fS) ? json_decode((string) file_get_contents($fS), true) : null;
     if (!is_array($suiteA)) {
@@ -181,6 +208,8 @@ if ($etat !== 'ok') {
     if ($nouveau !== '') $r['token'] = $nouveau;
     appr_rep($r);
 }
+
+if (isset($in['pdf'])) appr_servir_pdf($id, (string) $in['pdf'], $nouveau);
 
 $fichier = dirname(__DIR__) . '/uploads/protected/apprendre/' . $id . '.json';
 $suite = is_file($fichier) ? json_decode((string) file_get_contents($fichier), true) : null;

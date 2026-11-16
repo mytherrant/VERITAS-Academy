@@ -235,7 +235,59 @@
     W.addEventListener("afterprint", fin);
     setTimeout(function () { W.print(); }, 60);
   }
-  function choixPdf() {
+  /* ── Épreuves séquentielles : PDF vectoriels compilés en LaTeX (énoncé, corrigé),
+     servis par api/apprendre.php sous le même verrou que la suite, et lus dans le
+     lecteur du site (onglets, pages, zoom, téléchargement). Tant qu'un PDF n'est pas
+     déposé sur le serveur, on retombe sur l'impression de la page. ── */
+  var LECTEUR = "/assets/lecteur-pdf.js?v=20261116";   // changer v= à chaque modification du lecteur
+  function pdfServeur(nature) {
+    var a = achatLu(), corps = a ? { action: "achat", id: ID, ref: a.ref, cle: a.cle, pdf: nature } : { id: ID, token: jeton(), pdf: nature };
+    return fetch(API, { method: "POST", headers: { "Content-Type": "application/json" }, credentials: "same-origin", body: JSON.stringify(corps) })
+      .then(function (r) {
+        var t = r.headers.get("X-Vrt-Token"); if (t) lsSet(CLE, t);
+        if ((r.headers.get("Content-Type") || "").indexOf("application/pdf") === 0) return r.arrayBuffer();
+        return r.json().then(function (j) {
+          var e = new Error(MSG[(j && j.raison) || "reseau"] || MSG.reseau); e.raison = (j && j.raison) || "reseau"; throw e;
+        });
+      }, function () { var e = new Error(MSG.reseau); e.raison = "reseau"; throw e; });
+  }
+  function chargerLecteur() {
+    if (W.VRTLecteurPDF) return Promise.resolve(W.VRTLecteurPDF);
+    return new Promise(function (ok, ko) {
+      var s = D.createElement("script"); s.src = LECTEUR; s.async = true;
+      s.onload = function () { if (W.VRTLecteurPDF) ok(W.VRTLecteurPDF); else ko(new Error(MSG.reseau)); };
+      s.onerror = function () { ko(new Error(MSG.reseau)); };
+      D.head.appendChild(s);
+    });
+  }
+  function fermerPdf() { var z = D.getElementById("axPdf"); if (z) z.parentNode.removeChild(z); D.documentElement.style.overflow = ""; }
+  function lecteurPdf() {
+    occupe(true);
+    Promise.all([pdfServeur("enonce"), chargerLecteur()]).then(function (r) {
+      occupe(false);
+      var z = D.createElement("div"); z.id = "axPdf";
+      z.setAttribute("style", "position:fixed;inset:0;z-index:2147483000;background:rgba(0,17,54,.6);display:flex;justify-content:center;padding:12px 8px");
+      z.innerHTML = '<div role="dialog" aria-modal="true" aria-label="' + esc(TITRE) + '" style="background:#fff;border-radius:12px;width:100%;max-width:980px;display:flex;flex-direction:column;padding:12px 12px 10px;box-sizing:border-box;max-height:100%">' +
+        '<div style="display:flex;align-items:center;gap:8px;margin-bottom:4px"><b style="flex:1;font-size:15px;color:#001136;line-height:1.3">' + esc(TITRE) + '</b>' +
+        '<button type="button" class="ax-pdf-x" aria-label="Fermer" style="font-size:26px;line-height:1;background:none;border:0;cursor:pointer;color:#001136;padding:2px 8px">×</button></div>' +
+        '<div class="ax-pdf-l"></div></div>';
+      z.addEventListener("click", function (e) { if (e.target === z || e.target.classList.contains("ax-pdf-x")) fermerPdf(); });
+      D.body.appendChild(z);
+      D.documentElement.style.overflow = "hidden";
+      var enonce = { titre: "Énoncé", fichier: ID + "-enonce.pdf", charger: function () { return pdfServeur("enonce"); } };
+      enonce._octets = r[0];
+      r[1].monter(z.querySelector(".ax-pdf-l"), {
+        hauteur: "calc(100vh - 150px)",
+        documents: [enonce, { titre: "Corrigé", fichier: ID + "-corrige.pdf", charger: function () { return pdfServeur("corrige"); } }]
+      });
+    }).catch(function (e) {
+      occupe(false);
+      if (e && e.raison === "non_depose") { choixImpression(); return; }
+      fenetre("<h3>Télécharger en PDF</h3><p class=\"ax-fen-m\">" + esc(e && e.message ? e.message : MSG.reseau) + "</p>");
+    });
+  }
+  function choixPdf() { if (SUITE) lecteurPdf(); else choixImpression(); }
+  function choixImpression() {
     var f = fenetre('<h3>Télécharger en PDF</h3><p class="ax-fen-m">Dans la fenêtre qui s\'ouvre, choisis <b>« Enregistrer au format PDF »</b> comme imprimante.</p>' +
       '<button class="ax-btn ax-plein" type="button" data-c="0">Le sujet seul</button><button class="ax-btn" type="button" data-c="1">Le sujet et son corrigé</button>');
     [].forEach.call(f.querySelectorAll("[data-c]"), function (b) { b.addEventListener("click", function () { var c = b.getAttribute("data-c") === "1"; fermer(); imprimer(c); }); });
@@ -339,7 +391,7 @@
   if (LIB) LIB.addEventListener("click", function () { exiger(voir); });
   var ACH = D.querySelector("[data-a=acheter]");
   if (ACH) ACH.addEventListener("click", function () { if (CHARGEE) { voir(); return; } if (!reprendre(voir, false)) mur("connexion", voir); });
-  D.addEventListener("keydown", function (e) { if (e.key === "Escape") fermer(); });
+  D.addEventListener("keydown", function (e) { if (e.key === "Escape") { fermer(); fermerPdf(); } });
   maj();
   /* Épreuve déjà achetée sur cet appareil (ou paiement qui vient d'aboutir, retour de la
      page de paiement) : elle se rouvre sans rien demander. */
