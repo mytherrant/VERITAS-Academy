@@ -1,3 +1,13 @@
+## Apprendre : corrections de mise en page (16/11/2026)
+
+Demande de Jacques : « Corrige la mise en page » (sans capture) : audit complet en émulation Pixel 7 et sur ordinateur 1280 px (accueil, matière, leçon gratuite, leçon à verrou, ressources), corrections dans `apprendre/modele.css?v=20261116h` :
+
+- **Compte à rebours** (« Mon année ») : sur ordinateur, la case des secondes débordait de la carte (chiffres Nunito 900 plus larges). Colonnes en `minmax(0, fr)`, chiffres et libellés proportionnés à la largeur de la carte (requête de conteneur `cqw`, repli `vw`).
+- **En-têtes de chapitre** (page matière, téléphone) : la tuile du numéro passait au-dessus des titres longs et restait à côté des courts ; elle reste désormais toujours à côté.
+- **Étiquettes des lignes de leçon** (« Labo », « Jeu »…) : un rond écrasé sans marge ; vraies pastilles de la couleur du chapitre.
+- **Titres de section** : « Tout voir › », « Défi express › » ne se coincent plus contre un titre long (retour à la ligne sur téléphone) ; « Calendrier officiel 2026-2027 » rapproché de son titre.
+- Aucun débordement horizontal sur les 10 vues contrôlées, 0 erreur JS. Bancs : cartes au survol 4/4, charte 34/34, lisibilité 7/7, planche mobile 23/23, verrou 18/18, gabarits 54/54, réglages 29/29, calendrier 51/51, menu 19/19.
+
 ## Apprendre : police Nunito hébergée, animations et tuiles d'icônes sur toutes les pages (16/11/2026)
 
 Demande de Jacques (capture de l'accueil d'Apprendre sur Android) : « Aligne sur le style de Dénombrement : mêmes effets, style, animations ; polices scolaires lisibles et captivantes ; belles icônes » ; puis capture du panneau des formules.
