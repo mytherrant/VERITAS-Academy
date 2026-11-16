@@ -1,4 +1,18 @@
-## Apprendre : retour aux pointillés, vraie hiérarchie des titres, pastilles, police Poppins (16/11/2026)
+## Apprendre : police Roboto, titres de partie d'origine, accueil retravaillé (16/11/2026)
+
+Retours de Jacques : « Améliore aussi l'interface ci, les icônes et autres » (capture de l'accueil), puis « Conserve ceci, et utilise-en pour l'accueil d'Apprendre » (capture d'une leçon en ligne : numéros dans un cercle magenta à point or, titres magenta soulignés, police Roboto du téléphone).
+
+- **Police : Roboto**, hébergée (`assets/polices/roboto-latin(-ext)-400|500|700-normal.woff2`, `-400-italic`, licence Apache 2.0 `ROBOTO-LICENSE.txt`). « Poppins » désigne aussi Roboto pour les feuilles qui la nomment en dur. Les fichiers Poppins ajoutés plus tôt dans la même PR sont retirés.
+- **Leçons** : titres de partie remis au style d'origine (cercle magenta à point or, titre magenta souligné magenta → or) ; sous-titres `h3` en bleu-vert ; le reste (pointillés, petites icônes illustrées, pastilles des objectifs) inchangé.
+- **Accueil d'Apprendre** (`apprendre/modele.css`, fin du fichier ; `index.html` passe `--c/--cp` à la tuile de la leçon du jour) :
+  - titres de section au style des parties de leçon (cercle magenta à point or, titre magenta, trait magenta → or), aussi sur « Tout pour progresser » ;
+  - classes en vraies pastilles (classe choisie en dégradé de sa couleur) ;
+  - objectif du jour en puces à pictogramme coloré (bleu leçon, or quiz, vert une fois fait) ;
+  - icône de la leçon du jour sur tuile douce de la couleur de la matière ;
+  - barre des matières : chaque icône sur une tuile de la couleur de sa matière ; matière ouverte entourée de sa couleur.
+- `modele.css?v=20261116s`. Audit téléphone et ordinateur (10 vues) : aucun débordement, 0 erreur JS ; bancs verrou 18/18, gabarits 54/54, planche mobile 23/23, lisibilité 7/7, charte 34/34, survol 4/4, menu 19/19, calendrier 51/51, réglages 29/29.
+
+## Apprendre : retour aux pointillés, hiérarchie des titres, pastilles (16/11/2026) — police : voir l'entrée suivante (Roboto)
 
 Retour de Jacques (capture de la rubrique « Laboratoires ») : « Je préfère l'ancien système avec les pointillés. Mais conserve les icônes en diminuant la taille. Par hiérarchiser j'entendais distinguer les grands titres des sous-titres. Au niveau de l'objectif mets plutôt des puces, ou pastilles », puis « Garde aussi l'ancienne police ».
 

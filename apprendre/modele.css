@@ -3,20 +3,29 @@
    dans Dénombrement »). Chargé en DERNIER par les 7 pages (index, matière, leçon, manuel, ressources,
    labo, notes). Polices : Segoe UI (texte), Trebuchet MS 800 (titres). Icônes : tuiles arrondies en
    dégradé de la couleur de la famille, pictogramme blanc ; numéros dans des cercles à halo. */
-/* Police d'Apprendre : Poppins, l'ancienne police d'Apprendre, gardée à la demande de Jacques (16/11/2026).
-   Hébergée sur le site (SIL Open Font License 1.1, assets/polices/POPPINS-OFL.txt) : plus d'appel à Google Fonts,
-   et la même police sur Android, iPhone et Windows. Graisses 400 (texte), 500, 600 (gras), 700 (titres). */
-@font-face{font-family:'Poppins';font-style:normal;font-weight:400;font-display:swap;src:url(/assets/polices/poppins-latin-ext-400-normal.woff2) format('woff2');unicode-range:U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF}
-@font-face{font-family:'Poppins';font-style:normal;font-weight:400;font-display:swap;src:url(/assets/polices/poppins-latin-400-normal.woff2) format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
-@font-face{font-family:'Poppins';font-style:normal;font-weight:500;font-display:swap;src:url(/assets/polices/poppins-latin-ext-500-normal.woff2) format('woff2');unicode-range:U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF}
-@font-face{font-family:'Poppins';font-style:normal;font-weight:500;font-display:swap;src:url(/assets/polices/poppins-latin-500-normal.woff2) format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
-@font-face{font-family:'Poppins';font-style:normal;font-weight:600;font-display:swap;src:url(/assets/polices/poppins-latin-ext-600-normal.woff2) format('woff2');unicode-range:U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF}
-@font-face{font-family:'Poppins';font-style:normal;font-weight:600;font-display:swap;src:url(/assets/polices/poppins-latin-600-normal.woff2) format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
-@font-face{font-family:'Poppins';font-style:normal;font-weight:700;font-display:swap;src:url(/assets/polices/poppins-latin-ext-700-normal.woff2) format('woff2');unicode-range:U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF}
-@font-face{font-family:'Poppins';font-style:normal;font-weight:700;font-display:swap;src:url(/assets/polices/poppins-latin-700-normal.woff2) format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
-:root{--sans:"Poppins","Segoe UI",Roboto,Arial,sans-serif;--serif:"Poppins","Trebuchet MS",system-ui,sans-serif;--vm-titre:"Poppins","Trebuchet MS",system-ui,sans-serif;--vm-corps:"Poppins","Segoe UI",Roboto,Arial,sans-serif;--vm-mag:#B2316E;--vm-gold:#FFC93C}
+/* Police d'Apprendre : Roboto (16/11/2026), celle que Jacques voit dans les leçons sur son téléphone et qu'il demande
+   de garder (« Garde aussi l'ancienne police », « Conserve ceci »). Hébergée sur le site (licence Apache 2.0,
+   assets/polices/ROBOTO-LICENSE.txt) : même rendu sur Android, iPhone et Windows, sans appel à Google Fonts.
+   « Poppins » désigne aussi Roboto, pour les feuilles qui la nomment en dur. Graisses 400, 500, 700. */
+@font-face{font-family:'Roboto';font-style:normal;font-weight:400;font-display:swap;src:url(/assets/polices/roboto-latin-ext-400-normal.woff2) format('woff2');unicode-range:U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF}
+@font-face{font-family:'Roboto';font-style:normal;font-weight:400;font-display:swap;src:url(/assets/polices/roboto-latin-400-normal.woff2) format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
+@font-face{font-family:'Roboto';font-style:normal;font-weight:500;font-display:swap;src:url(/assets/polices/roboto-latin-ext-500-normal.woff2) format('woff2');unicode-range:U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF}
+@font-face{font-family:'Roboto';font-style:normal;font-weight:500;font-display:swap;src:url(/assets/polices/roboto-latin-500-normal.woff2) format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
+@font-face{font-family:'Roboto';font-style:normal;font-weight:700;font-display:swap;src:url(/assets/polices/roboto-latin-ext-700-normal.woff2) format('woff2');unicode-range:U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF}
+@font-face{font-family:'Roboto';font-style:normal;font-weight:700;font-display:swap;src:url(/assets/polices/roboto-latin-700-normal.woff2) format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
+@font-face{font-family:'Roboto';font-style:italic;font-weight:400;font-display:swap;src:url(/assets/polices/roboto-latin-ext-400-italic.woff2) format('woff2');unicode-range:U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF}
+@font-face{font-family:'Roboto';font-style:italic;font-weight:400;font-display:swap;src:url(/assets/polices/roboto-latin-400-italic.woff2) format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
+@font-face{font-family:'Poppins';font-style:normal;font-weight:400;font-display:swap;src:url(/assets/polices/roboto-latin-ext-400-normal.woff2) format('woff2');unicode-range:U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF}
+@font-face{font-family:'Poppins';font-style:normal;font-weight:400;font-display:swap;src:url(/assets/polices/roboto-latin-400-normal.woff2) format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
+@font-face{font-family:'Poppins';font-style:normal;font-weight:500;font-display:swap;src:url(/assets/polices/roboto-latin-ext-500-normal.woff2) format('woff2');unicode-range:U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF}
+@font-face{font-family:'Poppins';font-style:normal;font-weight:500;font-display:swap;src:url(/assets/polices/roboto-latin-500-normal.woff2) format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
+@font-face{font-family:'Poppins';font-style:normal;font-weight:700;font-display:swap;src:url(/assets/polices/roboto-latin-ext-700-normal.woff2) format('woff2');unicode-range:U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF}
+@font-face{font-family:'Poppins';font-style:normal;font-weight:700;font-display:swap;src:url(/assets/polices/roboto-latin-700-normal.woff2) format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
+@font-face{font-family:'Poppins';font-style:italic;font-weight:400;font-display:swap;src:url(/assets/polices/roboto-latin-ext-400-italic.woff2) format('woff2');unicode-range:U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF}
+@font-face{font-family:'Poppins';font-style:italic;font-weight:400;font-display:swap;src:url(/assets/polices/roboto-latin-400-italic.woff2) format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
+:root{--sans:"Roboto","Segoe UI",Roboto,Arial,sans-serif;--serif:"Roboto","Trebuchet MS",system-ui,sans-serif;--vm-titre:"Roboto","Trebuchet MS",system-ui,sans-serif;--vm-corps:"Roboto","Segoe UI",Roboto,Arial,sans-serif;--vm-mag:#B2316E;--vm-gold:#FFC93C}
 body{font-weight:400;-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
-b,strong{font-weight:600}
+b,strong{font-weight:700}
 /* textes des schémas et planches : même police que la page */
 figure svg text,.illus svg text,.p3d-svg text{font-family:var(--sans)!important}
 body,button,input,select,textarea{font-family:var(--sans)}
@@ -147,7 +156,7 @@ html body .mtete .pas svg{width:40px!important;height:40px!important}
    Demande de Jacques : « hiérarchiser = distinguer les grands titres des sous-titres » (comme « Laboratoires » /
    « Mathématiques » sur l'accueil) ; garder l'ancien système à pointillés ; garder les icônes illustrées en plus petit ;
    des pastilles pour les objectifs.
-   1. Grand titre de partie : tuile carrée arrondie en dégradé + titre bleu nuit très gras.
+   1. Grand titre de partie : cercle magenta numéroté à point or, titre magenta souligné (style d'origine).
    2. Sous-titre (h3) : plus petit, en couleur, sans icône.
    3. Encadrés (définition, propriété, méthode, exemple) : petite icône illustrée + rail en pointillés.
    4. Post-it : petite icône illustrée dans le titre. */
@@ -161,14 +170,11 @@ html body .mtete .pas svg{width:40px!important;height:40px!important}
   --vm-ill-retiens:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cpath d='M24 6h16l-2 14 8 8v6H18v-6l8-8z' fill='%23E8394B'/%3E%3Cpath d='M27 9h4l-1 11-5 6' stroke='%23fff' stroke-width='2.5' opacity='.6' fill='none'/%3E%3Cpath d='M32 34v24' stroke='%236B7287' stroke-width='3' stroke-linecap='round'/%3E%3C/svg%3E");
   --vm-ill-savais:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cpath d='M20 22a12 12 0 1 1 18.5 10C34 35 32 37.5 32 43' fill='none' stroke='%23B2316E' stroke-width='8' stroke-linecap='round'/%3E%3Ccircle cx='32' cy='54' r='5' fill='%23B2316E'/%3E%3Ccircle cx='47' cy='14' r='4' fill='%23FFC93C'/%3E%3C/svg%3E");
 }
-/* 1. grand titre de partie */
-.carte .partie>h2{gap:14px!important;margin:48px 0 16px!important}
-.carte .partie>h2 .num{flex:0 0 52px!important;width:52px!important;height:52px!important;border-radius:15px!important;border:0!important;background:linear-gradient(145deg,#4F7BE0,#1C3C9C)!important;color:#fff!important;font:700 24px/1 var(--vm-titre)!important;box-shadow:0 8px 16px rgba(28,60,156,.28),inset 0 1px 0 rgba(255,255,255,.35)!important}
-.carte .partie>h2 .num::after{display:none}
-.carte .partie>h2 .txt{font:700 clamp(24px,5vw,32px)/1.15 var(--vm-titre)!important;color:#0C1F55!important}
-@media (max-width:560px){.carte .partie>h2 .num{flex-basis:44px!important;width:44px!important;height:44px!important;border-radius:13px!important;font-size:20px!important}}
+/* 1. grand titre de partie : style d'origine conservé (« Conserve ceci ») : numéro dans un cercle magenta à point or,
+   titre magenta souligné d'un trait magenta → or (apprendre/lecon-modele.css) ; seule la graisse suit Roboto. */
+.carte .partie>h2 .txt{font-weight:700!important}
 /* 2. sous-titres */
-.carte .partie h3{font:600 clamp(19px,3.8vw,22px)/1.25 var(--vm-titre)!important;color:#2C55C4!important;margin:26px 0 10px!important}
+.carte .partie h3{font:700 clamp(19px,3.8vw,22px)/1.25 var(--vm-titre)!important;color:#0B6A74!important;margin:26px 0 10px!important}
 /* 3. encadrés : ancien système (pointillés), icône illustrée plus petite à la place de la tuile */
 .carte .def::before,.carte .prop::before,.carte .methode::before,.carte .ex::before{width:42px!important;height:42px!important;left:2px!important;border-radius:0!important;background:var(--vm-ill) center/contain no-repeat!important;box-shadow:none!important;filter:drop-shadow(0 2px 3px rgba(0,17,54,.2))}
 .carte .def::after,.carte .prop::after,.carte .methode::after,.carte .ex::after{top:52px!important}
@@ -186,3 +192,35 @@ html body .mtete .pas svg{width:40px!important;height:40px!important}
 .vec{position:relative;display:inline-block;padding-top:.32em;line-height:1;font-style:italic}
 .vec::after{content:"";position:absolute;left:.05em;right:-.05em;top:.08em;height:.09em;background:currentColor;border-radius:1px}
 .vec::before{content:"";position:absolute;right:-.12em;top:-.06em;border-left:.3em solid currentColor;border-top:.19em solid transparent;border-bottom:.19em solid transparent}
+
+/* ════════ Accueil d'Apprendre : interface (16/11/2026) ════════
+   Demande de Jacques (capture de l'accueil sur téléphone) : « Améliore aussi l'interface, les icônes et autres ».
+   Classes en vraies pastilles, objectif du jour en puces à pictogramme coloré, icône de la leçon du jour sur tuile,
+   barre des matières en tuiles de la couleur de chaque matière. */
+html body .classes{display:flex!important;flex-wrap:wrap;justify-content:flex-start!important;gap:9px 8px!important}
+html body .classes button{background:#fff!important;border:1.5px solid color-mix(in srgb,var(--k) 24%,#fff)!important;border-radius:999px!important;padding:8px 15px!important;min-width:54px;font:600 14.5px/1.2 var(--sans)!important;color:var(--k)!important;text-decoration:none!important;box-shadow:0 2px 6px rgba(19,48,122,.06)!important;transition:transform .15s,box-shadow .15s,background .15s}
+html body .classes button::after{display:none!important}
+html body .classes button:hover{transform:translateY(-1px);box-shadow:0 5px 12px rgba(19,48,122,.12)!important}
+html body .classes button[aria-pressed="true"]{background:linear-gradient(145deg,color-mix(in srgb,var(--k) 70%,#fff),var(--k))!important;color:#fff!important;border-color:transparent!important;box-shadow:0 6px 14px color-mix(in srgb,var(--k) 38%,transparent)!important}
+/* objectif du jour */
+html body #objectifJour p{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
+html body #objectifJour p span{display:inline-flex;align-items:center;gap:8px;padding:4px 13px 4px 4px;border-radius:999px;background:#F2F5FC;color:#1D2A4D;font-weight:500}
+html body #objectifJour p span .pic{flex:0 0 28px;width:28px;height:28px;padding:6px;box-sizing:border-box;border-radius:50%;color:#fff;background:linear-gradient(145deg,#4F7BE0,#1C3C9C);box-shadow:0 3px 8px rgba(28,60,156,.25)}
+html body #objectifJour p span:nth-child(2) .pic{background:linear-gradient(145deg,#FFC93C,#E08A00);box-shadow:0 3px 8px rgba(224,138,0,.3)}
+html body #objectifJour p span.ok{background:#E4F6E8;color:#0A6B1C}
+html body #objectifJour p span.ok .pic{background:linear-gradient(145deg,#33B852,#0A7A22)}
+/* leçon du jour : icône de la matière sur tuile douce */
+html body .jour .med{display:grid!important;place-items:center;flex:0 0 66px;width:66px;height:66px;border-radius:20px!important;background:linear-gradient(145deg,#fff,var(--cp,#E6EEFB))!important;border:1.5px solid color-mix(in srgb,var(--c,#1E499B) 22%,#fff)!important;box-shadow:0 8px 18px color-mix(in srgb,var(--c,#1E499B) 22%,transparent)!important}
+html body .jour .med svg{width:40px;height:40px}
+/* barre des matières (rail) : tuiles de la couleur de la matière */
+html body .rail a.rm{display:grid!important;place-items:center;width:46px;height:46px;border-radius:14px!important;color:var(--c)!important;background:var(--cp)!important;opacity:1!important;filter:none!important;transition:transform .15s,box-shadow .15s}
+html body .rail a.rm svg{opacity:1!important;filter:none!important}
+html body .rail a.rm:hover{transform:translateY(-2px);box-shadow:0 6px 12px color-mix(in srgb,var(--c) 30%,transparent)}
+html body .rail a.rm[aria-current]{background:#fff!important;box-shadow:0 0 0 2.5px var(--c),0 6px 14px color-mix(in srgb,var(--c) 35%,transparent)!important}
+@media (max-width:640px){html body .classes button.sep{margin-left:0!important}}
+
+/* ════════ Accueil d'Apprendre : titres au style des leçons (16/11/2026, « Conserve ceci, et utilises-en pour l'accueil ») ════════
+   Titres de section magenta soulignés du trait magenta → or, précédés du cercle magenta à point or des parties de leçon. */
+html body .sec-t h2,html body .res-fam>h2{color:var(--vm-mag)!important;font-weight:700!important;display:flex;align-items:center;gap:12px}
+html body .sec-t h2::before,html body .res-fam>h2::before{content:"";position:relative;flex:0 0 22px;width:22px;height:22px;box-sizing:border-box;border-radius:50%;border:3px solid var(--vm-mag);background:#fff;box-shadow:0 0 0 4px var(--vm-magbg,#FBE4EE),9px -8px 0 -4px var(--vm-gold)}
+html body .sec-t h2::after,html body .res-fam>h2::after{left:34px}

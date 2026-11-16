@@ -7,10 +7,10 @@
 <meta name="description" content="Toutes les matières du programme camerounais, leçon par leçon, d'après la progression harmonisée du MINESEC : cours illustrés, fiches de révision, quiz et scènes vivantes.">
 <meta name="robots" content="noindex">
 <link rel="icon" href="../VERITAS_favicon_512.png">
-<link rel="preload" href="/assets/polices/poppins-latin-400-normal.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/assets/polices/roboto-latin-400-normal.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="apprendre.css?v=20261116k">
 <link rel="stylesheet" href="jeu.css?v=20261112v">
-<link rel="stylesheet" href="modele.css?v=20261116p">
+<link rel="stylesheet" href="modele.css?v=20261116s">
 <style>
 .hero{background:linear-gradient(90deg,#EDF2FB,#F7F9FE 70%);color:#001136;border:1px solid #DCE5F5;border-radius:10px;padding:34px 34px 28px;position:relative;overflow:hidden;margin-bottom:26px}
 .hero::before{display:none}
@@ -276,7 +276,7 @@
     var b=[], ids=lecs(classe), der=Object.keys(lus).filter(function(k){return LE[k]&&LE[k].c===classe}).sort(function(x,y){return lus[y]-lus[x]})[0]||""; if(!ids.length) ids=lecs();
     var jourId=ids.length?ids[(function(s){var h=0;for(var i=0;i<s.length;i++)h=(h*31+s.charCodeAt(i))>>>0;return h})(A.jour()+classe)%ids.length]:null;
     if(jourId){var L=LE[jourId],M=A.PAR_ID[L.m];
-      b.push('<a class="bloc" href="lecon.html?id='+jourId+'"><small>Leçon du jour</small><div class="jour"><span class="med" style="background:'+M.t[1]+'">'+A.ico(M.ico,38)+'</span><div><h2>'+esc(L.titre)+'</h2><p>'+esc(M.nom)+' · '+esc(L.c)+' · '+(L.duree||15)+' min. '+esc((L.accroche||"").slice(0,120))+'</p></div></div><span class="go">Commencer ›</span></a>');}
+      b.push('<a class="bloc" href="lecon.html?id='+jourId+'"><small>Leçon du jour</small><div class="jour"><span class="med" style="--c:'+M.t[0]+';--cp:'+M.t[1]+';background:'+M.t[1]+'">'+A.ico(M.ico,38)+'</span><div><h2>'+esc(L.titre)+'</h2><p>'+esc(M.nom)+' · '+esc(L.c)+' · '+(L.duree||15)+' min. '+esc((L.accroche||"").slice(0,120))+'</p></div></div><span class="go">Commencer ›</span></a>');}
     if(der&&LE[der]){var D=LE[der];b.push('<a class="bloc" href="lecon.html?id='+der+'"><small>Reprendre</small><h2>'+esc(D.titre)+'</h2><p>'+esc(A.PAR_ID[D.m].nom)+' · '+esc(D.c)+(qz[der]?' · quiz : '+qz[der][0]+'/'+qz[der][1]:' · quiz pas encore fait')+'</p><span class="go">'+(qz[der]?'Revoir':'Faire le quiz')+' ›</span></a>')}
     /* (13/11/2026) plus de carte « Les scènes vivantes » ici : doublon de la section « Scènes vivantes de ta classe ». */
     $("#blocs").innerHTML=b.join("");
