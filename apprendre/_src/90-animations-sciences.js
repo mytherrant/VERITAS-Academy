@@ -43,7 +43,7 @@
 
   /* ---------- Atome : électrons en orbite, Z réglable (couches K et L) ---------- */
   var ELEM = ["", "H Hydrogène", "He Hélium", "Li Lithium", "Be Béryllium", "B Bore", "C Carbone", "N Azote", "O Oxygène", "F Fluor", "Ne Néon", "Na Sodium"];
-  VRT_A("3e-pct-atome", 0, "Choisis un élément et regarde ses électrons", function (el) {
+  VRT_A("3e-pct-atome", 2, "Choisis un élément et regarde ses électrons", function (el) {
     el.innerHTML = "<div class='an-atome'><svg viewBox='0 0 300 300' class='an-svg' style='max-width:320px;margin:auto'><circle cx='150' cy='150' r='62' fill='none' stroke='#8FB0EE' stroke-dasharray='4 6'/><circle cx='150' cy='150' r='104' fill='none' stroke='#8FB0EE' stroke-dasharray='4 6'/><circle cx='150' cy='150' r='138' fill='none' stroke='#8FB0EE' stroke-dasharray='4 6'/><g data-noyau></g><g class='an-orb an-k' data-k></g><g class='an-orb an-l' data-l></g><g class='an-orb an-m' data-mm></g></svg>" +
       "<div class='an-res'><span><b data-nom></b></span><span>Z = <b data-z></b></span><span>Couches : <b data-c></b></span></div></div>" + curseur("Numéro atomique Z :", 1, 11, 1, 3);
     var r = el.querySelector("input");
