@@ -709,4 +709,63 @@ S["bac-2025-physique-d-fresnel"] = () => {
   return svg(260, 170, g, "Construction de Fresnel : le vecteur OM1 de 5 cm (x1, phase 0) sur l'axe origine des phases, puis M1M de 5 cm perpendiculaire (x2, avance de phase π/2) ; la résultante OM mesure environ 7,1 cm et fait un angle π/4 avec l'axe.");
 };
 
+// Physique C 2025 (BAC), exercice 2.1 : abscisse angulaire θ(t) du pendule simple (θm = π/15 rad, T = 2 s).
+S["bac-2025-physique-c-pendule"] = () => {
+  const X = t => 50 + t * 110, Y = v => 130 - v * 22, fs = ' font-size="13"';
+  let g = '<g stroke-width="0.7" opacity="0.5">'; for (let k = 0; k <= 20; k++) g += L([X(k / 5), Y(4)], [X(k / 5), Y(-4)]); for (let v = -4; v <= 4; v++) g += L([X(0), Y(v)], [X(4), Y(v)]); g += "</g>";
+  g += L([X(0), Y(0)], [X(4.25), Y(0)], ' stroke-width="1.2"') + fleche([X(4.32), Y(0)], [X(4.2), Y(0)], 7) + L([X(0), Y(-4)], [X(0), Y(5.1)], ' stroke-width="1.2"') + fleche([X(0), Y(5.5)], [X(0), Y(5)], 7);
+  for (let t = 1; t <= 4; t++) g += L([X(t), Y(0) - 5], [X(t), Y(0) + 5], ' stroke-width="2.4"');
+  g += T([X(1) + 5, Y(0) - 6], "1", ' font-size="12"') + T([X(0) - 14, Y(0) + 5], "0", fs) + T([X(4.05), Y(0) - 10], "t (s)", fs) + T([X(0) + 10, 18], "θ (rad)", fs);
+  g += T([X(0) - 26, Y(4) - 4], "π", ' font-size="12"') + L([X(0) - 30, Y(4) + 1], [X(0) - 14, Y(4) + 1], ' stroke-width="1"') + T([X(0) - 30, Y(4) + 14], "15", ' font-size="12"');
+  const pts = []; for (let k = 0; k <= 160; k++) { const t = k / 40; pts.push([X(t), Y(4 * Math.cos(Math.PI * t))]); }
+  g += P(pts, ' stroke-width="2"');
+  return svg(X(4.32) + 30, Y(-4) + 10, g, "Abscisse angulaire θ du pendule en fonction du temps : sinusoïde partant de son maximum π/15 rad à t = 0, minimum à t = 1 s, de nouveau maximale à t = 2 s, puis à t = 4 s ; graduation de 1 s sur l'axe des temps.");
+};
+// Physique C 2025 (BAC), exercice 2.4 : rails de Laplace, barre MN dans le champ B sortant.
+S["bac-2025-physique-c-rails"] = () => {
+  const fs = ' font-size="13"';
+  let g = L([30, 40], [380, 40]) + L([30, 210], [380, 210]) + L([30, 40], [30, 70]) + '<rect x="23" y="70" width="14" height="44"/>' + L([30, 114], [30, 142]) + '<circle cx="30" cy="160" r="18"/>' + L([30, 178], [30, 210]);
+  g += L([0, 172], [0, 150], ' stroke-width="1.2"') + fleche([0, 144], [0, 154], 6) + T([-14, 165], "E", fs) + T([4, 98], "R", fs);
+  g += fleche([110, 40], [100, 40], 7) + T([66, 30], "I = 1 A", ' font-size="12"');
+  g += L([230, 14], [230, 236], ' stroke-width="2"') + T([240, 22], "M", fs) + T([240, 234], "N", fs);
+  g += '<rect x="110" y="72" width="270" height="88" stroke-dasharray="2 3" stroke-width="1.4"/>';
+  g += '<circle cx="300" cy="120" r="9"/><circle cx="300" cy="120" r="2.5" fill="currentColor" stroke="none"/>' + vecteur([314, 126], "B");
+  g += L([396, 78], [396, 154], ' stroke-width="1.2"') + fleche([396, 72], [396, 82], 6) + fleche([396, 160], [396, 150], 6) + T([404, 122], "d", fs);
+  return svg(440, 246, '<g transform="translate(20 0)">' + g + "</g>", "Rails de Laplace : deux rails horizontaux reliés à gauche par un générateur E et un résistor R ; le courant I = 1 A circule dans le rail supérieur vers la droite ; la barre MN, verticale, coupe les rails ; la zone en pointillés, de largeur d, est celle du champ magnétique B sortant du plan.");
+};
+// Physique C 2025 (BAC), document 1 : intensité efficace I en fonction de la fréquence N (résonance vers 500 Hz).
+S["bac-2025-physique-c-resonance"] = () => {
+  const X = n => 50 + (n - 300) * 0.9, Y = v => 240 - v * 2, fs = ' font-size="11"';
+  let g = '<g stroke-width="0.7" opacity="0.5">'; for (let n = 300; n <= 740; n += 20) g += L([X(n), Y(0)], [X(n), Y(100)]); for (let v = 10; v <= 100; v += 10) g += L([X(300), Y(v)], [X(740), Y(v)]); g += "</g>";
+  g += L([X(300), Y(0)], [X(760), Y(0)], ' stroke-width="1.2"') + fleche([X(770), Y(0)], [X(758), Y(0)], 7) + L([X(300), Y(0)], [X(300), Y(108)], ' stroke-width="1.2"') + fleche([X(300), Y(113)], [X(300), Y(106)], 7);
+  for (let n = 300; n <= 700; n += 100) g += T([X(n) - 10, Y(0) + 14], String(n), fs);
+  g += T([X(300) - 26, Y(100) + 4], "100", fs) + T([X(300) - 18, Y(50) + 4], "50", fs) + T([X(300) - 12, Y(0) + 4], "0", fs) + T([X(300) + 6, Y(108)], "I (mA)", fs) + T([X(735), Y(0) - 6], "N (Hz)", fs);
+  // points relevés sur le scan, lissés en Catmull-Rom
+  const R = [[311, 17], [369, 18], [400, 22], [425, 32], [445, 50], [462, 70], [478, 88], [490, 97], [500, 100], [510, 97], [524, 87], [540, 73], [560, 58], [600, 40], [646, 29], [702, 20], [737, 16]].map(([n, v]) => [X(n), Y(v)]);
+  let d = 'M' + f(R[0][0]) + ' ' + f(R[0][1]);
+  for (let i = 0; i < R.length - 1; i++) { const p0 = R[Math.max(i - 1, 0)], p1 = R[i], p2 = R[i + 1], p3 = R[Math.min(i + 2, R.length - 1)];
+    d += 'C' + f(p1[0] + (p2[0] - p0[0]) / 6) + ' ' + f(p1[1] + (p2[1] - p0[1]) / 6) + ' ' + f(p2[0] - (p3[0] - p1[0]) / 6) + ' ' + f(p2[1] - (p3[1] - p1[1]) / 6) + ' ' + f(p2[0]) + ' ' + f(p2[1]); }
+  g += '<path d="' + d + '" stroke-width="2"/>';
+  return svg(X(770) + 10, Y(0) + 22, g, "Document 1 : intensité efficace I (en mA) en fonction de la fréquence N (en Hz), de 300 à 740 Hz ; la courbe passe par un maximum de 100 mA pour N = 500 Hz.");
+};
+// Physique C 2025 (BAC), corrigé 3.1.1 : circuit RLC série alimenté par le GBF, avec l'ampèremètre.
+S["bac-2025-physique-c-rlc"] = () => {
+  const fs = ' font-size="12"';
+  let g = L([30, 30], [70, 30]) + '<rect x="70" y="22" width="40" height="16"/>' + T([82, 16], "R", fs) + L([110, 30], [150, 30]);
+  g += '<path d="M150 30 q6 -14 12 0 q6 -14 12 0 q6 -14 12 0 q6 -14 12 0"/>' + T([150, 14], "(L, r)", fs) + L([198, 30], [240, 30]);
+  g += L([240, 30], [240, 66]) + L([228, 66], [252, 66], ' stroke-width="2.2"') + L([228, 74], [252, 74], ' stroke-width="2.2"') + L([240, 74], [240, 120]) + T([258, 74], "C", fs);
+  g += L([240, 120], [170, 120]) + '<circle cx="155" cy="120" r="15"/>' + T([149, 125], "A", ' font-size="13" font-weight="700"') + L([140, 120], [30, 120]);
+  g += L([30, 120], [30, 93]) + '<circle cx="30" cy="75" r="18"/>' + '<path d="M18 75 q6 -10 12 0 q6 10 12 0" stroke-width="1.2"/>' + L([30, 57], [30, 30]) + T([54, 80], "GBF", fs);
+  return svg(280, 136, g, "Montage série : le GBF, le conducteur ohmique R, la bobine (L, r), le condensateur C et l'ampèremètre A, branchés les uns à la suite des autres.");
+};
+// Physique C 2025 (BAC), corrigé 2.4.1 : force de Laplace sur la tige MN (courant de M vers N, B sortant).
+S["bac-2025-physique-c-laplace"] = () => {
+  const fs = ' font-size="13"';
+  let g = L([130, 14], [130, 186], ' stroke-width="2"') + T([140, 22], "M", fs) + T([140, 184], "N", fs);
+  g += L([150, 70], [150, 112], ' stroke-width="1.4"') + fleche([150, 120], [150, 110], 7) + T([158, 100], "I", ' font-size="13" font-style="italic"');
+  g += '<circle cx="200" cy="100" r="9"/><circle cx="200" cy="100" r="2.5" fill="currentColor" stroke="none"/>' + vecteur([214, 106], "B");
+  g += L([130, 100], [60, 100], ' stroke-width="2.2"') + fleche([50, 100], [62, 100], 10) + vecteur([62, 88], "F");
+  return svg(250, 200, g, "Force de Laplace sur la tige MN : le courant I descend de M vers N, le champ B sort du plan ; la force F, appliquée au milieu de la portion plongée dans le champ, est horizontale et dirigée vers la gauche, du côté du générateur.");
+};
+
 module.exports = S;
