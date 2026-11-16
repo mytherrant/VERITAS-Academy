@@ -1,3 +1,17 @@
+## Apprendre : analyse de Terminale C et D au gabarit approfondi, quatre chapitres d'une traite (16/11/2026)
+
+Demande de Jacques : « Continue. Fais plusieurs d'une traite pour ne pas fusionner à chaque fois. »
+
+- **19 leçons** (10 contenus partagés), source privée `71-denombrement-approfondi.js` (50 leçons au total), aperçus `apercus-tle-c.js` et `apercus-tle-d.js` fusionnés en place, fiches APC d'origine conservées :
+  - **primitives** (Tle C r36-r37, Tle D r21-r22) : car Douala-Édéa (famille t² + 3t + C, condition x(1) = 0), pompe de Garoua (forme u'u³, V(1) = 3,75 L) ;
+  - **logarithmes** (Tle C r38-r39, Tle D r23-r24) : micro-finance de Bafoussam (1,1ⁿ ≥ 2, 8 ans), pH d'une eau de source de Yaoundé (pH 4, échelle du pH), décibels ;
+  - **exponentielles** (Tle C r45-r47, Tle D r32-r33) : culture de Douala (doublement en 2 ln 2 h, colonnes 3D), médicament t e⁻ᵗ (maximum en 1 h), fonctions aˣ (mutuelle de Bafoussam, Tle C seulement) ;
+  - **équations différentielles** (Tle C r60-r62, Tle D r39-r41) : culture de Bertoua (C e^(2x)), bouillon de Bafia (refroidissement, 10 ln 2 min, colonnes 3D), sismographe de Limbé (y'' + 4y = 0, ressort 3D animé, période π).
+- **Tle D r21** est la première leçon du 2e trimestre : gratuite, entière dans l'aperçu (comme avant).
+- Générateurs : `courbes` (repère, quadrillage, courbes rognées au cadre, points et pointillés), `ressort3D`.
+- Contrôlé dans Chromium (abonné 1200 et 390 px, visiteur) : 0 erreur JS. Bancs : verrou 18/18, gabarits 54/54, planche mobile 23/23, réglages 29/29.
+- **Reste chez Jacques** : remplacer `71-denombrement-approfondi.js` dans `apprendre_prive\sources` et déposer les 49 JSON (`apprendre-maths-approfondies-pour-jacques.zip`). Labos choisis ici : intégrale, courbe, décroissance, pendule ; exercices d'examen rédigés ici.
+
 ## Apprendre : statistiques à deux variables de Terminale C et D au gabarit approfondi (16/11/2026)
 
 Demande de Jacques : « Continue » (après #329).
