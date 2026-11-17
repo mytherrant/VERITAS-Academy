@@ -1,0 +1,64 @@
+/* Pages de séquence de corriges/ : dessin des leçons d'Apprendre (17/11/2026). Lu par tools/corriges_lecons.py
+   (commentaires retirés). « body:has(#vrtNav):has(.cr-ent) » + !important : les règles de veritas-pages.css et de l'habillage cèdent. */
+@font-face{font-family:'Roboto';font-style:normal;font-weight:400;font-display:swap;src:url(/assets/polices/roboto-latin-400-normal.woff2) format('woff2')}
+@font-face{font-family:'Roboto';font-style:normal;font-weight:500;font-display:swap;src:url(/assets/polices/roboto-latin-500-normal.woff2) format('woff2')}
+@font-face{font-family:'Roboto';font-style:normal;font-weight:700;font-display:swap;src:url(/assets/polices/roboto-latin-700-normal.woff2) format('woff2')}
+body:has(#vrtNav):has(.cr-ent){--cr-mag:#B2316E;--cr-magbg:#FBE9F1;--cr-gold:#FFC93C;--cr-sans:"Roboto","Segoe UI",Arial,sans-serif}
+body:has(#vrtNav):has(.cr-ent) .wrap :is(h1,h3,p,li,a,button,summary,small,b,strong,span,label,input){font-family:var(--cr-sans)!important}
+
+/* En-tête carte */
+body:has(#vrtNav):has(.cr-ent) .cr-tete{padding-top:18px!important;padding-bottom:0!important}
+body:has(#vrtNav):has(.cr-ent) .cr-ent{margin:0 0 18px;padding:20px 22px 18px;border-radius:22px;background:linear-gradient(160deg,#DBE8FE,#fff 72%);border:1.5px solid #C9D8F4;text-align:left}
+body:has(#vrtNav):has(.cr-ent) .cr-ent-haut{display:flex;align-items:center;gap:14px;margin:0 0 12px}
+body:has(#vrtNav):has(.cr-ent) .cr-med{flex:0 0 64px;width:64px;height:64px;border-radius:18px;background:#fff;border:2px solid #B4C9EE;display:grid;place-items:center;color:#1E499B}
+body:has(#vrtNav):has(.cr-ent) .cr-tags{display:flex;flex-direction:column;gap:6px;min-width:0}
+body:has(#vrtNav):has(.cr-ent) .cr-ent .badge{align-self:flex-start;display:inline-block;font:700 12px/1.2 var(--cr-sans)!important;letter-spacing:.1em;text-transform:uppercase;color:#fff!important;background:#1E499B!important;border:0!important;border-radius:999px;padding:6px 12px;margin:0!important}
+body:has(#vrtNav):has(.cr-ent) .cr-mat{font:500 15px/1.3 var(--cr-sans);color:#4D5163}
+body:has(#vrtNav):has(.cr-ent) .cr-mat b{color:#1E499B}
+body:has(#vrtNav):has(.cr-ent) .cr-ent h1{font:700 clamp(24px,6.2vw,34px)/1.15 var(--cr-sans)!important;color:#001136!important;text-align:left!important;margin:0 0 12px!important;letter-spacing:-.01em;text-wrap:balance;background:none!important;-webkit-text-fill-color:#001136!important}
+body:has(#vrtNav):has(.cr-ent) .cr-bref{margin:0 0 14px;padding:12px 14px;border-radius:14px;background:#fff;border:1.5px dashed #9DB6E6}
+body:has(#vrtNav):has(.cr-ent) .cr-bref-t{display:flex;align-items:center;gap:6px;margin:0 0 6px!important;font:700 12px/1 var(--cr-sans)!important;letter-spacing:.06em;text-transform:uppercase;color:#1E499B!important}
+body:has(#vrtNav):has(.cr-ent) .cr-bref .mx-chapo{margin:0!important;font:italic 500 16px/1.55 var(--cr-sans)!important;color:#33384A!important;text-align:justify;hyphens:auto;-webkit-hyphens:auto}
+body:has(#vrtNav):has(.cr-ent) .cr-puces{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 14px}
+body:has(#vrtNav):has(.cr-ent) .cr-puces span{display:inline-flex;align-items:center;gap:5px;background:#fff;border:1px solid #DCE5F5;border-radius:999px;padding:5px 11px;font:600 13px/1.2 var(--cr-sans)!important;color:#0C2A6A}
+body:has(#vrtNav):has(.cr-ent) .cr-puces svg{color:#1E499B;flex:none}
+body:has(#vrtNav):has(.cr-ent) .cr-prog-t{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:0 0 6px;font:600 13.5px/1.3 var(--cr-sans);color:#4D5163}
+body:has(#vrtNav):has(.cr-ent) .cr-prog-t button{border:0;background:none;padding:0;color:#1E499B;font:600 13px var(--cr-sans)!important;text-decoration:underline;cursor:pointer;min-height:0}
+body:has(#vrtNav):has(.cr-ent) .cr-barre{height:8px;border-radius:4px;background:#E2E9F6;overflow:hidden}
+body:has(#vrtNav):has(.cr-ent) .cr-barre i{display:block;height:100%;width:0;border-radius:4px;background:linear-gradient(90deg,var(--cr-mag),var(--cr-gold));transition:width .3s}
+@media (min-width:700px){body:has(#vrtNav):has(.cr-ent) .cr-ent{padding:24px 28px 22px}body:has(#vrtNav):has(.cr-ent) .cr-med{flex-basis:76px;width:76px;height:76px}}
+@media (max-width:600px){body:has(#vrtNav):has(.cr-ent) .cr-ent{padding:16px 14px 14px}}
+
+/* Leçons : carte, numéro au cercle magenta à point or, titre magenta souligné magenta → or */
+body:has(#vrtNav):has(.cr-ent) .wrap{counter-reset:crl}
+body:has(#vrtNav):has(.cr-ent) section.lec{border-radius:20px!important;border:1px solid #E3E8EE!important;box-shadow:0 6px 20px rgba(19,48,122,.05)!important;padding:20px 20px 12px!important}
+body:has(#vrtNav):has(.cr-ent) section.lec .sem{display:inline-block;margin:0 0 16px!important;padding:5px 12px!important;border-radius:999px;background:#EAF0FB;color:#1E499B!important;font:700 12px/1.35 var(--cr-sans)!important;letter-spacing:.04em;text-transform:uppercase;text-align:left!important}
+body:has(#vrtNav):has(.cr-ent) section.lec h3{counter-increment:crl;position:relative;display:flex!important;align-items:center;gap:14px;margin:4px 0 16px!important;padding:0 0 12px!important;color:var(--cr-mag)!important;font:700 clamp(19px,4.4vw,24px)/1.2 var(--cr-sans)!important;text-align:left!important;border:0!important;background:none!important}
+body:has(#vrtNav):has(.cr-ent) section.lec h3>svg{display:none!important}
+body:has(#vrtNav):has(.cr-ent) section.lec h3::before{content:counter(crl);flex:0 0 42px;width:42px;height:42px;box-sizing:border-box;display:grid;place-items:center;border-radius:50%;background:#fff;border:3px solid var(--cr-mag);color:var(--cr-mag);font:700 17px/1 var(--cr-sans);box-shadow:15px -15px 0 -13px var(--cr-gold),0 0 0 5px var(--cr-magbg),0 6px 14px rgba(178,49,110,.2)}
+body:has(#vrtNav):has(.cr-ent) section.lec h3::after{content:"";position:absolute;left:56px;bottom:0;width:80px;height:5px;border-radius:3px;background:linear-gradient(90deg,var(--cr-mag),var(--cr-gold))}
+/* objectif : « Tu sauras » à cible */
+body:has(#vrtNav):has(.cr-ent) section.lec .obj{display:flex!important;gap:10px;align-items:flex-start;margin:0 0 18px!important;padding:12px 14px!important;border-radius:14px;background:#fff;border:1.5px solid #E3E8EE;color:#1D2330!important;font:500 15.5px/1.5 var(--cr-sans)!important;text-align:left!important}
+body:has(#vrtNav):has(.cr-ent) section.lec .obj>svg{flex:none;width:22px;height:22px;color:var(--cr-mag)!important;margin-top:1px}
+/* rubriques bleu-vert, exercices en cartes */
+body:has(#vrtNav):has(.cr-ent) section.lec .rub{margin:20px 0 8px!important;color:#0B6A74!important;font:700 15.5px/1.3 var(--cr-sans)!important}
+body:has(#vrtNav):has(.cr-ent) section.lec .rub svg{color:#0B6A74!important}
+body:has(#vrtNav):has(.cr-ent) section.lec .ex{position:relative;border-radius:14px!important;background:#F6F8FD!important;border:1.5px solid #E3E8EE!important;padding:12px 14px!important;margin:0 0 10px!important}
+body:has(#vrtNav):has(.cr-ent) section.lec .ex .q{margin:0 0 8px!important;font:700 16px/1.3 var(--cr-sans)!important;color:#001136!important}
+body:has(#vrtNav):has(.cr-ent) section.lec .ex.vu{border-color:#A9DDB4!important;background:#F2FBF4!important}
+body:has(#vrtNav):has(.cr-ent) section.lec .ex.vu::after{content:"Vu";position:absolute;right:12px;top:12px;padding:3px 9px;border-radius:999px;background:#007E11;color:#fff;font:700 11.5px/1.2 var(--cr-sans);letter-spacing:.04em}
+body:has(#vrtNav):has(.cr-ent) details.sol>summary{border-radius:999px!important;font:600 14px/1.2 var(--cr-sans)!important}
+body:has(#vrtNav):has(.cr-ent) details.sol .body p,body:has(#vrtNav):has(.cr-ent) details.sol .body li{font-size:16px!important;line-height:1.6!important;text-align:justify;hyphens:auto;-webkit-hyphens:auto}
+
+/* Séquence précédente / suivante : boutons des leçons */
+body:has(#vrtNav):has(.cr-ent) .cr-suite{display:grid;gap:12px;margin:26px 0 8px}
+body:has(#vrtNav):has(.cr-ent) .cr-suite a{display:flex;align-items:center;gap:12px;padding:14px 16px;border-radius:16px;border:2px solid #CFDAEE;background:#fff;color:#001136!important;font:700 16px/1.3 var(--cr-sans)!important;text-decoration:none!important;text-align:left}
+body:has(#vrtNav):has(.cr-ent) .cr-suite a>span:not(.cr-fl){flex:1;min-width:0}
+body:has(#vrtNav):has(.cr-ent) .cr-suite small{display:block;font:700 12px/1.2 var(--cr-sans)!important;letter-spacing:.06em;text-transform:uppercase;color:#1E499B;margin:0 0 3px}
+body:has(#vrtNav):has(.cr-ent) .cr-fl{flex:none;display:grid;place-items:center;width:36px;height:36px;border-radius:50%;background:#EAF0FB;color:#1E499B;font:700 22px/1 var(--cr-sans)!important}
+body:has(#vrtNav):has(.cr-ent) .cr-suite a.cr-suiv{background:#1E499B;border-color:#1E499B;color:#fff!important;text-align:right}
+body:has(#vrtNav):has(.cr-ent) .cr-suite a.cr-suiv small{color:#FFC93C}
+body:has(#vrtNav):has(.cr-ent) .cr-suite a.cr-suiv .cr-fl{background:#FFC93C;color:#142554}
+@media (min-width:700px){body:has(#vrtNav):has(.cr-ent) .cr-suite{grid-template-columns:1fr 1fr}body:has(#vrtNav):has(.cr-ent) .cr-suite a.cr-suiv:only-child{grid-column:2}}
+@media print{body:has(#vrtNav):has(.cr-ent) .cr-suite,body:has(#vrtNav):has(.cr-ent) .cr-prog{display:none}}
+body:has(#vrtNav):has(.cr-ent) section.lec h3 span{font-weight:700!important;color:var(--cr-mag)!important}
