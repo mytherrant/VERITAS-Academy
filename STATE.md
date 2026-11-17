@@ -1,3 +1,15 @@
+## Leçon : en-tête parlant, barre des matières sobre, offres encadrées, leçons voisines en avant (17/11/2026)
+
+Retours de Jacques (captures d'une leçon de Tle A au téléphone) : « Entête de leçons trop simple et pas assez parlant. Les icônes en bas sont touffues : enlève l'ombre et les couleurs autour et diminue un peu la taille. Encadre aussi les autres formules d'abonnement et le message adressé aux enseignants à la fin », puis « leçon suivante et précédente en bas : mets en évidence, sinon cela peut échapper ».
+
+- **En-tête** (`lecon.html`, classe `bandeau ent`) : carte teintée de la couleur de la matière (`--mt`, `--mt-pale`), filet fin tout autour (le trait foncé à gauche est retiré à la demande de Jacques, comme celui sous l'onglet actif Cours / Révision / Quiz), médaille blanche cerclée, pastille « Cours » (le texte suit toujours l'onglet par `#sur`), matière et classe, titre, **chapitre** avec son icône, **place de la leçon** (« Leçon n du programme MINESEC » et barre « i / N leçons rédigées »), **situation de départ** encadrée en pointillés, puis les puces (durée, parties, labo, quiz).
+- **Barre des matières** (`.rail`) : plus de pastille colorée ni d'ombre autour des icônes ; 40 px au lieu de 46, icônes de 24 px ; matière ouverte signalée par le trait de sa couleur.
+- **Offre** : autres formules (`.fo-mini`), note de paiement (`.offre-n`) et liens (enseignants, accompagnement, cahier : `.offre-l`) encadrés d'un filet de 1,5 px, sans ombre.
+- **Situation de vie et tâche** (`.apc`) : une carte à pictogramme (boussole), texte justifié avec césure (« N'oublie pas de justifier les textes »), comme la situation de départ de l'en-tête ; « Ta tâche » dans son propre encadré doré, pictogramme crayon, libellé au-dessus.
+- **Texte justifié partout** (« Justifie aussi tout au long de la leçon ») : listes, bulle de Kalao, énoncés de questions et pistes d'enquête rejoignent le corps du texte (déjà justifié) ; légendes de figures et formules restent centrées.
+- **Leçons voisines** (`.suite`) : deux vrais boutons avec flèche ronde ; la suivante (ou « Tout le programme ») en bleu plein, flèche or.
+- `modele.css?v=20261117f` sur les 7 pages d'Apprendre. Bancs : réglages 29/29, verrou 18/18, charte 34/34, survol 4/4, gabarits, planche mobile, lisibilité au vert ; captures au téléphone et à l'ordinateur, 0 erreur JS.
+
 ## Apprendre : lot 5 (classes d'examen) et pages « cours » enrichies (17/11/2026)
 
 Demandes de Jacques : « Finalise et déploie » (lot 4 : PR #336 fusionnée, déploiement réussi), « Continue en privilégiant les classes d'examen », « Même en bas sur cours ».
