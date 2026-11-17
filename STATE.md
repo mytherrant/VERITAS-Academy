@@ -1,3 +1,11 @@
+## Post-it : le titre dans le ruban blanc (17/11/2026)
+
+Demande de Jacques (capture d'une leçon de 1re D) : « Mets les titres dans le petit cadre blanc au milieu des encadrés ».
+
+- **Leçons** (`apprendre/modele.css`, fin) : sur les post-it (Astuce, Attention / Piège, À retenir, Le savais-tu, Méthode), le ruban décoratif (`::before`) est retiré ; le titre (`b:first-child`), icône illustrée comprise, devient le ruban : fond blanc translucide, légère inclinaison, centré et à cheval sur le bord du haut (`display:table`, marge négative : un titre sur deux lignes repousse le texte au lieu de le couvrir). `modele.css?v=20261117h` sur les 7 pages d'Apprendre.
+- **Œuvres** (`tools/oeuvres_statiques.css`) : même traitement pour les titres des leçons de vie.
+- Contrôlé dans Chromium (390 et 1280 px), 0 erreur JS ; `oeuvres_statiques --controle` au vert.
+
 ## Annales : carte du Cameroun après 1914-1916 redessinée en SVG (17/11/2026)
 
 Retour de Jacques : « L'image du Cameroun n'est pas nette ». C'était le document 3 de l'annale d'histoire du probatoire A-ABI 2025 (`proba-2025-histoire-a-carte.jpg`, scan granuleux de 650 × 872 px).

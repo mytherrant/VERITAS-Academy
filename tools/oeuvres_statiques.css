@@ -123,3 +123,8 @@ body:has(#vrtNav) .wrap article .oe-suite a.oe-suiv .oe-fl{background:#FFC93C;co
 @media print{body:has(#vrtNav) .wrap article .oe-suite{display:none}body:has(#vrtNav) .wrap article details{display:block}}
 :root[data-vrt-theme="sombre"] body:has(#vrtNav) .wrap article .oe-postits .lecon p{color:#3B3520!important}
 body:has(#vrtNav) .wrap article .oe-br li::marker{content:none}
+/* Leçons de vie : le titre dans le ruban blanc, comme les post-it des leçons (17/11/2026). */
+body:has(#vrtNav) .wrap article .oe-postits{gap:34px!important;margin-top:28px!important}
+body:has(#vrtNav) .wrap article .oe-postits .lecon{padding-top:30px!important}
+body:has(#vrtNav) .wrap article .oe-postits .lecon::before{content:none!important;display:none!important}
+body:has(#vrtNav) .wrap article .oe-postits .lecon strong{position:relative;transform:rotate(-2.5deg);display:table!important;max-width:88%;box-sizing:border-box;margin:-46px auto 12px!important;padding:5px 14px!important;background:rgba(255,255,255,.9);border:1px solid rgba(0,0,0,.07);box-shadow:0 2px 4px rgba(0,0,0,.06);font-size:16.5px!important;line-height:1.25!important;text-align:center}

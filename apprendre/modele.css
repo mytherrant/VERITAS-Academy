@@ -301,3 +301,11 @@ html body .apc p,html body .apc .apc-t p,html body .bandeau.ent .accroche{text-a
 /* Texte justifié tout au long de la leçon (17/11/2026, « justifie aussi tout au long de la leçon ») :
    listes, bulle de Kalao, énoncés de questions. Légendes de figures et formules restent centrées. */
 html body .carte article li,html body .carte li,html body .kalao-bulle p,html body .q p,html body .enq-pistes li{text-align:justify!important;hyphens:auto!important;-webkit-hyphens:auto!important}
+
+/* ════════ Post-it : le titre dans le ruban blanc (17/11/2026) ════════
+   Demande de Jacques (capture d'une leçon de 1re D) : « Mets les titres dans le petit cadre blanc au milieu des encadrés ».
+   Le ruban (::before) disparaît : c'est le titre lui-même, icône comprise, qui devient le ruban collé en haut. */
+.carte .astuce,.carte .attention,.carte .retiens,.carte .savais{padding-top:30px!important;margin-top:36px!important}
+.carte .astuce::before,.carte .attention::before,.carte .retiens::before,.carte .savais::before{content:none!important;display:none!important}
+.carte .astuce>b:first-child,.carte .attention>b:first-child,.carte .retiens>b:first-child,.carte .savais>b:first-child{position:relative;display:table!important;max-width:88%;box-sizing:border-box;min-height:32px!important;margin:-46px auto 12px!important;padding:5px 14px 5px 40px!important;transform:rotate(-2.5deg);background:var(--vm-i) 11px 50%/22px no-repeat,rgba(255,255,255,.9)!important;border:1px solid rgba(0,0,0,.07);box-shadow:0 2px 4px rgba(0,0,0,.06);font-size:17px!important;line-height:1.25!important;text-align:center}
+@media (max-width:420px){.carte .astuce>b:first-child,.carte .attention>b:first-child,.carte .retiens>b:first-child,.carte .savais>b:first-child{font-size:16px!important}}
