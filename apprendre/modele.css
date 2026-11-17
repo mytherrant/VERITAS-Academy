@@ -3,24 +3,33 @@
    dans Dénombrement »). Chargé en DERNIER par les 7 pages (index, matière, leçon, manuel, ressources,
    labo, notes). Polices : Segoe UI (texte), Trebuchet MS 800 (titres). Icônes : tuiles arrondies en
    dégradé de la couleur de la famille, pictogramme blanc ; numéros dans des cercles à halo. */
-/* Police d'Apprendre (16/11/2026) : Nunito (SIL Open Font License 1.1, assets/polices/NUNITO-OFL.txt), hébergée sur le site,
-   variable de 200 à 1000. Trebuchet MS et Segoe UI n'existent que sous Windows : sur Android, les titres retombaient sur
-   la police du téléphone. « Poppins » désigne aussi Nunito dans Apprendre, pour les feuilles qui la nomment en dur. */
-@font-face{font-family:'Nunito';font-style:normal;font-weight:200 1000;font-display:swap;src:url(/assets/polices/nunito-latin-ext-wght-normal.woff2) format('woff2');unicode-range:U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF}
-@font-face{font-family:'Nunito';font-style:normal;font-weight:200 1000;font-display:swap;src:url(/assets/polices/nunito-latin-wght-normal.woff2) format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
-@font-face{font-family:'Nunito';font-style:italic;font-weight:200 1000;font-display:swap;src:url(/assets/polices/nunito-latin-ext-wght-italic.woff2) format('woff2');unicode-range:U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF}
-@font-face{font-family:'Nunito';font-style:italic;font-weight:200 1000;font-display:swap;src:url(/assets/polices/nunito-latin-wght-italic.woff2) format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
-@font-face{font-family:'Poppins';font-style:normal;font-weight:200 1000;font-display:swap;src:url(/assets/polices/nunito-latin-ext-wght-normal.woff2) format('woff2');unicode-range:U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF}
-@font-face{font-family:'Poppins';font-style:normal;font-weight:200 1000;font-display:swap;src:url(/assets/polices/nunito-latin-wght-normal.woff2) format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
-@font-face{font-family:'Poppins';font-style:italic;font-weight:200 1000;font-display:swap;src:url(/assets/polices/nunito-latin-ext-wght-italic.woff2) format('woff2');unicode-range:U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF}
-@font-face{font-family:'Poppins';font-style:italic;font-weight:200 1000;font-display:swap;src:url(/assets/polices/nunito-latin-wght-italic.woff2) format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
-:root{--sans:"Nunito","Segoe UI",Roboto,Arial,sans-serif;--serif:"Nunito","Trebuchet MS",system-ui,sans-serif;--vm-titre:"Nunito","Trebuchet MS",system-ui,sans-serif;--vm-corps:"Nunito","Segoe UI",Roboto,Arial,sans-serif;--vm-mag:#B2316E;--vm-gold:#FFC93C}
-body{font-weight:500;-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
-b,strong{font-weight:800}
+/* Police d'Apprendre : Roboto (16/11/2026), celle que Jacques voit dans les leçons sur son téléphone et qu'il demande
+   de garder (« Garde aussi l'ancienne police », « Conserve ceci »). Hébergée sur le site (licence Apache 2.0,
+   assets/polices/ROBOTO-LICENSE.txt) : même rendu sur Android, iPhone et Windows, sans appel à Google Fonts.
+   « Poppins » désigne aussi Roboto, pour les feuilles qui la nomment en dur. Graisses 400, 500, 700. */
+@font-face{font-family:'Roboto';font-style:normal;font-weight:400;font-display:swap;src:url(/assets/polices/roboto-latin-ext-400-normal.woff2) format('woff2');unicode-range:U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF}
+@font-face{font-family:'Roboto';font-style:normal;font-weight:400;font-display:swap;src:url(/assets/polices/roboto-latin-400-normal.woff2) format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
+@font-face{font-family:'Roboto';font-style:normal;font-weight:500;font-display:swap;src:url(/assets/polices/roboto-latin-ext-500-normal.woff2) format('woff2');unicode-range:U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF}
+@font-face{font-family:'Roboto';font-style:normal;font-weight:500;font-display:swap;src:url(/assets/polices/roboto-latin-500-normal.woff2) format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
+@font-face{font-family:'Roboto';font-style:normal;font-weight:700;font-display:swap;src:url(/assets/polices/roboto-latin-ext-700-normal.woff2) format('woff2');unicode-range:U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF}
+@font-face{font-family:'Roboto';font-style:normal;font-weight:700;font-display:swap;src:url(/assets/polices/roboto-latin-700-normal.woff2) format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
+@font-face{font-family:'Roboto';font-style:italic;font-weight:400;font-display:swap;src:url(/assets/polices/roboto-latin-ext-400-italic.woff2) format('woff2');unicode-range:U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF}
+@font-face{font-family:'Roboto';font-style:italic;font-weight:400;font-display:swap;src:url(/assets/polices/roboto-latin-400-italic.woff2) format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
+@font-face{font-family:'Poppins';font-style:normal;font-weight:400;font-display:swap;src:url(/assets/polices/roboto-latin-ext-400-normal.woff2) format('woff2');unicode-range:U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF}
+@font-face{font-family:'Poppins';font-style:normal;font-weight:400;font-display:swap;src:url(/assets/polices/roboto-latin-400-normal.woff2) format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
+@font-face{font-family:'Poppins';font-style:normal;font-weight:500;font-display:swap;src:url(/assets/polices/roboto-latin-ext-500-normal.woff2) format('woff2');unicode-range:U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF}
+@font-face{font-family:'Poppins';font-style:normal;font-weight:500;font-display:swap;src:url(/assets/polices/roboto-latin-500-normal.woff2) format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
+@font-face{font-family:'Poppins';font-style:normal;font-weight:700;font-display:swap;src:url(/assets/polices/roboto-latin-ext-700-normal.woff2) format('woff2');unicode-range:U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF}
+@font-face{font-family:'Poppins';font-style:normal;font-weight:700;font-display:swap;src:url(/assets/polices/roboto-latin-700-normal.woff2) format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
+@font-face{font-family:'Poppins';font-style:italic;font-weight:400;font-display:swap;src:url(/assets/polices/roboto-latin-ext-400-italic.woff2) format('woff2');unicode-range:U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF}
+@font-face{font-family:'Poppins';font-style:italic;font-weight:400;font-display:swap;src:url(/assets/polices/roboto-latin-400-italic.woff2) format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
+:root{--sans:"Roboto","Segoe UI",Roboto,Arial,sans-serif;--serif:"Roboto","Trebuchet MS",system-ui,sans-serif;--vm-titre:"Roboto","Trebuchet MS",system-ui,sans-serif;--vm-corps:"Roboto","Segoe UI",Roboto,Arial,sans-serif;--vm-mag:#B2316E;--vm-gold:#FFC93C}
+body{font-weight:400;-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
+b,strong{font-weight:700}
 /* textes des schémas et planches : même police que la page */
 figure svg text,.illus svg text,.p3d-svg text{font-family:var(--sans)!important}
 body,button,input,select,textarea{font-family:var(--sans)}
-h1,h2,h3,.sec-t h2,.bloc h2,.chap h3,.chap-t h3,.acc-g h2,.acc-d h3,.profils-z h2,.res-fam>h2,.tp-gt,.offre-t,.fo-nom,.mat b,.mtete h1,.bandeau h1{font-family:var(--vm-titre)!important;font-weight:900!important;letter-spacing:-.01em}
+h1,h2,h3,.sec-t h2,.bloc h2,.chap h3,.chap-t h3,.acc-g h2,.acc-d h3,.profils-z h2,.res-fam>h2,.tp-gt,.offre-t,.fo-nom,.mat b,.mtete h1,.bandeau h1{font-family:var(--vm-titre)!important;font-weight:700!important;letter-spacing:-.01em}
 h1{color:#0C1F55}
 
 /* titres de section : trait dégradé magenta → or, comme les titres du modèle */
@@ -32,13 +41,13 @@ h1{color:#0C1F55}
 .res-sm .res-c .res-p{background:linear-gradient(145deg,color-mix(in srgb,var(--sk,#13307A) 62%,#fff),var(--sk,#13307A))!important}
 .res-p svg,.tp-i svg{width:21px!important;height:21px!important;stroke:#fff}
 .tp-i{flex:0 0 46px!important;width:46px!important;height:46px!important;border-radius:14px!important;border:0!important;opacity:1!important;display:grid!important;place-items:center;color:#fff!important;background:linear-gradient(145deg,color-mix(in srgb,var(--k,#13307A) 62%,#fff),var(--k,#13307A))!important;box-shadow:0 6px 14px color-mix(in srgb,var(--k,#13307A) 28%,transparent),inset 0 1px 0 rgba(255,255,255,.35)!important}
-.res-c strong,.res-c b,.tp-c b,.tp-t b{font-family:var(--vm-titre);font-weight:800}
+.res-c strong,.res-c b,.tp-c b,.tp-t b{font-family:var(--vm-titre);font-weight:600}
 
 /* matière : numéro de chapitre en tuile, numéro de leçon en cercle à halo */
-.chap-n{border-radius:14px!important;background:linear-gradient(145deg,color-mix(in srgb,var(--k) 62%,#fff),var(--k))!important;font:800 20px var(--vm-titre)!important;box-shadow:0 6px 14px color-mix(in srgb,var(--k) 30%,transparent),inset 0 1px 0 rgba(255,255,255,.35);position:relative}
+.chap-n{border-radius:14px!important;background:linear-gradient(145deg,color-mix(in srgb,var(--k) 62%,#fff),var(--k))!important;font:600 20px var(--vm-titre)!important;box-shadow:0 6px 14px color-mix(in srgb,var(--k) 30%,transparent),inset 0 1px 0 rgba(255,255,255,.35);position:relative}
 .chap-n::after{content:"";position:absolute;right:-3px;top:-3px;width:12px;height:12px;border-radius:50%;background:var(--vm-gold);border:2px solid #fff}
 .chap-t h3{font-size:19px!important}
-.lg .n{font:800 13px var(--vm-titre)!important;background:#fff!important;border:2px solid var(--k)!important;color:var(--k)!important;box-shadow:0 0 0 3px var(--kp)}
+.lg .n{font:600 13px var(--vm-titre)!important;background:#fff!important;border:2px solid var(--k)!important;color:var(--k)!important;box-shadow:0 0 0 3px var(--kp)}
 .lg.r .n{background:var(--k)!important;color:#fff!important}
 .lg .t{font-size:15.5px}
 
@@ -64,7 +73,7 @@ html body .mtete .pas svg{width:40px!important;height:40px!important}
 .mat{transition:transform .2s ease,box-shadow .2s ease!important}
 .mat:hover{transform:translateY(-3px)}
 .mat:hover .pas,.res-c:hover .res-p,.tp-c:hover .tp-i,.porte:hover .res-p{transform:rotate(-6deg) scale(1.08)!important}
-.mat b{font-weight:900!important}
+.mat b{font-weight:700!important}
 
 /* ── Animations d'apparition (comme dans la leçon modèle) : cartes qui montent en fondu, en cascade ── */
 @keyframes vm-monte{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}
@@ -88,23 +97,23 @@ html body .mtete .pas svg{width:40px!important;height:40px!important}
 @media print{.mats>*,.res-g>*,.chap,.partie h2 .num{animation:none!important}}
 
 /* ── Formules et panneau « Avec un professeur » (16/11/2026) : charte du modèle ── */
-.offre-h,.fo-nom,.offre-t{font-family:var(--vm-titre)!important;font-weight:900!important;letter-spacing:-.01em}
+.offre-h,.fo-nom,.offre-t{font-family:var(--vm-titre)!important;font-weight:700!important;letter-spacing:-.01em}
 .fo-nom{font-size:21px!important}
 .fo-pour{font-weight:600}
-.fo-prix{font-family:var(--vm-titre);font-weight:900}
+.fo-prix{font-family:var(--vm-titre);font-weight:700}
 .fo-av li{font-size:15.5px;line-height:1.5}
-.fo-btn{font-family:var(--vm-titre)!important;font-weight:800!important;border-radius:14px!important;letter-spacing:.01em;transition:transform .15s ease,box-shadow .15s ease}
+.fo-btn{font-family:var(--vm-titre)!important;font-weight:600!important;border-radius:14px!important;letter-spacing:.01em;transition:transform .15s ease,box-shadow .15s ease}
 .fo-btn:hover{transform:translateY(-2px);box-shadow:0 8px 18px rgba(0,17,54,.14)}
 .fo{border-radius:20px!important;animation:vm-monte .55s cubic-bezier(.2,.7,.2,1) both}
 .offre-plans>.fo:nth-child(2){animation-delay:.08s}.offre-plans>.fo:nth-child(3){animation-delay:.16s}
 /* note sous les formules : lisible (elle était serrée sur une ligne de 1) */
 .offre-n{font:500 14.5px/1.6 var(--sans)!important;color:#4D5163!important;margin:14px 2px 16px!important;padding:12px 14px;border-radius:14px;background:#F6F8FC}
-.offre-n a{color:var(--vm-mag);font-weight:800}
+.offre-n a{color:var(--vm-mag);font-weight:600}
 /* liens « Enseignant ? », « Cahiers » : pictogramme en tuile dégradée, titre du modèle */
 .offre-l{border-radius:18px!important;padding:16px!important;gap:16px!important}
 .offre-l>svg{flex:0 0 44px!important;width:44px!important;height:44px!important;padding:11px;box-sizing:border-box;border-radius:14px;color:#fff!important;stroke:#fff;background:linear-gradient(145deg,#2C55C4,#0C1F55);box-shadow:0 6px 14px rgba(19,48,122,.28),inset 0 1px 0 rgba(255,255,255,.35)}
 .offre-l.or>svg{background:linear-gradient(145deg,#F39A45,#C2540A)}
-.offre-l b{font-family:var(--vm-titre)!important;font-weight:900!important;font-size:17px!important}
+.offre-l b{font-family:var(--vm-titre)!important;font-weight:700!important;font-size:17px!important}
 .offre-l small{font-size:14.5px!important;line-height:1.55!important}
 .offre-l:hover>svg{transform:rotate(-6deg) scale(1.06);transition:transform .25s cubic-bezier(.34,1.56,.64,1)}
 /* cartes de matière : la ligne « rédigées » et la barre s'alignent sous le nom (tuile de 54 px + 14 px) ;
@@ -130,7 +139,7 @@ html body .mtete .pas svg{width:40px!important;height:40px!important}
 /* 4. Compte à rebours : les cases se partagent la largeur (plus de débordement de la case des secondes) */
 .cal-chiffres{grid-template-columns:minmax(0,1.25fr) repeat(3,minmax(0,1fr))!important}
 .cal-chiffres span{min-width:0;overflow:hidden}
-.cal-chiffres b{font-size:clamp(22px,2.6vw,32px)!important;font-weight:900!important}
+.cal-chiffres b{font-size:clamp(22px,2.6vw,32px)!important;font-weight:700!important}
 .cal-chiffres small{font-size:11px;letter-spacing:.04em}
 /* compte à rebours : chiffres proportionnés à la largeur de la carte (requête de conteneur) */
 .cal-cpt{container-type:inline-size}
@@ -142,3 +151,76 @@ html body .mtete .pas svg{width:40px!important;height:40px!important}
 }
 .sec-t h2{margin-bottom:0}
 @media (max-width:640px){.sec-t>.lu{flex:1 1 100%;margin-top:2px}}
+
+/* ════════ Hiérarchie des titres dans les leçons (16/11/2026, 2e version) ════════
+   Demande de Jacques : « hiérarchiser = distinguer les grands titres des sous-titres » (comme « Laboratoires » /
+   « Mathématiques » sur l'accueil) ; garder l'ancien système à pointillés ; garder les icônes illustrées en plus petit ;
+   des pastilles pour les objectifs.
+   1. Grand titre de partie : cercle magenta numéroté à point or, titre magenta souligné (style d'origine).
+   2. Sous-titre (h3) : plus petit, en couleur, sans icône.
+   3. Encadrés (définition, propriété, méthode, exemple) : petite icône illustrée + rail en pointillés.
+   4. Post-it : petite icône illustrée dans le titre. */
+:root{
+  --vm-ill-def:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cpath d='M6 18c8-5 17-5 26 1v34c-9-6-18-6-26-1z' fill='%234F86E0'/%3E%3Cpath d='M58 18c-8-5-17-5-26 1v34c9-6 18-6 26-1z' fill='%232C55C4'/%3E%3Cpath d='M9 20c7-3 14-3 20 1v28c-6-4-13-4-20-1z' fill='%23fff'/%3E%3Cpath d='M55 20c-7-3-14-3-20 1v28c6-4 13-4 20-1z' fill='%23EAF1FF'/%3E%3Cpath d='M13 27h11M13 32h11M13 37h9M40 27h11M40 32h11M40 37h8' stroke='%239CB4E0' stroke-width='2' stroke-linecap='round'/%3E%3Cpath d='M44 8h8v20l-4-3-4 3z' fill='%23E8394B'/%3E%3Cpath d='M32 19v34' stroke='%23163A8C' stroke-width='2'/%3E%3C/svg%3E");
+  --vm-ill-prop:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cpath d='M20 34 12 58l9-4 5 8 7-22z' fill='%23E8394B'/%3E%3Cpath d='M44 34l8 24-9-4-5 8-7-22z' fill='%232C55C4'/%3E%3Ccircle cx='32' cy='26' r='19' fill='%23F2C540'/%3E%3Ccircle cx='32' cy='26' r='14' fill='%23FFE07A' stroke='%23C48A0C' stroke-width='2'/%3E%3Cpath d='m32 16 3 6.5 7 .8-5.2 4.8 1.5 7-6.3-3.6-6.3 3.6 1.5-7L22 23.3l7-.8z' fill='%23C48A0C'/%3E%3C/svg%3E");
+  --vm-ill-methode:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cg transform='translate(24 26)'%3E%3Cpath d='M-3-18h6l1 5 4 2 4-3 4 4-3 4 2 4 5 1v6l-5 1-2 4 3 4-4 4-4-3-4 2-1 5h-6l-1-5-4-2-4 3-4-4 3-4-2-4-5-1v-6l5-1 2-4-3-4 4-4 4 3 4-2z' fill='%231FB3C0'/%3E%3Ccircle r='6' fill='%23fff'/%3E%3C/g%3E%3Cg transform='translate(45 44)'%3E%3Cpath d='M-2.5-14h5l.8 3.8 3 1.5 3.2-2.3 3.5 3.5-2.3 3.2 1.5 3 3.8.8v5l-3.8.8-1.5 3 2.3 3.2-3.5 3.5-3.2-2.3-3 1.5-.8 3.8h-5l-.8-3.8-3-1.5-3.2 2.3-3.5-3.5 2.3-3.2-1.5-3-3.8-.8v-5l3.8-.8 1.5-3-2.3-3.2 3.5-3.5 3.2 2.3 3-1.5z' fill='%23F39A45'/%3E%3Ccircle r='4.5' fill='%23fff'/%3E%3C/g%3E%3C/svg%3E");
+  --vm-ill-ex:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect x='8' y='8' width='34' height='44' rx='4' fill='%23fff' stroke='%238A5AD0' stroke-width='3'/%3E%3Cpath d='M15 19h20M15 26h20M15 33h12' stroke='%23CDB8EA' stroke-width='3' stroke-linecap='round'/%3E%3Cpath d='m44 18 10 10-22 22-12 3 3-12z' fill='%23F2C540'/%3E%3Cpath d='m44 18 10 10 4-4a3 3 0 0 0 0-4l-6-6a3 3 0 0 0-4 0z' fill='%23E8394B'/%3E%3Cpath d='m23 41 9 9-12 3z' fill='%23F4D9B5'/%3E%3Cpath d='m20 53 3-3-3-1z' fill='%233B3520'/%3E%3C/svg%3E");
+  --vm-ill-astuce:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cpath d='M32 6a17 17 0 0 0-10 30.7c2 1.6 3 3.6 3 6.3h14c0-2.7 1-4.7 3-6.3A17 17 0 0 0 32 6z' fill='%23FFD43B'/%3E%3Cpath d='M27 12a12 12 0 0 0-7 10' stroke='%23fff' stroke-width='3' stroke-linecap='round' opacity='.8'/%3E%3Crect x='24' y='44' width='16' height='5' rx='2' fill='%238A96A8'/%3E%3Crect x='25' y='50' width='14' height='5' rx='2' fill='%236B7287'/%3E%3Cpath d='M4 22h5M55 22h5M10 6l4 4M54 6l-4 4' stroke='%23F2C540' stroke-width='3' stroke-linecap='round'/%3E%3C/svg%3E");
+  --vm-ill-attention:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cpath d='M29 6a3.5 3.5 0 0 1 6 0l25 46a3.5 3.5 0 0 1-3 5H7a3.5 3.5 0 0 1-3-5z' fill='%23E8394B'/%3E%3Cpath d='M32 15 53 52H11z' fill='%23fff'/%3E%3Crect x='29' y='24' width='6' height='16' rx='3' fill='%233B3520'/%3E%3Ccircle cx='32' cy='46' r='3.5' fill='%233B3520'/%3E%3C/svg%3E");
+  --vm-ill-retiens:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cpath d='M24 6h16l-2 14 8 8v6H18v-6l8-8z' fill='%23E8394B'/%3E%3Cpath d='M27 9h4l-1 11-5 6' stroke='%23fff' stroke-width='2.5' opacity='.6' fill='none'/%3E%3Cpath d='M32 34v24' stroke='%236B7287' stroke-width='3' stroke-linecap='round'/%3E%3C/svg%3E");
+  --vm-ill-savais:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cpath d='M20 22a12 12 0 1 1 18.5 10C34 35 32 37.5 32 43' fill='none' stroke='%23B2316E' stroke-width='8' stroke-linecap='round'/%3E%3Ccircle cx='32' cy='54' r='5' fill='%23B2316E'/%3E%3Ccircle cx='47' cy='14' r='4' fill='%23FFC93C'/%3E%3C/svg%3E");
+}
+/* 1. grand titre de partie : style d'origine conservé (« Conserve ceci ») : numéro dans un cercle magenta à point or,
+   titre magenta souligné d'un trait magenta → or (apprendre/lecon-modele.css) ; seule la graisse suit Roboto. */
+.carte .partie>h2 .txt{font-weight:700!important}
+/* 2. sous-titres */
+.carte .partie h3{font:700 clamp(19px,3.8vw,22px)/1.25 var(--vm-titre)!important;color:#0B6A74!important;margin:26px 0 10px!important}
+/* 3. encadrés : ancien système (pointillés), icône illustrée plus petite à la place de la tuile */
+.carte .def::before,.carte .prop::before,.carte .methode::before,.carte .ex::before{width:42px!important;height:42px!important;left:2px!important;border-radius:0!important;background:var(--vm-ill) center/contain no-repeat!important;box-shadow:none!important;filter:drop-shadow(0 2px 3px rgba(0,17,54,.2))}
+.carte .def::after,.carte .prop::after,.carte .methode::after,.carte .ex::after{top:52px!important}
+.carte .def{--vm-ill:var(--vm-ill-def)}.carte .prop{--vm-ill:var(--vm-ill-prop)}.carte .methode{--vm-ill:var(--vm-ill-methode)}.carte .ex{--vm-ill:var(--vm-ill-ex)}
+.carte .def>b:first-child,.carte .prop>b:first-child,.carte .methode>b:first-child,.carte .ex>b:first-child{font-size:19px!important;min-height:42px!important}
+@media (max-width:560px){.carte .def::before,.carte .prop::before,.carte .methode::before,.carte .ex::before{width:36px!important;height:36px!important}.carte .def::after,.carte .prop::after,.carte .methode::after,.carte .ex::after{left:18px!important;top:46px!important}.carte .def>b:first-child,.carte .prop>b:first-child,.carte .methode>b:first-child,.carte .ex>b:first-child{font-size:17.5px!important;min-height:36px!important}}
+/* 4. post-it : petite icône illustrée */
+.carte .astuce>b:first-child{--vm-i:var(--vm-ill-astuce)}.carte .attention>b:first-child{--vm-i:var(--vm-ill-attention)}.carte .retiens>b:first-child{--vm-i:var(--vm-ill-retiens)}.carte .savais>b:first-child{--vm-i:var(--vm-ill-savais)}
+/* objectifs : pastilles de couleur à la place des tuiles d'icônes */
+.carte .objectifs ul{gap:8px!important}
+.carte .objectifs li{padding:3px 0 3px 30px!important;min-height:0!important;font-weight:500!important;text-align:left}
+.carte .objectifs li::before{top:.62em!important;left:4px!important;width:13px!important;height:13px!important;border-radius:50%!important;background:linear-gradient(145deg,var(--vm-c1),var(--vm-c2))!important;box-shadow:0 0 0 3px color-mix(in srgb,var(--vm-c1) 20%,#fff)!important}
+
+/* Vecteurs fléchés (16/11/2026) : la police n'a pas le combinant U+20D7, la flèche est dessinée en CSS. */
+.vec{position:relative;display:inline-block;padding-top:.32em;line-height:1;font-style:italic}
+.vec::after{content:"";position:absolute;left:.05em;right:-.05em;top:.08em;height:.09em;background:currentColor;border-radius:1px}
+.vec::before{content:"";position:absolute;right:-.12em;top:-.06em;border-left:.3em solid currentColor;border-top:.19em solid transparent;border-bottom:.19em solid transparent}
+
+/* ════════ Accueil d'Apprendre : interface (16/11/2026) ════════
+   Demande de Jacques (capture de l'accueil sur téléphone) : « Améliore aussi l'interface, les icônes et autres ».
+   Classes en vraies pastilles, objectif du jour en puces à pictogramme coloré, icône de la leçon du jour sur tuile,
+   barre des matières en tuiles de la couleur de chaque matière. */
+html body .classes{display:flex!important;flex-wrap:wrap;justify-content:flex-start!important;gap:9px 8px!important}
+html body .classes button{background:#fff!important;border:1.5px solid color-mix(in srgb,var(--k) 24%,#fff)!important;border-radius:999px!important;padding:8px 15px!important;min-width:54px;font:600 14.5px/1.2 var(--sans)!important;color:var(--k)!important;text-decoration:none!important;box-shadow:0 2px 6px rgba(19,48,122,.06)!important;transition:transform .15s,box-shadow .15s,background .15s}
+html body .classes button::after{display:none!important}
+html body .classes button:hover{transform:translateY(-1px);box-shadow:0 5px 12px rgba(19,48,122,.12)!important}
+html body .classes button[aria-pressed="true"]{background:linear-gradient(145deg,color-mix(in srgb,var(--k) 70%,#fff),var(--k))!important;color:#fff!important;border-color:transparent!important;box-shadow:0 6px 14px color-mix(in srgb,var(--k) 38%,transparent)!important}
+/* objectif du jour */
+html body #objectifJour p{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
+html body #objectifJour p span{display:inline-flex;align-items:center;gap:8px;padding:4px 13px 4px 4px;border-radius:999px;background:#F2F5FC;color:#1D2A4D;font-weight:500}
+html body #objectifJour p span .pic{flex:0 0 28px;width:28px;height:28px;padding:6px;box-sizing:border-box;border-radius:50%;color:#fff;background:linear-gradient(145deg,#4F7BE0,#1C3C9C);box-shadow:0 3px 8px rgba(28,60,156,.25)}
+html body #objectifJour p span:nth-child(2) .pic{background:linear-gradient(145deg,#FFC93C,#E08A00);box-shadow:0 3px 8px rgba(224,138,0,.3)}
+html body #objectifJour p span.ok{background:#E4F6E8;color:#0A6B1C}
+html body #objectifJour p span.ok .pic{background:linear-gradient(145deg,#33B852,#0A7A22)}
+/* leçon du jour : icône de la matière sur tuile douce */
+html body .jour .med{display:grid!important;place-items:center;flex:0 0 66px;width:66px;height:66px;border-radius:20px!important;background:linear-gradient(145deg,#fff,var(--cp,#E6EEFB))!important;border:1.5px solid color-mix(in srgb,var(--c,#1E499B) 22%,#fff)!important;box-shadow:0 8px 18px color-mix(in srgb,var(--c,#1E499B) 22%,transparent)!important}
+html body .jour .med svg{width:40px;height:40px}
+/* barre des matières (rail) : tuiles de la couleur de la matière */
+html body .rail a.rm{display:grid!important;place-items:center;width:46px;height:46px;border-radius:14px!important;color:var(--c)!important;background:var(--cp)!important;opacity:1!important;filter:none!important;transition:transform .15s,box-shadow .15s}
+html body .rail a.rm svg{opacity:1!important;filter:none!important}
+html body .rail a.rm:hover{transform:translateY(-2px);box-shadow:0 6px 12px color-mix(in srgb,var(--c) 30%,transparent)}
+html body .rail a.rm[aria-current]{background:#fff!important;box-shadow:0 0 0 2.5px var(--c),0 6px 14px color-mix(in srgb,var(--c) 35%,transparent)!important}
+@media (max-width:640px){html body .classes button.sep{margin-left:0!important}}
+
+/* ════════ Accueil d'Apprendre : titres au style des leçons (16/11/2026, « Conserve ceci, et utilises-en pour l'accueil ») ════════
+   Titres de section magenta soulignés du trait magenta → or, précédés du cercle magenta à point or des parties de leçon. */
+html body .sec-t h2,html body .res-fam>h2{color:var(--vm-mag)!important;font-weight:700!important;display:flex;align-items:center;gap:12px}
+html body .sec-t h2::before,html body .res-fam>h2::before{content:"";position:relative;flex:0 0 22px;width:22px;height:22px;box-sizing:border-box;border-radius:50%;border:3px solid var(--vm-mag);background:#fff;box-shadow:0 0 0 4px var(--vm-magbg,#FBE4EE),9px -8px 0 -4px var(--vm-gold)}
+html body .sec-t h2::after,html body .res-fam>h2::after{left:34px}

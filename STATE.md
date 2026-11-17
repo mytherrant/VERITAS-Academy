@@ -1,3 +1,44 @@
+## Apprendre : police Roboto, titres de partie d'origine, accueil retravaillé (16/11/2026)
+
+Retours de Jacques : « Améliore aussi l'interface ci, les icônes et autres » (capture de l'accueil), puis « Conserve ceci, et utilise-en pour l'accueil d'Apprendre » (capture d'une leçon en ligne : numéros dans un cercle magenta à point or, titres magenta soulignés, police Roboto du téléphone).
+
+- **Police : Roboto**, hébergée (`assets/polices/roboto-latin(-ext)-400|500|700-normal.woff2`, `-400-italic`, licence Apache 2.0 `ROBOTO-LICENSE.txt`). « Poppins » désigne aussi Roboto pour les feuilles qui la nomment en dur. Les fichiers Poppins ajoutés plus tôt dans la même PR sont retirés.
+- **Leçons** : titres de partie remis au style d'origine (cercle magenta à point or, titre magenta souligné magenta → or) ; sous-titres `h3` en bleu-vert ; le reste (pointillés, petites icônes illustrées, pastilles des objectifs) inchangé.
+- **Accueil d'Apprendre** (`apprendre/modele.css`, fin du fichier ; `index.html` passe `--c/--cp` à la tuile de la leçon du jour) :
+  - titres de section au style des parties de leçon (cercle magenta à point or, titre magenta, trait magenta → or), aussi sur « Tout pour progresser » ;
+  - classes en vraies pastilles (classe choisie en dégradé de sa couleur) ;
+  - objectif du jour en puces à pictogramme coloré (bleu leçon, or quiz, vert une fois fait) ;
+  - icône de la leçon du jour sur tuile douce de la couleur de la matière ;
+  - barre des matières : chaque icône sur une tuile de la couleur de sa matière ; matière ouverte entourée de sa couleur.
+- `modele.css?v=20261116s`. Audit téléphone et ordinateur (10 vues) : aucun débordement, 0 erreur JS ; bancs verrou 18/18, gabarits 54/54, planche mobile 23/23, lisibilité 7/7, charte 34/34, survol 4/4, menu 19/19, calendrier 51/51, réglages 29/29.
+
+## Apprendre : retour aux pointillés, hiérarchie des titres, pastilles (16/11/2026) — police : voir l'entrée suivante (Roboto)
+
+Retour de Jacques (capture de la rubrique « Laboratoires ») : « Je préfère l'ancien système avec les pointillés. Mais conserve les icônes en diminuant la taille. Par hiérarchiser j'entendais distinguer les grands titres des sous-titres. Au niveau de l'objectif mets plutôt des puces, ou pastilles », puis « Garde aussi l'ancienne police ».
+
+- **Encadrés** : retour au rail en pointillés (ni cadre décalé, ni onglet) ; les icônes illustrées restent, en plus petit (42 px, 36 px sur téléphone).
+- **Titres en 3 niveaux**, comme « Laboratoires » / « Mathématiques » / titre de carte :
+  1. titre de partie : tuile carrée arrondie en dégradé bleu, avec le numéro, et grand titre bleu nuit ;
+  2. sous-titre (`h3`) : plus petit, en bleu ;
+  3. titre d'encadré : petit, de la couleur de l'encadré, avec sa petite icône.
+- **Objectifs** : pastilles rondes de couleur à la place des tuiles d'icônes.
+- **Police** : retour à **Poppins**, l'ancienne police d'Apprendre, désormais hébergée sur le site (`assets/polices/poppins-latin(-ext)-400|500|600|700-normal.woff2`, licence OFL `POPPINS-OFL.txt`, sans appel à Google Fonts) ; graisses ramenées à 700 pour les titres et 600 pour le gras. Les fichiers Nunito restent dans `assets/polices` mais ne sont plus utilisés.
+- `modele.css?v=20261116p`. Contrôles : aucun débordement sur les 10 vues de l'audit (téléphone et ordinateur), 0 erreur JS ; bancs gabarits 54/54, verrou 18/18, planche mobile 23/23, lisibilité 7/7, charte 34/34.
+
+## Apprendre : nombres complexes de Terminale C et D, hiérarchie des icônes façon manuel, correctif lecon.html (16/11/2026)
+
+Demandes de Jacques : « Continue », puis « Hiérarchise les icônes. Utilise les modèles plus réalistes et originaux comme sur l'image » (page de manuel Hatier : grande icône illustrée qui chevauche un onglet de couleur, cartes à cadre pastel décalé, numéros d'exercice dans des cases rouges arrondies).
+
+- **Correctif important** : `apprendre/lecon.html` ne chargeait **pas** `modele.css` (le contrôle par grep confondait `modele.css` et `lecon-modele.css`, et les montées de version touchaient la mauvaise feuille). Les leçons en ligne n'avaient donc ni Nunito ni les corrections de mise en page, et retombaient sur la police système depuis le retrait de Poppins. Lien ajouté (`modele.css?v=20261116m`, chargée en dernier).
+- **Hiérarchie des icônes en 3 niveaux** (`apprendre/modele.css`) :
+  1. **Parties** : pastille ronde orange-rouge 64 px, liseré blanc, surtitre « PARTIE » (comme « CHAPITRE 2 » du manuel) ;
+  2. **Encadrés** (définition, propriété, méthode, exemple) : carte blanche, bord pastel, cadre décalé de 8 px ; grande icône illustrée multicolore (livre, médaille, engrenages, crayon) qui chevauche un onglet dégradé portant le titre ;
+  3. **Post-it** (astuce, attention, retiens, le savais-tu) : icônes illustrées de 34 px ; étapes de méthode numérotées dans des cases rouges arrondies.
+- **16 leçons de nombres complexes** (Tle C r07-r10, r30-r33 ; Tle D r01-r04, r17-r20), source privée `71-denombrement-approfondi.js` (83 leçons) ; aperçus fusionnés en place. **Tle D r01** gratuite, entière.
+- **Écriture mathématique** : la source convertit `e^(…)` en exposant, `z_A` en indice et `AB⃗` en vecteur fléché (`span.vec`, flèche dessinée en CSS : Nunito n'a pas le caractère combinant U+20D7, qui s'affichait en carré) ; titres et légendes écrivent « vecteur AB ».
+- Livraison : `apprendre-maths-approfondies-pour-jacques.zip`, 83 JSON à déposer dans `uploads/protected/apprendre/` (80 à verrou + 3 gratuites).
+- Bancs : verrou 18/18, gabarits 54/54, planche mobile 23/23, réglages 29/29, charte 34/34, lisibilité 7/7, cartes au survol 4/4 ; `node --check` sur `apprendre/*.js` ; 0 erreur JS sur les leçons contrôlées (1200 px et 390 px).
+
 ## Apprendre : corrections de mise en page (16/11/2026)
 
 Demande de Jacques : « Corrige la mise en page » (sans capture) : audit complet en émulation Pixel 7 et sur ordinateur 1280 px (accueil, matière, leçon gratuite, leçon à verrou, ressources), corrections dans `apprendre/modele.css?v=20261116h` :
