@@ -3476,14 +3476,15 @@ VRT_PLUS("3e-en-articles", [
 
   function aimant3D() {
     var o = [], xn = -55, xs = 55, k;
-    o.push({ f: "boite", c: [0, -6, 0], d: [470, 10, 320], coul: "#C89A62", dessus: "#D9AE76" });
+    o.push({ f: "boite", c: [0, -6, 0], d: [470, 10, 320], coul: "#7A4A22", dessus: "#A8703A" });
     o.push({ f: "boite", c: [-45, 2, 0], d: [90, 22, 34], coul: "#D9472B", div: false });
     o.push({ f: "boite", c: [45, 2, 0], d: [90, 22, 34], coul: "#1E499B", div: false });
     for (k = 0; k < 12; k++) {
       var a = 2 * Math.PI * k / 12, cx = 150 * Math.cos(a), cz = 110 * Math.sin(a), e = champ(cx, cz, xn, 0, xs, 0), n = Math.sqrt(e[0] * e[0] + e[1] * e[1]), ux = e[0] / n, uz = e[1] / n, L = 15, w = 4, h = 9, ec = [0, 34, 0];
-      o.push({ f: "cylindre", c: [cx, 0, cz], r: 19, h: 6, n: 20, coul: "#B8BFCC", dessus: "#F4F2EA", ec: ec });
+      o.push({ f: "cylindre", c: [cx, 0, cz], r: 19, h: 6, n: 20, coul: "#B08D57", dessus: "#FBF6E9", ec: ec });
       o.push({ f: "poly", pts: [[cx + ux * L, h, cz + uz * L], [cx - uz * w, h, cz + ux * w], [cx + uz * w, h, cz - ux * w]], coul: "#D9472B", ec: ec });
-      o.push({ f: "poly", pts: [[cx - ux * L, h, cz - uz * L], [cx + uz * w, h, cz - ux * w], [cx - uz * w, h, cz + ux * w]], coul: "#5C6478", ec: ec });
+      o.push({ f: "poly", pts: [[cx - ux * L, h, cz - uz * L], [cx + uz * w, h, cz - ux * w], [cx - uz * w, h, cz + ux * w]], coul: "#E8ECF1", ec: ec });
+      o.push({ f: "cylindre", c: [cx, h, cz], r: 2, h: 1.5, n: 8, coul: "#B08D57", ec: ec });
     }
     [[-150, 0, 120], [170, 0, -120], [0, 0, 140]].forEach(function (p, i) { o.push({ f: "cylindre", c: p, r: 2.2, h: 40, n: 6, axe: "x", coul: "#7F8794" }); });
     return o;
@@ -3773,10 +3774,10 @@ VRT_PLUS("3e-en-articles", [
   function feuille3D() {
     var o = [], k, R = alea(1911);
     o.push({ f: "boite", c: [0, -70, 0], d: [520, 8, 340], coul: "#3C4253", dessus: "#4B5266" });
-    o.push({ f: "boite", c: [-215, -10, 0], d: [70, 70, 70], coul: "#5F6672", dessus: "#737B88" });
+    o.push({ f: "boite", c: [-215, -10, 0], d: [70, 70, 70], coul: "#6E7681", dessus: "#8A929C" });
     o.push({ f: "sphere", c: [-205, 0, 0], r: 7, coul: "#F2994A" });
     o.push({ f: "cylindre", c: [-180, 0, 0], r: 1.6, h: 175, n: 6, axe: "x", coul: "#FF7A45" });
-    o.push({ f: "boite", c: [0, 0, 0], d: [2, 120, 120], coul: "#F2C94C", div: false });
+    o.push({ f: "boite", c: [0, 0, 0], d: [2, 120, 120], coul: "#D4AF37", div: false });
     o.push({ f: "cylindre", c: [0, -50, 0], r: 230, h: 100, n: 48, coul: "#9BE3B0", op: 0.12, double: true });
     /* éclairs sur l'écran : nombreux en face, quelques-uns déviés, un rare vers l'arrière */
     for (k = 0; k < 26; k++) { var a = (R() - 0.5) * 0.25, y = (R() - 0.5) * 60; o.push({ f: "sphere", c: [229 * Math.cos(a), y, 229 * Math.sin(a)], r: 3.2, coul: "#C8FF6A" }); }
@@ -3899,16 +3900,16 @@ VRT_PLUS("3e-en-articles", [
   function defsCagette(id) { return defsMangue(id) + lin(id + "bo", ["#E2B57A", "#C08850", "#8A5A2D"], true); }
   function cagettes3D() {
     var o = [], i, j, k, R = alea(250);
-    o.push({ f: "boite", c: [0, -6, 0], d: [600, 8, 330], coul: "#C9A97A", dessus: "#D8BC8E" });
+    o.push({ f: "boite", c: [0, -6, 0], d: [600, 8, 330], coul: "#8C6A45", dessus: "#B08A5E" });
     for (i = 0; i < 10; i++) {
       var col = i % 5, et = Math.floor(i / 5), cx = -200 + col * 100, cz = -50, cy = et * 46, ec = [0, et * 50, et * 40];
       [[0, 0, 0, 90, 4, 64], [0, 18, -30, 90, 32, 4], [0, 18, 30, 90, 32, 4], [-43, 18, 0, 4, 32, 64], [43, 18, 0, 4, 32, 64]].forEach(function (b) {
-        o.push({ f: "boite", c: [cx + b[0], cy + b[1], cz + b[2]], d: [b[3], b[4], b[5]], coul: "#B9824A", dessus: "#D9A86A", div: false, ec: ec });
+        o.push({ f: "boite", c: [cx + b[0], cy + b[1], cz + b[2]], d: [b[3], b[4], b[5]], coul: "#C9A576", dessus: "#E3C79C", div: false, ec: ec });
       });
-      for (j = 0; j < 24; j++) { k = j % 12; o.push({ f: "sphere", c: [cx - 33 + (k % 6) * 13.2, cy + 28 + Math.floor(j / 12) * 10, cz - 18 + Math.floor(k / 6) * 26 + (R() - 0.5) * 6], r: 6.6, coul: R() < 0.3 ? "#9FBF3B" : (R() < 0.5 ? "#F2A93B" : "#F7C948"), ec: ec }); }
+      for (j = 0; j < 24; j++) { k = j % 12; o.push({ f: "sphere", c: [cx - 33 + (k % 6) * 13.2, cy + 28 + Math.floor(j / 12) * 10, cz - 18 + Math.floor(k / 6) * 26 + (R() - 0.5) * 6], r: 6.6, coul: ["#F4B63F", "#E98B2A", "#8DB33A", "#D9542B", "#F7CF4A"][Math.floor(R() * 5)], ec: ec }); }
     }
-    o.push({ f: "cylindre", c: [150, 0, 100], r: 48, r2: 58, h: 22, n: 24, coul: "#7FA6C9", dessus: "#9CC0DE" });
-    for (j = 0; j < 10; j++) { var a = j * 0.63, rr = j < 6 ? 30 : 10; o.push({ f: "sphere", c: [150 + rr * Math.cos(a), 26 + (j < 6 ? 0 : 10), 100 + rr * Math.sin(a)], r: 7, coul: j % 3 ? "#F2A93B" : "#9FBF3B" }); }
+    o.push({ f: "cylindre", c: [150, 0, 100], r: 48, r2: 58, h: 22, n: 24, coul: "#2F6DB5", dessus: "#4C8AD0" });
+    for (j = 0; j < 10; j++) { var a = j * 0.63, rr = j < 6 ? 30 : 10; o.push({ f: "sphere", c: [150 + rr * Math.cos(a), 26 + (j < 6 ? 0 : 10), 100 + rr * Math.sin(a)], r: 7, coul: ["#F4B63F", "#E98B2A", "#8DB33A", "#D9542B"][j % 4] }); }
     return o;
   }
 
@@ -4000,7 +4001,7 @@ VRT_PLUS("3e-en-articles", [
   var M_OLD = ancien("2nde-c-physique-mesure");
   function piedCoulisse3D() {
     var o = [], i;
-    o.push({ f: "boite", c: [0, -14, 0], d: [560, 6, 220], coul: "#8C6A45", dessus: "#A47E54" });
+    o.push({ f: "boite", c: [0, -14, 0], d: [560, 6, 220], coul: "#6B4A2B", dessus: "#94693F" });
     o.push({ f: "boite", c: [10, 0, 0], d: [420, 6, 34], coul: "#C3C9D2", dessus: "#E3E7ED", div: false });
     for (i = 0; i <= 40; i++) o.push({ f: "boite", c: [-190 + i * 9.5, 3.4, -10 + (i % 5 ? 4 : 0)], d: [0.9, 0.6, i % 5 ? 8 : 16], coul: "#1B2233", div: false });
     o.push({ f: "boite", c: [-205, 0, 40], d: [14, 6, 120], coul: "#B5BCC7", dessus: "#D8DDE4", div: false });
@@ -4292,14 +4293,17 @@ VRT_PLUS("3e-en-articles", [
   }
   function panneau3D(n) {
     var o = [], b = ("00000000" + bin(n)).slice(-8), i;
-    o.push({ f: "boite", c: [0, -10, 0], d: [520, 8, 200], coul: "#5A6170", dessus: "#6B7383" });
-    o.push({ f: "boite", c: [0, 60, -30], d: [470, 120, 22], coul: "#1E2433", dessus: "#2A3247" });
+    o.push({ f: "boite", c: [0, -10, 0], d: [540, 10, 200], coul: "#8B5A2B", dessus: "#A8733F" });
+    [-200, 200].forEach(function (x) { o.push({ f: "cylindre", c: [x, -5, -30], r: 5, h: 10, n: 12, coul: "#9CA3AD" }); });
+    o.push({ f: "boite", c: [0, 60, -30], d: [470, 120, 22], coul: "#15171C", dessus: "#1F2228" });
+    [[0, 124, 480, 8], [0, -4, 480, 8]].forEach(function (f) { o.push({ f: "boite", c: [f[0], f[1], -30], d: [f[2], f[3], 26], coul: "#BFC5CC", dessus: "#E2E6EA", div: false }); });
+    [-238, 238].forEach(function (x) { o.push({ f: "boite", c: [x, 60, -30], d: [8, 136, 26], coul: "#BFC5CC", dessus: "#E2E6EA", div: false }); });
     for (i = 0; i < 8; i++) {
-      var x = -192 + i * 55, on = b[i] === "1";
-      o.push({ f: "cylindre", c: [x, 62, -47], r: 18, h: 6, n: 20, axe: "z", coul: "#8E96A6" });
-      o.push({ f: "sphere", c: [x, 62, -54], r: 15, coul: on ? "#FFE066" : "#4B5266", ec: on ? [0, 0, -26] : [0, 0, 0] });
+      var x = -192 + i * 55, on = b[i] === "1", ec = on ? [0, 0, -26] : [0, 0, 0];
+      o.push({ f: "cylindre", c: [x, 62, -47], r: 11, h: 8, n: 20, axe: "z", coul: "#B08D57", dessus: "#D2B07A" });
+      o.push({ f: "sphere", c: [x, 62, -58], r: 15, coul: on ? "#FFF3C4" : "#E4E7EC", op: on ? 1 : 0.8, ec: ec });
+      if (on) o.push({ f: "sphere", c: [x, 62, -58], r: 23, coul: "#FFB938", op: 0.22, ec: ec });
     }
-    o.push({ f: "boite", c: [-215, 0, 40], d: [10, 10, 10], coul: "#5A6170", div: false });
     return o;
   }
   remplacer("tle-maths-binaire", {
@@ -4343,7 +4347,7 @@ VRT_PLUS("3e-en-articles", [
         "<div class='attention'><b>Piège</b>256 combinaisons ne veut pas dire « jusqu'à 256 » : la combinaison 00000000 sert à afficher 0.</div>",
         planches: [{ type: "3d", titre: "Le tableau à 8 ampoules affiche 255", legende: "Les 8 ampoules allumées : 128 + 64 + 32 + 16 + 8 + 4 + 2 + 1 = 255 = 2⁸ − 1, le plus grand score possible. Le curseur fait avancer les ampoules allumées.",
           modele: { h: 320, rx: -10, ry: -16, echelle: 0.95, alt: "Tableau de score en trois dimensions avec huit ampoules allumées", eclate: "Faire ressortir les ampoules allumées", jouer: "Allumer", objets: panneau3D(255),
-            etiquettes: [{ p: [-192, 90, -54], t: "128" }, { p: [193, 90, -54], t: "1", cote: "d" }] } }],
+            etiquettes: [{ p: [-192, 90, -58], t: "128" }, { p: [193, 90, -58], t: "1", cote: "d" }] } }],
         fil: { html: "<p>Toutes les ampoules allumées : 11111111₂ = 2⁸ − 1 = <strong>255</strong>. Pour 300 > 255, il faut une 9ᵉ ampoule (valeur 256) : 300 = 256 + 32 + 8 + 4 = 100101100₂.</p>", verdicts: [[1, "rejetee", "256 combinaisons, mais de 0 à 255 : 256 n'est pas affichable."], [2, "validee", "Maximum 2⁸ − 1 = 255 ; 300 = 100101100₂ demande 9 ampoules."]] },
         retenir: "n bits : de 0 à 2ⁿ − 1. Un octet : 0 à 255." }
     ],
@@ -4373,21 +4377,21 @@ VRT_PLUS("3e-en-articles", [
   var MO_OLD = ancien("tle-sc-microscopie");
   function microscope3D() {
     var o = [], up = [0, 46, 0];
-    o.push({ f: "boite", c: [0, -10, 0], d: [460, 8, 260], coul: "#C9B79A", dessus: "#DCCDB3" });
-    o.push({ f: "boite", c: [0, 0, 10], d: [150, 16, 190], coul: "#2F3646", dessus: "#3B4357" });
-    o.push({ f: "boite", c: [0, 16, 70], d: [44, 150, 34], coul: "#2F3646", dessus: "#3B4357", div: false });
-    o.push({ f: "boite", c: [0, 112, 10], d: [130, 8, 120], coul: "#262C3A", dessus: "#343B4D", div: false });
+    o.push({ f: "boite", c: [0, -10, 0], d: [460, 8, 260], coul: "#8B5A2B", dessus: "#B07A45" });
+    o.push({ f: "boite", c: [0, 0, 10], d: [150, 16, 190], coul: "#E9E4D8", dessus: "#F4F1EA" });
+    o.push({ f: "boite", c: [0, 16, 70], d: [44, 150, 34], coul: "#E9E4D8", dessus: "#F4F1EA", div: false });
+    o.push({ f: "boite", c: [0, 112, 10], d: [130, 8, 120], coul: "#1B1D22", dessus: "#2A2D33", div: false });
     o.push({ f: "boite", c: [0, 121, 10], d: [96, 2, 30], coul: "#DDEFF7", op: 0.7, div: false });
     o.push({ f: "boite", c: [0, 123, 10], d: [16, 1, 14], coul: "#C77DB0", op: 0.8, div: false });
     o.push({ f: "cylindre", c: [0, 40, 10], r: 22, h: 3, n: 24, coul: "#B8C4D6", dessus: "#EAF2FB" });
-    o.push({ f: "cylindre", c: [26, 120, 70], r: 13, h: 12, n: 18, axe: "x", coul: "#59627A" });
-    o.push({ f: "cylindre", c: [-38, 120, 70], r: 13, h: 12, n: 18, axe: "x", coul: "#59627A" });
-    o.push({ f: "cylindre", c: [26, 90, 70], r: 8, h: 10, n: 14, axe: "x", coul: "#7A8399" });
-    o.push({ f: "boite", c: [0, 166, 52], d: [40, 50, 30], coul: "#2F3646", dessus: "#3B4357", div: false, ec: up });
-    o.push({ f: "cylindre", c: [0, 160, 10], r: 26, h: 12, n: 22, coul: "#B5BCC7", dessus: "#D8DDE4", ec: up });
-    [[-14, 0], [12, -8], [10, 12]].forEach(function (p, i) { o.push({ f: "cylindre", c: [p[0], 134 + i * 4, 10 + p[1]], r: 6.5 - i, r2: 5, h: 26 - i * 4, n: 14, coul: ["#C9A227", "#9DA5B2", "#B23A48"][i], ec: up }); });
-    o.push({ f: "cylindre", c: [0, 172, 10], r: 16, h: 80, n: 20, coul: "#2F3646", dessus: "#3B4357", ec: up });
-    o.push({ f: "cylindre", c: [0, 252, 10], r: 11, h: 26, n: 18, coul: "#59627A", dessus: "#1B2233", ec: up });
+    o.push({ f: "cylindre", c: [26, 120, 70], r: 13, h: 12, n: 18, axe: "x", coul: "#2A2D33" });
+    o.push({ f: "cylindre", c: [-38, 120, 70], r: 13, h: 12, n: 18, axe: "x", coul: "#2A2D33" });
+    o.push({ f: "cylindre", c: [26, 90, 70], r: 8, h: 10, n: 14, axe: "x", coul: "#C9CED6" });
+    o.push({ f: "boite", c: [0, 166, 52], d: [40, 50, 30], coul: "#E9E4D8", dessus: "#F4F1EA", div: false, ec: up });
+    o.push({ f: "cylindre", c: [0, 160, 10], r: 26, h: 12, n: 22, coul: "#C9CED6", dessus: "#EEF1F4", ec: up });
+    [[-14, 0], [12, -8], [10, 12]].forEach(function (p, i) { o.push({ f: "cylindre", c: [p[0], 134 + i * 4, 10 + p[1]], r: 6.5 - i, r2: 5, h: 26 - i * 4, n: 14, coul: ["#D8DDE3", "#C9CED6", "#D4D9DF"][i], ec: up }); o.push({ f: "cylindre", c: [p[0], 150 + i * 2, 10 + p[1]], r: 6.8 - i, h: 3, n: 14, coul: ["#C62828", "#F2C94C", "#1E88E5"][i], ec: up }); });
+    o.push({ f: "cylindre", c: [0, 172, 10], r: 16, h: 80, n: 20, coul: "#E9E4D8", dessus: "#F4F1EA", ec: up });
+    o.push({ f: "cylindre", c: [0, 252, 10], r: 11, h: 26, n: 18, coul: "#1B1D22", dessus: "#0E0F12", ec: up });
     o.forEach(function (x) { x.c[1] -= 130; });
     return o;
   }
@@ -4574,12 +4578,14 @@ VRT_PLUS("3e-en-articles", [
   function hemicycle3D(T) {
     var o = [], n = T.reduce(function (a, b) { return a + b; }, 0), L = [], k;
     T.forEach(function (t, i) { for (var j = 0; j < t; j++) L.push(i); });
-    o.push({ f: "boite", c: [0, -8, 40], d: [460, 8, 300], coul: "#A97D50", dessus: "#C49A6C" });
-    o.push({ f: "boite", c: [0, 12, 150], d: [120, 36, 40], coul: "#7A5230", dessus: "#946640" });
+    o.push({ f: "boite", c: [0, -8, 40], d: [460, 8, 300], coul: "#9C6B3C", dessus: "#C0894F" });
+    o.push({ f: "boite", c: [0, 12, 150], d: [120, 36, 40], coul: "#5D3A1E", dessus: "#7A5230" });
+    o.push({ f: "boite", c: [0, 32, 140], d: [40, 4, 16], coul: "#2E7D32", dessus: "#3E9B44", div: false });
     for (k = 0; k < n; k++) {
       var a = Math.PI * (k + 0.5) / n, x = -150 * Math.cos(a), z = 130 - 150 * Math.sin(a);
-      o.push({ f: "boite", c: [x, 0, z], d: [26, 22, 22], coul: COUL_L[L[k]], div: false });
-      o.push({ f: "boite", c: [x - 12 * Math.cos(a) * 0, 22, z - 9], d: [26, 24, 5], coul: COUL_L[L[k]], div: false });
+      o.push({ f: "boite", c: [x, 0, z], d: [26, 8, 22], coul: "#4A2C14", dessus: "#5D3A1E", div: false });
+      o.push({ f: "boite", c: [x, 8, z], d: [26, 12, 22], coul: COUL_L[L[k]], div: false });
+      o.push({ f: "boite", c: [x, 20, z - 8.5], d: [26, 24, 5], coul: COUL_L[L[k]], div: false });
     }
     return o;
   }
