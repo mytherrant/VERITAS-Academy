@@ -826,6 +826,20 @@
   "u": "/ressources/annales/bepc-informatique-2024.html"
  },
  {
+  "id": "bac-informatique-cde-2025",
+  "examen": "bac",
+  "m": "informatique",
+  "serie": "séries C, D et E",
+  "nomExamen": "Baccalauréat",
+  "fiche": "ressources/examen-informatique-bac.html",
+  "matiere": "Informatique (séries C, D et E)",
+  "mat": "info",
+  "classes": "Tle C,Tle D",
+  "annee": 2025,
+  "national": true,
+  "u": "/ressources/annales/bac-informatique-cde-2025.html"
+ },
+ {
   "id": "probatoire-informatique-cde-2025",
   "examen": "probatoire",
   "m": "informatique",
