@@ -1,3 +1,13 @@
+## Annales et séquentielles enrichies (17/11/2026)
+
+Demande de Jacques : « Enrichis aussi les annales et les séquences ».
+
+- **Module commun `tools/methodes/_commun.cjs`** (teintes et icônes d'Apprendre, `entete()`, `planTemps()`, `suite()`, `voisins()`), utilisé par `annales.cjs` et `sequentielles.cjs` ; `article()` des deux générateurs accepte `{ tete, fin }` (les index gardent l'ancien en-tête).
+- **Annales** (61 pages) : en-tête carte à la couleur de la matière (pastille, matière · examen · série · classes, « L'essentiel », puces durée, coefficient, sujet officiel, corrigé national ou VÉRITAS, lien « Composer en direct ») ; **plan de temps illustré** dans « L'épreuve » (barre lire / traiter / relire, environ 10 % / 78 % / 12 %, arrondis à 5 min) ; **session précédente / suivante** ; **« Les autres épreuves du <examen> <année> »** en pastilles à l'icône de chaque matière.
+- **Séquentielles** (50 pages) : même en-tête (puces durée, coefficient, nombre de leçons évaluées, « 1er exercice gratuit », « Composer en direct ») ; plan de temps ; leçons évaluées en **liste à cocher** ; épreuve précédente / suivante de la même matière ; autres matières de la même séquence.
+- Styles ajoutés en fin de `_methode.css` (`.mx-temps`, `.sq-lecons`, puces-liens).
+- Contrôlé dans Chromium (390 et 1280 px) : aucun débordement, 0 erreur JS. `annales`, `sequentielles`, `methodes_examens`, `oeuvres_statiques`, `habiller_pages`, `build_llms`, `build_apprendre_ressources`, `apprendre_carte` en `--controle` au vert.
+
 ## Post-it : le titre dans le ruban blanc (17/11/2026)
 
 Demande de Jacques (capture d'une leçon de 1re D) : « Mets les titres dans le petit cadre blanc au milieu des encadrés ».

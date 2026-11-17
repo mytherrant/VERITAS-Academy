@@ -29,6 +29,7 @@ const GABARIT = "ressources/methode-dictee.html";
 const ARGS = process.argv.slice(2), CONTROLE = ARGS.includes("--controle"), PUBLIER = ARGS.includes("--publier");
 const esc = s => String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
 let erreurs = 0; const err = m => { erreurs++; console.error("ERREUR : " + m); };
+const K = require("./methodes/_commun.cjs");
 
 // Classes d'examen d'abord (demande de Jacques, 15/11/2026). Le préfixe d'identifiant est celui que
 // vrt_classe_de_lecon() reconnaît côté serveur : il décide de la classe couverte par la formule.
@@ -190,13 +191,14 @@ function habiller(html, page, titre, description, ld) {
   rep(/<style id="vrt-methode">[\s\S]*?<\/style>/, '<style id="vrt-methode">' + CSS + "</style>", "style vrt-methode");
   return html;
 }
-function article(badge, h1, chapo, parties, cta) {
+function article(badge, h1, chapo, parties, cta, opts) {
+  opts = opts || {};
   const som = '<aside class="mx-sommaire" aria-label="Sommaire"><p>Sommaire</p><ol class="mx-ol">' + parties.map(([id, ti], k) => '<li><a href="#' + id + '">' + (k + 1) + ". " + ti + "</a></li>").join("") +
     '</ol><div class="mx-lu"><span id="mxLu">Lecture : 0 %</span><div class="mx-barre"><i id="mxBar"></i></div></div></aside>';
   const nav = '<nav class="mx-som" aria-label="Sommaire">' + parties.map(([id, ti]) => '<a href="#' + id + '">' + ti + "</a>").join("") + "</nav>";
   const corps = parties.map(([id, ti, h], k) => '<section class="partie" id="' + id + '"><h2><span class="mx-num">' + (k + 1) + '</span><span class="mx-txt">' + ti + "</span></h2>" + h + "</section>\n").join("");
-  return '<div class="mx-grille" id="mx" data-vh-ignore="1">' + som + '<article class="card mx">\n<span class="badge">' + esc(badge) + "</span>\n<h1>" + esc(h1) + "</h1>\n" +
-    '<p class="mx-chapo">' + chapo + "</p>\n" + nav + "\n" + corps + cta + "\n</article></div>" + '<script src="/ressources/methode.js?v=' + JS_V + '" defer></script>';
+  return '<div class="mx-grille" id="mx" data-vh-ignore="1">' + som + '<article class="card mx">\n' + (opts.tete || '<span class="badge">' + esc(badge) + "</span>\n<h1>" + esc(h1) + "</h1>\n" +
+    '<p class="mx-chapo">' + chapo + "</p>\n") + nav + "\n" + corps + (opts.fin || "") + cta + "\n</article></div>" + '<script src="/ressources/methode.js?v=' + JS_V + '" defer></script>';
 }
 const RE_ART = /<div class="mx-grille"[^>]*>[\s\S]*?<\/article><\/div>(?:<script src="\/ressources\/methode\.js\?v=[0-9a-f]+" defer><\/script>)?/;
 const GAB = fs.readFileSync(path.join(R, GABARIT), "utf8");
@@ -247,7 +249,20 @@ for (const e of epreuves) {
   const badge = blanc ? "Examen blanc · " + meta.classe + " · format " + exam : "Épreuve séquentielle · " + meta.classe + " · Séquence " + meta.seq;
   const chapo = blanc ? "Un examen blanc complet de fin d'année, au format et au barème du " + exam + ". Le premier exercice est ouvert à tous."
     : "Une épreuve de séquence sur les leçons de la progression nationale, au format des évaluations APC. Le premier exercice est ouvert à tous.";
-  let html = GAB.replace(RE_ART, () => article(badge, titre, chapo, parties, cta));
+  // En-tête carte, plan de temps, séquences voisines, autres matières de la séquence (17/11/2026).
+  const mat = MATIERES[meta.matiere][2];
+  const tete = K.entete({ mat, badge, titre, chapo,
+    ligne: "<b>" + esc(lib) + "</b> · " + esc(meta.classe) + " · " + (blanc ? "format du " + exam : "séquence " + meta.seq),
+    puces: [["horloge", esc(meta.duree)], meta.coef && ["coef", "Coefficient " + esc(meta.coef)], e.lecons.length && ["liste", e.lecons.length + (blanc ? " chapitres" : " leçon" + (e.lecons.length > 1 ? "s" : "") + " évaluée" + (e.lecons.length > 1 ? "s" : ""))], ["libre", "1er exercice gratuit", "#sujet"], ["chrono", "Composer en direct", "#epreuve"]] });
+  parties[0][2] += K.planTemps(minutes(meta.duree));
+  const k = soeurs.indexOf(e), prec = soeurs[k - 1], suiv = soeurs[k + 1];
+  const autres = epreuves.filter(x => x.meta.classe === meta.classe && String(x.meta.seq) === String(meta.seq) && x !== e)
+    .sort((a, b) => ORDRE.indexOf(a.meta.matiere) - ORDRE.indexOf(b.meta.matiere))
+    .map(x => ({ u: "/" + x.page, mat: MATIERES[x.meta.matiere][2], ti: MATIERES[x.meta.matiere][0].replace(/^Français : /, "") }));
+  const fin = K.suite(prec && { u: "/" + prec.page, mot: blanc ? "Séquence précédente" : "Épreuve précédente", ti: nomSeq(prec.meta.seq) + " · " + lib },
+    suiv && { u: "/" + suiv.page, mot: BLANC(suiv.meta.seq) ? "Fin d'année" : "Épreuve suivante", ti: nomSeq(suiv.meta.seq) + " · " + lib }) +
+    K.voisins((blanc ? "Les autres examens blancs" : "Les autres épreuves de la séquence " + meta.seq) + " en " + meta.classe, autres);
+  let html = GAB.replace(RE_ART, () => article(badge, titre, chapo, parties, cta, { tete, fin }));
   html = html.replace(/(<script src="\/ressources\/methode\.js\?v=[0-9a-f]+" defer><\/script>)/, m => m + '<script src="/ressources/annales/annales.js?v=' + AX_V + '" defer></script>');
   html = habiller(html, e.page, titre + " | VÉRITAS", description, { "@type": "LearningResource", name: titre, description, educationalLevel: meta.classe, learningResourceType: blanc ? "Examen blanc" : "Évaluation séquentielle", about: lib, isAccessibleForFree: false });
   ecrire(e.page, html);
