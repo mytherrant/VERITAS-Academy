@@ -232,7 +232,7 @@ html body .sec-t h2::after,html body .res-fam>h2::after{left:34px}
 
 /* 1. En-tête : teinte de la matière (--mt, --mt-pale posées par commun.js) */
 html body .bandeau.ent{display:block!important;position:relative;overflow:hidden;margin:4px 0 22px!important;padding:20px 22px 18px!important;border-radius:22px!important;
-  background:linear-gradient(135deg,var(--mt-pale,#EAF0FB) 0%,#fff 62%)!important;border:1px solid color-mix(in srgb,var(--mt,#1E499B) 22%,#fff)!important;border-left:6px solid var(--mt,#1E499B)!important;color:#001136!important;box-shadow:0 6px 18px rgba(0,17,54,.06)!important}
+  background:linear-gradient(135deg,var(--mt-pale,#EAF0FB) 0%,#fff 62%)!important;border:1px solid color-mix(in srgb,var(--mt,#1E499B) 22%,#fff)!important;color:#001136!important;box-shadow:0 6px 18px rgba(0,17,54,.06)!important}
 html body .bandeau.ent::before,html body .bandeau.ent::after{display:none!important}
 .bandeau.ent .ent-haut{display:flex;align-items:center;gap:14px;margin:0 0 10px}
 html body .bandeau.ent .medaille{flex:0 0 64px;width:64px!important;height:64px!important;border-radius:18px!important;background:#fff!important;border:2px solid color-mix(in srgb,var(--mt,#1E499B) 35%,#fff)!important;box-shadow:none!important;transform:none!important;animation:none!important;display:grid;place-items:center;color:var(--mt)}
