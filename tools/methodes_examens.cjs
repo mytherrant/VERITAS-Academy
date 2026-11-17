@@ -74,6 +74,51 @@ function lireSource(f, meta, corps) {
   return { meta, corps, ids, src: f };
 }
 
+/* En-tête parlant et liens de fin (17/11/2026, « aligne les ressources sur les pages de cours ») :
+   la matière de chaque fiche vient de _classement.json ; teinte et icône sont celles d'Apprendre (apprendre/commun.js). */
+const CLASSEMENT = JSON.parse(fs.readFileSync(path.join(SRC, "_classement.json"), "utf8"));
+const TEINTE = { francais: ["Français", "m-francais", "#1E499B", "#DBE8FE"], anglais: ["Anglais", "m-anglais", "#B03A6E", "#FBE4EE"], maths: ["Mathématiques", "m-maths", "#0E7C86", "#DDF2F4"], pct: ["PCT", "m-pct-violet", "#5B4FA8", "#EAE7F7"], physique: ["Physique-chimie", "m-pct-violet", "#5B4FA8", "#EAE7F7"], chimie: ["Chimie", "m-pct-orange", "#C24E00", "#FDEBDD"], svt: ["SVTEEHB", "m-svt", "#007E11", "#E0F5E5"], sciences: ["Sciences", "m-svt", "#007E11", "#E0F5E5"], histoire: ["Histoire-géographie", "m-histoire", "#A84200", "#FFF3E4"], geo: ["Histoire-géographie", "m-geo", "#1E499B", "#DBE8FE"], ecm: ["ECM", "m-ecm", "#9A6F00", "#FFF6DA"], philo: ["Philosophie", "m-philo", "#5B4FA8", "#EAE7F7"], info: ["Informatique", "m-info", "#0C2A6A", "#E4E9F2"], espagnol: ["Langues vivantes", "m-langues-orange", "#C24E00", "#FDEBDD"], allemand: ["Langues vivantes", "m-langues-bleu", "#1E499B", "#DBE8FE"] };
+const SPRITE = "/assets/veritas-matieres.svg?v=20261110g";
+const EXAMENS = { bepc: "BEPC", probatoire: "Probatoire", bac: "Baccalauréat" };
+const examenDe = p => { const m = p.match(/(?:^|[-/])(bepc|probatoire|bac)(?=[-.])/); return m ? m[1] : ""; };
+const FICHES = []; // pages de méthode dans l'ordre du classement, une seule fois chacune
+CLASSEMENT.forEach(e => { const p = e.u.replace(/^\//, "").replace(/#.*$/, ""); if (FICHES.some(f => f.p === p)) return; FICHES.push({ p, u: "/" + p, ti: e.ti, m: e.l[0][1], cl: [].concat(...e.l.map(x => x[0].split(","))) }); });
+const fiche = p => FICHES.find(f => f.p === p);
+const PIC = { horloge: '<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>', parties: '<path d="M8 6h12M8 12h12M8 18h12"/><circle cx="4" cy="6" r="1"/><circle cx="4" cy="12" r="1"/><circle cx="4" cy="18" r="1"/>', crayon: '<path d="M4 20h4L19 9a2.8 2.8 0 0 0-4-4L4 16z"/><path d="M13.5 6.5l4 4"/>', annales: '<path d="M5 3h10l4 4v14H5z"/><path d="M14 3v5h5M9 13h6M9 17h6"/>', source: '<path d="M2 5h6a3 3 0 0 1 3 3v12a2 2 0 0 0-2-2H2zM22 5h-6a3 3 0 0 0-3 3v12a2 2 0 0 1 2-2h7z"/>', imprimer: '<path d="M7 9V3h10v6M7 17H4v-7h16v7h-3"/><path d="M7 14h10v7H7z"/>', bref: '<circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1"/>' };
+const pic = (k, t) => '<svg width="' + (t || 15) + '" height="' + (t || 15) + '" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + PIC[k] + "</svg>";
+const icoMat = (id, t) => '<svg width="' + t + '" height="' + t + '" aria-hidden="true"><use href="' + SPRITE + "#" + id + '"/></svg>';
+
+function entete(s, n) {
+  const f = fiche(s.meta.page), T = TEINTE[f ? f.m : ""] || TEINTE.francais, ex = examenDe(s.meta.page);
+  const mots = s.corps.replace(/<[^>]+>/g, " ").split(/\s+/).filter(Boolean).length, min = Math.max(3, Math.round(mots / 180));
+  const titres = s.ids.map(x => x[1]).join(" ");
+  const puces = ['<span>' + pic("horloge") + min + " min de lecture</span>", "<span>" + pic("parties") + n + " parties</span>"];
+  if (/exemple|traité|sujet/i.test(titres)) puces.push("<span>" + pic("crayon") + "Exemple traité</span>");
+  if (s.ids.some(x => x[0] === "annales")) puces.push("<span>" + pic("annales") + "Annales corrigées</span>");
+  puces.push("<span>" + pic("source") + "Sources officielles</span>", '<button type="button" data-mx-imprimer>' + pic("imprimer") + "Imprimer</button>");
+  const qui = f ? [...new Set(f.cl)].join(", ") : "";
+  return '<header class="mx-ent" style="--mt:' + T[2] + ";--mt-pale:" + T[3] + '"><div class="mx-ent-haut"><div class="mx-med">' + icoMat(T[1], 44) + '</div><div class="mx-tags"><span class="badge">' + esc(s.meta.badge) + '</span><span class="mx-mat"><b>' + T[0] + "</b>" + (ex ? " · " + EXAMENS[ex] : "") + (qui ? " · " + esc(qui) : "") + "</span></div></div>\n<h1>" + esc(s.meta.titre) + "</h1>\n" +
+    (s.meta.chapo ? '<div class="mx-bref"><p class="mx-bref-t">' + pic("bref", 14) + 'L\'essentiel</p><p class="mx-chapo">' + s.meta.chapo + "</p></div>\n" : "") +
+    '<div class="mx-puces">' + puces.join("") + "</div></header>\n";
+}
+
+// Fiche précédente / suivante de la même matière, puis les autres épreuves du même examen.
+function fin(s) {
+  const f = fiche(s.meta.page); if (!f) return "";
+  const meme = FICHES.filter(x => TEINTE[x.m] && TEINTE[f.m] && TEINTE[x.m][0] === TEINTE[f.m][0]), k = meme.findIndex(x => x.p === f.p);
+  const prec = meme[k - 1], suiv = meme[k + 1];
+  let h = "";
+  if (prec || suiv) h += '<nav class="mx-suite" aria-label="Fiches voisines">' +
+    (prec ? '<a href="' + prec.u + '"><span class="mx-fl">‹</span><span><small>Fiche précédente</small>' + esc(prec.ti) + "</span></a>" : "") +
+    (suiv ? '<a class="mx-suiv" href="' + suiv.u + '"><span><small>Fiche suivante</small>' + esc(suiv.ti) + '</span><span class="mx-fl">›</span></a>' : "") + "</nav>\n";
+  const ex = examenDe(s.meta.page);
+  if (ex) {
+    const vus = {}, autres = FICHES.filter(x => x.p !== f.p && examenDe(x.p) === ex && TEINTE[x.m] && TEINTE[x.m][0] !== TEINTE[f.m][0]).filter(x => !vus[TEINTE[x.m][0]] && (vus[TEINTE[x.m][0]] = 1));
+    if (autres.length) h += '<div class="mx-voisins"><p>Les autres épreuves du ' + EXAMENS[ex] + "</p><div>" + autres.map(x => { const T = TEINTE[x.m]; return '<a href="' + x.u + '" style="--c:' + T[2] + '">' + icoMat(T[1], 24) + T[0] + "</a>"; }).join("") + "</div></div>\n";
+  }
+  return h;
+}
+
 // Même dessin que les leçons d'Apprendre : sommaire latéral + barre de lecture, objectifs,
 // parties numérotées (un <h2 id> ouvre une partie), encadrés illustrés.
 function article(s) {
@@ -86,8 +131,7 @@ function article(s) {
     n++; return '<section class="partie" id="' + m[1] + '"><h2><span class="mx-num">' + n + '</span><span class="mx-txt">' + m[2] + "</span></h2>" + p.slice(m[0].length).trim() + "</section>\n";
   }).join("");
   const obj = (s.meta.objectifs || []).length ? '<div class="objectifs"><b>À la fin de cette fiche, tu sauras :</b><ul>' + s.meta.objectifs.map(o => "<li>" + esc(o) + "</li>").join("") + "</ul></div>\n" : "";
-  return '<div class="mx-grille" id="mx" data-vh-ignore="1">' + som + '<article class="card mx">\n<span class="badge">' + esc(s.meta.badge) + "</span>\n<h1>" + esc(s.meta.titre) + "</h1>\n" +
-    (s.meta.chapo ? '<p class="mx-chapo">' + s.meta.chapo + "</p>\n" : "") + nav + "\n" + obj + corps +
+  return '<div class="mx-grille" id="mx" data-vh-ignore="1">' + som + '<article class="card mx">\n' + entete(s, n) + nav + "\n" + obj + corps + fin(s) +
     '<a class="cta" href="/apprendre/">Réviser dans Apprendre<small>Leçons, quiz et corrigés rangés par classe et par série</small></a>\n</article></div>' +
     '<script src="/ressources/methode.js?v=' + JS_V + '" defer></script>';
 }

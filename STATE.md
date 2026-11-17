@@ -1,3 +1,13 @@
+## Ressources gratuites : même dessin que les leçons, fiches enrichies (17/11/2026)
+
+Demande de Jacques (capture de `ressources/examen-svt-bac.html` au téléphone) : « Aligne la mise en forme des ressources gratuites comme les pages de cours. Enrichis-les si possible. »
+
+- **Feuille commune `tools/methodes/_methode.css`** (fiches de méthode, annales, séquentielles : ~150 pages) : couche « dessin des leçons » ajoutée en fin de fichier. Police **Roboto** (fichiers `assets/polices/`), titres de partie au **cercle magenta numéroté à point or** et titre magenta souligné magenta → or (toutes les parties, plus de couleurs tournantes), sous-titres `h3` bleu-vert, **encadrés à icône illustrée et rail en pointillés** (icônes reprises telles quelles d'`apprendre/modele.css`), objectifs en carte à cible et **pastilles de couleur** (la coche du site est neutralisée), texte justifié avec césure, tableaux à en-tête teinté de la matière, sources discrètes.
+- **En-tête parlant** (`methodes_examens.cjs`, `entete()`) : carte teintée de la matière (`--mt`, `--mt-pale` d'Apprendre ; matière tirée de `_classement.json`), médaille à l'icône de la matière, pastille (badge), « Matière · Examen · classes », titre, chapô encadré en pointillés « L'essentiel », puces (temps de lecture, nombre de parties, exemple traité, annales corrigées, sources officielles, bouton **Imprimer**).
+- **Fin de fiche** (`fin()`) : **fiche précédente / suivante** de la même matière (boutons des leçons, la suivante en bleu plein à flèche or) et **« Les autres épreuves du BEPC / Probatoire / Baccalauréat »** en pastilles à l'icône de chaque matière.
+- Annales et séquentielles gardent leur balisage (pastille + titre) et reçoivent le nouveau dessin par la feuille commune.
+- Contrôlé dans Chromium (390 et 1280 px) : aucun débordement horizontal, 0 erreur JS. `methodes_examens`, `annales`, `sequentielles`, `habiller_pages`, `build_llms` en `--controle` au vert.
+
 ## Leçon : en-tête parlant, barre des matières sobre, offres encadrées, leçons voisines en avant (17/11/2026)
 
 Retours de Jacques (captures d'une leçon de Tle A au téléphone) : « Entête de leçons trop simple et pas assez parlant. Les icônes en bas sont touffues : enlève l'ombre et les couleurs autour et diminue un peu la taille. Encadre aussi les autres formules d'abonnement et le message adressé aux enseignants à la fin », puis « leçon suivante et précédente en bas : mets en évidence, sinon cela peut échapper ».
