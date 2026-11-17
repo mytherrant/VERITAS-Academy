@@ -1,3 +1,11 @@
+## Annales : carte du Cameroun après 1914-1916 redessinée en SVG (17/11/2026)
+
+Retour de Jacques : « L'image du Cameroun n'est pas nette ». C'était le document 3 de l'annale d'histoire du probatoire A-ABI 2025 (`proba-2025-histoire-a-carte.jpg`, scan granuleux de 650 × 872 px).
+
+- Redessinée dans `tools/annales/_schemas.cjs` (`proba-2025-histoire-a-carte`) d'après le scan agrandi et quadrillé : mêmes tracés (lac Tchad, Guinée espagnole, bande sous mandat anglais hachurée de Buea à Dikoa, limites de la zone restituée à l'AEF en pointillés, Chari, Congo) et mêmes libellés, rose des vents et échelle 0-200 km.
+- Dessin à l'échelle 0,8 dans un cadre de 520 px : sous le seuil `ax-large` (600 px), la carte s'adapte au téléphone au lieu de défiler. `currentColor` : nette en mode sombre. « Guinée espagnole » placé dans son territoire (il chevauchait la frontière sur le scan).
+- Source : `<!--schema:proba-2025-histoire-a-carte-->` remplace la figure JPEG ; le JPEG est retiré. `annales.cjs --controle` au vert ; Chromium au téléphone (376 × 505 px, clair et sombre), 0 erreur JS.
+
 ## Apprendre : lot 6, classes d'examen (17/11/2026)
 
 Demande de Jacques : « Continue » (après le lot 5, PR #337 déployée).
