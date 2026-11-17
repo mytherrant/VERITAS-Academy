@@ -1,3 +1,15 @@
+## Apprendre : lot 6, classes d'examen (17/11/2026)
+
+Demande de Jacques : « Continue » (après le lot 5, PR #337 déployée).
+
+- **`apprendre/_src/13-approfondies-examens-2.js`** : 4 leçons gratuites de classes d'examen au gabarit approfondi, remplacées en place, couleurs proches des objets réels :
+  - **3e géographie, présentation du Cameroun** : lettre de Yao, correspondant d'Abidjan (« Afrique en miniature ») ; carte simplifiée des régions naturelles et des voisins, bloc-diagramme 3D du sud au nord avec le mont Cameroun, pluies de Debundscha à Kousséri ; **simulation** : carte interactive (10 villes : milieu, altitude, pluies).
+  - **3e histoire, Cameroun allemand** : débat devant la Pagode de Douala (modernisation ou oppression ?) ; frise 1884-1916, carte des chemins de fer du Nord et du Centre, train à vapeur 3D chargé de cacao.
+  - **3e français, subordonnée relative** : avis de recherche fautif de Radio Bafang ; locomotive et wagon 3D (antécédent / relative, wagon décrochable), taxis déterminative / explicative ; **simulation** : choisir le pronom relatif (8 phrases, correction expliquée).
+  - **Tle, gérer son temps** : bilan d'Aïcha à Ngaoundéré (4 h 30 d'écran) ; journée en anneau, semaine type 3D, courbe de l'oubli et révisions espacées ; **simulateur** de semaine (sommeil, écran, cours → heures de révision réparties selon les coefficients).
+- `lecons.js?v=20261117d` ; 4 pages `apprendre/cours/` régénérées et habillées. Contrôlé dans Chromium (1200 et 390 px) : aucun débordement, aucune erreur JS. Bancs : réglages 29/29, verrou 18/18, gabarits 54/54, planche mobile 23/23, charte 34/34, lisibilité 7/7.
+- **Suite** : 3e histoire (partage de l'Afrique), ECM (démocratie), langues ; Tle philosophie (passions, liberté), orientation (bac), culture nationale ; 1re langues et ESF.
+
 ## Leçon : en-tête parlant, barre des matières sobre, offres encadrées, leçons voisines en avant (17/11/2026)
 
 Retours de Jacques (captures d'une leçon de Tle A au téléphone) : « Entête de leçons trop simple et pas assez parlant. Les icônes en bas sont touffues : enlève l'ombre et les couleurs autour et diminue un peu la taille. Encadre aussi les autres formules d'abonnement et le message adressé aux enseignants à la fin », puis « leçon suivante et précédente en bas : mets en évidence, sinon cela peut échapper ».
