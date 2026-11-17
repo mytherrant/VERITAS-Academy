@@ -78,13 +78,10 @@ const SYMBOLES = {
    sous-titre 20 px bleu avec pastille ; texte 18 px. #vrtNav (la barre
    d'habillage, présente sur chaque page d'œuvre) donne la spécificité d'un id :
    les règles de veritas-habillage.css (0,5,4 + !important) cèdent. */
+// Dessin des leçons d'Apprendre (17/11/2026) : tools/oeuvres_statiques.css, commentaires retirés.
+const OE_CSS = fs.readFileSync(path.join(__dirname, 'oeuvres_statiques.css'), 'utf8').replace(/\r/g, '').replace(/\/\*[\s\S]*?\*\//g, '').replace(/\n\s*\n/g, '\n').trim();
 const STYLE = '<!-- oeuvre-style -->\n<style>'
-  + 'body:has(#vrtNav) .wrap article h2{font-size:24px!important;font-weight:700!important;line-height:1.3!important}'
-  + 'body:has(#vrtNav) .wrap article h2>svg.vi{width:46px!important;height:46px!important;padding:10px!important;border-width:2.5px!important}'
-  + 'body:has(#vrtNav) .wrap article h3{font-size:20px!important;font-weight:700!important;color:#1E499B!important;margin:28px 0 8px!important;display:flex;align-items:baseline;gap:10px;text-align:left!important}'
-  + 'body:has(#vrtNav) .wrap article h3::before{content:"";flex:0 0 10px;height:10px;border-radius:50%;background:#FFC93C;transform:translateY(-2px)}'
-  + 'body:has(#vrtNav) .wrap article p,body:has(#vrtNav) .wrap article li{font-size:18px!important;line-height:1.75!important}'
-  + '@media (max-width:600px){body:has(#vrtNav) .wrap article p{text-align:left!important}body:has(#vrtNav) .wrap article h2{font-size:22px!important}body:has(#vrtNav) .wrap article h2>svg.vi{width:42px!important;height:42px!important;padding:9px!important}body:has(#vrtNav) .wrap article h3{font-size:19px!important}}'
+  + OE_CSS
   + '.lecons{display:grid;gap:12px;margin:8px 0 6px}'
   + '.lecon{background:#FFF8E5;border-radius:14px;padding:14px 16px}'
   + '.lecon strong{display:block;font-size:18.5px;color:#001136;margin-bottom:4px}'
@@ -127,7 +124,10 @@ function analyseHtml(contenu) {
   }).join('\n');
 }
 
-function bloc(o, cle) {
+// Teinte pâle calculée (le correcteur de contraste du site ne sait pas lire color-mix()).
+const pale = (hex, a) => '#' + [1, 3, 5].map(i => Math.round(parseInt(hex.slice(i, i + 2), 16) * a + 255 * (1 - a)).toString(16).padStart(2, '0')).join('');
+
+function bloc(o, cle, nom) {
   const f = o.fiche || {};
   const out = ['<!-- oeuvre-statique -->', '<section class="oeuvre-statique" aria-label="Analyse de l’œuvre" style="text-align:left">'];
 
@@ -135,7 +135,7 @@ function bloc(o, cle) {
     ['Mouvement', f.mouvement], ['Lieu', f.lieu]].filter(x => x[1]);
   if (identite.length) {
     out.push(h2('fiche', 'graduation', 'Fiche d’identité'));
-    out.push('<ul>' + identite.map(x => '<li><strong>' + esc(x[0]) + ' :</strong> ' + esc(x[1]) + '</li>').join('') + '</ul>');
+    out.push('<ul class="oe-fiche">' + identite.map(x => '<li><strong>' + esc(x[0]) + '</strong> ' + esc(x[1]) + '</li>').join('') + '</ul>');
   }
 
   if ((f.axes || []).length) {
@@ -143,12 +143,17 @@ function bloc(o, cle) {
     out.push('<ol>' + f.axes.map(a => '<li>' + esc(a) + '</li>').join('') + '</ol>');
   }
 
-  const branches = ((o.carte || {}).branches || []).filter(b => !/^axes/i.test(b.label || ''));
-  branches.forEach(b => {
-    if (!(b.items || []).length) return;
-    out.push('<h3>' + esc(b.label) + '</h3>');
-    out.push('<ul>' + b.items.map(i => '<li>' + esc(i) + '</li>').join('') + '</ul>');
-  });
+  /* Carte mentale dessinée (17/11/2026, « enrichis et illustre ») : le centre et les branches
+     de litt-oeuvres.js, en HTML (lisible au téléphone, indexé), couleurs de l'application. */
+  const carte = o.carte || {}, branches = (carte.branches || []).filter(b => (b.items || []).length);
+  if (branches.length) {
+    const centre = String(carte.centre || o.titre || '').split('\n').map(net).filter(Boolean);
+    out.push(h2('carte', 'compass', 'La carte mentale de l’œuvre'));
+    out.push('<div class="oe-carte"><div class="oe-centre"><b>' + esc(centre[0] || o.titre) + '</b>'
+      + (centre.length > 1 ? '<small>' + esc(centre.slice(1).join(' · ')) + '</small>' : '') + '</div><div class="oe-branches">'
+      + branches.map(b => { const k = /^#[0-9a-f]{6}$/i.test(b.color || '') ? b.color : '#1E499B'; return '<div class="oe-br" style="--c:' + k + ';--cp:' + pale(k, .07) + ';--cb:' + pale(k, .3) + '"><b>' + esc(net(b.label)) + '</b><ul>'
+        + b.items.map(i => '<li>' + esc(net(i)) + '</li>').join('') + '</ul></div>'; }).join('') + '</div></div>');
+  }
 
   const an = o.analyse || {};
   if (an.contenu) {
@@ -158,7 +163,7 @@ function bloc(o, cle) {
 
   if ((o.morales || []).length) {
     out.push(h2('lecons', 'heart', 'Les leçons de vie'));
-    out.push('<div class="lecons">' + o.morales.map(m => '<div class="lecon"><strong>' + esc(m.t) + '</strong><p>' + valoriser(esc(m.d), o, cle, false) + '</p></div>').join('') + '</div>');
+    out.push('<div class="lecons oe-postits">' + o.morales.map(m => '<div class="lecon"><strong>' + esc(m.t) + '</strong><p>' + valoriser(esc(m.d), o, cle, false) + '</p></div>').join('') + '</div>');
   }
 
   if ((o.citations || []).length) {
@@ -166,27 +171,41 @@ function bloc(o, cle) {
     o.citations.forEach(c => {
       out.push('<figure class="cit"><blockquote>« ' + esc(net(c.texte)) + ' »</blockquote>'
         + (c.source ? '<figcaption>' + esc(c.source) + '</figcaption>' : '') + '</figure>');
-      if ((c.figures || []).length) out.push('<p><strong>' + lib(o, 'figures') + '</strong> ' + esc(c.figures.join(' ; ')) + '.</p>');
-      if (c.analyse) out.push('<p>' + esc(c.analyse) + '</p>');
-      if (c.effet) out.push('<p><strong>' + lib(o, 'effet') + '</strong> ' + esc(c.effet) + '</p>');
+      const exp = [];
+      if ((c.figures || []).length) exp.push('<p><strong>' + lib(o, 'figures') + '</strong> ' + esc(c.figures.join(' ; ')) + '.</p>');
+      if (c.analyse) exp.push('<p>' + esc(c.analyse) + '</p>');
+      if (c.effet) exp.push('<p><strong>' + lib(o, 'effet') + '</strong> ' + esc(c.effet) + '</p>');
+      if (exp.length) out.push('<div class="oe-enc oe-expl"><strong>' + (jeune(o) ? 'Je comprends la citation' : 'Explication') + '</strong>' + exp.join('') + '</div>');
     });
   }
 
   if ((o.techniques || []).length) {
     out.push(h2('procedes', 'pencil', lib(o, 'procedes')));
     o.techniques.forEach(t => {
-      out.push('<h3>' + esc(t.nom) + '</h3>');
+      out.push('<div class="oe-enc oe-proc"><strong>' + esc(t.nom) + '</strong>');
       if (t.def) out.push('<p>' + esc(t.def) + '</p>');
       // Un exemple qui contient déjà ses guillemets (ou qui décrit au lieu de citer) n'en reçoit pas d'autres.
       if (t.exemple) { const ex = net(t.exemple); out.push('<p><strong>Exemple :</strong> ' + (/[«»]/.test(ex) ? esc(ex) : '« ' + esc(ex) + ' »') + '</p>'); }
       if (t.effet) out.push('<p><strong>Effet :</strong> ' + esc(t.effet) + '</p>');
+      out.push('</div>');
     });
   }
 
   if ((o.controle || []).length) {
     out.push(h2('questions', 'graduation', lib(o, 'questions')));
     o.controle.forEach(q => {
-      out.push('<h3>' + esc(q.q) + '</h3><p>' + esc(q.r) + '</p>');
+      out.push('<details class="oe-ctrl"><summary>' + esc(q.q) + '</summary><p>' + esc(q.r) + '</p></details>');
+    });
+  }
+
+  // Quiz (17/11/2026) : les QCM de l'application, réponse et explication à déplier.
+  const qcm = (o.qcm || []).filter(q => q && q.q && (q.opts || []).length && q.opts[q.ans] != null);
+  if (qcm.length) {
+    out.push(h2('quiz', 'target', 'Teste-toi : ' + qcm.length + ' questions'));
+    qcm.forEach((q, k) => {
+      out.push('<div class="oe-qcm"><p class="oe-qq"><span>' + (k + 1) + '</span>' + esc(net(q.q)) + '</p><ol class="oe-opts">'
+        + q.opts.map(x => '<li>' + esc(net(x)) + '</li>').join('') + '</ol><details><summary>Voir la réponse</summary><p><strong>Réponse '
+        + 'ABCDEFGH'[q.ans] + ' :</strong> ' + esc(net(q.opts[q.ans])) + (q.exp ? (/[.!?…»]$/.test(net(q.opts[q.ans])) ? ' ' : '. ') + esc(net(q.exp)) : '') + '</p></details></div>');
     });
   }
 
@@ -198,6 +217,10 @@ function bloc(o, cle) {
       + (ev.defi ? '<p class="defi">' + esc(ev.defi) + '</p>' : '') + '</div>');
   }
 
+  const k = ORDRE.indexOf(nom), prec = ORDRE[k - 1], suiv = ORDRE[k + 1];
+  const lien = (n, cls, mot) => { const x = OEUVRES[CLE[n]]; return x ? '<a class="' + cls + '" href="/oeuvres/' + n + '">' + (cls === 'oe-suiv' ? '' : '<span class="oe-fl">‹</span>')
+    + '<span><small>' + mot + ' · ' + esc(x.classe) + '</small>' + esc(x.titre) + '</span>' + (cls === 'oe-suiv' ? '<span class="oe-fl">›</span>' : '') + '</a>' : ''; };
+  if (k >= 0 && (prec || suiv)) out.push('<nav class="oe-suite" aria-label="Œuvres voisines">' + (prec ? lien(prec, 'oe-prec', 'Œuvre précédente') : '') + (suiv ? lien(suiv, 'oe-suiv', 'Œuvre suivante') : '') + '</nav>');
   out.push('</section>', '<!-- /oeuvre-statique -->');
   return out.join('\n');
 }
@@ -327,6 +350,40 @@ function haut(page, o, cle) {
   return page;
 }
 
+/* Ordre de lecture des œuvres (6e → Tle) pour « œuvre précédente / suivante ». */
+const RANG = ['6e', '5e', '4e', '3e', '2nde', '1ere', 'tle'];
+const CLE = {};
+fs.readdirSync(DOSSIER).filter(n => n.endsWith('.html') && n !== 'index.html').forEach(n => {
+  const m = fs.readFileSync(path.join(DOSSIER, n), 'utf8').match(/#oeuvre\?k=([a-z0-9_]+)/);
+  if (m && OEUVRES[m[1]]) CLE[n] = m[1];
+});
+const ORDRE = Object.keys(CLE).sort((a, b) => (RANG.indexOf(a.split('-')[0]) - RANG.indexOf(b.split('-')[0])) || a.localeCompare(b));
+
+/* En-tête (17/11/2026, « aligne sur les pages de cours ») : carte comme l'en-tête des leçons,
+   couverture en médaille. Un <header> autour du titre empêche vitrine.js d'en faire le bandeau bleu. */
+const PIC = { horloge: '<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>', livre: '<path d="M2 5h6a3 3 0 0 1 3 3v12a2 2 0 0 0-2-2H2zM22 5h-6a3 3 0 0 0-3 3v12a2 2 0 0 1 2-2h7z"/>', carte: '<circle cx="12" cy="12" r="3"/><path d="M12 3v6M12 15v6M3 12h6M15 12h6"/>', quiz: '<circle cx="12" cy="12" r="9"/><path d="M9.5 9a2.5 2.5 0 1 1 3.5 2.3c-.6.3-1 .9-1 1.6v.6M12 17h.01"/>', examen: '<path d="M22 10 12 5 2 10l10 5 10-5z"/><path d="M6 12v5c3 2 9 2 12 0v-5"/>' };
+const pic = k => '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + PIC[k] + '</svg>';
+function entete(page, o) {
+  const re = /<!-- oeuvre-ent -->[\s\S]*?<!-- \/oeuvre-ent -->|<span class="badge">[^<]*<\/span>\s*<h1>[\s\S]*?<\/h1>\s*<div class="auteur">[\s\S]*?<\/div>\s*<img [^>]*class="cover"[^>]*>/;
+  const m = page.match(re); if (!m) return page;
+  const z = m[0];
+  const badge = (z.match(/<span class="badge">([^<]*)<\/span>/) || [])[1] || '';
+  const h1 = (z.match(/<h1>([\s\S]*?)<\/h1>/) || [])[1] || esc(o.titre);
+  const aut = (z.match(/<div class="auteur">([\s\S]*?)<\/div>/) || [])[1] || '';
+  const img = (z.match(/<img [^>]*class="cover"[^>]*>/) || [])[0] || '';
+  const f = o.fiche || {}, ex = examen(o.classe);
+  const mots = (JSON.stringify(f) + JSON.stringify(o.analyse || {}) + JSON.stringify(o.citations || []) + JSON.stringify(o.techniques || []) + JSON.stringify(o.controle || [])).split(/\s+/).length;
+  const puces = ['<span>' + pic('horloge') + Math.max(5, Math.round(mots / 180)) + ' min de lecture</span>'];
+  if (f.genre) puces.push('<span>' + pic('livre') + esc(net(f.genre)) + '</span>');
+  if (ex) puces.push('<span>' + pic('examen') + 'Au programme du ' + ex + '</span>');
+  if (((o.carte || {}).branches || []).length) puces.push('<a href="#carte">' + pic('carte') + 'Carte mentale</a>');
+  if ((o.qcm || []).length) puces.push('<a href="#quiz">' + pic('quiz') + 'Quiz de ' + o.qcm.length + ' questions</a>');
+  const h = '<!-- oeuvre-ent -->\n<header class="oe-ent"><div class="oe-ent-haut"><div class="oe-couv">' + img + '</div><div class="oe-tags"><span class="badge">' + badge + '</span>'
+    + '<span class="oe-mat"><b>Français</b> · Œuvre intégrale · ' + esc(o.classe || '') + '</span></div></div>\n<h1>' + h1 + '</h1>\n<div class="auteur">' + aut + '</div>\n'
+    + '<div class="oe-puces">' + puces.join('') + '</div></header>\n<!-- /oeuvre-ent -->';
+  return page.replace(re, () => h);
+}
+
 let changees = 0, vues = 0;
 const manquantes = [];
 for (const nom of fs.readdirSync(DOSSIER).filter(n => n.endsWith('.html') && n !== 'index.html')) {
@@ -337,10 +394,11 @@ for (const nom of fs.readdirSync(DOSSIER).filter(n => n.endsWith('.html') && n !
   if (!o) { manquantes.push(nom); continue; }
   vues++;
   const url = BASE + 'oeuvres/' + nom;
-  let neuf = remplacer(page, '<!-- oeuvre-statique -->', '<!-- /oeuvre-statique -->', bloc(o, m[1]), '<a class="cta"');
+  let neuf = remplacer(page, '<!-- oeuvre-statique -->', '<!-- /oeuvre-statique -->', bloc(o, m[1], nom), '<a class="cta"');
   if (neuf) neuf = remplacer(neuf, '<!-- oeuvre-ld -->', '<!-- /oeuvre-ld -->', ld(o, url), '</head>');
   if (neuf) neuf = remplacer(neuf, '<!-- oeuvre-style -->', '<!-- /oeuvre-style -->', STYLE, '</head>');
   if (neuf) neuf = haut(neuf, o, m[1]);
+  if (neuf) neuf = entete(neuf, o);
   if (!neuf) { manquantes.push(nom + ' (gabarit)'); continue; }
   if (neuf !== page) {
     changees++;

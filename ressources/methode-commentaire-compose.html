@@ -25,7 +25,7 @@ a{color:#2563eb}
 .cta small{display:block;font-weight:500;opacity:.85;font-size:12px;margin-top:3px}
 .rel{font-size:14px;color:var(--mut)}
 footer{text-align:center;color:var(--mut);font-size:12px;padding:24px}
-</style><style id="vrt-methode">/* Fiches de méthode : même dessin que les leçons d'Apprendre (apprendre/apprendre.css). */
+</style><style id="vrt-methode">/* Fiches de méthode, annales, séquentielles : structure (grille, sommaire, tableaux), puis dessin des leçons ci-dessous. */
 .wrap{max-width:1010px}
 .mx-grille>*{min-width:0}
 .mx-grille{display:grid;grid-template-columns:220px minmax(0,720px);gap:28px;justify-content:center;align-items:start}
@@ -105,7 +105,152 @@ ul.mx-check li::before{content:"";position:absolute;left:4px;top:9px;width:16px;
 #mx .card.mx .partie h2 .mx-num{flex:0 0 38px;width:38px;min-width:38px}
 #mx .card.mx .partie h2{font-size:22px!important;color:#2B3550!important}
 #mx .card.mx .partie h2 .mx-txt{color:var(--pc)!important;-webkit-text-fill-color:var(--pc)!important}
-@media (max-width:760px){#mx .card.mx .partie h2{font-size:20px!important}}</style><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap"><link rel="stylesheet" href="/assets/veritas-tokens.css?v=1.19.25">
+@media (max-width:760px){#mx .card.mx .partie h2{font-size:20px!important}}
+/* ════════ Dessin des leçons d'Apprendre (17/11/2026) ════════
+   Demande de Jacques : « Aligne la mise en forme des ressources gratuites comme les pages de cours ».
+   Les icônes illustrées et la police viennent d'apprendre/modele.css et lecon-modele.css (copiées par le générateur). */
+@font-face{font-family:'Roboto';font-style:normal;font-weight:400;font-display:swap;src:url(/assets/polices/roboto-latin-ext-400-normal.woff2) format('woff2');unicode-range:U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF}
+@font-face{font-family:'Roboto';font-style:normal;font-weight:400;font-display:swap;src:url(/assets/polices/roboto-latin-400-normal.woff2) format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
+@font-face{font-family:'Roboto';font-style:normal;font-weight:500;font-display:swap;src:url(/assets/polices/roboto-latin-ext-500-normal.woff2) format('woff2');unicode-range:U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF}
+@font-face{font-family:'Roboto';font-style:normal;font-weight:500;font-display:swap;src:url(/assets/polices/roboto-latin-500-normal.woff2) format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
+@font-face{font-family:'Roboto';font-style:normal;font-weight:700;font-display:swap;src:url(/assets/polices/roboto-latin-ext-700-normal.woff2) format('woff2');unicode-range:U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF}
+@font-face{font-family:'Roboto';font-style:normal;font-weight:700;font-display:swap;src:url(/assets/polices/roboto-latin-700-normal.woff2) format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
+@font-face{font-family:'Roboto';font-style:italic;font-weight:400;font-display:swap;src:url(/assets/polices/roboto-latin-ext-400-italic.woff2) format('woff2');unicode-range:U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF}
+@font-face{font-family:'Roboto';font-style:italic;font-weight:400;font-display:swap;src:url(/assets/polices/roboto-latin-400-italic.woff2) format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
+#mx{--sans:"Roboto","Segoe UI",Arial,sans-serif;--vm-mag:#B2316E;--vm-magbg:#FBE9F1;--vm-gold:#FFC93C;--mt:#1E499B;--mt-pale:#DBE8FE;--vm-ill-def:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cpath d='M6 18c8-5 17-5 26 1v34c-9-6-18-6-26-1z' fill='%234F86E0'/%3E%3Cpath d='M58 18c-8-5-17-5-26 1v34c9-6 18-6 26-1z' fill='%232C55C4'/%3E%3Cpath d='M9 20c7-3 14-3 20 1v28c-6-4-13-4-20-1z' fill='%23fff'/%3E%3Cpath d='M55 20c-7-3-14-3-20 1v28c6-4 13-4 20-1z' fill='%23EAF1FF'/%3E%3Cpath d='M13 27h11M13 32h11M13 37h9M40 27h11M40 32h11M40 37h8' stroke='%239CB4E0' stroke-width='2' stroke-linecap='round'/%3E%3Cpath d='M44 8h8v20l-4-3-4 3z' fill='%23E8394B'/%3E%3Cpath d='M32 19v34' stroke='%23163A8C' stroke-width='2'/%3E%3C/svg%3E");--vm-ill-ex:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect x='8' y='8' width='34' height='44' rx='4' fill='%23fff' stroke='%238A5AD0' stroke-width='3'/%3E%3Cpath d='M15 19h20M15 26h20M15 33h12' stroke='%23CDB8EA' stroke-width='3' stroke-linecap='round'/%3E%3Cpath d='m44 18 10 10-22 22-12 3 3-12z' fill='%23F2C540'/%3E%3Cpath d='m44 18 10 10 4-4a3 3 0 0 0 0-4l-6-6a3 3 0 0 0-4 0z' fill='%23E8394B'/%3E%3Cpath d='m23 41 9 9-12 3z' fill='%23F4D9B5'/%3E%3Cpath d='m20 53 3-3-3-1z' fill='%233B3520'/%3E%3C/svg%3E");--vm-ill-methode:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cg transform='translate(24 26)'%3E%3Cpath d='M-3-18h6l1 5 4 2 4-3 4 4-3 4 2 4 5 1v6l-5 1-2 4 3 4-4 4-4-3-4 2-1 5h-6l-1-5-4-2-4 3-4-4 3-4-2-4-5-1v-6l5-1 2-4-3-4 4-4 4 3 4-2z' fill='%231FB3C0'/%3E%3Ccircle r='6' fill='%23fff'/%3E%3C/g%3E%3Cg transform='translate(45 44)'%3E%3Cpath d='M-2.5-14h5l.8 3.8 3 1.5 3.2-2.3 3.5 3.5-2.3 3.2 1.5 3 3.8.8v5l-3.8.8-1.5 3 2.3 3.2-3.5 3.5-3.2-2.3-3 1.5-.8 3.8h-5l-.8-3.8-3-1.5-3.2 2.3-3.5-3.5 2.3-3.2-1.5-3-3.8-.8v-5l3.8-.8 1.5-3-2.3-3.2 3.5-3.5 3.2 2.3 3-1.5z' fill='%23F39A45'/%3E%3Ccircle r='4.5' fill='%23fff'/%3E%3C/g%3E%3C/svg%3E");--vm-ill-astuce:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cpath d='M32 6a17 17 0 0 0-10 30.7c2 1.6 3 3.6 3 6.3h14c0-2.7 1-4.7 3-6.3A17 17 0 0 0 32 6z' fill='%23FFD43B'/%3E%3Cpath d='M27 12a12 12 0 0 0-7 10' stroke='%23fff' stroke-width='3' stroke-linecap='round' opacity='.8'/%3E%3Crect x='24' y='44' width='16' height='5' rx='2' fill='%238A96A8'/%3E%3Crect x='25' y='50' width='14' height='5' rx='2' fill='%236B7287'/%3E%3Cpath d='M4 22h5M55 22h5M10 6l4 4M54 6l-4 4' stroke='%23F2C540' stroke-width='3' stroke-linecap='round'/%3E%3C/svg%3E");--vm-ill-attention:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cpath d='M29 6a3.5 3.5 0 0 1 6 0l25 46a3.5 3.5 0 0 1-3 5H7a3.5 3.5 0 0 1-3-5z' fill='%23E8394B'/%3E%3Cpath d='M32 15 53 52H11z' fill='%23fff'/%3E%3Crect x='29' y='24' width='6' height='16' rx='3' fill='%233B3520'/%3E%3Ccircle cx='32' cy='46' r='3.5' fill='%233B3520'/%3E%3C/svg%3E");--vm-ill-retiens:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cpath d='M24 6h16l-2 14 8 8v6H18v-6l8-8z' fill='%23E8394B'/%3E%3Cpath d='M27 9h4l-1 11-5 6' stroke='%23fff' stroke-width='2.5' opacity='.6' fill='none'/%3E%3Cpath d='M32 34v24' stroke='%236B7287' stroke-width='3' stroke-linecap='round'/%3E%3C/svg%3E");--vm-target:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23B2316E' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='11' cy='13' r='8'/%3E%3Ccircle cx='11' cy='13' r='4'/%3E%3Ccircle cx='11' cy='13' r='.8' fill='%23B2316E'/%3E%3Cpath d='M11 13 20 4M16.5 3.5 20 4l.5 3.5'/%3E%3C/svg%3E");--vm-pin:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%230B6A74' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M9 3h6l-1 5 3 3v2H7v-2l3-3Z' fill='%239fe0d4' fill-opacity='.7'/%3E%3Cpath d='M12 13v8'/%3E%3C/svg%3E");}
+#mx,#mx .card.mx,#mx .mx-sommaire,#mx h1,#mx h2,#mx h3,#mx p,#mx li,#mx td,#mx th,#mx a,#mx button{font-family:var(--sans)!important}
+#mx .card.mx{border:1px solid #E3E8EE;border-radius:20px;padding:26px 30px;color:#33384A;box-shadow:0 6px 20px rgba(19,48,122,.05)}
+#mx .card.mx p,#mx .card.mx li{font-size:16.5px;line-height:1.65;text-align:justify!important;hyphens:auto;-webkit-hyphens:auto}
+#mx .card.mx td,#mx .card.mx th,#mx .card.mx td p,#mx .card.mx td li,#mx .mx-voisins p,#mx .card.mx .objectifs li,#mx .card.mx #sources li,#mx .card.mx .mx-som a{text-align:left!important;hyphens:manual}
+#mx .card.mx strong{color:#001136;font-weight:700}
+#mx .card.mx a{color:#1E499B}
+
+/* 1. En-tête : carte teintée de la matière (fiches) ; pastille seule (annales, séquentielles) */
+#mx .card.mx>.badge{display:inline-block;font:700 12px/1 var(--sans);letter-spacing:.1em;text-transform:uppercase;color:#fff;background:var(--mt);border-radius:999px;padding:6px 12px;margin:0 0 12px;border:0}
+#mx .card.mx>h1,#mx .mx-ent h1{font:700 clamp(25px,6.4vw,34px)/1.15 var(--sans)!important;color:#001136!important;letter-spacing:-.01em;margin:0 0 10px!important;text-align:left!important;text-wrap:balance}
+#mx .mx-ent{position:relative;margin:-4px 0 22px;padding:20px 22px 18px;border-radius:22px;background:linear-gradient(160deg,var(--mt-pale),#fff 72%);border:1.5px solid color-mix(in srgb,var(--mt) 22%,#fff)}
+#mx .mx-ent-haut{display:flex;align-items:center;gap:14px;margin:0 0 12px}
+#mx .mx-med{flex:0 0 64px;width:64px;height:64px;border-radius:18px;background:#fff;border:2px solid color-mix(in srgb,var(--mt) 35%,#fff);display:grid;place-items:center;color:var(--mt)}
+#mx .mx-med svg{width:44px;height:44px}
+#mx .mx-tags{display:flex;flex-direction:column;gap:5px;min-width:0}
+#mx .mx-ent .badge{align-self:flex-start;display:inline-block;font:700 12px/1 var(--sans);letter-spacing:.1em;text-transform:uppercase;color:#fff;background:var(--mt);border-radius:999px;padding:6px 12px;margin:0;border:0}
+#mx .mx-mat{font:500 15px/1.3 var(--sans);color:#4D5163}
+#mx .mx-mat b{color:var(--mt);font-weight:700}
+#mx .mx-bref{margin:0 0 14px;padding:12px 14px;border-radius:14px;background:#fff;border:1.5px dashed color-mix(in srgb,var(--mt) 45%,#fff)}
+#mx .mx-bref-t{display:flex;align-items:center;gap:6px;font:700 12px/1 var(--sans);letter-spacing:.06em;text-transform:uppercase;color:var(--mt);margin:0 0 6px}
+#mx .mx-bref .mx-chapo{margin:0;font:italic 500 16px/1.55 var(--sans);color:#33384A;text-align:justify;hyphens:auto;-webkit-hyphens:auto}
+#mx .card.mx>.mx-chapo{font-size:17px;color:#4D5163;margin:0 0 18px}
+#mx .mx-puces{display:flex;flex-wrap:wrap;gap:6px;margin:0}
+#mx .mx-puces span,#mx .mx-puces button{display:inline-flex;align-items:center;gap:5px;background:#fff;border:1px solid #DCE5F5;border-radius:999px;padding:5px 11px;font:600 13px/1.2 var(--sans);color:#0C2A6A;margin:0}
+#mx .mx-puces svg{flex:none;color:var(--mt)}
+#mx .mx-puces button{cursor:pointer}
+#mx .mx-puces button:hover{border-color:var(--mt)}
+@media (min-width:700px){#mx .mx-ent{padding:24px 28px 22px}#mx .mx-med{flex-basis:76px;width:76px;height:76px}#mx .mx-med svg{width:52px;height:52px}}
+
+/* sommaire en pastilles (téléphone) et sommaire latéral (ordinateur) */
+#mx .mx-som a{font:500 14px/1.25 var(--sans);border:1.5px solid #DCE5F5;border-radius:999px;padding:6px 13px;color:#0C2A6A;background:#fff}
+#mx .mx-sommaire a.actif{color:var(--vm-mag);border-left-color:var(--vm-mag)}
+#mx .mx-barre i{background:linear-gradient(90deg,var(--vm-mag),var(--vm-gold))}
+
+/* 2. Objectifs : carte, cible, pastilles de couleur */
+#mx .card.mx .objectifs{background:#fff;border:1.5px solid #E3E8EE;border-radius:18px;padding:18px 20px;margin:0 0 30px;box-shadow:0 6px 20px rgba(19,48,122,.06)}
+#mx .card.mx .objectifs>b{display:flex;align-items:center;gap:10px;font:700 18px/1.3 var(--sans);color:#0C1F55;margin:0 0 12px}
+#mx .card.mx .objectifs>b::before{content:"";flex:0 0 28px;height:28px;background:var(--vm-target) center/26px no-repeat}
+#mx .card.mx .objectifs ul{list-style:none;margin:0;padding:0;display:grid;gap:8px}
+#mx .card.mx .objectifs li{position:relative;padding:3px 0 3px 30px;font-weight:500;color:#1D2330;text-align:left}
+#mx .card.mx .objectifs li::before{content:""!important;position:absolute!important;top:.62em!important;left:4px!important;width:13px!important;height:13px!important;border-radius:50%!important;background:linear-gradient(145deg,var(--c1),var(--c2))!important;box-shadow:0 0 0 3px color-mix(in srgb,var(--c1) 20%,#fff)!important}
+#mx .card.mx .objectifs li:nth-child(4n+1){--c1:#2C55C4;--c2:#0C1F55}
+#mx .card.mx .objectifs li:nth-child(4n+2){--c1:#E0559A;--c2:#8D1D52}
+#mx .card.mx .objectifs li:nth-child(4n+3){--c1:#F39A45;--c2:#C2540A}
+#mx .card.mx .objectifs li:nth-child(4n+4){--c1:#1FB3C0;--c2:#0B6A74}
+
+/* 3. Parties : cercle magenta numéroté à point or, titre magenta souligné magenta → or (toutes les parties) */
+#mx .card.mx .partie,#mx .card.mx .partie:nth-of-type(n){--pc:var(--vm-mag);--pt:var(--vm-magbg);margin-top:44px}
+#mx .card.mx .partie h2{gap:16px!important;margin:0 0 18px!important;color:var(--vm-mag)!important;font:700 clamp(22px,4.6vw,28px)/1.15 var(--sans)!important}
+#mx .card.mx .partie h2 .mx-num{position:relative;flex:0 0 46px!important;width:46px!important;min-width:46px!important;height:46px;border-radius:50%;background:#fff;border:3px solid var(--vm-mag);color:var(--vm-mag);font:700 19px var(--sans);box-shadow:0 0 0 5px var(--vm-magbg),0 6px 14px rgba(178,49,110,.22);box-sizing:border-box}
+#mx .card.mx .partie h2 .mx-num::after{content:"";position:absolute;right:-4px;top:-4px;width:13px;height:13px;border-radius:50%;background:var(--vm-gold);border:2px solid #fff}
+#mx .card.mx .partie h2 .mx-txt{color:var(--vm-mag)!important;-webkit-text-fill-color:var(--vm-mag)!important;padding-bottom:10px;background:linear-gradient(90deg,var(--vm-mag),var(--vm-gold)) 0 100%/88px 5px no-repeat}
+@media (max-width:760px){#mx .card.mx .partie h2{font-size:22px!important}#mx .card.mx .partie h2 .mx-num{flex-basis:40px!important;width:40px!important;min-width:40px!important;height:40px;font-size:17px}}
+/* sous-titres : bleu-vert, sans pastille */
+#mx .card.mx h3{display:block;font:700 clamp(18px,3.8vw,21px)/1.25 var(--sans);color:#0B6A74;margin:26px 0 10px}
+#mx .card.mx h3::before{content:none;display:none}
+#mx .card.mx .partie li::marker{color:var(--vm-mag)}
+ol.mx-etapes>li::before{background:#fff;color:var(--vm-mag);border-color:var(--vm-mag);box-shadow:0 0 0 3px var(--vm-magbg)}
+ul.mx-check li::before{border-color:var(--vm-mag)}
+.mx-series span{color:var(--mt,#1E499B);background:var(--mt-pale,#EDF2FB)}
+.mx-fiche div{border-radius:14px;border-color:#E3E8EE}
+.mx-fiche b{color:var(--mt,#1E499B)}
+
+/* 4. Encadrés : petite icône illustrée des leçons + rail en pointillés */
+#mx .mx-enc{padding:4px 0 8px 58px;margin:28px 0}
+#mx .mx-enc::before{width:42px;height:42px;left:0;top:-4px;background:var(--ill) center/contain no-repeat;filter:drop-shadow(0 2px 3px rgba(0,17,54,.2))}
+#mx .mx-enc::after{left:19px;top:46px;bottom:4px;width:4px;border:0;background:radial-gradient(circle,var(--fil) 1.8px,transparent 2.2px) 0 0/4px 12px repeat-y;-webkit-mask:linear-gradient(#000 40%,transparent);mask:linear-gradient(#000 40%,transparent)}
+#mx .mx-enc>strong:first-child{display:flex;align-items:center;min-height:36px;font:700 19px/1.25 var(--sans);color:var(--fil);margin:0 0 8px}
+#mx .mx-officiel{--fil:#13307A;--ill:var(--vm-ill-def)}
+#mx .mx-ex{--fil:#6B3FB0;--ill:var(--vm-ill-ex)}
+#mx .mx-piege{--fil:#B4321E;--ill:var(--vm-ill-attention)}
+#mx .mx-astuce{--fil:#8A6100;--ill:var(--vm-ill-astuce)}
+#mx .mx-ex blockquote{border-left:3px solid var(--vm-gold);background:#FFFBEF;border-radius:0 12px 12px 0}
+@media (max-width:560px){#mx .mx-enc{padding-left:48px}#mx .mx-enc::before{width:36px;height:36px}#mx .mx-enc::after{left:16px;top:40px}#mx .mx-enc>strong:first-child{font-size:17.5px;min-height:32px}}
+
+/* 5. Tableaux : en-tête teinté de la matière, coins arrondis */
+#mx .mx-tbl{border-radius:14px;border-color:#E3E8EE}
+#mx .mx-tbl th{background:var(--mt-pale,#EDF2FB);border-bottom-color:var(--mt,#1E499B)}
+
+/* 6. Sources : discrètes */
+#mx .card.mx #sources ul{padding-left:18px}
+#mx .card.mx #sources li{font-size:14.5px;color:#636A80;text-align:left}
+
+/* 7. Fiches voisines (comme « Leçon précédente / suivante ») et autres épreuves du même examen */
+#mx .mx-suite{display:grid;gap:12px;margin:34px 0 0}
+#mx .mx-suite a{display:flex;align-items:center;gap:12px;padding:14px 16px;border-radius:16px;border:2px solid #CFDAEE;background:#fff;color:#001136;font:700 16px/1.3 var(--sans);text-decoration:none;transition:border-color .2s,transform .2s}
+#mx .mx-suite a>span:not(.mx-fl){flex:1;min-width:0}
+#mx .mx-suite small{display:block;font:700 12px/1.2 var(--sans);letter-spacing:.06em;text-transform:uppercase;color:#1E499B;margin:0 0 3px}
+#mx .mx-fl{flex:none;display:grid;place-items:center;width:36px;height:36px;border-radius:50%;background:#EAF0FB;color:#1E499B;font:700 22px/1 var(--sans)}
+#mx .mx-suite a.mx-suiv{background:#1E499B;border-color:#1E499B;color:#fff;text-align:right}
+#mx .mx-suite a.mx-suiv small{color:#FFC93C}
+#mx .mx-suite a.mx-suiv .mx-fl{background:#FFC93C;color:#142554}
+#mx .mx-suite a:hover{border-color:#1E499B;transform:translateY(-1px)}
+#mx .mx-suite a.mx-suiv:hover{background:#163A80}
+@media (min-width:700px){#mx .mx-suite{grid-template-columns:1fr 1fr}#mx .mx-suite a.mx-suiv:only-child{grid-column:2}}
+#mx .mx-voisins{margin:22px 0 0;padding:16px 18px;border-radius:18px;border:1.5px solid #E3E8EE;background:#FAFBFE}
+#mx .mx-voisins p{margin:0 0 10px;font:700 15px/1.3 var(--sans);color:#0C1F55}
+#mx .mx-voisins div{display:flex;flex-wrap:wrap;gap:8px}
+#mx .mx-voisins a{display:inline-flex;align-items:center;gap:7px;padding:6px 13px 6px 6px;border-radius:999px;background:#fff;border:1.5px solid color-mix(in srgb,var(--c) 28%,#fff);color:#1D2A4D;font:600 14px/1.2 var(--sans);text-decoration:none}
+#mx .mx-voisins a svg{flex:none;width:24px;height:24px;color:var(--c)}
+#mx .mx-voisins a:hover{border-color:var(--c)}
+#mx .card.mx .cta{border-radius:16px;margin-top:22px}
+@media (max-width:760px){#mx .card.mx{padding:18px 14px;border-radius:16px}#mx .mx-ent{padding:16px 14px 14px;margin:-2px 0 18px}}
+@media print{#mx .mx-suite,#mx .mx-voisins,#mx .mx-puces button,#mx .card.mx .cta{display:none}#mx .mx-ent{background:none}}
+/* Le site pose une coche (masque) sur les puces et 20 px sous chaque élément de liste : les objectifs gardent les pastilles. */
+#mx .card.mx .objectifs li::before{-webkit-mask:none!important;mask:none!important}
+#mx .card.mx .objectifs li{margin:0!important}
+#mx .mx-puces button{min-height:0!important;height:auto!important;line-height:1.2!important}
+/* Objectifs : interligne resserré (« réduis l'interligne dans les objectifs », 17/11/2026). */
+#mx .card.mx .objectifs ul{gap:5px!important}
+#mx .card.mx .objectifs li{line-height:1.38!important;padding:2px 0 2px 30px!important}
+#mx .card.mx .objectifs li::before{top:.5em!important}
+/* Plan de temps illustré (annales, séquentielles) */
+#mx .mx-temps{margin:22px 0 4px;padding:16px 18px;border-radius:18px;border:1.5px solid #E3E8EE;background:#FAFBFE}
+#mx .card.mx .mx-temps-t{display:flex;align-items:center;gap:8px;margin:0 0 12px;font:700 16px/1.3 var(--sans);color:#0C1F55;text-align:left!important}
+#mx .mx-temps-t svg{color:var(--vm-mag)}
+#mx .mx-temps-barre{display:flex;gap:4px;height:14px;margin:0 0 12px}
+#mx .mx-temps-barre i{display:block;border-radius:7px;min-width:14px}
+#mx .t-lire{--tc:#1E499B}#mx .t-faire{--tc:#B2316E}#mx .t-relire{--tc:#E0A100}
+#mx .mx-temps-barre i{background:var(--tc)}
+#mx .card.mx ol.mx-temps-l{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+#mx .card.mx ol.mx-temps-l li{margin:0!important;padding:0 0 0 12px!important;border-left:4px solid var(--tc);text-align:left!important;line-height:1.35!important}
+#mx .card.mx ol.mx-temps-l li::before{content:none!important;display:none!important}
+#mx .mx-temps-l b{display:flex;align-items:center;gap:6px;font:700 15px/1.3 var(--sans);color:var(--tc)}
+#mx .card.mx .mx-temps-l span{display:block;margin-top:3px;font-size:14px;color:#4D5163}
+@media (max-width:640px){#mx .card.mx ol.mx-temps-l{grid-template-columns:1fr}}
+/* Leçons évaluées d'une séquence : liste à cocher pour réviser */
+#mx .card.mx ul.sq-lecons{list-style:none;padding:0;margin:0 0 16px;display:grid;gap:6px}
+#mx .card.mx ul.sq-lecons li{position:relative;margin:0!important;padding:7px 12px 7px 40px!important;border-radius:12px;background:#F6F8FD;border:1px solid #E3E8EE;text-align:left!important;line-height:1.4!important}
+#mx .card.mx ul.sq-lecons li::before{content:""!important;position:absolute!important;left:12px!important;top:10px!important;width:16px!important;height:16px!important;border:2px solid var(--mt,#1E499B)!important;border-radius:5px!important;background:#fff!important;-webkit-mask:none!important;mask:none!important;transform:none!important;box-sizing:border-box}
+#mx .mx-puces a{display:inline-flex;align-items:center;gap:5px;background:#fff;border:1px solid #DCE5F5;border-radius:999px;padding:5px 11px;font:600 13px/1.2 var(--sans)!important;color:#0C2A6A!important;text-decoration:none!important;margin:0}
+#mx .mx-puces a svg{color:var(--mt)}
+#mx .mx-puces a:hover{border-color:var(--mt)}</style><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap"><link rel="stylesheet" href="/assets/veritas-tokens.css?v=1.19.25">
 <link rel="stylesheet" href="/assets/veritas-refonte.css?v=1.19.25"><!-- seo-tete -->
 <meta property="og:image" content="https://veritas-school.com/og-image.jpg">
 <meta name="twitter:card" content="summary_large_image">
@@ -193,9 +338,10 @@ ul.mx-check li::before{content:"";position:absolute;left:4px;top:9px;width:16px;
 
 
 <div class="wrap"><div class="mx-grille" id="mx" data-vh-ignore="1"><aside class="mx-sommaire" aria-label="Sommaire"><p>Sommaire</p><ol class="mx-ol"><li><a href="#epreuve">1. L'épreuve en bref</a></li><li><a href="#etapes">2. La méthode en six étapes</a></li><li><a href="#exemple">3. Exemple traité : « Le Vase brisé »</a></li><li><a href="#bareme">4. La grille de correction officielle</a></li><li><a href="#erreurs">5. Les erreurs qui coûtent le plus</a></li><li><a href="#jour-j">6. Check-list du jour J</a></li><li><a href="#sources">7. Sources</a></li></ol><div class="mx-lu"><span id="mxLu">Lecture : 0 %</span><div class="mx-barre"><i id="mxBar"></i></div></div></aside><article class="card mx">
-<span class="badge">Méthode · 2nde A, 1re A, Tle A</span>
+<header class="mx-ent" style="--mt:#1E499B;--mt-pale:#DBE8FE"><div class="mx-ent-haut"><div class="mx-med"><svg width="44" height="44" aria-hidden="true"><use href="/assets/veritas-matieres.svg?v=20261110g#m-francais"/></svg></div><div class="mx-tags"><span class="badge">Méthode · 2nde A, 1re A, Tle A</span><span class="mx-mat"><b>Français</b> · 2nde A, 1re A, Tle A</span></div></div>
 <h1>Le commentaire composé : méthode officielle et exemple traité</h1>
-<p class="mx-chapo">Le commentaire composé n'est proposé qu'aux <strong>séries A et ABI</strong>. Il porte sur un extrait de 20 à 30 lignes, ou d'une vingtaine de vers, tiré d'une <strong>œuvre au programme de ta classe</strong>. Il s'agit de montrer <em>comment</em> le texte produit son sens, en regroupant tes observations en deux centres d'intérêt.</p>
+<div class="mx-bref"><p class="mx-bref-t"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1"/></svg>L'essentiel</p><p class="mx-chapo">Le commentaire composé n'est proposé qu'aux <strong>séries A et ABI</strong>. Il porte sur un extrait de 20 à 30 lignes, ou d'une vingtaine de vers, tiré d'une <strong>œuvre au programme de ta classe</strong>. Il s'agit de montrer <em>comment</em> le texte produit son sens, en regroupant tes observations en deux centres d'intérêt.</p></div>
+<div class="mx-puces"><span><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>8 min de lecture</span><span><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 6h12M8 12h12M8 18h12"/><circle cx="4" cy="6" r="1"/><circle cx="4" cy="12" r="1"/><circle cx="4" cy="18" r="1"/></svg>7 parties</span><span><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20h4L19 9a2.8 2.8 0 0 0-4-4L4 16z"/><path d="M13.5 6.5l4 4"/></svg>Exemple traité</span><span><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 5h6a3 3 0 0 1 3 3v12a2 2 0 0 0-2-2H2zM22 5h-6a3 3 0 0 0-3 3v12a2 2 0 0 1 2-2h7z"/></svg>Sources officielles</span><button type="button" data-mx-imprimer><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 9V3h10v6M7 17H4v-7h16v7h-3"/><path d="M7 14h10v7H7z"/></svg>Imprimer</button></div></header>
 <nav class="mx-som" aria-label="Sommaire"><a href="#epreuve">L'épreuve en bref</a><a href="#etapes">La méthode en six étapes</a><a href="#exemple">Exemple traité : « Le Vase brisé »</a><a href="#bareme">La grille de correction officielle</a><a href="#erreurs">Les erreurs qui coûtent le plus</a><a href="#jour-j">Check-list du jour J</a><a href="#sources">Sources</a></nav>
 <div class="objectifs"><b>À la fin de cette fiche, tu sauras :</b><ul><li>faire la lecture méthodique d'un texte en tableau</li><li>bâtir deux centres d'intérêt</li><li>rédiger introduction, paragraphe, transition et conclusion</li></ul></div>
 <section class="partie" id="epreuve"><h2><span class="mx-num">1</span><span class="mx-txt">L'épreuve en bref</span></h2><div class="mx-fiche"><div><b>4 h</b><span>BAC et Probatoire A, ABI</span></div><div><b>Coefficient 3</b><span>épreuve de littérature</span></div><div><b>1 sujet sur 3</b><span>avec contraction et dissertation</span></div><div><b>/20</b><span>grille 6 · 6 · 6 · 2</span></div></div>
@@ -281,8 +427,9 @@ ul.mx-check li::before{content:"";position:absolute;left:4px;top:9px;width:16px;
 <li>Épreuves du BAC ESG 2025, littérature A-ABI-SH : 4 h, coefficient 3, trois sujets au choix.</li>
 <li>Sully Prudhomme, <em>Stances et Poèmes</em>, Paris, Lemerre, 1865 : texte vérifié sur l'édition originale.</li>
 </ul></section>
+<nav class="mx-suite" aria-label="Fiches voisines"><a href="/ressources/methode-dissertation-litteraire.html"><span class="mx-fl">‹</span><span><small>Fiche précédente</small>Méthode de la dissertation littéraire</span></a><a class="mx-suiv" href="/ressources/methode-langue-francaise.html"><span><small>Fiche suivante</small>L'épreuve de langue française</span><span class="mx-fl">›</span></a></nav>
 <a class="cta" href="/apprendre/">Réviser dans Apprendre<small>Leçons, quiz et corrigés rangés par classe et par série</small></a>
-</article></div><script src="/ressources/methode.js?v=2c45b027" defer></script>
+</article></div><script src="/ressources/methode.js?v=ccd96fbd" defer></script>
 <p class="rel"><a href="/ressources/">← Toutes les méthodes & examens</a> · <a href="/oeuvres/">Œuvres au programme</a></p>
 </div>
 
