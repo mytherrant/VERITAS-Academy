@@ -6,8 +6,9 @@ Retours de Jacques (captures d'une leçon de Tle A au téléphone) : « Entête 
 - **Barre des matières** (`.rail`) : plus de pastille colorée ni d'ombre autour des icônes ; 40 px au lieu de 46, icônes de 24 px ; matière ouverte signalée par le trait de sa couleur.
 - **Offre** : autres formules (`.fo-mini`), note de paiement (`.offre-n`) et liens (enseignants, accompagnement, cahier : `.offre-l`) encadrés d'un filet de 1,5 px, sans ombre.
 - **Situation de vie et tâche** (`.apc`) : une carte à pictogramme (boussole), texte justifié avec césure (« N'oublie pas de justifier les textes »), comme la situation de départ de l'en-tête ; « Ta tâche » dans son propre encadré doré, pictogramme crayon, libellé au-dessus.
+- **Texte justifié partout** (« Justifie aussi tout au long de la leçon ») : listes, bulle de Kalao, énoncés de questions et pistes d'enquête rejoignent le corps du texte (déjà justifié) ; légendes de figures et formules restent centrées.
 - **Leçons voisines** (`.suite`) : deux vrais boutons avec flèche ronde ; la suivante (ou « Tout le programme ») en bleu plein, flèche or.
-- `modele.css?v=20261117e` sur les 7 pages d'Apprendre. Bancs : réglages 29/29, verrou 18/18, charte 34/34, survol 4/4, gabarits, planche mobile, lisibilité au vert ; captures au téléphone et à l'ordinateur, 0 erreur JS.
+- `modele.css?v=20261117f` sur les 7 pages d'Apprendre. Bancs : réglages 29/29, verrou 18/18, charte 34/34, survol 4/4, gabarits, planche mobile, lisibilité au vert ; captures au téléphone et à l'ordinateur, 0 erreur JS.
 
 ## Apprendre : lot 5 (classes d'examen) et pages « cours » enrichies (17/11/2026)
 

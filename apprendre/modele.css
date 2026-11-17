@@ -297,3 +297,7 @@ html body .apc .apc-t{display:flex!important;align-items:flex-start;gap:12px;mar
 html body .apc .apc-t p{margin:0!important;font-size:16.5px!important;line-height:1.55!important;color:#22283A;text-align:justify!important}
 .apc .apc-t p b{display:block;margin:0 0 2px;font:700 12px/1.2 var(--sans);letter-spacing:.08em;text-transform:uppercase;color:#8A6A00}
 html body .apc p,html body .apc .apc-t p,html body .bandeau.ent .accroche{text-align:justify!important;hyphens:auto!important;-webkit-hyphens:auto!important}
+
+/* Texte justifié tout au long de la leçon (17/11/2026, « justifie aussi tout au long de la leçon ») :
+   listes, bulle de Kalao, énoncés de questions. Légendes de figures et formules restent centrées. */
+html body .carte article li,html body .carte li,html body .kalao-bulle p,html body .q p,html body .enq-pistes li{text-align:justify!important;hyphens:auto!important;-webkit-hyphens:auto!important}
