@@ -1,3 +1,15 @@
+## Apprendre : lot 7, classes d'examen, illustrations plus réalistes (17/11/2026)
+
+Demandes de Jacques : « Continue », puis « En français. Utilise les illustrations et animations plus réalistes et pertinentes ».
+
+- **`apprendre/_src/14-approfondies-examens-3.js`** : 4 leçons gratuites au gabarit approfondi, remplacées en place :
+  - **3e histoire, partage de l'Afrique** : la famille de Moussa, de Kousséri, répartie entre Nigeria, Cameroun et Tchad ; cartes de l'Afrique en 1880 (côtes, Algérie, Cap) et en 1914 (tout sauf Éthiopie et Libéria), table de la conférence de Berlin vue de dessus, frontière rectiligne 3D coupant un même pays ; **simulation** : appliquer les règles de Berlin (5 cas).
+  - **3e ECM, fondements de la démocratie** : le foyer du lycée de Mokolo et son règlement autoritaire ; formule de Lincoln, temple 3D en marbre à cinq colonnes (toit amovible), trois formes de démocratie ; **simulation** : cocher les règles du foyer, chaque règle dresse une colonne, le toit ne tient qu'avec les cinq.
+  - **Tle philosophie, les passions** : Junior (paris sportifs) et Sali (guitare) à Garoua ; courbes émotion / passion, rameau de Salzbourg (cristallisation), balance 3D en laiton dont le fléau penche puis se redresse ; **simulation** : passion ou émotion (6 situations).
+  - **Tle philosophie, la liberté** : trois taxis, trois accidents à Douala ; chaîne liberté → responsabilité, marionnette 3D dont on éloigne les fils ; **simulation** : tribunal de la classe (3 affaires, jauge de liberté).
+- **Réalisme** : personnages en silhouettes complètes (visage, cheveux, vêtements, chaussures, ombre) au lieu de pastilles ; délégués de Berlin vus de dessus (épaules, cols, drapeaux) ; cartes de l'Afrique au lieu d'un histogramme ; colonnes tombées couchées dans le simulateur du temple.
+- `lecons.js?v=20261117e` ; 4 pages `apprendre/cours/` régénérées et habillées. Chromium (1200 et 390 px) : aucun débordement, aucune erreur JS. Bancs : réglages 29/29, verrou 18/18, gabarits 54/54, planche mobile 23/23, charte 34/34, lisibilité 7/7.
+- **Suite** : 3e langues (anglais, allemand, espagnol), grec ; Tle orientation (bac), culture nationale, arabe ; 1re langues et ESF ; puis 6e-5e-4e.
 ## Annales et séquentielles enrichies (17/11/2026)
 
 Demande de Jacques : « Enrichis aussi les annales et les séquences ».
