@@ -1,3 +1,17 @@
+## Apprendre : lot 4 des leçons approfondies — aimants, osmose, Rutherford, mesure, division euclidienne (17/11/2026)
+
+Demande de Jacques : « Continue à enrichir les leçons (avec situation de vie de départ résolue, labos, simulation, effets 2D, 3D réalistes) ».
+
+- **Nouveau fichier `apprendre/_src/11-approfondies-lot4.js`** : 5 leçons GRATUITES passées au gabarit approfondi (situation de vie, documents, hypothèses tranchées partie après partie, planches 2D et 3D, situation résolue `denouement` avec transfert, quiz de 10). Elles remplacent EN PLACE les versions courtes (`remplacer()` garde `ordre`, `cle`, `rang`, `apc`, `examen` ; parties « Entraînement au format de l'examen » et quiz d'origine repris quand ils existaient) :
+  - **4e PCT, aimants** : clé en laiton tombée dans le sable d'un chantier de Bafoussam, aimant sans marques ; spectre de limaille calculé (champ de dipôle, 2 300 grains, graine fixe), 12 boussoles en 3D, tri des matériaux ; quiz neuf.
+  - **Tle D SVT, osmose** : perfusion d'eau distillée refusée à Laquintinie, ndolè aspergé et concombre salé à Sandaga ; osmomètre de Dutrochet, globules rouges dans 4 milieux, cellules d'oignon turgescente / plasmolysée en 3D, courbe des frites (isotonie ≈ 0,28 mol/L) ; labo `osmose` branché ; quiz neuf.
+  - **2nde C chimie, Rutherford** : débat du club scientifique de Garoua (modèle de Thomson contre noyau) ; dispositif de Geiger-Marsden en 3D, zoom sur la feuille d'or, noyau ⁵⁶₂₆Fe ; **simulation** : faisceau α intégré en Coulomb (pas adaptatif), modèle Rutherford/Thomson, taille du noyau réglable (≈ 79 % traversent, 19 % déviées, 2 % renvoyées ; Thomson : 0 rebond).
+  - **5e maths, division euclidienne** : 250 mangues de Garoua en cagettes de 24 (10 cagettes, 10 mangues, 31 500 F) ; cagettes 2D, potence, cagettes 3D ; **simulation** « Range les mangues » (a et b réglables).
+  - **2nde C physique, mesure** : sac de riz « 25 kg » de Mboppi, balance non tarée (0,8 kg à vide) ; pied à coulisse 3D, cibles erreur systématique / aléatoire ; **simulations** : lecture d'un vernier au 1/10 (nouvel objet, vérification) et pesées répétées (moyenne, incertitude, balance tarée ou non).
+- `lecons.js` reconstruit (76 entrées, les 5 remplacent les anciennes au chargement) ; `lecons.js?v=20261117b` sur les 7 pages ; 5 pages `apprendre/cours/` régénérées puis habillées.
+- Contrôlé dans Chromium (1200 et 390 px) : pas de débordement, aucune erreur JS propre aux leçons (l'erreur `apprendre_config.php` vient du serveur local sans PHP). Bancs : réglages 29/29, verrou 18/18, gabarits 54/54, planche mobile 23/23, charte 34/34, lisibilité 7/7 ; `apprendre_statique --controle` et `habiller_pages --controle` au vert.
+- **Suite possible** : les ~59 autres leçons gratuites courtes (liste : `VRT_L` sans `enquete`), en priorité 2nde C maths/français, 2nde A, 6e-5e maths, 4e facteurs premiers.
+
 ## Finalisation des branches cloud restées en suspens (17/11/2026)
 
 Demande de Jacques : « Identifie toutes les sessions en cours non poussées puis finalise-les » (projet VÉRITAS, dans le cloud). Inventaire : 21 branches portaient des commits absents de master ; périmètre retenu par Jacques : les 10 branches récentes (11 au 16/11). Tout est réuni dans `finalisation-2026-11-17`.
