@@ -814,4 +814,49 @@ S["bac-2025-svt-d-sarcomeres"] = () => {
   return svg(560, 360, g, "Schéma d'interprétation d'un sarcomère, entre deux stries Z. Au repos : les filaments fins d'actine, fixés aux stries Z, laissent au centre une zone H ; la bande A a la longueur des filaments épais de myosine ; les demi-bandes I sont larges. En activité : les filaments d'actine ont glissé entre les filaments de myosine vers le centre ; le sarcomère est plus court, les bandes I sont réduites, la zone H a presque disparu, la bande A garde la même longueur.");
 };
 
+// Probatoire 2025 histoire A-ABI, document 3 : le Cameroun après la guerre de 1914-1916 (carte redessinée d'après le scan,
+// mêmes tracés et mêmes libellés : bande sous mandat anglais hachurée, limites de la zone restituée à l'AEF en pointillés).
+S["proba-2025-histoire-a-carte"] = () => {
+  const PL = (pts, x = "") => P(pts, x), G = ' font-weight="700"', PT = ' stroke-dasharray="2 5" stroke-width="3"', TIR = ' stroke-dasharray="11 7" stroke-width="2.6"';
+  const lac = [[270, 26], [278, 16], [298, 17], [309, 10], [326, 12], [333, 30], [331, 46], [347, 52], [362, 61], [398, 64], [404, 88], [384, 96], [364, 102], [352, 114], [326, 118], [307, 108], [300, 94], [284, 74], [270, 48], [270, 26]];
+  const ouest = [[318, 118], [322, 135], [305, 160], [292, 185], [282, 205], [276, 230], [272, 255], [275, 272], [262, 290], [245, 310], [220, 330], [200, 345], [175, 365], [150, 390], [125, 410], [100, 435], [80, 460], [62, 490], [50, 520], [48, 545]];
+  const est = [[65, 555], [80, 530], [95, 500], [115, 480], [140, 465], [165, 450], [185, 435], [200, 415], [215, 385], [230, 355], [240, 330], [250, 315], [268, 298], [285, 275], [292, 250], [298, 225], [310, 205], [330, 190], [352, 170], [345, 150], [330, 130], [330, 118]];
+  const bande = ouest.concat(est);
+  const guinee = [[22, 550], [62, 550], [68, 586], [76, 592], [88, 587], [90, 612], [100, 627], [104, 642], [104, 700], [102, 735], [92, 745], [88, 790], [84, 824], [30, 800], [22, 550]];
+  const mandatFr = [[360, 100], [380, 145], [372, 176], [380, 205], [400, 238], [425, 260], [455, 285], [465, 302], [468, 332], [471, 362], [480, 400], [490, 430], [498, 452], [500, 476], [512, 500], [536, 530], [570, 545], [590, 572], [593, 585]];
+  const aefNord = [[422, 259], [408, 257], [330, 262], [326, 280], [345, 300], [370, 320], [395, 345], [415, 370], [420, 386], [410, 410], [398, 440], [380, 455], [360, 470], [362, 492], [370, 522], [385, 560], [405, 590], [430, 620], [452, 640], [455, 668], [446, 700], [452, 722], [470, 770], [486, 810], [500, 848], [510, 866]];
+  const aefEst = [[593, 585], [570, 590], [530, 600], [522, 640], [524, 690], [530, 722], [538, 752], [540, 800], [526, 832], [510, 866]];
+  const sudHaut = [[180, 678], [250, 684], [330, 690], [420, 702], [450, 712]], sudBas = [[92, 774], [170, 765], [250, 750], [320, 740], [390, 726], [450, 712]];
+  const chari = [[380, 145], [394, 170], [400, 198], [414, 214], [450, 215], [480, 222], [496, 215], [512, 226], [530, 246], [546, 280], [558, 286], [580, 268], [602, 282], [632, 282]];
+  const congo1 = [[630, 520], [610, 555], [596, 580], [595, 620], [580, 668], [566, 700], [560, 740], [550, 772], [544, 802], [541, 822]];
+  const congo2 = [[636, 702], [602, 726], [590, 742], [580, 780], [570, 810], [546, 840], [510, 866]];
+  const motif = '<defs><pattern id="ax-hach-angl" width="7" height="7" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><path d="M0 0V7M0 0H7" stroke="currentColor" stroke-width="2.4"/></pattern></defs>';
+  // dessin à l'échelle 0,8 dans un cadre de 520 px : il s'adapte au téléphone au lieu de défiler (seuil ax-large : 600 px)
+  return svg(520, 698, motif + '<g transform="scale(0.8)">' +
+    '<rect x="4" y="4" width="642" height="864" stroke-width="4"/>' +
+    '<polygon points="' + bande.map(p => p.join(",")).join(" ") + '" fill="url(#ax-hach-angl)" stroke="none" opacity=".75"/>' +
+    PL(est, ' stroke-dasharray="7 5" stroke-width="2"') + PL(ouest, ' stroke-width="1.2" opacity=".55"') +
+    PL(lac, ' stroke-width="4"') + PL(guinee, ' stroke-width="4"') +
+    PL(mandatFr, TIR) + PL(aefNord, PT) + PL(aefEst, PT) + PL([[180, 678], [184, 730], [170, 762]], TIR) + PL(sudHaut, TIR) + PL(sudBas, TIR) +
+    PL(chari, ' stroke-width="2.2"') + PL(congo1, ' stroke-width="2.2"') + PL(congo2, ' stroke-width="2.2"') +
+    // titre et légende
+    '<rect x="4" y="4" width="262" height="92"  stroke-width="1.6"/>' +
+    T([12, 40], "Le Cameroun après la", ' font-size="22"' + G) + T([12, 78], "guerre de 1914-1916", ' font-size="22"' + G) +
+    PL([[16, 176], [44, 176]], PT) + T([54, 167], "Zone restituée à", ' font-size="17"' + G) + T([54, 190], "l'AEF", ' font-size="17"' + G) +
+    '<rect x="14" y="216" width="36" height="28" fill="url(#ax-hach-angl)" stroke-width="1.2"/>' + T([62, 228], "Le Cameroun sous", ' font-size="15"' + G) + T([62, 247], "mandat Anglais", ' font-size="15"' + G) +
+    // libellés de la carte
+    T([350, 46], "Lac Tchad", ' font-size="27"' + G) + T([470, 158], "Tchad", ' font-size="27"' + G) +
+    T([0, 0], "Chari", ' font-size="17" transform="translate(514 214) rotate(52)"') +
+    T([233, 182], "Dikoa", ' font-size="19"' + G) + T([188, 298], "Yola", ' font-size="19"' + G) + '<circle cx="246" cy="291" r="3.5" fill="currentColor" stroke="none"/>' +
+    T([18, 348], "Nigéria", ' font-size="30"' + G) +
+    T([197, 510], "Cameroun", ' font-size="21"' + G) + T([130, 540], "sous mandat Français", ' font-size="21"' + G) +
+    T([92, 582], "Buea", ' font-size="19"' + G) + '<circle cx="206" cy="621" r="3.5" fill="currentColor" stroke="none"/>' + T([216, 627], "Yaoundé", ' font-size="19"' + G) +
+    T([32, 690], "Guinée", ' font-size="14"' + G) + T([27, 710], "espagnole", ' font-size="14"' + G) +
+    T([0, 0], "Congo", ' font-size="17" transform="translate(568 768) rotate(-62)"') +
+    // nord et échelle
+    L([585, 76], [585, 34], ' stroke-width="2"') + fleche([585, 30], [585, 50], 10) + T([578, 94], "N", ' font-size="17"' + G) +
+    L([214, 836], [306, 836], ' stroke-width="5"') + T([207, 826], "0", ' font-size="19"') + T([304, 828], "200 km", ' font-size="17"') + "</g>",
+    "Document 3 : carte du Cameroun après la guerre de 1914-1916 : une bande étroite à l'ouest, le long du Nigéria, de Buea à Dikoa, sous mandat anglais ; le reste du territoire, avec Yaoundé, sous mandat français ; une zone restituée à l'AEF à l'est et au sud ; la Guinée espagnole au sud-ouest.");
+};
+
 module.exports = S;
