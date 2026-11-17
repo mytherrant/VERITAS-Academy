@@ -7,11 +7,12 @@
 <meta name="description" content="Cours rédigé, fiche de révision et quiz, d'après la progression harmonisée du MINESEC.">
 <meta name="robots" content="noindex">
 <link rel="icon" href="../VERITAS_favicon_512.png">
-<link rel="preload" href="/assets/polices/nunito-latin-wght-normal.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/assets/polices/roboto-latin-400-normal.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="apprendre.css?v=20261116k">
 <link rel="stylesheet" href="jeu.css?v=20261112v">
 <link rel="stylesheet" href="planches.css?v=20261116b">
-<link rel="stylesheet" href="lecon-modele.css?v=20261116h">
+<link rel="stylesheet" href="lecon-modele.css?v=20261116j">
+<link rel="stylesheet" href="modele.css?v=20261116s">
 <style>
 /* ── Vue Enseignant, français : évaluer la leçon dans l'Atelier (10/11/2026) ── */
 .atelier-prof{display:none}
@@ -51,10 +52,10 @@
 <script src="/api/apprendre_config.php"></script>
 <script src="scenes.js?v=20261112a"></script>
 <script src="progressions.js?v=20261110g"></script>
-<script src="lecons.js?v=20261116o"></script>
-<script src="ressources.js?v=20261115sq"></script>
+<script src="lecons.js?v=20261117a"></script>
+<script src="ressources.js?v=20261117a"></script>
 <script src="atelier.js?v=20261110a"></script>
-<script src="charge.js?v=55f690ff"></script>
+<script src="charge.js?v=31ea7845"></script>
 <script src="commun.js?v=20261116a"></script>
 <script src="jeu.js?v=20261110g"></script>
 <script src="labo.js?v=20261111c"></script>
@@ -138,6 +139,8 @@
      L.quiz.map(function(q0,k){var q=A.melanger(q0);q.q=q0.q;q.e=q0.e;return '<div class="q" data-bonne="'+q.b+'"><p>'+(k+1)+'. '+q.q+'</p>'+q.r.map(function(r){return '<button type="button">'+r+'</button>'}).join("")+'<div class="expl" hidden>'+(q.e||"")+'</div></div>'}).join("")+
      (mur?'<p class="vide">Le quiz de cette leçon est réservé aux abonnés. <a href="#" data-retour-cours>Voir comment le débloquer</a>.</p>':'')+'<div class="bilan" id="bilan" hidden></div></article></section>';
   if(mur){ VRT.verrou.brancher(boite,L); $$("[data-retour-cours]").forEach(function(a){a.addEventListener("click",function(e){e.preventDefault();$('[data-f=cours]').click();var m=$(".mur");if(m)m.scrollIntoView({block:"center"})})}); }
+  /* « Pour aller plus loin » : 2 ressources, le reste derrière « Voir plus » (12/11/2026). */
+  A.replier(document.querySelector(".res-lecon .res-g"),2,"ressources");
 
   A.noterJour(); A.chiffreSerie($("#serie"));
 

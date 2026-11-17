@@ -214,9 +214,6 @@
 <url><loc>https://veritas-school.com/apprendre/programme/tle-d/tm.html</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
 <url><loc>https://veritas-school.com/apprendre/programme/tle-d/orientation.html</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
 <url><loc>https://veritas-school.com/apprendre/programme/tle-d/</loc><changefreq>weekly</changefreq><priority>0.7</priority></url>
-<url><loc>https://veritas-school.com/apprendre/cours/3e-maths-racines.html</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
-<url><loc>https://veritas-school.com/apprendre/cours/3e-pct-atome.html</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
-<url><loc>https://veritas-school.com/apprendre/cours/3e-svt-ressemblances.html</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
 <url><loc>https://veritas-school.com/apprendre/cours/6e-info-ia.html</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
 <url><loc>https://veritas-school.com/apprendre/cours/6e-info-composants.html</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
 <url><loc>https://veritas-school.com/apprendre/cours/3e-fr-relative.html</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
@@ -285,6 +282,9 @@
 <url><loc>https://veritas-school.com/apprendre/cours/3e-geo-mangrove.html</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
 <url><loc>https://veritas-school.com/apprendre/cours/3e-pct-ph.html</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
 <url><loc>https://veritas-school.com/apprendre/cours/3e-svt-adn.html</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+<url><loc>https://veritas-school.com/apprendre/cours/3e-maths-racines.html</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+<url><loc>https://veritas-school.com/apprendre/cours/3e-pct-atome.html</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+<url><loc>https://veritas-school.com/apprendre/cours/3e-svt-ressemblances.html</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
 <url><loc>https://veritas-school.com/apprendre/cours/2nde-a-maths-r26.html</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
 <url><loc>https://veritas-school.com/apprendre/cours/2nde-a-maths-r27.html</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
 <url><loc>https://veritas-school.com/apprendre/cours/2nde-a-maths-r28.html</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>

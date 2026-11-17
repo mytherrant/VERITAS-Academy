@@ -84,6 +84,34 @@
   "u": "/ressources/annales/bepc-expression-ecrite-2024.html"
  },
  {
+  "id": "probatoire-langue-francaise-aabi-2025",
+  "examen": "probatoire",
+  "m": "langue-francaise",
+  "serie": "séries A et ABI",
+  "nomExamen": "Probatoire",
+  "fiche": "ressources/probatoire-francais.html",
+  "matiere": "Langue française (séries A et ABI)",
+  "mat": "francais",
+  "classes": "1re A",
+  "annee": 2025,
+  "national": true,
+  "u": "/ressources/annales/probatoire-langue-francaise-aabi-2025.html"
+ },
+ {
+  "id": "probatoire-langue-francaise-cdeti-2025",
+  "examen": "probatoire",
+  "m": "langue-francaise",
+  "serie": "séries C, D, E et TI",
+  "nomExamen": "Probatoire",
+  "fiche": "ressources/probatoire-francais.html",
+  "matiere": "Langue française (séries C, D, E et TI)",
+  "mat": "francais",
+  "classes": "1re C,1re D",
+  "annee": 2025,
+  "national": true,
+  "u": "/ressources/annales/probatoire-langue-francaise-cdeti-2025.html"
+ },
+ {
   "id": "bepc-mathematiques-2026",
   "examen": "bepc",
   "m": "mathematiques",
@@ -168,6 +196,20 @@
   "u": "/ressources/annales/probatoire-mathematiques-ce-2025.html"
  },
  {
+  "id": "probatoire-mathematiques-ce-2024",
+  "examen": "probatoire",
+  "m": "mathematiques",
+  "serie": "séries C et E",
+  "nomExamen": "Probatoire",
+  "fiche": "ressources/examen-mathematiques-probatoire.html",
+  "matiere": "Mathématiques (séries C et E)",
+  "mat": "maths",
+  "classes": "1re C",
+  "annee": 2024,
+  "national": true,
+  "u": "/ressources/annales/probatoire-mathematiques-ce-2024.html"
+ },
+ {
   "id": "probatoire-mathematiques-d-2025",
   "examen": "probatoire",
   "m": "mathematiques",
@@ -180,6 +222,34 @@
   "annee": 2025,
   "national": true,
   "u": "/ressources/annales/probatoire-mathematiques-d-2025.html"
+ },
+ {
+  "id": "probatoire-mathematiques-d-2024",
+  "examen": "probatoire",
+  "m": "mathematiques",
+  "serie": "série D",
+  "nomExamen": "Probatoire",
+  "fiche": "ressources/examen-mathematiques-probatoire.html",
+  "matiere": "Mathématiques (série D)",
+  "mat": "maths",
+  "classes": "1re D",
+  "annee": 2024,
+  "national": true,
+  "u": "/ressources/annales/probatoire-mathematiques-d-2024.html"
+ },
+ {
+  "id": "bac-mathematiques-dti-2025",
+  "examen": "bac",
+  "m": "mathematiques",
+  "serie": "séries D et TI",
+  "nomExamen": "Baccalauréat",
+  "fiche": "ressources/examen-mathematiques-bac.html",
+  "matiere": "Mathématiques (séries D et TI)",
+  "mat": "maths",
+  "classes": "Tle D",
+  "annee": 2025,
+  "national": true,
+  "u": "/ressources/annales/bac-mathematiques-dti-2025.html"
  },
  {
   "id": "bepc-pct-2026",
@@ -224,6 +294,90 @@
   "u": "/ressources/annales/bepc-pct-2024.html"
  },
  {
+  "id": "bac-physique-c-2025",
+  "examen": "bac",
+  "m": "physique",
+  "serie": "série C",
+  "nomExamen": "Baccalauréat",
+  "fiche": "ressources/examen-physique-chimie-bac.html",
+  "matiere": "Physique (série C)",
+  "mat": "physique",
+  "classes": "Tle C",
+  "annee": 2025,
+  "national": true,
+  "u": "/ressources/annales/bac-physique-c-2025.html"
+ },
+ {
+  "id": "probatoire-physique-ce-2025",
+  "examen": "probatoire",
+  "m": "physique",
+  "serie": "séries C et E",
+  "nomExamen": "Probatoire",
+  "fiche": "ressources/examen-physique-chimie-probatoire.html",
+  "matiere": "Physique (séries C et E)",
+  "mat": "physique",
+  "classes": "1re C",
+  "annee": 2025,
+  "national": true,
+  "u": "/ressources/annales/probatoire-physique-ce-2025.html"
+ },
+ {
+  "id": "bac-physique-d-2025",
+  "examen": "bac",
+  "m": "physique",
+  "serie": "série D",
+  "nomExamen": "Baccalauréat",
+  "fiche": "ressources/examen-physique-chimie-bac.html",
+  "matiere": "Physique (série D)",
+  "mat": "physique",
+  "classes": "Tle D",
+  "annee": 2025,
+  "national": true,
+  "u": "/ressources/annales/bac-physique-d-2025.html"
+ },
+ {
+  "id": "probatoire-physique-dti-2025",
+  "examen": "probatoire",
+  "m": "physique",
+  "serie": "séries D et TI",
+  "nomExamen": "Probatoire",
+  "fiche": "ressources/examen-physique-chimie-probatoire.html",
+  "matiere": "Physique (séries D et TI)",
+  "mat": "physique",
+  "classes": "1re D",
+  "annee": 2025,
+  "national": true,
+  "u": "/ressources/annales/probatoire-physique-dti-2025.html"
+ },
+ {
+  "id": "bac-chimie-cde-2025",
+  "examen": "bac",
+  "m": "chimie",
+  "serie": "séries C, D et E",
+  "nomExamen": "Baccalauréat",
+  "fiche": "ressources/examen-physique-chimie-bac.html",
+  "matiere": "Chimie (séries C, D et E)",
+  "mat": "chimie",
+  "classes": "Tle C,Tle D",
+  "annee": 2025,
+  "national": true,
+  "u": "/ressources/annales/bac-chimie-cde-2025.html"
+ },
+ {
+  "id": "probatoire-chimie-cde-2025",
+  "examen": "probatoire",
+  "m": "chimie",
+  "serie": "séries C, D et E",
+  "nomExamen": "Probatoire",
+  "fiche": "ressources/examen-physique-chimie-probatoire.html",
+  "matiere": "Chimie (séries C, D et E)",
+  "mat": "chimie",
+  "classes": "1re C,1re D",
+  "annee": 2025,
+  "national": true,
+  "u": "/ressources/annales/probatoire-chimie-cde-2025.html"
+ },
+ {
   "id": "bepc-svt-2026",
   "examen": "bepc",
   "m": "svt",
@@ -266,6 +420,76 @@
   "u": "/ressources/annales/bepc-svt-2024.html"
  },
  {
+  "id": "bac-svt-cti-2025",
+  "examen": "bac",
+  "m": "svt",
+  "serie": "séries C et TI",
+  "nomExamen": "Baccalauréat",
+  "fiche": "ressources/examen-svt-bac.html",
+  "matiere": "SVTEEHB (séries C et TI)",
+  "mat": "svt",
+  "classes": "Tle C",
+  "annee": 2025,
+  "national": true,
+  "u": "/ressources/annales/bac-svt-cti-2025.html"
+ },
+ {
+  "id": "probatoire-svt-cti-2025",
+  "examen": "probatoire",
+  "m": "svt",
+  "serie": "séries C et TI",
+  "nomExamen": "Probatoire",
+  "fiche": "ressources/examen-svt-probatoire.html",
+  "matiere": "SVTEEHB (séries C et TI)",
+  "mat": "svt",
+  "classes": "1re C",
+  "annee": 2025,
+  "national": true,
+  "u": "/ressources/annales/probatoire-svt-cti-2025.html"
+ },
+ {
+  "id": "bac-svt-d-2025",
+  "examen": "bac",
+  "m": "svt",
+  "serie": "série D",
+  "nomExamen": "Baccalauréat",
+  "fiche": "ressources/examen-svt-bac.html",
+  "matiere": "SVTEEHB (série D)",
+  "mat": "svt",
+  "classes": "Tle D",
+  "annee": 2025,
+  "national": true,
+  "u": "/ressources/annales/bac-svt-d-2025.html"
+ },
+ {
+  "id": "probatoire-svt-d-2025",
+  "examen": "probatoire",
+  "m": "svt",
+  "serie": "série D",
+  "nomExamen": "Probatoire",
+  "fiche": "ressources/examen-svt-probatoire.html",
+  "matiere": "SVTEEHB (série D)",
+  "mat": "svt",
+  "classes": "1re D",
+  "annee": 2025,
+  "national": true,
+  "u": "/ressources/annales/probatoire-svt-d-2025.html"
+ },
+ {
+  "id": "probatoire-sciences-aabi-2025",
+  "examen": "probatoire",
+  "m": "sciences",
+  "serie": "séries A et ABI",
+  "nomExamen": "Probatoire",
+  "fiche": "ressources/examen-svt-probatoire.html",
+  "matiere": "Sciences (séries A et ABI)",
+  "mat": "svt",
+  "classes": "1re A",
+  "annee": 2025,
+  "national": true,
+  "u": "/ressources/annales/probatoire-sciences-aabi-2025.html"
+ },
+ {
   "id": "bepc-histoire-2025",
   "examen": "bepc",
   "m": "histoire",
@@ -278,6 +502,34 @@
   "annee": 2025,
   "national": false,
   "u": "/ressources/annales/bepc-histoire-2025.html"
+ },
+ {
+  "id": "probatoire-histoire-aabi-2025",
+  "examen": "probatoire",
+  "m": "histoire",
+  "serie": "séries A et ABI",
+  "nomExamen": "Probatoire",
+  "fiche": "ressources/examen-histoire-geographie-probatoire.html",
+  "matiere": "Histoire (séries A et ABI)",
+  "mat": "histoire",
+  "classes": "1re A",
+  "annee": 2025,
+  "national": false,
+  "u": "/ressources/annales/probatoire-histoire-aabi-2025.html"
+ },
+ {
+  "id": "probatoire-histoire-cdti-2025",
+  "examen": "probatoire",
+  "m": "histoire",
+  "serie": "séries C, D et TI",
+  "nomExamen": "Probatoire",
+  "fiche": "ressources/examen-histoire-geographie-probatoire.html",
+  "matiere": "Histoire (séries C, D et TI)",
+  "mat": "histoire",
+  "classes": "1re C,1re D",
+  "annee": 2025,
+  "national": false,
+  "u": "/ressources/annales/probatoire-histoire-cdti-2025.html"
  },
  {
   "id": "bepc-geographie-2026",
@@ -308,6 +560,20 @@
   "u": "/ressources/annales/bepc-ecm-2026.html"
  },
  {
+  "id": "bac-ecm-2025",
+  "examen": "bac",
+  "m": "ecm",
+  "serie": "",
+  "nomExamen": "Baccalauréat",
+  "fiche": "ressources/examen-ecm-bac.html",
+  "matiere": "Éducation à la citoyenneté et à la morale",
+  "mat": "ecm",
+  "classes": "Tle A,Tle C,Tle D",
+  "annee": 2025,
+  "national": true,
+  "u": "/ressources/annales/bac-ecm-2025.html"
+ },
+ {
   "id": "bepc-ecm-2025",
   "examen": "bepc",
   "m": "ecm",
@@ -320,6 +586,20 @@
   "annee": 2025,
   "national": false,
   "u": "/ressources/annales/bepc-ecm-2025.html"
+ },
+ {
+  "id": "probatoire-ecm-2025",
+  "examen": "probatoire",
+  "m": "ecm",
+  "serie": "",
+  "nomExamen": "Probatoire",
+  "fiche": "ressources/examen-ecm-probatoire.html",
+  "matiere": "Éducation à la citoyenneté et à la morale",
+  "mat": "ecm",
+  "classes": "1re A,1re C,1re D",
+  "annee": 2025,
+  "national": true,
+  "u": "/ressources/annales/probatoire-ecm-2025.html"
  },
  {
   "id": "bepc-ecm-2024",
@@ -336,6 +616,34 @@
   "u": "/ressources/annales/bepc-ecm-2024.html"
  },
  {
+  "id": "probatoire-philosophie-aabi-2025",
+  "examen": "probatoire",
+  "m": "philosophie",
+  "serie": "séries A et ABI",
+  "nomExamen": "Probatoire",
+  "fiche": "ressources/examen-philosophie-probatoire.html",
+  "matiere": "Philosophie (séries A et ABI)",
+  "mat": "philo",
+  "classes": "1re A",
+  "annee": 2025,
+  "national": true,
+  "u": "/ressources/annales/probatoire-philosophie-aabi-2025.html"
+ },
+ {
+  "id": "probatoire-philosophie-cdeti-2025",
+  "examen": "probatoire",
+  "m": "philosophie",
+  "serie": "séries C, D, E et TI",
+  "nomExamen": "Probatoire",
+  "fiche": "ressources/examen-philosophie-probatoire.html",
+  "matiere": "Philosophie (séries C, D, E et TI)",
+  "mat": "philo",
+  "classes": "1re C,1re D",
+  "annee": 2025,
+  "national": true,
+  "u": "/ressources/annales/probatoire-philosophie-cdeti-2025.html"
+ },
+ {
   "id": "bepc-anglais-2025",
   "examen": "bepc",
   "m": "anglais",
@@ -348,6 +656,34 @@
   "annee": 2025,
   "national": false,
   "u": "/ressources/annales/bepc-anglais-2025.html"
+ },
+ {
+  "id": "probatoire-anglais-acdti-2025",
+  "examen": "probatoire",
+  "m": "anglais",
+  "serie": "séries A, C, D et TI",
+  "nomExamen": "Probatoire",
+  "fiche": "ressources/examen-anglais-probatoire.html",
+  "matiere": "Anglais (séries A, C, D et TI)",
+  "mat": "anglais",
+  "classes": "1re A,1re C,1re D",
+  "annee": 2025,
+  "national": true,
+  "u": "/ressources/annales/probatoire-anglais-acdti-2025.html"
+ },
+ {
+  "id": "bac-anglais-cdeti-2025",
+  "examen": "bac",
+  "m": "anglais",
+  "serie": "séries C, D, E et TI",
+  "nomExamen": "Baccalauréat",
+  "fiche": "ressources/examen-anglais-bac.html",
+  "matiere": "Anglais (séries C, D, E et TI)",
+  "mat": "anglais",
+  "classes": "Tle C,Tle D",
+  "annee": 2025,
+  "national": true,
+  "u": "/ressources/annales/bac-anglais-cdeti-2025.html"
  },
  {
   "id": "bepc-espagnol-2026",
@@ -392,6 +728,20 @@
   "u": "/ressources/annales/bepc-espagnol-2024.html"
  },
  {
+  "id": "probatoire-espagnol-aabi-2025",
+  "examen": "probatoire",
+  "m": "espagnol",
+  "serie": "séries A et ABI",
+  "nomExamen": "Probatoire",
+  "fiche": "ressources/examen-langues-vivantes-probatoire.html",
+  "matiere": "Espagnol (séries A et ABI)",
+  "mat": "espagnol",
+  "classes": "1re A",
+  "annee": 2025,
+  "national": false,
+  "u": "/ressources/annales/probatoire-espagnol-aabi-2025.html"
+ },
+ {
   "id": "bepc-allemand-2025",
   "examen": "bepc",
   "m": "allemand",
@@ -418,6 +768,20 @@
   "annee": 2024,
   "national": false,
   "u": "/ressources/annales/bepc-allemand-2024.html"
+ },
+ {
+  "id": "probatoire-allemand-aabi-2025",
+  "examen": "probatoire",
+  "m": "allemand",
+  "serie": "séries A et ABI",
+  "nomExamen": "Probatoire",
+  "fiche": "ressources/examen-langues-vivantes-probatoire.html",
+  "matiere": "Allemand (séries A et ABI)",
+  "mat": "allemand",
+  "classes": "1re A",
+  "annee": 2025,
+  "national": false,
+  "u": "/ressources/annales/probatoire-allemand-aabi-2025.html"
  },
  {
   "id": "bepc-informatique-2026",
@@ -460,5 +824,19 @@
   "annee": 2024,
   "national": false,
   "u": "/ressources/annales/bepc-informatique-2024.html"
+ },
+ {
+  "id": "probatoire-informatique-cde-2025",
+  "examen": "probatoire",
+  "m": "informatique",
+  "serie": "séries C, D et E",
+  "nomExamen": "Probatoire",
+  "fiche": "ressources/examen-informatique-probatoire.html",
+  "matiere": "Informatique (séries C, D et E)",
+  "mat": "info",
+  "classes": "1re C,1re D",
+  "annee": 2025,
+  "national": true,
+  "u": "/ressources/annales/probatoire-informatique-cde-2025.html"
  }
 ]

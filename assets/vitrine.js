@@ -69,10 +69,58 @@
   var D = window.VRT_DATA || {};
   var G = window.VRT_TPL || {};
 
+  /* ── INSTANT DE MOTIVATION : une citation DIFFÉRENTE à chaque visite (13/11/2026) ──
+     Constaté : le visiteur voyait toujours Thomas Edison. La carte partait de
+     l'index 0, ne paraissait qu'une fois par session (12 s), et la rotation
+     (45 s) ne tournait qu'une fois la carte refermée. Six citations seulement,
+     embarquées dans chaque page. Désormais : un répertoire élargi (celui des
+     pages ajouté à celui ci-dessous, sans doublon), et un tirage au hasard qui
+     évite la dernière citation montrée sur cet appareil. */
+  (function () {
+    var PLUS = [
+      { t: 'L’éducation est l’arme la plus puissante pour changer le monde.', a: 'Nelson Mandela' },
+      { t: 'Le savoir est la seule richesse qu’on peut donner sans s’appauvrir.', a: 'Proverbe africain' },
+      { t: 'Celui qui ouvre une porte d’école ferme une prison.', a: 'Victor Hugo' },
+      { t: 'L’excellence n’est pas un acte, c’est une habitude.', a: 'Aristote' },
+      { t: 'Apprendre sans réfléchir est vain, réfléchir sans apprendre est dangereux.', a: 'Confucius' },
+      { t: 'L’avenir appartient à ceux qui croient en la beauté de leurs rêves.', a: 'Eleanor Roosevelt' },
+      { t: 'Seul on va plus vite, ensemble on va plus loin.', a: 'Proverbe africain' },
+      { t: 'La patience est un arbre dont la racine est amère et les fruits très doux.', a: 'Proverbe africain' },
+      { t: 'Le courage n’est pas l’absence de peur, mais la capacité de la vaincre.', a: 'Nelson Mandela' },
+      { t: 'Tu ne peux pas changer le vent, mais tu peux ajuster tes voiles.', a: 'Proverbe marin' },
+      { t: 'La discipline est le pont entre les objectifs et les résultats.', a: 'Jim Rohn' },
+      { t: 'Une erreur n’est pas un échec : c’est une information.', a: 'Développement personnel' },
+      { t: 'Chaque expert a d’abord été un débutant.', a: 'Développement personnel' },
+      { t: 'La rivière creuse la roche non par sa force, mais par sa constance.', a: 'Proverbe' },
+      { t: 'Fais de ton mieux jusqu’à ce que tu saches faire mieux. Ensuite, fais mieux.', a: 'Maya Angelou' },
+      { t: 'Il n’y a pas de honte à ne pas savoir ; la honte est de ne pas vouloir apprendre.', a: 'Proverbe africain' },
+      { t: 'Celui qui déplace la montagne commence par déplacer les petits cailloux.', a: 'Confucius' },
+      { t: 'Instruis-toi comme si tu devais vivre toujours.', a: 'Proverbe' },
+      { t: 'Le courage, c’est d’aller à l’école même les jours sans envie.', a: 'Centre VÉRITAS' },
+      { t: 'Le savoir est une arme : aiguise-la un peu chaque jour.', a: 'Centre VÉRITAS' }
+    ];
+    var cle = function (c) { return String((c && c.t) || '').toLowerCase().replace(/[^a-zà-ÿ0-9]/g, ''); };
+    var vus = {}, liste = [];
+    (D.citations || []).concat(PLUS).forEach(function (c) {
+      var k = cle(c); if (!k || vus[k]) return; vus[k] = 1; liste.push(c);
+    });
+    D.citations = liste;
+  })();
+  function citationAuHasard() {
+    var n = (D.citations || []).length, der = -1;
+    if (n < 2) return 0;
+    try { der = parseInt(localStorage.getItem('vrt_cit_der'), 10); } catch (e) {}
+    var i = Math.floor(Math.random() * (n - 1));
+    if (!isNaN(der) && der >= 0 && der < n && i >= der) i++;   // jamais la dernière vue
+    else if (isNaN(der) || der < 0 || der >= n) i = Math.floor(Math.random() * n);
+    return i;
+  }
+  function retenirCitation(i) { try { localStorage.setItem('vrt_cit_der', String(i)); } catch (e) {} }
+
   var S = {
     page: 'accueil', tab: 1, filtre: 0, moyen: 0, livr: 1, qte: 1,
     langue: 'fr', theme: 'clair', plus: false, burger: false,
-    ia: false, trad: false, cit: 0, citOn: true, copie: false,
+    ia: false, trad: false, cit: citationAuHasard(), citOn: true, copie: false,
     /* ⚠️ CE QUE LE VISITEUR ACHÈTE. Rien par défaut, et c'est volontaire.
        Le tunnel facturait 5 000 F l'unité EN DUR — `montantTotal()` ignorait
        purement et simplement le produit cliqué, le récapitulatif affichait
@@ -677,7 +725,7 @@
     ambassaSuggestion: function (el) { ambassaSuggestion(el); },
     ambassaOutil: function (el) { ambassaOutil(el); },
     nouvelleCitation: function () {
-      S.cit = (S.cit + 1) % (D.citations || [{}]).length; S.citOn = true;
+      S.cit = (S.cit + 1) % (D.citations || [{}]).length; S.citOn = true; retenirCitation(S.cit);
       var c = (D.citations && D.citations[S.cit]) || {};
       poser('citationTexte', c.t || ''); poser('citationAuteur', '— ' + (c.a || ''));
       panneau('vrtCit', true);
@@ -3012,6 +3060,7 @@
         if ((ici && ici !== 'accueil') || /app\.html|VERITAS_v/i.test(location.pathname)) return;
         var c = (D.citations && D.citations[S.cit]) || {};
         poser('citationTexte', c.t || ''); poser('citationAuteur', '— ' + (c.a || ''));
+        retenirCitation(S.cit);
         panneau('vrtCit', true);
         setTimeout(function () {
           /* On ne touche PAS à citOn : le visiteur n'a rien refusé, la
