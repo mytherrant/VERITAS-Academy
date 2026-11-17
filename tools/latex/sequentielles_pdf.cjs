@@ -67,7 +67,12 @@ function latex(s) {
   return s.replace(/\u00a0/g, '~').replace(/\u202f/g, '\\,');
 }
 
-const PTS = /^\(?\s*\d+(?:[,.]\d+)?\s*(?:pt|pts|point|points|mark|marks|marks?|punto|puntos|Punkt|Punkte|P\.)\s*\)?$/i;
+/* Barème simple « (1 pt) » ou composé « (0,5 pt × 2 = 1 pt) », « (0,5 pt + 0,25 pt × 2 = 1 pt) » :
+   tous passent en marge droite. Sans cela, le composé restait du gras dans la phrase et la
+   justification l'étirait sur toute la ligne. Il doit finir par une unité. */
+const PTS = /^\(?\s*\d+(?:[,.]\d+)?\s*(?:pts?|points?|marks?|puntos?|Punkte?|P\.)?(?:\s*[×x*+=]\s*\d+(?:[,.]\d+)?\s*(?:pts?|points?|marks?|puntos?|Punkte?|P\.)?)*\s*\)?$/i;
+const PTS_FIN = /(?:pts?|points?|marks?|puntos?|Punkte?|P\.)\s*\)?$/i;
+const estBareme = s => PTS.test(s) && PTS_FIN.test(s);
 const blanc = n => n.texte !== undefined && !n.texte.trim();
 function enLigne(enfants) {
   return enfants.map(n => {
@@ -89,7 +94,7 @@ function ligne(enfants) {
   const e = enfants.slice();
   while (e.length && blanc(e[e.length - 1])) e.pop();
   const der = e[e.length - 1];
-  if (der && (der.tag === 'strong' || der.tag === 'b') && PTS.test(texteDe(der).trim())) {
+  if (der && (der.tag === 'strong' || der.tag === 'b') && estBareme(texteDe(der).trim())) {
     return enLigne(e.slice(0, -1)).trim() + '\\pts{' + latex(texteDe(der).trim()) + '}';
   }
   return enLigne(e).trim();
