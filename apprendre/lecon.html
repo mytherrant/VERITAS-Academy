@@ -83,7 +83,7 @@
   /* Leçon approfondie (16/11/2026) : une situation-problème (L.enquete) résolue partie après partie
      (p.fil = indice), des planches 2D et 3D (p.planches), un dénouement chiffré (L.denouement). */
   var ouvertes=L.parties.filter(function(p){return !p.verrou}), nPl=0, nFil=ouvertes.filter(function(p){return p.fil}).length, kFil=0;
-  function planche(pl,k,i){ nPl++; var tag='<div class="pl-t"><span class="pl-tag">Planche '+nPl+' · '+esc(pl.type==="3d"?"3D":(pl.type||"2D"))+'</span>'+esc(pl.titre||"")+'</div>';
+  function planche(pl,k,i){ nPl++; var tag='<div class="pl-t"><span class="pl-tag">Planche '+nPl+'</span>'+esc(pl.titre||"")+'</div>';
     if(pl.type==="3d") return '<figure class="p3d">'+tag+'<div data-p3d="'+k+'-'+i+'"></div>'+(pl.legende?'<figcaption>'+esc(pl.legende)+'</figcaption>':'')+'</figure>';
     return '<figure class="illus planche">'+tag+pl.svg+(pl.legende?'<figcaption>'+esc(pl.legende)+'</figcaption>':'')+'</figure>'; }
   /* Situation-problème structurée : contexte, documents, problème, tâche, hypothèses (tranchées par les indices). */

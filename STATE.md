@@ -1,3 +1,7 @@
+## Leçons : étiquettes de planche sans « 2D » ni « 3D » (17/11/2026)
+
+Demande de Jacques : « pour toutes les fiches, enlève 2d, 3d ». `apprendre/lecon.html`, fonction `planche()` : l'étiquette devient « Planche n » (au lieu de « Planche n · 2D / 3D » ; les planches de type « Planche » affichaient même « Planche n · Planche »). Le type reste dans les données (`type: "3d"` pilote toujours le moteur 3D). Bancs gabarits, planche mobile, réglages, charte au vert ; 0 erreur JS.
+
 ## Apprendre : lot 8, langues de 3e et préparation du bac (17/11/2026)
 
 Demandes de Jacques : « Oui continue » (PR #322, déjà intégrée à master, fermée avec un commentaire), puis « continue ».
