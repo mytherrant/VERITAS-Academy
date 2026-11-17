@@ -1,3 +1,16 @@
+## Apprendre : lot 8, langues de 3e et préparation du bac (17/11/2026)
+
+Demandes de Jacques : « Oui continue » (PR #322, déjà intégrée à master, fermée avec un commentaire), puis « continue ».
+
+- **`apprendre/_src/15-approfondies-langues.js`** : 4 leçons gratuites de classes d'examen au gabarit approfondi, remplacées en place :
+  - **3e anglais, simple present / present continuous** : messages WhatsApp de Junior à Kwame (Accra) ; réveil 3D (habitudes), scène de marché « right now » ; **simulation** : choisir le temps selon le marqueur (8 phrases).
+  - **3e allemand, Wo? Wohin?** : lettre de Brenda (Buea) à Lena (Hambourg) ; neuf positions du ballon autour d'une caisse, chambre 3D où le ballon tombe de la table (datif → accusatif) ; **simulation** : placer le ballon, position ou direction.
+  - **3e espagnol, en el médico** : l'élève interprète d'une docteure espagnole à Maroua ; corps humain légendé (duele / duelen), table de consultation 3D (sirop, comprimés, thermomètre, stéthoscope) ; **simulation** : toucher une partie du corps.
+  - **Tle, préparer le bac** : bulletin de Kevin (Tle A, 8,6 → 10,4 avec des progrès ciblés, coefficients totaux 22) ; année en 3D mois par mois ; **calculateur** de moyenne pondérée.
+- `lecons.js?v=20261117f` ; 4 pages `apprendre/cours/` régénérées et habillées. Chromium (1200 et 390 px) : aucun débordement, aucune erreur JS. Bancs : réglages 29/29, verrou 18/18, gabarits 54/54, planche mobile 23/23, charte 34/34, lisibilité 7/7.
+- **Repère 3D** : dans `planche3d.js`, la vue de départ montre les faces tournées vers −z ; placer cadrans, ampoules, écrans côté −z.
+- **Suite** : 3e anglais (articles), allemand (verbes faibles), espagnol (familia), grec (Ésope, Homère) ; Tle culture nationale, arabe ; 1re langues et ESF ; puis 6e-5e-4e.
+
 ## Corrigés : dessin des leçons, suivi des corrigés consultés (17/11/2026)
 
 Demande de Jacques : « Enrichis aussi les pages de corrigés ».
