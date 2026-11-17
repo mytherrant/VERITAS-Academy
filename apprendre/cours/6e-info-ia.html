@@ -39,6 +39,19 @@ h3{color:var(--t);font-weight:600;font-size:17px;margin:20px 0 6px}
 .ap-encart{background:#F7F9FC;border-radius:10px;padding:14px 18px;margin:16px 0}
 .ap-quiz li{margin:10px 0}.ap-quiz .bonne{color:#007E11;font-weight:600}
 .ap-wrap img,.ap-wrap svg{max-width:100%;height:auto}
+.ap-sit{border:2px solid #F2DFA6;background:#FFFBEF;border-radius:14px;padding:6px 20px 14px;margin:20px 0}
+.ap-sit h2{margin-top:14px}.ap-sit .ap-q{font-weight:600;color:var(--t)}
+.ap-fig{margin:18px 0;padding:12px;border:1px solid var(--l);border-radius:12px;background:#fff}
+.ap-fig figcaption{font-size:14px;margin-top:8px}.ap-fig .ap-tag{display:inline-block;font-size:11px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--b);margin-bottom:6px}
+.ap-indice{border-left:4px solid var(--b);background:#F2F6FD;border-radius:0 10px 10px 0;padding:10px 16px;margin:16px 0}
+.ap-indice ul{margin:6px 0 0;padding-left:20px}.ap-v-ok{color:#007E11;font-weight:600}.ap-v-ko{color:#A31238;font-weight:600}
+.ap-resolue{border:2px solid #9FD3B3;background:#F2FBF5;border-radius:14px;padding:6px 20px 14px;margin:24px 0}
+.def,.ex,.prop,.methode,.astuce,.attention,.savais,.retiens{border-radius:10px;padding:12px 16px;margin:14px 0;background:#F7F9FC}
+.def b,.ex b,.prop b,.methode b,.astuce b,.attention b,.savais b,.retiens b{display:block;color:var(--t)}
+.attention{background:#FDF0EE}.astuce,.savais{background:#FFF8E6}.prop,.retiens{background:#EEF8F1}
+.formule{text-align:center;font-weight:600;color:var(--t)}
+table.donnees,.tab-scroll table{border-collapse:collapse;margin:8px 0;display:block;overflow-x:auto}
+table.donnees td,table.donnees th,.tab-scroll td,.tab-scroll th{border:1px solid var(--l);padding:4px 10px}
 a{color:var(--b)}
 </style>
 <link rel="stylesheet" href="/assets/veritas-refonte.css?v=1.19.25">
@@ -134,6 +147,8 @@ a{color:var(--b)}
 <div class="ap-encart"><b>À retenir</b> : L'IA imite l'intelligence, elle ne pense pas comme nous.</div>
 <h2>Comment une IA apprend</h2>
 <p>On montre à l'IA des milliers d'<strong>exemples</strong> (des photos de mangues et d'avocats, par exemple). Elle repère des régularités puis devine la réponse pour un exemple nouveau.</p>
+<figure class="ap-fig"><svg viewBox='0 0 460 170' role='img' aria-label='Exemples puis entraînement puis prédiction'><defs><marker id='fi' viewBox='0 0 10 10' refX='8' refY='5' markerWidth='7' markerHeight='7' orient='auto'><path d='M0 0l10 5-10 5z' fill='#142554'/></marker></defs><rect x='14' y='30' width='120' height='100' rx='14' fill='#E4E9F2' stroke='#0C2A6A' stroke-width='2'/><g><ellipse cx='48' cy='66' rx='16' ry='12' fill='#FFC93C'/><ellipse cx='96' cy='66' rx='16' ry='12' fill='#FFC93C'/><ellipse cx='48' cy='102' rx='12' ry='16' fill='#7FCB8C'/><ellipse cx='96' cy='102' rx='12' ry='16' fill='#7FCB8C'/></g><text x='74' y='152' text-anchor='middle' font-size='13' fill='#142554'>1. des exemples</text><path d='M140 80h40' stroke='#142554' stroke-width='2' marker-end='url(#fi)'/><rect x='186' y='30' width='100' height='100' rx='14' fill='#0C2A6A'/><g stroke='#FFC93C' stroke-width='2'><circle cx='212' cy='60' r='6' fill='none'/><circle cx='212' cy='100' r='6' fill='none'/><circle cx='260' cy='80' r='6' fill='none'/><path d='M218 60l36 18M218 100l36-18'/></g><text x='236' y='152' text-anchor='middle' font-size='13' fill='#142554'>2. l'entraînement</text><path d='M292 80h40' stroke='#142554' stroke-width='2' marker-end='url(#fi)'/><rect x='338' y='30' width='110' height='100' rx='14' fill='#E0F5E5' stroke='#00520B' stroke-width='2'/><ellipse cx='370' cy='80' rx='16' ry='12' fill='#FFC93C'/><text x='398' y='76' font-size='13' fill='#00520B' font-weight='700'>mangue</text><text x='398' y='94' font-size='12' fill='#00520B'>à 97 %</text><text x='393' y='152' text-anchor='middle' font-size='13' fill='#142554'>3. la prédiction</text></svg><figcaption>Les trois étapes : des exemples, un entraînement, une prédiction.</figcaption></figure>
+<p><a href="/apprendre/lecon.html?id=6e-info-ia">Simulation interactive : Entraîne ta propre mini-IA (dans Apprendre)</a></p>
 <div class="ap-encart"><b>À retenir</b> : Pas d'exemples, pas d'apprentissage : l'IA dépend de ses données.</div>
 <h2>L'IA autour de toi</h2>
 <ul><li><strong>Assistants vocaux</strong> qui comprennent une question posée à l'oral ;</li><li><strong>traduction automatique</strong> d'un texte ;</li><li><strong>reconnaissance de visage</strong> pour déverrouiller un téléphone ;</li><li><strong>recommandations</strong> de vidéos ou de musiques ;</li><li><strong>assistants pédagogiques</strong>, comme Prof. Ambassa sur VÉRITAS.</li></ul><div class='attention'><b>Garde l'esprit critique</b>Une IA peut se tromper avec assurance. Vérifie toujours une information importante dans ton cours ou auprès d'un enseignant.</div>
