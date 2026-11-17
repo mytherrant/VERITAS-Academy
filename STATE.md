@@ -1,3 +1,11 @@
+## Post-it : le titre dans le ruban blanc (17/11/2026)
+
+Demande de Jacques (capture d'une leçon de 1re D) : « Mets les titres dans le petit cadre blanc au milieu des encadrés ».
+
+- **Leçons** (`apprendre/modele.css`, fin) : sur les post-it (Astuce, Attention / Piège, À retenir, Le savais-tu, Méthode), le ruban décoratif (`::before`) est retiré ; le titre (`b:first-child`), icône illustrée comprise, devient le ruban : fond blanc translucide, légère inclinaison, centré et à cheval sur le bord du haut (`display:table`, marge négative : un titre sur deux lignes repousse le texte au lieu de le couvrir). `modele.css?v=20261117h` sur les 7 pages d'Apprendre.
+- **Œuvres** (`tools/oeuvres_statiques.css`) : même traitement pour les titres des leçons de vie.
+- Contrôlé dans Chromium (390 et 1280 px), 0 erreur JS ; `oeuvres_statiques --controle` au vert.
+
 ## Annales : carte du Cameroun après 1914-1916 redessinée en SVG (17/11/2026)
 
 Retour de Jacques : « L'image du Cameroun n'est pas nette ». C'était le document 3 de l'annale d'histoire du probatoire A-ABI 2025 (`proba-2025-histoire-a-carte.jpg`, scan granuleux de 650 × 872 px).
@@ -17,6 +25,31 @@ Demande de Jacques : « Continue » (après le lot 5, PR #337 déployée).
   - **Tle, gérer son temps** : bilan d'Aïcha à Ngaoundéré (4 h 30 d'écran) ; journée en anneau, semaine type 3D, courbe de l'oubli et révisions espacées ; **simulateur** de semaine (sommeil, écran, cours → heures de révision réparties selon les coefficients).
 - `lecons.js?v=20261117d` ; 4 pages `apprendre/cours/` régénérées et habillées. Contrôlé dans Chromium (1200 et 390 px) : aucun débordement, aucune erreur JS. Bancs : réglages 29/29, verrou 18/18, gabarits 54/54, planche mobile 23/23, charte 34/34, lisibilité 7/7.
 - **Suite** : 3e histoire (partage de l'Afrique), ECM (démocratie), langues ; Tle philosophie (passions, liberté), orientation (bac), culture nationale ; 1re langues et ESF.
+## Œuvres analysées : dessin des leçons, carte mentale, quiz ; objectifs resserrés (17/11/2026)
+
+Suite des retours de Jacques : « Réduis l'interligne dans les objectifs. Applique aussi ce style aux pages des œuvres littéraires analysées », puis « Enrichis et illustre si nécessaire ».
+
+- **Objectifs des fiches** (`_methode.css`, fin) : interligne 1,38, 5 px entre les lignes.
+- **Pages `oeuvres/*.html`** (`tools/oeuvres_statiques.js`, nouvelle feuille source `tools/oeuvres_statiques.css` lue par le générateur, commentaires retirés) :
+  - **en-tête carte** (`<!-- oeuvre-ent -->`) : couverture en médaille, pastille, « Français · Œuvre intégrale · classe », titre, auteur surligné, puces (temps de lecture, genre, examen, liens vers la carte mentale et le quiz). Le `<header>` autour du titre empêche `vitrine.js` d'en faire le bandeau bleu ;
+  - parties numérotées par compteur CSS au **cercle magenta à point or**, titre magenta souligné magenta → or ; sous-titres bleu-vert ; Roboto ; texte justifié ;
+  - thèmes en pastilles de couleur, citation en encadré crème à guillemet or, **fiche d'identité en tuiles**, axes de lecture en cartes numérotées ;
+  - **carte mentale dessinée** (nouvelle partie) à partir de `carte` de `litt-oeuvres.js` : centre bleu nuit, branches à la couleur de l'application (remplace les listes h3/ul) ;
+  - explications des citations et procédés en **encadrés illustrés à rail en pointillés** ; leçons de vie en **post-it** ;
+  - questions de contrôle **à déplier** ; nouvelle partie **« Teste-toi »** avec les QCM de l'application, réponse et explication à déplier ;
+  - **œuvre précédente / suivante** (ordre 6e → Tle).
+  - ⚠️ Teintes pâles des branches calculées dans le générateur (`pale()`) : `veritas-medaillons.js` (correcteur de contraste) ne lit pas `color-mix()` et forçait le texte en blanc.
+- Contrôlé dans Chromium (390 et 1280 px) : aucun débordement, 0 erreur JS. `oeuvres_statiques`, `methodes_examens`, `annales`, `sequentielles`, `habiller_pages`, `build_llms`, `build_search_index` en `--controle` au vert.
+
+## Ressources gratuites : même dessin que les leçons, fiches enrichies (17/11/2026)
+
+Demande de Jacques (capture de `ressources/examen-svt-bac.html` au téléphone) : « Aligne la mise en forme des ressources gratuites comme les pages de cours. Enrichis-les si possible. »
+
+- **Feuille commune `tools/methodes/_methode.css`** (fiches de méthode, annales, séquentielles : ~150 pages) : couche « dessin des leçons » ajoutée en fin de fichier. Police **Roboto** (fichiers `assets/polices/`), titres de partie au **cercle magenta numéroté à point or** et titre magenta souligné magenta → or (toutes les parties, plus de couleurs tournantes), sous-titres `h3` bleu-vert, **encadrés à icône illustrée et rail en pointillés** (icônes reprises telles quelles d'`apprendre/modele.css`), objectifs en carte à cible et **pastilles de couleur** (la coche du site est neutralisée), texte justifié avec césure, tableaux à en-tête teinté de la matière, sources discrètes.
+- **En-tête parlant** (`methodes_examens.cjs`, `entete()`) : carte teintée de la matière (`--mt`, `--mt-pale` d'Apprendre ; matière tirée de `_classement.json`), médaille à l'icône de la matière, pastille (badge), « Matière · Examen · classes », titre, chapô encadré en pointillés « L'essentiel », puces (temps de lecture, nombre de parties, exemple traité, annales corrigées, sources officielles, bouton **Imprimer**).
+- **Fin de fiche** (`fin()`) : **fiche précédente / suivante** de la même matière (boutons des leçons, la suivante en bleu plein à flèche or) et **« Les autres épreuves du BEPC / Probatoire / Baccalauréat »** en pastilles à l'icône de chaque matière.
+- Annales et séquentielles gardent leur balisage (pastille + titre) et reçoivent le nouveau dessin par la feuille commune.
+- Contrôlé dans Chromium (390 et 1280 px) : aucun débordement horizontal, 0 erreur JS. `methodes_examens`, `annales`, `sequentielles`, `habiller_pages`, `build_llms` en `--controle` au vert.
 
 ## Leçon : en-tête parlant, barre des matières sobre, offres encadrées, leçons voisines en avant (17/11/2026)
 

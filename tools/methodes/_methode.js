@@ -21,3 +21,8 @@
   window.addEventListener("resize", maj);
   maj();
 })();
+/* Bouton « Imprimer » de l'en-tête (la feuille d'impression masque sommaire et liens de fin). */
+(function () {
+  var b = document.querySelector("[data-mx-imprimer]");
+  if (b) b.addEventListener("click", function () { window.print(); });
+})();
