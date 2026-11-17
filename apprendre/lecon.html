@@ -12,7 +12,7 @@
 <link rel="stylesheet" href="jeu.css?v=20261112v">
 <link rel="stylesheet" href="planches.css?v=20261116b">
 <link rel="stylesheet" href="lecon-modele.css?v=20261116j">
-<link rel="stylesheet" href="modele.css?v=20261116s">
+<link rel="stylesheet" href="modele.css?v=20261117a">
 <style>
 /* ── Vue Enseignant, français : évaluer la leçon dans l'Atelier (10/11/2026) ── */
 .atelier-prof{display:none}
@@ -112,13 +112,18 @@
   var scenesHtml=sc.map(function(s){return '<a class="scene" href="/scenes/'+s+'.html"><span class="pl">'+A.pic("masques",30)+'</span><span><small>Scène vivante</small><strong>'+esc(nomScene(s))+'</strong></span><span class="jouer">'+A.pic("lecture",30)+'</span></a>'}).join("");
   var resL=A.resLecon(L.c,L.m,L.n), plus=resL.length?'<section class="res-fam res-lecon"><h2>'+A.pic("fleche",20)+'Pour aller plus loin</h2><div class="res-g">'+resL.map(A.carteRes).join("")+'</div></section>':'';
   var appel=L.examen?'<a class="appel" href="'+esc(L.examen.href)+'">'+A.ico("p-parent",40)+'<div><strong>'+esc(L.examen.t)+'</strong><span>'+esc(L.examen.d||"Des sujets réels, corrigés pas à pas.")+'</span></div><span class="chev" aria-hidden="true">›</span></a>':'';
-  var nav='<nav class="suite" aria-label="Leçons voisines">'+(prec?'<a href="lecon.html?id='+prec+'"><small>‹ Leçon précédente</small>'+esc(VRT_LECONS[prec].titre)+'</a>':'<span></span>')+(suiv?'<a href="lecon.html?id='+suiv+'"><small>Leçon suivante ›</small>'+esc(VRT_LECONS[suiv].titre)+'</a>':'<a href="matiere.html?c='+encodeURIComponent(L.c)+'&m='+L.m+'"><small>Tout le programme ›</small>'+esc(M.nom)+' · '+esc(L.c)+'</a>')+'</nav>';
+  var nav='<nav class="suite" aria-label="Leçons voisines">'+(prec?'<a class="su-prec" href="lecon.html?id='+prec+'"><span class="su-fl" aria-hidden="true">‹</span><span><small>Leçon précédente</small>'+esc(VRT_LECONS[prec].titre)+'</span></a>':'<span></span>')+(suiv?'<a class="su-suiv" href="lecon.html?id='+suiv+'"><span><small>Leçon suivante</small>'+esc(VRT_LECONS[suiv].titre)+'</span><span class="su-fl" aria-hidden="true">›</span></a>':'<a class="su-suiv" href="matiere.html?c='+encodeURIComponent(L.c)+'&m='+L.m+'"><span><small>Tout le programme</small>'+esc(M.nom)+' · '+esc(L.c)+'</span><span class="su-fl" aria-hidden="true">›</span></a>')+'</nav>';
 
   boite.innerHTML=
    '<p class="ariane"><a href="index.html">Apprendre</a><span>›</span><a href="index.html?c='+encodeURIComponent(L.c)+'">'+esc(L.c)+'</a><span>›</span><a href="matiere.html?c='+encodeURIComponent(L.c)+'&m='+L.m+'">'+esc(M.nom)+'</a><span>›</span>'+esc(L.titre)+'</p>'+
-   '<header class="bandeau"><span class="medaille" style="background:'+M.t[1]+'">'+A.icoM(M,62)+'</span><div><div class="sur" id="sur">Cours</div><h1>'+esc(L.titre)+'</h1><div class="meta"><span><b>'+esc(M.nom)+'</b> · '+esc(L.c)+'</span>'+(L.chap?'<span>'+esc(L.chap)+'</span>':'')+(L.n<900?'<span>Leçon '+L.n+' de la progression MINESEC</span>':'')+'</div>'+
-     (L.accroche?'<p class="accroche">'+esc(L.accroche)+'</p>':'')+
-     '<div class="puces"><span>'+A.pic("horloge",14)+' '+(L.duree||15)+' min</span><span>'+L.parties.length+' parties</span>'+(L.labo||L.parties.some(function(p){return p.anim||p.labo})?'<span>'+A.pic("lecture",14)+' labo interactif</span>':'')+'<span>'+A.pic("coche",14)+' quiz de '+(L.quiz.length||L.nq||0)+' questions</span>'+(A.scenesPour(L).length?'<span>'+A.pic("masques",16)+' scène vivante</span>':'')+'</div></div></header>'+
+   /* En-tête « parlant » (17/11/2026, retour de Jacques : « trop simple et pas assez parlant ») :
+      teinte de la matière, chapitre, place de la leçon dans la matière, situation de départ encadrée. */
+   '<header class="bandeau ent"><div class="ent-haut"><span class="medaille">'+A.icoM(M,48)+'</span><div class="ent-tags"><span class="sur" id="sur">Cours</span><span class="ent-mat"><b>'+esc(M.nom)+'</b> · '+esc(L.c)+'</span></div></div>'+
+     '<h1>'+esc(L.titre)+'</h1>'+
+     (L.chap?'<p class="ent-chap">'+A.pic("livre",16)+'<span>Chapitre : <b>'+esc(L.chap)+'</b></span></p>':'')+
+     (soeurs.length>1?'<div class="ent-pos"><span>'+(L.n<900?'Leçon '+L.n+' du programme MINESEC':'Leçon '+(i+1))+'</span><span class="ent-barre" aria-hidden="true"><i style="width:'+Math.round((i+1)/soeurs.length*100)+'%"></i></span><span>'+(i+1)+' / '+soeurs.length+' leçons rédigées</span></div>':(L.n<900?'<p class="ent-pos"><span>Leçon '+L.n+' du programme MINESEC</span></p>':''))+
+     (L.accroche?'<div class="ent-situ"><span class="ent-situ-t">'+A.pic("cible",16)+'Situation de départ</span><p class="accroche">'+esc(L.accroche)+'</p></div>':'')+
+     '<div class="puces"><span>'+A.pic("horloge",14)+' '+(L.duree||15)+' min</span><span>'+L.parties.length+' parties</span>'+(L.labo||L.parties.some(function(p){return p.anim||p.labo})?'<span>'+A.pic("lecture",14)+' labo interactif</span>':'')+'<span>'+A.pic("coche",14)+' quiz de '+(L.quiz.length||L.nq||0)+' questions</span>'+(A.scenesPour(L).length?'<span>'+A.pic("masques",16)+' scène vivante</span>':'')+'</div></header>'+
    '<div class="formats" role="tablist" aria-label="Formats de la leçon">'+
      '<button type="button" role="tab" aria-selected="true" data-f="cours"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 4h7a3 3 0 0 1 3 3v13a2 2 0 0 0-2-2H2zM22 4h-7a3 3 0 0 0-3 3v13a2 2 0 0 1 2-2h8z"/></svg>Cours</button>'+
      '<button type="button" role="tab" aria-selected="false" data-f="revision"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="3" width="16" height="18" rx="2"/><path d="M8 8h8M8 12h8M8 16h5"/></svg>Révision</button>'+
