@@ -1,3 +1,19 @@
+## Œuvres analysées : dessin des leçons, carte mentale, quiz ; objectifs resserrés (17/11/2026)
+
+Suite des retours de Jacques : « Réduis l'interligne dans les objectifs. Applique aussi ce style aux pages des œuvres littéraires analysées », puis « Enrichis et illustre si nécessaire ».
+
+- **Objectifs des fiches** (`_methode.css`, fin) : interligne 1,38, 5 px entre les lignes.
+- **Pages `oeuvres/*.html`** (`tools/oeuvres_statiques.js`, nouvelle feuille source `tools/oeuvres_statiques.css` lue par le générateur, commentaires retirés) :
+  - **en-tête carte** (`<!-- oeuvre-ent -->`) : couverture en médaille, pastille, « Français · Œuvre intégrale · classe », titre, auteur surligné, puces (temps de lecture, genre, examen, liens vers la carte mentale et le quiz). Le `<header>` autour du titre empêche `vitrine.js` d'en faire le bandeau bleu ;
+  - parties numérotées par compteur CSS au **cercle magenta à point or**, titre magenta souligné magenta → or ; sous-titres bleu-vert ; Roboto ; texte justifié ;
+  - thèmes en pastilles de couleur, citation en encadré crème à guillemet or, **fiche d'identité en tuiles**, axes de lecture en cartes numérotées ;
+  - **carte mentale dessinée** (nouvelle partie) à partir de `carte` de `litt-oeuvres.js` : centre bleu nuit, branches à la couleur de l'application (remplace les listes h3/ul) ;
+  - explications des citations et procédés en **encadrés illustrés à rail en pointillés** ; leçons de vie en **post-it** ;
+  - questions de contrôle **à déplier** ; nouvelle partie **« Teste-toi »** avec les QCM de l'application, réponse et explication à déplier ;
+  - **œuvre précédente / suivante** (ordre 6e → Tle).
+  - ⚠️ Teintes pâles des branches calculées dans le générateur (`pale()`) : `veritas-medaillons.js` (correcteur de contraste) ne lit pas `color-mix()` et forçait le texte en blanc.
+- Contrôlé dans Chromium (390 et 1280 px) : aucun débordement, 0 erreur JS. `oeuvres_statiques`, `methodes_examens`, `annales`, `sequentielles`, `habiller_pages`, `build_llms`, `build_search_index` en `--controle` au vert.
+
 ## Ressources gratuites : même dessin que les leçons, fiches enrichies (17/11/2026)
 
 Demande de Jacques (capture de `ressources/examen-svt-bac.html` au téléphone) : « Aligne la mise en forme des ressources gratuites comme les pages de cours. Enrichis-les si possible. »

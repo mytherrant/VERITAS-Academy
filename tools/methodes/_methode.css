@@ -199,3 +199,7 @@ ul.mx-check li::before{border-color:var(--vm-mag)}
 #mx .card.mx .objectifs li::before{-webkit-mask:none!important;mask:none!important}
 #mx .card.mx .objectifs li{margin:0!important}
 #mx .mx-puces button{min-height:0!important;height:auto!important;line-height:1.2!important}
+/* Objectifs : interligne resserré (« réduis l'interligne dans les objectifs », 17/11/2026). */
+#mx .card.mx .objectifs ul{gap:5px!important}
+#mx .card.mx .objectifs li{line-height:1.38!important;padding:2px 0 2px 30px!important}
+#mx .card.mx .objectifs li::before{top:.5em!important}
