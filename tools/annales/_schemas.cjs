@@ -280,4 +280,583 @@ S["proba-2024-maths-a-courbe"] = () => {
   return svg(X(xb) + 24, Y(ya) + 12, g, "Courbe de f(x) = (x − 1)/(x + 2) : deux branches croissantes, de (−6 ; 7/4) vers +∞ à gauche de l'asymptote x = −2, puis de −∞ vers (4 ; 1/2) ; tangente (T) : y = 3x/4 − 1/2 au point (0 ; −1/2).");
 };
 
+// Probatoire C-E 2024 maths : tétraèdre régulier ABCD, I milieu de [BC], H projeté orthogonal de A sur (BCD) ; coordonnées relevées sur le scan.
+S["proba-2024-maths-ce-tetraedre"] = () => {
+  const k = 0.55, Q = (x, y) => [x * k, y * k], A = Q(230, 55), B = Q(55, 218), C = Q(145, 445), D = Q(415, 350), I = Q(100, 331), H = Q(233, 338);
+  const it = ' font-style="italic" font-family="Times New Roman,serif" font-size="15"', pt = ' stroke-dasharray="1.6 3" stroke-width="1.3"';
+  return svg(250, 262, L(A, B) + L(A, C) + L(A, D) + L(B, C) + L(C, D) + L(B, D, ' stroke-dasharray="6 4" stroke-width="1.4"') +
+    L(A, I, pt) + L(A, H, pt) + L(I, D, pt) + P([[H[0], H[1] - 7], [H[0] + 6, H[1] - 7], [H[0] + 6, H[1] - 1]], pt) +
+    T([A[0] - 5, A[1] - 7], "A", it) + T([B[0] - 16, B[1] + 4], "B", it) + T([C[0] - 4, C[1] + 18], "C", it) + T([D[0] + 6, D[1] + 6], "D", it) + T([I[0] - 13, I[1] + 6], "I", it) + T([H[0] - 5, H[1] + 17], "H", it),
+    "Tétraèdre régulier ABCD ; I milieu de [BC] ; H projeté orthogonal de A sur le plan (BCD), situé sur [ID] ; segments [AI], [AH] et [ID] en pointillés, arête [BD] cachée.");
+};
+// Corrigé C-E 2024 : courbe de g, restriction de f(x) = (4x² − 4x − 2)/(2x − 3) à [1 ; 3/2[ ∪ ]3/2 ; +∞[ ; asymptotes x = 3/2 et (D) : y = 2x + 1.
+S["proba-2024-maths-ce-courbe"] = () => {
+  const u = 26, xa = -3, xb = 5, ya = -2, yb = 9.5, X = x => 22 + (x - xa) * u, Y = y => 12 + (yb - y) * u, fs = ' font-size="11"';
+  let g = ""; for (let i = xa; i <= 4; i++) if (i) g += L([X(i), Y(0) - 3], [X(i), Y(0) + 3], ' stroke-width="1"'); for (let j = ya; j <= 9; j++) if (j) g += L([X(0) - 3, Y(j)], [X(0) + 3, Y(j)], ' stroke-width="1"');
+  g += L([X(xa), Y(0)], [X(xb) + 6, Y(0)], ' stroke-width="1.2"') + fleche([X(xb) + 8, Y(0)], [X(xb), Y(0)], 6) + L([X(0), Y(ya)], [X(0), Y(yb) - 4], ' stroke-width="1.2"') + fleche([X(0), Y(yb) - 6], [X(0), Y(9)], 6);
+  for (let i = xa; i <= 4; i++) if (i) g += T([X(i) - 3, Y(0) + 14], String(i).replace("-", "−"), fs);
+  for (let j = ya; j <= 9; j++) if (j) g += T([X(0) - 14, Y(j) + 4], String(j).replace("-", "−"), fs);
+  g += T([X(0) + 3, Y(0) + 14], "0", fs) + T([X(xb) - 2, Y(0) + 16], "x", fs) + T([X(0) - 12, Y(yb) + 6], "y", fs);
+  const fn = x => 2 * x + 1 + 1 / (2 * x - 3), b1 = [], b2 = [];
+  for (let x = 1; x < 1.5; x += 0.002) { const y = fn(x); if (y >= ya) b1.push([X(x), Y(y)]); }
+  for (let x = 1.502; x <= 4.3; x += 0.004) { const y = fn(x); if (y <= 9.3) b2.push([X(x), Y(y)]); }
+  g += L([X(1.5), Y(ya)], [X(1.5), Y(yb)], ' stroke-width="1.4"');
+  g += L([X(-1.5), Y(-2)], [X(4.15), Y(9.3)], ' stroke-width="1.5"') + T([X(2.05), Y(4.75)], "(D)", fs);
+  g += L([X(1), Y(0)], [X(1), Y(2)], POINTILLE + ' stroke-width="1"') + L([X(0), Y(6)], [X(1), Y(6)], POINTILLE + ' stroke-width="1"') + L([X(2), Y(0)], [X(2), Y(6)], POINTILLE + ' stroke-width="1"') +
+    L([X(0) + 2, Y(2)], [X(2) - 2, Y(2)], ' stroke-width="1"') + fleche([X(0), Y(2)], [X(1), Y(2)], 6) + fleche([X(2), Y(2)], [X(1), Y(2)], 6) +
+    L([X(1) + 2, Y(6)], [X(3) - 2, Y(6)], ' stroke-width="1"') + fleche([X(1), Y(6)], [X(2), Y(6)], 6) + fleche([X(3), Y(6)], [X(2), Y(6)], 6);
+  g += P(b1, ' stroke-width="2.2"') + P(b2, ' stroke-width="2.2"');
+  return svg(X(xb) + 20, Y(ya) + 10, g, "Courbe de g : branche de gauche partant de (1 ; 2) et descendant vers −∞ près de x = 3/2 ; branche de droite venant de +∞, de minimum (2 ; 6), puis se rapprochant de l'asymptote oblique (D) : y = 2x + 1.");
+};
+
+// Probatoire D-TI 2024 maths, situation : espace rectangulaire au bord de la rivière, clôture en pointillés sur trois côtés.
+S["proba-2024-maths-d-cloture"] = () => {
+  const pt = ' stroke-dasharray="2 3" stroke-width="2"';
+  return svg(300, 96, T([150, 14], "Clôture", ' font-size="12" font-style="italic" text-anchor="middle"') +
+    P([[118, 54], [118, 22], [182, 22], [182, 54]], pt) +
+    '<rect x="4" y="56" width="292" height="22" fill="currentColor" fill-opacity="0.28" stroke="none"/>' + T([86, 72], "Rivière", ' font-size="12" font-style="italic"'),
+    "Espace rectangulaire au bord d'une rivière rectiligne : la clôture, en pointillés, borde trois côtés ; le côté ouvert à l'eau n'a pas de clôture.");
+};
+// Corrigé D-TI 2024, exercice 1 : ABC rectangle en A (AB = 4 ; AC = 3 sur la figure du corrigé), I milieu de [BC], G milieu de [AI],
+// (Σ) cercle de centre G passant par A, (Σ') son image par la rotation de centre A et d'angle −π/2.
+S["proba-2024-maths-d-cercles"] = () => {
+  const u = 52, O = [70, 176], Q = (x, y) => [O[0] + x * u, O[1] - y * u], A = Q(0, 0), B = Q(4, 0), C = Q(0, 3), I = Q(2, 1.5), G = Q(1, 0.75), G2 = Q(0.75, -1), r = 1.25 * u;
+  const pt = p => '<circle cx="' + f(p[0]) + '" cy="' + f(p[1]) + '" r="2.6" fill="currentColor" stroke="none"/>';
+  return svg(300, 316, L(A, B) + L(A, C) + L(B, C) + L(A, I) +
+    '<circle cx="' + f(G[0]) + '" cy="' + f(G[1]) + '" r="' + r + '"/><circle cx="' + f(G2[0]) + '" cy="' + f(G2[1]) + '" r="' + r + '"/>' +
+    code(C, I, 2) + code(I, B, 2) + code(A, G, 1) + code(G, I, 1) + pt(A) + pt(G) + pt(I) + pt(G2) +
+    T([A[0] - 14, A[1] + 2], "A", ' font-size="12"') + T([B[0] + 4, B[1] + 12], "B", ' font-size="12"') + T([C[0] - 4, C[1] - 8], "C", ' font-size="12"') +
+    T([I[0] + 2, I[1] - 8], "I", ' font-size="12"') + T([G[0] - 12, G[1] - 8], "G", ' font-size="12"') + T([G2[0] + 2, G2[1] + 14], "G'", ' font-size="12"') +
+    T([12, 128], "(Σ)", ' font-size="13" font-style="italic"') + T([16, 258], "(Σ')", ' font-size="13" font-style="italic"'),
+    "Triangle ABC rectangle en A ; I milieu de [BC] ; G milieu de [AI] ; cercle (Σ) de centre G passant par A ; cercle (Σ') de centre G', image de G par la rotation de centre A et d'angle −π/2, de même rayon.");
+};
+// Corrigé D-TI 2024, exercice 2 : (Cf) : y = −x³ + 3x² en trait plein et (Cg), son image par la translation de vecteur i, en tirets.
+S["proba-2024-maths-d-courbes"] = () => {
+  const u = 34, xa = -2.5, xb = 5.5, ya = -2.5, yb = 5.5, X = x => 14 + (x - xa) * u, Y = y => 10 + (yb - y) * u, fs = ' font-size="10"';
+  let g = '<g stroke-width="0.6" opacity="0.35" stroke-dasharray="1.5 2.5">'; for (let i = xa; i <= xb; i += 0.5) g += L([X(i), Y(ya)], [X(i), Y(yb)]); for (let j = ya; j <= yb; j += 0.5) g += L([X(xa), Y(j)], [X(xb), Y(j)]); g += "</g>";
+  g += L([X(xa), Y(0)], [X(xb), Y(0)], ' stroke-width="1.2"') + L([X(0), Y(ya)], [X(0), Y(yb)], ' stroke-width="1.2"');
+  [-2, -1, 1, 2, 5].forEach(i => { g += T([X(i) - 3, Y(0) + 13], String(i).replace("-", "−"), fs); });
+  [-2, -1, 1, 2, 3, 4, 5].forEach(j => { g += T([X(0) - 13, Y(j) + 4], String(j).replace("-", "−"), fs); });
+  g += T([X(0) - 10, Y(0) + 13], "0", fs);
+  const cf = x => -x * x * x + 3 * x * x, b = d => { const p = []; for (let x = -1.25 + d; x <= 3.45 + d; x += 0.01) { const y = cf(x - d); if (y <= 5.2 && y >= ya) p.push([X(x), Y(y)]); } return p; };
+  g += P(b(1), ' stroke-dasharray="7 5" stroke-width="2"') + P(b(0), ' stroke-width="2.2"');
+  g += L([X(1.4), Y(4)], [X(2.6), Y(4)], ' stroke-width="1"') + fleche([X(1.4), Y(4)], [X(2), Y(4)], 6) + fleche([X(2.6), Y(4)], [X(2), Y(4)], 6);
+  g += T([X(-1.95), Y(2.4)], "(Cf)", ' font-size="11" font-style="italic"') + T([X(4.1), Y(2.05)], "(Cg)", ' font-size="11" font-style="italic"');
+  return svg(X(xb) + 12, Y(ya) + 10, g, "Courbes (Cf) d'équation y = −x³ + 3x², en trait plein, minimum 0 en x = 0 et maximum 4 en x = 2 ; et (Cg), en tirets, son image par la translation de vecteur i : minimum 0 en x = 1, maximum 4 en x = 3.");
+};
+// Corrigé D-TI 2024, exercice 4 : polygone des fréquences cumulées croissantes (en %).
+S["proba-2024-maths-d-polygone"] = () => {
+  const ux = 34, uy = 2.6, X = x => 34 + x * ux, Y = y => 12 + (102 - y) * uy, fs = ' font-size="9"';
+  let g = '<g stroke-width="0.6" opacity="0.35" stroke-dasharray="1.5 2.5">'; for (let i = 0; i <= 8.5; i += 0.5) g += L([X(i), Y(0)], [X(i), Y(102)]); for (let j = 0; j <= 100; j += 2.5) g += L([X(0), Y(j)], [X(8.5), Y(j)]); g += "</g>";
+  g += L([X(-0.3), Y(0)], [X(8.7), Y(0)], ' stroke-width="1.2"') + fleche([X(8.9), Y(0)], [X(8.7), Y(0)], 6) + L([X(0), Y(-2)], [X(0), Y(103)], ' stroke-width="1.2"') + fleche([X(0), Y(104)], [X(0), Y(103)], 6);
+  for (let i = 1; i <= 8; i++) g += T([X(i) - 3, Y(0) + 13], String(i), fs);
+  for (let j = 5; j <= 100; j += 5) g += T([X(0) - 20, Y(j) + 3], String(j), fs);
+  g += T([X(0) - 9, Y(0) + 13], "0", fs) + T([X(8.6), Y(0) + 14], "x", fs);
+  g += P([[0, 0], [1, 10], [2, 25], [3, 45], [4, 65], [8, 100]].map(([x, y]) => [X(x), Y(y)]), ' stroke-width="1.8"');
+  return svg(X(9) + 10, Y(0) + 22, g, "Polygone des fréquences cumulées croissantes : points (0 ; 0), (1 ; 10), (2 ; 25), (3 ; 45), (4 ; 65) et (8 ; 100), temps en heures en abscisse et fréquences cumulées en % en ordonnée.");
+};
+
+// ——— Probatoire 2025, physique et chimie ———
+// Formule chimique en texte : les chiffres qui suivent une lettre ou « ) » passent en indice.
+const F = (p, s, x = "") => T(p, s.replace(/([A-Za-z)])(\d+)/g, '$1<tspan dy="4" font-size="10">$2</tspan><tspan dy="-4"></tspan>'), x);
+// Physique C-E 2025 : générateur U, diode D1 (tension U1), R1 et R2 en dérivation.
+S["proba-2025-physique-ce-circuit"] = () => {
+  const h = 30, b = 120, fs = ' font-size="13"';
+  let g = P([[40, 62], [40, h], [130, h]]) + P([[40, 86], [40, b], [270, b], [270, h], [176, h]]);
+  g += L([26, 62], [54, 62], ' stroke-width="1.4"') + L([33, 86], [47, 86], ' stroke-width="5"') + T([20, 58], "+", fs) + T([22, 102], "−", fs);
+  g += L([66, 108], [66, 52], ' stroke-width="1.2"') + fleche([66, 46], [66, 60], 7) + T([74, 84], "U", ' font-size="14" font-weight="700"');
+  g += L([60, h], [96, h]) + fleche([100, h], [90, h], 8) + T([84, 22], "I", fs);
+  g += '<path d="M130 18 L130 42 L162 30 Z" fill="none"/>' + L([162, 18], [162, 42]) + L([162, h], [176, h]) + T([136, 12], "D<tspan dy=\"4\" font-size=\"9\">1</tspan>", fs);
+  g += L([172, 50], [130, 50], ' stroke-width="1.2"') + fleche([124, 50], [134, 50], 7) + T([144, 68], "U<tspan dy=\"4\" font-size=\"9\">1</tspan>", ' font-size="13" font-style="italic"');
+  const zz = x => { let p = [[x, 52]], y = 52; for (let i = 0; i < 6; i++) { y += 5; p.push([x + (i % 2 ? -6 : 6), y]); } p.push([x, y + 4]); return L([x, h], [x, 52]) + P(p) + L([x, y + 4], [x, b]); };
+  g += zz(215) + zz(270) + T([224, 76], "R<tspan dy=\"4\" font-size=\"9\">1</tspan>", fs) + T([279, 76], "R<tspan dy=\"4\" font-size=\"9\">2</tspan>", fs);
+  return svg(300, 136, g, "Circuit : générateur de tension U ; diode D1 parcourue par le courant I, de tension U1 ; puis les résistors R1 et R2 montés en dérivation.");
+};
+// Physique C-E 2025 : treuil (poulie de rayon r sur l'axe (Δ) du moteur), charge suspendue au fil.
+S["proba-2025-physique-ce-treuil"] = () => {
+  const C = [110, 70], fs = ' font-size="12" font-style="italic"';
+  return svg(310, 236, L([18, 70], [236, 70], POINTILLE + ' stroke-width="1"') + '<ellipse cx="110" cy="70" rx="32" ry="56" stroke-width="2"/>' +
+    '<circle cx="110" cy="70" r="3.5" fill="currentColor" stroke="none"/>' + T([160, 64], "(Δ)", ' font-size="12"') +
+    '<rect x="238" y="60" width="62" height="20"/>' + T([244, 96], "Moteur", fs) +
+    '<path d="M40 56 A 10 14 0 1 0 40 84"/>' + fleche([40, 56], [34, 62], 6) +
+    L([78, 70], [78, 186]) + '<rect x="62" y="186" width="32" height="44" fill="currentColor" fill-opacity="0.75"/>' + T([102, 214], "Charge", fs),
+    "Treuil : poulie de rayon r montée sur l'axe (Δ) de l'arbre du moteur ; le fil enroulé sur la poulie soulève la charge.");
+};
+// Physique C-E 2025, document 1 : pendule sur un plan incliné (vue de côté et vue en perspective).
+S["proba-2025-physique-ce-pendule"] = () => {
+  const fs = ' font-size="12"', M = [118, 138];
+  let g = L([20, 22], [44, 10], ' stroke-width="3"') + L([32, 16], M) + '<circle cx="118" cy="138" r="6" fill="currentColor" stroke="none"/>' +
+    L(M, [136, 168], ' stroke-width="2"') + fleche([139, 173], [130, 158], 8) + T([142, 176], "P<tspan dy=\"4\" font-size=\"9\">1</tspan>", ' font-size="12" font-style="italic"') + L([140, 160], [150, 160], ' stroke-width="0.9"') +
+    T([96, 172], "α", fs) + T([76, 54], "Fil de longueur ℓ", fs) + T([6, 112], "Table inclinée", fs) + T([132, 136], "Mobile", fs);
+  const A = [196, 46], B = [356, 46], E = [196, 116], D = [236, 162], Cc = [416, 162], H = [356, 116];
+  g += P([A, B, Cc, D, A], ' stroke-width="1.8"') + L(A, E) + L(E, D) + L(E, H, POINTILLE + ' stroke-width="1"') + L(B, H, POINTILLE + ' stroke-width="1"') + L(H, Cc, POINTILLE + ' stroke-width="1"');
+  g += L([262, 56], [300, 124], ' stroke-width="1.6"') + '<circle cx="300" cy="126" r="6" fill="currentColor" stroke="none"/>' + L([262, 56], [276, 120], ' stroke-dasharray="2 3" stroke-width="1"');
+  g += T([282, 104], "θ", fs) + T([222, 132], "α", fs) + L([300, 126], [300, 166], ' stroke-width="2"') + fleche([300, 172], [300, 160], 8) + T([306, 180], "P", ' font-size="12" font-style="italic"') + L([306, 168], [314, 168], ' stroke-width="0.9"');
+  return svg(430, 186, g, "Document 1 : pendule de longueur ℓ posé sur une table inclinée d'un angle α ; écarté d'un angle θ de sa position d'équilibre ; poids P et sa composante P1 = P sin α le long du plan.");
+};
+// Physique C-E 2025, document 2 : profil spectral de l'étoile 71 Tauri (maximum vers 470 nm).
+S["proba-2025-physique-ce-spectre"] = () => {
+  const X = l => 34 + (l - 370) * 0.62, Y = v => 182 - v * 20, fs = ' font-size="10"';
+  let g = '<g stroke-width="0.7" opacity="0.5">'; for (let l = 400; l <= 750; l += 50) g += L([X(l), Y(0)], [X(l), Y(8.3)]); for (let v = 1; v <= 8; v++) g += L([X(370), Y(v)], [X(770), Y(v)]); g += "</g>";
+  g += L([X(370), Y(0)], [X(782), Y(0)], ' stroke-width="1.2"') + fleche([X(790), Y(0)], [X(780), Y(0)], 7) + L([X(370), Y(0)], [X(370), Y(8.7)], ' stroke-width="1.2"') + fleche([X(370), Y(9.1)], [X(370), Y(8.6)], 7);
+  for (let l = 400; l <= 750; l += 50) g += T([X(l) - 8, Y(0) + 13], String(l), fs);
+  g += T([X(372) + 4, 12], "Intensité lumineuse", ' font-size="11"') + T([X(745), Y(0) - 8], "λ(nm)", ' font-size="11"');
+  const pts = [[375, 0.3], [380, 1.0], [390, 2.6], [400, 3.8], [410, 4.5], [420, 5.4], [430, 6.1], [440, 6.6], [450, 6.9], [455, 5.6], [459, 6.9], [465, 7.6], [470, 8.0], [478, 7.5], [486, 6.1], [490, 4.6], [494, 6.4], [499, 5.2], [504, 6.1], [514, 5.3], [530, 5.0], [560, 4.6], [600, 3.9], [650, 3.2], [685, 2.9], [690, 2.5], [695, 2.9], [720, 2.6], [728, 2.2], [734, 2.6], [750, 2.3]];
+  g += P(pts.map(([l, v]) => [X(l), Y(v)]), ' stroke-width="1.6"');
+  return svg(X(790) + 12, Y(0) + 20, g, "Document 2 : profil spectral de l'étoile 71 Tauri, intensité lumineuse en fonction de la longueur d'onde de 400 à 750 nm ; l'intensité est maximale vers 470 nm puis décroît lentement vers le rouge.");
+};
+// Physique D-TI 2025 : barrage hydroélectrique, hauteur de chute h jusqu'à la turbine.
+S["proba-2025-physique-d-barrage"] = () => {
+  const fs = ' font-size="13" font-weight="700"';
+  let g = '<rect x="40" y="40" width="20" height="130" fill="currentColor" fill-opacity="0.75" stroke="none"/>' + L([60, 6], [60, 170]) + L([84, 6], [138, 116]) + L([20, 170], [320, 170]);
+  g += '<path d="M138 116 Q 200 104 250 110 T 320 104 L 320 170 L 138 170 Z" fill="currentColor" fill-opacity="0.18" stroke="none"/>';
+  g += L([28, 40], [28, 140], ' stroke-width="1.2"') + fleche([28, 36], [28, 48], 7) + fleche([28, 144], [28, 132], 7) + L([22, 40], [40, 40], POINTILLE + ' stroke-width="1"') + L([22, 140], [160, 140], POINTILLE + ' stroke-width="1"') + T([10, 96], "h", fs);
+  g += '<circle cx="180" cy="140" r="14"/><circle cx="180" cy="140" r="3" fill="currentColor" stroke="none"/>';
+  for (let k = 0; k < 10; k++) { const a = k * Math.PI / 5; g += L([180 + 14 * Math.cos(a), 140 + 14 * Math.sin(a)], [180 + 21 * Math.cos(a + 0.3), 140 + 21 * Math.sin(a + 0.3)], ' stroke-width="1.2"'); }
+  g += P([[262, 100], [272, 22], [282, 100]], ' stroke-width="1.2"') + L([264, 80], [280, 80]) + L([266, 60], [278, 60]) + L([268, 40], [276, 40]) + L([264, 80], [278, 60], ' stroke-width="0.8"') + L([280, 80], [266, 60], ' stroke-width="0.8"') + L([258, 22], [286, 22]);
+  g += '<path d="M258 22 Q 218 46 190 126" stroke-width="1"/><path d="M286 22 Q 304 18 320 14" stroke-width="1"/>';
+  return svg(330, 180, g, "Barrage hydroélectrique : l'eau de la retenue tombe d'une hauteur h jusqu'à la turbine, qui entraîne l'alternateur ; une ligne électrique part vers la ville.");
+};
+// Chimie C-D-E 2025, exercice 2, question 1 : composés à nommer.
+S["proba-2025-chimie-noms"] = () => {
+  const fs = ' font-size="14"';
+  let g = T([4, 46], "a)", fs) + T([44, 18], "H", fs) + T([96, 18], "H", fs) + L([52, 22], [62, 34], ' stroke-width="1.2"') + L([96, 22], [86, 34], ' stroke-width="1.2"') +
+    T([60, 46], "C=C", fs) + L([62, 50], [54, 60], ' stroke-width="1.2"') + F([36, 74], "CH3", fs) + L([90, 50], [98, 60], ' stroke-width="1.2"') + F([96, 74], "CH−CH3", fs) + L([104, 78], [104, 88], ' stroke-width="1.2"') + F([96, 102], "CH3", fs);
+  g += T([200, 46], "b)", fs) + F([222, 46], "CH3−CH−CH2−C−H", fs) + L([258, 52], [258, 62], ' stroke-width="1.2"') + F([250, 78], "CH3", fs) + T([318, 16], "O", fs) + L([321, 22], [321, 32]) + L([325, 22], [325, 32]);
+  return svg(400, 110, g, "a) H et H du même côté de la double liaison C=C, portée d'un côté par CH3, de l'autre par CH(CH3)–CH3. b) CH3–CH(CH3)–CH2–CHO.");
+};
+// Chimie C-D-E 2025, exercice 2, question 2 : classe des alcools.
+S["proba-2025-chimie-alcools"] = () => {
+  const fs = ' font-size="14"', v = (x, y1, y2) => L([x, y1], [x, y2], ' stroke-width="1.2"');
+  let g = T([4, 52], "a)", fs) + F([28, 52], "CH3−C−CH2−OH", fs) + F([66, 20], "CH3", fs) + v(74, 25, 38) + v(74, 57, 70) + F([66, 86], "CH3", fs);
+  g += T([226, 52], "b)", fs) + F([250, 52], "CH3−C−OH", fs) + F([288, 20], "CH3", fs) + v(296, 25, 38) + v(296, 57, 70) + F([288, 86], "CH3", fs);
+  return svg(380, 96, g, "a) CH3–C(CH3)2–CH2–OH. b) CH3–C(CH3)2–OH.");
+};
+// Chimie C-D-E 2025, situation : formule du 1,4-dichlorobenzène (PDB).
+S["proba-2025-chimie-pdb"] = () => {
+  const c = [110, 46], r = 30; let hex = []; for (let k = 0; k < 6; k++) { const a = k * Math.PI / 3; hex.push([c[0] + r * Math.cos(a), c[1] + r * Math.sin(a)]); }
+  hex.push(hex[0]);
+  return svg(220, 92, P(hex) + '<circle cx="110" cy="46" r="17"/>' + L([c[0] - r, 46], [58, 46]) + L([c[0] + r, 46], [162, 46]) +
+    T([38, 51], "Cl", ' font-size="14"') + T([164, 51], "Cl", ' font-size="14"'),
+    "1,4-dichlorobenzène : noyau benzénique portant deux atomes de chlore en positions opposées (para).");
+};
+// Corrigé chimie 2025 : conformation chaise du cyclohexane.
+S["proba-2025-chimie-chaise"] = () => {
+  return svg(200, 96, P([[30, 66], [74, 76], [118, 58], [170, 36], [126, 26], [82, 44], [30, 66]], ' stroke-width="1.8"'),
+    "Cyclohexane en conformation chaise : six atomes de carbone, deux sommets opposés hors du plan moyen, l'un vers le haut, l'autre vers le bas.");
+};
+
+// ——— Probatoire 2025, SVTEEHB ———
+const etoile = (x, y, r = 5) => { let p = ""; for (let k = 0; k < 8; k++) { const a = k * Math.PI / 4; p += L([x, y], [x + r * Math.cos(a), y + r * Math.sin(a)], ' stroke-width="1.2"'); } return p + '<circle cx="' + f(x) + '" cy="' + f(y) + '" r="2.2" fill="currentColor" stroke="none"/>'; };
+// SVT C-TI 2025 : le phénomène de subduction (plaque océanique sous plaque continentale).
+S["proba-2025-svt-c-subduction"] = () => {
+  const fs = ' font-size="10"', fb = ' font-size="11" font-weight="700"', f9 = ' font-size="9"';
+  // surface continentale : plateau vers y = 60, puis pente jusqu'au prisme d'accrétion
+  const surf = x => (x < 200 ? 60 : 64 + (x - 200) * 0.48);
+  let g = L([300, 62], [548, 62], ' stroke-width="1"');
+  g += '<path d="M40 60 L104 58 L116 40 L124 40 L136 58 L200 64 Q 250 70 280 100 L300 112"/>';
+  // croûte continentale (croix) entre la surface et le Moho, hors pluton, cheminée et chambre magmatique
+  for (let x = 52; x <= 262; x += 26) for (let y = 80; y <= 150; y += 22) {
+    if (y < surf(x) + 14) continue;
+    if (x > 56 && x < 104 && y < 130) continue;
+    if (x > 100 && x < 144) continue;
+    if (x > 232 && y > 132) continue;
+    g += T([x - 3, y], "+", f9);
+  }
+  g += L([40, 166], [292, 166], POINTILLE + ' stroke-width="1"');
+  g += '<path d="M66 82 Q 58 100 70 118 Q 84 126 92 110 Q 98 92 86 80 Q 76 72 66 82 Z" stroke-width="1.4"/>' + T([72, 104], "+", f9);
+  g += '<path d="M118 44 L118 92 Q 104 104 112 122 Q 122 134 116 150 L92 158 Q 82 176 96 186 L110 196 Q 70 210 86 226 Q 120 232 160 212 Q 186 196 170 176 Q 156 168 150 158 Q 132 150 132 124 Q 138 104 124 92 L124 44" stroke-width="1.4"/>';
+  g += '<rect x="118" y="160" width="44" height="14" fill="none" stroke-width="1"/>' + T([122, 171], "MAGMA", ' font-size="9" font-weight="700"');
+  // plaque plongeante : surface, Moho (tirets), base ; plus épaisse près de la dorsale
+  const haut = "M548 62 Q 420 64 340 104 Q 300 128 280 160 Q 250 220 222 330";
+  const moho = "M548 80 Q 430 96 360 126 Q 320 150 300 188 Q 276 244 252 330";
+  const bas = "M548 118 Q 440 130 380 150 Q 340 175 320 214 Q 300 270 280 330";
+  g += '<path d="' + haut + '" stroke-width="1.6"/><path d="' + bas + '" stroke-width="1.6"/><path d="' + moho + '"' + POINTILLE + ' stroke-width="1"/>';
+  g += '<path d="M296 112 L308 96 L330 98 L322 112" stroke-width="1"/>'; for (let k = 0; k < 4; k++) g += L([302 + k * 6, 110], [308 + k * 6, 98], ' stroke-width="0.8"');
+  g += '<path d="M528 62 L534 50 M528 62 L522 50 M528 62 L540 72 M528 62 L516 72" stroke-width="1"/>';
+  [[302, 140], [290, 160], [278, 180], [264, 206], [252, 236], [242, 266], [232, 300]].forEach(([x, y]) => { g += etoile(x, y); });
+  g += '<rect x="182" y="184" width="26" height="14" stroke-width="1"/>' + T([186, 195], "eau", f9) + L([256, 196], [212, 192], ' stroke-width="0.9"') + fleche([210, 192], [220, 193], 6) + '<path d="M182 196 Q 168 210 150 214" stroke-width="0.9"/>' + fleche([148, 215], [158, 212], 6);
+  // sens du mouvement de la plaque
+  [[470, 140, 448, 148], [356, 196, 346, 214], [318, 290, 312, 308]].forEach(([a, b, c, d]) => { g += L([a, b], [c, d], ' stroke-width="1"') + fleche([c, d], [a, b], 6); });
+  g += etoile(452, 296) + T([462, 300], "séismes", fs);
+  g += T([426, 178], "ASTHÉNOSPHÈRE", fb) + T([52, 250], "ASTHÉNOSPHÈRE", fb) + L([44, 236], [232, 236], ' stroke-width="0.8"');
+  g += T([436, 81], "croûte océanique", f9) + T([436, 112], "manteau supérieur", f9);
+  g += T([96, 12], "roches volcaniques", fs) + L([122, 16], [120, 38], ' stroke-width="0.7"') + T([270, 12], "prisme d'accrétion", fs) + L([316, 16], [316, 96], ' stroke-width="0.7"');
+  g += T([400, 12], "dorsale médio-océanique —", fs) + T([400, 26], "zone d'accrétion", fb) + L([528, 30], [528, 48], ' stroke-width="0.7"') + fleche([528, 56], [528, 46], 5);
+  g += T([356, 252], "plongement de la plaque", fs) + T([356, 263], "lithosphérique", fs) + L([354, 254], [318, 254], ' stroke-width="0.7"') + fleche([314, 254], [324, 254], 5);
+  g += T([132, 280], "lithosphère", fs) + T([132, 291], "océanique", fs) + L([228, 288], [276, 302], ' stroke-width="1.2"') + L([184, 286], [226, 288], ' stroke-width="0.7"');
+  g += T([150, 322], "Moho", fs) + L([178, 318], [246, 318], ' stroke-width="0.7"') + fleche([250, 318], [240, 318], 5);
+  // repère de la lithosphère continentale (accolade verticale) et légendes de gauche, dans une marge de 72 px
+  const M = 72;
+  g += L([30, 58], [30, 232], ' stroke-width="1"') + fleche([30, 54], [30, 64], 5) + fleche([30, 236], [30, 226], 5);
+  let marge = "";
+  [["pluton", "granitique", 92, 70], ["croûte", "continentale", 128, 50], ["Moho", "", 166, 40], ["manteau", "supérieur", 200, 40]].forEach(([a, b, y, x2]) => {
+    marge += T([0, b ? y - 2 : y + 3], a, f9) + (b ? T([0, y + 8], b, f9) : "") + L([58, y], [M + x2, y], ' stroke-width="0.7"');
+  });
+  marge += T([0, 252], "lithosphère", f9) + T([0, 262], "continentale", f9) + L([54, 250], [M + 26, 232], ' stroke-width="0.7"');
+  return svg(560 + M, 334, marge + '<g transform="translate(' + M + ' 0)">' + g + "</g>", "Subduction : la plaque océanique, formée à la dorsale médio-océanique, plonge sous la plaque continentale ; foyers des séismes le long du plan de plongement ; l'eau libérée par la plaque plongeante favorise la formation du magma qui alimente pluton granitique et volcan ; prisme d'accrétion au contact des deux plaques.");
+};
+// SVT D 2025, document 1 : étapes de la diagenèse (sédiment meuble → roche cohérente).
+S["proba-2025-svt-d-diagenese"] = () => {
+  const fs = ' font-size="11"', fb = ' font-size="11" font-weight="700"';
+  const grain = (x, y, sombre) => '<ellipse cx="' + f(x) + '" cy="' + f(y) + '" rx="14" ry="11"' + (sombre ? ' fill="currentColor" fill-opacity="0.55"' : "") + "/>";
+  let g = "";
+  for (let i = 0; i < 3; i++) for (let j = 0; j < 3; j++) g += grain(92 + i * 34, 34 + j * 28);
+  g += T([4, 70], "Sédiment", fb) + T([4, 82], "meuble", fs) + T([140, 12], "Grains de sable", ' font-size="10" font-weight="700"') + L([138, 12], [110, 30], ' stroke-width="0.7"') + L([150, 16], [128, 32], ' stroke-width="0.7"') + T([100, 124], "État 1", fb);
+  for (let i = 0; i < 3; i++) for (let j = 0; j < 3; j++) g += grain(326 + i * 26 + (j % 2) * 12, 52 + j * 20);
+  g += L([352, 6], [352, 22], ' stroke-width="3"') + fleche([352, 30], [352, 20], 8) + L([352, 132], [352, 116], ' stroke-width="3"') + fleche([352, 108], [352, 118], 8);
+  g += '<path d="M180 64 Q 240 58 300 76" stroke-width="1.2"/>' + T([228, 98], "Étape A", fb);
+  g += '<path d="M300 104 Q 270 136 236 150" stroke-width="1.2"/>' + fleche([230, 152], [242, 147], 7);
+  for (let i = 0; i < 3; i++) for (let j = 0; j < 3; j++) g += grain(150 + i * 26 + (j % 2) * 12, 164 + j * 20, j === 0);
+  [[96, 172], [96, 196]].forEach(([x, y]) => { g += '<path d="M' + x + " " + y + " q 6 -4 12 0 t 12 0 t 12 0" + '" stroke-width="1"/>' + fleche([x + 42, y], [x + 34, y], 6); });
+  [[234, 158], [234, 214]].forEach(([x, y]) => { g += '<path d="M' + x + " " + y + " q 6 -4 12 0 t 12 0 t 12 0" + '" stroke-width="1"/>' + fleche([x + 42, y], [x + 34, y], 6); });
+  g += T([236, 190], "circulation d'eau sursaturée", ' font-size="10" font-weight="700"') + T([150, 236], "État 2", fb);
+  g += L([196, 226], [262, 252], ' stroke-width="1.2"') + fleche([268, 254], [258, 250], 7) + T([200, 258], "Étape B", fb);
+  g += '<path d="M282 230 L404 226 L410 300 L280 304 Z" fill="currentColor" fill-opacity="0.3" stroke-width="1.2"/>';
+  for (let i = 0; i < 4; i++) for (let j = 0; j < 3; j++) g += grain(298 + i * 30 + (j % 2) * 8, 244 + j * 22, j === 0);
+  g += T([354, 220], "ciment", ' font-size="10" font-weight="700"') + L([366, 222], [372, 234], ' stroke-width="0.7"') + T([300, 320], "État 3", fb) + T([346, 320], "Roche cohérente", fs);
+  return svg(440, 326, g, "Diagenèse : état 1, sédiment meuble (grains de sable séparés) ; étape A, tassement sous pression ; état 2, grains rapprochés traversés par une eau sursaturée ; étape B ; état 3, grains liés par un ciment : roche cohérente.");
+};
+// SVT D 2025, document 5 : mouvements atmosphériques et océaniques dans les zones côtières.
+S["proba-2025-svt-d-oceans"] = () => {
+  const fb = ' font-size="12" font-weight="700"', fs = ' font-size="10" font-weight="700"';
+  let g = '<rect x="2" y="2" width="456" height="246" stroke-width="1.2"/>' + T([10, 20], "Région A", ' font-size="14" font-weight="700"') + T([376, 20], "Région B", ' font-size="14" font-weight="700"');
+  g += T([10, 40], "Basse pression", fb) + T([10, 54], "Climat humide", fb) + T([120, 38], "Précipitations", fs) + T([340, 40], "Haute pression", fb) + T([340, 54], "Climat sec", fb);
+  const nuage = (x, y) => '<path d="M' + x + " " + y + " q -2 -12 10 -12 q 4 -10 16 -6 q 10 -4 14 6 q 10 0 8 12 Z" + '" stroke-width="1.1"/>' + [0, 8, 16, 24].map(d => L([x + 4 + d, y + 4], [x + 2 + d, y + 12], ' stroke-width="0.8" stroke-dasharray="2 2"')).join("");
+  g += nuage(46, 82) + nuage(122, 76);
+  g += T([188, 66], "Vents alizés", ' font-size="13" font-weight="700"');
+  for (let x = 340; x > 160; x -= 50) g += L([x, 80], [x - 30, 80], ' stroke-width="1.2"') + fleche([x - 34, 80], [x - 26, 80], 6);
+  g += '<path d="M2 96 Q 30 88 60 96 L380 96 Q 410 92 420 70 Q 432 44 446 34" stroke-width="1.6"/>';
+  for (let x = 330; x > 110; x -= 50) g += L([x, 104], [x - 28, 104], ' stroke-width="1"') + fleche([x - 32, 104], [x - 24, 104], 5);
+  g += '<path d="M60 96 Q 70 110 72 140 L76 226 L80 140 Q 90 160 200 164 Q 260 162 290 150 Q 300 144 310 150 Q 340 162 356 160 L360 216 L364 140 Q 368 110 380 96" stroke-width="1.6"/>';
+  g += '<path d="M84 110 Q 96 138 120 144" stroke-width="1.4"/>' + fleche([126, 146], [114, 142], 6) + '<path d="M136 148 Q 200 150 290 132" stroke-width="1.4"/>' + fleche([296, 131], [284, 134], 6) + '<path d="M300 130 Q 344 132 366 104" stroke-width="1.4"/>' + fleche([369, 100], [362, 110], 6);
+  g += L([96, 140], [270, 124], ' stroke-dasharray="1.5 3" stroke-width="1"') + T([150, 128], "Thermocline", ' font-size="10" font-weight="700" transform="rotate(-6 150 128)"') + T([296, 124], "Upwelling", fs) + T([284, 176], "Dorsale", ' font-size="9" font-weight="700"');
+  g += T([52, 238], "Fosse", ' font-size="9" font-style="italic" font-weight="700"') + T([368, 214], "Fosse", ' font-size="9" font-style="italic" font-weight="700"') + L([68, 84], [68, 104], ' stroke-width="1"');
+  return svg(460, 250, g, "Mouvements atmosphériques et océaniques : les vents alizés soufflent de la région B (haute pression, climat sec) vers la région A (basse pression, climat humide, précipitations) ; ils entraînent les eaux de surface vers la région A ; les eaux profondes remontent près de la région B (upwelling) ; thermocline, dorsale et fosses.");
+};
+// Corrigé SVT D 2025 : courbes hodochrones des ondes P et S (données du document 2).
+S["proba-2025-svt-d-hodochrones"] = () => {
+  const X = d => 44 + d * 0.028, Y = t => 300 - t * 10.4, fs = ' font-size="10"';
+  let g = '<g stroke-width="0.6" opacity="0.4">'; for (let d = 2000; d <= 12000; d += 2000) g += L([X(d), Y(0)], [X(d), Y(27)]); for (let t = 5; t <= 25; t += 5) g += L([X(0), Y(t)], [X(12400), Y(t)]); g += "</g>";
+  g += L([X(0), Y(0)], [X(12600), Y(0)], ' stroke-width="1.2"') + fleche([X(12800), Y(0)], [X(12600), Y(0)], 7) + L([X(0), Y(0)], [X(0), Y(27.6)], ' stroke-width="1.2"') + fleche([X(0), Y(28.2)], [X(0), Y(27.6)], 7);
+  for (let d = 2000; d <= 12000; d += 2000) g += T([X(d) - 14, Y(0) + 14], String(d), fs);
+  for (let t = 5; t <= 25; t += 5) g += T([X(0) - 18, Y(t) + 4], String(t), fs);
+  g += T([X(0) - 6, Y(0) + 14], "0", fs) + T([X(7000), Y(0) + 30], "Distance à l'épicentre (km)", fs) + T([X(0) + 6, Y(28)], "Durée du trajet (min)", fs);
+  const P = [[0, 0], [1112, 2.4], [5049, 8 + 14 / 60], [11332, 13.8]], Sw = [[0, 0], [1112, 4 + 17 / 60], [5049, 14 + 49 / 60], [11332, 25 + 20 / 60]];
+  const courbe = pts => { const q = pts.map(([d, t]) => [X(d), Y(t)]); let c = "M" + f(q[0][0]) + " " + f(q[0][1]); for (let i = 0; i < q.length - 1; i++) { const a = q[Math.max(0, i - 1)], b = q[i], e = q[i + 1], n = q[Math.min(q.length - 1, i + 2)]; c += " C" + f(b[0] + (e[0] - a[0]) / 6) + " " + f(b[1] + (e[1] - a[1]) / 6) + " " + f(e[0] - (n[0] - b[0]) / 6) + " " + f(e[1] - (n[1] - b[1]) / 6) + " " + f(e[0]) + " " + f(e[1]); } return c; };
+  g += '<path d="' + courbe(Sw) + '" stroke-width="2"/><path d="' + courbe(P) + '" stroke-width="2" stroke-dasharray="7 4"/>';
+  [...P.slice(1), ...Sw.slice(1)].forEach(([d, t]) => { g += '<circle cx="' + f(X(d)) + '" cy="' + f(Y(t)) + '" r="3" fill="currentColor" stroke="none"/>'; });
+  g += T([X(11332) - 6, Y(25.33) - 8], "ondes S", ' font-size="11" font-weight="700"') + T([X(11332) - 6, Y(13.8) - 8], "ondes P", ' font-size="11" font-weight="700"');
+  return svg(X(12800) + 14, Y(0) + 36, g, "Courbes hodochrones : durée du trajet en fonction de la distance à l'épicentre ; ondes S (trait plein) passant par 4 min 17 s à 1 112 km, 14 min 49 s à 5 049 km, 25 min 20 s à 11 332 km ; ondes P (tirets) passant par 2 min 24 s, 8 min 14 s et 13 min 48 s ; les ondes P arrivent toujours les premières.");
+};
+// Corrigé SVT D 2025 : mécanisme de l'effet de serre.
+S["proba-2025-svt-d-serre"] = () => {
+  const fs = ' font-size="10"';
+  let g = '<circle cx="40" cy="36" r="20" stroke-width="1.6"/>'; for (let k = 0; k < 8; k++) { const a = k * Math.PI / 4; g += L([40 + 24 * Math.cos(a), 36 + 24 * Math.sin(a)], [40 + 31 * Math.cos(a), 36 + 31 * Math.sin(a)]); }
+  g += T([22, 82], "Soleil", ' font-size="11" font-weight="700"');
+  g += '<rect x="80" y="84" width="330" height="34" fill="currentColor" fill-opacity="0.12" stroke-dasharray="4 3" stroke-width="1"/>' + T([298, 106], "gaz à effet de serre", ' font-size="10" font-weight="700"') + T([168, 106], "atmosphère", fs);
+  g += '<path d="M60 210 Q 230 196 400 210 L400 236 L60 236 Z" fill="currentColor" fill-opacity="0.25" stroke-width="1.4"/>' + T([196, 230], "Terre", ' font-size="11" font-weight="700"');
+  g += L([64, 58], [150, 200], ' stroke-width="2"') + fleche([154, 206], [148, 196], 8) + T([30, 150], "rayonnement", fs) + T([30, 161], "solaire", fs);
+  g += L([90, 50], [128, 92], ' stroke-width="1.2"') + L([128, 92], [168, 52], ' stroke-width="1.2"') + fleche([172, 48], [164, 56], 7) + T([150, 40], "réfléchi", fs);
+  g += '<path d="M220 200 Q 230 150 250 96" stroke-width="1.6"/>' + fleche([252, 90], [249, 100], 7) + T([156, 146], "infrarouge", fs) + T([156, 157], "émis par le sol", fs);
+  g += '<path d="M262 96 Q 280 150 290 198" stroke-width="1.6"/>' + fleche([291, 204], [289, 194], 7) + T([298, 160], "infrarouge renvoyé", fs) + T([298, 171], "vers le sol", fs);
+  g += L([320, 84], [346, 26], ' stroke-width="1.2" stroke-dasharray="4 3"') + fleche([348, 20], [345, 30], 7) + T([352, 34], "vers l'espace", fs);
+  return svg(440, 240, g, "Effet de serre : le rayonnement solaire traverse l'atmosphère et réchauffe le sol ; le sol émet un rayonnement infrarouge ; les gaz à effet de serre en absorbent une partie et la renvoient vers le sol, le reste part vers l'espace.");
+};
+// Sciences A-ABI 2025, document 1 : caryotype d'une cellule reproductrice (un chromosome par numéro, 1 à 22 et Y),
+// en grille de cinq colonnes comme sur le scan. Tracés relevés sur le scan (repère 870 × 500, réduit à 60 %).
+S["proba-2025-sciences-caryotype"] = () => {
+  const C = [ // [numéro, épaisseur, points du tracé, position du numéro]
+    [1, 20, [[140, 32], [95, 60], [78, 95], [84, 120], [100, 130]], [62, 150]],
+    [2, 18, [[328, 45], [265, 78], [320, 125]], [272, 150]],
+    [3, 15, [[525, 45], [462, 72], [505, 102]], [465, 146]],
+    [4, 16, [[602, 40], [598, 85], [602, 118]], [628, 145]],
+    [5, 18, [[828, 42], [802, 62], [812, 92], [838, 108]], [805, 141]],
+    [6, 16, [[110, 180], [72, 192], [58, 212], [66, 232], [78, 235]], [50, 253]],
+    [7, 20, [[235, 172], [232, 200], [238, 230]], [262, 250]],
+    [8, 18, [[405, 178], [415, 205], [408, 232]], [440, 253]],
+    [9, 16, [[585, 175], [578, 200], [588, 225]], [612, 250]],
+    [10, 16, [[835, 178], [800, 188], [808, 208], [830, 220]], [805, 250]],
+    [11, 16, [[70, 277], [66, 300], [75, 325]], [72, 353]],
+    [12, 18, [[282, 277], [278, 300], [290, 328]], [258, 353]],
+    [13, 14, [[462, 293], [468, 325]], [445, 353]],
+    [14, 18, [[600, 288], [585, 310], [590, 328]], [615, 348]],
+    [15, 18, [[808, 285], [800, 305], [818, 325]], [805, 353]],
+    [16, 16, [[72, 368], [64, 385], [76, 402]], [55, 423]],
+    [17, 18, [[272, 372], [262, 388], [275, 405]], [250, 423]],
+    [18, 16, [[435, 378], [440, 398]], [465, 426]],
+    ["Y", 14, [[828, 410], [832, 397], [848, 395]], [862, 433]],
+    [19, 16, [[45, 445], [40, 462]], [70, 490]],
+    [20, 16, [[305, 450], [292, 460], [302, 472]], [285, 493]],
+    [21, 16, [[442, 452], [445, 468]], [470, 496]],
+    [22, 18, [[648, 450], [650, 462]], [628, 488]]];
+  let g = "";
+  C.forEach(([n, ep, pts, lab]) => {
+    g += '<polyline points="' + pts.map(p => p.join(",")).join(" ") + '" stroke-width="' + f(ep * 1.4) + '" stroke-linecap="round" stroke-linejoin="round"/>';
+    g += T(lab, String(n), ' font-size="22" font-weight="700" text-anchor="middle"');
+  });
+  return svg(522, 302, '<g transform="scale(0.6)">' + g + "</g>", "Document 1 : caryotype d'une cellule humaine : un seul chromosome de chaque numéro, de 1 à 22, et un chromosome Y, soit 23 chromosomes.");
+};
+
+// ——— BAC 2025 ———
+// Repère orthonormé quadrillé commun : unité u px, x de xa à xb, y de ya à yb ; renvoie {g, X, Y}.
+function repere(u, xa, xb, ya, yb, m = 24) {
+  const X = x => m + (x - xa) * u, Y = y => 10 + (yb - y) * u, fs = ' font-size="10"';
+  let g = '<g stroke-width="0.5" opacity="0.35">';
+  for (let i = Math.ceil(xa); i <= xb; i++) g += L([X(i), Y(ya)], [X(i), Y(yb)]);
+  for (let j = Math.ceil(ya); j <= yb; j++) g += L([X(xa), Y(j)], [X(xb), Y(j)]);
+  g += "</g>" + L([X(xa), Y(0)], [X(xb) + 4, Y(0)], ' stroke-width="1.2"') + fleche([X(xb) + 8, Y(0)], [X(xb), Y(0)], 6) +
+    L([X(0), Y(ya)], [X(0), Y(yb) - 4], ' stroke-width="1.2"') + fleche([X(0), Y(yb) - 8], [X(0), Y(yb)], 6);
+  for (let i = Math.ceil(xa); i <= xb; i++) if (i) g += T([X(i) - 3, Y(0) + 12], String(i).replace("-", "−"), fs);
+  for (let j = Math.ceil(ya); j <= yb; j++) if (j) g += T([X(0) - 13, Y(j) + 4], String(j).replace("-", "−"), fs);
+  g += T([X(0) - 10, Y(0) + 12], "O", fs);
+  return { g, X, Y, W: X(xb) + 14, H: Y(ya) + 12 };
+}
+const point = (X, Y, x, y, nom, dx = 5, dy = -5) => '<circle cx="' + f(X(x)) + '" cy="' + f(Y(y)) + '" r="2.6" fill="currentColor" stroke="none"/>' + T([X(x) + dx, Y(y) + dy], nom, ' font-size="12" font-style="italic"');
+// Corrigé maths D-TI 2025, exercice 3 : A, B, C, D, H et H' ; cercle (C2) de centre H'(1 ; −1), rayon 2√2 ; lieu : cercle de centre B, rayon 4.
+S["bac-2025-maths-dti-cercles"] = () => {
+  const R = repere(26, -6.5, 5.5, -4.5, 6.5), { X, Y } = R, u = 26, pt = ' stroke-width="1.1" stroke-dasharray="2 3"';
+  let g = R.g;
+  g += L([X(-1), Y(5)], [X(-1), Y(1)], ' stroke-width="1.4"') + L([X(-1), Y(5)], [X(3), Y(1)], ' stroke-width="1.4"') + L([X(-1), Y(1)], [X(3), Y(1)], ' stroke-width="1.4"');
+  g += L([X(-1), Y(1)], [X(3), Y(5)], pt) + L([X(-1), Y(1)], [X(1), Y(-1)], pt);
+  g += code([X(-1), Y(5)], [X(1), Y(3)], 2) + code([X(1), Y(3)], [X(3), Y(1)], 2) + code([X(-1), Y(1)], [X(1), Y(-1)], 2);
+  g += '<circle cx="' + f(X(1)) + '" cy="' + f(Y(3)) + '" r="' + f(2 * Math.SQRT2 * u) + '" stroke-width="1.2"/>';
+  g += '<circle cx="' + f(X(1)) + '" cy="' + f(Y(-1)) + '" r="' + f(2 * Math.SQRT2 * u) + '" stroke-width="1.8"/>';
+  g += '<circle cx="' + f(X(-1)) + '" cy="' + f(Y(1)) + '" r="' + f(4 * u) + '" stroke-width="1.8" stroke-dasharray="7 4"/>';
+  g += point(X, Y, -1, 5, "A", -14, -4) + point(X, Y, -1, 1, "B", -14, -4) + point(X, Y, 3, 1, "C", 6, 14) + point(X, Y, 3, 5, "D", 6, -5) + point(X, Y, 1, 3, "H", 6, -5) + point(X, Y, 1, -1, "H'", 6, 4);
+  g += T([X(3.9), Y(3.3)], "(C1)", ' font-size="12" font-style="italic"') + T([X(3.6), Y(-2.8)], "(C2)", ' font-size="12" font-style="italic"');
+  g += T([X(-6.3), Y(-3.7)], "Lieu géométrique des points M", ' font-size="11" font-style="italic"') + L([X(-4.6), Y(-3.3)], [X(-3.9), Y(-2.3)], ' stroke-width="0.8"');
+  return svg(R.W, R.H, g, "Triangle ABC rectangle isocèle en B, avec A(−1 ; 5), B(−1 ; 1), C(3 ; 1) ; D(3 ; 5) ; H(1 ; 3) milieu de [AC] et H'(1 ; −1) ; cercle (C1) de centre H, cercle (C2) de centre H' et de rayon 2√2, et lieu des points M : cercle de centre B et de rayon 4, en tirets.");
+};
+// Corrigé maths D-TI 2025, exercice 4 : courbe de f(x) = x ln x − x, f(0) = 0 ; minimum (1 ; −1), coupe l'axe en e ; tangente verticale en O.
+S["bac-2025-maths-dti-courbe"] = () => {
+  const R = repere(38, -0.6, 7.3, -1.6, 6.2), { X, Y } = R;
+  let g = R.g; const p = [[X(0), Y(0)]];
+  for (let x = 0.002; x <= 7.2; x += 0.01) { const y = x * Math.log(x) - x; if (y <= 6.1) p.push([X(x), Y(y)]); }
+  g += P(p, ' stroke-width="2.2"');
+  g += L([X(0.25), Y(-1)], [X(1.75), Y(-1)], ' stroke-width="1"') + fleche([X(0.2), Y(-1)], [X(1), Y(-1)], 6) + fleche([X(1.8), Y(-1)], [X(1), Y(-1)], 6) + L([X(1), Y(0)], [X(1), Y(-1)], POINTILLE + ' stroke-width="1"');
+  g += '<circle cx="' + f(X(Math.E)) + '" cy="' + f(Y(0)) + '" r="2.6" fill="currentColor" stroke="none"/>' + T([X(Math.E) - 4, Y(0) - 7], "e", ' font-size="12" font-style="italic"');
+  g += T([X(4.6), Y(2.2)], "(C<tspan font-size=\"9\" dy=\"3\">f</tspan>)", ' font-size="12" font-style="italic"');
+  return svg(R.W, R.H, g, "Courbe de f : part de l'origine avec une tangente verticale, descend jusqu'au minimum (1 ; −1) où la tangente est horizontale, remonte, coupe l'axe des abscisses en x = e ≈ 2,72, puis croît vers +∞.");
+};
+// Chimie C-D-E 2025, exercice 2.3 : acide 2-méthylbutanoïque (formule semi-développée du sujet).
+S["bac-2025-chimie-acide"] = () => {
+  const fs = ' font-size="14"', tiret = x => L([x, 45], [x + 12, 45], ' stroke-width="1.2"');
+  let g = F([4, 50], "CH3", fs) + tiret(34) + F([50, 50], "CH2", fs) + tiret(82) + T([98, 50], "CH", fs) + tiret(122) + T([138, 50], "C", fs);
+  g += L([107, 55], [107, 66], ' stroke-width="1.2"') + F([96, 82], "CH3", fs);
+  g += L([148, 38], [166, 18], ' stroke-width="1.2"') + L([152, 41], [170, 21], ' stroke-width="1.2"') + T([168, 16], "O", fs) + L([148, 52], [166, 70], ' stroke-width="1.2"') + T([164, 84], "OH", fs);
+  return svg(200, 92, g, "Acide 2-méthylbutanoïque : CH3–CH2–CH(CH3)–COOH.");
+};
+// Chimie C-D-E 2025, exercice 2.4 : anhydride éthanoïque + phénylamine → X + acide éthanoïque.
+S["bac-2025-chimie-anhydride"] = () => {
+  const fs = ' font-size="14"', v = (x, y1, y2) => L([x - 2, y1], [x - 2, y2], ' stroke-width="1.1"') + L([x + 2, y1], [x + 2, y2], ' stroke-width="1.1"');
+  let g = F([4, 52], "CH3 − C", fs) + T([60, 16], "O", fs) + L([64, 22], [56, 38], ' stroke-width="1.2"') + L([70, 22], [80, 38], ' stroke-width="1.2"') + F([76, 52], "C − CH3", fs);
+  g += v(56, 58, 72) + T([51, 88], "O", fs) + v(81, 58, 72) + T([76, 88], "O", fs);
+  g += F([150, 52], "+  C6H5 − NH2", fs) + L([262, 47], [298, 47], ' stroke-width="1.4"') + fleche([304, 47], [294, 47], 7) + T([330, 52], "X", fs) + F([372, 52], "+  CH3 − COOH", fs);
+  return svg(486, 96, g, "Anhydride éthanoïque CH3–CO–O–CO–CH3 + C6H5–NH2 → X + CH3–COOH.");
+};
+// Corrigé chimie 2025 : les deux énantiomères de l'acide 2-méthylbutanoïque (représentation de Cram), de part et d'autre d'un miroir.
+S["bac-2025-chimie-enantiomeres"] = () => {
+  const fs = ' font-size="13"';
+  const molecule = (cx, s) => {
+    const cy = 64, h = [cx + s * 34, cy + 6], e = [cx + s * 18, cy + 38], m = [cx - s * 30, cy + 28];
+    let g = L([cx, cy - 8], [cx, cy - 34], ' stroke-width="1.4"') + L([cx - s * 4, cy + 6], m, ' stroke-width="1.4"');
+    for (let k = 1; k <= 4; k++) { const t = k / 5; g += L([cx + s * (6 + 22 * t), cy + 2 + 4 * t - 3], [cx + s * (6 + 22 * t), cy + 2 + 4 * t + 3], ' stroke-width="1.2"'); }
+    g += '<path d="M' + f(cx + s * 3) + " " + f(cy + 6) + " L" + f(e[0] - 4) + " " + f(e[1] - 4) + " L" + f(e[0] + 4) + " " + f(e[1] - 6) + ' Z" fill="currentColor" stroke="none"/>';
+    g += T([cx, cy + 4], "C", fs + ' font-weight="700" text-anchor="middle"') + T([cx, cy - 40], s > 0 ? "COOH" : "HOOC", fs + ' text-anchor="middle"');
+    g += T([h[0] + s * 4, h[1] + 4], "H", fs + (s > 0 ? "" : ' text-anchor="end"')) + F([m[0] - (s > 0 ? 32 : -4), m[1] + 14], "CH3", fs) + F([e[0] - 14, e[1] + 18], "C2H5", fs);
+    return g;
+  };
+  return svg(360, 132, molecule(90, 1) + molecule(270, -1) + L([180, 4], [180, 104], ' stroke-width="1.4"') + T([180, 124], "miroir", ' font-size="12" text-anchor="middle"'),
+    "Les deux énantiomères de l'acide 2-méthylbutanoïque en représentation de Cram : autour du carbone asymétrique, COOH en haut, CH3 dans le plan, H en arrière (traits pointillés) et C2H5 en avant (triangle plein), images l'un de l'autre dans un miroir.");
+};
+
+// Physique D 2025 (BAC), exercice 2.1 : forces appliquées au corps (S) sur le plan horizontal.
+const vecteur = (p, nom, x = "") => T(p, nom, ' font-size="13" font-style="italic"' + x) + L([p[0] - 1, p[1] - 12], [p[0] + 9, p[1] - 12], ' stroke-width="0.9"') + fleche([p[0] + 11, p[1] - 12], [p[0] + 5, p[1] - 12], 4);
+S["bac-2025-physique-d-forces"] = () => {
+  let g = L([20, 50], [220, 50], ' stroke-width="1.8"');
+  for (let x = 30; x <= 214; x += 14) g += L([x, 51], [x - 9, 62], ' stroke-width="1.1"');
+  g += '<rect x="113" y="38" width="13" height="12" fill="currentColor" stroke="none"/>';
+  g += L([119.5, 38], [119.5, 12]) + fleche([119.5, 6], [119.5, 16], 7) + vecteur([126, 18], "R");
+  g += L([119.5, 50], [119.5, 72]) + fleche([119.5, 79], [119.5, 70], 7) + vecteur([126, 82], "P");
+  g += L([126, 44], [174, 44]) + fleche([181, 44], [172, 44], 7) + vecteur([160, 36], "F");
+  g += L([113, 44], [68, 44]) + fleche([61, 44], [70, 44], 7) + vecteur([70, 36], "f");
+  return svg(240, 90, g, "Le corps ponctuel (S) sur le plan horizontal : poids P vers le bas, réaction R vers le haut, force motrice F dans le sens du mouvement, force de frottement f en sens opposé.");
+};
+// Physique D 2025 (BAC), exercice 3.2 : plan incliné AB (β = 30°), saut à partir de B, sol en B'C.
+S["bac-2025-physique-d-plan"] = () => {
+  const A = [45, 205], B = [175, 130], u = unit(A, B), fs = ' font-size="14"';
+  let g = L(A, B, ' stroke-width="1.8"') + L(A, [175, 205], POINTILLE + ' stroke-width="1"');
+  g += L(B, [B[0] + u[0] * 70, B[1] + u[1] * 70], ' stroke-width="1.6"') + fleche([B[0] + u[0] * 80, B[1] + u[1] * 80], [B[0] + u[0] * 70, B[1] + u[1] * 70], 8);
+  g += '<path d="M73 205 A 28 28 0 0 0 69.2 191"/>' + T([78, 200], "β", fs);
+  g += L([175, 318], [175, 22]) + fleche([175, 14], [175, 24], 8) + T([156, 24], "y", fs);
+  g += L(B, [322, 130]) + fleche([330, 130], [320, 130], 8) + T([322, 152], "x", fs);
+  g += L([174, 318], [356, 318], ' stroke-width="1.8"'); for (let x = 184; x <= 356; x += 13) g += L([x, 319], [x - 9, 330], ' stroke-width="1.1"');
+  g += '<circle cx="105" cy="170" r="5" fill="currentColor" stroke="none"/>' + T([88, 156], "(S)", fs);
+  g += '<circle cx="300" cy="318" r="3" fill="currentColor" stroke="none"/>' + T([296, 308], "C", fs) + T([20, 210], "A", fs) + T([180, 152], "B", fs) + T([150, 314], "B’", fs);
+  g += vecteur([196, 102], "V<tspan dy=\"4\" font-size=\"9\">B</tspan>");
+  g += L([258, 28], [258, 54], ' stroke-width="1.4"') + fleche([258, 62], [258, 52], 7) + vecteur([266, 44], "g");
+  return svg(370, 340, g, "Le solide (S) monte le plan AB incliné de β sur l'horizontale passant par A ; en B il quitte le plan avec la vitesse VB ; repère (B, x, y) d'origine B ; il retombe en C sur le sol horizontal passant par B', à la verticale sous B.");
+};
+// Physique D 2025 (BAC), corrigé 2.3 : construction de Fresnel (1 cm pour 10 mm, ici 20 px par cm).
+S["bac-2025-physique-d-fresnel"] = () => {
+  const O = [40, 140], k = 20, fs = ' font-size="13"', M1 = [O[0] + 5 * k, O[1]], M = [O[0] + 5 * k, O[1] - 5 * k];
+  let g = L([20, 140], [200, 140], ' stroke-width="1"') + fleche([206, 140], [198, 140], 6) + T([190, 158], "Δ", fs);
+  g += L(O, [M1[0] - 6, M1[1]], ' stroke-width="2"') + fleche(M1, O, 9) + L(M1, [M[0], M[1] + 6], ' stroke-width="2"') + fleche(M, M1, 9);
+  g += L(O, [M[0] - 4.5, M[1] + 4.5], ' stroke-width="2.4"') + fleche(M, O, 10) + droit(M1, [-1, 0], [0, -1], 8);
+  g += '<path d="M66 140 A 26 26 0 0 0 58.4 121.6"/>' + T([70, 132], "π/4", ' font-size="11"');
+  g += T([24, 156], "O", fs) + T([56, 160], "OM₁ = 5 cm (x₁)", ' font-size="11"') + T([146, 92], "M₁M = 5 cm (x₂)", ' font-size="11"') + T([8, 64], "OM ≈ 7,1 cm (x)", ' font-size="11"') + T([144, 36], "M", fs) + T([144, 156], "M₁", fs);
+  return svg(260, 170, g, "Construction de Fresnel : le vecteur OM1 de 5 cm (x1, phase 0) sur l'axe origine des phases, puis M1M de 5 cm perpendiculaire (x2, avance de phase π/2) ; la résultante OM mesure environ 7,1 cm et fait un angle π/4 avec l'axe.");
+};
+
+// Physique C 2025 (BAC), exercice 2.1 : abscisse angulaire θ(t) du pendule simple (θm = π/15 rad, T = 2 s).
+S["bac-2025-physique-c-pendule"] = () => {
+  const X = t => 50 + t * 110, Y = v => 130 - v * 22, fs = ' font-size="13"';
+  let g = '<g stroke-width="0.7" opacity="0.5">'; for (let k = 0; k <= 20; k++) g += L([X(k / 5), Y(4)], [X(k / 5), Y(-4)]); for (let v = -4; v <= 4; v++) g += L([X(0), Y(v)], [X(4), Y(v)]); g += "</g>";
+  g += L([X(0), Y(0)], [X(4.25), Y(0)], ' stroke-width="1.2"') + fleche([X(4.32), Y(0)], [X(4.2), Y(0)], 7) + L([X(0), Y(-4)], [X(0), Y(5.1)], ' stroke-width="1.2"') + fleche([X(0), Y(5.5)], [X(0), Y(5)], 7);
+  for (let t = 1; t <= 4; t++) g += L([X(t), Y(0) - 5], [X(t), Y(0) + 5], ' stroke-width="2.4"');
+  g += T([X(1) + 5, Y(0) - 6], "1", ' font-size="12"') + T([X(0) - 14, Y(0) + 5], "0", fs) + T([X(4.05), Y(0) - 10], "t (s)", fs) + T([X(0) + 10, 18], "θ (rad)", fs);
+  g += T([X(0) - 26, Y(4) - 4], "π", ' font-size="12"') + L([X(0) - 30, Y(4) + 1], [X(0) - 14, Y(4) + 1], ' stroke-width="1"') + T([X(0) - 30, Y(4) + 14], "15", ' font-size="12"');
+  const pts = []; for (let k = 0; k <= 160; k++) { const t = k / 40; pts.push([X(t), Y(4 * Math.cos(Math.PI * t))]); }
+  g += P(pts, ' stroke-width="2"');
+  return svg(X(4.32) + 30, Y(-4) + 10, g, "Abscisse angulaire θ du pendule en fonction du temps : sinusoïde partant de son maximum π/15 rad à t = 0, minimum à t = 1 s, de nouveau maximale à t = 2 s, puis à t = 4 s ; graduation de 1 s sur l'axe des temps.");
+};
+// Physique C 2025 (BAC), exercice 2.4 : rails de Laplace, barre MN dans le champ B sortant.
+S["bac-2025-physique-c-rails"] = () => {
+  const fs = ' font-size="13"';
+  let g = L([30, 40], [380, 40]) + L([30, 210], [380, 210]) + L([30, 40], [30, 70]) + '<rect x="23" y="70" width="14" height="44"/>' + L([30, 114], [30, 142]) + '<circle cx="30" cy="160" r="18"/>' + L([30, 178], [30, 210]);
+  g += L([0, 172], [0, 150], ' stroke-width="1.2"') + fleche([0, 144], [0, 154], 6) + T([-14, 165], "E", fs) + T([4, 98], "R", fs);
+  g += fleche([110, 40], [100, 40], 7) + T([66, 30], "I = 1 A", ' font-size="12"');
+  g += L([230, 14], [230, 236], ' stroke-width="2"') + T([240, 22], "M", fs) + T([240, 234], "N", fs);
+  g += '<rect x="110" y="72" width="270" height="88" stroke-dasharray="2 3" stroke-width="1.4"/>';
+  g += '<circle cx="300" cy="120" r="9"/><circle cx="300" cy="120" r="2.5" fill="currentColor" stroke="none"/>' + vecteur([314, 126], "B");
+  g += L([396, 78], [396, 154], ' stroke-width="1.2"') + fleche([396, 72], [396, 82], 6) + fleche([396, 160], [396, 150], 6) + T([404, 122], "d", fs);
+  return svg(440, 246, '<g transform="translate(20 0)">' + g + "</g>", "Rails de Laplace : deux rails horizontaux reliés à gauche par un générateur E et un résistor R ; le courant I = 1 A circule dans le rail supérieur vers la droite ; la barre MN, verticale, coupe les rails ; la zone en pointillés, de largeur d, est celle du champ magnétique B sortant du plan.");
+};
+// Physique C 2025 (BAC), document 1 : intensité efficace I en fonction de la fréquence N (résonance vers 500 Hz).
+S["bac-2025-physique-c-resonance"] = () => {
+  const X = n => 50 + (n - 300) * 0.9, Y = v => 240 - v * 2, fs = ' font-size="11"';
+  let g = '<g stroke-width="0.7" opacity="0.5">'; for (let n = 300; n <= 740; n += 20) g += L([X(n), Y(0)], [X(n), Y(100)]); for (let v = 10; v <= 100; v += 10) g += L([X(300), Y(v)], [X(740), Y(v)]); g += "</g>";
+  g += L([X(300), Y(0)], [X(760), Y(0)], ' stroke-width="1.2"') + fleche([X(770), Y(0)], [X(758), Y(0)], 7) + L([X(300), Y(0)], [X(300), Y(108)], ' stroke-width="1.2"') + fleche([X(300), Y(113)], [X(300), Y(106)], 7);
+  for (let n = 300; n <= 700; n += 100) g += T([X(n) - 10, Y(0) + 14], String(n), fs);
+  g += T([X(300) - 26, Y(100) + 4], "100", fs) + T([X(300) - 18, Y(50) + 4], "50", fs) + T([X(300) - 12, Y(0) + 4], "0", fs) + T([X(300) + 6, Y(108)], "I (mA)", fs) + T([X(735), Y(0) - 6], "N (Hz)", fs);
+  // points relevés sur le scan, lissés en Catmull-Rom
+  const R = [[311, 17], [369, 18], [400, 22], [425, 32], [445, 50], [462, 70], [478, 88], [490, 97], [500, 100], [510, 97], [524, 87], [540, 73], [560, 58], [600, 40], [646, 29], [702, 20], [737, 16]].map(([n, v]) => [X(n), Y(v)]);
+  let d = 'M' + f(R[0][0]) + ' ' + f(R[0][1]);
+  for (let i = 0; i < R.length - 1; i++) { const p0 = R[Math.max(i - 1, 0)], p1 = R[i], p2 = R[i + 1], p3 = R[Math.min(i + 2, R.length - 1)];
+    d += 'C' + f(p1[0] + (p2[0] - p0[0]) / 6) + ' ' + f(p1[1] + (p2[1] - p0[1]) / 6) + ' ' + f(p2[0] - (p3[0] - p1[0]) / 6) + ' ' + f(p2[1] - (p3[1] - p1[1]) / 6) + ' ' + f(p2[0]) + ' ' + f(p2[1]); }
+  g += '<path d="' + d + '" stroke-width="2"/>';
+  return svg(X(770) + 10, Y(0) + 22, g, "Document 1 : intensité efficace I (en mA) en fonction de la fréquence N (en Hz), de 300 à 740 Hz ; la courbe passe par un maximum de 100 mA pour N = 500 Hz.");
+};
+// Physique C 2025 (BAC), corrigé 3.1.1 : circuit RLC série alimenté par le GBF, avec l'ampèremètre.
+S["bac-2025-physique-c-rlc"] = () => {
+  const fs = ' font-size="12"';
+  let g = L([30, 30], [70, 30]) + '<rect x="70" y="22" width="40" height="16"/>' + T([82, 16], "R", fs) + L([110, 30], [150, 30]);
+  g += '<path d="M150 30 q6 -14 12 0 q6 -14 12 0 q6 -14 12 0 q6 -14 12 0"/>' + T([150, 14], "(L, r)", fs) + L([198, 30], [240, 30]);
+  g += L([240, 30], [240, 66]) + L([228, 66], [252, 66], ' stroke-width="2.2"') + L([228, 74], [252, 74], ' stroke-width="2.2"') + L([240, 74], [240, 120]) + T([258, 74], "C", fs);
+  g += L([240, 120], [170, 120]) + '<circle cx="155" cy="120" r="15"/>' + T([149, 125], "A", ' font-size="13" font-weight="700"') + L([140, 120], [30, 120]);
+  g += L([30, 120], [30, 93]) + '<circle cx="30" cy="75" r="18"/>' + '<path d="M18 75 q6 -10 12 0 q6 10 12 0" stroke-width="1.2"/>' + L([30, 57], [30, 30]) + T([54, 80], "GBF", fs);
+  return svg(280, 136, g, "Montage série : le GBF, le conducteur ohmique R, la bobine (L, r), le condensateur C et l'ampèremètre A, branchés les uns à la suite des autres.");
+};
+// Physique C 2025 (BAC), corrigé 2.4.1 : force de Laplace sur la tige MN (courant de M vers N, B sortant).
+S["bac-2025-physique-c-laplace"] = () => {
+  const fs = ' font-size="13"';
+  let g = L([130, 14], [130, 186], ' stroke-width="2"') + T([140, 22], "M", fs) + T([140, 184], "N", fs);
+  g += L([150, 70], [150, 112], ' stroke-width="1.4"') + fleche([150, 120], [150, 110], 7) + T([158, 100], "I", ' font-size="13" font-style="italic"');
+  g += '<circle cx="200" cy="100" r="9"/><circle cx="200" cy="100" r="2.5" fill="currentColor" stroke="none"/>' + vecteur([214, 106], "B");
+  g += L([130, 100], [60, 100], ' stroke-width="2.2"') + fleche([50, 100], [62, 100], 10) + vecteur([62, 88], "F");
+  return svg(250, 200, g, "Force de Laplace sur la tige MN : le courant I descend de M vers N, le champ B sort du plan ; la force F, appliquée au milieu de la portion plongée dans le champ, est horizontale et dirigée vers la gauche, du côté du générateur.");
+};
+
+// SVT D 2025 (BAC), document 3 : étapes de la fécondation chez les Spermaphytes (A', B', C').
+S["bac-2025-svt-d-spermaphytes"] = () => {
+  const fs = ' font-size="11"', fin = ' stroke-width="0.8"', pt = (x, y, r = 2.2) => '<circle cx="' + f(x) + '" cy="' + f(y) + '" r="' + r + '" fill="currentColor" stroke="none"/>';
+  // A' : grain de pollen qui germe
+  let g = '<path d="M112 128 A 52 52 0 1 1 132 112" stroke-width="2.6"/>';
+  for (let k = 0; k < 15; k++) { const a = Math.PI * (0.78 + k * 0.1), c = [86 + 52 * Math.cos(a), 78 + 52 * Math.sin(a)], u = [Math.cos(a), Math.sin(a)];
+    g += P([[c[0] - u[1] * 3, c[1] + u[0] * 3], [c[0] + u[0] * 7, c[1] + u[1] * 7], [c[0] + u[1] * 3, c[1] - u[0] * 3]], ' fill="currentColor" stroke-width="0.6"'); }
+  g += '<path d="M112 128 C 116 150, 112 180, 114 222 Q 121 232 128 222 C 129 182, 133 150, 132 112" stroke-width="1.2"/>';
+  g += '<ellipse cx="119" cy="112" rx="5" ry="9" transform="rotate(-25 119 112)" fill="currentColor" fill-opacity="0.55" stroke-width="0.8"/>' + '<ellipse cx="121" cy="204" rx="5" ry="10" stroke-dasharray="2 2" stroke-width="1"/>';
+  g += L([125, 110], [178, 92], fin) + T([182, 88], "noyau", fs) + T([182, 101], "reproducteur", fs) + L([130, 150], [178, 150], fin) + T([182, 154], "tube pollinique", fs) + L([127, 204], [178, 204], fin) + T([182, 208], "noyau végétatif", fs) + T([96, 262], "A’", ' font-size="13"');
+  // B' : deux tubes polliniques, deux anthérozoïdes, noyau végétatif qui dégénère
+  const tube = x => '<path d="M' + (x - 11) + ' 34 L' + (x - 11) + ' 222 Q' + x + ' 236 ' + (x + 11) + ' 222 L' + (x + 11) + ' 34" stroke-width="1.2" stroke-dasharray="6 3"/>';
+  g += tube(310) + tube(410);
+  g += pt(309, 108, 2.6) + pt(311, 138, 2.6) + pt(408, 126, 2.6) + pt(410, 152, 2.6);
+  for (let k = 0; k < 22; k++) g += pt(302 + (k * 37 % 17), 196 + (k * 23 % 28), 1.5);
+  g += L([318, 108], [338, 122], fin) + L([400, 128], [384, 126], fin) + T([340, 124], "anthéro-", fs) + T([340, 137], "zoïdes", fs);
+  g += L([422, 70], [470, 70], fin) + T([474, 66], "tube", fs) + T([474, 79], "pollinique", fs) + L([418, 214], [470, 214], fin) + T([474, 210], "noyau", fs) + T([474, 223], "végétatif", fs) + T([352, 262], "B’", ' font-size="13"');
+  // C' : sac embryonnaire atteint par le tube pollinique
+  g += '<ellipse cx="610" cy="140" rx="48" ry="104" stroke-width="1.6"/>';
+  g += '<path d="M604 6 L604 52 M616 6 L616 52" stroke-width="1.2"/>' + '<rect x="604" y="6" width="12" height="40" fill="currentColor" fill-opacity="0.35" stroke="none"/>';
+  g += '<path d="M572 64 Q 590 46 608 66 Q 594 80 572 64 Z M612 66 Q 630 46 648 64 Q 626 80 612 66 Z" stroke-width="1"/>' + '<circle cx="610" cy="78" r="12" stroke-width="1"/>' + pt(610, 78, 4) + pt(590, 64, 1.8) + pt(630, 64, 1.8);
+  g += '<circle cx="610" cy="140" r="10" fill="currentColor" fill-opacity="0.5" stroke-width="1"/>' + pt(606, 137, 2.4) + pt(614, 143, 2.4);
+  g += '<path d="M572 206 L610 196 L648 206 M590 201 L596 236 M630 201 L624 236" stroke-width="1"/>' + pt(590, 216, 1.8) + pt(610, 222, 1.8) + pt(630, 216, 1.8);
+  g += L([618, 22], [668, 22], fin) + T([672, 26], "tube pollinique", fs) + L([620, 140], [668, 150], fin) + T([672, 154], "noyaux du sac", fs) + L([640, 172], [668, 182], fin) + T([672, 186], "sac embryonnaire", fs) + T([600, 262], "C’", ' font-size="13"');
+  return svg(770, 272, g, "Document 3 : A', un grain de pollen germe ; son tube pollinique contient le noyau végétatif en tête et le noyau reproducteur encore dans le grain. B', deux tubes polliniques allongés ; le noyau reproducteur a donné deux anthérozoïdes, le noyau végétatif dégénère au fond du tube. C', le tube pollinique atteint le sac embryonnaire, qui contient l'oosphère près du micropyle et les noyaux du sac au centre.");
+};
+// SVT D 2025 (BAC), corrigé : schéma d'interprétation du sarcomère au repos et contracté.
+const sarcomere = (y0, za, zb, titre) => {
+  const fs = ' font-size="11"', ma = 150, mb = 290, act = 100;
+  let g = T([12, y0 - 6], titre, ' font-size="12" font-weight="700"');
+  g += L([za, y0 + 4], [za, y0 + 96], ' stroke-width="2.6"') + L([zb, y0 + 4], [zb, y0 + 96], ' stroke-width="2.6"');
+  for (const y of [y0 + 14, y0 + 38, y0 + 62, y0 + 86]) g += L([za, y], [za + act, y], ' stroke-width="1.4"') + L([zb, y], [zb - act, y], ' stroke-width="1.4"');
+  for (const y of [y0 + 26, y0 + 50, y0 + 74]) { g += L([ma, y], [mb, y], ' stroke-width="4.5"'); for (let x = ma + 6; x <= mb - 6; x += 10) { if (Math.abs(x - 220) < 10) continue; const d = x < 220 ? -4 : 4; g += L([x, y - 2], [x + d, y - 7], ' stroke-width="1"') + L([x, y + 2], [x + d, y + 7], ' stroke-width="1"'); } }
+  const cote = (a, b, y, nom) => (b - a > 12 ? L([a + 2, y], [b - 2, y], ' stroke-width="0.9"') + fleche([a, y], [a + 6, y], 5) + fleche([b, y], [b - 6, y], 5) : "") + T([(a + b) / 2 - nom.length * 2.8, y - 4], nom, fs);
+  g += cote(ma, mb, y0 + 114, "bande A") + cote(za, ma, y0 + 114, "½ I") + cote(mb, zb, y0 + 114, "½ I");
+  g += cote(za + act, zb - act, y0 - 4, zb - za - 2 * act > 12 ? "zone H" : "");
+  g += cote(za, zb, y0 + 134, "sarcomère");
+  return g;
+};
+S["bac-2025-svt-d-sarcomeres"] = () => {
+  const fs = ' font-size="11"', fin = ' stroke-width="0.8"';
+  let g = sarcomere(24, 70, 370, "Au repos") + sarcomere(204, 115, 325, "En activité (contracté)");
+  g += L([372, 32], [420, 20], fin) + T([424, 22], "strie Z", fs) + L([340, 62], [420, 52], fin) + T([424, 54], "filament fin d'actine", fs) + L([284, 74], [420, 84], fin) + T([424, 88], "filament épais de myosine", fs);
+  return svg(560, 360, g, "Schéma d'interprétation d'un sarcomère, entre deux stries Z. Au repos : les filaments fins d'actine, fixés aux stries Z, laissent au centre une zone H ; la bande A a la longueur des filaments épais de myosine ; les demi-bandes I sont larges. En activité : les filaments d'actine ont glissé entre les filaments de myosine vers le centre ; le sarcomère est plus court, les bandes I sont réduites, la zone H a presque disparu, la bande A garde la même longueur.");
+};
+
+// Probatoire 2025 histoire A-ABI, document 3 : le Cameroun après la guerre de 1914-1916 (carte redessinée d'après le scan,
+// mêmes tracés et mêmes libellés : bande sous mandat anglais hachurée, limites de la zone restituée à l'AEF en pointillés).
+S["proba-2025-histoire-a-carte"] = () => {
+  const PL = (pts, x = "") => P(pts, x), G = ' font-weight="700"', PT = ' stroke-dasharray="2 5" stroke-width="3"', TIR = ' stroke-dasharray="11 7" stroke-width="2.6"';
+  const lac = [[270, 26], [278, 16], [298, 17], [309, 10], [326, 12], [333, 30], [331, 46], [347, 52], [362, 61], [398, 64], [404, 88], [384, 96], [364, 102], [352, 114], [326, 118], [307, 108], [300, 94], [284, 74], [270, 48], [270, 26]];
+  const ouest = [[318, 118], [322, 135], [305, 160], [292, 185], [282, 205], [276, 230], [272, 255], [275, 272], [262, 290], [245, 310], [220, 330], [200, 345], [175, 365], [150, 390], [125, 410], [100, 435], [80, 460], [62, 490], [50, 520], [48, 545]];
+  const est = [[65, 555], [80, 530], [95, 500], [115, 480], [140, 465], [165, 450], [185, 435], [200, 415], [215, 385], [230, 355], [240, 330], [250, 315], [268, 298], [285, 275], [292, 250], [298, 225], [310, 205], [330, 190], [352, 170], [345, 150], [330, 130], [330, 118]];
+  const bande = ouest.concat(est);
+  const guinee = [[22, 550], [62, 550], [68, 586], [76, 592], [88, 587], [90, 612], [100, 627], [104, 642], [104, 700], [102, 735], [92, 745], [88, 790], [84, 824], [30, 800], [22, 550]];
+  const mandatFr = [[360, 100], [380, 145], [372, 176], [380, 205], [400, 238], [425, 260], [455, 285], [465, 302], [468, 332], [471, 362], [480, 400], [490, 430], [498, 452], [500, 476], [512, 500], [536, 530], [570, 545], [590, 572], [593, 585]];
+  const aefNord = [[422, 259], [408, 257], [330, 262], [326, 280], [345, 300], [370, 320], [395, 345], [415, 370], [420, 386], [410, 410], [398, 440], [380, 455], [360, 470], [362, 492], [370, 522], [385, 560], [405, 590], [430, 620], [452, 640], [455, 668], [446, 700], [452, 722], [470, 770], [486, 810], [500, 848], [510, 866]];
+  const aefEst = [[593, 585], [570, 590], [530, 600], [522, 640], [524, 690], [530, 722], [538, 752], [540, 800], [526, 832], [510, 866]];
+  const sudHaut = [[180, 678], [250, 684], [330, 690], [420, 702], [450, 712]], sudBas = [[92, 774], [170, 765], [250, 750], [320, 740], [390, 726], [450, 712]];
+  const chari = [[380, 145], [394, 170], [400, 198], [414, 214], [450, 215], [480, 222], [496, 215], [512, 226], [530, 246], [546, 280], [558, 286], [580, 268], [602, 282], [632, 282]];
+  const congo1 = [[630, 520], [610, 555], [596, 580], [595, 620], [580, 668], [566, 700], [560, 740], [550, 772], [544, 802], [541, 822]];
+  const congo2 = [[636, 702], [602, 726], [590, 742], [580, 780], [570, 810], [546, 840], [510, 866]];
+  const motif = '<defs><pattern id="ax-hach-angl" width="7" height="7" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><path d="M0 0V7M0 0H7" stroke="currentColor" stroke-width="2.4"/></pattern></defs>';
+  // dessin à l'échelle 0,8 dans un cadre de 520 px : il s'adapte au téléphone au lieu de défiler (seuil ax-large : 600 px)
+  return svg(520, 698, motif + '<g transform="scale(0.8)">' +
+    '<rect x="4" y="4" width="642" height="864" stroke-width="4"/>' +
+    '<polygon points="' + bande.map(p => p.join(",")).join(" ") + '" fill="url(#ax-hach-angl)" stroke="none" opacity=".75"/>' +
+    PL(est, ' stroke-dasharray="7 5" stroke-width="2"') + PL(ouest, ' stroke-width="1.2" opacity=".55"') +
+    PL(lac, ' stroke-width="4"') + PL(guinee, ' stroke-width="4"') +
+    PL(mandatFr, TIR) + PL(aefNord, PT) + PL(aefEst, PT) + PL([[180, 678], [184, 730], [170, 762]], TIR) + PL(sudHaut, TIR) + PL(sudBas, TIR) +
+    PL(chari, ' stroke-width="2.2"') + PL(congo1, ' stroke-width="2.2"') + PL(congo2, ' stroke-width="2.2"') +
+    // titre et légende
+    '<rect x="4" y="4" width="262" height="92"  stroke-width="1.6"/>' +
+    T([12, 40], "Le Cameroun après la", ' font-size="22"' + G) + T([12, 78], "guerre de 1914-1916", ' font-size="22"' + G) +
+    PL([[16, 176], [44, 176]], PT) + T([54, 167], "Zone restituée à", ' font-size="17"' + G) + T([54, 190], "l'AEF", ' font-size="17"' + G) +
+    '<rect x="14" y="216" width="36" height="28" fill="url(#ax-hach-angl)" stroke-width="1.2"/>' + T([62, 228], "Le Cameroun sous", ' font-size="15"' + G) + T([62, 247], "mandat Anglais", ' font-size="15"' + G) +
+    // libellés de la carte
+    T([350, 46], "Lac Tchad", ' font-size="27"' + G) + T([470, 158], "Tchad", ' font-size="27"' + G) +
+    T([0, 0], "Chari", ' font-size="17" transform="translate(514 214) rotate(52)"') +
+    T([233, 182], "Dikoa", ' font-size="19"' + G) + T([188, 298], "Yola", ' font-size="19"' + G) + '<circle cx="246" cy="291" r="3.5" fill="currentColor" stroke="none"/>' +
+    T([18, 348], "Nigéria", ' font-size="30"' + G) +
+    T([197, 510], "Cameroun", ' font-size="21"' + G) + T([130, 540], "sous mandat Français", ' font-size="21"' + G) +
+    T([92, 582], "Buea", ' font-size="19"' + G) + '<circle cx="206" cy="621" r="3.5" fill="currentColor" stroke="none"/>' + T([216, 627], "Yaoundé", ' font-size="19"' + G) +
+    T([32, 690], "Guinée", ' font-size="14"' + G) + T([27, 710], "espagnole", ' font-size="14"' + G) +
+    T([0, 0], "Congo", ' font-size="17" transform="translate(568 768) rotate(-62)"') +
+    // nord et échelle
+    L([585, 76], [585, 34], ' stroke-width="2"') + fleche([585, 30], [585, 50], 10) + T([578, 94], "N", ' font-size="17"' + G) +
+    L([214, 836], [306, 836], ' stroke-width="5"') + T([207, 826], "0", ' font-size="19"') + T([304, 828], "200 km", ' font-size="17"') + "</g>",
+    "Document 3 : carte du Cameroun après la guerre de 1914-1916 : une bande étroite à l'ouest, le long du Nigéria, de Buea à Dikoa, sous mandat anglais ; le reste du territoire, avec Yaoundé, sous mandat français ; une zone restituée à l'AEF à l'est et au sud ; la Guinée espagnole au sud-ouest.");
+};
+
 module.exports = S;

@@ -7,94 +7,6 @@ function VRT_A(id, i, titre, fn) { var L = window.VRT_LECONS[id]; if (L && L.par
 
 /* Leçons rédigées VÉRITAS — sciences (maths, PCT, SVT, informatique).
    cle = morceau du titre officiel de la progression MINESEC 2026-2027 (rattachement automatique). */
-VRT_L("3e-maths-racines", {
-  c: "3e", m: "maths", cle: "Racines carrées d", titre: "Racine carrée d'un nombre positif", duree: 15,
-  accroche: "Quel côté pour un champ carré de 49 m² ? La racine carrée répond.",
-  intro: "Un terrain carré mesure 49 m². Quelle est la longueur de son côté ? Il faut trouver le nombre qui, multiplié par lui-même, donne 49 : c'est sa racine carrée.",
-  objectifs: ["définir la racine carrée d'un nombre positif", "connaître les carrés parfaits usuels", "appliquer √(a×b) = √a × √b"],
-  parties: [
-    { t: "Définition", html:
-      "<div class='def'><b>Définition</b>a est un nombre positif. La racine carrée de a, notée √a, est le nombre <strong>positif</strong> dont le carré est égal à a.</div>" +
-      "<p class='formule'>(√a)² = a   et   √a ≥ 0</p><p>Exemples : √49 = 7 car 7² = 49 ; √0 = 0 ; √1 = 1.</p>" +
-      "<div class='attention'><b>Attention</b>√(−4) n'existe pas dans les nombres réels : aucun carré n'est négatif.</div>",
-      illus: { legende: "Un carré d'aire 49 a un côté de √49 = 7.", svg:
-      "<svg viewBox='0 0 420 200' role='img' aria-label='Carré d aire 49 et de côté 7'><rect x='60' y='20' width='160' height='160' rx='4' fill='#DBE8FE' stroke='#142554' stroke-width='2.5'/><g stroke='#8FB0EE' stroke-width='1'><path d='M82.9 20v160M105.7 20v160M128.6 20v160M151.4 20v160M174.3 20v160M197.1 20v160M60 42.9h160M60 65.7h160M60 88.6h160M60 111.4h160M60 134.3h160M60 157.1h160'/></g><text x='140' y='108' text-anchor='middle' font-size='30' font-weight='700' fill='#142554'>49 m²</text><text x='140' y='198' text-anchor='middle' font-size='16' fill='#1E499B'>côté = √49 = 7 m</text><text x='260' y='70' font-size='18' fill='#142554'>7 × 7 = 49</text><text x='260' y='105' font-size='18' fill='#142554'>donc √49 = 7</text><rect x='256' y='124' width='130' height='4' rx='2' fill='#FFC93C'/></svg>" },
-      retenir: "Une racine carrée est toujours positive ou nulle." },
-    { t: "Les carrés parfaits à connaître", html:
-      "<div class='tab-scroll'><table><thead><tr><th>n</th><td>1</td><td>2</td><td>3</td><td>4</td><td>5</td><td>6</td><td>7</td><td>8</td><td>9</td><td>10</td><td>11</td><td>12</td></tr></thead><tbody><tr><th>n²</th><td>1</td><td>4</td><td>9</td><td>16</td><td>25</td><td>36</td><td>49</td><td>64</td><td>81</td><td>100</td><td>121</td><td>144</td></tr></tbody></table></div>" +
-      "<div class='astuce'><b>Astuce</b>Un carré parfait se termine toujours par 0, 1, 4, 5, 6 ou 9 : un nombre qui finit par 2, 3, 7 ou 8 n'est jamais un carré parfait.</div><p>Lis le tableau dans l'autre sens : √81 = 9, √144 = 12. Pour un nombre qui n'est pas un carré parfait, on encadre : 36 &lt; 40 &lt; 49 donc 6 &lt; √40 &lt; 7.</p>",
-      retenir: "Connaître les carrés de 1 à 12 fait gagner un temps précieux à l'examen." },
-    { t: "Règles de calcul", html:
-      "<p class='formule'>√(a × b) = √a × √b    √(a / b) = √a / √b  (b ≠ 0)</p>" +
-      "<div class='ex'><b>Simplifier √50</b>50 = 25 × 2, donc √50 = √25 × √2 = <strong>5√2</strong>.</div>" +
-      "<div class='attention'><b>Piège classique</b>√(a + b) n'est PAS égal à √a + √b. Exemple : √(9 + 16) = √25 = 5, alors que √9 + √16 = 3 + 4 = 7.</div>",
-      retenir: "La racine se « partage » dans un produit, jamais dans une somme." }
-  ],
-  revision: ["√a existe seulement si a ≥ 0, et √a ≥ 0.", "(√a)² = a.", "Carrés parfaits de 1 à 144.", "√(ab) = √a × √b ; √(a/b) = √a / √b.", "√(a + b) ≠ √a + √b."],
-  exo: "<p>Écris sous la forme a√b : √12 ; √75 ; √200. <em>(2√3 ; 5√3 ; 10√2.)</em></p>",
-  quiz: [
-    { q: "Combien vaut √121 ?", r: ["11", "12", "60,5"], b: 0, e: "11 × 11 = 121." },
-    { q: "√18 s'écrit aussi…", r: ["9√2", "3√2", "2√3"], b: 1, e: "18 = 9 × 2, donc √18 = 3√2." },
-    { q: "√(16 + 9) vaut…", r: ["7", "5", "25"], b: 1, e: "On calcule d'abord 16 + 9 = 25, puis √25 = 5." },
-    { q: "Entre quels entiers se trouve √30 ?", r: ["4 et 5", "5 et 6", "6 et 7"], b: 1, e: "25 < 30 < 36." }
-  ]
-});
-
-VRT_L("3e-pct-atome", {
-  c: "3e", m: "pct", cle: "Séance 1 : Atome", titre: "L'atome", duree: 15,
-  accroche: "Tout ce qui t'entoure est fait de grains minuscules : les atomes.",
-  intro: "La table, l'eau du seau, l'air que tu respires : tout est fait d'atomes. Un seul grain de sel en contient des milliards de milliards.",
-  objectifs: ["décrire la structure d'un atome", "expliquer pourquoi l'atome est électriquement neutre", "lire un symbole chimique"],
-  parties: [
-    { t: "Un noyau et des électrons", html:
-      "<p>Un atome est formé :</p><ul><li>d'un <strong>noyau</strong> central, très petit, chargé positivement ; il contient des <strong>protons</strong> (charge +) et des <strong>neutrons</strong> (neutres) ;</li><li>d'<strong>électrons</strong> (charge −) qui se déplacent autour du noyau, dans un espace presque vide appelé <strong>nuage électronique</strong>.</li></ul>",
-      illus: { legende: "Modèle simplifié de l'atome de lithium : 3 protons, 4 neutrons, 3 électrons.", svg:
-      "<svg viewBox='0 0 420 260' role='img' aria-label='Schéma d un atome avec noyau et électrons'><circle cx='170' cy='130' r='110' fill='#DBE8FE' fill-opacity='.5' stroke='#8FB0EE' stroke-dasharray='5 6'/><circle cx='170' cy='130' r='62' fill='none' stroke='#8FB0EE' stroke-dasharray='5 6'/><g><circle cx='162' cy='124' r='9' fill='#D9472B'/><circle cx='178' cy='124' r='9' fill='#8C9BC0'/><circle cx='170' cy='138' r='9' fill='#D9472B'/><circle cx='155' cy='139' r='9' fill='#8C9BC0'/><circle cx='185' cy='139' r='9' fill='#D9472B'/><circle cx='170' cy='112' r='9' fill='#8C9BC0'/><circle cx='170' cy='150' r='9' fill='#8C9BC0'/></g><g fill='#FFC93C' stroke='#142554' stroke-width='1.5'><circle cx='232' cy='130' r='8'/><circle cx='99' cy='80' r='8'/><circle cx='118' cy='225' r='8'/></g><g font-size='14' fill='#142554'><text x='300' y='80'>● proton (+)</text><text x='300' y='108'>● neutron</text><text x='300' y='136'>● électron (−)</text></g><circle cx='296' cy='75' r='5' fill='#D9472B'/><circle cx='296' cy='103' r='5' fill='#8C9BC0'/><circle cx='296' cy='131' r='5' fill='#FFC93C' stroke='#142554'/><text x='300' y='190' font-size='13' fill='#636A80'>Proportions non respectées :</text><text x='300' y='208' font-size='13' fill='#636A80'>le noyau est 100 000 fois</text><text x='300' y='226' font-size='13' fill='#636A80'>plus petit que l'atome.</text></svg>" },
-      retenir: "Atome = noyau (protons + neutrons) + électrons autour." },
-    { t: "Un atome est neutre", html:
-      "<p>Dans un atome, il y a <strong>autant de protons que d'électrons</strong>. Les charges + et − se compensent : l'atome est électriquement neutre.</p><p>Le nombre de protons s'appelle le <strong>numéro atomique Z</strong>. C'est la carte d'identité de l'élément : Z = 1 hydrogène, Z = 6 carbone, Z = 8 oxygène.</p>",
-      retenir: "Nombre de protons = nombre d'électrons = Z." },
-    { t: "Symboles chimiques", html:
-      "<p>Chaque élément a un symbole : une majuscule, parfois suivie d'une minuscule.</p><table><thead><tr><th>Élément</th><th>Symbole</th><th>Z</th></tr></thead><tbody><tr><td>Hydrogène</td><td>H</td><td>1</td></tr><tr><td>Carbone</td><td>C</td><td>6</td></tr><tr><td>Azote</td><td>N</td><td>7</td></tr><tr><td>Oxygène</td><td>O</td><td>8</td></tr><tr><td>Sodium</td><td>Na</td><td>11</td></tr><tr><td>Fer</td><td>Fe</td><td>26</td></tr></tbody></table>",
-      retenir: "Un symbole commence toujours par une majuscule : Na, et non NA ou na."  }
-  ],
-  revision: ["Noyau positif : protons (+) et neutrons (0).", "Électrons (−) autour du noyau.", "Atome neutre : autant de protons que d'électrons.", "Z = numéro atomique = nombre de protons.", "Symboles : H, C, N, O, Na, Fe…"],
-  exo: "<p>L'atome d'aluminium a Z = 13. Combien a-t-il d'électrons ? Pourquoi ? <em>(13, car il est neutre.)</em></p>",
-  quiz: [
-    { q: "Quelles particules se trouvent dans le noyau ?", r: ["Protons et électrons", "Protons et neutrons", "Électrons seulement"], b: 1, e: "Les électrons tournent autour du noyau." },
-    { q: "Un atome a 8 protons. Combien a-t-il d'électrons ?", r: ["8", "16", "4"], b: 0, e: "L'atome est neutre." },
-    { q: "Quel est le symbole du sodium ?", r: ["So", "Na", "S"], b: 1, e: "Du latin natrium." },
-    { q: "Pourquoi un atome est-il neutre ?", r: ["Il n'a pas de charge du tout", "Les charges + et − se compensent", "Les neutrons annulent tout"], b: 1, e: "Autant de protons (+) que d'électrons (−)." }
-  ]
-});
-
-VRT_L("3e-svt-ressemblances", {
-  c: "3e", m: "svt", cle: "Ressemblances entre les individus", titre: "Ressemblances entre les individus : les caractères de l'espèce humaine", duree: 15,
-  accroche: "Nous sommes tous différents… et pourtant tous humains.",
-  intro: "Au marché de Mokolo, aucun visage n'est identique. Pourtant, tous ces gens partagent des caractères qui font d'eux des êtres humains.",
-  objectifs: ["distinguer caractères de l'espèce et caractères individuels", "définir l'espèce", "donner des exemples précis"],
-  parties: [
-    { t: "Les caractères de l'espèce", html:
-      "<p>Tous les êtres humains marchent sur deux pieds, ont un pouce opposable, un grand cerveau, la parole articulée. Ces traits communs sont les <strong>caractères de l'espèce humaine</strong>.</p><div class='def'><b>Définition</b>Une espèce est un ensemble d'individus qui se ressemblent et qui peuvent se reproduire entre eux en donnant des descendants eux-mêmes féconds.</div>",
-      retenir: "Caractères de l'espèce = traits partagés par tous les humains." },
-    { t: "Les caractères individuels", html:
-      "<p>À l'intérieur de l'espèce, chacun a ses propres variations : couleur des yeux, forme du lobe de l'oreille, groupe sanguin, taille… Ce sont les <strong>caractères individuels</strong>.</p>",
-      illus: { legende: "Le même caractère (le lobe de l'oreille) existe sous deux formes : libre ou attaché.", svg:
-      "<svg viewBox='0 0 420 190' role='img' aria-label='Lobe d oreille libre et lobe attaché'><g fill='#E0F5E5' stroke='#00520B' stroke-width='2.5' stroke-linejoin='round'><path d='M90 30c40 0 62 30 58 66-3 26-22 38-26 56-4 18-30 24-38 6-6-14 10-12 4-28' /><path d='M290 30c40 0 62 30 58 66-3 26-14 40-28 56-8 8-20 4-24-6'/></g><path d='M88 130c-10 8-12 24 2 30 10 4 18-2 18-10' fill='#FFC93C' fill-opacity='.5' stroke='#9A6F00' stroke-width='2'/><path d='M296 146c-8 4-10 10-6 12' fill='none' stroke='#9A6F00' stroke-width='3'/><g font-size='15' font-weight='700' fill='#142554' text-anchor='middle'><text x='110' y='186'>lobe libre</text><text x='310' y='186'>lobe attaché</text></g></svg>" },
-      retenir: "Caractères individuels = ce qui rend chaque personne unique." },
-    { t: "Héréditaire ou acquis ?", html:
-      "<p>Certains caractères viennent des parents : ils sont <strong>héréditaires</strong> (groupe sanguin, couleur naturelle des yeux). D'autres sont modifiés par le milieu ou le mode de vie : la peau qui fonce au soleil, les muscles qui grossissent avec le sport.</p>",
-      retenir: "Hérédité + environnement façonnent chaque individu." }
-  ],
-  revision: ["Espèce : individus semblables, interféconds, à descendance féconde.", "Caractères de l'espèce : communs à tous.", "Caractères individuels : variables d'une personne à l'autre.", "Certains sont héréditaires, d'autres modifiés par le milieu."],
-  exo: "<p>Classe : groupe sanguin, bronzage, bipédie, couleur des yeux, cicatrice. <em>(Espèce : bipédie. Individuels héréditaires : groupe sanguin, yeux. Acquis : bronzage, cicatrice.)</em></p>",
-  quiz: [
-    { q: "La bipédie est un caractère…", r: ["de l'espèce", "individuel", "acquis"], b: 0, e: "Tous les humains marchent sur deux pieds." },
-    { q: "Le groupe sanguin est…", r: ["acquis", "héréditaire", "inexistant"], b: 1, e: "Il est transmis par les parents." },
-    { q: "Le bronzage est un caractère…", r: ["héréditaire", "modifié par le milieu", "de l'espèce"], b: 1, e: "Il dépend de l'exposition au soleil." }
-  ]
-});
-
 VRT_L("6e-info-ia", {
   c: "6e", m: "info", cle: "Généralités sur l", titre: "L'intelligence artificielle, c'est quoi ?", duree: 15,
   accroche: "Un téléphone qui reconnaît ta voix : c'est de l'IA.",
@@ -2917,6 +2829,3382 @@ VRT_PLUS("3e-en-articles", [
   });
 })();
 
+/* Leçons APPROFONDIES — lot 3 : racines carrées, atome, ressemblances (3e, 16/11/2026). Gabarit : 07-lecons-approfondies.js. */
+(function () {
+  function poulailler3D() {
+    var o = [], S = 141, h = S / 2;   /* 7,07 m à l'échelle 20 unités par mètre */
+    o.push({ f: "boite", c: [0, -3, 0], d: [S + 60, 6, S + 60], coul: "#C9A97A", dessus: "#B98E5A" });
+    o.push({ f: "boite", c: [0, 1, 0], d: [S, 2, S], coul: "#E3D3AE" });
+    [[-h, -h], [h, -h], [h, h], [-h, h]].forEach(function (p) { o.push({ f: "cylindre", c: [p[0], 0, p[1]], r: 3, h: 50, n: 8, coul: "#7A4A1E" }); });
+    o.push({ f: "poly", pts: [[-h, 2, h], [h, 2, h], [h, 48, h], [-h, 48, h]], coul: "#AEB6C6", op: 0.35 });
+    o.push({ f: "poly", pts: [[h, 2, h], [h, 2, -h], [h, 48, -h], [h, 48, h]], coul: "#AEB6C6", op: 0.35 });
+    o.push({ f: "poly", pts: [[-h, 2, -h], [-h, 2, h], [-h, 48, h], [-h, 48, -h]], coul: "#AEB6C6", op: 0.35 });
+    o.push({ f: "boite", c: [0, 54, -h + 22], d: [S + 10, 4, 54], coul: "#9AA3B2", dessus: "#C2C9D4" });
+    o.push({ f: "poly", pts: [[-h, 3, -h], [-h + 2, 3, -h - 2], [h, 3, h - 2], [h - 2, 3, h]], coul: "#C0392B" });
+    [[-30, 20], [20, -10], [40, 40], [-50, -40], [0, 50]].forEach(function (p) {
+      o.push({ f: "sphere", c: [p[0], 9, p[1]], r: [7, 6, 9], n: 8, m: 5, coul: "#F4EFE6" });
+      o.push({ f: "sphere", c: [p[0], 16, p[1] + 7], r: 3.5, n: 6, m: 4, coul: "#C0392B" });
+    });
+    return o;
+  }
+  function atome3D() {
+    var o = [], k, N = [[0, 0, 0], [9, 4, 2], [-8, 5, -3], [3, -8, 5], [-4, -6, -7], [6, 7, -8], [-7, -3, 8], [2, 10, 6], [10, -5, -4], [-10, 2, 4], [4, -2, -11], [-2, -11, -1]];
+    N.forEach(function (p, i) { o.push({ f: "sphere", c: [p[0] * 1.7, p[1] * 1.7, p[2] * 1.7], r: 10, n: 8, m: 5, coul: i % 2 ? "#8E96A6" : "#C0392B" }); });
+    function anneau(R, tilt, n, el) {
+      for (k = 0; k < n; k++) {
+        var a = 2 * Math.PI * k / n, x = R * Math.cos(a), z = R * Math.sin(a), y = z * Math.sin(tilt), zz = z * Math.cos(tilt);
+        o.push({ f: "sphere", c: [x, y, zz], r: 1.6, n: 4, m: 3, coul: "#9DB4D8" });
+      }
+      el.forEach(function (a) { var x = R * Math.cos(a), z = R * Math.sin(a); o.push({ f: "sphere", c: [x, z * Math.sin(tilt), z * Math.cos(tilt)], r: 6, n: 8, m: 5, coul: "#1E499B" }); });
+    }
+    anneau(75, 1.15, 48, [0.3, 3.44]);
+    anneau(135, -0.75, 80, [1.0, 2.6, 4.2, 5.8]);
+    return o;
+  }
+  function enquete3D() {
+    /* histogramme en 3D du relevé de la classe : présents / absents pour 4 caractères */
+    var o = [{ f: "boite", c: [0, -2, 0], d: [380, 4, 120], coul: "#E3E8F1" }], D = [[26, 14], [31, 9], [22, 18], [11, 29]];
+    D.forEach(function (d, i) {
+      var x = -135 + i * 90;
+      o.push({ f: "boite", c: [x - 16, d[0] * 2.5, -10], d: [26, d[0] * 5, 26], coul: "#1E499B", dessus: "#5B8DD6", div: false });
+      o.push({ f: "boite", c: [x + 16, d[1] * 2.5, 10], d: [26, d[1] * 5, 26], coul: "#F2B705", dessus: "#FFD86B", div: false });
+    });
+    return o;
+  }
+
+  /* ════════════════════ MATHS 3e — RACINES CARRÉES ════════════════════ */
+  VRT_L("3e-maths-racines", {
+    c: "3e", m: "maths", cle: "Racines carrées d", titre: "Racine carrée d'un nombre positif", duree: 35,
+    accroche: "Papa Fotso veut un poulailler carré de 50 m². Combien mesure un côté, et combien de grillage acheter ?",
+    intro: "Le poulailler de Papa Fotso te suit toute la leçon : à chaque partie, tu avances d'un pas vers les bonnes mesures.",
+    objectifs: ["définir la racine carrée d'un nombre positif", "encadrer une racine carrée entre deux entiers", "simplifier une racine carrée avec √(a × b) = √a × √b", "utiliser une valeur approchée pour résoudre un problème concret"],
+    enquete: {
+      titre: "Le poulailler de Papa Fotso",
+      svg: "<svg viewBox='0 0 640 230' role='img' aria-label='Un terrain derrière une maison, un carré tracé au sol pour le poulailler, des poules, un homme avec un mètre ruban'><rect width='640' height='230' fill='#EAF4FF'/><rect y='120' width='640' height='110' fill='#C9A97A'/><rect x='470' y='40' width='150' height='90' fill='#F1E6CF'/><path d='M460 44l85-30 85 30z' fill='#9AA3B2'/><rect x='520' y='80' width='30' height='50' fill='#6B4A2A'/><path d='M150 140h170v70H150z' fill='#E3D3AE' stroke='#C0392B' stroke-width='2.5' stroke-dasharray='8 5'/><text x='235' y='182' text-anchor='middle' font-size='14' font-weight='600' fill='#C0392B'>50 m² ?</text><g><circle cx='96' cy='126' r='10' fill='#6B4A2A'/><path d='M84 138h24l4 40H80z' fill='#1F8A4C'/><path d='M108 150l40 0' stroke='#F2C200' stroke-width='3'/><text x='96' y='196' text-anchor='middle' font-size='11' font-weight='600' fill='#001136'>Papa Fotso</text></g><g fill='#F4EFE6' stroke='#C9BFAE'><ellipse cx='370' cy='196' rx='12' ry='9'/><ellipse cx='400' cy='206' rx='12' ry='9'/><ellipse cx='430' cy='192' rx='12' ry='9'/></g><g fill='#C0392B'><circle cx='380' cy='189' r='4'/><circle cx='410' cy='199' r='4'/><circle cx='440' cy='185' r='4'/></g><g><rect x='30' y='20' width='240' height='44' rx='10' fill='#fff' stroke='#1E499B'/><text x='150' y='38' text-anchor='middle' font-size='11.5' fill='#1E499B' font-weight='600'>« 200 poules, 4 par m² : 50 m².</text><text x='150' y='54' text-anchor='middle' font-size='11.5' fill='#1E499B' font-weight='600'>Côté : 50 ÷ 4 = 12,5 m ! »</text></g></svg>",
+      legende: "Derrière la maison, à Bafang : le carré tracé à la ficelle et les premières poules.",
+      contexte: "<p>Papa Fotso, ton voisin à Bafang, se lance dans l'élevage : il veut <strong>200 poules pondeuses</strong>. Le technicien d'élevage lui a dit : pas plus de <strong>4 poules par mètre carré</strong>. Il veut un poulailler <strong>carré</strong> et doit acheter, au mètre, le grillage du tour et un fil de fer à tendre en diagonale pour accrocher les abreuvoirs.</p><p>Il a déjà fait son calcul (bulle ci-dessus). Son fils Junior, en 4e, propose autre chose. Papa Fotso te demande de vérifier avant d'aller à la quincaillerie.</p>",
+      documents: [
+        { t: "Les données de l'élevage", html: "<table class='donnees'><tr><td>Nombre de poules</td><td>200</td></tr><tr><td>Densité conseillée</td><td>4 poules par m² au plus</td></tr><tr><td>Forme</td><td>carré</td></tr><tr><td>Grillage</td><td>vendu au mètre entier</td></tr></table>" },
+        { t: "Les calculs de la famille", html: "<p><strong>Papa Fotso :</strong> « Côté = 50 ÷ 4 = 12,5 m. »</p><p><strong>Junior :</strong> « 50 = 25 + 25, donc √50 = √25 + √25 = 5 + 5 = 10 m. »</p><p><strong>Toi :</strong> « Le côté est le nombre positif qui, multiplié par lui-même, donne 50. »</p>" }
+      ],
+      question: "Combien mesure exactement le côté du poulailler, combien de mètres de grillage faut-il acheter, et quelle longueur de fil pour la diagonale ?",
+      tache: "Vérifie les deux calculs de la famille, puis donne à Papa Fotso les trois mesures avec une justification.",
+      hypotheses: [
+        "Le côté mesure 50 ÷ 4 = 12,5 m (Papa Fotso).",
+        "√50 = √25 + √25 = 10, donc le côté mesure 10 m (Junior).",
+        "Le côté est le nombre positif dont le carré vaut 50 : il est compris entre 7 et 8."
+      ]
+    },
+    parties: [
+      { t: "Définition de la racine carrée", html:
+        "<p>Pour un carré de côté c, l'aire vaut c × c = c². Si l'on connaît l'aire et que l'on cherche le côté, on cherche un nombre <strong>positif</strong> dont le carré est égal à l'aire.</p>" +
+        "<div class='def'><b>Définition</b>a est un nombre positif. La <strong>racine carrée</strong> de a, notée √a, est le nombre <strong>positif</strong> dont le carré est égal à a.</div>" +
+        "<p class='formule'>(√a)² = a   et   √a ≥ 0</p><p>Exemples : √49 = 7 car 7² = 49 ; √0 = 0 ; √1 = 1 ; √0,25 = 0,5 car 0,5² = 0,25.</p>" +
+        "<div class='attention'><b>Attention</b>√(−4) n'existe pas : aucun nombre au carré n'est négatif. Et −7 a aussi pour carré 49, mais √49 désigne le nombre <strong>positif</strong> 7.</div>",
+        fil: { html: "<p>L'aire du poulailler est 200 ÷ 4 = <strong>50 m²</strong>. Son côté c vérifie c² = 50 avec c &gt; 0 : c'est <strong>√50</strong>. Papa Fotso a divisé par 4 comme pour un périmètre : vérifions, 12,5 × 12,5 = 156,25 m², trois fois trop !</p>", verdicts: [[0, "rejetee", "12,5² = 156,25 ≠ 50 : diviser l'aire par 4 ne donne pas le côté."], [2, "precisee", "Le côté est √50 ; reste à le situer et à le calculer."]] },
+        retenir: "√a est le nombre positif dont le carré vaut a. Côté d'un carré = √(aire)." },
+
+      { t: "Carrés parfaits et encadrement", html:
+        "<p>Un <strong>carré parfait</strong> est le carré d'un entier. Les connaître permet de lire des racines exactes et d'encadrer les autres.</p>" +
+        "<div class='tab-scroll'><table class='donnees'><tr><th>n</th><td>1</td><td>2</td><td>3</td><td>4</td><td>5</td><td>6</td><td>7</td><td>8</td><td>9</td><td>10</td><td>11</td><td>12</td></tr><tr><th>n²</th><td>1</td><td>4</td><td>9</td><td>16</td><td>25</td><td>36</td><td>49</td><td>64</td><td>81</td><td>100</td><td>121</td><td>144</td></tr></table></div>" +
+        "<div class='ex'><b>Encadrer √40</b>36 &lt; 40 &lt; 49, donc √36 &lt; √40 &lt; √49, soit <strong>6 &lt; √40 &lt; 7</strong>.</div>" +
+        "<div class='astuce'><b>Astuce</b>Un carré parfait se termine par 0, 1, 4, 5, 6 ou 9. Un entier qui finit par 2, 3, 7 ou 8 n'est jamais un carré parfait : sa racine n'est pas entière.</div>",
+        planches: [{ type: "Figure", titre: "50 m² entre deux carrés parfaits", legende: "Le carré de 49 m² (côté 7 m) est à peine plus petit ; celui de 64 m² (côté 8 m) est trop grand. Le côté cherché est entre 7 et 8.", svg:
+          "<svg viewBox='0 0 640 230' role='img' aria-label='Trois carrés emboîtés de 49, 50 et 64 mètres carrés'><rect width='640' height='230' fill='#fff'/><g transform='translate(40 20)'><rect width='184' height='184' fill='#FFF3D1' stroke='#C79A00' stroke-width='2'/><rect width='163' height='163' fill='#EAF1FC' stroke='#1E499B' stroke-width='2.5'/><rect width='161' height='161' fill='#DDE8FA' stroke='#5B8DD6' stroke-dasharray='4 3'/><text x='80' y='88' text-anchor='middle' font-size='14' font-weight='600' fill='#1E499B'>50 m²</text><text x='80' y='106' text-anchor='middle' font-size='11' fill='#4D5163'>côté √50</text></g><g font-size='12.5' fill='#001136'><text x='290' y='60'><tspan font-weight='600' fill='#5B8DD6'>49 m²</tspan> : côté 7 m (trop juste)</text><text x='290' y='92'><tspan font-weight='600' fill='#1E499B'>50 m²</tspan> : côté √50</text><text x='290' y='124'><tspan font-weight='600' fill='#C79A00'>64 m²</tspan> : côté 8 m (trop grand)</text></g><path d='M290 170h300' stroke='#001136'/><g font-size='12' fill='#001136' text-anchor='middle'><path d='M310 165v10M570 165v10' stroke='#001136'/><text x='310' y='192'>7</text><text x='570' y='192'>8</text><circle cx='328' cy='170' r='5' fill='#C0392B'/><text x='336' y='158' fill='#C0392B' font-weight='600'>√50 ≈ 7,07</text></g></svg>" }],
+        fil: { html: "<p>49 &lt; 50 &lt; 64, donc <strong>7 &lt; √50 &lt; 8</strong> : le côté mesure entre 7 et 8 mètres. Ni 12,5 m, ni 10 m. Et comme 50 est tout près de 49, √50 est tout près de 7.</p>", verdicts: [[2, "precisee", "7 < √50 < 8 : l'encadrement est confirmé."], [1, "rejetee", "10² = 100, pas 50 : 10 m est hors de l'encadrement."]] },
+        retenir: "Pour encadrer √a, on cherche les deux carrés parfaits qui entourent a." },
+
+      { t: "Règles de calcul : produit, quotient, et le piège de la somme", html:
+        "<p class='formule'>√(a × b) = √a × √b      √(a / b) = √a / √b  (b ≠ 0)</p>" +
+        "<div class='ex'><b>Simplifier √50</b>On cherche dans 50 un carré parfait en facteur : 50 = 25 × 2. Donc √50 = √25 × √2 = <strong>5√2</strong>.</div>" +
+        "<div class='attention'><b>Piège classique</b>√(a + b) n'est <strong>pas</strong> égal à √a + √b. Contre-exemple : √(9 + 16) = √25 = 5, alors que √9 + √16 = 3 + 4 = 7. La racine se « partage » dans un produit, jamais dans une somme.</div>" +
+        "<h3>La diagonale d'un carré</h3><p>Dans un carré de côté c, la diagonale d vérifie, d'après le théorème de Pythagore, d² = c² + c² = 2c². Donc <strong>d = c × √2</strong>.</p>",
+        planches: [{ type: "3d", titre: "Le poulailler en 3D", legende: "Tourne le poulailler : le grillage fait le tour (4 côtés de √50 m), le fil rouge part d'un coin et va au coin opposé.",
+          modele: { h: 360, rx: -30, ry: 35, echelle: 1.35, dy: 30, alt: "Poulailler carré en trois dimensions avec son grillage, son toit et un fil en diagonale", objets: poulailler3D(),
+            etiquettes: [
+              { p: [0, 2, 71], t: "Côté : √50 = 5√2 ≈ 7,07 m" },
+              { p: [-35, 3, -35], t: "Fil en diagonale : 10 m", cote: "d" },
+              { p: [71, 30, 30], t: "Grillage (4 côtés)", cote: "d" },
+              { p: [0, 56, -48], t: "Toit en tôle" },
+              { p: [20, 9, -10], t: "200 poules, 4 par m²", cote: "d" }
+            ] } }],
+        fil: { html: "<p>Junior a « partagé » la racine dans une somme : c'est interdit. En revanche, 50 = 25 × 2 donne √50 = <strong>5√2</strong>. Et la diagonale ? d = √50 × √2 = √(50 × 2) = √100 = <strong>10 m exactement</strong>. Le 10 de Junior était la bonne longueur… mais pour la diagonale, pas pour le côté !</p>", verdicts: [[1, "rejetee", "√(25 + 25) ≠ √25 + √25. Le côté vaut 5√2 ; c'est la diagonale qui mesure 10 m."]] },
+        retenir: "√(ab) = √a × √b ; √(a + b) ≠ √a + √b ; diagonale d'un carré = côté × √2." },
+
+      { t: "Valeur approchée et réponse concrète", html:
+        "<p>Pour acheter du grillage, il faut un nombre décimal. On utilise la touche √ de la calculatrice, ou une valeur à connaître : <strong>√2 ≈ 1,414</strong>.</p>" +
+        "<div class='ex'><b>Calcul</b>5√2 ≈ 5 × 1,414 = 7,07 m. Vérification : 7,07² ≈ 49,98 ≈ 50. ✔</div>" +
+        "<div class='attention'><b>Arrondir dans le bon sens</b>Quand on achète, on arrondit <strong>au-dessus</strong> : avec un grillage trop court, le poulailler ne ferme pas.</div>" +
+        "<div class='savais'><b>Le savais-tu ?</b>√2 n'est pas un nombre décimal : son écriture après la virgule ne s'arrête jamais et ne se répète jamais. On dit que c'est un nombre <strong>irrationnel</strong>.</div>",
+        fil: { html: "<p>Périmètre : 4 × 5√2 = 20√2 ≈ 20 × 1,414 = 28,28 m. Le grillage se vend au mètre entier : il faut <strong>29 m</strong>. Pour la diagonale, <strong>10 m</strong> de fil, plus de quoi faire les nœuds.</p>", verdicts: [[2, "validee", "Côté √50 = 5√2 ≈ 7,07 m, entre 7 et 8 ; d'où 29 m de grillage et 10 m de diagonale."]] },
+        retenir: "√2 ≈ 1,414 ; à l'achat, on arrondit toujours au-dessus." }
+    ],
+    denouement: {
+      titre: "Les mesures pour la quincaillerie",
+      etapes: [
+        "Aire : 200 ÷ 4 = 50 m² ; côté c = √50 (indice 1).",
+        "49 < 50 < 64 donc 7 < √50 < 8 : ni 12,5 m ni 10 m (indice 2).",
+        "√50 = √25 × √2 = 5√2 ; diagonale = 5√2 × √2 = √100 = 10 m (indice 3).",
+        "5√2 ≈ 7,07 m ; périmètre ≈ 28,28 m, donc 29 m de grillage (indice 4)."
+      ],
+      reponse: "<p>Papa Fotso, pour 200 poules à 4 par m², il faut 50 m². Le côté du carré est le nombre positif dont le carré vaut 50 : c'est √50 = 5√2, soit environ 7,07 m. Votre 12,5 m donnerait 156 m², trois fois trop, et les 10 m de Junior donneraient 100 m². Le tour mesure 4 × 7,07 ≈ 28,3 m : achetez 29 m de grillage. Le fil en diagonale mesure exactement √50 × √2 = √100 = 10 m : prévoyez 10,5 m pour les nœuds.</p>",
+      transfert: "<p>Le collège veut un potager carré de 72 m² pour le club agricole, entouré d'une haie. Donne la valeur exacte du côté sous la forme a√b, une valeur approchée au centimètre, et la longueur de la diagonale (chemin en terre battue). <em>Indice : 72 = 36 × 2.</em></p>"
+    },
+    revision: [
+      "√a existe si <strong>a ≥ 0</strong>, et <strong>√a ≥ 0</strong> ; (√a)² = a.",
+      "Côté d'un carré d'aire A : <strong>√A</strong>.",
+      "Carrés parfaits de 1 à 144 ; encadrer √a entre deux entiers.",
+      "<strong>√(ab) = √a × √b</strong> ; √(a/b) = √a / √b.",
+      "Simplifier : faire apparaître un carré parfait, √50 = √25 × √2 = 5√2.",
+      "<strong>√(a + b) ≠ √a + √b</strong>.",
+      "Diagonale d'un carré = côté × √2 ; √2 ≈ 1,414.",
+      "Pour un achat, arrondir <strong>au-dessus</strong>."
+    ],
+    exo: "<p>Écris sous la forme a√b : √12 ; √75 ; √200. Puis encadre √130 entre deux entiers consécutifs. <em>(2√3 ; 5√3 ; 10√2 ; 11 &lt; √130 &lt; 12.)</em></p>",
+    quiz: [
+      { q: "Que vaut √49 ?", r: ["7", "−7", "24,5"], b: 0, e: "7² = 49 et √49 est positif." },
+      { q: "Un carré a une aire de 50 m². Son côté est…", r: ["√50 m", "12,5 m", "25 m"], b: 0, e: "Côté = √(aire)." },
+      { q: "Entre quels entiers se trouve √50 ?", r: ["7 et 8", "6 et 7", "8 et 9"], b: 0, e: "49 < 50 < 64." },
+      { q: "√50 s'écrit aussi…", r: ["5√2", "25√2", "2√5"], b: 0, e: "50 = 25 × 2." },
+      { q: "√(9 + 16) vaut…", r: ["5", "7", "25"], b: 0, e: "√25 = 5 ; on ne partage pas la racine dans une somme." },
+      { q: "La diagonale d'un carré de côté √50 mesure…", r: ["10", "√100 + 2", "7,07"], b: 0, e: "√50 × √2 = √100 = 10." },
+      { q: "Une valeur approchée de √2 est…", r: ["1,414", "1,732", "2,236"], b: 0, e: "1,414² ≈ 2." },
+      { q: "√(−9)…", r: ["n'existe pas", "vaut −3", "vaut 3"], b: 0, e: "Aucun carré n'est négatif." },
+      { q: "Il faut 28,28 m de grillage vendu au mètre. On achète…", r: ["29 m", "28 m", "28,3 m"], b: 0, e: "On arrondit au-dessus pour fermer le poulailler." },
+      { q: "Lequel de ces nombres n'est pas un carré parfait ?", r: ["72", "81", "144"], b: 0, e: "72 est entre 64 et 81." }
+    ],
+    examen: { t: "Racines carrées au BEPC : sujets corrigés", href: "/corriges/" }
+  });
+
+  /* ════════════════════ PCT 3e — L'ATOME ════════════════════ */
+  VRT_L("3e-pct-atome", {
+    c: "3e", m: "pct", cle: "Séance 1 : Atome", titre: "L'atome", duree: 35,
+    accroche: "Un fil de cuivre et la chaîne en or de Mama : même matière, couleur différente ? L'atome tranche.",
+    intro: "Une discussion de famille te sert de fil rouge : à chaque partie, un indice t'aide à trancher entre trois idées.",
+    objectifs: ["savoir que la matière est faite d'atomes", "décrire la structure d'un atome et ses ordres de grandeur", "expliquer la neutralité de l'atome et le rôle du numéro atomique Z", "lire et écrire les symboles chimiques"],
+    enquete: {
+      titre: "Le fil de cuivre et la chaîne en or",
+      svg: "<svg viewBox='0 0 640 220' role='img' aria-label='Sur une table : une chaîne en or, un fil électrique dénudé en cuivre, une pince coupante ; deux enfants discutent'><rect width='640' height='220' fill='#FFF8EC'/><rect x='60' y='120' width='520' height='16' rx='4' fill='#A97D50'/><path d='M90 136v70M550 136v70' stroke='#8E6A3E' stroke-width='8'/><path d='M120 112c30-20 70-20 100 0' fill='none' stroke='#E0A800' stroke-width='5' stroke-dasharray='3 3'/><circle cx='170' cy='116' r='7' fill='#F2C200'/><path d='M260 112h120' stroke='#2E3445' stroke-width='9' stroke-linecap='round'/><path d='M380 112h40' stroke='#C46A2B' stroke-width='5' stroke-linecap='round'/><path d='M430 104l30 8-30 8' fill='#8E96A6'/><g font-size='11.5' font-weight='600' fill='#001136' text-anchor='middle'><text x='170' y='98'>chaîne en or</text><text x='340' y='98'>fil électrique (cuivre)</text></g><g><circle cx='60' cy='60' r='12' fill='#6B4A2A'/><path d='M46 74h28l4 40H42z' fill='#5B8DD6'/><rect x='80' y='18' width='190' height='40' rx='10' fill='#fff' stroke='#1E499B'/><text x='175' y='35' text-anchor='middle' font-size='11' fill='#1E499B'>« Or, cuivre : même matière,</text><text x='175' y='50' text-anchor='middle' font-size='11' fill='#1E499B'>seule la couleur change. »</text></g><g><circle cx='590' cy='70' r='10' fill='#6B4A2A'/><path d='M579 82h22l3 34h-28z' fill='#E05A8A'/><rect x='370' y='18' width='200' height='40' rx='10' fill='#fff' stroke='#C0392B'/><text x='470' y='35' text-anchor='middle' font-size='11' fill='#C0392B'>« Et si je coupe le fil en deux,</text><text x='470' y='50' text-anchor='middle' font-size='11' fill='#C0392B'>encore et encore, sans fin ? »</text></g></svg>",
+      legende: "Chez toi, à Ngaoundéré : Ibrahim répare une rallonge pendant que sa petite sœur Fadimatou regarde.",
+      contexte: "<p>Ton grand frère Ibrahim répare une rallonge électrique. Il dénude le fil : dedans, du <strong>cuivre</strong>, orange et brillant. Sur la table traîne la chaîne en <strong>or</strong> de Mama, jaune et brillante aussi. Ibrahim affirme que c'est « la même matière, de couleur différente ». Ta petite sœur Fadimatou prend la pince : « Et si je coupe le fil en deux, puis encore en deux, je peux continuer sans fin ? »</p><p>Mama, qui a acheté sa chaîne cher au marché, n'est pas d'accord avec Ibrahim. Tout le monde se tourne vers toi.</p>",
+      documents: [
+        { t: "Quelques éléments et leur numéro atomique", html: "<table class='donnees'><tr><th>Élément</th><th>Symbole</th><th>Z</th></tr><tr><td>Hydrogène</td><td>H</td><td>1</td></tr><tr><td>Carbone</td><td>C</td><td>6</td></tr><tr><td>Oxygène</td><td>O</td><td>8</td></tr><tr><td>Aluminium</td><td>Al</td><td>13</td></tr><tr><td>Fer</td><td>Fe</td><td>26</td></tr><tr><td>Cuivre</td><td>Cu</td><td>29</td></tr><tr><td>Or</td><td>Au</td><td>79</td></tr></table>" },
+        { t: "Des tailles vertigineuses", html: "<p>Un atome de cuivre mesure environ <strong>0,25 milliardième de mètre</strong> (0,000 000 000 25 m). Sur un seul millimètre de fil, on pourrait aligner environ <strong>4 millions</strong> d'atomes de cuivre.</p><p>Le noyau est environ <strong>100 000 fois</strong> plus petit que l'atome.</p>", source: "Ordres de grandeur." }
+      ],
+      question: "Le cuivre et l'or sont-ils faits de la même matière, et peut-on couper un fil de cuivre indéfiniment ?",
+      tache: "Explique à ta famille, en huit lignes, de quoi sont faits le fil et la chaîne et ce qui les distingue vraiment, chiffres à l'appui.",
+      hypotheses: [
+        "Le cuivre et l'or sont faits des mêmes grains de matière ; seule la couleur change (Ibrahim).",
+        "On peut couper la matière en morceaux de plus en plus petits sans jamais s'arrêter (Fadimatou).",
+        "Le cuivre et l'or sont faits d'atomes différents, qui se distinguent par leur nombre de protons."
+      ]
+    },
+    parties: [
+      { t: "La matière est faite d'atomes", html:
+        "<p>Toute la matière qui nous entoure (le fil, la chaîne, l'eau du seau, l'air) est faite de grains extrêmement petits : les <strong>atomes</strong>. On ne peut pas les voir au microscope ordinaire ; des microscopes spéciaux (à effet tunnel) permettent aujourd'hui d'en « photographier » la surface.</p>" +
+        "<div class='def'><b>Définition</b>Un <strong>atome</strong> est la plus petite partie d'un élément chimique qui garde l'identité de cet élément. Le cuivre est fait d'atomes de cuivre, l'or d'atomes d'or.</div>" +
+        "<div class='ex'><b>Ordre de grandeur</b>Un atome de cuivre mesure environ 0,25 × 10⁻⁹ m. Dans 1 mm (10⁻³ m) de fil, on aligne environ 10⁻³ ÷ (0,25 × 10⁻⁹) = 4 × 10⁶, soit <strong>4 millions</strong> d'atomes.</div>",
+        fil: { html: "<p>Fadimatou peut couper le fil en deux une vingtaine de fois avant que les morceaux deviennent trop petits pour sa pince. Mais même avec des outils parfaits, elle finirait par arriver à un <strong>atome de cuivre</strong> : si on le « coupait », ce ne serait plus du cuivre. La division a une limite.</p>", verdicts: [[1, "rejetee", "On arrive à l'atome, plus petite partie qui reste du cuivre."]] },
+        retenir: "Toute matière est faite d'atomes ; l'atome est la plus petite partie d'un élément." },
+
+      { t: "Un noyau minuscule et des électrons", html:
+        "<p>Un atome est formé de deux parties :</p><ul><li>un <strong>noyau</strong> central, chargé positivement, qui contient des <strong>protons</strong> (charge +) et des <strong>neutrons</strong> (sans charge) ;</li><li>des <strong>électrons</strong> (charge −), très légers, qui se déplacent autour du noyau.</li></ul>" +
+        "<p>Le noyau est environ <strong>100 000 fois</strong> plus petit que l'atome, mais il contient presque toute sa masse. Entre le noyau et les électrons : du <strong>vide</strong>.</p>" +
+        "<div class='savais'><b>Pour imaginer</b>Si un atome avait la taille d'un grand stade de football (environ 200 m), son noyau serait un grain de maïs posé au centre (2 mm), et les électrons de minuscules poussières dans les tribunes.</div>" +
+        "<div class='attention'><b>Modèle</b>Le dessin en anneaux ci-dessous est un <strong>modèle simplifié</strong> : en réalité, les électrons ne suivent pas des trajectoires circulaires bien nettes, ils occupent une région autour du noyau, le nuage électronique.</div>",
+        planches: [{ type: "3d", titre: "Modèle simplifié de l'atome de carbone", legende: "Tourne l'atome : au centre, 6 protons (rouges) et 6 neutrons (gris) ; autour, 6 électrons (bleus), 2 sur la couche K et 4 sur la couche L. Les distances ne sont pas à l'échelle : le noyau devrait être 100 000 fois plus petit.",
+          modele: { h: 380, rx: -10, ry: 25, echelle: 1.1, alt: "Modèle simplifié de l atome de carbone en trois dimensions", objets: atome3D(),
+            etiquettes: [
+              { p: [0, 0, 0], t: "Noyau : protons + neutrons" },
+              { p: [15.3, 6.8, 3.4], t: "Neutron (pas de charge)", cote: "d" },
+              { p: [-13.6, 8.5, -5.1], t: "Proton (charge +)" },
+              { p: [75 * Math.cos(0.3), 75 * Math.sin(0.3) * Math.sin(1.15), 75 * Math.sin(0.3) * Math.cos(1.15)], t: "Électron (charge −)", cote: "d" },
+              { p: [-135, 0, 0], t: "Couche L : 4 électrons" }
+            ] } }],
+        fil: { html: "<p>Le fil de cuivre comme la chaîne en or sont faits d'atomes qui ont tous la même architecture : un noyau de protons et de neutrons, entouré d'électrons. Alors, Ibrahim aurait-il raison ? Pas si vite : tout dépend du <strong>nombre</strong> de ces particules.</p>" },
+        retenir: "Atome = noyau (protons +, neutrons) + électrons (−) ; noyau 100 000 fois plus petit que l'atome." },
+
+      { t: "L'atome est neutre ; Z fait son identité", html:
+        "<p>Dans un atome, il y a <strong>autant de protons que d'électrons</strong>. Les charges + et − se compensent exactement : l'atome est <strong>électriquement neutre</strong>.</p>" +
+        "<div class='def'><b>Numéro atomique</b>Le nombre de protons du noyau s'appelle le <strong>numéro atomique Z</strong>. Tous les atomes d'un même élément ont le même Z, et deux éléments différents ont des Z différents : <strong>Z est la carte d'identité de l'élément</strong>.</div>" +
+        "<div class='ex'><b>Exemple</b>Cuivre : Z = 29, donc 29 protons et, l'atome étant neutre, 29 électrons. Or : Z = 79, donc 79 protons et 79 électrons.</div>",
+        fil: { html: "<p>D'après le document 1, un atome de cuivre a <strong>29 protons</strong>, un atome d'or en a <strong>79</strong>. Ce ne sont pas les mêmes atomes : ce sont deux <strong>éléments différents</strong>. La couleur, la masse, le prix et le comportement chimique en découlent. Mama a raison : sa chaîne n'est pas du cuivre « peint en jaune ».</p>", verdicts: [[0, "rejetee", "Cuivre Z = 29, or Z = 79 : deux éléments différents."], [2, "validee", "C'est le nombre de protons (Z) qui distingue les éléments."]] },
+        retenir: "Nombre de protons = nombre d'électrons = Z. Z identifie l'élément." },
+
+      { t: "Les symboles chimiques", html:
+        "<p>Chaque élément a un <strong>symbole</strong> reconnu dans le monde entier : une lettre majuscule, parfois suivie d'une lettre minuscule. Il vient souvent du nom latin : Cu (cuprum, cuivre), Au (aurum, or), Fe (ferrum, fer), Na (natrium, sodium).</p>" +
+        "<div class='attention'><b>Écriture</b>La première lettre est toujours en <strong>majuscule</strong>, la deuxième en <strong>minuscule</strong> : Cu, et non CU ni cu. Sinon on confond : Co (cobalt) n'est pas CO (monoxyde de carbone, une molécule).</div>" +
+        "<div class='savais'><b>Le savais-tu ?</b>On connaît 118 éléments. Ils sont rangés par Z croissant dans la classification périodique, que tu étudieras en seconde.</div>",
+        planches: [{ type: "Planche", titre: "Cases d'identité de quatre éléments de la maison", legende: "Chaque case donne le symbole, le nom et Z. Un atome de chaque élément a Z protons et Z électrons.", svg:
+          "<svg viewBox='0 0 640 170' role='img' aria-label='Cases de l aluminium, du fer, du cuivre et de l or avec leur symbole et leur numéro atomique'><rect width='640' height='170' fill='#fff'/><g font-family='Poppins, sans-serif'><g transform='translate(20 20)'><rect width='130' height='130' rx='12' fill='#EEF1F6' stroke='#8E96A6'/><text x='12' y='26' font-size='14' fill='#4D5163'>13</text><text x='65' y='82' text-anchor='middle' font-size='44' font-weight='600' fill='#001136'>Al</text><text x='65' y='114' text-anchor='middle' font-size='12' fill='#4D5163'>aluminium (marmites)</text></g><g transform='translate(175 20)'><rect width='130' height='130' rx='12' fill='#F3ECE6' stroke='#8E6A3E'/><text x='12' y='26' font-size='14' fill='#4D5163'>26</text><text x='65' y='82' text-anchor='middle' font-size='44' font-weight='600' fill='#001136'>Fe</text><text x='65' y='114' text-anchor='middle' font-size='12' fill='#4D5163'>fer (fer à béton)</text></g><g transform='translate(330 20)'><rect width='130' height='130' rx='12' fill='#FBE9DE' stroke='#C46A2B'/><text x='12' y='26' font-size='14' fill='#4D5163'>29</text><text x='65' y='82' text-anchor='middle' font-size='44' font-weight='600' fill='#001136'>Cu</text><text x='65' y='114' text-anchor='middle' font-size='12' fill='#4D5163'>cuivre (fils)</text></g><g transform='translate(485 20)'><rect width='130' height='130' rx='12' fill='#FFF3D1' stroke='#C79A00'/><text x='12' y='26' font-size='14' fill='#4D5163'>79</text><text x='65' y='82' text-anchor='middle' font-size='44' font-weight='600' fill='#001136'>Au</text><text x='65' y='114' text-anchor='middle' font-size='12' fill='#4D5163'>or (bijoux)</text></g></g></svg>" }],
+        fil: { html: "<p>Sur l'étiquette d'un câble électrique, on lit « Cu » ; sur le certificat d'un bijou, « Au ». Deux symboles, deux éléments, deux sortes d'atomes. La réponse de la famille est complète.</p>", verdicts: [[2, "validee", "Symboles Cu et Au : deux éléments aux atomes différents."]] },
+        retenir: "Symbole : majuscule puis minuscule (Cu, Au, Fe, Na) ; souvent tiré du latin." }
+    ],
+    denouement: {
+      titre: "De quoi sont faits le fil et la chaîne",
+      etapes: [
+        "Toute matière est faite d'atomes ; on ne peut pas diviser sans fin (indice 1).",
+        "Chaque atome a un noyau (protons, neutrons) et des électrons ; le noyau est 100 000 fois plus petit (indice 2).",
+        "Cuivre : Z = 29 ; or : Z = 79. Deux éléments différents (indice 3).",
+        "Symboles Cu et Au, reconnus partout (indice 4)."
+      ],
+      reponse: "<p>Le fil et la chaîne sont faits d'atomes, des grains si petits qu'un millimètre de fil en aligne environ 4 millions. On ne peut donc pas couper le fil sans fin, Fadimatou : on finirait par arriver à un atome de cuivre, la plus petite partie qui soit encore du cuivre. Tous les atomes ont la même architecture : un noyau minuscule de protons et de neutrons, entouré d'électrons, autant d'électrons que de protons. Mais un atome de cuivre a 29 protons et un atome d'or en a 79 : ce sont deux éléments différents, de symboles Cu et Au. Ibrahim, ce n'est donc pas qu'une question de couleur, et la chaîne de Mama est bien en or.</p>",
+      transfert: "<p>Au marché, un vendeur propose des marmites « en alu » et d'autres « en fonte » (du fer). Sachant que Z(Al) = 13 et Z(Fe) = 26, explique à un acheteur, en quatre lignes, ce qui différencie les atomes de ces deux métaux, et combien d'électrons possède chacun d'eux.</p>"
+    },
+    revision: [
+      "Toute matière est faite d'<strong>atomes</strong>, plus petites parties d'un élément.",
+      "Taille d'un atome : de l'ordre du dixième de <strong>milliardième de mètre</strong>.",
+      "<strong>Noyau</strong> : protons (+) et neutrons (0) ; <strong>électrons</strong> (−) autour.",
+      "Noyau environ <strong>100 000 fois</strong> plus petit que l'atome ; entre les deux, du vide.",
+      "Atome <strong>neutre</strong> : autant de protons que d'électrons.",
+      "<strong>Z</strong> = numéro atomique = nombre de protons = identité de l'élément.",
+      "Symboles : <strong>H, C, O, Al, Fe, Cu, Au, Na</strong> (majuscule puis minuscule)."
+    ],
+    exo: "<p>L'atome de sodium a Z = 11. Combien a-t-il de protons ? d'électrons ? Pourquoi ? Écris son symbole correctement. <em>(11 protons, 11 électrons car l'atome est neutre ; symbole Na.)</em></p>",
+    quiz: [
+      { q: "La plus petite partie d'un élément qui garde son identité est…", r: ["l'atome", "le noyau", "l'électron"], b: 0, e: "Couper un atome de cuivre, ce n'est plus du cuivre." },
+      { q: "Que contient le noyau d'un atome ?", r: ["Des protons et des neutrons", "Des électrons seulement", "Du vide"], b: 0, e: "Les électrons sont autour du noyau." },
+      { q: "Quelle est la charge d'un électron ?", r: ["Négative", "Positive", "Nulle"], b: 0, e: "Le proton est +, le neutron n'a pas de charge." },
+      { q: "Pourquoi un atome est-il électriquement neutre ?", r: ["Il a autant de protons que d'électrons", "Il n'a pas de neutrons", "Ses électrons sont immobiles"], b: 0, e: "Les charges + et − se compensent." },
+      { q: "Le cuivre a Z = 29. Combien d'électrons a un atome de cuivre ?", r: ["29", "58", "0"], b: 0, e: "Atome neutre : autant d'électrons que de protons." },
+      { q: "Qu'est-ce qui distingue un atome d'or d'un atome de cuivre ?", r: ["Le nombre de protons", "La couleur de ses électrons", "Rien"], b: 0, e: "Z(Au) = 79, Z(Cu) = 29." },
+      { q: "Le noyau est environ … fois plus petit que l'atome.", r: ["100 000", "10", "2"], b: 0, e: "D'où l'image du grain de maïs dans un stade." },
+      { q: "Quelle écriture du symbole du cuivre est correcte ?", r: ["Cu", "CU", "cu"], b: 0, e: "Majuscule puis minuscule." },
+      { q: "Le symbole Au désigne…", r: ["l'or", "l'aluminium", "l'argent"], b: 0, e: "Du latin aurum." },
+      { q: "Environ combien d'atomes de cuivre sur 1 mm de fil ?", r: ["4 millions", "4 000", "4"], b: 0, e: "10⁻³ ÷ (0,25 × 10⁻⁹) = 4 × 10⁶." }
+    ]
+  });
+
+  /* ════════════════════ SVT 3e — RESSEMBLANCES ENTRE LES INDIVIDUS ════════════════════ */
+  VRT_L("3e-svt-ressemblances", {
+    c: "3e", m: "svt", cle: "Ressemblances entre les individus", titre: "Ressemblances entre les individus : les caractères de l'espèce humaine", duree: 35,
+    accroche: "Deux jumelles qu'on confond, un chimpanzé qui nous ressemble : qui fait partie de quelle espèce, et pourquoi ?",
+    intro: "Une sortie de classe et deux jumelles te guident toute la leçon : à chaque partie, un indice trie les caractères.",
+    objectifs: ["distinguer caractères de l'espèce et caractères individuels", "définir l'espèce par l'interfécondité", "distinguer caractères héréditaires et caractères modifiés par le milieu", "exploiter un relevé de caractères"],
+    enquete: {
+      titre: "Awa, Aïssa et le chimpanzé de Limbé",
+      svg: "<svg viewBox='0 0 640 230' role='img' aria-label='Une classe au centre de faune de Limbé devant un enclos de chimpanzés ; deux jumelles, l une en tenue de sport'><rect width='640' height='230' fill='#EAF4FF'/><rect y='150' width='640' height='80' fill='#7FB069'/><g fill='#2F8A3B'><ellipse cx='480' cy='80' rx='70' ry='50'/><ellipse cx='580' cy='90' rx='60' ry='45'/></g><path d='M380 150V90M380 90h260' stroke='#8E6A3E' stroke-width='3'/><g stroke='#8E6A3E' stroke-width='1.5'><path d='M400 90v60M430 90v60M460 90v60M490 90v60M520 90v60M550 90v60M580 90v60M610 90v60'/></g><g><circle cx='520' cy='120' r='12' fill='#3B2A1E'/><circle cx='520' cy='124' r='7' fill='#A97D50'/><path d='M508 134h24l6 30h-36z' fill='#3B2A1E'/><path d='M508 140l-14 18M532 140l14 18' stroke='#3B2A1E' stroke-width='6' stroke-linecap='round'/></g><g><circle cx='120' cy='112' r='11' fill='#6B4A2A'/><path d='M108 124h24l4 40h-32z' fill='#1E3A6E'/><circle cx='170' cy='112' r='11' fill='#5A3C22'/><path d='M156 124h28l6 40h-40z' fill='#C0392B'/><path d='M156 132l-8 16M184 132l8 16' stroke='#5A3C22' stroke-width='6' stroke-linecap='round'/></g><g fill='#6B4A2A'><circle cx='250' cy='118' r='10'/><circle cx='300' cy='120' r='10'/></g><g><path d='M240 130h20l4 34h-28z' fill='#E9EEF6'/><path d='M290 132h20l4 32h-28z' fill='#E9EEF6'/></g><g font-size='11' font-weight='600' fill='#001136' text-anchor='middle'><text x='120' y='182'>Awa</text><text x='172' y='182'>Aïssa (handball)</text><text x='275' y='182'>Christelle, Ndi</text><text x='520' y='186'>chimpanzé</text></g><g><rect x='206' y='30' width='200' height='40' rx='10' fill='#fff' stroke='#1E499B'/><text x='306' y='47' text-anchor='middle' font-size='11' fill='#1E499B'>« Il est presque humain,</text><text x='306' y='62' text-anchor='middle' font-size='11' fill='#1E499B'>regarde ses mains ! »</text></g></svg>",
+      legende: "Sortie de la 3e au centre de faune de Limbé ; sur le chemin du retour, on parle des jumelles.",
+      contexte: "<p>Ta classe de 3e visite le centre de faune de Limbé. Devant l'enclos des chimpanzés, Ndi s'exclame : « Il est presque humain ! Il a des mains comme nous, il nous regarde comme nous. » Christelle répond qu'un chimpanzé n'est pas un humain, « même s'il nous ressemble ».</p><p>Dans le car du retour, la discussion continue avec les jumelles <strong>Awa et Aïssa</strong>, de vraies jumelles. Au CM2, tout le monde les confondait. Aujourd'hui, Aïssa, qui fait du handball tous les jours, est plus musclée et plus bronzée que sa sœur. « Les vraies jumelles ont exactement les mêmes caractères », affirme Ndi. Le professeur de SVT vous demande de trier tout cela.</p>",
+      documents: [
+        { t: "Le relevé de la classe de 3e B (40 élèves)", html: "<table class='donnees'><tr><th>Caractère</th><th>Présent</th><th>Absent</th></tr><tr><td>Lobe de l'oreille détaché</td><td>26</td><td>14</td></tr><tr><td>Sait rouler la langue en gouttière</td><td>31</td><td>9</td></tr><tr><td>Fossette au menton ou aux joues</td><td>22</td><td>18</td></tr><tr><td>Pousse le pouce en arrière (« pouce d'auto-stoppeur »)</td><td>11</td><td>29</td></tr><tr><td>Marche debout sur deux pieds</td><td>40</td><td>0</td></tr></table>", source: "Données de l'exercice, relevées en classe." },
+        { t: "Ce que dit le guide du centre", html: "<p>« Le chimpanzé partage avec nous beaucoup de caractères : mains préhensiles, vision des couleurs, vie en groupe. Mais un être humain et un chimpanzé <strong>ne peuvent pas avoir de descendance ensemble</strong>. »</p>" }
+      ],
+      question: "Qu'est-ce qui fait qu'un individu appartient à l'espèce humaine, et pourquoi deux vraies jumelles ne sont-elles plus tout à fait identiques ?",
+      tache: "Classe les caractères observés (relevé, jumelles, chimpanzé) dans un tableau, puis rédige une conclusion de six à huit lignes pour la classe.",
+      hypotheses: [
+        "Le chimpanzé fait presque partie de l'espèce humaine puisqu'il nous ressemble beaucoup (Ndi).",
+        "De vraies jumelles ont, toute leur vie, exactement les mêmes caractères (Ndi).",
+        "Chaque individu porte des caractères de l'espèce, des caractères individuels hérités de ses parents, et d'autres modifiés par son mode de vie."
+      ]
+    },
+    parties: [
+      { t: "Les caractères de l'espèce et la notion d'espèce", html:
+        "<p>Les 40 élèves de la classe marchent debout sur deux pieds (dernière ligne du relevé). Tous ont aussi un pouce opposable, un grand cerveau, la parole articulée. Ces traits, communs à tous les êtres humains, sont les <strong>caractères de l'espèce humaine</strong>.</p>" +
+        "<div class='def'><b>Définition</b>Une <strong>espèce</strong> est un ensemble d'individus qui se ressemblent et qui peuvent se reproduire entre eux en donnant des descendants eux-mêmes <strong>féconds</strong>.</div>" +
+        "<p>La ressemblance ne suffit donc pas : le critère décisif est l'<strong>interfécondité</strong>. Le cheval et l'âne peuvent avoir un descendant, le mulet, mais le mulet est stérile : le cheval et l'âne appartiennent à deux espèces différentes.</p>",
+        fil: { html: "<p>Le chimpanzé partage de nombreux caractères avec nous, mais le guide est clair : un humain et un chimpanzé ne peuvent pas avoir de descendance ensemble. Le chimpanzé appartient donc à une <strong>autre espèce</strong>, même s'il en est l'une des plus proches.</p>", verdicts: [[0, "rejetee", "Pas d'interfécondité entre humain et chimpanzé : ce sont deux espèces."]] },
+        retenir: "Espèce = individus semblables, interféconds, à descendance féconde." },
+
+      { t: "Les caractères individuels", html:
+        "<p>À l'intérieur de l'espèce, chacun présente ses propres variations : forme du lobe de l'oreille, capacité à rouler la langue, fossettes, groupe sanguin, couleur des yeux… Ce sont les <strong>caractères individuels</strong> (ou variations individuelles).</p>" +
+        "<p>Le relevé de la classe le montre : pour ces caractères, les élèves se répartissent en deux groupes, alors que pour la bipédie, ils sont tous identiques. C'est l'association de nombreux caractères individuels qui rend chaque personne <strong>unique</strong>.</p>",
+        planches: [{ type: "3d", titre: "Le relevé de la classe en 3D", legende: "Bleu : élèves qui présentent le caractère ; jaune : ceux qui ne le présentent pas. De gauche à droite : lobe détaché, langue roulée, fossettes, pouce d'auto-stoppeur. Chaque caractère partage la classe : ce sont des caractères individuels.",
+          modele: { h: 340, rx: -22, ry: 28, echelle: 1.1, dy: 90, alt: "Histogramme en trois dimensions des quatre caractères du relevé de la classe", objets: enquete3D(),
+            etiquettes: [
+              { p: [-151, 130, -10], t: "Lobe détaché : 26" },
+              { p: [-29, 155, -10], t: "Langue roulée : 31" },
+              { p: [61, 110, -10], t: "Fossettes : 22", cote: "d" },
+              { p: [151, 145, 10], t: "Pas de pouce d'auto-stoppeur : 29", cote: "d" }
+            ] } }],
+        fil: { html: "<p>Awa et Aïssa partagent avec toute la classe les caractères de l'espèce. Elles partagent aussi entre elles les mêmes caractères individuels hérités : même forme de lobe, mêmes fossettes, même groupe sanguin. C'est pour cela qu'on les confondait au CM2.</p>", verdicts: [[2, "precisee", "Caractères de l'espèce communs à tous, caractères individuels variables : le tri commence."]] },
+        retenir: "Caractères individuels = variations qui rendent chaque personne unique." },
+
+      { t: "Héréditaire ou modifié par le milieu ?", html:
+        "<p>Certains caractères individuels sont transmis par les parents : ils sont <strong>héréditaires</strong> (groupe sanguin, forme du lobe de l'oreille, couleur naturelle des yeux et de la peau). D'autres dépendent du <strong>milieu</strong> et du <strong>mode de vie</strong> : la peau qui fonce au soleil, les muscles développés par le sport, une cicatrice, l'accent.</p>" +
+        "<div class='def'><b>À retenir</b>Un caractère héréditaire se transmet aux enfants ; un caractère acquis par le mode de vie ne se transmet pas. Le fils d'un champion de handball ne naît pas musclé.</div>" +
+        "<div class='ex'><b>Les vraies jumelles</b>Elles proviennent d'une même cellule-œuf qui s'est séparée en deux : elles ont reçu exactement la même information génétique. Leurs différences ne peuvent donc venir que du <strong>milieu</strong> et du <strong>mode de vie</strong>.</div>",
+        planches: [{ type: "Tableau", titre: "Trier les caractères des jumelles", legende: "Les caractères héréditaires restent identiques ; ce sont les caractères modifiés par le mode de vie qui les distinguent.", svg:
+          "<svg viewBox='0 0 640 220' role='img' aria-label='Tableau en trois colonnes : caractères de l espèce, caractères individuels héréditaires, caractères modifiés par le milieu'><rect width='640' height='220' fill='#fff'/><g><rect x='10' y='10' width='200' height='34' rx='8' fill='#EEF3FC'/><rect x='220' y='10' width='200' height='34' rx='8' fill='#FFF3D1'/><rect x='430' y='10' width='200' height='34' rx='8' fill='#F1FAF4'/></g><g font-size='12.5' font-weight='600' fill='#001136' text-anchor='middle'><text x='110' y='32'>Caractères de l’espèce</text><text x='320' y='32'>Individuels héréditaires</text><text x='530' y='32'>Modifiés par le milieu</text></g><g font-size='12' fill='#2E3445'><text x='24' y='76'>• bipédie</text><text x='24' y='102'>• pouce opposable</text><text x='24' y='128'>• grand cerveau</text><text x='24' y='154'>• langage articulé</text><text x='234' y='76'>• groupe sanguin</text><text x='234' y='102'>• forme du lobe</text><text x='234' y='128'>• fossettes</text><text x='234' y='154'>• couleur des yeux</text><text x='444' y='76'>• muscles (handball)</text><text x='444' y='102'>• bronzage</text><text x='444' y='128'>• cicatrice</text><text x='444' y='154'>• accent, savoirs</text></g><g font-size='11.5' text-anchor='middle'><text x='110' y='196' fill='#1E499B'>communs à tous</text><text x='320' y='196' fill='#8A6200'>identiques chez Awa et Aïssa</text><text x='530' y='196' fill='#1F7A45'>différents chez Awa et Aïssa</text></g></svg>" }],
+        fil: { html: "<p>Awa et Aïssa ont reçu la même information génétique : groupe sanguin, lobe, fossettes, couleur des yeux sont identiques. Mais Aïssa s'entraîne au handball et joue au soleil : ses muscles et sa peau se sont modifiés. Ces différences ne sont pas héréditaires.</p>", verdicts: [[1, "rejetee", "Même information génétique, mais le mode de vie (sport, soleil) a modifié certains caractères."]] },
+        retenir: "Héréditaire : transmis par les parents. Modifié par le milieu : acquis, non transmis." },
+
+      { t: "D'où viennent les caractères héréditaires ?", html:
+        "<p>Chaque être humain provient d'une <strong>cellule-œuf</strong>, formée par l'union d'un spermatozoïde du père et d'un ovule de la mère. Chacune de ces cellules apporte la moitié de l'information génétique, portée par les <strong>chromosomes</strong> du noyau.</p>" +
+        "<p>Comme chaque spermatozoïde et chaque ovule emporte un assortiment différent de cette information, deux frères et sœurs ne reçoivent pas les mêmes combinaisons : ils se ressemblent sans être identiques. Seuls les <strong>vrais jumeaux</strong>, issus d'une même cellule-œuf, ont la même information génétique.</p>" +
+        "<div class='savais'><b>Pour aller plus loin</b>La leçon « Chromosomes et ADN » montre où et comment cette information est écrite.</div>",
+        fil: { html: "<p>Le tri est complet : chaque individu porte les caractères de son espèce, des caractères individuels hérités de ses deux parents par la cellule-œuf, et des caractères modifiés par sa vie. C'est vrai pour toi, pour Awa et Aïssa… et, dans son espèce à lui, pour le chimpanzé de Limbé.</p>", verdicts: [[2, "validee", "Caractères de l'espèce + caractères individuels héréditaires (cellule-œuf) + caractères modifiés par le milieu."]] },
+        retenir: "Les caractères héréditaires viennent des deux parents, par la cellule-œuf." }
+    ],
+    denouement: {
+      titre: "La conclusion de la classe",
+      etapes: [
+        "Le chimpanzé n'est pas interfécond avec l'humain : autre espèce (indice 1).",
+        "Le relevé partage la classe pour les caractères individuels, pas pour la bipédie (indice 2).",
+        "Les vraies jumelles ont la même information génétique ; sport et soleil les ont différenciées (indice 3).",
+        "Les caractères héréditaires viennent des deux parents, par la cellule-œuf (indice 4)."
+      ],
+      reponse: "<p>Tous les élèves de la classe marchent debout, ont un pouce opposable et parlent : ce sont des caractères de l'espèce humaine. Le chimpanzé nous ressemble, mais il ne peut pas avoir de descendance avec un humain : il appartient à une autre espèce. À l'intérieur de notre espèce, chacun présente des caractères individuels, comme la forme du lobe ou les fossettes, qui partagent la classe en groupes. Beaucoup sont héréditaires : ils viennent des deux parents par la cellule-œuf. D'autres sont modifiés par le mode de vie. Awa et Aïssa, vraies jumelles, ont reçu la même information génétique : leurs différences de muscles et de bronzage viennent du handball et du soleil, pas de l'hérédité.</p>",
+      transfert: "<p>Un éleveur de Ngaoundéré croise une vache de race goudali avec un taureau de race holstein et obtient des veaux qui, adultes, se reproduisent normalement. Le goudali et la holstein appartiennent-ils à la même espèce ? Justifie avec la définition de l'espèce, puis cite un caractère de l'espèce et deux caractères qui varient d'une race à l'autre.</p>"
+    },
+    revision: [
+      "<strong>Espèce</strong> : individus semblables, interféconds, à descendance féconde.",
+      "Ressembler ne suffit pas : critère de l'<strong>interfécondité</strong> (humain et chimpanzé : deux espèces).",
+      "<strong>Caractères de l'espèce</strong> : communs à tous (bipédie, pouce opposable, langage).",
+      "<strong>Caractères individuels</strong> : variables d'une personne à l'autre (lobe, fossettes, groupe sanguin).",
+      "<strong>Héréditaires</strong> : transmis par les parents ; <strong>modifiés par le milieu</strong> : acquis, non transmis.",
+      "Vrais jumeaux : même information génétique, différences dues au milieu.",
+      "Information héréditaire apportée par le spermatozoïde et l'ovule, réunis dans la <strong>cellule-œuf</strong>."
+    ],
+    exo: "<p>Classe ces caractères dans les trois colonnes (espèce, individuel héréditaire, modifié par le milieu) : groupe sanguin, bronzage, bipédie, couleur des yeux, cicatrice, langage articulé, muscles d'un docker du port de Douala. <em>(Espèce : bipédie, langage. Héréditaires : groupe sanguin, yeux. Milieu : bronzage, cicatrice, muscles.)</em></p>",
+    quiz: [
+      { q: "Quel critère décide que deux individus sont de la même espèce ?", r: ["Ils ont ensemble des descendants féconds", "Ils se ressemblent beaucoup", "Ils vivent au même endroit"], b: 0, e: "C'est l'interfécondité." },
+      { q: "Le chimpanzé et l'humain sont…", r: ["deux espèces différentes", "la même espèce", "deux races de la même espèce"], b: 0, e: "Pas de descendance possible entre eux." },
+      { q: "Le mulet, fils d'un âne et d'une jument, est stérile. Donc…", r: ["l'âne et le cheval sont deux espèces", "l'âne et le cheval sont une seule espèce", "le mulet est une espèce"], b: 0, e: "La descendance doit être féconde." },
+      { q: "La bipédie est un caractère…", r: ["de l'espèce", "individuel acquis", "individuel héréditaire"], b: 0, e: "Les 40 élèves la présentent." },
+      { q: "La forme du lobe de l'oreille est un caractère…", r: ["individuel héréditaire", "de l'espèce", "acquis par le sport"], b: 0, e: "Il partage la classe et vient des parents." },
+      { q: "Le bronzage est un caractère…", r: ["modifié par le milieu", "héréditaire", "de l'espèce"], b: 0, e: "Il dépend de l'exposition au soleil." },
+      { q: "D'après le relevé, combien d'élèves savent rouler la langue ?", r: ["31", "9", "40"], b: 0, e: "31 présents, 9 absents." },
+      { q: "Pourquoi deux vraies jumelles ont-elles le même groupe sanguin ?", r: ["Elles viennent d'une même cellule-œuf", "Elles mangent la même chose", "Elles dorment dans la même chambre"], b: 0, e: "Même information génétique." },
+      { q: "Aïssa est plus musclée que sa jumelle car…", r: ["elle fait du handball", "elle a hérité d'autres gènes", "elle est plus âgée"], b: 0, e: "Caractère modifié par le mode de vie." },
+      { q: "Un caractère acquis par le sport…", r: ["ne se transmet pas aux enfants", "se transmet toujours", "devient un caractère de l'espèce"], b: 0, e: "Seuls les caractères héréditaires passent à la descendance." }
+    ]
+  });
+})();
+
+/* Dénombrement de 2nde A (rangs 26 à 28), gabarit des leçons APPROFONDIES (16/11/2026) :
+   situation-problème, indices, planches 2D et 3D, dénouement. Leçons publiques (la 2nde est en libre accès). */
+(function () {
+  "use strict";
+  var NUIT = "#001136", BLEU = "#1E499B", OR = "#FFC93C", GRIS = "#4D5163";
+  var COUL = { R: ["#FFB3B3", "#E8394B", "#B0182C", "#5E0812"], V: ["#BDF2D2", "#36B37A", "#17784D", "#093D26"], B: ["#CFE0FF", "#4F86E0", "#2155B0", "#0E2A62"], J: ["#FFF1C2", "#F2C540", "#C48A0C", "#6D4A00"] };
+
+  /* ── dessin 2D ── */
+  function defs(g) {
+    var s = "<defs>";
+    for (var k in COUL) { var c = COUL[k]; s += "<radialGradient id='" + g + k + "' cx='35%' cy='30%' r='75%'><stop offset='0' stop-color='" + c[0] + "'/><stop offset='.28' stop-color='" + c[1] + "'/><stop offset='.72' stop-color='" + c[2] + "'/><stop offset='1' stop-color='" + c[3] + "'/></radialGradient>"; }
+    s += "<linearGradient id='" + g + "verre' x1='0' x2='1'><stop offset='0' stop-color='#EAF6FB' stop-opacity='.95'/><stop offset='.45' stop-color='#D6EBF3' stop-opacity='.55'/><stop offset='1' stop-color='#9CC3D4' stop-opacity='.8'/></linearGradient>";
+    s += "<linearGradient id='" + g + "bois' x1='0' y1='0' x2='0' y2='1'><stop offset='0' stop-color='#D9A86A'/><stop offset='.5' stop-color='#B9824A'/><stop offset='1' stop-color='#8A5A2D'/></linearGradient>";
+    s += "<linearGradient id='" + g + "sac' x1='0' x2='1'><stop offset='0' stop-color='#F4E3C3'/><stop offset='.5' stop-color='#E2C896'/><stop offset='1' stop-color='#B8975E'/></linearGradient>";
+    s += "<radialGradient id='" + g + "omb'><stop offset='0' stop-color='#001136' stop-opacity='.26'/><stop offset='1' stop-color='#001136' stop-opacity='0'/></radialGradient>";
+    s += "<marker id='" + g + "fl' markerWidth='10' markerHeight='10' refX='7' refY='5' orient='auto'><path d='M0 1L8 5L0 9Z' fill='" + BLEU + "'/></marker>";
+    s += "<marker id='" + g + "flo' markerWidth='10' markerHeight='10' refX='7' refY='5' orient='auto'><path d='M0 1L8 5L0 9Z' fill='#C2540A'/></marker>";
+    return s + "</defs>";
+  }
+  function boule(g, x, y, c, lab, r) {
+    r = r || 11;
+    return "<ellipse cx='" + (x + 1) + "' cy='" + (y + r * .95) + "' rx='" + (r * .9) + "' ry='" + (r * .28) + "' fill='url(#" + g + "omb)'/>" +
+      "<circle cx='" + x + "' cy='" + y + "' r='" + r + "' fill='url(#" + g + c + ")'/>" +
+      "<ellipse cx='" + (x - r * .35) + "' cy='" + (y - r * .45) + "' rx='" + (r * .32) + "' ry='" + (r * .2) + "' fill='#fff' opacity='.7' transform='rotate(-30 " + (x - r * .35) + " " + (y - r * .45) + ")'/>" +
+      (lab ? "<text x='" + x + "' y='" + (y + r * .36) + "' text-anchor='middle' font-size='" + (r * .92).toFixed(1) + "' font-weight='800' fill='#fff'>" + lab + "</text>" : "");
+  }
+  function fantome(x, y, r) { return "<circle cx='" + x + "' cy='" + y + "' r='" + (r || 11) + "' fill='none' stroke='#8A96A8' stroke-width='1.5' stroke-dasharray='3 3'/>"; }
+  var NID = [[20, 141], [43, 141], [66, 141], [89, 141], [112, 141], [31, 119], [54, 119], [77, 119], [100, 119], [43, 97], [66, 97], [89, 97]];
+  /* urne en verre : contenu = liste de [couleur, étiquette] ; caches = indices des boules sorties */
+  function urne(g, tx, ty, sc, contenu, caches) {
+    caches = caches || [];
+    var corps = "M17 30C7 30 2 40 2 55L2 136C2 149 12 156 27 156L105 156C120 156 130 149 130 136L130 55C130 40 125 30 115 30Z", b = "";
+    contenu.forEach(function (x, i) { var p = NID[i]; b += caches.indexOf(i) >= 0 ? fantome(p[0], p[1]) : boule(g, p[0], p[1], x[0], x[1]); });
+    return "<g transform='translate(" + tx + " " + ty + ") scale(" + sc + ")'><ellipse cx='66' cy='158' rx='76' ry='9' fill='url(#" + g + "omb)'/>" +
+      "<path d='" + corps + "' fill='url(#" + g + "verre)'/>" + b +
+      "<path d='" + corps + "' fill='none' stroke='#86AEBF' stroke-width='2'/><ellipse cx='66' cy='30' rx='54' ry='8' fill='#EEF8FB' fill-opacity='.85' stroke='#86AEBF' stroke-width='2'/>" +
+      "<path d='M10 52V134' stroke='#fff' stroke-width='6' stroke-linecap='round' opacity='.55'/><path d='M120 60V120' stroke='#fff' stroke-width='2.5' stroke-linecap='round' opacity='.5'/></g>";
+  }
+  function support(g, tx, ty, items) {
+    var s = "<g transform='translate(" + tx + " " + ty + ")'><ellipse cx='" + (items.length * 20 + 2) + "' cy='44' rx='" + (items.length * 24) + "' ry='7' fill='url(#" + g + "omb)'/><rect x='0' y='14' width='" + (items.length * 40 + 4) + "' height='28' rx='8' fill='url(#" + g + "bois)' stroke='#7A4F27'/><path d='M6 20h" + (items.length * 40 - 8) + "' stroke='#F1C98F' stroke-width='1.5' opacity='.7'/>";
+    items.forEach(function (it, i) { var x = 22 + i * 40; s += "<ellipse cx='" + x + "' cy='24' rx='15' ry='6' fill='#5C3818' opacity='.7'/>" + boule(g, x, 13, it[0], it[1], 13) + "<circle cx='" + x + "' cy='55' r='9' fill='" + NUIT + "'/><text x='" + x + "' y='59' text-anchor='middle' fill='#fff' font-size='11' font-weight='800'>" + (i + 1) + "</text>"; });
+    return s + "</g>";
+  }
+  function sac(g, tx, ty, items) {
+    var s = "<g transform='translate(" + tx + " " + ty + ")'><ellipse cx='45' cy='92' rx='52' ry='8' fill='url(#" + g + "omb)'/><path d='M18 22C4 40 0 62 6 78C12 92 78 92 84 78C90 62 86 40 72 22Z' fill='url(#" + g + "sac)' stroke='#8B6B37' stroke-width='2'/><path d='M22 24C30 30 60 30 68 24' fill='none' stroke='#8B6B37' stroke-width='2'/><path d='M30 26C28 14 36 8 45 8S62 14 60 26' fill='none' stroke='#A3824A' stroke-width='3'/>";
+    var P = [[30, 62], [58, 62], [44, 42]];
+    items.forEach(function (it, i) { s += boule(g, P[i][0], P[i][1], it[0], it[1], 13); });
+    return s + "</g>";
+  }
+  function svg(w, h, alt, g, corps) {
+    return "<svg viewBox='0 0 " + w + " " + h + "' role='img' aria-label='" + alt + "' font-family='Inter,Arial,sans-serif'><rect width='" + w + "' height='" + h + "' fill='#fff'/>" + defs(g) + corps + "<text x='" + (w - 6) + "' y='" + (h - 5) + "' font-size='8' text-anchor='end' fill='#8A93A6'>Planche VÉRITAS</text></svg>";
+  }
+  function txt(x, y, t, o) { o = o || {}; return "<text x='" + x + "' y='" + y + "' font-size='" + (o.s || 13) + "' font-weight='" + (o.w || 700) + "' text-anchor='" + (o.a || "middle") + "' fill='" + (o.c || NUIT) + "'>" + t + "</text>"; }
+
+  function urne3D(contenu, sorties, cibles) {
+    var o = [{ f: "boite", c: [30, -4, 0], d: [460, 8, 220], coul: "#D9C7A0", dessus: "#E3D3AE" },
+      { f: "cylindre", c: [-110, 0, 0], r: 72, h: 8, n: 28, coul: "#A9D0DE", dessus: "#C9E4EE" }];
+    var P = [[-140, 22, -26], [-110, 22, 30], [-80, 22, -26], [-138, 22, 28], [-82, 22, 30], [-110, 22, -2], [-124, 56, 8], [-96, 56, -12], [-110, 56, 30], [-110, 88, 0]];
+    contenu.forEach(function (c, i) {
+      var k = sorties.indexOf(i), b = { f: "sphere", c: P[i], r: 15, n: 12, m: 8, coul: c };
+      if (k >= 0) b.ec = [cibles[k][0] - P[i][0], cibles[k][1] - P[i][1], cibles[k][2] - P[i][2]];
+      o.push(b);
+    });
+    o.push({ f: "cylindre", c: [-110, 4, 0], r: 74, h: 150, n: 32, coul: "#CFE9F3", op: 0.2, double: true });
+    o.push({ f: "cylindre", c: [-110, 150, 0], r: 77, h: 6, n: 32, coul: "#BFE1EE", op: 0.55, double: true });   /* col de l'urne */
+    return o;
+  }
+  function plateau3D(o, n, x0) { /* support à places numérotées, à droite de l'urne */
+    o.push({ f: "boite", c: [x0 + (n - 1) * 25, 8, 40], d: [n * 50 + 10, 16, 56], coul: "#B07A44", dessus: "#C98E55" });
+    return o;
+  }
+
+
+  function q(qq, bonne, f1, f2, e) { return { q: qq, r: [bonne, f1, f2], b: 0, e: e }; }
+
+  /* ── r26 : diagramme de Venn, tableau à double entrée ── */
+  VRT_L("2nde-a-maths-r26", {
+    c: "2nde A", m: "maths", rang: 26, duree: 30, cle: "Diagramme de Venn",
+    titre: "Diagramme de Venn et tableau à double entrée",
+    accroche: "Club de lecture et club de danse : combien d'élèves de 2nde A ne vont à aucun club ?",
+    intro: "Deux outils pour compter sans oublier personne et sans compter deux fois : le diagramme de Venn et le tableau à double entrée.",
+    objectifs: ["représenter une situation par un diagramme de Venn", "remplir et lire un tableau à double entrée", "calculer « au moins un » et « aucun »"],
+    enquete: { titre: "Les clubs de la 2nde A",
+      contexte: "<p>La 2nde A d'un lycée de Bafoussam compte <strong>48 élèves</strong>. <strong>20</strong> sont inscrits au club de lecture, <strong>18</strong> au club de danse, et <strong>7</strong> aux deux. Le professeur principal veut proposer un <strong>troisième club</strong> si au moins 15 élèves ne font encore aucune activité.</p>",
+      documents: [{ t: "La fiche d'inscription", html: "<table class='donnees'><tr><td>Élèves</td><td>48</td></tr><tr><td>Lecture</td><td>20</td></tr><tr><td>Danse</td><td>18</td></tr><tr><td>Les deux</td><td>7</td></tr></table>" }],
+      question: "Combien d'élèves ne font aucun club ? Faut-il ouvrir un troisième club ?",
+      tache: "Représente la situation par un diagramme de Venn puis par un tableau, calcule, et décide.",
+      hypotheses: ["48 − 20 − 18 = 10 élèves sans club : pas de troisième club.", "Les 7 élèves des deux clubs ont été retirés deux fois : il y en a plus que 10."] },
+    parties: [
+      { t: "Le diagramme de Venn", html: "<div class='def'><b>Définition</b>Un <strong>diagramme de Venn</strong> représente un ensemble E par un rectangle et ses parties par des cercles. La zone commune à deux cercles est l'<strong>intersection</strong> A ∩ B ; la réunion des deux cercles est A ∪ B.</div>" +
+        "<div class='methode'><b>Remplir un diagramme</b><ol><li>Place d'abord l'<strong>intersection</strong> : 7.</li><li>Puis « lecture seulement » : 20 − 7 = 13, « danse seulement » : 18 − 7 = 11.</li><li>Enfin l'extérieur : 48 − (13 + 7 + 11).</li></ol></div>",
+        planches: [{ type: "2D", titre: "Le diagramme de la 2nde A", legende: "7 élèves aux deux clubs, 13 à la lecture seulement, 11 à la danse seulement : 31 élèves inscrits, 17 sans club.", svg: (function () {
+          var g = "n26", s = "<rect x='40' y='30' width='560' height='240' rx='18' fill='#FBFAF7' stroke='#C9D2E3'/>" + txt(64, 54, "E : 48 élèves", { s: 13, a: "start" }) +
+            "<circle cx='260' cy='155' r='96' fill='#1E499B' fill-opacity='.14' stroke='" + BLEU + "' stroke-width='2.5'/><circle cx='380' cy='155' r='90' fill='#B2316E' fill-opacity='.14' stroke='#B2316E' stroke-width='2.5'/>" +
+            txt(205, 162, "13", { s: 26 }) + txt(320, 162, "7", { s: 26, c: "#4F2686" }) + txt(425, 162, "11", { s: 26, c: "#8D1D52" }) + txt(560, 254, "17", { s: 22, c: GRIS }) +
+            txt(205, 78, "Lecture : 20", { s: 13, c: BLEU }) + txt(425, 82, "Danse : 18", { s: 13, c: "#8D1D52" });
+          return svg(640, 290, "Diagramme de Venn : 13 en lecture seulement, 7 aux deux, 11 en danse seulement, 17 sans club", g, s); })() }],
+        fil: { html: "<p>48 − 20 − 18 retire deux fois les 7 élèves des deux clubs. Inscrits à au moins un club : 13 + 7 + 11 = <strong>31</strong>. Sans club : 48 − 31 = <strong>17</strong>.</p>", verdicts: [[0, "rejetee", "Les 7 élèves des deux clubs sont retirés deux fois."], [1, "validee", "17 élèves n'ont aucun club."]] },
+        retenir: "Au moins un club : 20 + 18 − 7 = 31 ; aucun : 48 − 31 = 17." },
+      { t: "Le tableau à double entrée", html: "<p>Un <strong>tableau à double entrée</strong> croise deux caractères (lecture : oui / non ; danse : oui / non). Chaque élève est dans une seule case.</p>" +
+        "<table class='donnees'><tr><th></th><th>Danse</th><th>Pas danse</th><th>Total</th></tr><tr><th>Lecture</th><td>7</td><td>13</td><td>20</td></tr><tr><th>Pas lecture</th><td>11</td><td><strong>17</strong></td><td>28</td></tr><tr><th>Total</th><td>18</td><td>30</td><td>48</td></tr></table>" +
+        "<div class='astuce'><b>Contrôle</b>Les totaux des lignes et des colonnes doivent redonner 48. Une case se calcule toujours par différence.</div>" +
+        "<div class='prop'><b>Formule</b>card(A ∪ B) = card(A) + card(B) − card(A ∩ B) : 20 + 18 − 7 = 31.</div>",
+        fil: { html: "<p>Le tableau confirme : la case « ni lecture ni danse » vaut 28 − 11 = <strong>17</strong>.</p>" },
+        retenir: "Tableau : remplir par différences, vérifier les totaux." },
+      { t: "Décider", html: "<div class='ex'><b>La décision</b>17 élèves sans club, c'est plus que les 15 exigés : le troisième club (par exemple un club journal) peut ouvrir.</div>" +
+        "<div class='attention'><b>Piège</b>« Lecture » (20) n'est pas « lecture seulement » (13). Lis bien « seulement », « au moins un », « aucun ».</div>" +
+        "<div class='savais'><b>Le savais-tu ?</b>Le diagramme porte le nom du logicien anglais John Venn, qui l'a popularisé en 1880.</div>",
+        retenir: "Calculer, puis répondre à la question posée." }
+    ],
+    denouement: { titre: "17 élèves sans club : le troisième club ouvre",
+      etapes: ["Intersection : 7 élèves aux deux clubs.", "Parties propres : 13 et 11.", "Au moins un club : 31 ; aucun : 17.", "17 ≥ 15 : on ouvre le troisième club."],
+      reponse: "<p>Notons L et D les inscrits aux clubs de lecture et de danse. card(L ∪ D) = 20 + 18 − 7 = 31, donc 48 − 31 = <strong>17 élèves</strong> ne font aucun club. Comme 17 ≥ 15, le professeur principal peut ouvrir un troisième club.</p>",
+      transfert: "<p>Dans un village de l'Ouest, sur 120 familles, 70 cultivent le maïs, 55 le haricot, 30 les deux. Combien ne cultivent ni l'un ni l'autre ? <em>(120 − (70 + 55 − 30) = 25.)</em></p>" },
+    revision: ["Venn : intersection d'abord, puis « seulement », puis l'extérieur.", "card(A ∪ B) = card(A) + card(B) − card(A ∩ B).", "Aucun : card(E) − card(A ∪ B).", "Tableau à double entrée : cases par différence, totaux vérifiés."],
+    exo: "<p>Sur 60 élèves, 35 aiment le football, 25 le basket, 10 les deux. Combien n'aiment aucun des deux ? <em>(60 − 50 = 10.)</em></p>",
+    quiz: [q("20 en lecture, 18 en danse, 7 aux deux : au moins un club ?", "31", "38", "45", "20 + 18 − 7."), q("Sur 48, sans club ?", "17", "10", "31", "48 − 31."), q("Lecture seulement ?", "13", "20", "7", "20 − 7."), q("Dans un Venn, on commence par…", "l'intersection", "l'extérieur", "le plus grand cercle", "Sinon double comptage."), q("card(A) = 9, card(B) = 6, card(A ∩ B) = 2 : card(A ∪ B) ?", "13", "15", "11", "9 + 6 − 2."), q("Dans un tableau à double entrée, chaque élève est…", "dans une seule case", "dans deux cases", "en dehors", "Les cases se partagent l'effectif."), q("Pourquoi 48 − 20 − 18 est faux ?", "Les élèves des deux clubs sont retirés deux fois", "Il manque des élèves", "Il faut multiplier", "Intersection."), q("A et B disjoints, 5 et 8 éléments : card(A ∪ B) ?", "13", "40", "3", "Intersection vide.")]
+  });
+
+  /* ── r27 : arbre de choix, arbre des parties ── */
+  VRT_L("2nde-a-maths-r27", {
+    c: "2nde A", m: "maths", rang: 27, duree: 30, cle: "Arbre de choix",
+    titre: "Arbre de choix et arbre des parties",
+    accroche: "Une tenue de la fête du lycée : un pagne, un modèle, une coiffe. Combien de tenues ?",
+    intro: "L'arbre de choix compte les possibilités quand on fait des choix successifs ; l'arbre des parties compte toutes les façons de choisir « ou pas » chaque objet.",
+    objectifs: ["construire et lire un arbre de choix", "appliquer le principe multiplicatif", "compter les parties d'un ensemble avec un arbre"],
+    enquete: { titre: "Les tenues de la fête du lycée",
+      contexte: "<p>Pour la fête de la jeunesse, la classe de 2nde A défile en tenue traditionnelle. La couturière propose <strong>3 pagnes</strong> (ndop, kaba, wax), <strong>2 modèles</strong> (robe, ensemble) et, en option, une <strong>coiffe</strong> ou <strong>sans coiffe</strong>. La classe compte <strong>12 filles</strong> qui veulent toutes une tenue différente.</p>",
+      question: "Combien de tenues différentes la couturière peut-elle proposer, et suffisent-elles pour les 12 filles ?",
+      tache: "Construis l'arbre de choix, dénombre les tenues et conclus.",
+      hypotheses: ["3 + 2 + 2 = 7 tenues : pas assez.", "3 × 2 × 2 = 12 tenues : juste assez."] },
+    parties: [
+      { t: "L'arbre de choix", html: "<div class='def'><b>Définition</b>Un <strong>arbre de choix</strong> représente des choix successifs : chaque niveau est un choix, chaque branche une possibilité. Le nombre de <strong>chemins complets</strong> est le produit des nombres de branches à chaque niveau (<strong>principe multiplicatif</strong>).</div>",
+        planches: [{ type: "2D", titre: "L'arbre des tenues", legende: "3 pagnes, puis 2 modèles, puis avec ou sans coiffe : 3 × 2 × 2 = 12 chemins, donc 12 tenues.", svg: (function () {
+          var g = "n27", s = "", P = ["Ndop", "Kaba", "Wax"], M = ["Robe", "Ensemble"], i, j, k;
+          s += "<circle cx='30' cy='170' r='7' fill='" + NUIT + "'/>";
+          for (i = 0; i < 3; i++) { var y1 = 60 + i * 110;
+            s += "<path d='M37 170C80 170 80 " + y1 + " 120 " + y1 + "' fill='none' stroke='" + BLEU + "' stroke-width='2.4'/><rect x='120' y='" + (y1 - 13) + "' width='80' height='26' rx='13' fill='#EEF3FC' stroke='" + BLEU + "'/>" + txt(160, y1 + 5, P[i], { s: 12, c: BLEU });
+            for (j = 0; j < 2; j++) { var y2 = y1 - 26 + j * 52;
+              s += "<path d='M200 " + y1 + "C240 " + y1 + " 240 " + y2 + " 280 " + y2 + "' fill='none' stroke='#B2316E' stroke-width='2'/><rect x='280' y='" + (y2 - 12) + "' width='92' height='24' rx='12' fill='#FBE9F1' stroke='#B2316E'/>" + txt(326, y2 + 4, M[j], { s: 11.5, c: "#8D1D52" });
+              for (k = 0; k < 2; k++) { var y3 = y2 - 11 + k * 22; s += "<path d='M372 " + y2 + "L420 " + y3 + "' stroke='#C2540A' stroke-width='1.6'/>" + boule(g, 432, y3, k ? "V" : "J", "", 6.5) + txt(446, y3 + 4, k ? "sans coiffe" : "coiffe", { s: 10, w: 500, a: "start", c: GRIS }); } } }
+          s += "<rect x='520' y='140' width='110' height='60' rx='12' fill='#FFF8E6' stroke='#F2DFA6'/>" + txt(575, 166, "3 × 2 × 2", { s: 14, c: "#8A6200" }) + txt(575, 188, "= 12 tenues", { s: 13, c: "#8A6200" });
+          return svg(640, 360, "Arbre de choix : trois pagnes, deux modèles, avec ou sans coiffe, douze tenues", g, s); })() }],
+        fil: { html: "<p>Chaque pagne se combine avec chaque modèle, puis avec chaque option : on <strong>multiplie</strong>. 3 × 2 × 2 = <strong>12 tenues</strong>.</p>", verdicts: [[0, "rejetee", "Additionner ne compte pas des tenues complètes."], [1, "validee", "12 tenues, une par fille."]] },
+        retenir: "Un chemin complet = une possibilité ; on multiplie les branches." },
+      { t: "Le principe multiplicatif", html: "<div class='prop'><b>Principe multiplicatif</b>Si un choix se fait en k étapes avec n₁, n₂, …, nₖ possibilités, il y a n₁ × n₂ × … × nₖ choix au total.</div>" +
+        "<div class='ex'><b>Exemple</b>Un menu de cantine : 2 entrées, 3 plats, 2 desserts : 2 × 3 × 2 = 12 menus.</div>" +
+        "<div class='astuce'><b>Quand dessiner l'arbre ?</b>Dessine-le pour comprendre (petits nombres) ; ensuite, le produit suffit.</div>",
+        fil: { html: "<p>Les 12 filles peuvent toutes avoir une tenue différente : il n'y en a <strong>ni trop ni trop peu</strong>.</p>" },
+        retenir: "Choix successifs : produit." },
+      { t: "L'arbre des parties", html: "<div class='def'><b>Arbre des parties</b>Pour chaque élément d'un ensemble, on répond « je le prends » ou « je ne le prends pas ». Un ensemble à n éléments a <strong>2ⁿ parties</strong> (y compris l'ensemble vide et l'ensemble entier).</div>" +
+        "<div class='ex'><b>Exemple</b>Accessoires possibles : collier, bracelet, foulard. Chaque fille choisit ceux qu'elle porte : 2 × 2 × 2 = 2³ = 8 façons (de « aucun » à « les trois »).</div>",
+        planches: [{ type: "2D", titre: "L'arbre des parties de {collier ; bracelet ; foulard}", legende: "Trois questions « oui / non » : 2³ = 8 parties, de l'ensemble vide à l'ensemble entier.", svg: (function () {
+          var g = "n27b", s = "", L = ["Collier ?", "Bracelet ?", "Foulard ?"], i, y = 30, leaves = [];
+          for (i = 0; i < 8; i++) leaves.push([(i & 4) ? 0 : 1, (i & 2) ? 0 : 1, (i & 1) ? 0 : 1]);
+          for (i = 0; i < 3; i++) s += txt(110 + i * 150, 22, L[i], { s: 12, c: BLEU });
+          leaves.forEach(function (l, k) { var yy = 46 + k * 34; s += txt(560, yy + 4, (l[0] ? "C" : "") + (l[1] ? "B" : "") + (l[2] ? "F" : "") || "∅", { s: 13, c: NUIT, a: "start" }) + boule(g, 540, yy, l.reduce(function (a, b) { return a + b; }, 0) ? "B" : "J", "", 7); });
+          function br(x, y0, depth, lo, hi) { if (depth === 3) return; var mid = (lo + hi) / 2, yo = 46 + (lo + mid - 1) / 2 * 34, yn = 46 + (mid + hi - 1) / 2 * 34;
+            s += "<path d='M" + x + " " + y0 + "L" + (x + 150) + " " + yo + "' stroke='#1C6B43' stroke-width='1.8'/><path d='M" + x + " " + y0 + "L" + (x + 150) + " " + yn + "' stroke='#A31238' stroke-width='1.8' stroke-dasharray='5 4'/>";
+            br(x + 150, yo, depth + 1, lo, mid); br(x + 150, yn, depth + 1, mid, hi); }
+          br(40, 46 + 3.5 * 34, 0, 0, 8);
+          s += txt(320, 330, "oui (trait plein) · non (pointillés) · 2³ = 8 parties", { s: 12, c: GRIS });
+          return svg(640, 345, "Arbre des parties d'un ensemble à trois éléments, huit parties", g, s); })() }],
+        retenir: "Un ensemble à n éléments a 2ⁿ parties." }
+    ],
+    denouement: { titre: "12 tenues : une par fille",
+      etapes: ["Choix successifs : pagne, modèle, coiffe.", "Principe multiplicatif : 3 × 2 × 2 = 12.", "12 tenues pour 12 filles : toutes différentes."],
+      reponse: "<p>Une tenue se compose d'un pagne (3 choix), d'un modèle (2 choix) et d'une option coiffe (2 choix). D'après le principe multiplicatif, il y a 3 × 2 × 2 = <strong>12 tenues</strong> : exactement assez pour que les 12 filles portent chacune une tenue différente.</p>",
+      transfert: "<p>Si la couturière ajoute un 4e pagne, combien de tenues ? Et si 15 filles défilent ? <em>(4 × 2 × 2 = 16 ≥ 15 : assez.)</em></p>" },
+    revision: ["Arbre de choix : un niveau par choix, un chemin = une possibilité.", "Principe multiplicatif : n₁ × n₂ × … × nₖ.", "Arbre des parties : « oui / non » pour chaque élément.", "Un ensemble à n éléments a 2ⁿ parties."],
+    exo: "<p>Un code de cantine est formé d'une lettre parmi A, B, C puis d'un chiffre parmi 1, 2, 3, 4. Combien de codes ? Combien de parties a l'ensemble {A ; B ; C ; D} ? <em>(3 × 4 = 12 ; 2⁴ = 16.)</em></p>",
+    quiz: [q("3 pagnes, 2 modèles, 2 options : tenues ?", "12", "7", "6", "3 × 2 × 2."), q("Dans un arbre de choix, une possibilité est…", "un chemin complet", "une branche", "un niveau", "Du départ à une feuille."), q("2 entrées, 3 plats, 2 desserts : menus ?", "12", "7", "18", "Produit."), q("Nombre de parties de {a ; b ; c} ?", "8", "6", "3", "2³."), q("Nombre de parties d'un ensemble à 4 éléments ?", "16", "8", "4", "2⁴."), q("L'ensemble vide est-il une partie ?", "oui", "non", "seulement si n = 0", "On ne prend aucun élément."), q("Pourquoi 3 + 2 + 2 est faux ?", "Une tenue réunit trois choix successifs", "Il faut soustraire", "Les coiffes ne comptent pas", "On multiplie."), q("4 pagnes, 2 modèles, 2 options ?", "16", "8", "12", "4 × 2 × 2.")]
+  });
+
+  /* ── r28 : activité d'intégration ── */
+  VRT_L("2nde-a-maths-r28", {
+    c: "2nde A", m: "maths", rang: 28, duree: 35, cle: "Activités d'intégration",
+    titre: "Intégration : la kermesse du lycée",
+    accroche: "Plateaux-repas, tickets, inscriptions croisées : la kermesse se prépare en comptant juste.",
+    intro: "Une activité d'intégration réunit les outils du chapitre : diagramme de Venn, tableau à double entrée, arbre de choix. Une seule situation, celle de la kermesse d'un lycée de Garoua.",
+    objectifs: ["choisir l'outil adapté à chaque question", "dénombrer sans oubli ni double comptage", "décider et rédiger une réponse"],
+    enquete: { titre: "La kermesse du lycée de Garoua",
+      contexte: "<p>Le foyer du lycée organise une kermesse. Le comité doit : (1) savoir combien des <strong>120 élèves</strong> de 2nde viendront, sachant que <strong>75</strong> tiennent un stand, <strong>50</strong> participent au tournoi de dames et <strong>30</strong> font les deux ; (2) imprimer un <strong>ticket différent pour chaque plateau-repas</strong> : une boisson parmi 4 (foléré, gingembre, citronnelle, eau), un plat parmi 3 et un dessert parmi 2. Le comité a 25 modèles de tickets.</p>",
+      question: "Combien d'élèves participent à au moins une activité ? Les 25 modèles de tickets suffisent-ils ?",
+      tache: "Choisis un outil pour chaque question, calcule et rédige ta réponse au comité.",
+      hypotheses: ["75 + 50 = 125 participants : plus que les 120 élèves, c'est impossible.", "4 × 3 × 2 plateaux : les 25 tickets suffisent."] },
+    parties: [
+      { t: "Choisir l'outil", html: "<div class='def'><b>Définition</b>Des ensembles qui se chevauchent : <strong>diagramme de Venn</strong> ou <strong>tableau à double entrée</strong>. Des choix successifs : <strong>arbre de choix</strong> et principe multiplicatif.</div>" +
+        "<div class='methode'><b>Démarche</b><ol><li>Lire chaque question et repérer : ensembles ou choix successifs ?</li><li>Représenter (Venn, tableau, arbre).</li><li>Calculer, contrôler.</li><li>Répondre par une phrase.</li></ol></div>",
+        planches: [{ type: "2D", titre: "Les participants de la kermesse", legende: "30 élèves font les deux ; 45 tiennent seulement un stand ; 20 jouent seulement aux dames ; 25 ne participent à rien.", svg: (function () {
+          var g = "n28", s = "<rect x='40' y='30' width='560' height='240' rx='18' fill='#FBFAF7' stroke='#C9D2E3'/>" + txt(64, 54, "E : 120 élèves", { s: 13, a: "start" }) +
+            "<circle cx='260' cy='155' r='96' fill='#1E499B' fill-opacity='.14' stroke='" + BLEU + "' stroke-width='2.5'/><circle cx='380' cy='155' r='90' fill='#B2316E' fill-opacity='.14' stroke='#B2316E' stroke-width='2.5'/>" +
+            txt(205, 162, "45", { s: 26 }) + txt(320, 162, "30", { s: 26, c: "#4F2686" }) + txt(425, 162, "20", { s: 26, c: "#8D1D52" }) + txt(560, 254, "25", { s: 22, c: GRIS }) +
+            txt(205, 78, "Stand : 75", { s: 13, c: BLEU }) + txt(425, 82, "Dames : 50", { s: 13, c: "#8D1D52" });
+          return svg(640, 290, "Diagramme de Venn de la kermesse : 45, 30, 20 et 25 élèves", g, s); })() }],
+        fil: { html: "<p>75 + 50 compte deux fois les 30 élèves des deux activités. Au moins une activité : 75 + 50 − 30 = <strong>95 élèves</strong>.</p>", verdicts: [[0, "rejetee", "Il faut retirer une fois les 30 élèves comptés deux fois : 95 participants."]] },
+        retenir: "Ensembles qui se chevauchent : retirer l'intersection." },
+      { t: "Les plateaux-repas", html: "<div class='ex'><b>Calcul</b>Une boisson <strong>et</strong> un plat <strong>et</strong> un dessert : 4 × 3 × 2 = <strong>24 plateaux</strong>.</div>" +
+        "<div class='astuce'><b>Contrôle par l'arbre</b>4 branches, puis 3 sous chacune (12), puis 2 sous chacune (24).</div>",
+        planches: [{ type: "3d", titre: "24 plateaux, 24 cubes", legende: "4 boissons (colonnes), 3 plats (rangées), 2 desserts (étages) : écarte les cubes pour vérifier qu'il y en a 24.", modele: { h: 340, rx: -22, ry: 34, echelle: 0.85, alt: "Pavé de 4 sur 3 sur 2 cubes", eclate: "Écarter", jouer: "Écarter les 24 plateaux", objets: (function () { var o = [{ f: "boite", c: [0, -4, 0], d: [460, 8, 240], coul: "#E9E2D2", dessus: "#F3EEE2" }], C = ["#E8394B", "#F2994A", "#36B37A", "#4F86E0"], x, y, z; for (x = 0; x < 4; x++) for (y = 0; y < 2; y++) for (z = 0; z < 3; z++) o.push({ f: "boite", c: [-120 + x * 80, 18 + y * 44, -70 + z * 70], d: [70, 38, 56], coul: C[x], dessus: y ? "#FFF1C2" : "#FFFFFF", ec: [(x - 1.5) * 34, y * 46, (z - 1) * 26] }); return o; })(),
+          etiquettes: [{ p: [-120, 70, -120], t: "Foléré" }, { p: [120, 70, -120], t: "Eau", cote: "d" }, { p: [160, 30, 70], t: "3 plats", cote: "d" }] } }],
+        fil: { html: "<p>24 plateaux, 25 modèles de tickets : <strong>ils suffisent</strong>, il en reste un.</p>", verdicts: [[1, "validee", "4 × 3 × 2 = 24 ≤ 25."]] },
+        retenir: "Choix successifs : produit." },
+      { t: "Rédiger la réponse", html: "<div class='retiens'><b>Ce qui fait gagner les points</b>Nommer les ensembles, justifier l'outil (« certains élèves font les deux, je retire l'intersection » ; « trois choix successifs, je multiplie »), calculer, puis répondre en reprenant la question.</div>" +
+        "<div class='attention'><b>Piège</b>Ne pas confondre « participent à au moins une activité » (95) et « ne participent à rien » (120 − 95 = 25).</div>",
+        retenir: "Justifier, calculer, conclure." }
+    ],
+    denouement: { titre: "95 participants et 24 plateaux",
+      etapes: ["Venn : 75 + 50 − 30 = 95 participants (indice 1).", "Sans activité : 120 − 95 = 25.", "Plateaux : 4 × 3 × 2 = 24 (indice 2).", "24 ≤ 25 : les tickets suffisent."],
+      reponse: "<p>Notons S et D les élèves qui tiennent un stand et ceux qui jouent aux dames. card(S ∪ D) = 75 + 50 − 30 = <strong>95 élèves</strong> participent à au moins une activité (25 ne participent à rien). Un plateau-repas se compose d'une boisson, d'un plat et d'un dessert : 4 × 3 × 2 = <strong>24 plateaux</strong>. Les 25 modèles de tickets suffisent.</p>",
+      transfert: "<p>L'an prochain, le comité ajoute un 4e plat et propose « avec ou sans dessert ». Combien de plateaux ? Les 25 tickets suffisent-ils ? <em>(4 × 4 × (2 + 1) = 48 : non.)</em></p>" },
+    revision: ["Ensembles qui se chevauchent : Venn ou tableau, card(A ∪ B) = card(A) + card(B) − card(A ∩ B).", "Choix successifs : arbre et produit.", "Toujours conclure par une phrase qui répond à la question."],
+    exo: "<p>Sur 80 élèves, 45 font du sport, 30 de la musique, 12 les deux. Combien ne font ni sport ni musique ? Une tenue de sport : un maillot parmi 3 couleurs et un short parmi 2 : combien de tenues ? <em>(80 − 63 = 17 ; 3 × 2 = 6.)</em></p>",
+    quiz: [q("75 au stand, 50 aux dames, 30 aux deux : au moins une activité ?", "95", "125", "65", "75 + 50 − 30."), q("Sur 120, sans activité ?", "25", "95", "5", "120 − 95."), q("4 boissons, 3 plats, 2 desserts : plateaux ?", "24", "9", "12", "Produit."), q("Quel outil pour des ensembles qui se chevauchent ?", "diagramme de Venn", "arbre de choix", "factorielle", "Ou tableau à double entrée."), q("Quel outil pour des choix successifs ?", "arbre de choix", "diagramme de Venn", "tableau des effectifs", "Principe multiplicatif."), q("Stand seulement ?", "45", "75", "30", "75 − 30."), q("Les 25 tickets suffisent-ils pour 24 plateaux ?", "oui", "non", "on ne peut pas savoir", "24 ≤ 25."), q("4 plats et « avec ou sans dessert » (2 desserts) : plateaux ?", "48", "32", "24", "4 × 4 × 3.")]
+  });
+})();
+
+/* Leçons APPROFONDIES — lot 4 (17/11/2026) : aimants (4e), osmose (Tle D), expérience de Rutherford et mesure (2nde C),
+   division euclidienne (5e). Gabarit de 07-lecons-approfondies.js : situation de vie suivie partie après partie,
+   hypothèses tranchées, planches 2D et 3D, labo ou simulation, situation résolue (denouement), quiz de 10 questions.
+   Ces leçons remplacent EN PLACE les versions courtes des fichiers 05 et 06 (même identifiant, même rang dans la
+   liste ; fiche APC et « examen » repris). Les simulations sont déclarées à la fin du fichier (VRT_A). */
+(function () {
+  "use strict";
+  var NUIT = "#001136", BLEU = "#1E499B", GRIS = "#4D5163", ROUGE = "#D9472B", VERT = "#17784D", NS = "http://www.w3.org/2000/svg";
+
+  /* ── outils de dessin 2D ── */
+  function txt(x, y, t, o) {
+    o = o || {};
+    return "<text x='" + x + "' y='" + y + "' text-anchor='" + (o.a || "middle") + "' font-size='" + (o.s || 12) + "' font-weight='" + (o.w || 700) + "' fill='" + (o.c || NUIT) + "'" + (o.i ? " font-style='italic'" : "") + ">" + t + "</text>";
+  }
+  function lin(id, cs, vertical) {
+    var s = "<linearGradient id='" + id + "'" + (vertical ? " x1='0' y1='0' x2='0' y2='1'" : "") + ">";
+    cs.forEach(function (c, i) { s += "<stop offset='" + (i / (cs.length - 1)).toFixed(2) + "' stop-color='" + c + "'/>"; });
+    return s + "</linearGradient>";
+  }
+  function rad(id, cs) {
+    var s = "<radialGradient id='" + id + "' cx='35%' cy='30%' r='75%'>";
+    cs.forEach(function (c, i) { s += "<stop offset='" + (i / (cs.length - 1)).toFixed(2) + "' stop-color='" + c + "'/>"; });
+    return s + "</radialGradient>";
+  }
+  function omb(id) { return "<radialGradient id='" + id + "'><stop offset='0' stop-color='#001136' stop-opacity='.28'/><stop offset='1' stop-color='#001136' stop-opacity='0'/></radialGradient>"; }
+  function fleche(id, c) { return "<marker id='" + id + "' markerWidth='10' markerHeight='10' refX='7' refY='5' orient='auto'><path d='M0 1L8 5L0 9Z' fill='" + c + "'/></marker>"; }
+  function svg(w, h, alt, defs, corps) {
+    return "<svg viewBox='0 0 " + w + " " + h + "' role='img' aria-label='" + alt + "' font-family='Inter,Arial,sans-serif'><rect width='" + w + "' height='" + h + "' fill='#fff'/><defs>" + defs + "</defs>" + corps +
+      "<text x='" + (w - 6) + "' y='" + (h - 5) + "' font-size='8' text-anchor='end' fill='#8A93A6'>Planche VÉRITAS</text></svg>";
+  }
+  /* générateur pseudo-aléatoire à graine fixe : les dessins (et les pages statiques) restent identiques d'une construction à l'autre */
+  function alea(g) { return function () { g = (g * 16807) % 2147483647; return (g - 1) / 2147483646; }; }
+  /* une mangue mûre (2D) */
+  function mangue(id, x, y, r, a) {
+    return "<g transform='translate(" + x + " " + y + ") rotate(" + (a || 0) + ")'><ellipse cx='1' cy='" + (r * .9) + "' rx='" + (r * .9) + "' ry='" + (r * .25) + "' fill='url(#" + id + "o)'/><ellipse rx='" + r + "' ry='" + (r * .78) + "' fill='url(#" + id + "m)'/>" +
+      "<ellipse cx='" + (-r * .35) + "' cy='" + (-r * .3) + "' rx='" + (r * .3) + "' ry='" + (r * .16) + "' fill='#fff' opacity='.55' transform='rotate(-25)'/><path d='M" + (r * .85) + " " + (-r * .25) + "l" + (r * .3).toFixed(1) + " " + (-r * .3).toFixed(1) + "' stroke='#5B3A12' stroke-width='" + (r > 7 ? 1.4 : 1) + "' fill='none'/></g>";
+  }
+  function defsMangue(id) { return rad(id + "m", ["#FFE07A", "#F7B32B", "#E07A1F", "#7A9A2E"]) + omb(id + "o"); }
+
+  /* reprendre une leçon existante : même rang dans la liste, fiche APC et lien d'examen conservés */
+  function ancien(id) { return window.VRT_LECONS[id]; }
+  function remplacer(id, o) {
+    var a = ancien(id);
+    if (a) ["apc", "examen", "rang", "cle"].forEach(function (k) { if (a[k] != null && o[k] == null) o[k] = a[k]; });
+    VRT_L(id, o);
+    if (a) o.ordre = a.ordre;
+  }
+  function q(qq, bonne, f1, f2, e) { return { q: qq, r: [bonne, f1, f2], b: 0, e: e }; }
+
+  /* ═══════════════════════ 4e PCT — LES AIMANTS ET LEURS PÔLES ═══════════════════════ */
+  /* champ d'un aimant droit (pôle N en (xn, yn), pôle S en (xs, ys)) : somme de deux « charges magnétiques » */
+  function champ(px, py, xn, yn, xs, ys) {
+    var dx = px - xn, dy = py - yn, d = Math.pow(dx * dx + dy * dy, 1.5) + 1e-6, ex = dx / d, ey = dy / d;
+    dx = px - xs; dy = py - ys; d = Math.pow(dx * dx + dy * dy, 1.5) + 1e-6; ex -= dx / d; ey -= dy / d;
+    return [ex, ey];
+  }
+  function aimant2D(id, x, y, L, H) {
+    return "<ellipse cx='" + (x + L / 2) + "' cy='" + (y + H + 6) + "' rx='" + (L * .55) + "' ry='7' fill='url(#" + id + "o)'/>" +
+      "<rect x='" + x + "' y='" + y + "' width='" + (L / 2) + "' height='" + H + "' rx='5' fill='url(#" + id + "r)'/><rect x='" + (x + L / 2) + "' y='" + y + "' width='" + (L / 2) + "' height='" + H + "' rx='5' fill='url(#" + id + "b)'/>" +
+      "<rect x='" + (x + 6) + "' y='" + (y + 4) + "' width='" + (L - 12) + "' height='" + (H * .22) + "' rx='3' fill='#fff' opacity='.32'/>" +
+      txt(x + L / 4, y + H / 2 + 7, "N", { s: 20, c: "#fff", w: 800 }) + txt(x + 3 * L / 4, y + H / 2 + 7, "S", { s: 20, c: "#fff", w: 800 });
+  }
+  function defsAimant(id) { return lin(id + "r", ["#F2836B", "#D9472B", "#9E2A14"], true) + lin(id + "b", ["#6E9BEA", "#1E499B", "#0E2A62"], true) + omb(id + "o"); }
+  function boussole2D(x, y, ang, r) {
+    r = r || 13;
+    return "<g transform='translate(" + x + " " + y + ")'><circle r='" + (r + 2) + "' fill='#C9CFDD'/><circle r='" + r + "' fill='#FDFCF7' stroke='#8E96A6'/><g transform='rotate(" + ang.toFixed(1) + ")'><path d='M0 " + (-r + 2) + "L3.6 0L-3.6 0Z' fill='" + ROUGE + "'/><path d='M0 " + (r - 2) + "L3.6 0L-3.6 0Z' fill='#5C6478'/></g><circle r='1.8' fill='" + NUIT + "'/></g>";
+  }
+  var PLANCHE_SPECTRE = (function () {
+    var id = "ai1", W = 640, H = 330, xn = 250, xs = 390, y0 = 165, s = "", R = alea(20261117), i;
+    s += "<rect x='12' y='12' width='616' height='306' rx='14' fill='#F7F3EA' stroke='#E3DCCB'/>";
+    for (i = 0; i < 2300; i++) {
+      var px = 24 + R() * 592, py = 24 + R() * 282;
+      if ((px > 222 && px < 418 && py > 141 && py < 189) || (py < 46 && px > 130 && px < 510)) continue;
+      var e = champ(px, py, xn, y0, xs, y0), n = Math.sqrt(e[0] * e[0] + e[1] * e[1]), l = 3.2 + Math.min(4.5, n * 9000), ux = e[0] / n, uy = e[1] / n;
+      var op = Math.max(0.18, Math.min(0.95, n * 26000));
+      s += "<path d='M" + (px - ux * l).toFixed(1) + " " + (py - uy * l).toFixed(1) + "L" + (px + ux * l).toFixed(1) + " " + (py + uy * l).toFixed(1) + "' stroke='#2E2F36' stroke-opacity='" + op.toFixed(2) + "' stroke-width='1.3' stroke-linecap='round'/>";
+    }
+    s += aimant2D(id, 222, 141, 196, 48);
+    [[120, 70], [520, 70], [320, 60], [120, 262], [520, 262], [320, 272], [70, 165], [570, 165]].forEach(function (p) {
+      var e = champ(p[0], p[1], xn, y0, xs, y0); s += boussole2D(p[0], p[1], Math.atan2(e[1], e[0]) * 180 / Math.PI + 90, 14);
+    });
+    s += "<rect x='130' y='16' width='380' height='24' rx='12' fill='#fff' fill-opacity='.92' stroke='#E3DCCB'/>" + txt(320, 33, "Limaille de fer saupoudrée sur un carton posé sur l'aimant", { s: 12.5, c: GRIS, w: 600 });
+    return svg(W, H, "Spectre magnétique d un aimant droit : la limaille de fer dessine des lignes qui vont du pôle Nord au pôle Sud ; les aiguilles des boussoles suivent ces lignes", defsAimant(id), s);
+  })();
+
+  function aimant3D() {
+    var o = [], xn = -55, xs = 55, k;
+    o.push({ f: "boite", c: [0, -6, 0], d: [470, 10, 320], coul: "#7A4A22", dessus: "#A8703A" });
+    o.push({ f: "boite", c: [-45, 2, 0], d: [90, 22, 34], coul: "#D9472B", div: false });
+    o.push({ f: "boite", c: [45, 2, 0], d: [90, 22, 34], coul: "#1E499B", div: false });
+    for (k = 0; k < 12; k++) {
+      var a = 2 * Math.PI * k / 12, cx = 150 * Math.cos(a), cz = 110 * Math.sin(a), e = champ(cx, cz, xn, 0, xs, 0), n = Math.sqrt(e[0] * e[0] + e[1] * e[1]), ux = e[0] / n, uz = e[1] / n, L = 15, w = 4, h = 9, ec = [0, 34, 0];
+      o.push({ f: "cylindre", c: [cx, 0, cz], r: 19, h: 6, n: 20, coul: "#B08D57", dessus: "#FBF6E9", ec: ec });
+      o.push({ f: "poly", pts: [[cx + ux * L, h, cz + uz * L], [cx - uz * w, h, cz + ux * w], [cx + uz * w, h, cz - ux * w]], coul: "#D9472B", ec: ec });
+      o.push({ f: "poly", pts: [[cx - ux * L, h, cz - uz * L], [cx + uz * w, h, cz - ux * w], [cx - uz * w, h, cz + ux * w]], coul: "#E8ECF1", ec: ec });
+      o.push({ f: "cylindre", c: [cx, h, cz], r: 2, h: 1.5, n: 8, coul: "#B08D57", ec: ec });
+    }
+    [[-150, 0, 120], [170, 0, -120], [0, 0, 140]].forEach(function (p, i) { o.push({ f: "cylindre", c: p, r: 2.2, h: 40, n: 6, axe: "x", coul: "#7F8794" }); });
+    return o;
+  }
+
+  remplacer("4e-pct-aimants", {
+    c: "4e", m: "pct", titre: "Les aimants et leurs pôles", duree: 30,
+    accroche: "Une clé perdue dans le sable du chantier et un aimant sans lettres : la physique mène l'enquête.",
+    intro: "Une clé tombée dans un tas de sable te sert de fil rouge : à chaque partie, un indice te permet de trancher entre quatre idées.",
+    objectifs: ["nommer les deux pôles d'un aimant et les repérer avec une boussole", "énoncer les règles d'attraction et de répulsion", "décrire le champ magnétique et son spectre", "citer les matériaux attirés par un aimant"],
+    enquete: {
+      titre: "La clé du portail dans le tas de sable",
+      svg: (function () {
+        var id = "aisc", R = alea(77), s = "<rect width='640' height='230' fill='#EAF4FB'/><rect y='150' width='640' height='80' fill='#E9D6AE'/>";
+        s += "<path d='M140 160C200 70 330 60 420 160Z' fill='#DCC08A'/><path d='M160 160C220 92 320 86 400 160' fill='none' stroke='#C9A86B' stroke-width='2'/>";
+        for (var i = 0; i < 60; i++) { var x = 170 + R() * 230, y = 115 + R() * 42; if ((x - 285) * (x - 285) / 12000 + (y - 160) * (y - 160) / 2600 > 1) continue; s += R() < .5 ? "<path d='M" + x.toFixed(0) + " " + y.toFixed(0) + "l" + (6 + R() * 6).toFixed(0) + " " + (R() * 6 - 3).toFixed(0) + "' stroke='#5D646F' stroke-width='2' stroke-linecap='round'/>" : "<circle cx='" + x.toFixed(0) + "' cy='" + y.toFixed(0) + "' r='2.6' fill='" + (R() < .5 ? "#B8432C" : "#A7AEB9") + "'/>"; }
+        s += "<g transform='translate(300 128) rotate(-18)'><circle r='7' fill='none' stroke='#8E96A6' stroke-width='3'/><rect x='6' y='-3' width='26' height='6' rx='2' fill='#D9B23A'/><rect x='24' y='3' width='5' height='5' fill='#D9B23A'/></g>";
+        s += "<rect x='470' y='60' width='14' height='100' fill='#7A5230'/><path d='M462 60h90v12h-90z' fill='#8E96A6'/>";
+        s += "<g transform='translate(470 120)'>" + aimant2D(id, 0, 0, 70, 20).replace(/>N</, ">?<").replace(/>S</, ">?<") + "</g>";
+        s += txt(285, 205, "sable mêlé de clous, de capsules et de fils de cuivre", { s: 12, c: "#6D4A00", w: 600 }) + txt(505, 52, "aimant du vieux haut-parleur", { s: 11.5, c: NUIT, w: 600 });
+        s += "<path d='M296 112l-6-26' stroke='#C2540A' stroke-width='1.5' marker-end='url(#aiscf)'/>" + txt(286, 80, "la clé", { s: 12, c: "#C2540A" });
+        return svg(640, 230, "Un tas de sable de chantier mêlé de clous et de capsules ; une clé dorée au porte-clés en acier y est tombée ; un aimant sans marques attend", defsAimant(id) + fleche("aiscf", "#C2540A"), s);
+      })(),
+      legende: "Au quartier Tamdja, à Bafoussam : le tas de sable du chantier de l'oncle Kamga, devant le portail.",
+      contexte: "<p>Junior a laissé tomber la <strong>clé du cadenas du portail</strong> dans le tas de sable du chantier de son oncle. Le sable est plein de clous, de capsules de bouteilles et de bouts de fil électrique. La clé est dorée (en <strong>laiton</strong>, un alliage de cuivre et de zinc) et pend à un petit <strong>anneau en acier</strong>.</p><p>Son cousin Arnaud démonte un vieux haut-parleur et en sort un <strong>aimant</strong> puissant… dont les lettres N et S sont effacées. Ce soir, l'oncle veut aussi s'en servir comme boussole de secours pour orienter la future fenêtre vers le nord.</p>",
+      documents: [
+        { t: "Ce qu'il y a dans le sable", html: "<table class='donnees'><tr><th>Objet</th><th>Matériau</th></tr><tr><td>clous</td><td>fer</td></tr><tr><td>capsules de bouteilles</td><td>acier (fer + carbone)</td></tr><tr><td>bouts de fil électrique</td><td>cuivre</td></tr><tr><td>canette écrasée</td><td>aluminium</td></tr><tr><td>clé</td><td>laiton (cuivre + zinc)</td></tr><tr><td>anneau de la clé</td><td>acier</td></tr></table>" },
+        { t: "La boussole de l'oncle", html: "<p>Une boussole est une petite <strong>aiguille aimantée</strong> qui tourne librement sur un pivot. Loin de tout aimant, son extrémité colorée (pôle Nord de l'aiguille) indique le <strong>nord géographique</strong>.</p>" }
+      ],
+      question: "L'aimant peut-il sortir la clé du sable, et comment retrouver son pôle Nord sans les lettres ?",
+      tache: "Explique à Junior et Arnaud, en huit lignes, ce que l'aimant va ramener, pourquoi, et comment identifier ses pôles.",
+      hypotheses: [
+        "Un aimant attire tous les métaux : il ramènera la clé directement.",
+        "La clé est en laiton : elle n'est pas attirée, elle est perdue.",
+        "La clé n'est pas attirée, mais son anneau en acier l'est : l'aimant ramènera la clé par l'anneau.",
+        "Sans les lettres, on ne peut plus savoir où est le pôle Nord de l'aimant."
+      ]
+    },
+    parties: [
+      { t: "Deux pôles, toujours", html:
+        "<div class='def'><b>Définition</b>Tout aimant possède deux <strong>pôles</strong> : le <strong>pôle Nord</strong> et le <strong>pôle Sud</strong>. C'est près des pôles que l'action de l'aimant est la plus forte : les clous s'y accrochent en grappes.</div>" +
+        "<p>Si on casse un aimant, on n'isole jamais un pôle : chaque morceau redevient un aimant complet, avec son pôle Nord et son pôle Sud.</p>" +
+        "<div class='methode'><b>Retrouver le pôle Nord d'un aimant sans marques</b><ol><li>Suspends l'aimant par son milieu à un fil, loin de tout objet en fer.</li><li>Attends qu'il s'immobilise : il s'oriente comme une boussole.</li><li>L'extrémité tournée vers le <strong>nord géographique</strong> est son <strong>pôle Nord</strong>.</li></ol></div>" +
+        "<div class='savais'><b>Le savais-tu ?</b>La Terre elle-même se comporte comme un énorme aimant. C'est pour cela qu'une aiguille aimantée, partout au Cameroun, montre le nord.</div>",
+        fil: { html: "<p>Arnaud attache l'aimant à un fil de pêche, au milieu de la cour, loin du chantier. Après quelques oscillations, il s'arrête : une extrémité regarde vers Bamenda, au nord. C'est le <strong>pôle Nord</strong>. Il le marque au feutre rouge. Les lettres effacées n'étaient pas un problème.</p>", verdicts: [[3, "rejetee", "L'aimant suspendu s'oriente comme une boussole : son extrémité tournée vers le nord est son pôle Nord."]] },
+        retenir: "Un aimant a toujours deux pôles ; suspendu, son pôle Nord indique le nord géographique." },
+
+      { t: "Attraction et répulsion", html:
+        "<ul><li>Deux pôles de <strong>même nom</strong> se <strong>repoussent</strong> (Nord-Nord, Sud-Sud).</li><li>Deux pôles de <strong>noms différents</strong> s'<strong>attirent</strong> (Nord-Sud).</li></ul>" +
+        "<div class='prop'><b>Règle</b>L'aiguille d'une boussole est un petit aimant : son pôle Nord est <strong>attiré</strong> par le pôle Sud d'un aimant et <strong>repoussé</strong> par son pôle Nord.</div>" +
+        "<div class='astuce'><b>Contrôle du marquage</b>Approche l'extrémité marquée en rouge de la boussole : si le bout coloré de l'aiguille <strong>s'enfuit</strong>, c'est bien un pôle Nord.</div>" +
+        "<div class='attention'><b>Piège</b>L'attraction ne prouve rien : un aimant attire aussi un clou non aimanté. Seule la <strong>répulsion</strong> prouve qu'un objet est un aimant, et permet d'identifier ses pôles.</div>",
+        fil: { html: "<p>Arnaud approche le bout marqué de la boussole de l'oncle : le bout coloré de l'aiguille <strong>recule</strong>. Répulsion Nord-Nord : le marquage est confirmé. Il retourne l'aimant : l'aiguille se précipite vers l'autre extrémité, le pôle Sud.</p>" },
+        retenir: "Pôles de même nom : répulsion ; pôles de noms différents : attraction." },
+
+      { t: "Le champ magnétique et son spectre", html:
+        "<div class='def'><b>Champ magnétique</b>Autour d'un aimant, il existe une région où une aiguille aimantée subit une action : c'est le <strong>champ magnétique</strong>. En chaque point, l'aiguille s'oriente selon une direction bien précise.</div>" +
+        "<p>Saupoudre de la <strong>limaille de fer</strong> sur un carton posé sur l'aimant et tapote : les grains s'alignent et dessinent des <strong>lignes de champ</strong>. Ce dessin s'appelle le <strong>spectre magnétique</strong>.</p>" +
+        "<div class='prop'><b>Lignes de champ</b>Elles sortent par le <strong>pôle Nord</strong> et rentrent par le <strong>pôle Sud</strong> ; elles se resserrent près des pôles, là où le champ est le plus intense.</div>",
+        planches: [
+          { type: "2D", titre: "Le spectre magnétique d'un aimant droit", legende: "Les grains de limaille s'alignent en lignes courbes qui vont d'un pôle à l'autre ; ils sont plus serrés et plus nombreux près des pôles. Chaque boussole s'aligne sur la ligne qui passe par elle.", svg: PLANCHE_SPECTRE },
+          { type: "3d", titre: "Douze boussoles autour de l'aimant", legende: "Tourne la table : chaque aiguille (rouge = pôle Nord) suit la ligne de champ qui passe par elle. Le curseur soulève les boussoles pour mieux voir leurs aiguilles.",
+            modele: { h: 360, rx: -38, ry: 18, echelle: 0.95, alt: "Aimant droit rouge et bleu entouré de douze boussoles sur une table en bois", eclate: "Soulever les boussoles", jouer: "Soulever", objets: aimant3D(),
+              etiquettes: [{ p: [-80, 14, 0], t: "Pôle Nord" }, { p: [80, 14, 0], t: "Pôle Sud", cote: "d" }, { p: [150, 10, 0], t: "Boussole", cote: "d", ec: [0, 34, 0] }] } }
+        ],
+        fil: { html: "<p>Le champ est le plus fort près des pôles : pour « pêcher » dans le sable, Arnaud plongera donc une <strong>extrémité</strong> de l'aimant, et non son milieu. Il l'emballe d'abord dans un sachet plastique : les objets attirés se détacheront d'un coup quand il retirera le sachet.</p>" },
+        retenir: "Lignes de champ : du pôle Nord au pôle Sud, serrées près des pôles." },
+
+      { t: "Ce que l'aimant attire", html:
+        "<p>Un aimant attire le <strong>fer</strong>, l'<strong>acier</strong> (fer + carbone), le <strong>nickel</strong> et le <strong>cobalt</strong> : ce sont des matériaux <strong>ferromagnétiques</strong>. Il n'attire ni le cuivre, ni l'aluminium, ni le laiton, ni l'or, ni le bois, ni le plastique.</p>",
+        planches: [{ type: "2D", titre: "Le tri du sable du chantier", legende: "Côté gauche, ce que l'aimant ramène : clous, capsules et la clé, tirée par son anneau en acier. Côté droit, ce qui reste dans le sable : fils de cuivre et canette en aluminium.", svg: (function () {
+          var id = "ai3", s = "<rect x='14' y='14' width='300' height='242' rx='14' fill='#EEF8F1' stroke='#9FD3B3'/><rect x='326' y='14' width='300' height='242' rx='14' fill='#FCEDEA' stroke='#E9AFA4'/>";
+          s += txt(164, 40, "Attiré", { s: 15, c: VERT }) + txt(476, 40, "Pas attiré", { s: 15, c: "#A31238" });
+          s += "<g transform='translate(110 62)'>" + aimant2D(id, 0, 0, 108, 30) + "</g>";
+          [[124, 100, 86], [144, 102, 92], [164, 100, 88], [184, 102, 95]].forEach(function (c) { s += "<g transform='translate(" + c[0] + " " + c[1] + ") rotate(" + c[2] + ")'><rect x='-1' y='-2' width='36' height='4' rx='2' fill='#6E7684'/><rect x='-5' y='-4' width='6' height='8' rx='1' fill='#5D646F'/></g>"; });
+          s += "<g transform='translate(204 112)'><circle r='12' fill='url(#" + id + "cap)'/><circle r='9' fill='none' stroke='#8E96A6' stroke-dasharray='2 2'/></g>";
+          s += "<g transform='translate(130 172) rotate(70)'><circle r='8' fill='none' stroke='#7F8794' stroke-width='3.4'/><rect x='7' y='-4' width='40' height='8' rx='2' fill='url(#" + id + "lai)'/><rect x='34' y='4' width='7' height='7' fill='#C9A12F'/><rect x='42' y='4' width='5' height='5' fill='#C9A12F'/></g>";
+          s += txt(164, 236, "clous (fer) · capsule (acier) · anneau (acier)", { s: 11, w: 600, c: VERT });
+          s += "<g transform='translate(380 110)'><path d='M0 0c20-20 40 20 60 0s40 20 60 0' fill='none' stroke='#C46A2B' stroke-width='5' stroke-linecap='round'/><path d='M10 40c20-14 40 14 60 0' fill='none' stroke='#C46A2B' stroke-width='5' stroke-linecap='round'/></g>";
+          s += "<g transform='translate(520 140)'><rect x='-26' y='-38' width='52' height='76' rx='10' fill='url(#" + id + "alu)'/><path d='M-26 -6l52 14' stroke='#8E96A6' stroke-width='2'/><rect x='-12' y='-46' width='24' height='8' rx='3' fill='#A7AEB9'/></g>";
+          s += txt(476, 236, "fils (cuivre) · canette (aluminium) · clé seule (laiton)", { s: 11, w: 600, c: "#A31238" });
+          return svg(640, 270, "Tri des objets du sable : clous, capsule et anneau d acier attirés ; fils de cuivre et canette en aluminium non attirés", defsAimant(id) + rad(id + "cap", ["#F2F4F7", "#BFC5CF", "#7F8794"]) + lin(id + "lai", ["#F5D77A", "#D9B23A", "#9C7A16"], true) + lin(id + "alu", ["#E6EAF0", "#B9C0CB", "#8992A0"]), s);
+        })() }],
+        fil: { html: "<p>D'après le document 1, le laiton contient du cuivre et du zinc : la clé seule ne serait <strong>pas</strong> attirée. Mais son anneau est en <strong>acier</strong> : il colle à l'aimant et remonte la clé avec lui. Les clous et les capsules montent aussi ; les fils de cuivre et la canette restent dans le sable.</p>", verdicts: [[0, "rejetee", "Le cuivre, l'aluminium et le laiton ne sont pas attirés."], [1, "rejetee", "La clé n'est pas attirée, mais son anneau en acier l'est."], [2, "validee", "L'anneau en acier est attiré et ramène la clé."]] },
+        retenir: "Attirés : fer, acier, nickel, cobalt. Pas attirés : cuivre, aluminium, laiton, bois, plastique." }
+    ],
+    denouement: {
+      titre: "La clé remonte, accrochée par son anneau",
+      etapes: [
+        "Aimant suspendu : l'extrémité tournée vers le nord est son pôle Nord (indice 1).",
+        "Répulsion avec le bout coloré de la boussole : le marquage est confirmé (indice 2).",
+        "On pêche avec une extrémité, là où le champ est le plus fort (indice 3).",
+        "Laiton non attiré, anneau en acier attiré : la clé remonte par l'anneau (indice 4)."
+      ],
+      reponse: "<p>Pour retrouver les pôles, on suspend l'aimant par son milieu loin de tout objet en fer : il s'oriente comme une boussole, et l'extrémité tournée vers le nord géographique est son pôle Nord. La répulsion avec le bout coloré de l'aiguille de la boussole le confirme, car deux pôles de même nom se repoussent. Pour fouiller le sable, on plonge une extrémité de l'aimant, emballée dans un sachet, car le champ magnétique est le plus intense près des pôles. La clé, en laiton (cuivre et zinc), n'est pas attirée ; mais son anneau en acier l'est : l'aimant ramène donc la clé par son anneau, avec les clous et les capsules, tandis que les fils de cuivre et la canette en aluminium restent dans le sable.</p>",
+      transfert: "<p>Au marché Central de Yaoundé, un ferrailleur doit séparer, dans un tas de déchets, les boîtes de conserve (acier) des canettes de boisson (aluminium). Propose-lui un procédé en trois lignes et justifie-le.</p>"
+    },
+    revision: [
+      "Deux pôles : <strong>Nord</strong> et <strong>Sud</strong> ; un aimant cassé redonne deux aimants complets.",
+      "Suspendu, le pôle Nord d'un aimant indique le <strong>nord géographique</strong>.",
+      "Même nom : <strong>répulsion</strong> ; noms différents : <strong>attraction</strong>.",
+      "Seule la répulsion prouve qu'un objet est un aimant.",
+      "<strong>Champ magnétique</strong> : lignes du pôle Nord au pôle Sud, serrées près des pôles (spectre de limaille).",
+      "Attirés : <strong>fer, acier, nickel, cobalt</strong> ; pas le cuivre, l'aluminium, le laiton."
+    ],
+    exo: "<p>Tu disposes de deux barres métalliques identiques : l'une est un aimant, l'autre une simple barre de fer. Sans aucun autre objet, comment savoir laquelle est l'aimant ? <em>(Pose l'extrémité de la barre A sur le milieu de la barre B : s'il y a attraction, A est l'aimant, car le milieu d'un aimant n'attire presque rien.)</em></p>",
+    quiz: [
+      q("Deux pôles Sud face à face…", "se repoussent", "s'attirent", "ne font rien", "Même nom : répulsion."),
+      q("Lequel est attiré par un aimant ?", "Une capsule de bouteille en acier", "Une canette en aluminium", "Une clé en laiton", "L'acier contient du fer."),
+      q("On casse un aimant en deux. Chaque morceau a…", "deux pôles", "un seul pôle", "aucun pôle", "Chaque morceau est un aimant complet."),
+      q("Un aimant suspendu par son milieu s'oriente…", "son pôle Nord vers le nord", "son pôle Nord vers le sud", "au hasard", "Il se comporte comme une boussole."),
+      q("Le bout coloré d'une aiguille de boussole recule devant une extrémité d'aimant : cette extrémité est…", "un pôle Nord", "un pôle Sud", "non aimantée", "Le bout coloré est un pôle Nord : répulsion Nord-Nord."),
+      q("Quelle observation prouve qu'un objet est un aimant ?", "une répulsion", "une attraction", "sa couleur", "Un clou est attiré sans être un aimant."),
+      q("Les lignes de champ d'un aimant droit…", "sortent du pôle Nord et rentrent par le pôle Sud", "sortent du pôle Sud", "sont des droites parallèles", "C'est la convention."),
+      q("Où le champ d'un aimant droit est-il le plus intense ?", "près des pôles", "au milieu", "loin de l'aimant", "La limaille s'y accumule."),
+      q("La limaille de fer sur un carton permet d'obtenir…", "le spectre magnétique", "la masse de l'aimant", "le courant électrique", "Les grains s'alignent sur les lignes de champ."),
+      q("Une clé en laiton accrochée à un anneau en acier…", "est ramenée par l'anneau", "est attirée directement", "ne peut jamais être ramenée", "Le laiton n'est pas attiré, l'acier l'est.")
+    ]
+  });
+
+  /* ═══════════════════════ Tle D SVT — LES ÉCHANGES D'EAU (OSMOSE) ═══════════════════════ */
+  function globule(id, x, y, k, lab) {
+    /* k = 1 normal, k > 1 gonflé (sphérique), k = 0 éclaté (fantôme), k < 1 ratatiné (crénelé) */
+    var s = "<g transform='translate(" + x + " " + y + ")'><ellipse cy='46' rx='42' ry='6' fill='url(#" + id + "o)'/>";
+    if (k === 0) {
+      s += "<circle r='38' fill='#F6C9C0' fill-opacity='.35' stroke='#C26A5A' stroke-width='1.6' stroke-dasharray='5 5'/>";
+      for (var i = 0; i < 9; i++) { var a = i * 0.7; s += "<circle cx='" + (52 * Math.cos(a)).toFixed(1) + "' cy='" + (52 * Math.sin(a)).toFixed(1) + "' r='2.4' fill='#C2412F' opacity='.6'/>"; }
+    } else if (k < 1) {
+      var d = "";
+      for (var j = 0; j <= 28; j++) { var b = 2 * Math.PI * j / 28, r = (j % 2 ? 22 : 29); d += (j ? "L" : "M") + (r * Math.cos(b) * 1.15).toFixed(1) + " " + (r * Math.sin(b)).toFixed(1); }
+      s += "<path d='" + d + "Z' fill='url(#" + id + "g)' stroke='#9E2A14' stroke-width='1.5' stroke-linejoin='round'/>";
+    } else if (k > 1) {
+      s += "<circle r='40' fill='url(#" + id + "g)' stroke='#B4321E' stroke-width='1.6'/><ellipse cx='-12' cy='-14' rx='12' ry='7' fill='#fff' opacity='.35'/>";
+    } else {
+      s += "<ellipse rx='40' ry='30' fill='url(#" + id + "g)' stroke='#B4321E' stroke-width='1.6'/><ellipse rx='20' ry='12' fill='#C2412F' opacity='.45'/><ellipse cx='-14' cy='-14' rx='11' ry='5' fill='#fff' opacity='.4'/>";
+    }
+    return s + txt(0, 72, lab[0], { s: 12.5, c: NUIT }) + txt(0, 88, lab[1], { s: 11, w: 500, c: GRIS }) + "</g>";
+  }
+  function cellule3D() {
+    var o = [];
+    o.push({ f: "boite", c: [0, -8, 0], d: [520, 8, 220], coul: "#DDE4EE", dessus: "#EEF2F7" });
+    /* cellule turgescente (à gauche) */
+    o.push({ f: "boite", c: [-125, 0, 0], d: [190, 110, 120], coul: "#4CAF50", op: 0.18, div: false, ec: [0, 120, 0] });
+    o.push({ f: "sphere", c: [-125, 55, 0], r: [86, 50, 54], n: 28, m: 16, coul: "#8E3B8C", op: 0.7 });
+    o.push({ f: "sphere", c: [-195, 30, 30], r: 13, coul: "#6B4C9A" });
+    /* cellule plasmolysée (à droite) */
+    o.push({ f: "boite", c: [125, 0, 0], d: [190, 110, 120], coul: "#4CAF50", op: 0.18, div: false, ec: [0, 120, 0] });
+    o.push({ f: "sphere", c: [125, 50, 0], r: [62, 38, 40], n: 28, m: 16, coul: "#BFE6B8", op: 0.45 });
+    o.push({ f: "sphere", c: [125, 50, 0], r: [36, 24, 26], n: 24, m: 14, coul: "#5E1F5C", op: 0.85 });
+    o.push({ f: "sphere", c: [85, 45, 22], r: 10, coul: "#6B4C9A" });
+    return o;
+  }
+  var PLANCHE_FRITES = (function () {
+    var id = "os4", X = function (c) { return 70 + c / 0.6 * 520; }, Y = function (p) { return 160 - p * 10.5; }, s = "", P = [[0, 12], [0.1, 7.5], [0.2, 3.2], [0.3, -0.6], [0.4, -4.1], [0.5, -8], [0.6, -11]], i;
+    for (i = 0; i <= 6; i++) s += "<path d='M" + X(i / 10) + " 30V292' stroke='#E3E8F1'/>" + txt(X(i / 10), 310, String(i / 10).replace(".", ","), { s: 11, w: 500, c: GRIS });
+    for (i = -12; i <= 12; i += 4) s += "<path d='M70 " + Y(i) + "H600' stroke='#E3E8F1'/>" + txt(62, Y(i) + 4, (i > 0 ? "+" : i < 0 ? "−" : "") + Math.abs(i), { s: 11, w: 500, c: GRIS, a: "end" });
+    s += "<path d='M70 " + Y(0) + "H604' stroke='" + NUIT + "' stroke-width='1.6' marker-end='url(#" + id + "f)'/><path d='M70 296V24' stroke='" + NUIT + "' stroke-width='1.6' marker-end='url(#" + id + "f)'/>";
+    s += "<rect x='70' y='30' width='" + (X(0.28) - 70) + "' height='" + (Y(0) - 30) + "' fill='#DCEBFF' opacity='.55'/><rect x='" + X(0.28) + "' y='" + Y(0) + "' width='" + (600 - X(0.28)) + "' height='" + (292 - Y(0)) + "' fill='#FCE4E0' opacity='.55'/>";
+    s += txt(160, 52, "milieu hypotonique : la frite gagne de l'eau", { s: 11.5, c: BLEU, a: "start" }) + txt(360, 270, "milieu hypertonique : elle en perd", { s: 11.5, c: "#A31238", a: "start" });
+    s += "<path d='M" + X(-0.0) + " " + Y(11.5) + "L" + X(0.6) + " " + Y(-11.3) + "' stroke='#C2540A' stroke-width='2.4' stroke-dasharray='7 5'/>";
+    P.forEach(function (p) { s += "<circle cx='" + X(p[0]) + "' cy='" + Y(p[1]) + "' r='5.5' fill='" + BLEU + "' stroke='#fff' stroke-width='1.6'/>"; });
+    s += "<circle cx='" + X(0.28) + "' cy='" + Y(0) + "' r='8' fill='none' stroke='#C2540A' stroke-width='2.4'/><path d='M" + X(0.28) + " " + Y(0) + "V292' stroke='#C2540A' stroke-dasharray='4 4'/>" + txt(X(0.28) + 6, 286, "≈ 0,28 mol/L", { s: 12.5, c: "#C2540A", a: "start" });
+    s += txt(335, 330, "concentration de la solution de saccharose (mol/L)", { s: 12, c: NUIT }) + "<text transform='translate(22 160) rotate(-90)' text-anchor='middle' font-size='12' font-weight='700' fill='" + NUIT + "'>variation de masse (%)</text>";
+    return svg(640, 340, "Graphique : la variation de masse des frites de pomme de terre diminue quand la concentration augmente et s annule vers 0,28 mol par litre", fleche(id + "f", NUIT), s);
+  })();
+
+  remplacer("tle-svt-osmose", {
+    c: "Tle D", m: "svt", titre: "Les échanges d'eau entre la cellule et son milieu", duree: 35,
+    accroche: "De l'eau distillée dans une perfusion ? L'infirmière-major dit non. Les légumes du marché expliquent pourquoi.",
+    intro: "Un stage à l'hôpital et un étal du marché te servent de fil rouge : à chaque partie, un indice t'aide à trancher entre trois idées.",
+    objectifs: ["définir l'osmose et les milieux hypo-, iso- et hypertoniques", "prévoir et expliquer le comportement d'une cellule animale (hémolyse)", "décrire turgescence et plasmolyse d'une cellule végétale", "déterminer expérimentalement la concentration isotonique d'un tissu"],
+    enquete: {
+      titre: "La perfusion et les légumes de Sandaga",
+      svg: (function () {
+        var id = "ossc", s = "<rect width='640' height='220' fill='#F3F8FC'/><rect x='0' y='170' width='640' height='50' fill='#E4E9F0'/>";
+        s += "<rect x='60' y='30' width='6' height='150' fill='#9AA3B2'/><path d='M40 30h50' stroke='#9AA3B2' stroke-width='5'/><rect x='70' y='38' width='40' height='64' rx='8' fill='url(#" + id + "fl)' stroke='#8EA9C1'/><path d='M90 102v40c0 20 40 20 40 40' fill='none' stroke='#8EA9C1' stroke-width='3'/>" + txt(90, 72, "?", { s: 22, c: BLEU });
+        s += "<rect x='140' y='120' width='70' height='14' rx='4' fill='#C7D3E3'/>" + txt(175, 156, "perfusion", { s: 11.5, c: GRIS, w: 600 });
+        s += "<rect x='330' y='118' width='260' height='16' rx='3' fill='#A97D50'/><path d='M350 134v40M570 134v40' stroke='#8E6A3E' stroke-width='7'/>";
+        [0, 1, 2, 3].forEach(function (i) { var x = 360 + i * 32; s += "<path d='M" + x + " 118c-6-40 4-62 10-70c6 8 16 30 10 70Z' fill='" + (i % 2 ? "#2E8B3E" : "#3FA34D") + "' stroke='#1C6B2A'/>"; });
+        s += "<g fill='#5A9BD8' opacity='.8'><circle cx='370' cy='40' r='2.5'/><circle cx='392' cy='30' r='2'/><circle cx='410' cy='44' r='2.5'/><circle cx='430' cy='34' r='2'/></g>";
+        [0, 1, 2].forEach(function (i) { var x = 510 + i * 22; s += "<ellipse cx='" + x + "' cy='110' rx='10' ry='7' fill='#D9F0C8' stroke='#7DAA55' transform='rotate(" + (i * 20 - 15) + " " + x + " 110)'/>"; });
+        s += "<g fill='#fff' stroke='#C9CFDD'><circle cx='520' cy='92' r='2'/><circle cx='534' cy='86' r='1.6'/><circle cx='546' cy='94' r='2'/></g>";
+        s += txt(400, 205, "ndolè aspergé d'eau", { s: 11.5, c: "#1C6B2A", w: 600 }) + txt(535, 205, "concombre salé", { s: 11.5, c: "#5B7A2E", w: 600 });
+        return svg(640, 220, "À gauche, une perfusion avec un flacon d eau distillée ; à droite, un étal du marché : bottes de ndolè aspergées d eau et tranches de concombre salées", lin(id + "fl", ["#EAF4FB", "#CFE3F3"], true), s);
+      })(),
+      legende: "À Douala : le service de pédiatrie de l'hôpital Laquintinie, puis l'étal de la mère de Brenda au marché Sandaga.",
+      contexte: "<p>Brenda, élève infirmière en stage à l'hôpital Laquintinie, doit poser une perfusion à un enfant déshydraté. Le flacon de <strong>sérum physiologique</strong> est fini ; elle propose de le remplacer par de l'<strong>eau distillée</strong>, « puisque c'est l'eau la plus pure ». L'infirmière-major l'arrête net : « Tu veux faire éclater ses globules rouges ? »</p><p>Le soir, au marché Sandaga, Brenda voit sa mère <strong>asperger d'eau</strong> ses bottes de ndolè pour qu'elles restent fermes, tandis que la voisine <strong>sale</strong> des tranches de concombre qui ramollissent et rendent leur eau.</p>",
+      documents: [
+        { t: "L'étiquette du sérum physiologique", html: "<p>Solution de chlorure de sodium à <strong>9 g/L</strong> (0,9 %), stérile, pour perfusion. <em>Même concentration en substances dissoutes que le plasma sanguin.</em></p>" },
+        { t: "Expérience des frites de pomme de terre (TP du lycée de Bonabéri)", html: "<table class='donnees'><tr><th>Saccharose (mol/L)</th><td>0</td><td>0,1</td><td>0,2</td><td>0,3</td><td>0,4</td><td>0,5</td><td>0,6</td></tr><tr><th>Variation de masse (%)</th><td>+12</td><td>+7,5</td><td>+3,2</td><td>−0,6</td><td>−4,1</td><td>−8</td><td>−11</td></tr></table><p>Frites de même taille pesées avant et après 1 h dans chaque solution.</p>" }
+      ],
+      question: "Pourquoi l'eau distillée serait-elle dangereuse dans le sang, alors que l'eau rend les légumes fermes et que le sel les ramollit ?",
+      tache: "Rédige pour Brenda, en dix lignes, une explication unique valable pour le sang et pour les légumes, en t'appuyant sur les deux documents.",
+      hypotheses: [
+        "L'eau distillée, très pure, ne peut faire de mal à aucune cellule.",
+        "Le sel « brûle » les légumes, comme le ferait un acide.",
+        "L'eau traverse les membranes vers le milieu le plus concentré : trop d'eau fait éclater les globules rouges, et le sel retire l'eau des légumes."
+      ]
+    },
+    parties: [
+      { t: "L'osmose, un mouvement d'eau", html:
+        "<div class='def'><b>Définition</b>L'<strong>osmose</strong> est le passage de l'<strong>eau</strong> à travers une membrane <strong>semi-perméable</strong> (perméable à l'eau, pas aux substances dissoutes), du milieu le <strong>moins concentré</strong> vers le milieu le <strong>plus concentré</strong>.</div>" +
+        "<ul><li>Milieu <strong>hypotonique</strong> : moins concentré que la cellule → l'eau <strong>entre</strong>.</li><li>Milieu <strong>isotonique</strong> : même concentration → pas de mouvement net.</li><li>Milieu <strong>hypertonique</strong> : plus concentré → l'eau <strong>sort</strong>.</li></ul>" +
+        "<div class='astuce'><b>Pour ne pas se tromper</b>L'eau « suit » les substances dissoutes : elle va là où il y en a le plus, comme pour les diluer.</div>",
+        planches: [{ type: "2D", titre: "L'osmomètre de Dutrochet", legende: "Un entonnoir fermé par une membrane semi-perméable (boyau, cellophane) contient de l'eau sucrée ; il plonge dans de l'eau pure. L'eau entre dans l'entonnoir, plus concentré : le liquide monte dans le tube de h.", svg: (function () {
+          var id = "os1", s = "";
+          s += "<rect x='150' y='190' width='340' height='130' rx='10' fill='url(#" + id + "eau)' stroke='#8EA9C1' stroke-width='2'/><path d='M150 210H490' stroke='#fff' stroke-width='2' opacity='.6'/>";
+          s += "<path d='M240 170L280 250H360L400 170Z' fill='url(#" + id + "suc)' stroke='#6D8299' stroke-width='2'/><rect x='312' y='40' width='16' height='132' fill='url(#" + id + "suc)' stroke='#6D8299' stroke-width='1.5'/><path d='M312 172v-132M328 172v-132' stroke='#6D8299'/>";
+          s += "<path d='M240 170H312M328 170H400' stroke='#6D8299' stroke-width='2'/><rect x='278' y='248' width='84' height='6' rx='2' fill='#C2540A'/>";
+          s += "<path d='M300 92H340' stroke='" + NUIT + "' stroke-dasharray='3 3'/><path d='M300 150H340' stroke='" + NUIT + "' stroke-dasharray='3 3'/><path d='M350 150V92' stroke='" + NUIT + "' stroke-width='1.5' marker-end='url(#" + id + "f)' marker-start='url(#" + id + "f)'/>" + txt(362, 126, "h", { s: 15, a: "start" });
+          var R = alea(5); for (var i = 0; i < 26; i++) { var x = 270 + R() * 100, y = 186 + R() * 58; if (Math.abs(x - 320) > 40 + (y - 186) * -0.55 + 20) continue; s += "<circle cx='" + x.toFixed(0) + "' cy='" + y.toFixed(0) + "' r='3.2' fill='#E39B2E'/>"; }
+          [[290, 300], [320, 304], [350, 300]].forEach(function (p) { s += "<path d='M" + p[0] + " " + p[1] + "L" + (320 + (p[0] - 320) * 0.4) + " 266' fill='none' stroke='" + BLEU + "' stroke-width='2.4' marker-end='url(#" + id + "b)'/>"; });
+          s += txt(140, 250, "eau pure", { s: 12.5, c: BLEU, a: "end" }) + txt(420, 160, "eau sucrée", { s: 12.5, c: "#B8741A", a: "start" }) + txt(500, 214, "membrane", { s: 12, c: "#C2540A", a: "start" }) + txt(500, 230, "semi-perméable", { s: 12, c: "#C2540A", a: "start" }) + "<path d='M496 218L364 250' stroke='#C2540A'/>";
+          s += "<g transform='translate(520 60)'><circle r='3.2' fill='#E39B2E'/>" + txt(10, 4, "saccharose", { s: 11, w: 500, a: "start", c: GRIS }) + "<path d='M-6 24h20' stroke='" + BLEU + "' stroke-width='2.2' marker-end='url(#" + id + "b)'/>" + txt(20, 28, "eau", { s: 11, w: 500, a: "start", c: GRIS }) + "</g>";
+          return svg(640, 340, "Osmomètre : un entonnoir d eau sucrée fermé par une membrane plonge dans de l eau pure ; le niveau monte dans le tube", lin(id + "eau", ["#E2F1FB", "#BFDDF2"], true) + lin(id + "suc", ["#FFF4D6", "#F9DFA0"], true) + fleche(id + "f", NUIT) + fleche(id + "b", BLEU), s);
+        })() }],
+        fil: { html: "<p>L'eau distillée ne contient presque aucune substance dissoute : face à des cellules, elle est le milieu <strong>le plus hypotonique</strong> qui soit. L'eau va donc entrer massivement dans les cellules. « Pure » ne veut pas dire « sans danger ».</p>" },
+        retenir: "Osmose : l'eau traverse la membrane du moins concentré vers le plus concentré." },
+
+      { t: "La cellule animale : le globule rouge", html:
+        "<p>Le globule rouge est en équilibre dans une solution de chlorure de sodium à environ <strong>9 g/L</strong> : elle est <strong>isotonique</strong> au plasma. C'est le sérum physiologique.</p>" +
+        "<ul><li>En milieu <strong>hypotonique</strong>, l'eau entre : le globule gonfle, devient sphérique puis sa membrane se rompt et l'hémoglobine s'échappe : c'est l'<strong>hémolyse</strong>.</li><li>En milieu <strong>hypertonique</strong>, l'eau sort : le globule se <strong>ratatine</strong> et se hérisse (aspect crénelé).</li></ul>" +
+        "<div class='attention'><b>À l'hôpital</b>Une perfusion doit toujours être <strong>isotonique</strong> au plasma (sérum physiologique à 9 g/L, sérum glucosé à 50 g/L). Une perfusion d'eau distillée provoquerait une hémolyse massive.</div>",
+        planches: [{ type: "2D", titre: "Un globule rouge dans trois milieux", legende: "Vus au microscope : à 9 g/L, le disque biconcave est intact ; dans l'eau salée à 20 g/L, il se ratatine ; à 3 g/L, il gonfle en sphère ; dans l'eau distillée, il éclate et l'hémoglobine se répand.", svg: (function () {
+          var id = "os2", s = "";
+          s += globule(id, 90, 110, 0.5, ["20 g/L", "hypertonique"]) + globule(id, 245, 110, 1, ["9 g/L", "isotonique"]) + globule(id, 400, 110, 1.3, ["3 g/L", "hypotonique"]) + globule(id, 555, 110, 0, ["eau distillée", "hémolyse"]);
+          s += "<path d='M40 30H600' stroke='url(#" + id + "dg)' stroke-width='10' stroke-linecap='round'/>" + txt(40, 22, "plus concentré", { s: 11, w: 600, a: "start", c: "#A31238" }) + txt(600, 22, "moins concentré", { s: 11, w: 600, a: "end", c: BLEU });
+          return svg(640, 220, "Quatre globules rouges : ratatiné à 20 grammes par litre, normal à 9, gonflé à 3, éclaté dans l eau distillée", rad(id + "g", ["#F9B9AA", "#E25D45", "#B4321E", "#7A1A0C"]) + omb(id + "o") + lin(id + "dg", ["#E8394B", "#F2C2C9", "#CFE0FF", "#4F86E0"]), s);
+        })() }],
+        fil: { html: "<p>Injectée dans une veine, l'eau distillée dilue brutalement le plasma autour des globules rouges : l'eau y entre, ils gonflent et éclatent. L'infirmière-major a raison : il faut une solution <strong>isotonique</strong>, à 9 g/L.</p>", verdicts: [[0, "rejetee", "L'eau distillée est fortement hypotonique : elle fait éclater les globules rouges (hémolyse)."]] },
+        retenir: "Globule rouge : hémolyse en milieu hypotonique, ratatinement en milieu hypertonique, intact à 9 g/L de NaCl." },
+
+      { t: "La cellule végétale : turgescence et plasmolyse", html:
+        "<p>La cellule végétale est entourée d'une <strong>paroi</strong> rigide de cellulose et contient une grande <strong>vacuole</strong>. La paroi l'empêche d'éclater.</p>" +
+        "<ul><li>En milieu <strong>hypotonique</strong>, la vacuole se remplit et pousse le cytoplasme contre la paroi : la cellule est <strong>turgescente</strong>, ferme.</li><li>En milieu <strong>hypertonique</strong>, la vacuole se vide, le cytoplasme se rétracte et la membrane se décolle de la paroi : c'est la <strong>plasmolyse</strong> ; le tissu devient mou.</li></ul>" +
+        "<div class='methode'><b>Observer la plasmolyse au microscope</b><ol><li>Prélève un fragment d'épiderme d'oignon rouge (vacuoles colorées).</li><li>Monte-le dans l'eau : cellules turgescentes, vacuoles violettes pleines.</li><li>Remplace l'eau par de l'eau très salée : en quelques minutes, les vacuoles se contractent et se décollent des parois.</li><li>Remets de l'eau pure : la turgescence revient (déplasmolyse).</li></ol></div>",
+        planches: [{ type: "3d", titre: "Deux cellules d'épiderme d'oignon rouge", legende: "À gauche, une cellule turgescente : la vacuole violette remplit la cellule. À droite, une cellule plasmolysée : la vacuole s'est contractée et le cytoplasme s'est décollé de la paroi. Le curseur soulève les parois.",
+          modele: { h: 360, rx: -26, ry: 24, echelle: 0.9, alt: "Deux cellules végétales en trois dimensions, l une turgescente, l autre plasmolysée", eclate: "Soulever les parois", jouer: "Soulever les parois", objets: cellule3D(),
+            etiquettes: [{ p: [-125, 60, 0], t: "Vacuole pleine" }, { p: [-125, 112, 0], t: "Paroi (cellulose)", ec: [0, 120, 0] }, { p: [125, 50, 0], t: "Vacuole contractée", cote: "d" }, { p: [175, 70, 30], t: "Cytoplasme décollé", cote: "d" }] } }],
+        labo: { type: "osmose", veg: true, c: 4 },
+        fil: { html: "<p>L'eau aspergée sur le ndolè est hypotonique : elle entre dans les cellules des feuilles, les vacuoles se remplissent, les cellules deviennent <strong>turgescentes</strong> et les feuilles fermes. Le sel crée autour des tranches de concombre un milieu <strong>hypertonique</strong> : l'eau sort des cellules (c'est elle qui coule dans l'assiette), elles se plasmolysent, le concombre ramollit. Aucune « brûlure » : un simple mouvement d'eau.</p>", verdicts: [[1, "rejetee", "Le sel ne brûle pas : il rend le milieu hypertonique et l'eau quitte les cellules (plasmolyse)."], [2, "validee", "Une seule loi, l'osmose, explique la perfusion et les légumes."]] },
+        retenir: "Cellule végétale : turgescence en milieu hypotonique, plasmolyse en milieu hypertonique." },
+
+      { t: "Mesurer la concentration des cellules", html:
+        "<p>On peut trouver la concentration du contenu des cellules d'un tissu en cherchant la solution dans laquelle il ne gagne ni ne perd d'eau.</p>" +
+        "<div class='methode'><b>Exploiter l'expérience des frites</b><ol><li>Calcule pour chaque solution la variation de masse en % : (m<sub>finale</sub> − m<sub>initiale</sub>) ÷ m<sub>initiale</sub> × 100.</li><li>Trace la variation de masse en fonction de la concentration.</li><li>Lis la concentration pour laquelle la variation est <strong>nulle</strong> : c'est la concentration <strong>isotonique</strong> au contenu des cellules.</li></ol></div>",
+        planches: [{ type: "2D", titre: "Variation de masse des frites selon la concentration", legende: "Les points du document 2 s'alignent presque. La droite coupe l'axe horizontal vers 0,28 mol/L : c'est la concentration du contenu des cellules de pomme de terre.", svg: PLANCHE_FRITES }],
+        fil: { html: "<p>Sous 0,28 mol/L, les frites gagnent de l'eau (milieu hypotonique) ; au-dessus, elles en perdent (hypertonique). C'est la preuve chiffrée que le sens du mouvement d'eau ne dépend que de la <strong>différence de concentration</strong> entre la cellule et son milieu.</p>", verdicts: [[2, "validee", "Le gain ou la perte d'eau change de signe à la concentration isotonique."]] },
+        retenir: "Concentration isotonique = celle pour laquelle la masse du tissu ne varie pas." }
+    ],
+    denouement: {
+      titre: "Une seule loi pour la perfusion et les légumes",
+      etapes: [
+        "L'eau traverse les membranes du moins concentré vers le plus concentré (indice 1).",
+        "Eau distillée : hypotonique, hémolyse des globules rouges ; d'où le sérum à 9 g/L (indice 2).",
+        "Légumes arrosés : turgescence ; légumes salés : plasmolyse (indice 3).",
+        "Les frites changent de comportement autour de 0,28 mol/L : la concentration décide (indice 4)."
+      ],
+      reponse: "<p>L'eau traverse les membranes cellulaires par osmose, du milieu le moins concentré en substances dissoutes vers le plus concentré. L'eau distillée ne contient presque rien de dissous : injectée dans le sang, elle serait fortement hypotonique ; l'eau entrerait dans les globules rouges qui gonfleraient puis éclateraient (hémolyse). C'est pourquoi on perfuse une solution isotonique au plasma, le sérum physiologique à 9 g/L. Les cellules végétales obéissent à la même loi, mais leur paroi les empêche d'éclater : l'eau aspergée sur le ndolè entre dans les cellules, qui deviennent turgescentes, et les feuilles restent fermes ; le sel rend le milieu hypertonique autour du concombre, l'eau sort des cellules, qui se plasmolysent, et le concombre ramollit. L'expérience des frites le confirme : elles gagnent de l'eau sous 0,28 mol/L de saccharose et en perdent au-dessus.</p>",
+      transfert: "<p>Pour conserver le poisson, les femmes de Kribi le salent abondamment avant de le fumer. En t'appuyant sur l'osmose, explique en cinq lignes pourquoi le sel empêche les bactéries de se développer.</p>"
+    },
+    revision: [
+      "<strong>Osmose</strong> : passage de l'eau à travers une membrane semi-perméable, du moins concentré vers le plus concentré.",
+      "Milieux <strong>hypo-</strong>, <strong>iso-</strong>, <strong>hypertonique</strong> : l'eau entre, ne bouge pas, sort.",
+      "Globule rouge : <strong>hémolyse</strong> (hypo), ratatinement (hyper), intact à <strong>9 g/L</strong> de NaCl.",
+      "Perfusion : toujours <strong>isotonique</strong> au plasma.",
+      "Cellule végétale : <strong>turgescence</strong> (hypo), <strong>plasmolyse</strong> (hyper) ; la paroi empêche l'éclatement.",
+      "Concentration isotonique d'un tissu : variation de masse nulle (frites : ≈ 0,28 mol/L)."
+    ],
+    exo: "<p>Des cellules d'épiderme d'oignon rouge sont placées dans des solutions de saccharose à 0,1 ; 0,3 et 0,6 mol/L. La concentration isotonique de ces cellules est 0,35 mol/L. Décris et explique ce qu'on observe au microscope dans chaque cas. <em>(0,1 et 0,3 : hypotoniques, cellules turgescentes ; 0,6 : hypertonique, plasmolyse.)</em></p>",
+    quiz: [
+      q("Dans de l'eau distillée, un globule rouge…", "gonfle puis éclate", "se ratatine", "ne change pas", "Milieu hypotonique : l'eau entre, hémolyse."),
+      q("La plasmolyse s'observe en milieu…", "hypertonique", "hypotonique", "isotonique", "La vacuole perd son eau."),
+      q("L'eau se déplace vers le milieu…", "le plus concentré", "le moins concentré", "le plus chaud", "C'est la définition de l'osmose."),
+      q("Le sérum physiologique contient…", "9 g/L de chlorure de sodium", "90 g/L de chlorure de sodium", "de l'eau distillée", "Il est isotonique au plasma."),
+      q("Pourquoi une cellule végétale n'éclate-t-elle pas en milieu hypotonique ?", "sa paroi rigide la retient", "sa vacuole est vide", "elle n'a pas de membrane", "Elle devient turgescente."),
+      q("Une membrane semi-perméable laisse passer…", "l'eau mais pas les substances dissoutes", "toutes les substances", "rien du tout", "D'où le mouvement de l'eau seule."),
+      q("Des tranches de concombre salées ramollissent car…", "leurs cellules perdent de l'eau", "le sel les brûle", "elles gagnent de l'eau", "Milieu hypertonique : plasmolyse."),
+      q("Une frite qui garde la même masse est dans un milieu…", "isotonique", "hypotonique", "hypertonique", "Pas de mouvement net d'eau."),
+      q("Une salade arrosée redevient croquante grâce à…", "la turgescence de ses cellules", "la plasmolyse", "l'hémolyse", "Ses vacuoles se remplissent."),
+      q("Le contenu des cellules de pomme de terre équivaut à environ…", "0,28 mol/L de saccharose", "0 mol/L", "0,6 mol/L", "Variation de masse nulle vers 0,28 mol/L.")
+    ]
+  });
+
+  /* ═══════════════════════ 2nde C CHIMIE — L'EXPÉRIENCE DE RUTHERFORD ═══════════════════════ */
+  var R_OLD = ancien("2nde-c-chimie-rutherford");
+  function feuille3D() {
+    var o = [], k, R = alea(1911);
+    o.push({ f: "boite", c: [0, -70, 0], d: [520, 8, 340], coul: "#3C4253", dessus: "#4B5266" });
+    o.push({ f: "boite", c: [-215, -10, 0], d: [70, 70, 70], coul: "#6E7681", dessus: "#8A929C" });
+    o.push({ f: "sphere", c: [-205, 0, 0], r: 7, coul: "#F2994A" });
+    o.push({ f: "cylindre", c: [-180, 0, 0], r: 1.6, h: 175, n: 6, axe: "x", coul: "#FF7A45" });
+    o.push({ f: "boite", c: [0, 0, 0], d: [2, 120, 120], coul: "#D4AF37", div: false });
+    o.push({ f: "cylindre", c: [0, -50, 0], r: 230, h: 100, n: 48, coul: "#9BE3B0", op: 0.12, double: true });
+    /* éclairs sur l'écran : nombreux en face, quelques-uns déviés, un rare vers l'arrière */
+    for (k = 0; k < 26; k++) { var a = (R() - 0.5) * 0.25, y = (R() - 0.5) * 60; o.push({ f: "sphere", c: [229 * Math.cos(a), y, 229 * Math.sin(a)], r: 3.2, coul: "#C8FF6A" }); }
+    [0.55, -0.7, 0.95, -1.2, 1.6].forEach(function (a) { o.push({ f: "sphere", c: [229 * Math.cos(a), (R() - 0.5) * 40, 229 * Math.sin(a)], r: 3.6, coul: "#C8FF6A" }); });
+    o.push({ f: "sphere", c: [229 * Math.cos(2.7), 8, 229 * Math.sin(2.7)], r: 4.5, coul: "#E9FF9E" });
+    /* trajectoires en pointillés : une déviée, une renvoyée */
+    for (k = 1; k < 14; k++) o.push({ f: "sphere", c: [k * 15, 0, k * k * 0.9], r: 1.5, coul: "#FF7A45" });
+    for (k = 1; k < 14; k++) o.push({ f: "sphere", c: [229 * Math.cos(2.7) * k / 14, 8 * k / 14, 229 * Math.sin(2.7) * k / 14], r: 1.5, coul: "#FFB347" });
+    return o;
+  }
+  var PLANCHE_ZOOM_OR = (function () {
+    var id = "ru2", s = "<rect x='12' y='12' width='616' height='296' rx='14' fill='#0F1830'/>", i, j;
+    for (i = 0; i < 4; i++) for (j = 0; j < 4; j++) {
+      var cx = 230 + i * 62 + (j % 2) * 31, cy = 60 + j * 66;
+      s += "<circle cx='" + cx + "' cy='" + cy + "' r='31' fill='url(#" + id + "nu)'/><circle cx='" + cx + "' cy='" + cy + "' r='2.6' fill='#FFD54A'/>";
+    }
+    function traj(d, c) { s += "<path d='" + d + "' fill='none' stroke='" + (c || "#FF8A50") + "' stroke-width='2.2' stroke-dasharray='1 0' marker-end='url(#" + id + "f)'/>"; }
+    [42, 92, 160, 228, 284].forEach(function (y) { traj("M30 " + y + "H600"); });
+    traj("M30 199H272Q300 201 326 214L600 270");
+    traj("M30 128H250Q262 128 252 134L40 196", "#FFD54A");
+    s += txt(46, 34, "particules α", { s: 12, c: "#FFB38A", a: "start" }) + txt(420, 296, "noyau d'or (agrandi 1 000 fois : il serait invisible)", { s: 11.5, w: 600, c: "#FFE08A" }) + txt(560, 34, "nuage électronique", { s: 11.5, w: 600, c: "#A9C4FF", a: "end" });
+    return svg(640, 320, "Zoom sur la feuille d or : des atomes presque vides, chacun avec un noyau minuscule ; presque toutes les particules alpha passent tout droit, une est déviée, une rebondit", "<radialGradient id='" + id + "nu'><stop offset='0' stop-color='#7C9BEF' stop-opacity='.42'/><stop offset='.7' stop-color='#3A5BB8' stop-opacity='.2'/><stop offset='1' stop-color='#3A5BB8' stop-opacity='.05'/></radialGradient>" + fleche(id + "f", "#FF8A50"), s);
+  })();
+
+  remplacer("2nde-c-chimie-rutherford", {
+    c: "2nde C", m: "chimie", titre: "L'expérience de Rutherford et le noyau atomique", duree: 35,
+    accroche: "« Si la matière était vide, ma main traverserait la table ! » Une feuille d'or tranche le débat.",
+    intro: "Un débat au club scientifique te sert de fil rouge : à chaque partie, un résultat de l'expérience de 1911 t'aide à trancher entre trois modèles de l'atome.",
+    objectifs: ["décrire l'expérience de Rutherford et ses trois observations", "en déduire le modèle planétaire de l'atome et rejeter le modèle de Thomson", "manipuler les ordres de grandeur du noyau et de l'atome", "écrire et lire la représentation symbolique d'un noyau"],
+    enquete: {
+      titre: "Le débat du club scientifique de Garoua",
+      svg: (function () {
+        var id = "rusc", s = "<rect width='640' height='210' fill='#FBF7EE'/><rect x='30' y='20' width='250' height='120' rx='6' fill='#244A3A' stroke='#7A5230' stroke-width='6'/>";
+        s += "<circle cx='105' cy='80' r='42' fill='#F2B7A8' opacity='.85'/>"; [[90, 66], [120, 74], [98, 98], [118, 96], [84, 86], [106, 80]].forEach(function (p) { s += "<circle cx='" + p[0] + "' cy='" + p[1] + "' r='4' fill='#1E499B'/>"; });
+        s += txt(105, 134, "Aïssatou : « pudding »", { s: 10.5, c: "#E8F5EE", w: 600 });
+        s += "<circle cx='210' cy='80' r='42' fill='none' stroke='#9FD3B3' stroke-dasharray='3 4'/><circle cx='210' cy='80' r='3' fill='#FFD54A'/><circle cx='250' cy='78' r='3.5' fill='#8FB4FF'/><circle cx='180' cy='52' r='3.5' fill='#8FB4FF'/>" + txt(210, 134, "noyau et vide ?", { s: 10.5, c: "#E8F5EE", w: 600 });
+        s += "<rect x='330' y='110' width='260' height='14' rx='3' fill='#A97D50'/><path d='M350 124v60M570 124v60' stroke='#8E6A3E' stroke-width='7'/>";
+        s += "<g transform='translate(440 70)'><circle r='16' fill='#6B4423'/><path d='M-22 60c0-30 10-42 22-42s22 12 22 42' fill='#2E6FB0'/><path d='M14 30l30 10' stroke='#6B4423' stroke-width='8' stroke-linecap='round'/></g>";
+        s += "<path d='M486 84l-6 22' stroke='#C2540A' stroke-width='2' marker-end='url(#" + id + "f)'/>";
+        s += "<rect x='470' y='20' width='160' height='40' rx='12' fill='#fff' stroke='#E3DCCB'/>" + txt(550, 45, "« Ma main passera ! »", { s: 12, c: NUIT });
+        return svg(640, 210, "Au tableau, deux modèles de l atome dessinés ; un élève frappe la table de la main", fleche(id + "f", "#C2540A"), s);
+      })(),
+      legende: "Au lycée classique de Garoua, le mercredi après-midi : la séance du club scientifique.",
+      contexte: "<p>Au club scientifique, le professeur annonce : « La matière est presque entièrement vide. » Moussa frappe la table : « Si c'était vrai, ma main passerait à travers ! » Aïssatou a lu un vieux livre : pour elle, l'atome est une <strong>boule pleine de charge positive</strong>, dans laquelle les électrons sont piqués comme des raisins dans un gâteau (le modèle de <strong>Thomson</strong>, 1904).</p><p>Le professeur sort un document : les résultats de l'expérience menée en 1909-1911 par Geiger et Marsden dans le laboratoire de <strong>Rutherford</strong>.</p>",
+      documents: [
+        { t: "Les comptages de Geiger et Marsden", html: "<table class='donnees'><tr><th>Ce qui arrive sur l'écran</th><th>Proportion</th></tr><tr><td>particules α non déviées (ou presque)</td><td>plus de 99,9 %</td></tr><tr><td>déviées de plus de 10°</td><td>environ 1 sur 1 000</td></tr><tr><td>renvoyées vers l'arrière (plus de 90°)</td><td>environ 1 sur 10 000</td></tr></table><p>Feuille d'or de 0,4 µm d'épaisseur, soit environ <strong>1 000 couches d'atomes</strong>.</p>" },
+        { t: "La particule α", html: "<p>Noyau d'hélium ⁴₂He : chargée <strong>positivement</strong> (+2e), environ 7 300 fois plus lourde qu'un électron, lancée à près de <strong>15 000 km/s</strong>.</p>" }
+      ],
+      question: "L'atome est-il une boule pleine ou presque vide ? Et si la matière est vide, pourquoi la main de Moussa ne traverse-t-elle pas la table ?",
+      tache: "Rédige la synthèse du club en dix lignes, en appuyant chaque affirmation sur une observation de l'expérience.",
+      hypotheses: [
+        "L'atome est une boule pleine de charge positive où sont piqués les électrons (Aïssatou).",
+        "Si l'atome était presque vide, la main de Moussa passerait à travers la table.",
+        "L'atome est presque vide : un noyau minuscule, positif et lourd, entouré d'électrons lointains."
+      ]
+    },
+    parties: [
+      { t: "L'expérience", html:
+        "<p>Une source radioactive (du polonium), enfermée dans une boîte de plomb percée d'un trou, émet un <strong>faisceau</strong> fin de particules α. Le faisceau frappe une <strong>feuille d'or</strong> très mince. Un <strong>écran</strong> de sulfure de zinc, qui fait un petit éclair à chaque impact, entoure la feuille ; on compte les éclairs au microscope, dans le noir.</p>" +
+        "<ol><li>La très grande majorité des particules <strong>traverse</strong> la feuille sans être déviée.</li><li>Quelques-unes sont <strong>déviées</strong>, parfois fortement.</li><li>De très rares particules (environ 1 sur 10 000) <strong>rebondissent</strong> vers l'arrière.</li></ol>" +
+        "<div class='savais'><b>Le savais-tu ?</b>Rutherford a raconté : « C'était aussi incroyable que si vous tiriez un obus de 38 cm sur une feuille de papier à cigarette et qu'il revenait vous frapper. »</div>",
+        planches: [{ type: "3d", titre: "Le dispositif de Geiger et Marsden", legende: "Tourne le dispositif : la boîte de plomb (à gauche) envoie le faisceau α sur la feuille d'or. L'écran circulaire s'allume surtout en face ; quelques éclairs sur les côtés ; un éclair rare revient du côté de la source.",
+          modele: { h: 380, rx: -30, ry: 28, echelle: 0.82, alt: "Dispositif de Rutherford en trois dimensions : source dans une boîte de plomb, faisceau, feuille d or, écran circulaire avec des éclairs", objets: feuille3D(),
+            etiquettes: [{ p: [-215, 30, 0], t: "Source α (boîte de plomb)" }, { p: [0, 62, 0], t: "Feuille d'or", cote: "d" }, { p: [229, 30, 0], t: "Éclairs nombreux en face", cote: "d" }, { p: [229 * Math.cos(2.7), 20, 229 * Math.sin(2.7)], t: "Rebond (1 sur 10 000)" }] } }],
+        fil: { html: "<p>Le document 1 est sans appel : plus de 99,9 % des particules α traversent 1 000 couches d'atomes d'or <strong>sans rien rencontrer</strong>. Les atomes de la feuille sont donc essentiellement faits de <strong>vide</strong>. Lance toi-même le faisceau dans la simulation pour le constater.</p>" },
+        retenir: "Presque tout traverse, quelques déviations, de très rares rebonds." },
+
+      { t: "Interpréter : le noyau", html:
+        "<div class='def'><b>Modèle planétaire (Rutherford, 1911)</b>L'atome est constitué d'un <strong>noyau</strong> central, très petit, chargé positivement, qui contient presque toute la masse ; les <strong>électrons</strong>, négatifs et très légers, se déplacent autour, très loin du noyau. Entre les deux : du <strong>vide</strong>.</div>" +
+        "<div class='methode'><b>Raisonner observation par observation</b><ol><li>Presque toutes les α passent : l'atome est surtout <strong>vide</strong>.</li><li>Certaines sont déviées : elles passent près d'une charge <strong>positive</strong> qui les repousse (les électrons, 7 300 fois plus légers, ne pourraient pas dévier une α).</li><li>De rares α rebondissent : elles ont frappé presque de plein fouet une charge positive <strong>concentrée</strong> et <strong>lourde</strong>, le noyau.</li></ol></div>",
+        planches: [{ type: "2D", titre: "Zoom sur la feuille d'or", legende: "Chaque atome d'or est un nuage d'électrons presque vide, avec au centre un noyau minuscule (agrandi ici 1 000 fois). La plupart des α passent loin des noyaux ; une frôle un noyau et est déviée ; une le frappe de face et rebondit.", svg: PLANCHE_ZOOM_OR }],
+        fil: { html: "<p>Dans le modèle d'Aïssatou, la charge positive est étalée dans toute la boule : elle ne pourrait que <strong>freiner légèrement</strong> les α, jamais en renvoyer une. Les rebonds exigent une charge positive très concentrée. Dans la simulation, passe au modèle de Thomson : aucun rebond.</p>", verdicts: [[0, "rejetee", "Une charge positive étalée ne peut pas renvoyer une particule α ; il faut un noyau concentré."], [2, "validee", "Les rebonds rares révèlent un noyau minuscule, positif et lourd."]] },
+        retenir: "Noyau minuscule, positif, lourd ; électrons légers et lointains ; entre les deux, le vide." },
+
+      { t: "Ordres de grandeur, et la main de Moussa", html:
+        "<p>Le noyau mesure environ 10⁻¹⁵ m, l'atome environ 10⁻¹⁰ m : le noyau est <strong>100 000 fois</strong> plus petit que l'atome.</p>" +
+        "<div class='ex'><b>Calcul</b>Si l'atome avait le diamètre du terrain du stade Roumdé Adjia de Garoua (100 m), son noyau mesurerait 100 m ÷ 100 000 = 10⁻³ m = <strong>1 mm</strong> : un grain de mil au centre de la pelouse.</div>" +
+        "<div class='prop'><b>Pourquoi la matière paraît pleine</b>Les électrons des atomes de ta main et ceux des atomes de la table, tous négatifs, se <strong>repoussent</strong> très fortement dès qu'ils se rapprochent. C'est cette répulsion électrique, et non un « remplissage », qui empêche ta main de traverser la table.</div>",
+        fil: { html: "<p>Moussa a mal raisonné : « vide » ne veut pas dire « sans force ». Sa main ne touche jamais vraiment la table : les nuages d'électrons se repoussent. La particule α, elle, est un projectile minuscule et très rapide qui se faufile entre les noyaux.</p>", verdicts: [[1, "rejetee", "La répulsion entre les électrons de la main et ceux de la table empêche de traverser, même si l'atome est presque vide."]] },
+        retenir: "Noyau ≈ 10⁻¹⁵ m, atome ≈ 10⁻¹⁰ m : rapport 100 000. La matière « résiste » par répulsion électrique." },
+
+      { t: "La représentation symbolique d'un noyau", html: (R_OLD && R_OLD.parties[2] ? R_OLD.parties[2].html : "") +
+        "<div class='savais'><b>La particule α elle-même</b>C'est le noyau ⁴₂He : 2 protons et 4 − 2 = 2 neutrons, d'où sa charge +2e.</div>",
+        planches: [{ type: "2D", titre: "Lire ⁵⁶₂₆Fe", legende: "Le nombre de masse A (en haut) compte les nucléons ; le numéro atomique Z (en bas) compte les protons ; N = A − Z neutrons.", svg: (function () {
+          var id = "ru4", s = "", R = alea(56), i, P = [];
+          s += txt(150, 150, "Fe", { s: 82, c: NUIT }) + txt(40, 92, "56", { s: 30, c: "#C2540A", a: "start" }) + txt(40, 186, "26", { s: 30, c: BLEU, a: "start" });
+          s += txt(60, 230, "A = 56 nucléons", { s: 13, c: "#C2540A", a: "start" }) + txt(60, 252, "Z = 26 protons", { s: 13, c: BLEU, a: "start" }) + txt(60, 274, "N = 56 − 26 = 30 neutrons", { s: 13, a: "start" });
+          for (i = 0; i < 56; i++) { var r = 50 * Math.cbrt(R()), t = R() * 2 * Math.PI, ph = Math.acos(2 * R() - 1); P.push([430 + r * Math.sin(ph) * Math.cos(t), 150 + r * Math.sin(ph) * Math.sin(t), r * Math.cos(ph), i < 26]); }
+          P.sort(function (a, b) { return a[2] - b[2]; }).forEach(function (p) { s += "<circle cx='" + p[0].toFixed(1) + "' cy='" + p[1].toFixed(1) + "' r='11' fill='url(#" + id + (p[3] ? "p" : "n") + ")'/>"; });
+          s += "<g transform='translate(520 250)'><circle r='8' fill='url(#" + id + "p)'/>" + txt(14, 4, "proton (+e)", { s: 11.5, a: "start", w: 600 }) + "<circle cy='24' r='8' fill='url(#" + id + "n)'/>" + txt(14, 28, "neutron (0)", { s: 11.5, a: "start", w: 600 }) + "</g>";
+          return svg(640, 300, "Le noyau de fer 56 26 : 26 protons rouges et 30 neutrons gris serrés en boule", rad(id + "p", ["#FFB3B3", "#E8394B", "#B0182C", "#5E0812"]) + rad(id + "n", ["#EEF1F6", "#AEB6C6", "#727C8E", "#3B4252"]), s);
+        })() }],
+        retenir: "Z protons, A nucléons, N = A − Z neutrons ; des isotopes ont le même Z." },
+      R_OLD && R_OLD.parties[3] ? R_OLD.parties[3] : { t: "Entraînement", html: "" }
+    ],
+    denouement: {
+      titre: "Un atome presque vide, une table qui résiste",
+      etapes: [
+        "Plus de 99,9 % des α traversent 1 000 couches d'atomes : l'atome est surtout vide (indice 1).",
+        "Déviations et rares rebonds : une charge positive concentrée et lourde, le noyau ; le modèle de Thomson est rejeté (indice 2).",
+        "Noyau 100 000 fois plus petit que l'atome ; la main ne passe pas à cause de la répulsion entre électrons (indice 3).",
+        "Le noyau s'écrit ᴬ_Z X : Z protons, A − Z neutrons (indice 4)."
+      ],
+      reponse: "<p>Dans l'expérience de Rutherford, plus de 99,9 % des particules α traversent sans déviation une feuille d'or épaisse d'environ 1 000 couches d'atomes : l'atome est donc essentiellement vide. Quelques particules sont déviées et environ une sur 10 000 rebondit : elles ont rencontré une charge positive très concentrée et lourde, le noyau. Une charge positive étalée dans tout l'atome, comme dans le modèle de Thomson défendu par Aïssatou, ne pourrait jamais renvoyer une particule α : ce modèle est rejeté au profit du modèle planétaire, un noyau 100 000 fois plus petit que l'atome entouré d'électrons lointains. Moussa a tort de croire que sa main passerait : les électrons de sa main et ceux de la table se repoussent fortement, ce qui donne à la matière sa consistance malgré le vide qu'elle contient.</p>",
+      transfert: "<p>Si l'on refaisait l'expérience avec une feuille d'aluminium (noyau ²⁷₁₃Al, deux fois moins chargé environ que celui de l'or, Z = 79), observerait-on plus ou moins de rebonds ? Justifie en quatre lignes.</p>"
+    },
+    revision: (R_OLD && R_OLD.revision || []).concat(["Modèle de Thomson (charge étalée) <strong>rejeté</strong> : il n'explique pas les rebonds.", "La matière résiste par <strong>répulsion</strong> entre électrons, pas parce qu'elle est pleine."]),
+    exo: R_OLD ? R_OLD.exo : "",
+    quiz: R_OLD ? R_OLD.quiz : []
+  });
+
+  /* ═══════════════════════ 5e MATHS — LA DIVISION EUCLIDIENNE ═══════════════════════ */
+  var D_OLD = ancien("5e-maths-division-euclidienne");
+  function cagette2D(id, x, y, n) {
+    var s = "<g transform='translate(" + x + " " + y + ")'><ellipse cx='60' cy='70' rx='64' ry='7' fill='url(#" + id + "o)'/><rect x='0' y='8' width='120' height='58' rx='4' fill='url(#" + id + "bo)' stroke='#7A4F27'/>", i;
+    for (i = 0; i < Math.min(n, 24); i++) s += mangue(id, 12 + (i % 8) * 13.7, 18 + Math.floor(i / 8) * 13, 7.5, (i * 37) % 50 - 25);
+    s += "<rect x='0' y='38' width='120' height='9' fill='url(#" + id + "bo)' stroke='#7A4F27' opacity='.95'/><rect x='0' y='54' width='120' height='12' rx='3' fill='url(#" + id + "bo)' stroke='#7A4F27'/><path d='M4 42h112' stroke='#F1C98F' opacity='.6'/>";
+    return s + "</g>";
+  }
+  function defsCagette(id) { return defsMangue(id) + lin(id + "bo", ["#E2B57A", "#C08850", "#8A5A2D"], true); }
+  function cagettes3D() {
+    var o = [], i, j, k, R = alea(250);
+    o.push({ f: "boite", c: [0, -6, 0], d: [600, 8, 330], coul: "#8C6A45", dessus: "#B08A5E" });
+    for (i = 0; i < 10; i++) {
+      var col = i % 5, et = Math.floor(i / 5), cx = -200 + col * 100, cz = -50, cy = et * 46, ec = [0, et * 50, et * 40];
+      [[0, 0, 0, 90, 4, 64], [0, 18, -30, 90, 32, 4], [0, 18, 30, 90, 32, 4], [-43, 18, 0, 4, 32, 64], [43, 18, 0, 4, 32, 64]].forEach(function (b) {
+        o.push({ f: "boite", c: [cx + b[0], cy + b[1], cz + b[2]], d: [b[3], b[4], b[5]], coul: "#C9A576", dessus: "#E3C79C", div: false, ec: ec });
+      });
+      for (j = 0; j < 24; j++) { k = j % 12; o.push({ f: "sphere", c: [cx - 33 + (k % 6) * 13.2, cy + 28 + Math.floor(j / 12) * 10, cz - 18 + Math.floor(k / 6) * 26 + (R() - 0.5) * 6], r: 6.6, coul: ["#F4B63F", "#E98B2A", "#8DB33A", "#D9542B", "#F7CF4A"][Math.floor(R() * 5)], ec: ec }); }
+    }
+    o.push({ f: "cylindre", c: [150, 0, 100], r: 48, r2: 58, h: 22, n: 24, coul: "#2F6DB5", dessus: "#4C8AD0" });
+    for (j = 0; j < 10; j++) { var a = j * 0.63, rr = j < 6 ? 30 : 10; o.push({ f: "sphere", c: [150 + rr * Math.cos(a), 26 + (j < 6 ? 0 : 10), 100 + rr * Math.sin(a)], r: 7, coul: ["#F4B63F", "#E98B2A", "#8DB33A", "#D9542B"][j % 4] }); }
+    return o;
+  }
+
+  remplacer("5e-maths-division-euclidienne", {
+    c: "5e", m: "maths", titre: "La division euclidienne", duree: 30,
+    accroche: "250 mangues, des cagettes de 24 : « 10,4 cagettes », dit Ibrahim. Le grossiste éclate de rire.",
+    intro: "La récolte de Maman Aïssa te sert de fil rouge : à chaque partie, un indice t'aide à trancher entre trois réponses.",
+    objectifs: ["poser une division euclidienne et nommer ses termes", "écrire l'égalité a = b × q + r et vérifier que r < b", "interpréter le quotient et le reste dans un problème concret", "reconnaître un diviseur et un multiple"],
+    enquete: {
+      titre: "La récolte de mangues de Maman Aïssa",
+      svg: (function () {
+        var id = "dvsc", s = "<rect width='640' height='220' fill='#FFF7E6'/><rect y='168' width='640' height='52' fill='#E7D3A8'/>";
+        s += "<path d='M60 168c-4-60 8-90 14-110' stroke='#6B4423' stroke-width='12' fill='none'/><ellipse cx='80' cy='60' rx='70' ry='46' fill='#2E7D32'/><ellipse cx='50' cy='76' rx='44' ry='30' fill='#388E3C'/>";
+        [[60, 80], [95, 70], [40, 60], [110, 92]].forEach(function (p) { s += mangue(id, p[0], p[1], 7, 80); });
+        var R = alea(3), i; for (i = 0; i < 60; i++) s += mangue(id, 180 + (i % 15) * 15 + R() * 4, 160 - Math.floor(i / 15) * 9 - (i % 15 > 3 && i % 15 < 11 ? 6 : 0), 8, R() * 60 - 30);
+        s += cagette2D(id, 440, 104, 24) + cagette2D(id, 440, 50, 24);
+        s += "<rect x='420' y='12' width='200' height='34' rx='12' fill='#fff' stroke='#E3DCCB'/>" + txt(520, 34, "cagette de 24 : 3 000 F", { s: 12.5, c: "#8A6200" });
+        s += txt(290, 200, "250 mangues récoltées", { s: 13, c: "#6D4A00" });
+        return svg(640, 220, "Un manguier, un tas de mangues au sol et deux cagettes pleines ; affiche : cagette de 24 à 3 000 francs", defsCagette(id), s);
+      })(),
+      legende: "À Garoua, au bord de la route de Ngaoundéré : le verger de Maman Aïssa, un samedi de mars.",
+      contexte: "<p>Maman Aïssa a récolté <strong>250 mangues</strong>. Le grossiste qui passe le samedi achète uniquement des <strong>cagettes pleines de 24 mangues</strong>, à <strong>3 000 F</strong> la cagette. Les mangues qui restent seront vendues au détail au bord de la route, à <strong>150 F</strong> pièce.</p><p>Ibrahim, son fils, tape 250 ÷ 24 sur le téléphone : « 10,416… Maman, ça fait 10,4 cagettes ! » Sa sœur Hawa propose d'arrondir : « Prépare 11 cagettes, comme ça tout part au grossiste. »</p>",
+      documents: [{ t: "Les prix du samedi", html: "<table class='donnees'><tr><td>Cagette pleine (24 mangues), grossiste</td><td>3 000 F</td></tr><tr><td>Mangue au détail</td><td>150 F</td></tr></table>" }],
+      question: "Combien de cagettes pleines Maman Aïssa peut-elle vendre, combien de mangues lui restera-t-il, et combien gagnera-t-elle en tout ?",
+      tache: "Pose la bonne division, écris l'égalité qui la contrôle, puis calcule la recette totale.",
+      hypotheses: [
+        "« 10,4 cagettes » (Ibrahim) : le résultat de la calculatrice suffit.",
+        "« 11 cagettes pleines » (Hawa) : on arrondit au-dessus et tout part au grossiste.",
+        "10 cagettes pleines, et quelques mangues à vendre au détail."
+      ]
+    },
+    parties: [
+      { t: "Le vocabulaire", html: (D_OLD ? D_OLD.parties[0].html : "") +
+        "<div class='astuce'><b>Ce que disent q et r</b>Le <strong>quotient</strong> q compte les groupes complets (les cagettes pleines) ; le <strong>reste</strong> r compte ce qui ne suffit pas à faire un groupe de plus (les mangues en trop).</div>",
+        planches: [{ type: "2D", titre: "250 mangues rangées par 24", legende: "10 cagettes pleines de 24 mangues (240 mangues) et 10 mangues qui restent dans la bassine : 250 = 24 × 10 + 10.", svg: (function () {
+          var id = "dv1", s = "", i;
+          for (i = 0; i < 10; i++) s += cagette2D(id, 14 + (i % 5) * 124, 14 + Math.floor(i / 5) * 84, 24);
+          s += "<g transform='translate(250 190)'><ellipse cx='70' cy='54' rx='80' ry='8' fill='url(#" + id + "o)'/><path d='M0 14h140l-14 40h-112z' fill='url(#" + id + "ba)' stroke='#4F7AA3'/><ellipse cx='70' cy='14' rx='70' ry='9' fill='#B7D4EC' stroke='#4F7AA3'/>";
+          for (i = 0; i < 10; i++) s += mangue(id, 22 + (i % 5) * 24, 6 + Math.floor(i / 5) * 9, 8, i * 23);
+          s += "</g>" + txt(320, 275, "reste : 10 mangues", { s: 13, c: "#C2540A" });
+          s += "<rect x='420' y='196' width='200' height='58' rx='12' fill='#FFF8E6' stroke='#F2DFA6'/>" + txt(520, 220, "250 = 24 × 10 + 10", { s: 15, c: "#8A6200" }) + txt(520, 242, "et 10 < 24", { s: 12.5, c: "#8A6200" });
+          return svg(640, 290, "Dix cagettes pleines de vingt-quatre mangues et une bassine de dix mangues", defsCagette(id) + lin(id + "ba", ["#CFE3F3", "#7FA6C9"], true), s);
+        })() }],
+        fil: { html: "<p>On ne vend pas 0,4 cagette au grossiste : il ne prend que des cagettes <strong>pleines</strong>. La calculatrice donne un quotient décimal ; ce qu'il faut ici, c'est un quotient <strong>entier</strong> et un <strong>reste</strong>. 24 × 10 = 240 et 250 − 240 = 10 : <strong>10 cagettes</strong> et <strong>10 mangues</strong>.</p>", verdicts: [[0, "rejetee", "On ne vend pas une fraction de cagette : il faut un quotient entier et un reste."]] },
+        retenir: "Dividende = diviseur × quotient + reste, et le reste est toujours plus petit que le diviseur." },
+
+      { t: "Poser la division", html:
+        "<ol><li>Combien de fois 24 « va »-t-il dans 25 (les deux premiers chiffres de 250) ? <strong>1</strong> fois (24), il reste 1.</li><li>On abaisse le 0 : 10. 24 va <strong>0</strong> fois dans 10, il reste 10.</li><li>Résultat : quotient <strong>10</strong>, reste <strong>10</strong>.</li></ol>" +
+        "<div class='astuce'><b>Vérifier</b>On calcule toujours b × q + r : 24 × 10 + 10 = 240 + 10 = 250. ✓ Et 10 &lt; 24. ✓</div>" +
+        "<div class='attention'><b>Piège du zéro</b>Quand le diviseur ne « va » pas dans le nombre formé, on écrit <strong>0</strong> au quotient avant de continuer : sans lui, on trouverait 1 au lieu de 10.</div>",
+        planches: [{ type: "2D", titre: "La potence de 250 ÷ 24", legende: "On lit le quotient sous la barre (10) et le reste en bas à gauche (10).", svg: (function () {
+          var s = "<rect x='120' y='20' width='400' height='240' rx='14' fill='#FBFAF7' stroke='#E3DCCB'/>";
+          s += txt(250, 70, "2 5 0", { s: 30, a: "end" }) + "<path d='M270 40V230M270 82H420' stroke='" + NUIT + "' stroke-width='3'/>" + txt(300, 70, "24", { s: 30, a: "start", c: BLEU }) + txt(300, 120, "1 0", { s: 30, a: "start", c: "#C2540A" });
+          s += txt(222, 112, "− 2 4", { s: 24, a: "end", c: GRIS }) + "<path d='M170 122H236' stroke='" + GRIS + "' stroke-width='2'/>" + txt(250, 160, "1 0", { s: 26, a: "end" }) + txt(250, 200, "− 0", { s: 22, a: "end", c: GRIS }) + "<path d='M196 210H254' stroke='" + GRIS + "' stroke-width='2'/>" + txt(250, 246, "1 0", { s: 28, a: "end", c: VERT });
+          s += txt(440, 160, "quotient", { s: 13, c: "#C2540A" }) + "<path d='M406 156L356 118' stroke='#C2540A' stroke-width='1.6'/>" + txt(110, 246, "reste", { s: 13, c: VERT, a: "end" }) + txt(440, 70, "diviseur", { s: 13, c: BLEU }) + txt(110, 70, "dividende", { s: 13, a: "end" });
+          return svg(640, 280, "Division posée de 250 par 24 : quotient 10, reste 10", "", s);
+        })() }],
+        fil: { html: "<p>La division posée confirme : <strong>q = 10</strong> et <strong>r = 10</strong>. Pour remplir une 11ᵉ cagette, il faudrait 24 × 11 = 264 mangues : il en manque 14.</p>", verdicts: [[1, "rejetee", "24 × 11 = 264 > 250 : la 11ᵉ cagette ne serait pas pleine."]] },
+        retenir: "Toujours vérifier : b × q + r redonne a, et r < b." },
+
+      { t: "Le reste, plus petit que le diviseur ; diviseurs et multiples", html:
+        "<div class='prop'><b>Unicité</b>Pour a et b donnés (b ≠ 0), il n'existe qu'<strong>un seul</strong> couple (q ; r) avec a = b × q + r et 0 ≤ r &lt; b. Si r ≥ b, on peut encore remplir un groupe : on n'a pas fini la division.</div>" +
+        (D_OLD ? D_OLD.parties[2].html : "") +
+        "<div class='ex'><b>Quand faut-il « une de plus » ?</b>Pour transporter les 250 mangues dans des cagettes (pleines ou non), il faut 10 + 1 = <strong>11 cagettes</strong>, car les 10 mangues restantes ont besoin d'une cagette. Pour en <strong>vendre</strong> au grossiste, seules les 10 pleines comptent. Tout dépend de la question.</div>",
+        planches: [{ type: "3d", titre: "Les dix cagettes et la bassine", legende: "Deux étages de 5 cagettes de 24 mangues, et la bassine bleue des 10 mangues restantes. Le curseur écarte l'étage du dessus pour compter les cagettes.",
+          modele: { h: 360, rx: -26, ry: 30, echelle: 0.8, alt: "Dix cagettes de mangues empilées sur deux étages et une bassine de dix mangues", eclate: "Écarter l'étage du dessus", jouer: "Écarter les cagettes", objets: cagettes3D(),
+            etiquettes: [{ p: [-200, 70, -50], t: "5 cagettes en haut", ec: [0, 50, 40] }, { p: [200, 20, -50], t: "5 cagettes en bas", cote: "d" }, { p: [150, 40, 100], t: "Reste : 10 mangues", cote: "d" }] } }],
+        fil: { html: "<p>Recette : 10 cagettes × 3 000 F = <strong>30 000 F</strong> ; 10 mangues × 150 F = <strong>1 500 F</strong> au détail. Total : <strong>31 500 F</strong>.</p>", verdicts: [[2, "validee", "250 = 24 × 10 + 10 : 10 cagettes pleines et 10 mangues, soit 31 500 F."]] },
+        retenir: "Reste nul : b divise a. Selon la question, le reste peut obliger à prévoir « une de plus »." },
+      D_OLD && D_OLD.parties[3] ? D_OLD.parties[3] : { t: "Entraînement", html: "" }
+    ],
+    denouement: {
+      titre: "10 cagettes, 10 mangues, 31 500 F",
+      etapes: [
+        "On cherche des cagettes pleines : quotient entier et reste, pas 10,4 (indice 1).",
+        "Division posée : 250 = 24 × 10 + 10, avec 10 < 24 (indice 2).",
+        "Une 11ᵉ cagette pleine demanderait 264 mangues (indice 2).",
+        "Recette : 10 × 3 000 + 10 × 150 = 31 500 F (indice 3)."
+      ],
+      reponse: "<p>Il faut faire la division euclidienne de 250 par 24 : 250 = 24 × 10 + 10, et le reste 10 est bien plus petit que 24. Maman Aïssa peut donc vendre <strong>10 cagettes pleines</strong> au grossiste, et il lui restera <strong>10 mangues</strong>. « 10,4 cagettes » n'a pas de sens, car le grossiste n'achète que des cagettes pleines ; et une 11ᵉ cagette pleine demanderait 24 × 11 = 264 mangues. Sa recette sera de 10 × 3 000 F = 30 000 F chez le grossiste et de 10 × 150 F = 1 500 F au détail, soit <strong>31 500 F</strong> en tout.</p>",
+      transfert: "<p>L'an prochain, Maman Aïssa espère 400 mangues. Combien de cagettes pleines ? Combien de mangues au détail ? Quelle recette ? <em>(400 = 24 × 16 + 16 : 16 cagettes, 16 mangues, 48 000 + 2 400 = 50 400 F.)</em></p>"
+    },
+    revision: D_OLD ? D_OLD.revision : [],
+    exo: D_OLD ? D_OLD.exo : "",
+    quiz: D_OLD ? D_OLD.quiz : []
+  });
+
+  /* ═══════════════════════ 2nde C PHYSIQUE — MESURER ET ESTIMER L'ERREUR ═══════════════════════ */
+  var M_OLD = ancien("2nde-c-physique-mesure");
+  function piedCoulisse3D() {
+    var o = [], i;
+    o.push({ f: "boite", c: [0, -14, 0], d: [560, 6, 220], coul: "#6B4A2B", dessus: "#94693F" });
+    o.push({ f: "boite", c: [10, 0, 0], d: [420, 6, 34], coul: "#C3C9D2", dessus: "#E3E7ED", div: false });
+    for (i = 0; i <= 40; i++) o.push({ f: "boite", c: [-190 + i * 9.5, 3.4, -10 + (i % 5 ? 4 : 0)], d: [0.9, 0.6, i % 5 ? 8 : 16], coul: "#1B2233", div: false });
+    o.push({ f: "boite", c: [-205, 0, 40], d: [14, 6, 120], coul: "#B5BCC7", dessus: "#D8DDE4", div: false });
+    var ec = [44, 0, 0];
+    o.push({ f: "boite", c: [-180, 0, 40], d: [14, 6, 120], coul: "#B5BCC7", dessus: "#D8DDE4", div: false, ec: ec });
+    o.push({ f: "boite", c: [-140, 4, 0], d: [90, 12, 44], coul: "#9DA5B2", dessus: "#C6CCD6", div: false, ec: ec });
+    for (i = 0; i <= 10; i++) o.push({ f: "boite", c: [-175 + i * 8.55, 10.4, 16], d: [0.8, 0.6, i % 5 ? 6 : 10], coul: "#1B2233", div: false, ec: ec });
+    o.push({ f: "cylindre", c: [-192.5, 0, 70], r: 11, h: 30, n: 24, coul: "#B87333", dessus: "#D99A5B" });
+    return o;
+  }
+  var PLANCHE_CIBLES = (function () {
+    var id = "me2", s = "", R = alea(42);
+    function cible(cx, lab, sous, dx, dy, sig) {
+      var t = "<g transform='translate(" + cx + " 140)'>";
+      [80, 60, 40, 20].forEach(function (r, i) { t += "<circle r='" + r + "' fill='" + (i % 2 ? "#fff" : "#EEF3FC") + "' stroke='#9FB3D8'/>"; });
+      t += "<circle r='4' fill='" + ROUGE + "'/>";
+      for (var k = 0; k < 9; k++) { var x = dx + (R() - 0.5) * 2 * sig, y = dy + (R() - 0.5) * 2 * sig; t += "<circle cx='" + x.toFixed(1) + "' cy='" + y.toFixed(1) + "' r='4.6' fill='" + BLEU + "' stroke='#fff' stroke-width='1.2'/>"; }
+      return t + txt(0, 112, lab, { s: 13 }) + txt(0, 130, sous, { s: 11, w: 500, c: GRIS }) + "</g>";
+    }
+    s += cible(110, "fidèle et juste", "petite erreur aléatoire, pas de biais", 0, 0, 9) + cible(320, "fidèle mais fausse", "erreur systématique", 34, -26, 9) + cible(530, "dispersée", "grande erreur aléatoire", 0, 0, 46);
+    s += txt(320, 26, "Centre rouge = valeur vraie ; points bleus = mesures répétées", { s: 12, c: GRIS, w: 600 });
+    return svg(640, 290, "Trois cibles : mesures groupées au centre ; mesures groupées mais décalées (erreur systématique) ; mesures dispersées (erreur aléatoire)", "", s);
+  })();
+
+  remplacer("2nde-c-physique-mesure", {
+    c: "2nde C", m: "physique", titre: "Mesurer une grandeur et estimer l'erreur", duree: 35,
+    accroche: "Le sac de riz « 25 kg » ne fait que 24,2 kg sur la balance de la maison. Qui se trompe ?",
+    intro: "Un sac de riz pesé deux fois te sert de fil rouge : à chaque partie, un indice t'aide à trancher entre trois explications.",
+    objectifs: ["utiliser correctement un instrument de mesure et lire un vernier", "distinguer erreur systématique et erreur aléatoire", "écrire un résultat avec sa valeur moyenne, son incertitude et son unité", "juger si deux mesures sont compatibles"],
+    enquete: {
+      titre: "Le sac de riz du marché Mboppi",
+      svg: (function () {
+        var id = "mesc", s = "<rect width='640' height='220' fill='#F6F2EA'/><rect y='170' width='640' height='50' fill='#E2D6BE'/>";
+        s += "<rect x='60' y='120' width='170' height='50' rx='8' fill='url(#" + id + "ba)' stroke='#7F8794'/><rect x='92' y='134' width='106' height='26' rx='4' fill='#14301F'/>" + txt(145, 153, "25,0 kg", { s: 16, c: "#7CFFA2" });
+        s += "<path d='M95 120l12-56h76l12 56Z' fill='url(#" + id + "sac)' stroke='#A3824A'/>" + txt(145, 98, "RIZ 25 kg", { s: 12, c: "#6D4A00" });
+        s += "<rect x='96' y='176' width='98' height='20' rx='4' fill='#14301F'/>" + txt(145, 191, "à vide : 0,8", { s: 11, c: "#7CFFA2", w: 600 });
+        s += "<g transform='translate(470 110)'><circle r='54' fill='#fff' stroke='#7F8794' stroke-width='4'/>";
+        for (var i = 0; i < 30; i++) { var a = -Math.PI * 0.75 + i * Math.PI * 1.5 / 29; s += "<path d='M" + (46 * Math.cos(a)).toFixed(1) + " " + (46 * Math.sin(a)).toFixed(1) + "L" + ((i % 5 ? 41 : 36) * Math.cos(a)).toFixed(1) + " " + ((i % 5 ? 41 : 36) * Math.sin(a)).toFixed(1) + "' stroke='" + NUIT + "' stroke-width='1.2'/>"; }
+        s += "<path d='M0 0L30 -26' stroke='" + ROUGE + "' stroke-width='3' stroke-linecap='round'/><circle r='4' fill='" + NUIT + "'/>" + txt(0, 30, "24,2 kg ?", { s: 13 }) + "</g>";
+        s += txt(145, 212, "balance du commerçant", { s: 11.5, c: GRIS, w: 600 }) + txt(470, 190, "balance de cuisine de Mme Ngo Bayiha", { s: 11.5, c: GRIS, w: 600 });
+        return svg(640, 220, "À gauche, la balance électronique du commerçant affiche 25 kilogrammes, et 0,8 kilogramme à vide ; à droite, une balance à aiguille indique environ 24,2 kilogrammes", lin(id + "ba", ["#D7DCE3", "#A7AEB9"], true) + lin(id + "sac", ["#F4E3C3", "#E2C896", "#B8975E"]), s);
+      })(),
+      legende: "À Douala : l'étal d'un grossiste du marché Mboppi, puis la cuisine de Mme Ngo Bayiha à Akwa.",
+      contexte: "<p>Mme Ngo Bayiha achète un sac de riz étiqueté <strong>25 kg</strong>. Sur la balance électronique du commerçant, il affiche 25,0 kg. Avant de partir, elle remarque que la balance affiche <strong>0,8 kg</strong> quand le plateau est vide. Le commerçant hausse les épaules : « Une balance électronique ne se trompe jamais. »</p><p>À la maison, son fils Samuel, élève de 2nde C, pèse le sac <strong>cinq fois</strong> sur la balance de cuisine bien tarée (aiguille sur 0 à vide). Les cinq lectures ne sont pas identiques.</p>",
+      documents: [
+        { t: "Les cinq pesées de Samuel", html: "<table class='donnees'><tr><th>Pesée</th><td>1</td><td>2</td><td>3</td><td>4</td><td>5</td></tr><tr><th>Masse (kg)</th><td>24,1</td><td>24,3</td><td>24,2</td><td>24,4</td><td>24,0</td></tr></table><p>Balance à aiguille graduée tous les 100 g.</p>" },
+        { t: "Ce que dit la loi", html: "<p>Les instruments de pesage du commerce sont contrôlés par le service de la métrologie légale. Un écart de plus de 0,2 % sur une masse vendue est une fraude.</p>" }
+      ],
+      question: "Le sac fait-il vraiment 25 kg ? D'où viennent les écarts entre les deux balances, et entre les cinq pesées de Samuel ?",
+      tache: "Rédige pour Mme Ngo Bayiha un compte rendu de mesure : la masse du sac avec son incertitude, et l'explication des écarts.",
+      hypotheses: [
+        "Le commerçant a raison : une balance électronique ne peut pas se tromper.",
+        "Les cinq pesées ne sont pas identiques : la balance de Samuel est inutilisable.",
+        "La balance du commerçant ajoute 0,8 kg à toutes les pesées ; le sac pèse environ 24,2 kg, à quelques centaines de grammes près."
+      ]
+    },
+    parties: [
+      { t: "Grandeur, unité, instrument", html: (M_OLD ? M_OLD.parties[0].html : "") +
+        "<div class='methode'><b>Lire un pied à coulisse au 1/10 de mm</b><ol><li>Lis sur la règle les millimètres entiers placés <strong>avant</strong> le zéro du vernier.</li><li>Cherche le trait du vernier qui est <strong>exactement aligné</strong> avec un trait de la règle.</li><li>Son numéro donne les dixièmes de millimètre.</li></ol></div>",
+        planches: [{ type: "3d", titre: "Le pied à coulisse", legende: "Tourne l'instrument : la règle graduée en mm, le coulisseau portant le vernier (10 divisions sur 9 mm) et les deux becs qui serrent un tuyau en cuivre. Le curseur fait glisser le coulisseau.",
+          modele: { h: 340, rx: -46, ry: 8, echelle: 1.05, alt: "Pied à coulisse en trois dimensions serrant un tuyau de cuivre", eclate: "Ouvrir les becs", jouer: "Ouvrir les becs", objets: piedCoulisse3D(),
+            etiquettes: [{ p: [120, 6, -10], t: "Règle (mm)", cote: "d" }, { p: [-140, 12, 16], t: "Vernier au 1/10", ec: [44, 0, 0] }, { p: [-192, 30, 70], t: "Tuyau mesuré" }, { p: [-205, 4, 100], t: "Bec fixe" }] } }],
+        fil: { html: "<p>Samuel commence par vérifier sa balance : à vide, l'aiguille est sur <strong>0</strong>. Celle du commerçant affiche 0,8 kg à vide : elle n'est pas « remise à zéro » (tarée). Un instrument électronique peut donc se tromper s'il est mal réglé.</p>", verdicts: [[0, "rejetee", "La balance affiche 0,8 kg à vide : elle est mal tarée, toutes ses pesées sont faussées."]] },
+        retenir: "Grandeur + nombre + unité ; vérifier le zéro de l'instrument avant de mesurer." },
+
+      { t: "Les différents types d'erreur", html: (M_OLD ? M_OLD.parties[1].html : ""),
+        planches: [{ type: "2D", titre: "Erreur systématique ou erreur aléatoire ?", legende: "Des mesures groupées mais décalées trahissent une erreur systématique (on corrige l'instrument) ; des mesures dispersées autour du centre trahissent une erreur aléatoire (on répète et on fait la moyenne).", svg: PLANCHE_CIBLES }],
+        fil: { html: "<p>Les 0,8 kg affichés à vide s'ajoutent à <strong>chaque</strong> pesée du commerçant, toujours dans le même sens : c'est une erreur <strong>systématique</strong>. 25,0 − 0,8 = <strong>24,2 kg</strong>. Les petits écarts entre les pesées de Samuel (24,0 à 24,4) vont tantôt en plus, tantôt en moins : erreur <strong>aléatoire</strong> (lecture de l'aiguille, position du sac). Elle ne rend pas la balance inutilisable : on la réduit en faisant la moyenne.</p>", verdicts: [[1, "rejetee", "Des écarts aléatoires sont normaux : on les réduit par la moyenne, l'instrument reste utilisable."]] },
+        retenir: "Systématique : même sens, on corrige l'instrument. Aléatoire : on répète et on fait la moyenne." },
+
+      { t: "Écrire un résultat de mesure", html: (M_OLD ? M_OLD.parties[2].html : "") +
+        "<div class='methode'><b>Exploiter une série de mesures</b><ol><li>Calcule la <strong>moyenne</strong> m̄ des mesures.</li><li>Prends comme incertitude ΔG le plus grand écart entre une mesure et la moyenne (ou la demi-étendue).</li><li>Écris G = (m̄ ± ΔG) unité, puis l'incertitude relative ΔG/m̄ en %.</li></ol></div>",
+        fil: { html: "<p>Moyenne des cinq pesées : (24,1 + 24,3 + 24,2 + 24,4 + 24,0) ÷ 5 = 121,0 ÷ 5 = <strong>24,2 kg</strong>. Plus grand écart à la moyenne : 0,2 kg. Donc <strong>m = (24,2 ± 0,2) kg</strong>, soit une incertitude relative de 0,2 ÷ 24,2 ≈ 0,8 %. Les 25 kg annoncés sont hors de l'intervalle [24,0 ; 24,4] : il manque environ 800 g, soit 3,2 %, bien au-delà des 0,2 % tolérés.</p>", verdicts: [[2, "validee", "Balance corrigée : 25,0 − 0,8 = 24,2 kg, exactement la moyenne de Samuel : m = (24,2 ± 0,2) kg."]] },
+        retenir: "G = (valeur moyenne ± incertitude) unité ; deux mesures sont compatibles si leurs intervalles se recouvrent." },
+      M_OLD && M_OLD.parties[3] ? M_OLD.parties[3] : { t: "Entraînement", html: "" }
+    ],
+    denouement: {
+      titre: "m = (24,2 ± 0,2) kg : il manque 800 g",
+      etapes: [
+        "La balance du commerçant affiche 0,8 kg à vide : elle est mal tarée (indice 1).",
+        "Cette erreur systématique fausse toutes ses pesées : 25,0 − 0,8 = 24,2 kg (indice 2).",
+        "Les écarts de Samuel sont aléatoires : on fait la moyenne (indice 2).",
+        "Moyenne 24,2 kg, incertitude 0,2 kg : m = (24,2 ± 0,2) kg, 25 kg est exclu (indice 3)."
+      ],
+      reponse: "<p>La balance du commerçant affiche 0,8 kg à vide : elle n'est pas tarée et ajoute 0,8 kg à chaque pesée. C'est une erreur systématique, qui ne disparaît pas en répétant la mesure ; corrigée, sa lecture donne 25,0 − 0,8 = 24,2 kg. Les cinq pesées de Samuel, faites sur une balance bien tarée, varient de 24,0 à 24,4 kg : ce sont des erreurs aléatoires de lecture, que l'on réduit en calculant la moyenne, 24,2 kg. Le plus grand écart à la moyenne est de 0,2 kg, d'où le résultat <strong>m = (24,2 ± 0,2) kg</strong>, avec une incertitude relative d'environ 0,8 %. Les deux balances sont donc d'accord une fois l'erreur corrigée, et le sac ne pèse pas 25 kg : il manque environ 800 g, bien au-delà de la tolérance légale.</p>",
+      transfert: "<p>Au laboratoire, quatre groupes mesurent la période d'un pendule : 1,42 s ; 1,38 s ; 1,40 s ; 1,44 s. Le chronomètre du groupe 4 démarre toujours 0,04 s en retard. Corrige la mesure du groupe 4, puis donne le résultat avec son incertitude. <em>(1,40 s ; T = (1,40 ± 0,02) s.)</em></p>"
+    },
+    revision: M_OLD ? M_OLD.revision.concat(["Vernier au 1/10 : mm entiers avant le zéro, puis le trait du vernier aligné donne les dixièmes."]) : [],
+    exo: M_OLD ? M_OLD.exo : "",
+    quiz: M_OLD ? M_OLD.quiz : []
+  });
+
+  /* ═══════════════════════ SIMULATIONS (VRT_A) ═══════════════════════ */
+  function $(el, s) { return el.querySelector(s); }
+  function curseur(lib, min, max, pas, val, unite) {
+    return "<label class='labo-c'><span>" + lib + " : <b data-v>" + val + "</b>" + (unite || "") + "</span><input type='range' min='" + min + "' max='" + max + "' step='" + pas + "' value='" + val + "'></label>";
+  }
+  function moinsAnimer() { try { return window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches; } catch (e) { return false; } }
+
+  /* Rutherford : faisceau de particules α sur une feuille d'or (modèle de Rutherford ou de Thomson) */
+  VRT_A("2nde-c-chimie-rutherford", 0, "Bombarde la feuille d'or et compte les éclairs", function (el) {
+    el.innerHTML = "<canvas width='640' height='300' style='width:100%;height:auto;display:block;border-radius:12px;background:#0B1226' aria-label='Simulation : des particules alpha traversent une feuille d or'></canvas>" +
+      "<div class='labo-cs' style='display:flex;flex-wrap:wrap;gap:8px;margin-top:10px'><button type='button' class='btn-l' data-go>Lancer le faisceau</button><button type='button' class='btn-l' data-mod>Modèle : Rutherford</button>" + curseur("Taille du noyau (agrandie)", 2, 10, 1, 4, "") + "</div>" +
+      "<p class='labo-r' data-res></p><p class='an-note'>Le noyau est dessiné des milliers de fois trop gros pour être visible : dans la réalité, environ 1 particule sur 10 000 seulement rebondit. Passe au modèle de Thomson (charge positive étalée) : plus aucun rebond.</p>";
+    var cv = $(el, "canvas"), ctx = cv.getContext("2d"), W = 640, H = 300, dpr = Math.min(2, window.devicePixelRatio || 1);
+    cv.width = W * dpr; cv.height = H * dpr; ctx.scale(dpr, dpr);
+    var thomson = false, rn = 4, V0 = 4.2, P = [], N = [], cpt = { t: 0, d: 0, r: 0 }, raf = 0, actif = false, i, j;
+    function d0() { return rn * 0.12; }
+    for (i = 0; i < 2; i++) for (j = 0; j < 6; j++) N.push([312 + i * 26, 30 + j * 48 + i * 24]);
+    var inp = $(el, "input"), res = $(el, "[data-res]");
+    inp.addEventListener("input", function () { rn = +inp.value; $(el, "[data-v]").textContent = rn; dessine(); });
+    $(el, "[data-mod]").addEventListener("click", function () { thomson = !thomson; this.textContent = "Modèle : " + (thomson ? "Thomson" : "Rutherford"); cpt = { t: 0, d: 0, r: 0 }; P = []; dessine(); });
+    $(el, "[data-go]").addEventListener("click", function () { actif = !actif; this.textContent = actif ? "Pause" : "Lancer le faisceau"; if (actif) boucle(); else cancelAnimationFrame(raf); });
+    function nouveau() { P.push({ x: 0, y: 14 + Math.random() * (H - 28), vx: V0, vy: 0, tr: [], fin: false }); }
+    /* Coulomb : distance minimale d'approche de face d0 = 2k / v0² ; Thomson : même charge étalée dans une boule de rayon R0 */
+    function avance(p, T) {
+      var k = d0() * V0 * V0 / 2, t = 0, R0 = 16;
+      while (t < T) {
+        var ax = 0, ay = 0, dmin = 1e9;
+        N.forEach(function (n) {
+          var dx = p.x - n[0], dy = p.y - n[1], d = Math.sqrt(dx * dx + dy * dy) + 1e-9, f;
+          dmin = Math.min(dmin, d);
+          f = thomson ? (d < R0 ? k * d / (R0 * R0 * R0) : k / (d * d)) : k / (d * d);
+          ax += f * dx / d; ay += f * dy / d;
+        });
+        var dt = Math.max(0.002, Math.min(1, 0.08 * dmin / V0, T - t));
+        p.vx += ax * dt; p.vy += ay * dt; p.x += p.vx * dt; p.y += p.vy * dt; t += dt;
+      }
+      p.tr.push([p.x, p.y]); if (p.tr.length > 70) p.tr.shift();
+      if (p.x < -4 || p.x > W + 4 || p.y < -4 || p.y > H + 4) {
+        p.fin = true; var ang = Math.abs(Math.atan2(p.vy, p.vx)) * 180 / Math.PI;
+        if (ang > 90) cpt.r++; else if (ang > 10) cpt.d++; else cpt.t++;
+      }
+    }
+    function dessine() {
+      ctx.fillStyle = "rgba(11,18,38,1)"; ctx.fillRect(0, 0, W, H);
+      ctx.fillStyle = "rgba(242,201,76,.16)"; ctx.fillRect(292, 0, 64, H);
+      N.forEach(function (n) {
+        if (thomson) { var g = ctx.createRadialGradient(n[0], n[1], 1, n[0], n[1], 16); g.addColorStop(0, "rgba(255,120,90,.55)"); g.addColorStop(1, "rgba(255,120,90,.08)"); ctx.fillStyle = g; ctx.beginPath(); ctx.arc(n[0], n[1], 16, 0, 7); ctx.fill(); }
+        else { ctx.fillStyle = "rgba(120,150,230,.10)"; ctx.beginPath(); ctx.arc(n[0], n[1], 16, 0, 7); ctx.fill(); ctx.fillStyle = "#FFD54A"; ctx.shadowColor = "#FFD54A"; ctx.shadowBlur = 8; ctx.beginPath(); ctx.arc(n[0], n[1], rn * 0.5, 0, 7); ctx.fill(); ctx.shadowBlur = 0; }
+      });
+      P.forEach(function (p) {
+        for (var k = 1; k < p.tr.length; k++) { ctx.strokeStyle = "rgba(255,138,80," + (k / p.tr.length * 0.8).toFixed(2) + ")"; ctx.lineWidth = 1.6; ctx.beginPath(); ctx.moveTo(p.tr[k - 1][0], p.tr[k - 1][1]); ctx.lineTo(p.tr[k][0], p.tr[k][1]); ctx.stroke(); }
+        ctx.fillStyle = "#FFB38A"; ctx.beginPath(); ctx.arc(p.x, p.y, 2.4, 0, 7); ctx.fill();
+      });
+      var tot = cpt.t + cpt.d + cpt.r;
+      res.innerHTML = "Particules arrivées : <b>" + tot + "</b> · traversent (moins de 10°) : <b>" + cpt.t + "</b> · déviées : <b>" + cpt.d + "</b> · renvoyées vers l'arrière : <b>" + cpt.r + "</b>";
+    }
+    function boucle() {
+      if (Math.random() < 0.6) nouveau();
+      P.forEach(function (p) { avance(p, 2); });
+      P = P.filter(function (p) { return !p.fin; });
+      dessine(); if (actif) raf = requestAnimationFrame(boucle);
+    }
+    dessine();
+    if (moinsAnimer()) $(el, "[data-go]").textContent = "Lancer le faisceau (animation)";
+  });
+
+  /* Division euclidienne : ranger a mangues dans des cagettes de b */
+  VRT_A("5e-maths-division-euclidienne", 0, "Range les mangues dans les cagettes", function (el) {
+    el.innerHTML = "<div style='display:flex;flex-wrap:wrap;gap:8px 18px'>" + curseur("Mangues (a)", 1, 300, 1, 250) + curseur("Mangues par cagette (b)", 2, 30, 1, 24) + "</div><svg viewBox='0 0 640 260' class='an-svg' data-s></svg><p class='labo-r' data-r></p>";
+    var I = el.querySelectorAll("input"), V = el.querySelectorAll("[data-v]"), sv = $(el, "[data-s]"), id = "dvA";
+    function maj() {
+      var a = +I[0].value, b = +I[1].value, qq = Math.floor(a / b), r = a - b * qq, s = "<defs>" + defsMangue(id) + "</defs>", k, max = Math.min(qq, 24), col = 8;
+      V[0].textContent = a; V[1].textContent = b;
+      for (k = 0; k < max; k++) {
+        var x = 8 + (k % col) * 66, y = 8 + Math.floor(k / col) * 60;
+        s += "<rect x='" + x + "' y='" + y + "' width='60' height='52' rx='6' fill='#E2B57A' stroke='#8A5A2D'/><rect x='" + (x + 4) + "' y='" + (y + 4) + "' width='52' height='44' rx='4' fill='#C08850' opacity='.45'/>";
+        var cc = Math.ceil(Math.sqrt(b * 1.3)), rr = Math.ceil(b / cc), dm = Math.min(46 / cc, 40 / rr);
+        for (var m = 0; m < b; m++) s += "<circle cx='" + (x + 7 + dm / 2 + (m % cc) * dm).toFixed(1) + "' cy='" + (y + 6 + dm / 2 + Math.floor(m / cc) * dm).toFixed(1) + "' r='" + (dm * 0.42).toFixed(1) + "' fill='url(#" + id + "m)'/>";
+      }
+      if (qq > max) s += "<text x='540' y='" + (8 + Math.ceil(max / col) * 60 + 4) + "' font-size='13' font-weight='700' fill='" + GRIS + "'>… et " + (qq - max) + " de plus</text>";
+      var y0 = 8 + Math.ceil(max / col) * 60 + (qq > max ? 10 : 0);
+      for (k = 0; k < r; k++) s += mangue(id, 20 + (k % 30) * 20, y0 + 30 + Math.floor(k / 30) * 18, 8, k * 31);
+      sv.setAttribute("viewBox", "0 0 640 " + (y0 + 34 + Math.ceil(r / 30) * 18));
+      s += "<text x='8' y='" + (y0 + 14) + "' font-size='12' font-weight='700' fill='#C2540A'>" + (r ? "reste : " + r + " mangue" + (r > 1 ? "s" : "") : "reste : 0 (b divise a)") + "</text>";
+      sv.innerHTML = s;
+      $(el, "[data-r]").innerHTML = "<b>" + a + " = " + b + " × " + qq + " + " + r + "</b> avec " + r + " &lt; " + b + " · quotient : <b>" + qq + "</b> cagette" + (qq > 1 ? "s" : "") + " pleine" + (qq > 1 ? "s" : "") + " · reste : <b>" + r + "</b>" + (r ? " · pour tout transporter : <b>" + (qq + 1) + "</b> cagettes" : "");
+    }
+    I[0].addEventListener("input", maj); I[1].addEventListener("input", maj); maj();
+  });
+
+  /* Pied à coulisse : lire un vernier au 1/10 de mm */
+  VRT_A("2nde-c-physique-mesure", 0, "Lis le pied à coulisse, puis vérifie ta lecture", function (el) {
+    el.innerHTML = "<svg viewBox='0 0 640 190' class='an-svg' data-s></svg><div style='display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:8px'><button type='button' class='btn-l' data-n>Nouvel objet</button><label class='labo-c'><span>Ta lecture (mm)</span><input type='text' inputmode='decimal' size='6' data-l style='font:inherit;padding:6px 8px;border:1px solid #C9D2E3;border-radius:8px'></label><button type='button' class='btn-l' data-v>Vérifier</button></div><p class='labo-r' data-r>Lis les millimètres avant le zéro du vernier, puis cherche le trait du vernier aligné avec la règle.</p>";
+    var sv = $(el, "[data-s]"), L = 23.7, K = 14;   /* 14 px par mm */
+    function dessine() {
+      var x0 = 40, s = "<defs>" + lin("pcR", ["#EEF1F5", "#C3C9D2"], true) + lin("pcV", ["#DDE2E9", "#A9B1BD"], true) + "</defs>";
+      s += "<rect x='20' y='40' width='600' height='46' rx='4' fill='url(#pcR)' stroke='#7F8794'/>";
+      for (var m = 0; m <= 41; m++) { var x = x0 + m * K; if (x > 615) break; var h = m % 10 ? (m % 5 ? 12 : 18) : 24; s += "<path d='M" + x + " 86V" + (86 - h) + "' stroke='#1B2233' stroke-width='1.2'/>"; if (m % 10 === 0) s += "<text x='" + x + "' y='56' font-size='12' font-weight='700' text-anchor='middle' fill='#1B2233'>" + m / 10 + "</text>"; }
+      
+      var xv = x0 + L * K;
+      s += "<rect x='" + (xv - 18) + "' y='86' width='" + (10 * 0.9 * K + 40) + "' height='44' rx='4' fill='url(#pcV)' stroke='#7F8794'/>";
+      for (var v = 0; v <= 10; v++) { var xx = xv + v * 0.9 * K; s += "<path d='M" + xx.toFixed(1) + " 86V" + (v % 5 ? 98 : 104) + "' stroke='#1B2233' stroke-width='1.2'/>"; if (v % 5 === 0) s += "<text x='" + xx.toFixed(1) + "' y='118' font-size='11' font-weight='700' text-anchor='middle' fill='#1B2233'>" + v + "</text>"; }
+      s += "<rect x='20' y='86' width='16' height='80' fill='#B5BCC7' stroke='#7F8794'/><rect x='" + (xv - 18) + "' y='130' width='16' height='36' fill='#B5BCC7' stroke='#7F8794'/>";
+      s += "<rect x='36' y='136' width='" + (xv - 18 - 36) + "' height='26' rx='13' fill='url(#pcCu)'/>";
+      sv.innerHTML = s.replace("</defs>", lin("pcCu", ["#F0B27A", "#B87333", "#7A4A1E"], true) + "</defs>");
+    }
+    function nouveau() { L = Math.round((8 + Math.random() * 28) * 10) / 10; $(el, "[data-l]").value = ""; $(el, "[data-r]").textContent = "Nouvel objet serré entre les becs : à toi de lire."; dessine(); }
+    $(el, "[data-n]").addEventListener("click", nouveau);
+    $(el, "[data-v]").addEventListener("click", function () {
+      var u = parseFloat(String($(el, "[data-l]").value).replace(",", ".")), ent = Math.floor(L + 1e-9), dix = Math.round((L - ent) * 10);
+      $(el, "[data-r]").innerHTML = isNaN(u) ? "Écris un nombre, par exemple 23,7." : Math.abs(u - L) < 0.05 ? "<b>Exact : " + String(L).replace(".", ",") + " mm.</b> " + ent + " mm avant le zéro, et le trait " + dix + " du vernier est aligné." : "Pas tout à fait. Lecture correcte : <b>" + String(L).replace(".", ",") + " mm</b> (" + ent + " mm entiers, trait n° " + dix + " du vernier aligné).";
+    });
+    dessine();
+  });
+
+  /* Pesées répétées : moyenne et incertitude ; balance tarée ou non */
+  VRT_A("2nde-c-physique-mesure", 2, "Pèse le sac autant de fois que tu veux", function (el) {
+    el.innerHTML = "<div style='display:flex;flex-wrap:wrap;gap:8px'><button type='button' class='btn-l' data-p>Peser le sac</button><button type='button' class='btn-l' data-b>Balance : celle de Samuel (tarée)</button><button type='button' class='btn-l' data-z>Effacer</button></div><svg viewBox='0 0 640 150' class='an-svg' data-s></svg><p class='labo-r' data-r>Appuie plusieurs fois sur « Peser le sac ».</p>";
+    var M = [], com = false, sv = $(el, "[data-s]"), R = alea(7);
+    function gauss() { var u = R() || 0.5, v = R(); return Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * v); }
+    function X(m) { return 40 + (m - 23.5) / 2 * 560; }
+    function maj() {
+      var s = "<path d='M30 100H620' stroke='" + NUIT + "' stroke-width='1.5'/>", k;
+      for (k = 0; k <= 20; k++) { var m = 23.5 + k * 0.1; s += "<path d='M" + X(m) + " 100v" + (k % 5 ? 6 : 10) + "' stroke='" + NUIT + "'/>"; if (k % 5 === 0) s += "<text x='" + X(m) + "' y='124' font-size='11' text-anchor='middle' fill='" + GRIS + "'>" + m.toFixed(1).replace(".", ",") + "</text>"; }
+      s += "<path d='M" + X(25) + " 30V100' stroke='#A31238' stroke-dasharray='4 4'/><text x='" + X(25) + "' y='24' font-size='11' font-weight='700' text-anchor='middle' fill='#A31238'>étiquette : 25 kg</text>";
+      var cnt = {};
+      M.forEach(function (m) { var key = m.toFixed(1); cnt[key] = (cnt[key] || 0) + 1; s += "<circle cx='" + X(m) + "' cy='" + (96 - cnt[key] * 9) + "' r='4.2' fill='" + (com ? ROUGE : BLEU) + "'/>"; });
+      if (M.length) {
+        var moy = M.reduce(function (a, b) { return a + b; }, 0) / M.length, dg = Math.max.apply(null, M.map(function (m) { return Math.abs(m - moy); }));
+        s += "<rect x='" + X(moy - dg) + "' y='132' width='" + (X(moy + dg) - X(moy - dg)) + "' height='8' rx='4' fill='#C2540A' opacity='.5'/><path d='M" + X(moy) + " 128V144' stroke='#C2540A' stroke-width='2.5'/>";
+        $(el, "[data-r]").innerHTML = M.length + " pesée" + (M.length > 1 ? "s" : "") + " · moyenne : <b>" + moy.toFixed(2).replace(".", ",") + " kg</b> · plus grand écart : <b>" + dg.toFixed(1).replace(".", ",") + " kg</b> · résultat : <b>m = (" + moy.toFixed(1).replace(".", ",") + " ± " + Math.max(0.1, dg).toFixed(1).replace(".", ",") + ") kg</b>" + (com ? " · ⚠️ balance non tarée : toutes les valeurs sont décalées de +0,8 kg (erreur systématique)." : "");
+      } else $(el, "[data-r]").textContent = "Appuie plusieurs fois sur « Peser le sac ».";
+      sv.innerHTML = s;
+    }
+    $(el, "[data-p]").addEventListener("click", function () { var m = Math.round((24.2 + Math.max(-0.2, Math.min(0.2, gauss() * 0.11)) + (com ? 0.8 : 0)) * 10) / 10; M.push(m); maj(); });
+    $(el, "[data-b]").addEventListener("click", function () { com = !com; M = []; this.textContent = "Balance : " + (com ? "celle du commerçant (0,8 kg à vide)" : "celle de Samuel (tarée)"); maj(); });
+    $(el, "[data-z]").addEventListener("click", function () { M = []; maj(); });
+    maj();
+  });
+})();
+
+/* Leçons APPROFONDIES — lot 5, classes d'examen (17/11/2026) : numération binaire (Tle C), cellule en microscopie
+   optique et électronique (Tle A), calcul des sièges au scrutin proportionnel et ombres (3e).
+   Même gabarit et même mécanisme que 11-approfondies-lot4.js : remplacement EN PLACE des versions courtes
+   (ordre, clé, fiche APC, examen et scènes conservés), simulations VRT_A en fin de fichier. */
+(function () {
+  "use strict";
+  var NUIT = "#001136", BLEU = "#1E499B", GRIS = "#4D5163", VERT = "#17784D";
+
+  function txt(x, y, t, o) {
+    o = o || {};
+    return "<text x='" + x + "' y='" + y + "' text-anchor='" + (o.a || "middle") + "' font-size='" + (o.s || 12) + "' font-weight='" + (o.w || 700) + "' fill='" + (o.c || NUIT) + "'" + (o.i ? " font-style='italic'" : "") + ">" + t + "</text>";
+  }
+  function lin(id, cs, vertical) {
+    var s = "<linearGradient id='" + id + "'" + (vertical ? " x1='0' y1='0' x2='0' y2='1'" : "") + ">";
+    cs.forEach(function (c, i) { s += "<stop offset='" + (i / (cs.length - 1)).toFixed(2) + "' stop-color='" + c + "'/>"; });
+    return s + "</linearGradient>";
+  }
+  function rad(id, cs, cx, cy) {
+    var s = "<radialGradient id='" + id + "' cx='" + (cx || "35%") + "' cy='" + (cy || "30%") + "' r='75%'>";
+    cs.forEach(function (c, i) { s += "<stop offset='" + (i / (cs.length - 1)).toFixed(2) + "' stop-color='" + c + "'/>"; });
+    return s + "</radialGradient>";
+  }
+  function omb(id) { return "<radialGradient id='" + id + "'><stop offset='0' stop-color='#001136' stop-opacity='.3'/><stop offset='1' stop-color='#001136' stop-opacity='0'/></radialGradient>"; }
+  function fleche(id, c) { return "<marker id='" + id + "' markerWidth='10' markerHeight='10' refX='7' refY='5' orient='auto'><path d='M0 1L8 5L0 9Z' fill='" + c + "'/></marker>"; }
+  function svg(w, h, alt, defs, corps) {
+    return "<svg viewBox='0 0 " + w + " " + h + "' role='img' aria-label='" + alt + "' font-family='Inter,Arial,sans-serif'><rect width='" + w + "' height='" + h + "' fill='#fff'/><defs>" + defs + "</defs>" + corps +
+      "<text x='" + (w - 6) + "' y='" + (h - 5) + "' font-size='8' text-anchor='end' fill='#8A93A6'>Planche VÉRITAS</text></svg>";
+  }
+  function alea(g) { return function () { g = (g * 16807) % 2147483647; return (g - 1) / 2147483646; }; }
+  function ancien(id) { return window.VRT_LECONS[id]; }
+  function remplacer(id, o) {
+    var a = ancien(id);
+    if (a) ["apc", "examen", "rang", "cle", "scenes"].forEach(function (k) { if (a[k] != null && o[k] == null) o[k] = a[k]; });
+    VRT_L(id, o);
+    if (a) o.ordre = a.ordre;
+  }
+  function q(qq, bonne, f1, f2, e) { return { q: qq, r: [bonne, f1, f2], b: 0, e: e }; }
+  function bin(n) { return n.toString(2); }
+
+  /* ═══════════════════════ Tle C MATHS — NUMÉRATION BINAIRE ═══════════════════════ */
+  var B_OLD = ancien("tle-maths-binaire");
+  function lampes2D(id, x, y, n, L) {
+    var s = "<g transform='translate(" + x + " " + y + ")'><rect x='-14' y='-34' width='" + (L * 8 + 10) + "' height='96' rx='14' fill='url(#" + id + "pan)'/>", b = ("00000000" + bin(n)).slice(-8), i;
+    for (i = 0; i < 8; i++) {
+      var cx = i * L + L / 2 - 4, on = b[i] === "1";
+      if (on) s += "<circle cx='" + cx + "' cy='0' r='" + (L * .46) + "' fill='url(#" + id + "halo)'/>";
+      s += "<circle cx='" + cx + "' cy='0' r='" + (L * .28) + "' fill='url(#" + id + (on ? "on" : "off") + ")' stroke='" + (on ? "#C48A0C" : "#3A4152") + "'/>" +
+        "<ellipse cx='" + (cx - L * .09) + "' cy='" + (-L * .1) + "' rx='" + (L * .08) + "' ry='" + (L * .05) + "' fill='#fff' opacity='.7'/>" +
+        txt(cx, L * .62, Math.pow(2, 7 - i), { s: 11, c: "#C9D2E3", w: 600 }) + txt(cx, L * .9, b[i], { s: 14, c: on ? "#FFD54A" : "#8A93A6" });
+    }
+    return s + "</g>";
+  }
+  function defsLampes(id) {
+    return lin(id + "pan", ["#2A3247", "#151B2B"], true) + rad(id + "on", ["#FFFDE8", "#FFE066", "#F2B705", "#B07A00"]) + rad(id + "off", ["#9AA3B2", "#5C6478", "#2E3445"]) +
+      "<radialGradient id='" + id + "halo'><stop offset='0' stop-color='#FFE066' stop-opacity='.55'/><stop offset='1' stop-color='#FFE066' stop-opacity='0'/></radialGradient>";
+  }
+  function panneau3D(n) {
+    var o = [], b = ("00000000" + bin(n)).slice(-8), i;
+    o.push({ f: "boite", c: [0, -10, 0], d: [540, 10, 200], coul: "#8B5A2B", dessus: "#A8733F" });
+    [-200, 200].forEach(function (x) { o.push({ f: "cylindre", c: [x, -5, -30], r: 5, h: 10, n: 12, coul: "#9CA3AD" }); });
+    o.push({ f: "boite", c: [0, 60, -30], d: [470, 120, 22], coul: "#15171C", dessus: "#1F2228" });
+    [[0, 124, 480, 8], [0, -4, 480, 8]].forEach(function (f) { o.push({ f: "boite", c: [f[0], f[1], -30], d: [f[2], f[3], 26], coul: "#BFC5CC", dessus: "#E2E6EA", div: false }); });
+    [-238, 238].forEach(function (x) { o.push({ f: "boite", c: [x, 60, -30], d: [8, 136, 26], coul: "#BFC5CC", dessus: "#E2E6EA", div: false }); });
+    for (i = 0; i < 8; i++) {
+      var x = -192 + i * 55, on = b[i] === "1", ec = on ? [0, 0, -26] : [0, 0, 0];
+      o.push({ f: "cylindre", c: [x, 62, -47], r: 11, h: 8, n: 20, axe: "z", coul: "#B08D57", dessus: "#D2B07A" });
+      o.push({ f: "sphere", c: [x, 62, -58], r: 15, coul: on ? "#FFF3C4" : "#E4E7EC", op: on ? 1 : 0.8, ec: ec });
+      if (on) o.push({ f: "sphere", c: [x, 62, -58], r: 23, coul: "#FFB938", op: 0.22, ec: ec });
+    }
+    return o;
+  }
+  remplacer("tle-maths-binaire", {
+    c: "Tle C", m: "maths", titre: "Numération binaire et numération décimale", duree: 35,
+    accroche: "Huit ampoules seulement pour afficher le score : le tableau du gymnase parle binaire.",
+    intro: "Le tableau d'affichage d'un gymnase te sert de fil rouge : à chaque partie, un indice t'aide à trancher entre trois affirmations.",
+    objectifs: ["écrire un entier en base 2 et le reconvertir en base 10", "maîtriser l'algorithme des divisions successives par 2", "justifier l'unicité de l'écriture binaire par la division euclidienne", "connaître la capacité d'un octet (0 à 255)"],
+    enquete: {
+      titre: "Le tableau de score du gymnase de Bafoussam",
+      svg: (function () { var id = "bisc"; return svg(640, 200, "Un tableau de score à huit ampoules : quatre sont allumées et affichent 45 en binaire", defsLampes(id), "<rect width='640' height='200' fill='#EEF2F8'/>" + lampes2D(id, 130, 70, 45, 52) + txt(320, 180, "Score de l'équipe locale : 00101101", { s: 14, c: NUIT })); })(),
+      legende: "Au gymnase omnisports de Bafoussam : le vieux tableau d'affichage du club de handball, fabriqué par les élèves du lycée technique.",
+      contexte: "<p>Pour un tournoi de handball, les élèves du club d'électronique ont fabriqué un tableau de score avec <strong>8 ampoules</strong> par équipe. Chaque ampoule est allumée (1) ou éteinte (0). Ce soir, l'équipe locale a marqué <strong>45 buts</strong> en cumul du tournoi.</p><p>Le président du club s'inquiète : « Avec 8 ampoules, on ne pourra jamais afficher plus de 8 buts ! » Un élève répond : « Au contraire, on peut aller jusqu'à 256. » Et on prévoit 300 buts cumulés en fin de saison.</p>",
+      documents: [{ t: "Le principe du tableau", html: "<p>De droite à gauche, les ampoules valent <strong>1, 2, 4, 8, 16, 32, 64, 128</strong>. Le score est la somme des valeurs des ampoules allumées.</p>" }],
+      question: "Quelles ampoules allumer pour 45 ? Quel est le plus grand score affichable, et faut-il ajouter des ampoules pour 300 ?",
+      tache: "Écris 45 en base 2 par deux méthodes, détermine la capacité du tableau et propose une solution pour la fin de saison.",
+      hypotheses: ["Avec 8 ampoules, on ne peut afficher que 8 scores différents au plus (le président).", "Le plus grand score affichable est 256 (l'élève).", "Le plus grand score affichable est 255 ; pour 300, il faut une 9ᵉ ampoule."]
+    },
+    parties: [
+      { t: "Le principe de la base 2", html: (B_OLD ? B_OLD.parties[0].html : "") +
+        "<div class='ex'><b>Lecture du tableau</b>00101101₂ = 32 + 8 + 4 + 1 = <strong>45</strong>.</div>",
+        planches: [{ type: "2D", titre: "45 sur le tableau : 00101101₂", legende: "Les ampoules allumées valent 32, 8, 4 et 1 : 32 + 8 + 4 + 1 = 45. Sous chaque ampoule, sa valeur (puissance de 2) et son chiffre binaire.", svg: (function () { var id = "bi1"; return svg(640, 170, "Huit ampoules, valeurs 128 à 1, allumées pour 32, 8, 4 et 1", defsLampes(id), lampes2D(id, 130, 64, 45, 52)); })() }],
+        fil: { html: "<p>Chaque ampoule a <strong>2 états</strong>. Pour 8 ampoules, le principe multiplicatif donne 2 × 2 × … × 2 = 2⁸ = <strong>256 combinaisons</strong>, pas 8. Le président confond le nombre d'ampoules et le nombre d'affichages.</p>", verdicts: [[0, "rejetee", "8 ampoules à 2 états : 2⁸ = 256 affichages différents."]] },
+        retenir: "En base 2, les rangs sont les puissances de 2 : 1, 2, 4, 8, 16, 32, 64, 128." },
+      { t: "De la base 10 à la base 2", html: (B_OLD ? B_OLD.parties[1].html : "") +
+        "<div class='methode'><b>Deuxième méthode : les plus grandes puissances</b><ol><li>Cherche la plus grande puissance de 2 inférieure ou égale au nombre : 32 ≤ 45.</li><li>Retire-la : 45 − 32 = 13 ; recommence : 8 ≤ 13, 13 − 8 = 5 ; 4 ≤ 5, 5 − 4 = 1 ; 1.</li><li>Allume 32, 8, 4, 1 : 101101₂.</li></ol></div>",
+        planches: [{ type: "2D", titre: "Les divisions successives de 45 par 2", legende: "On divise par 2 jusqu'à un quotient nul ; les restes, lus de bas en haut, donnent 101101.", svg: (function () {
+          var s = "", n = 45, i = 0, R = [];
+          while (n > 0) { R.push([n, Math.floor(n / 2), n % 2]); n = Math.floor(n / 2); }
+          R.forEach(function (r, k) {
+            var x = 40 + k * 82, y = 40 + k * 34;
+            s += txt(x + 24, y, r[0], { s: 18, a: "end" }) + "<path d='M" + (x + 30) + " " + (y - 18) + "V" + (y + 22) + "M" + (x + 30) + " " + (y + 6) + "H" + (x + 72) + "' stroke='" + NUIT + "' stroke-width='2'/>" + txt(x + 50, y, "2", { s: 16, c: BLEU }) +
+              "<rect x='" + (x + 4) + "' y='" + (y + 10) + "' width='24' height='22' rx='6' fill='" + (r[2] ? "#FFE9A8" : "#EEF1F6") + "'/>" + txt(x + 16, y + 26, r[2], { s: 15, c: "#C2540A" });
+          });
+          s += "<path d='M582 250V60' stroke='#C2540A' stroke-width='2.5' marker-end='url(#bi2f)'/>" + txt(570, 280, "lecture : 101101₂", { s: 15, c: "#C2540A", a: "end" });
+          return svg(640, 300, "Divisions successives de 45 par 2 avec les restes 1, 0, 1, 1, 0, 1 lus de bas en haut", fleche("bi2f", "#C2540A"), s);
+        })() }],
+        fil: { html: "<p>Les deux méthodes donnent <strong>45 = 101101₂</strong>, soit 00101101 sur les 8 ampoules : on allume les ampoules 32, 8, 4 et 1.</p>" },
+        retenir: "Divisions successives par 2, restes lus de bas en haut." },
+      { t: "Unicité de l'écriture et capacité d'un octet", html: (B_OLD ? B_OLD.parties[2].html : "") +
+        "<div class='prop'><b>Capacité</b>Avec n chiffres binaires, on écrit les entiers de 0 à <strong>2ⁿ − 1</strong> : 2ⁿ valeurs en tout, en comptant 0. Pour n = 8 : de 0 à 255. Pour n = 9 : de 0 à 511.</div>" +
+        "<div class='attention'><b>Piège</b>256 combinaisons ne veut pas dire « jusqu'à 256 » : la combinaison 00000000 sert à afficher 0.</div>",
+        planches: [{ type: "3d", titre: "Le tableau à 8 ampoules affiche 255", legende: "Les 8 ampoules allumées : 128 + 64 + 32 + 16 + 8 + 4 + 2 + 1 = 255 = 2⁸ − 1, le plus grand score possible. Le curseur fait avancer les ampoules allumées.",
+          modele: { h: 320, rx: -10, ry: -16, echelle: 0.95, alt: "Tableau de score en trois dimensions avec huit ampoules allumées", eclate: "Faire ressortir les ampoules allumées", jouer: "Allumer", objets: panneau3D(255),
+            etiquettes: [{ p: [-192, 90, -58], t: "128" }, { p: [193, 90, -58], t: "1", cote: "d" }] } }],
+        fil: { html: "<p>Toutes les ampoules allumées : 11111111₂ = 2⁸ − 1 = <strong>255</strong>. Pour 300 > 255, il faut une 9ᵉ ampoule (valeur 256) : 300 = 256 + 32 + 8 + 4 = 100101100₂.</p>", verdicts: [[1, "rejetee", "256 combinaisons, mais de 0 à 255 : 256 n'est pas affichable."], [2, "validee", "Maximum 2⁸ − 1 = 255 ; 300 = 100101100₂ demande 9 ampoules."]] },
+        retenir: "n bits : de 0 à 2ⁿ − 1. Un octet : 0 à 255." }
+    ],
+    denouement: {
+      titre: "45 = 00101101₂ ; maximum 255 ; une 9ᵉ ampoule pour 300",
+      etapes: ["Chaque ampoule vaut une puissance de 2 (indice 1).", "45 = 32 + 8 + 4 + 1 = 101101₂ (indice 2).", "8 ampoules : 2⁸ = 256 combinaisons, de 0 à 255 (indice 3).", "300 = 256 + 44 = 100101100₂ : 9 ampoules (indice 3)."],
+      reponse: "<p>Par divisions successives par 2, 45 = 101101₂ : sur le tableau, on allume les ampoules de valeurs 32, 8, 4 et 1 (00101101). Chaque ampoule ayant deux états, 8 ampoules offrent 2⁸ = 256 combinaisons, ce qui permet d'afficher tous les entiers de 0 à 2⁸ − 1 = 255 ; le président se trompe donc, mais l'élève aussi, car 256 n'est pas affichable. Comme 300 > 255 et que 300 = 256 + 32 + 8 + 4 = 100101100₂, il faut ajouter une 9ᵉ ampoule, de valeur 256 : le tableau ira alors jusqu'à 2⁹ − 1 = 511.</p>",
+      transfert: "<p>Une adresse IP s'écrit avec quatre octets, par exemple 192.168.1.45. Écris l'octet 192 en binaire et explique pourquoi aucun des quatre nombres ne peut dépasser 255. <em>(192 = 11000000₂.)</em></p>"
+    },
+    revision: (B_OLD ? B_OLD.revision : []).concat(["n bits : 2ⁿ valeurs, de 0 à 2ⁿ − 1."]),
+    exo: B_OLD ? B_OLD.exo : "",
+    quiz: [
+      q("1010₂ vaut…", "10", "5", "12", "8 + 2 = 10."),
+      q("13 en base 2 :", "1101", "1011", "1110", "8 + 4 + 1."),
+      q("Le plus grand entier sur 8 bits :", "255", "256", "128", "2⁸ − 1."),
+      q("45 en base 2 :", "101101", "110101", "101011", "32 + 8 + 4 + 1."),
+      q("Combien de combinaisons avec 8 ampoules allumées ou éteintes ?", "256", "8", "16", "2⁸."),
+      q("Dans les divisions successives par 2, on lit les restes…", "de bas en haut", "de haut en bas", "dans n'importe quel ordre", "Le dernier reste est le chiffre de plus fort poids."),
+      q("100000000₂ vaut…", "256", "128", "512", "2⁸."),
+      q("Combien de bits faut-il au minimum pour écrire 300 ?", "9", "8", "10", "256 ≤ 300 < 512."),
+      q("L'unicité de l'écriture binaire découle…", "de la division euclidienne par 2", "du théorème de Pythagore", "du calcul intégral", "Quotient et reste uniques."),
+      q("11111₂ vaut…", "31", "32", "15", "2⁵ − 1.")
+    ]
+  });
+
+  /* ═══════════════════════ Tle A SCIENCES — LA CELLULE EN MICROSCOPIE OPTIQUE ═══════════════════════ */
+  var MO_OLD = ancien("tle-sc-microscopie");
+  function microscope3D() {
+    var o = [], up = [0, 46, 0];
+    o.push({ f: "boite", c: [0, -10, 0], d: [460, 8, 260], coul: "#8B5A2B", dessus: "#B07A45" });
+    o.push({ f: "boite", c: [0, 0, 10], d: [150, 16, 190], coul: "#E9E4D8", dessus: "#F4F1EA" });
+    o.push({ f: "boite", c: [0, 16, 70], d: [44, 150, 34], coul: "#E9E4D8", dessus: "#F4F1EA", div: false });
+    o.push({ f: "boite", c: [0, 112, 10], d: [130, 8, 120], coul: "#1B1D22", dessus: "#2A2D33", div: false });
+    o.push({ f: "boite", c: [0, 121, 10], d: [96, 2, 30], coul: "#DDEFF7", op: 0.7, div: false });
+    o.push({ f: "boite", c: [0, 123, 10], d: [16, 1, 14], coul: "#C77DB0", op: 0.8, div: false });
+    o.push({ f: "cylindre", c: [0, 40, 10], r: 22, h: 3, n: 24, coul: "#B8C4D6", dessus: "#EAF2FB" });
+    o.push({ f: "cylindre", c: [26, 120, 70], r: 13, h: 12, n: 18, axe: "x", coul: "#2A2D33" });
+    o.push({ f: "cylindre", c: [-38, 120, 70], r: 13, h: 12, n: 18, axe: "x", coul: "#2A2D33" });
+    o.push({ f: "cylindre", c: [26, 90, 70], r: 8, h: 10, n: 14, axe: "x", coul: "#C9CED6" });
+    o.push({ f: "boite", c: [0, 166, 52], d: [40, 50, 30], coul: "#E9E4D8", dessus: "#F4F1EA", div: false, ec: up });
+    o.push({ f: "cylindre", c: [0, 160, 10], r: 26, h: 12, n: 22, coul: "#C9CED6", dessus: "#EEF1F4", ec: up });
+    [[-14, 0], [12, -8], [10, 12]].forEach(function (p, i) { o.push({ f: "cylindre", c: [p[0], 134 + i * 4, 10 + p[1]], r: 6.5 - i, r2: 5, h: 26 - i * 4, n: 14, coul: ["#D8DDE3", "#C9CED6", "#D4D9DF"][i], ec: up }); o.push({ f: "cylindre", c: [p[0], 150 + i * 2, 10 + p[1]], r: 6.8 - i, h: 3, n: 14, coul: ["#C62828", "#F2C94C", "#1E88E5"][i], ec: up }); });
+    o.push({ f: "cylindre", c: [0, 172, 10], r: 16, h: 80, n: 20, coul: "#E9E4D8", dessus: "#F4F1EA", ec: up });
+    o.push({ f: "cylindre", c: [0, 252, 10], r: 11, h: 26, n: 18, coul: "#1B1D22", dessus: "#0E0F12", ec: up });
+    o.forEach(function (x) { x.c[1] -= 130; });
+    return o;
+  }
+  function cellulesOignon(id, x, y, w, h, bar) {
+    var s = "<g transform='translate(" + x + " " + y + ")'><clipPath id='" + id + "cl'><circle cx='" + (w / 2) + "' cy='" + (h / 2) + "' r='" + (h / 2) + "'/></clipPath><circle cx='" + (w / 2) + "' cy='" + (h / 2) + "' r='" + (h / 2) + "' fill='#FBF3F6'/><g clip-path='url(#" + id + "cl)'>", R = alea(9), r, c;
+    for (r = -1; r < 7; r++) for (c = -1; c < 4; c++) {
+      var ox = c * 120 + (r % 2 ? 60 : 0) + (R() - .5) * 8, oy = r * 40, L = 116 + (R() - .5) * 10, H = 38;
+      s += "<path d='M" + ox + " " + oy + "h" + L + "l4 " + H + "h-" + L + "Z' fill='url(#" + id + "vac)' stroke='#7B3F69' stroke-width='2.2'/>";
+      s += "<ellipse cx='" + (ox + 18 + R() * 70) + "' cy='" + (oy + 20) + "' rx='9' ry='7' fill='#8E4A80' opacity='.85'/><circle cx='" + (ox + 22 + R() * 60) + "' cy='" + (oy + 18) + "' r='2' fill='#5B2450'/>";
+    }
+    s += "</g><circle cx='" + (w / 2) + "' cy='" + (h / 2) + "' r='" + (h / 2) + "' fill='none' stroke='#1B2233' stroke-width='6'/>";
+    if (bar) s += "<path d='M" + (w / 2 - 40) + " " + (h - 26) + "h80' stroke='#001136' stroke-width='4'/>" + txt(w / 2, h - 34, bar, { s: 12 });
+    return s + "</g>";
+  }
+  remplacer("tle-sc-microscopie", {
+    c: "Tle A", m: "sciences", titre: "La cellule en microscopie optique", duree: 35,
+    accroche: "« Une cellule d'oignon, c'est gros comme un grain de riz ! » Le microscope et un calcul tranchent.",
+    intro: "Une séance de travaux pratiques te sert de fil rouge : à chaque partie, un indice t'aide à trancher entre trois affirmations.",
+    objectifs: ["énoncer la théorie cellulaire", "nommer les parties du microscope optique et l'utiliser", "calculer un grossissement et la taille réelle d'une cellule", "comparer cellule animale et cellule végétale"],
+    enquete: {
+      titre: "Le TP de sciences au lycée de Bertoua",
+      svg: (function () { var id = "mosc"; return svg(640, 220, "Le champ du microscope montre des cellules d oignon allongées avec leur noyau ; à côté, un dessin d élève de 20 millimètres", rad(id + "vac", ["#FBE3EF", "#F3C8DD", "#E7A9C8"]), "<rect width='640' height='220' fill='#F4F6FA'/>" + cellulesOignon(id, 60, 10, 200, 200) + "<rect x='330' y='40' width='260' height='140' rx='12' fill='#fff' stroke='#C9D2E3'/>" + txt(460, 70, "Dessin de Mireille (×400)", { s: 13 }) + "<rect x='380' y='96' width='160' height='40' fill='none' stroke='#7B3F69' stroke-width='2'/><ellipse cx='420' cy='116' rx='10' ry='8' fill='#8E4A80'/>" + "<path d='M380 150h160' stroke='#C2540A' stroke-width='2' marker-start='url(#moscf)' marker-end='url(#moscf)'/>" + txt(460, 168, "20 mm sur le dessin… et en vrai ?", { s: 12, c: "#C2540A" }), true).replace("</defs>", fleche("moscf", "#C2540A") + "</defs>"); })(),
+      legende: "Au lycée bilingue de Bertoua, en Terminale A : la séance de TP de sciences, avec deux microscopes pour toute la classe.",
+      contexte: "<p>Mireille monte un fragment d'épiderme d'oignon rouge entre lame et lamelle. Avec l'objectif <strong>×40</strong> et l'oculaire <strong>×10</strong>, elle voit des « petites cases » allongées, chacune avec un point sombre. Elle dessine une case : <strong>20 mm</strong> de long sur sa feuille, à la même échelle que ce qu'elle voit.</p><p>Son voisin Junior s'exclame : « Une cellule d'oignon, c'est donc gros comme un grain de riz ! » Il veut aussi passer directement à l'objectif ×40 pour « gagner du temps ». La professeure demande d'abord de faire le calcul… et un frottis de joue.</p>",
+      documents: [{ t: "Les deux observations", html: "<table class='donnees'><tr><th></th><th>Épiderme d'oignon</th><th>Cellules de la joue</th></tr><tr><td>forme</td><td>rectangles réguliers jointifs</td><td>contours irréguliers, isolées</td></tr><tr><td>paroi épaisse</td><td>oui</td><td>non</td></tr><tr><td>grande vacuole colorée</td><td>oui</td><td>non</td></tr><tr><td>noyau</td><td>oui</td><td>oui</td></tr></table>" }],
+      question: "Quelle est la taille réelle de la cellule d'oignon, et qu'est-ce qui distingue une cellule végétale d'une cellule animale ?",
+      tache: "Calcule le grossissement et la taille réelle, explique la bonne façon d'utiliser le microscope, puis compare les deux cellules.",
+      hypotheses: ["Une cellule d'oignon mesure environ 20 mm, comme un grain de riz (Junior).", "Une cellule d'oignon mesure environ 0,05 mm : invisible à l'œil nu.", "Toutes les cellules ont la même forme et les mêmes constituants."]
+    },
+    parties: [
+      { t: "La cellule, unité du vivant", html: (MO_OLD ? MO_OLD.parties[0].html : ""),
+        fil: { html: "<p>Les « petites cases » de Mireille sont des <strong>cellules</strong> ; le point sombre est leur <strong>noyau</strong>. L'oignon, la joue de Junior, une bactérie : tous sont faits de cellules.</p>" },
+        retenir: "Pas de vie sans cellule." },
+      { t: "Utiliser le microscope optique", html: (MO_OLD ? MO_OLD.parties[1].html : ""),
+        planches: [{ type: "3d", titre: "Le microscope optique", legende: "Tourne le microscope : oculaire en haut, tube, revolver portant trois objectifs, platine avec la lame, vis macrométrique (grosse) et micrométrique (petite), source de lumière au pied. Le curseur remonte le tube, comme la vis macrométrique.",
+          modele: { h: 420, rx: -12, ry: 38, echelle: 0.85, alt: "Microscope optique en trois dimensions", eclate: "Remonter le tube", jouer: "Mise au point", objets: microscope3D(),
+            etiquettes: [{ p: [0, 148, 10], t: "Oculaire (×10)", ec: [0, 46, 0] }, { p: [-14, 4, 10], t: "Objectifs (×4, ×10, ×40)", ec: [0, 46, 0] }, { p: [48, -14, 10], t: "Platine et lame", cote: "d" }, { p: [32, -10, 70], t: "Vis macrométrique", cote: "d" }, { p: [0, -87, 10], t: "Source de lumière" }] } }],
+        fil: { html: "<p>Junior a tort de passer directement au ×40 : le champ est minuscule, la mise au point se fait à quelques dixièmes de millimètre et l'objectif risque d'écraser la lame. On repère d'abord au ×4, on centre, puis on grossit. Ici, le grossissement total est 40 × 10 = <strong>×400</strong>.</p>" },
+        retenir: "Grossissement = objectif × oculaire ; toujours commencer par le plus faible." },
+      { t: "Calculer la taille réelle", html:
+        "<p class='formule'>taille réelle = taille sur le dessin ÷ grossissement</p>" +
+        "<div class='methode'><b>Méthode</b><ol><li>Mesure l'objet sur le dessin (en mm).</li><li>Divise par le grossissement.</li><li>Convertis en micromètres : 1 mm = 1 000 µm.</li></ol></div>" +
+        "<div class='ex'><b>Exemple</b>20 mm ÷ 400 = 0,05 mm = <strong>50 µm</strong>.</div>" +
+        "<div class='savais'><b>Ordres de grandeur</b>Bactérie : 1 à 5 µm ; globule rouge : 7 µm ; cellule de joue : 50 µm ; cellule d'oignon : 50 à 200 µm ; grain de riz : 6 000 µm. L'œil nu ne distingue pas en dessous d'environ 100 µm.</div>",
+        planches: [{ type: "2D", titre: "Le champ au ×400 et sa barre d'échelle", legende: "Chaque cellule allongée mesure environ 50 µm ; la barre d'échelle de 25 µm permet de le vérifier directement sur l'image.", svg: (function () { var id = "mo3"; return svg(640, 300, "Cellules d oignon vues au microscope avec une barre d échelle de 25 micromètres", rad(id + "vac", ["#FBE3EF", "#F3C8DD", "#E7A9C8"]), cellulesOignon(id, 170, 4, 300, 290, "25 µm")); })() }],
+        fil: { html: "<p>20 mm ÷ 400 = 0,05 mm = 50 µm. Un grain de riz mesure environ 6 mm : il est <strong>120 fois</strong> plus long que la cellule. Junior a oublié de diviser par le grossissement.</p>", verdicts: [[0, "rejetee", "Il faut diviser la taille du dessin par 400 : 0,05 mm, pas 20 mm."], [1, "validee", "20 mm ÷ 400 = 0,05 mm = 50 µm."]] },
+        retenir: "Taille réelle = taille observée ÷ grossissement." },
+      { t: "Cellule animale, cellule végétale", html: (MO_OLD ? MO_OLD.parties[2].html : ""),
+        planches: [{ type: "2D", titre: "Cellules de la joue et cellules d'oignon", legende: "À gauche, des cellules de la joue au bleu de méthylène : contour irrégulier, noyau bien visible, pas de paroi. À droite, des cellules d'oignon : paroi épaisse, grande vacuole, cellules jointives.", svg: (function () {
+          var id = "mo4", s = "<circle cx='170' cy='150' r='130' fill='#EEF6FC'/>", R = alea(31), i;
+          [[120, 110], [210, 120], [150, 200], [230, 210], [100, 180]].forEach(function (p) {
+            var d = "", k; for (k = 0; k <= 12; k++) { var a = k / 12 * 6.283, r = 34 + (R() - .5) * 12; d += (k ? "L" : "M") + (p[0] + r * Math.cos(a)).toFixed(1) + " " + (p[1] + r * .8 * Math.sin(a)).toFixed(1); }
+            s += "<path d='" + d + "Z' fill='#BFD7F2' fill-opacity='.7' stroke='#3D6FB0' stroke-width='1.6' stroke-linejoin='round'/><circle cx='" + (p[0] + 4) + "' cy='" + p[1] + "' r='9' fill='#2155B0'/>";
+          });
+          s += "<circle cx='170' cy='150' r='130' fill='none' stroke='#1B2233' stroke-width='6'/>" + txt(170, 300, "cellules de la joue", { s: 13, c: BLEU });
+          s += cellulesOignon(id, 340, 20, 260, 260) + txt(470, 300, "cellules d'oignon", { s: 13, c: "#7B3F69" });
+          return svg(640, 316, "Deux champs de microscope : cellules de la joue irrégulières à noyau bleu, cellules d oignon rectangulaires à paroi", rad(id + "vac", ["#FBE3EF", "#F3C8DD", "#E7A9C8"]), s);
+        })() }],
+        fil: { html: "<p>Le document le montre : les deux cellules ont un <strong>noyau</strong>, un cytoplasme et une membrane, mais seule la cellule d'oignon a une <strong>paroi</strong> épaisse et une grande <strong>vacuole</strong>. Toutes les cellules ne sont donc pas identiques.</p>", verdicts: [[2, "rejetee", "Paroi et vacuole n'existent que dans la cellule végétale ; les formes diffèrent."]] },
+        retenir: "Végétale = animale + paroi + vacuole + chloroplastes." }
+    ],
+    denouement: {
+      titre: "50 µm, et deux cellules différentes",
+      etapes: ["Les « cases » sont des cellules, unités du vivant (indice 1).", "Grossissement 40 × 10 = 400, en commençant au plus faible (indice 2).", "20 mm ÷ 400 = 0,05 mm = 50 µm (indice 3).", "Paroi et vacuole : cellule végétale seulement (indice 4)."],
+      reponse: "<p>Avec l'objectif ×40 et l'oculaire ×10, le grossissement est de 40 × 10 = 400. La cellule dessinée à 20 mm mesure donc réellement 20 ÷ 400 = 0,05 mm, soit 50 µm : environ 120 fois moins qu'un grain de riz, et invisible à l'œil nu. Junior a oublié de diviser par le grossissement ; il doit aussi toujours commencer l'observation au plus faible grossissement. Les cellules d'oignon et celles de la joue possèdent toutes une membrane, un cytoplasme et un noyau, ce qui illustre la théorie cellulaire ; mais la cellule végétale d'oignon possède en plus une paroi épaisse et une grande vacuole, absentes de la cellule animale de la joue.</p>",
+      transfert: "<p>Sur une photographie prise au ×1 000, un globule rouge mesure 7 mm. Calcule sa taille réelle en µm et compare-la à celle de la cellule d'oignon. <em>(7 µm, environ 7 fois plus petit.)</em></p>"
+    },
+    revision: (MO_OLD ? MO_OLD.revision : []).concat(["Taille réelle = taille observée ÷ grossissement ; 1 mm = 1 000 µm."]),
+    exo: MO_OLD ? MO_OLD.exo : "",
+    quiz: [
+      q("Objectif ×40, oculaire ×10 : grossissement ?", "×400", "×50", "×4", "On multiplie."),
+      q("Quel élément est propre à la cellule végétale ?", "la paroi", "le noyau", "la membrane", "Elle donne sa rigidité."),
+      q("Toute cellule provient…", "d'une autre cellule", "de la matière inerte", "de l'eau", "Théorie cellulaire."),
+      q("Un dessin de 20 mm au ×400 représente…", "50 µm", "20 mm", "8 000 mm", "20 ÷ 400 = 0,05 mm."),
+      q("1 mm vaut…", "1 000 µm", "100 µm", "10 µm", "Micromètre = millième de mm."),
+      q("On commence une observation avec…", "le plus faible grossissement", "le plus fort grossissement", "l'objectif ×40", "Pour repérer et centrer."),
+      q("La vis qui sert à la mise au point fine est…", "la vis micrométrique", "la vis macrométrique", "le revolver", "La grosse vis approche, la petite affine."),
+      q("Les cellules de la joue n'ont pas…", "de paroi", "de noyau", "de membrane", "Ce sont des cellules animales."),
+      q("Taille réelle = …", "taille observée ÷ grossissement", "taille observée × grossissement", "grossissement ÷ taille observée", "On revient à la vraie taille."),
+      q("Une bactérie mesure environ…", "1 à 5 µm", "1 mm", "1 cm", "Bien plus petite qu'une cellule d'oignon.")
+    ]
+  });
+
+  /* ═══════════════════════ Tle A SCIENCES — LES ORGANITES ═══════════════════════ */
+  var OR_OLD = ancien("tle-sc-organites");
+  function cellule3D() {
+    var o = [], R = alea(77), k;
+    o.push({ f: "sphere", c: [0, 0, 0], r: [190, 120, 140], n: 30, m: 18, coul: "#F6D3E1", op: 0.16 });
+    o.push({ f: "sphere", c: [-30, 0, 0], r: 50, coul: "#7C4DA8", ec: [0, 90, 0] });
+    o.push({ f: "sphere", c: [-40, 8, 22], r: 16, coul: "#4A2470", ec: [0, 90, 0] });
+    for (k = 0; k < 4; k++) o.push({ f: "sphere", c: [-30 + 70 * Math.cos(k), -4 + k * 5, 70 * Math.sin(k) * .6], r: [44, 4, 26], n: 18, m: 6, coul: "#5B8DEF", op: 0.85, ec: [0, -70, 0] });
+    for (k = 0; k < 4; k++) o.push({ f: "sphere", c: [110, 30 + k * 9, -30], r: [36 - k * 3, 3.5, 20], n: 16, m: 6, coul: "#F2C94C", ec: [80, 40, 0] });
+    for (k = 0; k < 9; k++) { var a = k * 0.7 + R(), rr = 95 + R() * 40; o.push({ f: "sphere", c: [rr * Math.cos(a), (R() - .5) * 70, rr * Math.sin(a) * .7], r: [20, 9, 9], n: 14, m: 8, coul: "#E8703A", ec: [Math.cos(a) * 80, 0, Math.sin(a) * 80] }); }
+    for (k = 0; k < 6; k++) { var b = k * 1.05 + 0.3; o.push({ f: "sphere", c: [140 * Math.cos(b) * .8, (R() - .5) * 50, 110 * Math.sin(b) * .7], r: 8, coul: "#36B37A", ec: [Math.cos(b) * 60, 30, Math.sin(b) * 60] }); }
+    for (k = 0; k < 40; k++) { var c = R() * 6.28, d = 70 + R() * 90; o.push({ f: "sphere", c: [d * Math.cos(c), (R() - .5) * 90, d * Math.sin(c) * .7], r: 2.2, coul: "#2E3445" }); }
+    return o;
+  }
+  remplacer("tle-sc-organites", {
+    c: "Tle A", m: "sciences", titre: "La cellule en microscopie électronique : les organites", duree: 35,
+    accroche: "Pourquoi le cœur d'un athlète de Buéa a-t-il autant de « centrales électriques » dans ses cellules ?",
+    intro: "La Course de l'Espoir sur le mont Cameroun te sert de fil rouge : à chaque partie, un indice t'aide à trancher entre trois explications.",
+    objectifs: ["expliquer pourquoi le microscope électronique révèle l'ultrastructure", "citer les principaux organites et leur rôle", "relier le nombre d'organites à l'activité d'une cellule", "comparer microscopie optique et électronique"],
+    enquete: {
+      titre: "La Course de l'Espoir et les mitochondries",
+      svg: (function () {
+        var s = "<rect width='640' height='200' fill='#EAF4FB'/><path d='M0 200L180 70L260 110L380 20L520 120L640 80V200Z' fill='#5E7C5A'/><path d='M380 20L350 50L400 46Z' fill='#E9EEF2'/><path d='M0 200C160 170 300 190 640 150V200Z' fill='#7FA36E'/>";
+        s += "<g transform='translate(200 150)'><circle cx='0' cy='-30' r='7' fill='#6B4423'/><path d='M0 -22l-4 20l-10 14M-4 -2l10 16M0 -18l12 8M0 -18l-12 4' stroke='#6B4423' stroke-width='4' stroke-linecap='round' fill='none'/><rect x='-6' y='-20' width='10' height='14' rx='3' fill='#D9472B'/></g>";
+        s += "<rect x='430' y='130' width='190' height='54' rx='10' fill='#fff' fill-opacity='.92' stroke='#C9D2E3'/>" + txt(525, 152, "38 km, 3 000 m de dénivelé", { s: 12 }) + txt(525, 172, "Mont Cameroun, Buéa", { s: 11.5, w: 600, c: GRIS });
+        return svg(640, 200, "Un coureur sur les pentes du mont Cameroun", "", s);
+      })(),
+      legende: "À Buéa, la veille de la Course de l'Espoir : une conférence du médecin de l'équipe au lycée.",
+      contexte: "<p>Le médecin d'un club d'athlétisme de Buéa présente aux Terminales des photographies de cellules prises au <strong>microscope électronique</strong>. Il montre que les cellules du muscle cardiaque d'un coureur de la Course de l'Espoir contiennent des <strong>milliers de mitochondries</strong>.</p><p>Un élève affirme : « Ce sont des réserves de graisse. » Une autre : « Toutes les cellules du corps ont le même nombre d'organites. » Le médecin sourit et distribue un tableau.</p>",
+      documents: [{ t: "Nombre moyen de mitochondries par cellule", html: "<table class='donnees'><tr><th>Cellule</th><th>Mitochondries</th></tr><tr><td>muscle cardiaque</td><td>≈ 5 000</td></tr><tr><td>foie</td><td>≈ 1 500</td></tr><tr><td>peau</td><td>≈ 100</td></tr><tr><td>globule rouge adulte</td><td>0</td></tr></table>" }],
+      question: "À quoi servent les mitochondries, et pourquoi sont-elles si nombreuses dans les cellules du cœur ?",
+      tache: "Explique, en huit lignes, ce que révèle le microscope électronique et le rôle des principaux organites, en t'appuyant sur le tableau.",
+      hypotheses: ["Les mitochondries sont des réserves de graisse.", "Toutes les cellules ont le même nombre d'organites.", "Les mitochondries produisent l'énergie : plus une cellule travaille, plus elle en a."]
+    },
+    parties: [
+      { t: "Pourquoi le microscope électronique ?", html: (OR_OLD ? OR_OLD.parties[0].html : "") +
+        "<div class='def'><b>Pouvoir de séparation</b>Plus petite distance entre deux points que l'instrument montre encore séparés : environ <strong>0,2 µm</strong> au microscope optique, environ <strong>0,2 nm</strong> (1 000 fois moins) au microscope électronique.</div>",
+        planches: [{ type: "2D", titre: "Une mitochondrie vue par les deux microscopes", legende: "Au microscope optique (à gauche), une mitochondrie n'est qu'un petit bâtonnet flou. Au microscope électronique (à droite), on voit sa double membrane et ses crêtes internes.", svg: (function () {
+          var s = "<circle cx='160' cy='150' r='120' fill='#F3EDE2'/><ellipse cx='160' cy='150' rx='16' ry='7' fill='#C98A55' opacity='.7' filter='url(#fl)'/><circle cx='160' cy='150' r='120' fill='none' stroke='#1B2233' stroke-width='6'/>" + txt(160, 296, "optique ×1 000", { s: 13 });
+          s += "<rect x='340' y='30' width='260' height='240' rx='8' fill='#2B2B2B'/><ellipse cx='470' cy='150' rx='110' ry='56' fill='#8C8C8C' stroke='#E6E6E6' stroke-width='4'/><ellipse cx='470' cy='150' rx='100' ry='47' fill='#6E6E6E' stroke='#CFCFCF' stroke-width='2'/>";
+          for (var k = 0; k < 9; k++) { var x = 390 + k * 20, t = k % 2 ? 106 : 194, L = 40 + (k % 3) * 8; s += "<path d='M" + x + " " + t + "V" + (k % 2 ? t + L : t - L) + "' stroke='#D9D9D9' stroke-width='4' stroke-linecap='round'/>"; }
+          s += txt(470, 296, "électronique ×40 000", { s: 13 }) + txt(470, 52, "crêtes", { s: 12, c: "#F2F2F2" }) + txt(570, 252, "double membrane", { s: 11, c: "#F2F2F2", a: "end" });
+          return svg(640, 310, "Une mitochondrie floue au microscope optique et détaillée au microscope électronique", "<filter id='fl'><feGaussianBlur stdDeviation='2.5'/></filter>", s);
+        })() }],
+        fil: { html: "<p>Au microscope optique, une mitochondrie (1 à 2 µm) est à peine un point. Seul le microscope électronique révèle sa structure : double membrane et crêtes internes. Ce ne sont pas des gouttes de graisse, mais de véritables organites.</p>", verdicts: [[0, "rejetee", "Le microscope électronique montre une double membrane et des crêtes : un organite, pas une réserve de graisse."]] },
+        retenir: "Électrons au lieu de lumière : pouvoir de séparation 1 000 fois meilleur, on voit l'ultrastructure." },
+      { t: "Les organites et leurs rôles", html: (OR_OLD ? OR_OLD.parties[1].html : ""),
+        planches: [{ type: "3d", titre: "Une cellule en vue éclatée", legende: "Tourne la cellule, puis écarte les organites : le noyau (violet) monte, le réticulum (bleu) descend, l'appareil de Golgi (jaune) s'écarte, les mitochondries (orange) et les lysosomes (verts) sortent vers l'extérieur ; les petits points noirs sont les ribosomes.",
+          modele: { h: 400, rx: -18, ry: 22, echelle: 0.9, alt: "Cellule animale en trois dimensions avec ses organites en vue éclatée", eclate: "Écarter les organites", jouer: "Éclater la cellule", objets: cellule3D(),
+            etiquettes: [{ p: [-30, 52, 0], t: "Noyau (ADN)", ec: [0, 90, 0] }, { p: [110, 60, -30], t: "Appareil de Golgi", cote: "d", ec: [80, 40, 0] }, { p: [-100, -4, 0], t: "Réticulum endoplasmique", ec: [0, -70, 0] }, { p: [190, 0, 0], t: "Membrane plasmique", cote: "d" }] } }],
+        fil: { html: "<p>La <strong>mitochondrie</strong> est le siège de la respiration cellulaire : elle oxyde les nutriments (glucose) en présence de dioxygène et libère l'énergie dont la cellule a besoin pour travailler.</p>" },
+        retenir: "Chaque organite a un métier : la cellule est une usine organisée." },
+      { t: "Structure et fonction", html: (OR_OLD ? OR_OLD.parties[2].html : "") +
+        "<div class='prop'><b>Relation structure-fonction</b>Le nombre d'organites d'une cellule dépend de son activité : beaucoup de mitochondries dans les cellules qui consomment beaucoup d'énergie (muscle, cœur), beaucoup de réticulum et de Golgi dans celles qui fabriquent et exportent des protéines (cellules du pancréas).</div>",
+        fil: { html: "<p>Le cœur bat sans arrêt, de 60 à 180 fois par minute pendant la course : ses cellules ont un énorme besoin d'énergie, d'où <strong>5 000 mitochondries</strong> chacune ; une cellule de peau, peu active, en a 100 ; le globule rouge adulte, qui a perdu ses organites, aucune. Le nombre d'organites varie donc selon le travail de la cellule.</p>", verdicts: [[1, "rejetee", "De 0 à 5 000 mitochondries selon les cellules."], [2, "validee", "Plus la cellule consomme d'énergie, plus elle a de mitochondries."]] },
+        retenir: "L'optique montre la cellule ; l'électronique montre ses organites, dont le nombre suit l'activité." }
+    ],
+    denouement: {
+      titre: "Des centrales électriques en nombre",
+      etapes: ["Le microscope électronique, 1 000 fois plus précis, révèle les organites (indice 1).", "La mitochondrie produit l'énergie par respiration cellulaire (indice 2).", "Cœur ≈ 5 000 mitochondries par cellule, peau ≈ 100 (indice 3)."],
+      reponse: "<p>Le microscope électronique utilise un faisceau d'électrons au lieu de la lumière ; son pouvoir de séparation, environ 1 000 fois meilleur, révèle l'ultrastructure de la cellule : noyau, réticulum, appareil de Golgi, ribosomes, lysosomes et mitochondries. Les mitochondries ne sont pas des réserves de graisse : ce sont des organites à double membrane, sièges de la respiration cellulaire, qui libèrent l'énergie à partir des nutriments et du dioxygène. Une cellule du muscle cardiaque, qui travaille sans relâche et encore plus pendant la Course de l'Espoir, en contient environ 5 000, contre 100 pour une cellule de peau : le nombre d'organites dépend de l'activité de la cellule.</p>",
+      transfert: "<p>Les cellules du pancréas fabriquent et exportent de grandes quantités d'enzymes (des protéines). Quels organites s'attend-on à y trouver en abondance ? Justifie en trois lignes. <em>(Ribosomes, réticulum endoplasmique, appareil de Golgi.)</em></p>"
+    },
+    revision: (OR_OLD ? OR_OLD.revision : []).concat(["Pouvoir de séparation : 0,2 µm (optique), 0,2 nm (électronique).", "Le nombre d'organites suit l'activité de la cellule."]),
+    exo: OR_OLD ? OR_OLD.exo : "",
+    quiz: [
+      q("Quel organite produit l'énergie ?", "la mitochondrie", "le lysosome", "la vacuole", "Respiration cellulaire."),
+      q("Les protéines sont fabriquées par…", "les ribosomes", "la paroi", "les pores", "Libres ou sur le réticulum."),
+      q("Le microscope électronique utilise…", "des électrons", "la lumière", "des ultrasons", "D'où son pouvoir de séparation."),
+      q("Le noyau contient…", "l'ADN", "les mitochondries", "les chloroplastes", "Il dirige la cellule."),
+      q("La photosynthèse se fait dans…", "le chloroplaste", "la mitochondrie", "le lysosome", "Cellules végétales chlorophylliennes."),
+      q("Une cellule du cœur a environ…", "5 000 mitochondries", "100 mitochondries", "aucune mitochondrie", "Gros besoin d'énergie."),
+      q("L'appareil de Golgi sert à…", "emballer et expédier les protéines", "digérer les déchets", "produire l'énergie", "Le service d'expédition."),
+      q("Le pouvoir de séparation du microscope optique est d'environ…", "0,2 µm", "0,2 nm", "2 mm", "Limite due à la lumière."),
+      q("Les lysosomes…", "digèrent les déchets de la cellule", "fabriquent l'ADN", "font la photosynthèse", "Ils contiennent des enzymes digestives."),
+      q("Les échantillons observés au microscope électronique sont…", "préparés et morts", "toujours vivants", "colorés au bleu de méthylène seulement", "Ils sont fixés et coupés très finement.")
+    ]
+  });
+
+  /* ═══════════════════════ 3e ECM — CALCULER LES SIÈGES ═══════════════════════ */
+  var S_OLD = ancien("3e-ecm-sieges");
+  var COUL_L = ["#1E499B", "#D9472B", "#17784D", "#C48A0C", "#7B3F99"];
+  function repartir(voix, n) {
+    var tot = voix.reduce(function (a, b) { return a + b; }, 0), qe = tot / n, S = voix.map(function (v) { return Math.floor(v / qe); }), R = voix.map(function (v, i) { return v - S[i] * qe; }), reste = n - S.reduce(function (a, b) { return a + b; }, 0);
+    var ord = voix.map(function (v, i) { return i; }).sort(function (a, b) { return R[b] - R[a]; });
+    var T = S.slice(); for (var k = 0; k < reste; k++) T[ord[k]]++;
+    return { tot: tot, qe: qe, S: S, R: R, T: T, reste: reste };
+  }
+  function hemicycle(T, cx, cy, R0) {
+    var n = T.reduce(function (a, b) { return a + b; }, 0), s = "", k = 0, rangs = n <= 9 ? 1 : n <= 24 ? 2 : 3, par = Math.ceil(n / rangs), L = [];
+    T.forEach(function (t, i) { for (var j = 0; j < t; j++) L.push(i); });
+    for (var r = 0; r < rangs; r++) {
+      var m = Math.min(par, n - k), rr = R0 + r * 34;
+      for (var j = 0; j < m; j++, k++) {
+        var a = Math.PI - (j + 0.5) / m * Math.PI, x = cx + rr * Math.cos(a), y = cy - rr * Math.sin(a);
+        s += "<ellipse cx='" + x.toFixed(1) + "' cy='" + (y + 11).toFixed(1) + "' rx='12' ry='3.5' fill='#001136' opacity='.18'/><circle cx='" + x.toFixed(1) + "' cy='" + y.toFixed(1) + "' r='12' fill='" + COUL_L[L[k]] + "'/><ellipse cx='" + (x - 4).toFixed(1) + "' cy='" + (y - 5).toFixed(1) + "' rx='4.5' ry='2.6' fill='#fff' opacity='.55'/>";
+      }
+    }
+    return s;
+  }
+  function hemicycle3D(T) {
+    var o = [], n = T.reduce(function (a, b) { return a + b; }, 0), L = [], k;
+    T.forEach(function (t, i) { for (var j = 0; j < t; j++) L.push(i); });
+    o.push({ f: "boite", c: [0, -8, 40], d: [460, 8, 300], coul: "#9C6B3C", dessus: "#C0894F" });
+    o.push({ f: "boite", c: [0, 12, 150], d: [120, 36, 40], coul: "#5D3A1E", dessus: "#7A5230" });
+    o.push({ f: "boite", c: [0, 32, 140], d: [40, 4, 16], coul: "#2E7D32", dessus: "#3E9B44", div: false });
+    for (k = 0; k < n; k++) {
+      var a = Math.PI * (k + 0.5) / n, x = -150 * Math.cos(a), z = 130 - 150 * Math.sin(a);
+      o.push({ f: "boite", c: [x, 0, z], d: [26, 8, 22], coul: "#4A2C14", dessus: "#5D3A1E", div: false });
+      o.push({ f: "boite", c: [x, 8, z], d: [26, 12, 22], coul: COUL_L[L[k]], div: false });
+      o.push({ f: "boite", c: [x, 20, z - 8.5], d: [26, 24, 5], coul: COUL_L[L[k]], div: false });
+    }
+    return o;
+  }
+  var ELEC = [5300, 3900, 1800, 1000];
+  remplacer("3e-ecm-sieges", {
+    c: "3e", m: "ecm", titre: "TP : calculer les sièges au scrutin proportionnel", duree: 30,
+    accroche: "Quatre listes, sept sièges, 12 000 voix : la liste B réclame un recomptage. A-t-elle raison ?",
+    intro: "Une élection municipale simulée en classe te sert de fil rouge : à chaque partie, un indice t'aide à trancher entre trois réclamations.",
+    objectifs: ["calculer les suffrages exprimés et le quotient électoral", "attribuer les sièges au quotient", "répartir les sièges restants au plus fort reste", "vérifier et contester un résultat avec des arguments chiffrés"],
+    enquete: {
+      titre: "Le conseil municipal simulé de la 3ᵉ B",
+      svg: (function () { var r = repartir(ELEC, 7); return svg(640, 210, "Hémicycle de sept sièges colorés selon les listes", "", "<rect width='640' height='210' fill='#F6F3EC'/>" + hemicycle(r.T, 320, 180, 120) + txt(320, 200, "7 sièges à pourvoir", { s: 13, c: GRIS }) + ELEC.map(function (v, i) { return "<rect x='" + (28 + i * 0) + "' y='" + (24 + i * 26) + "' width='14' height='14' rx='4' fill='" + COUL_L[i] + "'/>" + txt(50, 36 + i * 26, "Liste " + "ABCD"[i], { s: 12, a: "start" }); }).join("")); })(),
+      legende: "Au collège de Mbalmayo, en ECM : la classe de 3ᵉ B simule l'élection d'un conseil municipal de 7 conseillers.",
+      contexte: "<p>Pour comprendre le scrutin proportionnel, la 3ᵉ B organise une élection simulée avec les élèves de tout le collège. Sur 12 600 bulletins, <strong>600 sont blancs ou nuls</strong>. Quatre listes se présentent pour <strong>7 sièges</strong>.</p><p>Le bureau de vote annonce A : 3 sièges, B : 2, C : 1, D : 1. La tête de liste B proteste : « On a presque un tiers des voix, on devrait avoir 3 sièges ! » La liste D, elle, voudrait que l'on compte les bulletins blancs.</p>",
+      documents: [{ t: "Procès-verbal du bureau de vote", html: "<table class='donnees'><tr><th>Liste</th><td>A</td><td>B</td><td>C</td><td>D</td><td>blancs et nuls</td></tr><tr><th>Voix</th><td>5 300</td><td>3 900</td><td>1 800</td><td>1 000</td><td>600</td></tr></table>" }],
+      question: "La répartition annoncée est-elle juste, et les réclamations des listes B et D sont-elles fondées ?",
+      tache: "Refais le calcul complet (suffrages exprimés, quotient, sièges au quotient, plus forts restes) et réponds par écrit aux deux réclamations.",
+      hypotheses: ["Il faut compter les 600 bulletins blancs et nuls dans le calcul (liste D).", "La liste B devrait avoir 3 sièges (liste B).", "La répartition 3, 2, 1, 1 est conforme à la méthode du quotient et des plus forts restes."]
+    },
+    parties: [
+      { t: "Suffrages exprimés et quotient électoral", html: (S_OLD ? S_OLD.parties[0].html : "") +
+        "<div class='def'><b>Suffrages exprimés</b>Bulletins valablement attribués à une liste : on retire les bulletins <strong>blancs et nuls</strong> du nombre de votants.</div>",
+        fil: { html: "<p>Votants : 12 600 ; blancs et nuls : 600 ; suffrages exprimés : <strong>12 000</strong>. Quotient : 12 000 ÷ 7 ≈ <strong>1 714,3</strong> voix par siège. Compter les blancs fausserait le quotient : ils n'expriment le choix d'aucune liste.</p>", verdicts: [[0, "rejetee", "Les blancs et nuls ne sont pas des suffrages exprimés : on ne les compte pas."]] },
+        retenir: "On compte les suffrages exprimés : bulletins nuls et blancs exclus." },
+      { t: "Répartir les sièges", html: (S_OLD ? S_OLD.parties[1].html : "") +
+        "<div class='methode'><b>Le calcul de la 3ᵉ B</b><ol><li>A : 5 300 ÷ 1 714,3 ≈ 3,09 → 3 sièges, reste ≈ 157.</li><li>B : 3 900 ÷ 1 714,3 ≈ 2,28 → 2 sièges, reste ≈ 471.</li><li>C : 1 800 ÷ 1 714,3 ≈ 1,05 → 1 siège, reste ≈ 86.</li><li>D : 1 000 ÷ 1 714,3 ≈ 0,58 → 0 siège, reste 1 000.</li><li>6 sièges attribués, 1 restant : au plus fort reste, <strong>D</strong> (1 000).</li></ol></div>",
+        planches: [{ type: "2D", titre: "Sièges au quotient, puis au plus fort reste", legende: "Barres : voix de chaque liste ; chaque case pleine vaut un quotient (≈ 1 714 voix) et donne un siège ; la partie hachurée est le reste. Le 7ᵉ siège va au plus fort reste, celui de D.", svg: (function () {
+          var r = repartir(ELEC, 7), s = "", K = 440 / 5400;
+          ELEC.forEach(function (v, i) {
+            var y = 30 + i * 60, x = 80;
+            s += txt(66, y + 24, "ABCD"[i], { s: 18, c: COUL_L[i], a: "end" });
+            for (var k = 0; k < r.S[i]; k++) s += "<rect x='" + (x + k * r.qe * K) + "' y='" + y + "' width='" + (r.qe * K - 3) + "' height='34' rx='6' fill='" + COUL_L[i] + "'/>" + txt(x + k * r.qe * K + r.qe * K / 2, y + 23, "siège", { s: 11, c: "#fff" });
+            var xr = x + r.S[i] * r.qe * K;
+            s += "<rect x='" + xr + "' y='" + y + "' width='" + Math.max(2, r.R[i] * K) + "' height='34' rx='6' fill='url(#hach" + i + ")' stroke='" + COUL_L[i] + "'/>" + txt(xr + r.R[i] * K + 8, y + 22, "reste " + Math.round(r.R[i]) + (r.T[i] > r.S[i] ? " → +1 siège" : ""), { s: 12, a: "start", c: r.T[i] > r.S[i] ? "#C2540A" : GRIS });
+          });
+          s += "<path d='M" + (80 + r.qe * K) + " 20V270' stroke='" + NUIT + "' stroke-dasharray='4 4'/>" + txt(80 + r.qe * K, 288, "1 quotient ≈ 1 714 voix", { s: 11.5 });
+          var d = ELEC.map(function (v, i) { return "<pattern id='hach" + i + "' width='8' height='8' patternUnits='userSpaceOnUse' patternTransform='rotate(45)'><rect width='8' height='8' fill='#fff'/><rect width='3' height='8' fill='" + COUL_L[i] + "' opacity='.45'/></pattern>"; }).join("");
+          return svg(640, 300, "Barres des voix des quatre listes découpées en quotients et en restes ; le dernier siège va à la liste D", d, s);
+        })() }],
+        fil: { html: "<p>Le calcul confirme la répartition annoncée : <strong>A 3, B 2, C 1, D 1</strong>. Le dernier siège revient à D, dont le reste (1 000) dépasse celui de B (≈ 471). Essaie toi-même avec le simulateur : il faudrait à B environ 530 voix de plus pour lui prendre ce siège.</p>", verdicts: [[2, "validee", "Quotient puis plus forts restes : 3, 2, 1, 1."]] },
+        retenir: "Quotient d'abord, plus forts restes ensuite." },
+      { t: "Lire le résultat et contester avec des arguments", html:
+        "<div class='prop'><b>Proportionnalité approchée</b>B a 3 900 ÷ 12 000 = 32,5 % des voix ; 32,5 % de 7 sièges = 2,28 sièges. Avec des sièges entiers, B ne peut avoir que 2 ou 3 sièges : la méthode donne 2, car son reste est plus faible que celui de D.</div>" +
+        "<div class='attention'><b>Contester, oui, mais par la loi</b>Toute réclamation se fait par écrit, auprès de l'organe électoral compétent (au Cameroun, ELECAM et, pour le contentieux, les juridictions compétentes), avec des chiffres. Insulter ou bloquer un bureau de vote est une infraction.</div>" +
+        (S_OLD ? S_OLD.parties[2].html : ""),
+        planches: [{ type: "3d", titre: "La salle du conseil municipal", legende: "Les 7 sièges du conseil, colorés selon les listes : 3 bleus (A), 2 rouges (B), 1 vert (C), 1 jaune (D). Tourne la salle.",
+          modele: { h: 320, rx: -32, ry: 0, echelle: 1, alt: "Salle du conseil en hémicycle avec sept fauteuils colorés", objets: hemicycle3D(repartir(ELEC, 7).T),
+            etiquettes: [{ p: [0, 30, 150], t: "Tribune du maire" }, { p: [-140, 30, 80], t: "Liste A (3 sièges)" }, { p: [140, 30, 80], t: "Liste D (1 siège)", cote: "d" }] } }],
+        fil: { html: "<p>B a 32,5 % des voix, soit 2,28 sièges « idéaux » : obtenir 3 sièges la sur-représenterait davantage que D n'est sur-représentée avec 1. Sa réclamation n'est pas fondée ; elle peut cependant la déposer par écrit.</p>", verdicts: [[1, "rejetee", "B : 2,28 sièges idéaux ; son reste (471) est inférieur à celui de D (1 000)."]] },
+        retenir: "Toujours lire le texte de loi avant de calculer ; contester par écrit, chiffres à l'appui." }
+    ],
+    denouement: {
+      titre: "A 3, B 2, C 1, D 1 : le procès-verbal est juste",
+      etapes: ["Suffrages exprimés : 12 600 − 600 = 12 000 (indice 1).", "Quotient : 12 000 ÷ 7 ≈ 1 714 ; au quotient : A 3, B 2, C 1, D 0 (indice 2).", "Siège restant au plus fort reste : D (1 000) (indice 2).", "B : 2,28 sièges idéaux, 2 obtenus ; réclamation par écrit possible mais non fondée (indice 3)."],
+      reponse: "<p>Les bulletins blancs et nuls ne sont pas des suffrages exprimés : il y en a 12 600 − 600 = 12 000, et la réclamation de D sur ce point n'est pas fondée. Le quotient électoral vaut 12 000 ÷ 7 ≈ 1 714 voix. Au quotient, A obtient 3 sièges, B 2, C 1 et D 0 ; il reste un siège, attribué au plus fort reste, celui de D (1 000 voix, contre environ 471 pour B, 157 pour A et 86 pour C). La répartition annoncée, A 3, B 2, C 1, D 1, est donc conforme. Avec 32,5 % des voix, B a droit à 2,28 sièges « idéaux » : la méthode des plus forts restes lui en donne 2. Elle peut contester par écrit auprès de l'organe compétent, mais ses chiffres ne lui donnent pas raison.</p>",
+      transfert: "<p>Même élection, mais avec 9 sièges. Refais la répartition avec le simulateur puis à la main. <em>(Quotient ≈ 1 333 ; au quotient A 3, B 2, C 1, D 0 ; restes A 1 300, B 1 233, C 467, D 1 000 : A, B et D gagnent un siège → A 4, B 3, C 1, D 1.)</em></p>"
+    },
+    revision: (S_OLD ? S_OLD.revision : []).concat(["Suffrages exprimés = votants − blancs et nuls.", "Contester un résultat : par écrit, devant l'organe compétent, chiffres à l'appui."]),
+    exo: S_OLD ? S_OLD.exo : "",
+    quiz: [
+      q("9 000 suffrages exprimés, 3 sièges : quotient ?", "3 000", "9 000", "300", "9 000 ÷ 3."),
+      q("Les bulletins blancs comptent-ils dans les suffrages exprimés ?", "non", "oui", "seulement s'ils sont nombreux", "Ils n'expriment le choix d'aucune liste."),
+      q("Après le quotient, les sièges restants vont…", "aux plus forts restes", "au hasard", "toujours à la première liste", "Méthode des plus forts restes."),
+      q("12 600 votants, 600 blancs et nuls : suffrages exprimés ?", "12 000", "12 600", "13 200", "On retire les blancs et nuls."),
+      q("Quotient pour 12 000 exprimés et 7 sièges :", "environ 1 714", "7", "12 007", "12 000 ÷ 7."),
+      q("A a 5 300 voix, quotient 1 714 : sièges au quotient ?", "3", "4", "2", "Partie entière de 3,09."),
+      q("D a 1 000 voix et 0 siège au quotient. Son reste vaut…", "1 000", "0", "714", "Aucun quotient complet."),
+      q("Qui obtient le 7ᵉ siège ?", "D, plus fort reste", "B, deuxième liste", "A, liste en tête", "1 000 > 471 > 157 > 86."),
+      q("Une réclamation électorale se fait…", "par écrit, devant l'organe compétent", "en bloquant le bureau de vote", "sur les réseaux sociaux seulement", "Respect de la loi."),
+      q("32,5 % des voix pour 7 sièges représentent…", "2,28 sièges", "3 sièges exactement", "32 sièges", "0,325 × 7.")
+    ]
+  });
+
+  /* ═══════════════════════ 3e ARTS — OMBRE PROPRE ET OMBRE PORTÉE ═══════════════════════ */
+  var A_OLD = ancien("3e-arts-ombre");
+  var PLANCHE_SPHERE = (function () {
+    var s = "<rect width='640' height='330' fill='#F4EFE6'/><rect y='230' width='640' height='100' fill='#E3D8C4'/>";
+    s += "<ellipse cx='392' cy='252' rx='150' ry='22' fill='url(#om1)'/>";
+    s += "<circle cx='240' cy='170' r='80' fill='url(#sph1)'/>";
+    s += "<path d='M200 101A80 80 0 0 0 314 236' fill='none' stroke='#C2540A' stroke-width='2' stroke-dasharray='5 4'/>";
+    s += "<g transform='translate(70 52)'><circle r='18' fill='url(#lp)'/><circle r='34' fill='#FFE066' opacity='.18'/></g><path d='M92 64L190 120' stroke='#F2B705' stroke-width='2' marker-end='url(#fl1)'/><path d='M90 70L310 236' stroke='#F2B705' stroke-width='1.4' stroke-dasharray='6 5'/><path d='M88 62L540 248' stroke='#F2B705' stroke-width='1.4' stroke-dasharray='6 5'/>";
+    s += "<g font-size='12' font-weight='700' fill='" + NUIT + "'><path d='M206 140l-60 -20' stroke='" + NUIT + "'/><text x='140' y='116' text-anchor='end'>reflet</text><path d='M236 170l-90 30' stroke='" + NUIT + "'/><text x='140' y='206' text-anchor='end'>lumière</text><path d='M292 154l70 -50' stroke='" + NUIT + "'/><text x='366' y='100'>pénombre</text><path d='M290 214l90 -60' stroke='" + NUIT + "'/><text x='384' y='150'>ombre propre</text><path d='M300 244l-6 6' stroke='" + NUIT + "'/><text x='300' y='292'>reflet du sol</text><text x='470' y='292'>ombre portée</text><path d='M470 280l-20 -26' stroke='" + NUIT + "'/></g>";
+    return svg(640, 330, "Une sphère éclairée par une lampe en haut à gauche : reflet, lumière, pénombre, ombre propre, reflet du sol et ombre portée allongée à droite", rad("sph1", ["#FFFFFF", "#E9E4DA", "#B9B1A2", "#6E665A", "#3B352C", "#5A5246"], "32%", "28%") + rad("lp", ["#FFFDE8", "#FFE066", "#F2B705"]) + omb("om1") + fleche("fl1", "#F2B705"), s);
+  })();
+  function scene3D() {
+    return [
+      { f: "boite", c: [0, -6, 0], d: [500, 8, 300], coul: "#E3D8C4", dessus: "#EFE6D6" },
+      { f: "poly", pts: [[120, 2, -10], [280, 2, 20], [290, 2, -70], [125, 2, -95]], coul: "#6E665A", op: 0.45 },
+      { f: "boite", c: [-80, 0, 0], d: [90, 90, 90], coul: "#C9C1B2", dessus: "#EFE9DE", div: false },
+      { f: "sphere", c: [120, 52, -50], r: 50, coul: "#D9D2C4" },
+      { f: "poly", pts: [[-35, 2, 45], [60, 2, 80], [60, 2, -20], [-35, 2, -45]], coul: "#6E665A", op: 0.4 }
+    ];
+  }
+  remplacer("3e-arts-ombre", {
+    c: "3e", m: "arts", titre: "L'ombre et la lumière : ombre propre et ombre portée", duree: 30,
+    accroche: "Le canari de grand-mère semble tout plat sur l'affiche. Deux ombres vont lui rendre son volume.",
+    intro: "L'affiche de l'exposition du collège te sert de fil rouge : à chaque partie, un indice t'aide à trancher entre trois conseils.",
+    objectifs: ["distinguer ombre propre et ombre portée", "placer les ombres selon la position de la source de lumière", "modeler un volume par un dégradé progressif", "ombrer un volume simple au crayon"],
+    enquete: {
+      titre: "L'affiche de l'exposition de Foumban",
+      svg: (function () {
+        var s = "<rect width='640' height='220' fill='#F7F2E8'/><rect x='40' y='20' width='240' height='180' rx='8' fill='#fff' stroke='#C9D2E3'/><path d='M120 70c-30 10-40 70 0 100h80c40-30 30-90 0-100Z' fill='#C9805B' stroke='#7A4A1E' stroke-width='2'/><rect x='130' y='56' width='60' height='16' rx='6' fill='#C9805B' stroke='#7A4A1E' stroke-width='2'/>" + txt(160, 190, "dessin « plat »", { s: 12, c: GRIS });
+        s += "<rect x='360' y='20' width='240' height='180' rx='8' fill='#fff' stroke='#C9D2E3'/><ellipse cx='520' cy='172' rx='70' ry='12' fill='url(#om2)'/><path d='M440 70c-30 10-40 70 0 100h80c40-30 30-90 0-100Z' fill='url(#can)' stroke='#7A4A1E' stroke-width='2'/><rect x='450' y='56' width='60' height='16' rx='6' fill='url(#can)' stroke='#7A4A1E' stroke-width='2'/>" + txt(480, 190, "avec ses ombres", { s: 12, c: GRIS });
+        s += "<g transform='translate(330 40)'><circle r='12' fill='#FFE066'/><circle r='22' fill='#FFE066' opacity='.25'/></g>";
+        return svg(640, 220, "Le même canari dessiné deux fois : plat sans ombres, en volume avec ombre propre et ombre portée", rad("can", ["#F1C3A4", "#C9805B", "#8A4E2C", "#4E2A14"], "30%", "30%") + omb("om2"), s);
+      })(),
+      legende: "À Foumban, ville des artistes : le collège prépare une exposition sur les objets du patrimoine bamoun.",
+      contexte: "<p>Pour l'affiche de l'exposition, Njoya dessine au crayon le <strong>canari</strong> (jarre en terre) de sa grand-mère, posé sur une table près de la fenêtre. Son dessin est juste, mais il paraît « plat », comme découpé.</p><p>Trois camarades le conseillent : « Noircis tout le côté droit uniformément », dit l'un ; « Ajoute une ombre sous le canari, du même côté que la fenêtre », dit l'autre ; la troisième propose de regarder d'où vient la lumière avant de toucher au crayon.</p>",
+      documents: [{ t: "La position de la lumière", html: "<p>La fenêtre est <strong>en haut à gauche</strong> du canari ; c'est la fin d'après-midi, le soleil est assez bas.</p>" }],
+      question: "Où placer l'ombre propre et l'ombre portée, et comment ombrer pour que le canari paraisse en volume ?",
+      tache: "Rédige pour Njoya une méthode en quatre étapes, puis ombre une sphère éclairée par la gauche.",
+      hypotheses: ["Il suffit de noircir uniformément tout le côté droit.", "L'ombre portée se place du même côté que la fenêtre.", "Ombre propre à l'opposé de la lumière, avec un dégradé ; ombre portée sur la table, à droite, allongée car le soleil est bas."]
+    },
+    parties: [
+      { t: "Deux sortes d'ombres", html: (A_OLD ? A_OLD.parties[0].html : ""),
+        fil: { html: "<p>La lumière arrive en haut à gauche : l'<strong>ombre propre</strong> sera sur la partie droite et basse du canari ; l'<strong>ombre portée</strong> sera projetée sur la table, vers la droite, à l'opposé de la fenêtre. Fais tourner la lampe dans l'animation pour le vérifier.</p>", verdicts: [[1, "rejetee", "L'ombre portée se forme à l'opposé de la source de lumière."]] },
+        retenir: "Propre : SUR l'objet. Portée : À CÔTÉ de l'objet, à l'opposé de la lumière." },
+      { t: "Lumière, pénombre, ombre", html: (A_OLD ? A_OLD.parties[1].html : "") +
+        "<div class='def'><b>Reflet du sol</b>Au bas de l'ombre propre, la table renvoie un peu de lumière : une bande légèrement plus claire, qui renforce l'impression de volume.</div>",
+        planches: [
+          { type: "2D", titre: "Les six valeurs d'une sphère éclairée", legende: "Du plus clair au plus foncé : reflet, lumière, pénombre, ombre propre (la limite en pointillés est la ligne de séparation), puis le reflet du sol ; l'ombre portée s'allonge à droite, d'autant plus que la lampe est basse.", svg: PLANCHE_SPHERE },
+          { type: "3d", titre: "Un cube et une sphère sur la table", legende: "Tourne la scène : la lumière vient d'en haut à gauche ; les faces tournées vers elle sont claires, les autres foncées, et les ombres portées s'étirent vers la droite.",
+            modele: { h: 320, rx: -26, ry: 20, echelle: 1, alt: "Un cube et une sphère blancs sur une table avec leurs ombres portées", objets: scene3D(), etiquettes: [{ p: [-80, 92, 0], t: "Face éclairée" }, { p: [230, 4, -30], t: "Ombre portée", cote: "d" }] } }
+        ],
+        fil: { html: "<p>Noircir uniformément donne un aplat sans relief : c'est le <strong>dégradé progressif</strong> (lumière, pénombre, ombre) qui fait « tourner » la surface du canari.</p>", verdicts: [[0, "rejetee", "Un aplat uniforme ne donne pas de volume : il faut un dégradé progressif."]] },
+        retenir: "Le passage de la lumière à l'ombre doit être progressif." },
+      { t: "Ombrer au crayon", html: (A_OLD ? A_OLD.parties[2].html : "") +
+        "<div class='ex'><b>Pour le canari</b>Flèche de lumière en haut à gauche ; ligne de séparation en arc sur la droite de la panse ; hachures croisées au 2B qui suivent la courbure ; bande claire en bas (reflet de la table) ; ombre portée au 4B, allongée vers la droite et plus floue en s'éloignant.</div>",
+        fil: { html: "<p>Avec ces quatre étapes, le canari de Njoya « sort » de la feuille : la conseillère qui voulait d'abord repérer la lumière avait raison.</p>", verdicts: [[2, "validee", "Lumière d'abord, dégradé sur l'objet, ombre portée allongée à l'opposé."]] },
+        retenir: "Toujours partir de la position de la lumière." }
+    ],
+    denouement: {
+      titre: "Le canari prend du volume",
+      etapes: ["Repérer la lumière : en haut à gauche (indice 1).", "Ombre propre à droite, en dégradé progressif, avec le reflet du sol (indice 2).", "Ombre portée sur la table, vers la droite, allongée car le soleil est bas (indices 2 et 3)."],
+      reponse: "<p>Njoya doit d'abord repérer la source de lumière : la fenêtre, en haut à gauche. L'ombre propre se place alors sur la partie droite et basse du canari, mais pas en aplat : on passe progressivement de la lumière à la pénombre puis à l'ombre, en gardant un reflet clair là où la lumière frappe directement et une bande plus claire en bas, renvoyée par la table. L'ombre portée se dessine sur la table, à l'opposé de la fenêtre, donc vers la droite ; comme le soleil est bas en fin d'après-midi, elle est allongée. Noircir tout le côté droit ou placer l'ombre portée du côté de la fenêtre aplatirait le dessin ou le rendrait incohérent.</p>",
+      transfert: "<p>À midi, le soleil est presque au-dessus du canari. Décris en trois lignes comment changent l'ombre propre et l'ombre portée. <em>(Ombre propre en bas de la panse, ombre portée courte, presque sous l'objet.)</em></p>"
+    },
+    revision: (A_OLD ? A_OLD.revision : []).concat(["Six valeurs : reflet, lumière, pénombre, ombre propre, reflet du sol, ombre portée."]),
+    exo: A_OLD ? A_OLD.exo : "",
+    quiz: [
+      q("L'ombre portée se trouve…", "du côté opposé à la lumière, sur une surface", "sur l'objet", "toujours derrière le dessinateur", "C'est l'ombre projetée."),
+      q("Si la lampe descend, l'ombre portée…", "s'allonge", "raccourcit", "disparaît", "Comme les ombres du soir."),
+      q("Pour des noirs profonds, on prend un crayon…", "4B", "H", "HB", "B = tendre et foncé."),
+      q("L'ombre propre se trouve…", "sur l'objet, du côté non éclairé", "sur la table", "du côté de la lampe", "Partie de l'objet sans lumière."),
+      q("La lumière vient de gauche : l'ombre portée va…", "vers la droite", "vers la gauche", "sous la lampe", "À l'opposé de la source."),
+      q("Le point le plus clair d'une sphère s'appelle…", "le reflet", "la pénombre", "l'ombre portée", "Lumière directement renvoyée."),
+      q("La pénombre est…", "le passage progressif de la lumière à l'ombre", "l'ombre la plus noire", "l'ombre sur le sol", "Zone intermédiaire."),
+      q("Pourquoi un aplat noir ne donne-t-il pas de volume ?", "il n'y a pas de dégradé", "le crayon est trop dur", "la feuille est trop petite", "Le volume naît des valeurs progressives."),
+      q("À midi, l'ombre portée est…", "courte", "très longue", "inexistante pour toujours", "Soleil haut."),
+      q("Première étape pour ombrer un objet :", "repérer la source de lumière", "noircir le fond", "gommer les contours", "Tout en découle.")
+    ]
+  });
+
+  /* ═══════════════════════ SIMULATION : RÉPARTITION DES SIÈGES ═══════════════════════ */
+  VRT_A("3e-ecm-sieges", 1, "Simulateur : change les voix et le nombre de sièges", function (el) {
+    function cur(l, min, max, pas, v) { return "<label class='labo-c'><span>" + l + " : <b data-v>" + v.toLocaleString("fr-FR") + "</b></span><input type='range' min='" + min + "' max='" + max + "' step='" + pas + "' value='" + v + "'></label>"; }
+    el.innerHTML = "<div style='display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:4px 18px'>" + ELEC.map(function (v, i) { return cur("Voix de " + "ABCD"[i], 0, 8000, 50, v); }).join("") + cur("Sièges", 3, 21, 1, 7) + "</div><svg viewBox='0 0 640 230' class='an-svg' data-s></svg><div class='tab-scroll' data-t></div><p class='labo-r' data-r></p>";
+    var I = el.querySelectorAll("input"), V = el.querySelectorAll("[data-v]");
+    function maj() {
+      var voix = [0, 1, 2, 3].map(function (i) { return +I[i].value; }), n = +I[4].value;
+      I.forEach(function (x, i) { V[i].textContent = (+x.value).toLocaleString("fr-FR"); });
+      var tot = voix.reduce(function (a, b) { return a + b; }, 0);
+      if (!tot) { el.querySelector("[data-r]").textContent = "Aucun suffrage exprimé."; return; }
+      var r = repartir(voix, n);
+      el.querySelector("[data-s]").innerHTML = hemicycle(r.T, 320, 210, n > 9 ? 110 : 140) + r.T.map(function (t, i) { return "<rect x='16' y='" + (14 + i * 24) + "' width='14' height='14' rx='4' fill='" + COUL_L[i] + "'/><text x='36' y='26' dy='" + i * 24 + "' font-size='12.5' font-weight='700' fill='" + NUIT + "'>" + "ABCD"[i] + " : " + t + "</text>"; }).join("");
+      el.querySelector("[data-t]").innerHTML = "<table><tr><th>Liste</th><th>Voix</th><th>Au quotient</th><th>Reste</th><th>Total</th></tr>" + voix.map(function (v, i) { return "<tr><th>" + "ABCD"[i] + "</th><td>" + v.toLocaleString("fr-FR") + "</td><td>" + r.S[i] + "</td><td>" + Math.round(r.R[i]).toLocaleString("fr-FR") + "</td><td><b>" + r.T[i] + "</b>" + (r.T[i] > r.S[i] ? " (+1 au reste)" : "") + "</td></tr>"; }).join("") + "</table>";
+      el.querySelector("[data-r]").innerHTML = "Suffrages exprimés : <b>" + tot.toLocaleString("fr-FR") + "</b> · quotient : <b>" + Math.round(r.qe).toLocaleString("fr-FR") + "</b> voix par siège · sièges au quotient : <b>" + (n - r.reste) + "</b> · aux plus forts restes : <b>" + r.reste + "</b>";
+    }
+    I.forEach(function (x) { x.addEventListener("input", maj); }); maj();
+  });
+})();
+
+/* Leçons APPROFONDIES — lot 6, classes d'examen (17/11/2026) : présentation du Cameroun et Cameroun allemand (3e),
+   subordonnée relative (3e), gestion du temps en classe d'examen (Tle). Même gabarit et même mécanisme que
+   11-approfondies-lot4.js (remplacement EN PLACE ; ordre, clé, fiche APC, examen et scènes conservés). Couleurs des
+   planches proches des objets réels. Simulations VRT_A en fin de fichier. */
+(function () {
+  "use strict";
+  var NUIT = "#001136", BLEU = "#1E499B", GRIS = "#4D5163", VERT = "#17784D";
+
+  function txt(x, y, t, o) {
+    o = o || {};
+    return "<text x='" + x + "' y='" + y + "' text-anchor='" + (o.a || "middle") + "' font-size='" + (o.s || 12) + "' font-weight='" + (o.w || 700) + "' fill='" + (o.c || NUIT) + "'" + (o.i ? " font-style='italic'" : "") + (o.halo ? " stroke='#fff' stroke-width='3' paint-order='stroke'" : "") + ">" + t + "</text>";
+  }
+  function lin(id, cs, vertical) {
+    var s = "<linearGradient id='" + id + "'" + (vertical ? " x1='0' y1='0' x2='0' y2='1'" : "") + ">";
+    cs.forEach(function (c, i) { s += "<stop offset='" + (i / (cs.length - 1)).toFixed(2) + "' stop-color='" + c + "'/>"; });
+    return s + "</linearGradient>";
+  }
+  function rad(id, cs) {
+    var s = "<radialGradient id='" + id + "' cx='35%' cy='30%' r='75%'>";
+    cs.forEach(function (c, i) { s += "<stop offset='" + (i / (cs.length - 1)).toFixed(2) + "' stop-color='" + c + "'/>"; });
+    return s + "</radialGradient>";
+  }
+  function omb(id) { return "<radialGradient id='" + id + "'><stop offset='0' stop-color='#001136' stop-opacity='.3'/><stop offset='1' stop-color='#001136' stop-opacity='0'/></radialGradient>"; }
+  function fleche(id, c) { return "<marker id='" + id + "' markerWidth='10' markerHeight='10' refX='7' refY='5' orient='auto'><path d='M0 1L8 5L0 9Z' fill='" + c + "'/></marker>"; }
+  function svg(w, h, alt, defs, corps) {
+    return "<svg viewBox='0 0 " + w + " " + h + "' role='img' aria-label='" + alt + "' font-family='Inter,Arial,sans-serif'><rect width='" + w + "' height='" + h + "' fill='#fff'/><defs>" + defs + "</defs>" + corps +
+      "<text x='" + (w - 6) + "' y='" + (h - 5) + "' font-size='8' text-anchor='end' fill='#8A93A6'>Planche VÉRITAS</text></svg>";
+  }
+  function alea(g) { return function () { g = (g * 16807) % 2147483647; return (g - 1) / 2147483646; }; }
+  function ancien(id) { return window.VRT_LECONS[id]; }
+  function remplacer(id, o) {
+    var a = ancien(id);
+    if (a) ["apc", "examen", "rang", "cle", "scenes"].forEach(function (k) { if (a[k] != null && o[k] == null) o[k] = a[k]; });
+    VRT_L(id, o);
+    if (a) o.ordre = a.ordre;
+  }
+  function q(qq, bonne, f1, f2, e) { return { q: qq, r: [bonne, f1, f2], b: 0, e: e }; }
+  function partie(old, i) { return old && old.parties[i] ? old.parties[i].html : ""; }
+
+  /* ═══════════════════════ 3e GÉOGRAPHIE — PRÉSENTATION GÉNÉRALE DU CAMEROUN ═══════════════════════ */
+  /* contour simplifié (longitude, latitude) : carte scolaire, échelle approximative */
+  var CMR = [[8.6, 4.6], [9.3, 6.0], [10.1, 6.9], [11.1, 6.5], [11.8, 7.1], [12.3, 8.4], [13.0, 9.4], [13.6, 10.2], [14.1, 11.2], [14.6, 12.0], [14.1, 13.0], [14.6, 13.1], [15.0, 12.0], [15.1, 10.8], [15.6, 10.0], [14.4, 9.9], [14.9, 8.7], [15.5, 7.5], [14.6, 6.3], [14.5, 5.0], [15.0, 4.1], [16.1, 3.0], [16.2, 2.2], [15.0, 1.9], [13.3, 2.2], [11.3, 2.2], [9.8, 2.3], [9.8, 3.0], [9.5, 3.9], [9.0, 4.0]];
+  var VILLES = [["Yaoundé", 11.5, 3.87, "plateau sud-camerounais", "forêt dense, climat équatorial à 4 saisons", 730, 1600], ["Douala", 9.7, 4.05, "plaine côtière", "mangrove, climat équatorial très humide", 13, 4000], ["Buea", 9.24, 4.15, "hautes terres de l'Ouest", "pentes du mont Cameroun, climat de montagne", 900, 2800], ["Bafoussam", 10.42, 5.48, "hautes terres de l'Ouest", "volcans, sols fertiles, climat tempéré par l'altitude", 1450, 1800], ["Ngaoundéré", 13.58, 7.32, "plateau de l'Adamaoua", "château d'eau, savane d'altitude", 1100, 1500], ["Garoua", 13.4, 9.3, "basses terres du Nord", "savane, climat tropical à 2 saisons", 240, 1000], ["Maroua", 14.32, 10.6, "basses terres du Nord", "steppe sahélienne, longue saison sèche", 420, 800], ["Kousséri", 15.03, 12.08, "plaine du lac Tchad", "Sahel, climat chaud et sec", 300, 600], ["Ebolowa", 11.15, 2.9, "plateau sud-camerounais", "forêt dense, climat équatorial", 600, 1700], ["Bertoua", 13.68, 4.58, "plateau sud-camerounais", "forêt et savane, climat équatorial", 670, 1500]];
+  function carte(id, X, Y, opt) {
+    opt = opt || {};
+    var pts = CMR.map(function (p) { return X(p[0]).toFixed(1) + " " + Y(p[1]).toFixed(1); }).join("L"), s = "";
+    s += "<clipPath id='" + id + "cl'><path d='M" + pts + "Z'/></clipPath>";
+    s += "<path d='M" + pts + "Z' fill='#000' opacity='.12' transform='translate(4 5)'/>";
+    s += "<g clip-path='url(#" + id + "cl)'>";
+    [[1.5, 5.9, "#2E6B34"], [5.9, 7.0, "#7E9D57"], [7.0, 8.3, "#A9B46A"], [8.3, 10.9, "#CDBB78"], [10.9, 13.4, "#E6D6A2"]].forEach(function (b) { s += "<rect x='0' y='" + Y(b[1]) + "' width='2000' height='" + (Y(b[0]) - Y(b[1])) + "' fill='" + b[2] + "'/>"; });
+    s += "<ellipse cx='" + X(10.3) + "' cy='" + Y(5.8) + "' rx='" + (X(11.3) - X(10.3)) + "' ry='" + (Y(5.0) - Y(5.8) + 6) + "' fill='#5F7F45'/>";
+    s += "<ellipse cx='" + X(9.3) + "' cy='" + Y(4.0) + "' rx='" + (X(9.8) - X(9.3)) + "' ry='" + (Y(3.6) - Y(4.0) + 4) + "' fill='#3D7A5C'/>";
+    s += "<ellipse cx='" + X(13.8) + "' cy='" + Y(10.6) + "' rx='" + (X(14.2) - X(13.8)) + "' ry='" + (Y(10.0) - Y(10.6) + 8) + "' fill='#B49B66'/>";
+    s += "</g><path d='M" + pts + "Z' fill='none' stroke='#5B3A1A' stroke-width='2' stroke-linejoin='round'/>";
+    s += "<path d='M" + X(14.1) + " " + Y(13.0) + "q10 -14 26 -8q8 10 -6 18Z' fill='#5BA3D9' stroke='#2F6DB5'/>";
+    s += "<path d='M" + X(9.17) + " " + Y(4.45) + "l5 -9l5 9Z' fill='#6B4423'/>";
+    if (opt.villes !== false) VILLES.forEach(function (v) {
+      var cap = v[0] === "Yaoundé" || v[0] === "Douala";
+      var g = v[0] === "Buea";
+      s += "<circle cx='" + X(v[1]) + "' cy='" + Y(v[2]) + "' r='" + (cap ? 5 : 3.5) + "' fill='" + (cap ? "#C62828" : NUIT) + "' stroke='#fff' stroke-width='1.5'/>" + txt(X(v[1]) + (g ? -7 : 7), Y(v[2]) + (g ? -5 : 4), v[0], { s: cap ? 12 : 10.5, a: g ? "end" : "start", halo: true });
+    });
+    return s;
+  }
+  var PLANCHE_CARTE = (function () {
+    var id = "gc1", X = function (l) { return 150 + (l - 8) * 46; }, Y = function (l) { return 520 - (l - 1.5) * 42; };
+    var s = "<rect width='640' height='540' fill='#DCEBF5'/><path d='M0 380L120 360L150 420L120 540H0Z' fill='#BFDDF2'/>" + txt(60, 470, "Océan", { s: 13, c: "#2F6DB5", i: true }) + txt(60, 486, "Atlantique", { s: 13, c: "#2F6DB5", i: true });
+    s += "<rect x='0' y='0' width='640' height='540' fill='#EFE8DA' opacity='.0'/>";
+    s += carte(id, X, Y);
+    [["NIGERIA", 9.0, 9.0], ["TCHAD", 16.0, 11.0], ["RCA", 16.4, 6.0], ["CONGO", 16.6, 1.75], ["GABON", 11.6, 1.6], ["GUINÉE ÉQ.", 9.0, 1.8]].forEach(function (p) { s += txt(X(p[1]), Y(p[2]), p[0], { s: 12, c: "#7A6A55", w: 600 }); });
+    s += txt(X(14.4), Y(13.35), "lac Tchad", { s: 10.5, c: "#2F6DB5", a: "end", i: true }) + txt(X(9.05), Y(4.75), "mont Cameroun 4 095 m", { s: 10, a: "end", halo: true, c: "#6B4423" });
+    [["#2E6B34", "forêt dense"], ["#3D7A5C", "plaine côtière, mangrove"], ["#5F7F45", "hautes terres de l'Ouest"], ["#A9B46A", "plateau de l'Adamaoua"], ["#CDBB78", "savane du Nord"], ["#E6D6A2", "Sahel"]].forEach(function (l, i) { s += "<rect x='22' y='" + (24 + i * 22) + "' width='16' height='14' rx='3' fill='" + l[0] + "'/>" + txt(44, 36 + i * 22, l[1], { s: 11, a: "start", w: 600 }); });
+    s += "<g transform='translate(560 40)'><path d='M0 -22L7 0H-7Z' fill='" + NUIT + "'/><path d='M0 22L7 0H-7Z' fill='#fff' stroke='" + NUIT + "'/>" + txt(0, -26, "N", { s: 12 }) + "</g>";
+    s += "<path d='M22 176h92' stroke='" + NUIT + "' stroke-width='3'/>" + txt(68, 168, "≈ 200 km", { s: 10.5 });
+    return svg(640, 540, "Carte simplifiée du Cameroun : régions naturelles en couleurs, de la forêt du Sud au Sahel du Nord, principales villes et pays voisins", "", s);
+  })();
+  function relief3D() {
+    /* bloc-diagramme sud-nord : chaque tranche = 0,5° de latitude ; hauteur = altitude moyenne exagérée */
+    var o = [], P = [[2.5, 600, "#2E6B34"], [3.0, 650, "#2E6B34"], [3.5, 700, "#2E6B34"], [4.0, 60, "#3D7A5C"], [4.5, 300, "#3D7A5C"], [5.0, 1200, "#5F7F45"], [5.5, 1500, "#5F7F45"], [6.0, 1300, "#5F7F45"], [6.5, 1000, "#7E9D57"], [7.0, 1200, "#A9B46A"], [7.5, 1150, "#A9B46A"], [8.0, 900, "#A9B46A"], [8.5, 400, "#CDBB78"], [9.0, 250, "#CDBB78"], [9.5, 300, "#CDBB78"], [10.0, 450, "#CDBB78"], [10.5, 900, "#B49B66"], [11.0, 500, "#E6D6A2"], [11.5, 350, "#E6D6A2"], [12.0, 320, "#E6D6A2"], [12.5, 290, "#E6D6A2"]], k;
+    P.forEach(function (p, i) { var h = 8 + p[1] / 16; o.push({ f: "boite", c: [-250 + i * 25, 0, 0], d: [25, h, 120], coul: "#8D6E4C", dessus: p[2], div: false }); });
+    o.push({ f: "cone", c: [-250 + 3.6 * 25, 0, -30], r: 46, h: 8 + 4095 / 16, n: 22, coul: "#5D4A36" });
+    o.push({ f: "boite", c: [-280, 0, 0], d: [30, 2, 120], coul: "#2F6DB5", dessus: "#4C8AD0", div: false });
+    o.push({ f: "boite", c: [270, 0, 0], d: [30, 6, 120], coul: "#2F6DB5", dessus: "#5BA3D9", div: false });
+    for (k = 0; k < 18; k++) o.push({ f: "sphere", c: [-245 + (k % 6) * 12, 54 + (k % 3) * 2, -50 + Math.floor(k / 6) * 45], r: 6, coul: "#1F5A25" });
+    return o;
+  }
+  var GC_OLD = ancien("3e-geo-cameroun");
+  remplacer("3e-geo-cameroun", {
+    c: "3e", m: "geo", titre: "Présentation générale du Cameroun", duree: 35,
+    accroche: "« Pourquoi dit-on que le Cameroun est l'Afrique en miniature ? » Un correspondant ivoirien attend ta réponse.",
+    intro: "La lettre d'un correspondant te sert de fil rouge : à chaque partie, un indice t'aide à trancher entre trois explications.",
+    objectifs: ["situer le Cameroun et nommer ses voisins", "donner ses chiffres clés", "nommer et localiser les grandes régions naturelles", "expliquer l'expression « Afrique en miniature » par la diversité des milieux"],
+    enquete: {
+      titre: "La lettre de Yao, correspondant d'Abidjan",
+      svg: (function () { var X = function (l) { return 360 + (l - 8) * 22; }, Y = function (l) { return 215 - (l - 1.5) * 18; }; return svg(640, 230, "Une lettre posée à côté d une petite carte du Cameroun en couleurs", "", "<rect width='640' height='230' fill='#F6F1E6'/><g transform='rotate(-4 160 115)'><rect x='40' y='24' width='240' height='180' rx='6' fill='#fff' stroke='#D9CFBC'/><path d='M60 60h190M60 84h200M60 108h180M60 132h196M60 156h120' stroke='#C9D2E3' stroke-width='3' stroke-linecap='round'/>" + txt(60, 46, "Abidjan, le 3 octobre", { s: 11, a: "start", c: GRIS, i: true }) + txt(60, 188, "Yao", { s: 13, a: "start", c: BLEU, i: true }) + "</g>" + carte("gcsc", X, Y, { villes: false })); })(),
+      legende: "Au collège de Kribi : la lettre de Yao, élève de 3e à Abidjan, arrive par le club des correspondants.",
+      contexte: "<p>Ta classe de 3e correspond avec un collège d'Abidjan. Yao écrit : « Notre professeur dit que ton pays est l'<strong>Afrique en miniature</strong>. Est-ce parce que le Cameroun a la forme de l'Afrique ? Ou parce qu'il est au centre du continent ? Raconte-moi ton pays. »</p><p>Ton professeur te demande de répondre avec une carte, des chiffres et des exemples de paysages, du littoral de Kribi jusqu'au lac Tchad.</p>",
+      documents: [{ t: "Pluies et altitudes de quelques villes", html: "<table class='donnees'><tr><th>Ville</th><th>Altitude (m)</th><th>Pluies (mm/an, environ)</th></tr><tr><td>Debundscha (pied du mont Cameroun)</td><td>10</td><td>10 000</td></tr><tr><td>Douala</td><td>13</td><td>4 000</td></tr><tr><td>Yaoundé</td><td>730</td><td>1 600</td></tr><tr><td>Ngaoundéré</td><td>1 100</td><td>1 500</td></tr><tr><td>Garoua</td><td>240</td><td>1 000</td></tr><tr><td>Maroua</td><td>420</td><td>800</td></tr><tr><td>Kousséri</td><td>300</td><td>600</td></tr></table>" }],
+      question: "Pourquoi le Cameroun est-il surnommé « l'Afrique en miniature » ?",
+      tache: "Rédige pour Yao une réponse de dix lignes, appuyée sur la carte et sur le document.",
+      hypotheses: ["Parce que le Cameroun a la forme du continent africain.", "Parce que le Cameroun est situé au centre exact de l'Afrique.", "Parce qu'on y trouve presque tous les milieux naturels du continent, de la mer et de la forêt jusqu'au Sahel."]
+    },
+    parties: [
+      { t: "Situation et limites", html: partie(GC_OLD, 0) +
+        "<div class='methode'><b>Situer un pays</b><ol><li>Le continent et la région (Afrique centrale).</li><li>Les repères (golfe de Guinée, latitudes 2° à 13° N).</li><li>Les voisins, en tournant dans le sens des aiguilles d'une montre.</li></ol></div>",
+        planches: [{ type: "2D", titre: "Le Cameroun et ses voisins", legende: "Carte simplifiée : du sud au nord, la forêt dense (vert foncé), les hautes terres de l'Ouest, le plateau de l'Adamaoua, la savane puis le Sahel jusqu'au lac Tchad. Six pays voisins et une façade sur l'océan Atlantique.", svg: PLANCHE_CARTE }],
+        fil: { html: "<p>Le Cameroun s'étire sur plus de 1 200 km, du 2ᵉ au 13ᵉ degré de latitude Nord : de l'équateur presque jusqu'au Sahara. Il est en Afrique centrale, mais pas « au centre exact » du continent ; et sa forme, un triangle allongé, ne ressemble que vaguement à l'Afrique.</p>", verdicts: [[1, "rejetee", "Le Cameroun est en Afrique centrale, au fond du golfe de Guinée, pas au centre exact du continent."], [0, "rejetee", "La ressemblance de forme est une curiosité, pas l'explication donnée par les géographes."]] },
+        retenir: "Six voisins et une façade maritime sur l'Atlantique ; du 2ᵉ au 13ᵉ degré Nord." },
+      { t: "Chiffres clés", html: partie(GC_OLD, 1) +
+        "<div class='savais'><b>Pour comparer</b>475 650 km², c'est un peu moins que la superficie de la Côte d'Ivoire et du Ghana réunis (environ 560 000 km²).</div>",
+        retenir: "Deux langues officielles, dix régions, deux grandes métropoles." },
+      { t: "Les grandes régions naturelles", html: partie(GC_OLD, 2) +
+        "<div class='prop'><b>Un gradient du sud au nord</b>Plus on monte vers le nord, moins il pleut : d'environ 4 000 mm à Douala à 600 mm à Kousséri ; la forêt laisse place à la savane, puis à la steppe sahélienne. Le relief (hautes terres, Adamaoua) ajoute des milieux de montagne.</div>",
+        planches: [
+          { type: "3d", titre: "Bloc-diagramme du sud au nord", legende: "Tourne le bloc : à gauche, la forêt du Sud ; puis la plaine côtière, les hautes terres de l'Ouest et le cône du mont Cameroun ; le plateau de l'Adamaoua ; la savane du Nord, les monts Mandara et le Sahel jusqu'au lac Tchad (à droite). Altitudes très exagérées.",
+            modele: { h: 360, rx: -26, ry: -34, echelle: 0.72, alt: "Bloc-diagramme du relief camerounais en trois dimensions, du sud au nord", objets: relief3D(),
+              etiquettes: [{ p: [-245, 70, 0], t: "Forêt du Sud" }, { p: [-160, 264, -30], t: "Mont Cameroun" }, { p: [-25, 84, 0], t: "Adamaoua", cote: "d" }, { p: [270, 10, 0], t: "Lac Tchad", cote: "d" }] } },
+          { type: "2D", titre: "Moins de pluie vers le nord", legende: "Pluies annuelles moyennes (document) : de 10 000 mm au pied du mont Cameroun, l'un des lieux les plus arrosés du monde, à 600 mm à Kousséri.", svg: (function () {
+            var D = [["Debundscha", 10000, "#2E6B34"], ["Douala", 4000, "#3D7A5C"], ["Yaoundé", 1600, "#2E6B34"], ["Ngaoundéré", 1500, "#A9B46A"], ["Garoua", 1000, "#CDBB78"], ["Maroua", 800, "#CDBB78"], ["Kousséri", 600, "#D9C48C"]], s = "";
+            D.forEach(function (d, i) { var h = d[1] / 10000 * 220, x = 60 + i * 82; s += "<rect x='" + x + "' y='" + (260 - h) + "' width='52' height='" + h + "' rx='5' fill='" + d[2] + "'/>" + txt(x + 26, 252 - h, d[1].toLocaleString("fr-FR"), { s: 11.5 }) + txt(x + 26, 278, d[0], { s: 11, w: 600 }); });
+            s += "<path d='M40 260H620' stroke='" + NUIT + "' stroke-width='1.5'/>" + txt(40, 24, "mm de pluie par an", { s: 11.5, a: "start", c: GRIS }) + "<path d='M70 300H610' stroke='#C2540A' stroke-width='2' marker-end='url(#gc3f)'/>" + txt(340, 296, "du sud vers le nord", { s: 11.5, c: "#C2540A" });
+            return svg(640, 310, "Diagramme en barres : les pluies diminuent du sud au nord du Cameroun", fleche("gc3f", "#C2540A"), s);
+          })() }
+        ],
+        fil: { html: "<p>Mangrove de Douala, forêt dense d'Ebolowa, volcans de l'Ouest, savane d'altitude de l'Adamaoua, savane et steppe du Nord, rives sahéliennes du lac Tchad : presque tous les milieux de l'Afrique tropicale sont réunis dans un seul pays, d'où le surnom.</p>", verdicts: [[2, "validee", "La diversité des milieux, de la mer au Sahel, explique « l'Afrique en miniature »."]] },
+        retenir: "Cinq grands ensembles naturels, une diversité qui fait la richesse du pays." }
+    ],
+    denouement: {
+      titre: "L'Afrique en miniature : la diversité des milieux",
+      etapes: ["Du 2ᵉ au 13ᵉ degré Nord, de la mer jusqu'au lac Tchad (indice 1).", "475 650 km², 10 régions, deux langues officielles (indice 2).", "Forêt, mangrove, montagnes, plateau, savane, Sahel ; pluies de 10 000 à 600 mm (indice 3)."],
+      reponse: "<p>Cher Yao, le Cameroun est un pays d'Afrique centrale, au fond du golfe de Guinée, voisin du Nigeria, du Tchad, de la Centrafrique, du Congo, du Gabon et de la Guinée équatoriale. Il couvre environ 475 650 km², compte 10 régions et deux langues officielles. Si on l'appelle « l'Afrique en miniature », ce n'est ni pour sa forme ni parce qu'il serait au centre du continent : c'est parce qu'il s'étire de l'océan Atlantique jusqu'au lac Tchad et réunit presque tous les milieux africains. Au sud, la mangrove de Douala et la forêt dense, où il pleut jusqu'à 4 000 mm par an ; à l'ouest, les volcans et le mont Cameroun ; au centre, le plateau de l'Adamaoua, château d'eau du pays ; au nord, la savane puis le Sahel, où il ne tombe plus que 600 mm de pluie.</p>",
+      transfert: "<p>Un touriste n'a qu'une semaine pour « voir toute l'Afrique » au Cameroun. Propose-lui un itinéraire de quatre étapes, du sud au nord, en nommant le milieu naturel de chaque étape.</p>"
+    },
+    revision: (GC_OLD ? GC_OLD.revision : []).concat(["Pluies : de 4 000 mm (Douala) à 600 mm (Kousséri) ; 10 000 mm au pied du mont Cameroun.", "« Afrique en miniature » : diversité des milieux naturels."]),
+    exo: GC_OLD ? GC_OLD.exo : "",
+    quiz: [
+      q("Quelle est la capitale économique ?", "Douala", "Yaoundé", "Garoua", "Yaoundé est la capitale politique."),
+      q("Combien de régions compte le Cameroun ?", "10", "8", "12", "Dix régions administratives."),
+      q("Quel plateau est appelé « château d'eau » ?", "l'Adamaoua", "le plateau sud", "la plaine côtière", "De nombreux fleuves y prennent leur source."),
+      q("Le Cameroun s'ouvre sur…", "l'océan Atlantique", "l'océan Indien", "la mer Rouge", "Au fond du golfe de Guinée."),
+      q("Combien de pays voisins ?", "6", "4", "8", "Nigeria, Tchad, RCA, Congo, Gabon, Guinée équatoriale."),
+      q("Superficie du Cameroun :", "environ 475 650 km²", "environ 47 500 km²", "environ 4 millions de km²", "Un peu moins que Côte d'Ivoire + Ghana."),
+      q("Où pleut-il le moins ?", "à Kousséri", "à Douala", "à Yaoundé", "Environ 600 mm par an."),
+      q("Le mont Cameroun culmine à environ…", "4 095 m", "1 095 m", "8 000 m", "Plus haut sommet d'Afrique de l'Ouest et du Centre."),
+      q("« Afrique en miniature » s'explique par…", "la diversité des milieux naturels", "la forme du pays", "sa position au centre exact de l'Afrique", "De la mer au Sahel."),
+      q("Le Sahel camerounais se trouve…", "au nord, près du lac Tchad", "au sud, près de Kribi", "à l'ouest, près de Bafoussam", "Climat chaud et sec.")
+    ]
+  });
+
+  /* ═══════════════════════ 3e HISTOIRE — LE CAMEROUN ALLEMAND ═══════════════════════ */
+  var HK_OLD = ancien("3e-hist-kamerun");
+  function train3D() {
+    var o = [], k;
+    o.push({ f: "boite", c: [0, -10, 0], d: [600, 8, 220], coul: "#6E5B3E", dessus: "#8A7350" });
+    for (k = 0; k < 24; k++) o.push({ f: "boite", c: [-276 + k * 24, -4, 0], d: [8, 4, 70], coul: "#5A3E26", dessus: "#6B4A2D", div: false });
+    [-22, 22].forEach(function (z) { o.push({ f: "boite", c: [0, 0, z], d: [580, 3, 4], coul: "#8E96A6", dessus: "#C9CED6", div: false }); });
+    /* locomotive à vapeur */
+    o.push({ f: "cylindre", c: [-200, 26, 0], r: 22, h: 110, n: 20, axe: "x", coul: "#1F2328", dessus: "#2C3138" });
+    o.push({ f: "boite", c: [-80, 4, 0], d: [44, 70, 54], coul: "#2C3138", dessus: "#3A4048", div: false });
+    o.push({ f: "boite", c: [-80, 74, 0], d: [54, 6, 62], coul: "#7A1F1F", dessus: "#8E2A2A", div: false });
+    o.push({ f: "cylindre", c: [-185, 48, 0], r: 7, r2: 10, h: 34, n: 14, coul: "#1F2328" });
+    o.push({ f: "cylindre", c: [-150, 48, 0], r: 8, h: 12, n: 14, coul: "#B08D57", dessus: "#D2B07A" });
+    [-190, -150, -110].forEach(function (x) { [-26, 26].forEach(function (z) { o.push({ f: "cylindre", c: [x, 14, z], r: 14, h: 4, n: 18, axe: "z", coul: "#7A1F1F" }); }); });
+    for (k = 0; k < 6; k++) o.push({ f: "sphere", c: [-185 + k * 4, 96 + k * 16, -k * 3], r: 10 + k * 3, coul: "#E9ECEF", op: 0.55 - k * 0.06 });
+    /* deux wagons de sacs de cacao */
+    [20, 140].forEach(function (x) {
+      o.push({ f: "boite", c: [x, 6, 0], d: [100, 30, 56], coul: "#6B4A2D", dessus: "#7C5836", div: false });
+      [[-30, -14], [0, -14], [30, -14], [-30, 14], [0, 14], [30, 14], [-15, 0], [15, 0]].forEach(function (p, i) { o.push({ f: "sphere", c: [x + p[0], 44 + (i > 5 ? 14 : 0), p[1]], r: [16, 9, 12], n: 12, m: 7, coul: "#C9B28A" }); });
+      [-34, 34].forEach(function (dx) { [-26, 26].forEach(function (z) { o.push({ f: "cylindre", c: [x + dx, 10, z], r: 10, h: 4, n: 16, axe: "z", coul: "#3A4048" }); }); });
+    });
+    o.push({ f: "boite", c: [250, 0, -80], d: [60, 40, 40], coul: "#E6D8BE", dessus: "#B33A2C", div: false });
+    return o;
+  }
+  var PLANCHE_RAILS = (function () {
+    var X = function (l) { return 40 + (l - 8.4) * 150; }, Y = function (l) { return 360 - (l - 2.6) * 120; }, s = "<rect width='640' height='380' fill='#DCEBF5'/>";
+    s += "<path d='M0 260L60 250L120 330L80 380H0Z' fill='#BFDDF2'/>";
+    s += "<path d='M" + X(8.6) + " " + Y(4.6) + "L" + X(9.3) + " " + Y(6.0) + "L" + X(10.1) + " " + Y(6.9) + "L" + X(11.1) + " " + Y(6.5) + "L" + X(11.8) + " " + Y(7.1) + "L640 0V380H" + X(9.8) + "L" + X(9.8) + " " + Y(3.0) + "L" + X(9.5) + " " + Y(3.9) + "L" + X(9.0) + " " + Y(4.0) + "Z' fill='#D9E3C3' stroke='#5B3A1A' stroke-width='1.5'/>";
+    s += "<path d='M" + X(9.3) + " " + Y(4.3) + "l9 -16l9 16Z' fill='#6B4423'/>";
+    function rail(pts, c) { var d = "M" + pts.map(function (p) { return X(p[0]).toFixed(1) + " " + Y(p[1]).toFixed(1); }).join("L"); return "<path d='" + d + "' fill='none' stroke='" + c + "' stroke-width='5' stroke-linecap='round'/><path d='" + d + "' fill='none' stroke='#fff' stroke-width='2' stroke-dasharray='5 6'/>"; }
+    s += rail([[9.66, 4.06], [9.78, 4.4], [9.85, 4.75], [9.93, 4.95]], "#7A1F1F");
+    s += rail([[9.72, 4.04], [10.1, 3.8], [10.5, 3.65], [10.75, 3.65]], "#1E499B");
+    [["Douala / Bonabéri", 9.7, 4.05], ["Nkongsamba", 9.93, 4.95], ["Eséka", 10.75, 3.65], ["Buea", 9.24, 4.15], ["Yaoundé", 11.5, 3.87], ["Kribi", 9.91, 2.94]].forEach(function (v) { s += "<circle cx='" + X(v[1]) + "' cy='" + Y(v[2]) + "' r='4.5' fill='" + NUIT + "' stroke='#fff' stroke-width='1.5'/>" + txt(X(v[1]) + 8, Y(v[2]) + 4, v[0], { s: 11.5, a: "start", halo: true }); });
+    s += "<g transform='translate(400 240)'><rect width='220' height='92' rx='10' fill='#fff' fill-opacity='.93' stroke='#C9D2E3'/><path d='M16 26h40' stroke='#7A1F1F' stroke-width='5'/>" + txt(64, 30, "chemin de fer du Nord", { s: 11.5, a: "start" }) + txt(64, 46, "160 km, achevé en 1911", { s: 10.5, a: "start", w: 500, c: GRIS }) + "<path d='M16 66h40' stroke='#1E499B' stroke-width='5'/>" + txt(64, 70, "chemin de fer du Centre", { s: 11.5, a: "start" }) + txt(64, 86, "vers Eséka, à la veille de 1914", { s: 10.5, a: "start", w: 500, c: GRIS }) + "</g>";
+    return svg(640, 380, "Carte du littoral camerounais avec les deux voies ferrées allemandes partant de Douala : vers Nkongsamba au nord et vers Eséka à l est", "", s);
+  })();
+  remplacer("3e-hist-kamerun", {
+    c: "3e", m: "histoire", titre: "Le Cameroun allemand (1884-1916)", duree: 35,
+    accroche: "Devant la Pagode de Douala, deux élèves s'opposent : « Les Allemands ont modernisé le pays ! » — « Ils l'ont pillé ! »",
+    intro: "Une sortie de classe à Douala te sert de fil rouge : à chaque partie, un document t'aide à trancher entre trois jugements.",
+    objectifs: ["dater et expliquer la naissance du protectorat", "décrire l'exploitation allemande et ses infrastructures", "présenter les résistances et la fin de la colonie", "porter un jugement nuancé, appuyé sur des faits"],
+    enquete: {
+      titre: "La sortie de classe à Bonanjo",
+      svg: (function () {
+        var s = "<rect width='640' height='220' fill='#EEF4F8'/><rect y='176' width='640' height='44' fill='#C9C1B2'/>";
+        s += "<rect x='90' y='96' width='200' height='80' fill='#E9DCC4' stroke='#8A6E4B'/><path d='M80 98L190 50L300 98Z' fill='#B33A2C'/><path d='M150 60L190 26L230 60Z' fill='#B33A2C'/><rect x='170' y='60' width='40' height='36' fill='#E9DCC4' stroke='#8A6E4B'/>";
+        for (var i = 0; i < 5; i++) s += "<rect x='" + (104 + i * 38) + "' y='112' width='18' height='30' rx='9' fill='#5C4630'/>";
+        s += txt(190, 198, "la Pagode, palais des rois Bell (1905)", { s: 11.5, c: GRIS, w: 600 });
+        s += "<path d='M360 176V120' stroke='#2C3138' stroke-width='5'/><rect x='340' y='104' width='60' height='18' rx='4' fill='#2C3138'/>" + txt(370, 117, "1884", { s: 11, c: "#FFD54A" });
+        s += "<g transform='translate(470 120)'><circle cx='-30' r='9' fill='#6B4423'/><path d='M-30 9v34' stroke='#2E6FB0' stroke-width='12'/><circle cx='30' r='9' fill='#5A3A1E'/><path d='M30 9v34' stroke='#C62828' stroke-width='12'/><rect x='-80' y='-60' width='120' height='30' rx='10' fill='#fff' stroke='#C9D2E3'/>" + txt(-20, -40, "Ils ont modernisé !", { s: 11 }) + "<rect x='0' y='-96' width='120' height='30' rx='10' fill='#fff' stroke='#C9D2E3'/>" + txt(60, -76, "Ils ont pillé !", { s: 11 }) + "</g>";
+        return svg(640, 220, "Deux élèves se disputent devant la Pagode, ancien palais des rois Bell à Douala", "", s);
+      })(),
+      legende: "À Douala, quartier Bonanjo : la classe de 3e visite les lieux de mémoire du Kamerun.",
+      contexte: "<p>Pendant une sortie à Bonanjo, la classe découvre la <strong>Pagode</strong>, palais construit en 1905 pour la famille royale Bell, puis la gare de Bonabéri, départ de l'ancien chemin de fer du Nord. Kevin s'enthousiasme : « Sans les Allemands, il n'y aurait ni rails ni ports : ils ont modernisé le Cameroun ! » Grace proteste : « Ils ont pris les terres et fait travailler les gens de force. Ils ont même pendu Rudolf Duala Manga Bell ! »</p><p>Le professeur demande à chacun de dépasser l'opinion et de juger à partir des faits.</p>",
+      documents: [
+        { t: "Le traité du 12 juillet 1884 (extrait des conditions douala)", html: "<p>« Les terrains cultivés par nous et les emplacements sur lesquels se trouvent les villages doivent rester la propriété des possesseurs actuels et de leurs descendants. »</p>" },
+        { t: "Le témoignage d'un administrateur (1913)", html: "<p>« Sur les chantiers du chemin de fer et dans les plantations, la main-d'œuvre est recrutée de force dans les villages ; la mortalité y est très élevée. »</p>" }
+      ],
+      question: "Le Kamerun allemand fut-il une œuvre de modernisation ou d'oppression ?",
+      tache: "Rédige un paragraphe argumenté de dix lignes qui tranche le débat entre Kevin et Grace, chaque argument appuyé sur un fait daté.",
+      hypotheses: ["Les Allemands ont apporté le progrès au Cameroun, sans contrepartie pour les populations (Kevin).", "Les Allemands n'ont rien construit d'utile au Cameroun.", "Les Allemands ont construit des infrastructures réelles, mais par le travail forcé, l'expropriation et la répression des résistances."]
+    },
+    parties: [
+      { t: "La naissance du Kamerun", html: partie(HK_OLD, 0),
+        planches: [{ type: "2D", titre: "Du traité à la fin du Kamerun", legende: "Frise chronologique : 1884, traité germano-douala ; 1901, la capitale passe à Buea ; 1911, chemin de fer du Nord achevé et Neukamerun ; 1914, exécutions de Manga Bell et Samba ; 1916, départ des Allemands.", svg: (function () {
+          var E = [[1884, "Traité germano-douala", "12 juillet"], [1901, "Capitale à Buea", ""], [1911, "Rail du Nord, Neukamerun", ""], [1914, "Manga Bell et Samba exécutés", "août 1914"], [1916, "Fin du Kamerun", "février"]], X = function (a) { return 50 + (a - 1884) / 32 * 540; }, s = "";
+          s += "<rect x='40' y='118' width='560' height='14' rx='7' fill='url(#hkf)'/>";
+          for (var a = 1884; a <= 1916; a += 4) s += "<path d='M" + X(a) + " 132v8' stroke='" + NUIT + "'/>" + txt(X(a), 154, a, { s: 10.5, w: 500, c: GRIS });
+          var NIV = [70, 196, 70, 236, 26];
+          E.forEach(function (e, i) { var x = X(e[0]), y = NIV[i], up = y < 125, bx = Math.max(6, Math.min(634 - 200, x - 100)); s += "<path d='M" + x + " 125V" + (up ? y + 18 : y - 22) + "' stroke='" + NUIT + "' stroke-width='1.5'/><circle cx='" + x + "' cy='125' r='8' fill='#FFD54A' stroke='#7A4A00' stroke-width='2'/><rect x='" + bx + "' y='" + (y - 22) + "' width='200' height='" + (e[2] ? 40 : 28) + "' rx='9' fill='#fff' stroke='#D9CFBC'/>" + txt(bx + 100, y - 4, e[0] + " · " + e[1], { s: 10.5 }) + (e[2] ? txt(bx + 100, y + 12, e[2], { s: 10, w: 500, c: GRIS }) : ""); });
+          return svg(640, 270, "Frise chronologique du Cameroun allemand de 1884 à 1916", lin("hkf", ["#2C3138", "#7A1F1F", "#B33A2C"]), s);
+        })() }],
+        fil: { html: "<p>Le document 1 montre que les chefs douala n'ont pas « donné » leur pays : ils ont posé des conditions, dont la conservation de leurs terres. Le protectorat repose donc sur un accord que l'Allemagne va bientôt trahir.</p>" },
+        retenir: "12 juillet 1884 : traité germano-douala ; 14 juillet : drapeau hissé par Nachtigal." },
+      { t: "Exploiter le territoire", html: partie(HK_OLD, 1),
+        planches: [
+          { type: "2D", titre: "Les chemins de fer allemands", legende: "Deux lignes partent de la côte : celle du Nord (Bonabéri-Nkongsamba, 160 km, achevée en 1911) et celle du Centre (vers Eséka). Elles servent d'abord à évacuer les produits des plantations vers le port.", svg: PLANCHE_RAILS },
+          { type: "3d", titre: "Un train du chemin de fer du Nord", legende: "Tourne le convoi : une locomotive à vapeur et deux wagons chargés de sacs de cacao, sur des traverses en bois. Ces voies ont été posées à la main par des travailleurs recrutés de force.",
+            modele: { h: 320, rx: -20, ry: 30, echelle: 0.85, alt: "Locomotive à vapeur et deux wagons de sacs de cacao en trois dimensions", objets: train3D(),
+              etiquettes: [{ p: [-200, 60, 0], t: "Locomotive à vapeur" }, { p: [80, 64, 0], t: "Sacs de cacao", cote: "d" }, { p: [250, 40, -80], t: "Gare", cote: "d" }] } }
+        ],
+        fil: { html: "<p>Les rails, les ports et les plantations existent bel et bien : Grace ne peut pas dire que rien n'a été construit. Mais le document 2 rappelle le prix : recrutement forcé et mortalité élevée sur les chantiers. Et ces lignes allaient de la côte vers les zones de production, pour exporter, plus que pour relier les Camerounais entre eux.</p>", verdicts: [[1, "rejetee", "Chemins de fer, wharfs, plantations : des infrastructures réelles ont été construites."], [0, "rejetee", "Ces infrastructures ont coûté le travail forcé et de nombreuses vies."]] },
+        retenir: "Infrastructures réelles, mais construites par le travail forcé et tournées vers l'exportation." },
+      { t: "Résister, puis tourner la page", html: partie(HK_OLD, 2) +
+        "<div class='def'><b>Résistance par le droit</b>Rudolf Duala Manga Bell, éduqué en Allemagne, porte plainte et écrit au Parlement allemand (Reichstag) contre l'expropriation des Douala de leur plateau de Joss : il invoque le traité de 1884. Il est accusé de haute trahison et pendu le 8 août 1914.</div>",
+        fil: { html: "<p>L'expropriation des terres douala viole la condition posée en 1884 (document 1). Les résistances, armées ou juridiques, sont réprimées dans le sang. Le jugement le plus juste combine les deux faces du Kamerun.</p>", verdicts: [[2, "validee", "Des réalisations réelles, obtenues par la contrainte et contre la volonté des populations."]] },
+        retenir: "1914 : Manga Bell et Samba exécutés ; 1916 : fin du Kamerun." }
+    ],
+    denouement: {
+      titre: "Des réalisations réelles, au prix de l'oppression",
+      etapes: ["1884 : un traité aux conditions précises (indice 1).", "Rails, wharfs, plantations : des infrastructures réelles, tournées vers l'exportation (indice 2).", "Travail forcé, expropriation, exécutions de 1914 (indices 2 et 3).", "1916 : fin du Kamerun."],
+      reponse: "<p>Le Kamerun naît du traité germano-douala du 12 juillet 1884, par lequel les rois Bell et Akwa acceptent un protectorat tout en exigeant de garder leurs terres. Pendant trente-deux ans, l'Allemagne construit des infrastructures bien réelles : le chemin de fer du Nord jusqu'à Nkongsamba (160 km, 1911), celui du Centre vers Eséka, des routes, des wharfs, des plantations autour du mont Cameroun ; Kevin a raison sur ce point, et Grace aurait tort de dire que rien n'a été fait. Mais ces réalisations, destinées surtout à exporter les richesses, reposent sur le travail forcé et une forte mortalité, et l'Allemagne viole le traité en expropriant les Douala. Ceux qui résistent sont réprimés : Rudolf Duala Manga Bell et Martin-Paul Samba sont exécutés en 1914. Le Kamerun fut donc à la fois une mise en valeur et une oppression ; il disparaît en 1916, chassé par les troupes franco-britanniques.</p>",
+      transfert: "<p>Rédige la légende (cinq lignes) d'une plaque commémorative à installer devant la gare de Bonabéri : elle doit rappeler à la fois l'ouvrage et ceux qui l'ont construit.</p>"
+    },
+    revision: (HK_OLD ? HK_OLD.revision : []).concat(["Chemin de fer du Nord : Bonabéri-Nkongsamba, 160 km, 1911.", "Juger une colonisation : réalisations ET coût humain, faits datés à l'appui."]),
+    exo: HK_OLD ? HK_OLD.exo : "",
+    quiz: [
+      q("Quand est signé le traité germano-douala ?", "12 juillet 1884", "1er janvier 1960", "1916", "Deux jours avant que Nachtigal hisse le drapeau."),
+      q("Rudolf Duala Manga Bell s'opposait…", "à l'expropriation des terres douala", "à la construction des écoles", "aux missionnaires seulement", "Il fut pendu en 1914."),
+      q("Quand les Allemands quittent-ils le Cameroun ?", "1916", "1884", "1945", "Chassés pendant la Première Guerre mondiale."),
+      q("Qui hisse le drapeau allemand le 14 juillet 1884 ?", "Gustav Nachtigal", "Bismarck", "Puttkamer", "Explorateur et consul."),
+      q("Le chemin de fer du Nord relie Bonabéri à…", "Nkongsamba", "Garoua", "Yaoundé", "160 km, achevé en 1911."),
+      q("À quoi servaient d'abord les voies ferrées ?", "exporter les produits vers le port", "relier toutes les régions entre elles", "transporter les touristes", "De la côte vers les plantations."),
+      q("Comment était recrutée la main-d'œuvre des chantiers ?", "souvent de force", "par concours", "parmi des volontaires payés", "Travail forcé, forte mortalité."),
+      q("Martin-Paul Samba est…", "fusillé en 1914", "roi des Douala", "gouverneur allemand", "Héros de la résistance."),
+      q("Le Neukamerun (1911) est…", "l'agrandissement de la colonie vers l'est et le sud", "une nouvelle capitale", "un traité avec les Douala", "Accord franco-allemand."),
+      q("Un jugement historique solide…", "s'appuie sur des faits datés et nuancés", "répète une opinion", "ne retient que les aspects positifs", "Réalisations et coût humain.")
+    ]
+  });
+
+  /* ═══════════════════════ 3e FRANÇAIS — LA SUBORDONNÉE RELATIVE ═══════════════════════ */
+  var FR_OLD = ancien("3e-fr-relative");
+  function wagon3D() {
+    var o = [], ec = [130, 0, 0];
+    o.push({ f: "boite", c: [0, -10, 0], d: [560, 8, 160], coul: "#7A6A55", dessus: "#97866D" });
+    [-20, 20].forEach(function (z) { o.push({ f: "boite", c: [0, -4, z], d: [540, 3, 4], coul: "#8E96A6", dessus: "#C9CED6", div: false }); });
+    o.push({ f: "boite", c: [-130, 6, 0], d: [150, 60, 60], coul: "#1E499B", dessus: "#2F5FBF", div: false });
+    o.push({ f: "boite", c: [-170, 66, 0], d: [60, 30, 60], coul: "#163A7C", dessus: "#1E499B", div: false });
+    o.push({ f: "cylindre", c: [-90, 66, 0], r: 8, h: 26, n: 12, coul: "#1F2328" });
+    o.push({ f: "boite", c: [-50, 20, 0], d: [14, 6, 10], coul: "#5C6478", div: false });
+    o.push({ f: "boite", c: [70, 6, 0], d: [140, 50, 56], coul: "#C2540A", dessus: "#D9772E", div: false, ec: ec });
+    o.push({ f: "boite", c: [10, 20, 0], d: [14, 6, 10], coul: "#5C6478", div: false, ec: ec });
+    [-185, -130, -75, 25, 115].forEach(function (x, i) { [-26, 26].forEach(function (z) { o.push({ f: "cylindre", c: [x, 10, z], r: 10, h: 4, n: 16, axe: "z", coul: "#2C3138", ec: i > 2 ? ec : [0, 0, 0] }); }); });
+    return o;
+  }
+  remplacer("3e-fr-relative", {
+    c: "3e", m: "francais", titre: "La proposition subordonnée relative", duree: 35,
+    accroche: "« Le taxi que j'ai oublié mon sac dedans… » : l'avis de recherche de la radio de Bafang est à réécrire.",
+    intro: "Un avis de recherche à corriger te sert de fil rouge : à chaque partie, un indice t'aide à trancher entre trois conseils.",
+    objectifs: ["repérer une subordonnée relative et son antécédent", "choisir le pronom relatif selon sa fonction dans la relative", "distinguer relative déterminative et relative explicative", "corriger les relatives fautives de l'oral"],
+    enquete: {
+      titre: "L'avis de recherche de Radio Bafang",
+      svg: (function () {
+        var s = "<rect width='640' height='200' fill='#F4F0FA'/><rect x='40' y='60' width='150' height='96' rx='14' fill='#3A4048'/><circle cx='86' cy='108' r='30' fill='#2C3138' stroke='#8E96A6' stroke-width='3'/><circle cx='86' cy='108' r='10' fill='#5C6478'/><rect x='130' y='80' width='46' height='12' rx='3' fill='#FFD54A'/><path d='M150 60L180 18' stroke='#8E96A6' stroke-width='3'/>";
+        s += "<rect x='230' y='30' width='380' height='140' rx='12' fill='#fff' stroke='#C9D2E3'/>" + txt(250, 56, "AVIS DE RECHERCHE", { s: 13, a: "start", c: "#C62828" });
+        ["« Le taxi que j'ai oublié mon sac dedans", "était jaune. Le chauffeur que je vous parle", "est un monsieur gentil. Les papiers que", "le sac contenait sont importants. »"].forEach(function (l, i) { s += txt(250, 84 + i * 22, l, { s: 12.5, a: "start", w: 500, i: true }); });
+        return svg(640, 200, "Un poste de radio et le texte d un avis de recherche contenant des fautes de relatives", "", s);
+      })(),
+      legende: "À Bafang : Mama Ngo Nkamga dicte un avis de recherche à son fils Junior, élève de 3e, pour la radio communautaire.",
+      contexte: "<p>Mama a oublié son sac, avec ses papiers, dans un taxi. Elle dicte à Junior l'avis qu'elle veut faire lire à la radio : « Le taxi <em>que j'ai oublié mon sac dedans</em> était jaune. Le chauffeur <em>que je vous parle</em> est un monsieur gentil. Les papiers <em>que le sac contenait</em> sont importants. Les passagers <em>qui étaient assis derrière</em> peuvent appeler le 6.. »</p><p>Le journaliste refuse de lire le texte tel quel. Le grand frère de Junior propose : « Mets “que” partout, c'est plus simple ! »</p>",
+      documents: [{ t: "Ce que demande le journaliste", html: "<p>« Un français correct à l'antenne, et que les auditeurs comprennent bien <strong>qui</strong> doit appeler : tous les passagers, ou seulement ceux qui étaient assis derrière ? »</p>" }],
+      question: "Comment corriger l'avis pour que chaque relative soit juste et que le message soit clair ?",
+      tache: "Réécris l'avis de recherche en justifiant le choix de chaque pronom relatif et de la ponctuation.",
+      hypotheses: ["« Que » convient partout : c'est le pronom relatif le plus courant.", "Le pronom relatif se choisit selon sa fonction dans la relative.", "Les virgules autour d'une relative ne changent rien au sens."]
+    },
+    parties: [
+      { t: "Reconnaître la relative", html: partie(FR_OLD, 0),
+        planches: [{ type: "3d", titre: "L'antécédent et sa relative, une locomotive et son wagon", legende: "La locomotive bleue est l'antécédent (le taxi) ; le wagon orange est la relative (« dans lequel j'ai oublié mon sac »), accrochée par le pronom relatif. Le curseur décroche le wagon : la phrase reste correcte, mais on ne sait plus de quel taxi il s'agit.",
+          modele: { h: 300, rx: -18, ry: 26, echelle: 0.95, alt: "Locomotive bleue et wagon orange attelés en trois dimensions", eclate: "Décrocher la relative", jouer: "Décrocher le wagon", objets: wagon3D(),
+            etiquettes: [{ p: [-130, 80, 0], t: "Antécédent : le taxi" }, { p: [70, 60, 0], t: "Relative : dans lequel j'ai oublié mon sac", cote: "d", ec: [130, 0, 0] }, { p: [10, 26, 0], t: "Pronom relatif = attelage", cote: "d", ec: [130, 0, 0] }] } }],
+        fil: { html: "<p>Dans l'avis, chaque passage en italique complète un nom : <em>le taxi</em>, <em>le chauffeur</em>, <em>les papiers</em>, <em>les passagers</em>. Ce sont quatre relatives, et ces quatre noms sont leurs antécédents.</p>" },
+        retenir: "Pas d'antécédent, pas de relative : on cherche d'abord le nom complété." },
+      { t: "Choisir le pronom relatif", html: partie(FR_OLD, 1) +
+        "<div class='methode'><b>La méthode de la phrase simple</b><ol><li>Remplace le pronom relatif par l'antécédent et écris la phrase simple : « J'ai oublié mon sac <strong>dans le taxi</strong>. »</li><li>Regarde la fonction du groupe : complément introduit par « dans ».</li><li>Choisis le pronom : préposition + lequel → « <strong>dans lequel</strong> » (ou « où » pour le lieu).</li></ol></div>",
+        fil: { html: "<p>« J'ai oublié mon sac <strong>dans</strong> le taxi » → le taxi <strong>dans lequel</strong> (ou <strong>où</strong>) j'ai oublié mon sac. « Je vous parle <strong>du</strong> chauffeur » → le chauffeur <strong>dont</strong> je vous parle. « Le sac contenait <strong>les papiers</strong> » (COD) → les papiers <strong>que</strong> le sac contenait : ici « que » est juste. Mettre « que » partout produirait deux fautes sur trois.</p>", verdicts: [[0, "rejetee", "« que » n'est correct que pour un COD : « dont » et « dans lequel » sont nécessaires ici."], [1, "validee", "Phrase simple → fonction → pronom."]] },
+        retenir: "Le pronom dépend de sa fonction DANS la relative : qui sujet, que COD, dont = « de »." },
+      { t: "Déterminative ou explicative ?", html: partie(FR_OLD, 2),
+        planches: [{ type: "2D", titre: "Une virgule, deux sens", legende: "Sans virgules, seuls les passagers assis derrière sont concernés (relative déterminative). Avec des virgules, tous les passagers étaient assis derrière et tous doivent appeler (relative explicative).", svg: (function () {
+          function taxi(x, y, tous) {
+            var s = "<g transform='translate(" + x + " " + y + ")'><path d='M10 70h250v-26l-30-34h-150l-36 34h-34z' fill='#F7C948' stroke='#7A5A00' stroke-width='2'/><rect x='70' y='18' width='70' height='26' rx='4' fill='#CFE3F3'/><rect x='150' y='18' width='70' height='26' rx='4' fill='#CFE3F3'/><circle cx='60' cy='72' r='16' fill='#2C3138'/><circle cx='210' cy='72' r='16' fill='#2C3138'/><circle cx='60' cy='72' r='6' fill='#9AA3B2'/><circle cx='210' cy='72' r='6' fill='#9AA3B2'/>";
+            s += "<circle cx='100' cy='30' r='8' fill='#6B4423'/>";
+            [170, 188, 206].forEach(function (cx) { s += "<circle cx='" + cx + "' cy='30' r='8' fill='" + "#5A3A1E" + "'/>"; });
+            s += "<rect x='" + (tous ? 86 : 158) + "' y='14' width='" + (tous ? 136 : 62) + "' height='34' rx='8' fill='none' stroke='#C62828' stroke-width='3'/>";
+            return s + "</g>";
+          }
+          var s = taxi(30, 50, false) + taxi(340, 50, true);
+          s += txt(165, 30, "Les passagers qui étaient assis derrière", { s: 12.5 }) + txt(165, 46, "peuvent appeler.", { s: 12.5 }) + txt(165, 170, "déterminative : seulement ceux de derrière", { s: 11.5, c: "#C62828" });
+          s += txt(475, 30, "Les passagers, qui étaient assis derrière,", { s: 12.5 }) + txt(475, 46, "peuvent appeler.", { s: 12.5 }) + txt(475, 170, "explicative : tous les passagers", { s: 11.5, c: "#C62828" });
+          return svg(640, 190, "Deux taxis : dans le premier, seuls les passagers de l arrière sont entourés ; dans le second, tous les passagers le sont", "", s);
+        })() }],
+        fil: { html: "<p>Mama veut que <strong>seuls</strong> les passagers de l'arrière appellent (le chauffeur et le passager avant n'ont rien vu) : la relative doit rester <strong>déterminative</strong>, sans virgules. Ajouter des virgules changerait le message : les virgules comptent.</p>", verdicts: [[2, "rejetee", "Avec des virgules, la relative devient explicative et désigne tous les passagers."]] },
+        retenir: "La virgule change le sens : elle transforme une sélection en simple explication." }
+    ],
+    denouement: {
+      titre: "L'avis corrigé, prêt pour l'antenne",
+      etapes: ["Repérer les quatre antécédents (indice 1).", "Phrase simple → fonction → pronom : où / dans lequel, dont, que (indice 2).", "Relative déterminative sans virgules pour « les passagers qui étaient assis derrière » (indice 3)."],
+      reponse: "<p>Avis de recherche corrigé : « Le taxi <strong>dans lequel</strong> (ou <strong>où</strong>) j'ai oublié mon sac était jaune. Le chauffeur <strong>dont</strong> je vous parle est un monsieur gentil. Les papiers <strong>que</strong> le sac contenait sont importants. Les passagers <strong>qui</strong> étaient assis derrière peuvent appeler le 6.. » Le pronom se choisit selon sa fonction dans la relative : « dans lequel » ou « où » pour le complément de lieu (oublier <em>dans</em> le taxi), « dont » pour un complément introduit par « de » (parler <em>du</em> chauffeur), « que » pour le COD (contenir <em>les papiers</em>), « qui » pour le sujet. Mettre « que » partout aurait laissé deux fautes. Enfin, la dernière relative reste sans virgules, car elle est déterminative : seuls les passagers de l'arrière sont concernés.</p>",
+      transfert: "<p>Corrige et justifie : « C'est le marché que je t'ai dit que les prix sont bas. » <em>(C'est le marché dont je t'ai dit que les prix sont bas → mieux : C'est le marché où les prix sont bas, dont je t'ai parlé.)</em></p>"
+    },
+    revision: (FR_OLD ? FR_OLD.revision : []).concat(["Méthode : phrase simple → fonction → pronom.", "Oral fautif : « que … dedans » → dans lequel / où ; « que je te parle » → dont je te parle."]),
+    exo: FR_OLD ? FR_OLD.exo : "",
+    quiz: [
+      q("Dans « le livre que je lis », l'antécédent est…", "le livre", "que", "je lis", "Le nom complété par la relative."),
+      q("« Le chauffeur ___ je vous parle » :", "dont", "que", "qui", "Parler DE quelqu'un."),
+      q("« Le taxi ___ j'ai oublié mon sac » :", "dans lequel", "que", "dont", "Oublier DANS le taxi (ou « où »)."),
+      q("« Les papiers ___ le sac contenait » :", "que", "dont", "qui", "COD de contenait."),
+      q("« Les passagers ___ étaient assis derrière » :", "qui", "que", "dont", "Sujet de étaient."),
+      q("Une relative explicative se reconnaît…", "à ses virgules", "à son pronom « dont »", "à sa longueur", "On peut la supprimer."),
+      q("« Les élèves qui ont fini peuvent sortir » : qui sort ?", "seulement ceux qui ont fini", "tous les élèves", "personne", "Relative déterminative."),
+      q("« La ville où je suis né » : « où » est complément…", "de lieu", "sujet", "COD", "Où = lieu ou temps."),
+      q("« La table sur ___ j'écris » :", "laquelle", "que", "dont", "Préposition + lequel."),
+      q("Pour choisir le pronom relatif, on cherche…", "sa fonction dans la relative", "la fonction de l'antécédent dans la principale", "le temps du verbe", "Méthode de la phrase simple.")
+    ]
+  });
+
+  /* ═══════════════════════ Tle — GÉRER SON TEMPS EN CLASSE D'EXAMEN ═══════════════════════ */
+  var OT_OLD = ancien("tle-orient-temps");
+  var JOURNEE = [["Sommeil", 6, "#3A4E8C"], ["Cours", 7, "#1E88E5"], ["Trajets", 1.5, "#8E96A6"], ["Repas, tâches", 2.5, "#C9A576"], ["Téléphone, réseaux", 4.5, "#C62828"], ["Révisions", 1, "#2E7D32"], ["Autre", 1.5, "#E0E3E8"]];
+  function donut(cx, cy, R, r, D) {
+    var tot = D.reduce(function (a, d) { return a + d[1]; }, 0), a0 = -Math.PI / 2, s = "";
+    D.forEach(function (d) {
+      var a1 = a0 + d[1] / tot * 2 * Math.PI, g = a1 - a0 > Math.PI ? 1 : 0, p = function (rr, a) { return (cx + rr * Math.cos(a)).toFixed(1) + " " + (cy + rr * Math.sin(a)).toFixed(1); };
+      s += "<path d='M" + p(R, a0) + "A" + R + " " + R + " 0 " + g + " 1 " + p(R, a1) + "L" + p(r, a1) + "A" + r + " " + r + " 0 " + g + " 0 " + p(r, a0) + "Z' fill='" + d[2] + "' stroke='#fff' stroke-width='2'/>";
+      a0 = a1;
+    });
+    return s;
+  }
+  function semaine3D() {
+    var o = [], J = ["L", "M", "M", "J", "V", "S", "D"], C = { cours: "#1E88E5", rev: "#2E7D32", sport: "#F2994A", repos: "#E0E3E8", som: "#3A4E8C" }, k;
+    o.push({ f: "boite", c: [0, -6, 0], d: [460, 8, 160], coul: "#C9A576", dessus: "#E3C79C" });
+    var P = [[["som", 8], ["cours", 7], ["rev", 2], ["repos", 2]], [["som", 8], ["cours", 7], ["rev", 2], ["sport", 1]], [["som", 8], ["cours", 5], ["rev", 2], ["repos", 2]], [["som", 8], ["cours", 7], ["rev", 2], ["sport", 1]], [["som", 8], ["cours", 7], ["rev", 1.5], ["repos", 2]], [["som", 9], ["rev", 4], ["sport", 2], ["repos", 4]], [["som", 9], ["rev", 2], ["repos", 6]]];
+    P.forEach(function (j, i) {
+      var y = 0; j.forEach(function (b, n) { var h = b[1] * 8; o.push({ f: "boite", c: [-195 + i * 65, y, 0], d: [48, h - 1.5, 60], coul: C[b[0]], div: false, ec: [0, n * 10, 0] }); y += h; });
+    });
+    return o;
+  }
+  remplacer("tle-orient-temps", {
+    c: "Tle A", m: "orientation", titre: "Gérer son temps en classe d'examen", duree: 30,
+    accroche: "Quatre heures et demie par jour sur le téléphone, une heure de révision : Aïcha veut changer avant le bac.",
+    intro: "L'emploi du temps réel d'une élève de Terminale te sert de fil rouge : à chaque partie, un indice t'aide à trancher entre trois stratégies.",
+    objectifs: ["faire le bilan chiffré de son emploi du temps", "construire un planning réaliste qui respecte le sommeil", "répartir les révisions selon les coefficients et les faiblesses", "utiliser la révision espacée et lutter contre la procrastination"],
+    enquete: {
+      titre: "Le bilan d'Aïcha, Terminale A à Ngaoundéré",
+      svg: svg(640, 220, "Diagramme circulaire d une journée d Aïcha : 6 heures de sommeil, 7 de cours, 4 heures et demie de téléphone, 1 heure de révision", "", "<rect width='640' height='220' fill='#F5F7FB'/>" + donut(130, 110, 90, 52, JOURNEE) + txt(130, 106, "24 h", { s: 18 }) + txt(130, 124, "d'Aïcha", { s: 11, w: 500, c: GRIS }) + JOURNEE.map(function (d, i) { return "<rect x='260' y='" + (30 + i * 24) + "' width='16' height='16' rx='4' fill='" + d[2] + "'/>" + txt(284, 43 + i * 24, d[0] + " : " + String(d[1]).replace(".", ",") + " h", { s: 12, a: "start", w: d[0] === "Révisions" || d[0] === "Téléphone, réseaux" ? 800 : 600 }); }).join("")),
+      legende: "À Ngaoundéré : Aïcha, en Terminale A, note pendant une semaine ce qu'elle fait heure par heure, comme le conseille le conseiller d'orientation.",
+      contexte: "<p>À six mois du baccalauréat, Aïcha se sent débordée. Son bilan d'une journée de semaine est sans appel : <strong>4 h 30 de téléphone</strong>, <strong>1 h de révision</strong>, <strong>6 h de sommeil</strong>. Sa camarade Ramatou lui conseille de « travailler la nuit jusqu'à 2 h comme les grands ». Son cousin, lui, a eu le bac en « révisant tout la dernière semaine ».</p>",
+      documents: [
+        { t: "Ce que dit la recherche sur la mémoire", html: "<p>Sans révision, on oublie environ <strong>la moitié</strong> d'une leçon en quelques jours. Chaque révision espacée (le lendemain, une semaine après, un mois après) ralentit l'oubli. Le sommeil consolide ce qui a été appris dans la journée.</p>" },
+        { t: "Les coefficients (exemple d'une série littéraire)", html: "<table class='donnees'><tr><th>Matière</th><td>Philosophie</td><td>Français</td><td>Anglais</td><td>Histoire-géo</td><td>Autres</td></tr><tr><th>Coefficient</th><td>5</td><td>4</td><td>3</td><td>3</td><td>1 à 2</td></tr></table><p><em>Exemple pour le calcul ; vérifie les coefficients de ta série auprès de ton établissement.</em></p>" }
+      ],
+      question: "Comment Aïcha doit-elle réorganiser son temps pour être prête au bac sans s'épuiser ?",
+      tache: "Construis pour Aïcha une semaine type chiffrée, justifiée par son bilan et les documents.",
+      hypotheses: ["Travailler la nuit jusqu'à 2 h pour gagner des heures (Ramatou).", "Tout réviser la dernière semaine, quand la pression aide à se concentrer (le cousin).", "Garder 7 à 8 h de sommeil, réduire le téléphone et réviser chaque jour par séances courtes, selon les coefficients."]
+    },
+    parties: [
+      { t: "Faire le bilan", html: partie(OT_OLD, 0) +
+        "<div class='ex'><b>Le calcul d'Aïcha</b>4 h 30 de téléphone par jour, c'est 31 h 30 par semaine, plus que ses heures de cours. En ramenant l'écran à 1 h 30, elle récupère 3 h par jour : de quoi dormir enfin 8 h et ajouter une heure de révision chaque soir.</div>",
+        fil: { html: "<p>Le temps existe : il est caché dans les 4 h 30 d'écran. Il n'est pas nécessaire de le prendre sur le sommeil.</p>" },
+        retenir: "On ne gère bien que ce que l'on mesure." },
+      { t: "Construire un planning", html: partie(OT_OLD, 1) +
+        "<div class='methode'><b>Répartir selon les coefficients</b><ol><li>Additionne les coefficients des matières écrites (ex. 5 + 4 + 3 + 3 = 15).</li><li>Partage les heures de révision au prorata : philosophie 5/15, français 4/15…</li><li>Ajoute un bonus aux matières où tu es faible.</li></ol></div>",
+        planches: [{ type: "3d", titre: "La semaine type d'Aïcha", legende: "Chaque colonne est un jour, chaque bloc une activité : sommeil (bleu nuit), cours (bleu), révisions (vert), sport (orange), repos (gris clair). Le curseur sépare les blocs pour mieux les compter : environ 15 h 30 de révisions dans la semaine, sans toucher au sommeil.",
+          modele: { h: 340, rx: -20, ry: 24, echelle: 0.95, alt: "Sept colonnes de blocs colorés représentant une semaine type", eclate: "Séparer les blocs", jouer: "Séparer", objets: semaine3D(),
+            etiquettes: [{ p: [-195, 30, 30], t: "Sommeil 8 h" }, { p: [130, 90, 30], t: "Samedi : 4 h de révision", cote: "d", ec: [0, 10, 0] }] } }],
+        fil: { html: "<p>Travailler jusqu'à 2 h du matin réduirait encore un sommeil déjà trop court : fatigue en classe, mémoire moins efficace (document 1). Le simulateur montre qu'avec 8 h de sommeil et 1 h 30 de téléphone par jour, Aïcha dispose de plus de 15 h de révision par semaine.</p>", verdicts: [[0, "rejetee", "Le sommeil consolide la mémoire : on prend le temps sur l'écran, pas sur la nuit."]] },
+        retenir: "Un planning réaliste vaut mieux qu'un planning parfait jamais suivi." },
+      { t: "Réviser au bon moment et vaincre la procrastination", html: partie(OT_OLD, 2) +
+        "<div class='def'><b>Révision espacée</b>Revoir une leçon le lendemain, puis une semaine après, puis un mois après : chaque rappel remonte la mémoire et la fait baisser moins vite ensuite.</div>",
+        planches: [{ type: "2D", titre: "La courbe de l'oubli et les révisions espacées", legende: "Sans révision (pointillés rouges), la mémoire d'une leçon chute à environ 50 % en quelques jours. Avec trois révisions espacées (courbe verte), elle reste haute jusqu'à l'examen.", svg: (function () {
+          var X = function (j) { return 70 + j / 30 * 530; }, Y = function (p) { return 250 - p * 2; }, s = "", d1 = "", d2 = "", j;
+          for (j = 0; j <= 30; j += 0.5) { d1 += (j ? "L" : "M") + X(j).toFixed(1) + " " + Y(100 * Math.exp(-j / 4) * 0.62 + 30).toFixed(1); }
+          var R = [0, 1, 7, 21], k = 0.25;
+          for (j = 0; j <= 30; j += 0.25) { var last = 0, n = 0; R.forEach(function (r, i) { if (j >= r) { last = r; n = i; } }); var tau = 2 * Math.pow(3, n); d2 += (j ? "L" : "M") + X(j).toFixed(1) + " " + Y(100 - (100 - 30) * (1 - Math.exp(-(j - last) / tau)) * 0.9).toFixed(1); }
+          for (j = 0; j <= 100; j += 25) s += "<path d='M70 " + Y(j) + "H600' stroke='#E6EAF2'/>" + txt(62, Y(j) + 4, j + " %", { s: 10.5, a: "end", w: 500, c: GRIS });
+          s += "<path d='" + d1 + "' fill='none' stroke='#C62828' stroke-width='2.5' stroke-dasharray='7 5'/><path d='" + d2 + "' fill='none' stroke='#2E7D32' stroke-width='3'/>";
+          R.slice(1).forEach(function (r) { s += "<circle cx='" + X(r) + "' cy='" + Y(100) + "' r='5' fill='#2E7D32'/>" + txt(X(r), Y(100) - 10, "J" + r, { s: 11, c: VERT }); });
+          s += "<path d='M70 250H604M70 250V36' stroke='" + NUIT + "' stroke-width='1.5'/>" + txt(335, 276, "jours après la leçon", { s: 12 }) + txt(80, 30, "ce qu'on retient", { s: 11.5, a: "start", c: GRIS });
+          return svg(640, 290, "Courbe de l oubli : sans révision la mémoire chute, avec des révisions espacées à J1, J7 et J21 elle reste haute", "", s);
+        })() }],
+        fil: { html: "<p>Tout réviser la dernière semaine, c'est réapprendre des leçons à moitié oubliées, sous stress, sans le temps de les revoir : la courbe de l'oubli condamne cette stratégie. Mieux vaut des séances courtes chaque jour, avec des révisions espacées.</p>", verdicts: [[1, "rejetee", "Sans révisions espacées, on a oublié la moitié des leçons ; la dernière semaine ne suffit pas."], [2, "validee", "Sommeil préservé, écran réduit, séances courtes et espacées selon les coefficients."]] },
+        retenir: "Commencer petit, mais commencer aujourd'hui ; revoir à J1, J7, J21." }
+    ],
+    denouement: {
+      titre: "Une semaine type pour Aïcha",
+      etapes: ["Bilan : 4 h 30 de téléphone, 1 h de révision, 6 h de sommeil (indice 1).", "Sommeil à 8 h, téléphone ramené à 1 h 30, séances de 45 min réparties selon les coefficients : au moins 15 h par semaine (indice 2).", "Révisions espacées à J1, J7, J21 ; démarrer par 5 minutes (indice 3)."],
+      reponse: "<p>Le bilan d'Aïcha montre que le temps ne manque pas : il est absorbé par 4 h 30 d'écran par jour, soit plus de 31 h par semaine. Elle ne doit pas le prendre sur ses nuits, car le sommeil consolide la mémoire : elle se couchera assez tôt pour dormir 7 à 8 h. En ramenant le téléphone à 1 h 30 par jour, elle dégage au moins 15 h de révision par semaine, qu'elle découpe en séances de 40 à 50 minutes suivies de pauses, réparties selon les coefficients (la philosophie et le français d'abord) et ses points faibles. Plutôt que de tout réviser la dernière semaine, elle revoit chaque leçon le lendemain, une semaine puis trois semaines après, pour contrer la courbe de l'oubli. Pour démarrer chaque soir, elle commence par une tâche de cinq minutes, téléphone rangé dans une autre pièce.</p>",
+      transfert: "<p>Fais ton propre bilan d'une journée (en heures), puis utilise le simulateur pour calculer combien d'heures de révision tu peux dégager chaque semaine sans réduire ton sommeil.</p>"
+    },
+    revision: (OT_OLD ? OT_OLD.revision : []).concat(["Répartition des révisions au prorata des coefficients.", "Révisions espacées : J1, J7, J21."]),
+    exo: OT_OLD ? OT_OLD.exo : "",
+    quiz: [
+      q("Combien d'heures de sommeil viser ?", "7 à 8 h", "4 à 5 h", "12 h", "Le sommeil fixe les apprentissages."),
+      q("Durée conseillée d'une séance de travail :", "40 à 50 min", "4 heures sans pause", "10 min", "Suivie d'une pause courte."),
+      q("Contre la procrastination :", "commencer par une tâche de 5 min", "attendre l'inspiration", "tout faire la veille", "Le plus dur est de commencer."),
+      q("4 h 30 de téléphone par jour représentent par semaine…", "31 h 30", "4 h 30", "15 h", "4,5 × 7."),
+      q("Sans révision, on oublie une leçon…", "en grande partie en quelques jours", "jamais", "seulement après un an", "Courbe de l'oubli."),
+      q("Révisions espacées :", "J1, J7, J21", "toutes la veille de l'examen", "une seule fois", "Chaque rappel ralentit l'oubli."),
+      q("Coefficients 5, 4, 3, 3 : part de la matière de coefficient 5 ?", "5/15", "5/4", "1/4", "Au prorata du total 15."),
+      q("Travailler jusqu'à 2 h du matin…", "nuit à la mémoire et à l'attention", "double les résultats", "est sans effet", "Le sommeil consolide la mémoire."),
+      q("Pendant une séance de travail, le téléphone doit être…", "hors de portée, en silencieux", "à côté, sonnerie forte", "en main", "Chaque notification coupe l'attention."),
+      q("La première étape pour gérer son temps :", "faire le bilan de sa semaine", "acheter un agenda neuf", "réviser la nuit", "On ne gère bien que ce que l'on mesure.")
+    ]
+  });
+
+  /* ═══════════════════════ SIMULATIONS ═══════════════════════ */
+  function $(el, s) { return el.querySelector(s); }
+  /* carte du Cameroun interactive : choisir une ville */
+  VRT_A("3e-geo-cameroun", 2, "Choisis une ville : milieu naturel, altitude et pluies", function (el) {
+    var X = function (l) { return 40 + (l - 8) * 40; }, Y = function (l) { return 470 - (l - 1.5) * 38; };
+    el.innerHTML = "<div style='display:flex;flex-wrap:wrap;gap:6px' data-b>" + VILLES.map(function (v, i) { return "<button type='button' class='btn-l' data-i='" + i + "'>" + v[0] + "</button>"; }).join("") + "</div><svg viewBox='0 0 640 480' class='an-svg' style='max-height:420px' data-s></svg><p class='labo-r' data-r>Choisis une ville.</p>";
+    var sv = $(el, "[data-s]");
+    function maj(i) {
+      var v = VILLES[i], s = "<rect width='640' height='480' fill='#DCEBF5'/><defs></defs>" + carte("gcA", X, Y, { villes: false });
+      VILLES.forEach(function (w, k) { s += "<circle cx='" + X(w[1]) + "' cy='" + Y(w[2]) + "' r='" + (k === i ? 9 : 4) + "' fill='" + (k === i ? "#C62828" : NUIT) + "' stroke='#fff' stroke-width='2'/>"; });
+      s += txt(X(v[1]) + 12, Y(v[2]) + 5, v[0], { s: 15, a: "start", halo: true });
+      var h = v[6] / 4000 * 120; s += "<g transform='translate(520 330)'><rect x='0' y='" + (-Math.min(140, h)) + "' width='40' height='" + Math.min(140, h) + "' rx='4' fill='#2F6DB5'/>" + txt(20, 18, v[6].toLocaleString("fr-FR") + " mm", { s: 12 }) + txt(20, 34, "pluies/an", { s: 10.5, w: 500, c: GRIS }) + "</g>";
+      sv.innerHTML = s;
+      $(el, "[data-r]").innerHTML = "<b>" + v[0] + "</b> · " + v[3] + " · " + v[4] + " · altitude ≈ <b>" + v[5].toLocaleString("fr-FR") + " m</b> · pluies ≈ <b>" + v[6].toLocaleString("fr-FR") + " mm/an</b>";
+      el.querySelectorAll("[data-i]").forEach(function (b) { b.setAttribute("aria-pressed", +b.dataset.i === i); });
+    }
+    el.querySelectorAll("[data-i]").forEach(function (b) { b.addEventListener("click", function () { maj(+b.dataset.i); }); });
+    maj(0);
+  });
+
+  /* choisir le pronom relatif */
+  VRT_A("3e-fr-relative", 1, "Choisis le bon pronom relatif", function (el) {
+    var P = [["Le taxi ___ j'ai oublié mon sac était jaune.", ["dans lequel", "que", "dont"], 0, "On oublie DANS le taxi : préposition + lequel (ou « où »)."], ["Le chauffeur ___ je vous parle est gentil.", ["dont", "que", "qui"], 0, "On parle DE quelqu'un : « dont »."], ["Les papiers ___ le sac contenait sont importants.", ["que", "dont", "qui"], 0, "« les papiers » est COD de « contenait »."], ["Les passagers ___ étaient assis derrière peuvent appeler.", ["qui", "que", "où"], 0, "Sujet de « étaient » : « qui »."], ["Bafang est la ville ___ Junior est né.", ["où", "que", "dont"], 0, "Complément de lieu : « où »."], ["C'est un roman ___ tout le monde parle.", ["dont", "que", "lequel"], 0, "Parler DE : « dont »."], ["Voici la table sur ___ j'écris.", ["laquelle", "que", "qui"], 0, "Préposition + lequel, accordé au féminin."], ["Le cacao ___ Banda transporte est lourd.", ["que", "qui", "dont"], 0, "COD de « transporte »."]];
+    var i = 0, ok = 0;
+    el.innerHTML = "<p class='labo-r' data-q style='font-size:17px'></p><div style='display:flex;gap:8px;flex-wrap:wrap' data-c></div><p class='an-note' data-e></p><p class='labo-r' data-s></p>";
+    function melange(a) { return a.map(function (x, k) { return [x, (k * 7 + i * 3) % 5]; }).sort(function (u, v) { return u[1] - v[1]; }).map(function (x) { return x[0]; }); }
+    function poser() {
+      var p = P[i];
+      $(el, "[data-q]").innerHTML = p[0].replace("___", "<b style='border-bottom:2px dashed #1E499B;padding:0 18px'>?</b>");
+      $(el, "[data-e]").textContent = ""; $(el, "[data-s]").innerHTML = "Question " + (i + 1) + " sur " + P.length + " · score : <b>" + ok + "</b>";
+      $(el, "[data-c]").innerHTML = melange(p[1]).map(function (c) { return "<button type='button' class='btn-l' data-v='" + c + "'>" + c + "</button>"; }).join("");
+      el.querySelectorAll("[data-v]").forEach(function (b) {
+        b.addEventListener("click", function () {
+          var bon = b.dataset.v === p[1][p[2]];
+          if (bon) ok++;
+          $(el, "[data-q]").innerHTML = p[0].replace("___", "<b style='color:" + (bon ? VERT : "#C62828") + "'>" + p[1][p[2]] + "</b>");
+          $(el, "[data-e]").innerHTML = (bon ? "✔ Juste. " : "✘ Non : « " + b.dataset.v + " » ne convient pas. ") + p[3];
+          el.querySelectorAll("[data-v]").forEach(function (x) { x.disabled = true; });
+          var nx = document.createElement("button"); nx.type = "button"; nx.className = "btn-l"; nx.textContent = i + 1 < P.length ? "Phrase suivante" : "Recommencer";
+          nx.addEventListener("click", function () { i = (i + 1) % P.length; if (!i) ok = 0; poser(); });
+          $(el, "[data-c]").appendChild(nx);
+          $(el, "[data-s]").innerHTML = "Question " + (i + 1) + " sur " + P.length + " · score : <b>" + ok + "</b>";
+        });
+      });
+    }
+    poser();
+  });
+
+  /* simulateur de semaine : sommeil, téléphone → heures de révision et répartition */
+  VRT_A("tle-orient-temps", 1, "Simulateur : combien d'heures de révision par semaine ?", function (el) {
+    function cur(l, min, max, pas, v, u) { return "<label class='labo-c'><span>" + l + " : <b data-v>" + String(v).replace(".", ",") + "</b> " + u + "</span><input type='range' min='" + min + "' max='" + max + "' step='" + pas + "' value='" + v + "'></label>"; }
+    el.innerHTML = "<div style='display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:4px 18px'>" + cur("Sommeil par nuit", 5, 9, 0.5, 6, "h") + cur("Téléphone par jour", 0, 6, 0.5, 4.5, "h") + cur("Cours par jour (semaine)", 5, 8, 0.5, 7, "h") + "</div><svg viewBox='0 0 640 210' class='an-svg' data-s></svg><p class='labo-r' data-r></p>";
+    var I = el.querySelectorAll("input"), V = el.querySelectorAll("[data-v]"), M = [["Philosophie", 5, "#7B3F99"], ["Français", 4, "#1E499B"], ["Anglais", 3, "#2E7D32"], ["Histoire-géo", 3, "#C2540A"]];
+    function maj() {
+      var som = +I[0].value, tel = +I[1].value, cours = +I[2].value;
+      I.forEach(function (x, i) { V[i].textContent = String(+x.value).replace(".", ","); });
+      var libreSemaine = 5 * Math.max(0, 24 - som - cours - 1.5 - 2.5 - tel - 1.5) + 2 * Math.max(0, 24 - som - 3 - tel - 4);
+      var rev = Math.round(libreSemaine * 0.8 * 2) / 2, s = "", x = 20;
+      M.forEach(function (m) { var h = rev * m[1] / 15, w = h / Math.max(rev, 1) * 600; s += "<rect x='" + x + "' y='40' width='" + Math.max(0, w - 3) + "' height='46' rx='6' fill='" + m[2] + "'/>" + (w > 70 ? txt(x + w / 2, 60, m[0], { s: 11.5, c: "#fff" }) + txt(x + w / 2, 77, String(Math.round(h * 2) / 2).replace(".", ",") + " h", { s: 11.5, c: "#fff" }) : ""); x += w; });
+      s += txt(20, 26, "Répartition au prorata des coefficients (5, 4, 3, 3)", { s: 12, a: "start", c: GRIS });
+      var alerte = som < 7 ? "⚠️ Moins de 7 h de sommeil : mémoire et attention en baisse." : "✔ Sommeil suffisant.";
+      s += "<rect x='20' y='120' width='600' height='26' rx='13' fill='#EEF1F6'/><rect x='20' y='120' width='" + Math.min(600, rev / 25 * 600) + "' height='26' rx='13' fill='" + (rev >= 15 ? "#2E7D32" : rev >= 8 ? "#F2994A" : "#C62828") + "'/>" + txt(20, 112, "Révisions possibles : " + String(rev).replace(".", ",") + " h par semaine (objectif ≥ 15 h)", { s: 12.5, a: "start" });
+      s += txt(20, 180, alerte, { s: 12.5, a: "start", c: som < 7 ? "#C62828" : VERT });
+      $(el, "[data-s]").innerHTML = s;
+      $(el, "[data-r]").innerHTML = "Écran par semaine : <b>" + String(tel * 7).replace(".", ",") + " h</b> · révisions possibles (80 % du temps libre) : <b>" + String(rev).replace(".", ",") + " h</b>";
+    }
+    I.forEach(function (x) { x.addEventListener("input", maj); }); maj();
+  });
+})();
+
+/* Leçons APPROFONDIES — lot 7, classes d'examen (17/11/2026) : partage de l'Afrique et fondements de la démocratie (3e),
+   les passions et la liberté (Tle, philosophie). Même gabarit et même mécanisme que 11-approfondies-lot4.js
+   (remplacement EN PLACE ; ordre, clé, fiche APC, examen et scènes conservés). Couleurs proches des objets réels.
+   Simulations VRT_A en fin de fichier. */
+(function () {
+  "use strict";
+  var NUIT = "#001136", BLEU = "#1E499B", GRIS = "#4D5163", VERT = "#17784D", ROUGE = "#C62828";
+
+  function txt(x, y, t, o) {
+    o = o || {};
+    return "<text x='" + x + "' y='" + y + "' text-anchor='" + (o.a || "middle") + "' font-size='" + (o.s || 12) + "' font-weight='" + (o.w || 700) + "' fill='" + (o.c || NUIT) + "'" + (o.i ? " font-style='italic'" : "") + (o.halo ? " stroke='#fff' stroke-width='3' paint-order='stroke'" : "") + ">" + t + "</text>";
+  }
+  function lin(id, cs, vertical) {
+    var s = "<linearGradient id='" + id + "'" + (vertical ? " x1='0' y1='0' x2='0' y2='1'" : "") + ">";
+    cs.forEach(function (c, i) { s += "<stop offset='" + (i / (cs.length - 1)).toFixed(2) + "' stop-color='" + c + "'/>"; });
+    return s + "</linearGradient>";
+  }
+  function fleche(id, c) { return "<marker id='" + id + "' markerWidth='10' markerHeight='10' refX='7' refY='5' orient='auto'><path d='M0 1L8 5L0 9Z' fill='" + c + "'/></marker>"; }
+  function svg(w, h, alt, defs, corps) {
+    return "<svg viewBox='0 0 " + w + " " + h + "' role='img' aria-label='" + alt + "' font-family='Inter,Arial,sans-serif'><rect width='" + w + "' height='" + h + "' fill='#fff'/><defs>" + defs + "</defs>" + corps +
+      "<text x='" + (w - 6) + "' y='" + (h - 5) + "' font-size='8' text-anchor='end' fill='#8A93A6'>Planche VÉRITAS</text></svg>";
+  }
+  function alea(g) { return function () { g = (g * 16807) % 2147483647; return (g - 1) / 2147483646; }; }
+  function ancien(id) { return window.VRT_LECONS[id]; }
+  function remplacer(id, o) {
+    var a = ancien(id);
+    if (a) ["apc", "examen", "rang", "cle", "scenes"].forEach(function (k) { if (a[k] != null && o[k] == null) o[k] = a[k]; });
+    VRT_L(id, o);
+    if (a) o.ordre = a.ordre;
+  }
+  function q(qq, bonne, f1, f2, e) { return { q: qq, r: [bonne, f1, f2], b: 0, e: e }; }
+  function partie(old, i) { return old && old.parties[i] ? old.parties[i].html : ""; }
+  function bulle(x, y, w, t, c) { return "<rect x='" + x + "' y='" + y + "' width='" + w + "' height='30' rx='12' fill='#fff' stroke='" + (c || "#C9D2E3") + "'/>" + txt(x + w / 2, y + 20, t, { s: 11.5 }); }
+  /* silhouette debout : y = centre de la tête ; environ 92 px de haut */
+  function perso(x, y, peau, habit, bas) {
+    bas = bas || "#2E3445";
+    return "<g transform='translate(" + x + " " + y + ")'><ellipse cx='0' cy='84' rx='18' ry='4' fill='#001136' opacity='.18'/>" +
+      "<rect x='-9' y='44' width='8' height='36' rx='3' fill='" + bas + "'/><rect x='1' y='44' width='8' height='36' rx='3' fill='" + bas + "'/>" +
+      "<ellipse cx='-6' cy='81' rx='7' ry='3.5' fill='#1F2328'/><ellipse cx='6' cy='81' rx='7' ry='3.5' fill='#1F2328'/>" +
+      "<path d='M-13 46L-16 18C-16 13 -12 11 -6 10H6C12 11 16 13 16 18L13 46Z' fill='" + habit + "'/>" +
+      "<path d='M-15 16L-20 40' stroke='" + habit + "' stroke-width='7' stroke-linecap='round'/><path d='M15 16L20 40' stroke='" + habit + "' stroke-width='7' stroke-linecap='round'/>" +
+      "<circle cx='-20' cy='42' r='3.6' fill='" + peau + "'/><circle cx='20' cy='42' r='3.6' fill='" + peau + "'/>" +
+      "<rect x='-3.5' y='5' width='7' height='7' fill='" + peau + "'/><ellipse cx='0' cy='-2' rx='9' ry='10.5' fill='" + peau + "'/>" +
+      "<path d='M-9 -4C-10 -14 -4 -13.5 0 -13.5S10 -14 9 -4C7 -9 -7 -9 -9 -4Z' fill='#1B1410'/><ellipse cx='-9' cy='-1' rx='1.8' ry='3' fill='" + peau + "'/><ellipse cx='9' cy='-1' rx='1.8' ry='3' fill='" + peau + "'/></g>";
+  }
+
+  /* ═══════════════════════ 3e HISTOIRE — LE PARTAGE DE L'AFRIQUE ═══════════════════════ */
+  var HP_OLD = ancien("3e-hist-partage");
+  function frontiere3D() {
+    var o = [], R = alea(1885), k;
+    o.push({ f: "boite", c: [0, -8, 0], d: [600, 8, 340], coul: "#8C7A55", dessus: "#C9B07A" });
+    for (k = 0; k < 14; k++) o.push({ f: "boite", c: [-280 + k * 44, -2, 30 + Math.sin(k * 0.7) * 30], d: [46, 3, 34], coul: "#2F6DB5", dessus: "#5BA3D9", div: false });
+    for (k = -150; k <= 150; k += 30) o.push({ f: "boite", c: [0, 0, k], d: [6, 30, 6], coul: "#E9E4D8", dessus: "#C62828", div: false });
+    o.push({ f: "boite", c: [0, 1, 0], d: [2, 1, 320], coul: "#C62828", div: false });
+    [[-160, -90], [-110, -120], [-200, -60], [-120, -60], [120, -100], [170, -70], [140, -130], [200, -110], [-150, 120], [-90, 140], [130, 120], [190, 140]].forEach(function (p) {
+      o.push({ f: "cylindre", c: [p[0], 0, p[1]], r: 16, h: 18, n: 16, coul: "#B98A55", dessus: "#C99A65" });
+      o.push({ f: "cone", c: [p[0], 18, p[1]], r: 22, h: 22, n: 16, coul: "#C9A86B" });
+    });
+    for (k = 0; k < 22; k++) { var x = (R() - 0.5) * 560, z = (R() - 0.5) * 300; if (Math.abs(x) < 30) continue; o.push({ f: "cylindre", c: [x, 0, z], r: 2.5, h: 22, n: 6, coul: "#6B4423" }); o.push({ f: "sphere", c: [x, 28, z], r: 12, coul: "#3E7C3A" }); }
+    return o;
+  }
+  var AFR = [[-17, 21], [-16, 28], [-10, 30], [-6, 36], [10, 37], [11, 33], [20, 31], [25, 32], [32, 31], [34, 28], [37, 22], [39, 15], [43, 12], [51, 12], [51, 10], [48, 5], [42, -1], [40, -5], [40, -10], [40, -16], [35, -22], [33, -26], [28, -33], [20, -35], [18, -33], [15, -27], [12, -18], [13, -12], [12, -5], [9, -1], [9, 4], [5, 6], [-3, 5], [-8, 4], [-13, 8], [-17, 14]];
+  var ETH = [[36, 14], [40, 14], [42, 12], [44, 9], [47, 8], [44, 4.5], [39, 3.5], [35, 5], [34, 8]], LBR = [[-11.5, 7], [-10, 8.5], [-8, 8], [-7.5, 5], [-9, 4.8]];
+  var PLANCHE_AFRIQUE = (function () {
+    function carteAf(ox, an) {
+      var X = function (l) { return ox + (l + 18) * 3.9; }, Y = function (l) { return 36 + (38 - l) * 3.9; }, P = function (T) { return "M" + T.map(function (p) { return X(p[0]).toFixed(1) + " " + Y(p[1]).toFixed(1); }).join("L") + "Z"; }, id = "af" + an, s = "";
+      s += "<clipPath id='" + id + "'><path d='" + P(AFR) + "'/></clipPath><path d='" + P(AFR) + "' fill='#000' opacity='.12' transform='translate(3 4)'/><path d='" + P(AFR) + "' fill='#CDBB78'/>";
+      if (an === 1880) s += "<g clip-path='url(#" + id + ")'><path d='" + P(AFR) + "' fill='none' stroke='#7A1F1F' stroke-width='9'/><rect x='" + X(-2) + "' y='" + Y(37) + "' width='" + (X(9) - X(-2)) + "' height='" + (Y(32) - Y(37)) + "' fill='#7A1F1F'/><rect x='" + X(17) + "' y='" + Y(-28) + "' width='" + (X(33) - X(17)) + "' height='" + (Y(-35) - Y(-28)) + "' fill='#7A1F1F'/></g>";
+      else s += "<path d='" + P(AFR) + "' fill='#7A1F1F'/><path d='" + P(ETH) + "' fill='#CDBB78' stroke='#5B3A1A'/><path d='" + P(LBR) + "' fill='#CDBB78' stroke='#5B3A1A'/>" + txt(X(41), Y(9) + 4, "Éthiopie", { s: 9.5, halo: true }) + txt(X(-9), Y(3), "Libéria", { s: 9.5, halo: true });
+      s += "<path d='" + P(AFR) + "' fill='none' stroke='#5B3A1A' stroke-width='1.6' stroke-linejoin='round'/>" + txt(X(17), 32, an + " : ≈ " + (an === 1880 ? 10 : 90) + " %", { s: 16 });
+      return s;
+    }
+    var s = "<rect width='640' height='360' fill='#DCEBF5'/>" + carteAf(10, 1880) + carteAf(330, 1914);
+    s += "<rect x='200' y='326' width='14' height='14' fill='#7A1F1F'/>" + txt(220, 338, "sous contrôle européen", { s: 11.5, a: "start" }) + "<rect x='380' y='326' width='14' height='14' fill='#CDBB78'/>" + txt(400, 338, "États africains", { s: 11.5, a: "start" });
+    return svg(640, 360, "Deux cartes de l Afrique : en 1880 seules les côtes, l Algérie et le Cap sont européennes ; en 1914 tout le continent l est sauf l Éthiopie et le Libéria", "", s);
+  })();
+  remplacer("3e-hist-partage", {
+    c: "3e", m: "histoire", titre: "La conquête et le partage de l'Afrique", duree: 35,
+    accroche: "« Pourquoi ma famille vit-elle dans trois pays ? » Moussa, de Kousséri, cherche la réponse à Berlin.",
+    intro: "La question d'un élève de Kousséri te sert de fil rouge : à chaque partie, un document t'aide à trancher entre trois explications.",
+    objectifs: ["expliquer les causes et les moyens de la conquête", "présenter les règles fixées par la conférence de Berlin", "décrire le partage et les résistances africaines", "expliquer l'origine des frontières actuelles"],
+    enquete: {
+      titre: "La famille de Moussa, de part et d'autre des frontières",
+      svg: (function () {
+        var s = "<rect width='640' height='210' fill='#F6EFDF'/><path d='M0 160C160 150 320 170 640 150V210H0Z' fill='#E3D3A8'/><path d='M0 120C200 110 420 140 640 112V132C420 160 200 130 0 140Z' fill='#5BA3D9'/>";
+        s += "<path d='M320 30V200' stroke='#C62828' stroke-width='3' stroke-dasharray='10 6'/><path d='M150 30L200 200' stroke='#C62828' stroke-width='3' stroke-dasharray='10 6'/>";
+        s += txt(80, 24, "NIGERIA", { s: 13, c: "#7A6A55" }) + txt(250, 24, "CAMEROUN", { s: 13, c: "#7A6A55" }) + txt(470, 24, "TCHAD", { s: 13, c: "#7A6A55" });
+        s += perso(90, 64, "#6B4423", "#2E7D32", "#2E7D32") + perso(250, 64, "#5A3A1E", "#F2F2F2") + perso(470, 64, "#6B4423", "#C2540A", "#C2540A") + txt(250, 44, "Moussa", { s: 12 });
+        s += "<path d='M110 150q70 -24 120 0M270 150q100 -30 180 0' fill='none' stroke='#8A6E4B' stroke-width='2' stroke-dasharray='4 4'/>" + txt(320, 202, "le Logone et le Chari : une même famille, trois pays", { s: 11.5, c: "#6D4A00", w: 600 });
+        return svg(640, 210, "Trois membres d une même famille séparés par deux frontières en pointillés rouges, au Nigeria, au Cameroun et au Tchad", "", s);
+      })(),
+      legende: "À Kousséri, au bord du Logone : Moussa revient d'un mariage à N'Djamena et rend visite à un cousin à Maiduguri.",
+      contexte: "<p>Moussa, élève de 3e à Kousséri, a des cousins à <strong>N'Djamena</strong> (Tchad), juste en face, de l'autre côté du Logone, et des oncles à <strong>Maiduguri</strong> (Nigeria). Tous parlent la même langue et ont les mêmes ancêtres. « Qui a décidé de ces frontières ? » demande-t-il en classe.</p><p>Son voisin affirme : « Ce sont nos chefs qui les ont choisies. » Une autre : « Les Européens ont découpé l'Afrique sur une carte, à Berlin. » Le professeur sort deux documents.</p>",
+      documents: [
+        { t: "L'Acte général de la conférence de Berlin (26 février 1885), article 35", html: "<p>« Les puissances signataires reconnaissent l'obligation d'assurer, dans les territoires occupés par elles sur les côtes du continent africain, l'existence d'une autorité suffisante pour faire respecter les droits acquis. »</p>" },
+        { t: "L'Afrique sous contrôle européen", html: "<table class='donnees'><tr><th>Année</th><td>1880</td><td>1914</td></tr><tr><th>Part du continent contrôlée par des Européens</th><td>environ 10 %</td><td>environ 90 %</td></tr></table>" }
+      ],
+      question: "Qui a tracé les frontières qui séparent la famille de Moussa, et comment ?",
+      tache: "Rédige pour Moussa une réponse argumentée de dix lignes, en t'appuyant sur les deux documents.",
+      hypotheses: ["Les chefs africains ont choisi ces frontières.", "La conférence de Berlin a découpé l'Afrique sur une carte.", "Berlin a fixé les règles du partage ; les frontières ont ensuite été tracées par des traités entre Européens, sans les peuples concernés."]
+    },
+    parties: [
+      { t: "Pourquoi conquérir l'Afrique ?", html: partie(HP_OLD, 0),
+        planches: [{ type: "2D", titre: "L'Afrique en 1880 et en 1914", legende: "Cartes simplifiées. En 1880, les Européens ne tiennent que des comptoirs côtiers, l'Algérie et la colonie du Cap (environ 10 % du continent). En 1914, presque tout est colonisé (environ 90 %) : seuls l'Éthiopie et le Libéria restent indépendants.", svg: PLANCHE_AFRIQUE }],
+        fil: { html: "<p>En 1880, les Européens n'occupent que des comptoirs côtiers : il n'existe alors aucune des frontières actuelles entre le Nigeria, le Cameroun et le Tchad. Elles naissent entre 1884 et 1914, au moment où la conquête s'accélère.</p>" },
+        retenir: "Économie, puissance, idéologie : trois familles de causes." },
+      { t: "La conférence de Berlin (1884-1885)", html: partie(HP_OLD, 1) +
+        "<div class='attention'><b>Idée fausse</b>On lit souvent que les Européens ont « découpé l'Afrique sur une carte » à Berlin. En réalité, la conférence fixe des <strong>règles</strong> ; les frontières sont tracées ensuite, par des traités bilatéraux entre puissances (par exemple les accords anglo-allemands et franco-allemands pour le Kamerun).</div>",
+        planches: [{ type: "2D", titre: "Autour de la table de Berlin", legende: "Quatorze délégations (puissances européennes, Empire ottoman, États-Unis) autour de la table, aucune chaise pour un Africain ; sur la table, une carte de l'Afrique encore en grande partie inconnue des Européens.", svg: (function () {
+          var s = "<rect width='640' height='300' fill='#F2EADB'/><ellipse cx='320' cy='150' rx='230' ry='92' fill='#6B4423'/><ellipse cx='320' cy='146' rx='224' ry='86' fill='#8B5A2B'/><rect x='250' y='110' width='140' height='76' rx='4' fill='#F4E7C5' stroke='#C9A86B'/>";
+          s += "<path d='M300 118c-14 6-20 22-12 34 8 14 4 22 14 30s20-6 24-18c6-14 18-12 14-26s-26-24-40-20Z' fill='#C9B07A' stroke='#8A6E4B'/>" + txt(320, 198, "carte de l'Afrique", { s: 10.5, c: "#F4E7C5", w: 600 });
+          var C = ["#000", "#D52B1E", "#0055A4", "#C8102E", "#008C45", "#AA151B", "#006600", "#FFCD00", "#C8102E", "#002B7F", "#003DA5", "#E30A17", "#B22234", "#0064AA"];
+          for (var k = 0; k < 14; k++) { var a = Math.PI * 2 * k / 14, x = 320 + 262 * Math.cos(a), y = 150 + 112 * Math.sin(a); var ang = (a * 180 / Math.PI + 90).toFixed(0); s += "<g transform='translate(" + x.toFixed(0) + " " + y.toFixed(0) + ") rotate(" + ang + ")'><rect x='-17' y='-4' width='34' height='18' rx='6' fill='#5C3A1E'/><ellipse cx='0' cy='2' rx='17' ry='9' fill='#1F2328'/><path d='M-4 -6L0 2L4 -6Z' fill='#F4F1EA'/><circle cx='0' cy='-4' r='7.5' fill='#E8C3A0'/><path d='M-7 -3A7.5 7.5 0 0 1 7 -3Z' fill='#5A4632'/></g><rect x='" + (x - 6).toFixed(0) + "' y='" + (y - 30).toFixed(0) + "' width='12' height='8' fill='" + C[k] + "' stroke='#fff' stroke-width='.8'/>"; }
+          s += txt(320, 288, "15 novembre 1884 – 26 février 1885 : aucun représentant africain", { s: 12, c: ROUGE });
+          return svg(640, 300, "Une table ovale entourée de quatorze délégations avec leurs drapeaux, une carte de l Afrique au centre, aucun Africain", "", s);
+        })() }],
+        fil: { html: "<p>Le document 1 le montre : Berlin impose l'<strong>occupation effective</strong> (une « autorité suffisante » sur place) et la notification. Ce ne sont pas des lignes tracées sur une carte, mais une règle du jeu qui lance la course à la conquête. Et aucun Africain n'est consulté.</p>", verdicts: [[1, "rejetee", "Berlin fixe des règles (occupation effective, notification), il ne trace pas les frontières."], [0, "rejetee", "Aucun Africain n'est invité à Berlin ; les frontières sont négociées entre Européens."]] },
+        retenir: "Berlin ne partage pas l'Afrique sur une carte : il fixe les RÈGLES du partage." },
+      { t: "Le partage du continent", html: partie(HP_OLD, 2) +
+        "<div class='ex'><b>Les frontières de Moussa</b>La frontière entre le Kamerun allemand et le Nigeria britannique est fixée par des accords anglo-allemands (1885-1913) ; celle avec le Tchad français par des accords franco-allemands, qui suivent en partie le Logone et le Chari. Kotoko, Arabes Choa, Kanouri se retrouvent partagés entre plusieurs colonies.</div>",
+        planches: [{ type: "3d", titre: "Une frontière tracée à la règle", legende: "Tourne le paysage : une ligne de bornes rouges coupe en deux un même pays, avec ses cases et ses champs, et traverse la rivière. Les villages de part et d'autre appartiennent au même peuple.",
+          modele: { h: 340, rx: -30, ry: 24, echelle: 0.85, alt: "Paysage de savane avec des cases rondes de part et d autre d une ligne de bornes rouges rectiligne", objets: frontiere3D(),
+            etiquettes: [{ p: [0, 32, -150], t: "Bornes de la frontière" }, { p: [-150, 42, -90], t: "Village de la colonie A" }, { p: [170, 42, -70], t: "Village de la colonie B", cote: "d" }, { p: [120, 4, 40], t: "Rivière", cote: "d" }] } }],
+        fil: { html: "<p>Les frontières de la région de Moussa ont été négociées entre l'Allemagne, la Grande-Bretagne et la France, souvent en lignes droites ou le long des fleuves, sans tenir compte des peuples. À l'indépendance, les États africains ont choisi de les conserver (OUA, 1964) pour éviter des guerres : la famille de Moussa en vit encore les effets.</p>", verdicts: [[2, "validee", "Règles fixées à Berlin, frontières tracées ensuite par des traités entre Européens, sans les peuples."]] },
+        retenir: "Des frontières tracées par d'autres : un héritage encore visible aujourd'hui." }
+    ],
+    denouement: {
+      titre: "Des frontières négociées entre Européens",
+      etapes: ["1880 : 10 % de l'Afrique contrôlée ; 1914 : 90 % (indice 1).", "Berlin (1884-1885) : règles de l'occupation effective et de la notification, sans Africains (indice 2).", "Traités entre Européens, frontières droites ou fluviales, peuples séparés (indice 3)."],
+      reponse: "<p>Les frontières qui séparent la famille de Moussa ne viennent pas des chefs africains. Poussés par des intérêts économiques, politiques et idéologiques, les Européens se lancent à la conquête de l'Afrique, dont ils ne contrôlaient que 10 % en 1880. La conférence de Berlin (15 novembre 1884 – 26 février 1885), convoquée par Bismarck sans aucun Africain, ne découpe pas le continent sur une carte : elle fixe les règles du partage, notamment l'occupation effective et la notification. Les frontières sont ensuite tracées par des traités entre puissances, l'Allemagne avec la Grande-Bretagne pour la frontière du Nigeria, avec la France pour celle du Tchad, souvent en lignes droites ou le long des fleuves, sans consulter les peuples. En 1914, 90 % de l'Afrique est colonisée ; ces frontières, conservées à l'indépendance, séparent encore des familles comme celle de Moussa.</p>",
+      transfert: "<p>Cherche sur une carte du Cameroun une frontière tracée en ligne droite et une frontière qui suit un fleuve. Nomme-les et indique quelles puissances coloniales les ont négociées.</p>"
+    },
+    revision: (HP_OLD ? HP_OLD.revision : []).concat(["Berlin fixe des règles ; les frontières viennent de traités entre Européens.", "1880 : 10 % ; 1914 : 90 % du continent colonisé."]),
+    exo: HP_OLD ? HP_OLD.exo : "",
+    quiz: [
+      q("Qui convoque la conférence de Berlin ?", "Bismarck", "Napoléon III", "la reine Victoria", "Le chancelier allemand."),
+      q("Que signifie l'occupation effective ?", "occuper réellement le territoire revendiqué", "acheter le territoire", "le visiter une fois", "Une simple revendication ne suffit plus."),
+      q("Combien d'Africains participent à la conférence ?", "aucun", "dix", "un par royaume", "Le continent est partagé sans ses peuples."),
+      q("En 1914, quels pays africains restent indépendants ?", "l'Éthiopie et le Libéria", "le Cameroun et le Tchad", "l'Égypte et le Maroc", "Menelik II bat l'Italie à Adoua (1896)."),
+      q("La conférence de Berlin a…", "fixé les règles du partage", "tracé toutes les frontières", "accordé l'indépendance à l'Afrique", "Les frontières viennent ensuite de traités."),
+      q("Part de l'Afrique sous contrôle européen en 1880 :", "environ 10 %", "environ 90 %", "100 %", "Des comptoirs côtiers."),
+      q("Une cause économique de la conquête :", "le besoin de matières premières", "la mission civilisatrice", "le prestige national", "Caoutchouc, huile de palme, minerais."),
+      q("Quel médicament a facilité la pénétration européenne ?", "la quinine", "la pénicilline", "l'aspirine", "Contre le paludisme."),
+      q("Un résistant à la conquête :", "Samory Touré", "Bismarck", "Nachtigal", "Avec Béhanzin, Menelik II…"),
+      q("Pourquoi les États africains ont-ils gardé les frontières coloniales ?", "pour éviter des guerres", "parce qu'elles respectaient les peuples", "par obligation de Berlin", "Principe adopté par l'OUA en 1964.")
+    ]
+  });
+
+  /* ═══════════════════════ 3e ECM — LES FONDEMENTS DE LA DÉMOCRATIE ═══════════════════════ */
+  var ED_OLD = ancien("3e-ecm-democratie");
+  var PILIERS = ["Élections libres", "Séparation des pouvoirs", "État de droit", "Libertés", "Pluralisme"];
+  function temple3D() {
+    var o = [], toit = [0, 70, 0], k;
+    o.push({ f: "boite", c: [0, -14, 0], d: [460, 10, 200], coul: "#B9B2A2", dessus: "#D9D3C6" });
+    o.push({ f: "boite", c: [0, -4, 0], d: [400, 10, 150], coul: "#D6CFC0", dessus: "#ECE7DC" });
+    o.push({ f: "boite", c: [0, 6, 0], d: [370, 10, 130], coul: "#E4DED2", dessus: "#F4F1EA" });
+    for (k = 0; k < 5; k++) { var x = -150 + k * 75; o.push({ f: "cylindre", c: [x, 16, 30], r: 14, h: 150, n: 18, coul: "#F1ECE2", dessus: "#FBF8F2" }); o.push({ f: "boite", c: [x, 166, 30], d: [36, 8, 36], coul: "#E4DED2", dessus: "#F4F1EA", div: false }); }
+    o.push({ f: "boite", c: [0, 174, 0], d: [380, 18, 130], coul: "#E4DED2", dessus: "#F1ECE2", ec: toit });
+    o.push({ f: "poly", pts: [[-190, 192, 65], [190, 192, 65], [0, 250, 65]], coul: "#ECE7DC", ec: toit });
+    o.push({ f: "poly", pts: [[-190, 192, -65], [0, 250, -65], [190, 192, -65]], coul: "#D6CFC0", ec: toit });
+    o.push({ f: "poly", pts: [[-190, 192, 65], [0, 250, 65], [0, 250, -65], [-190, 192, -65]], coul: "#B33A2C", ec: toit });
+    o.push({ f: "poly", pts: [[190, 192, 65], [190, 192, -65], [0, 250, -65], [0, 250, 65]], coul: "#9E2F24", ec: toit });
+    o.forEach(function (x) { if (x.c) x.c[1] -= 110; if (x.pts) x.pts.forEach(function (q) { q[1] -= 110; }); });
+    return o;
+  }
+  remplacer("3e-ecm-democratie", {
+    c: "3e", m: "ecm", titre: "Les fondements de la démocratie", duree: 35,
+    accroche: "Le proviseur veut nommer lui-même le président du foyer ; les élèves réclament un vote. Un seul vote suffit-il à faire une démocratie ?",
+    intro: "L'élection du foyer d'un lycée te sert de fil rouge : à chaque partie, un indice t'aide à trancher entre trois idées.",
+    objectifs: ["définir la démocratie et expliquer son étymologie", "identifier les cinq piliers d'un régime démocratique", "distinguer démocratie directe, représentative et semi-directe", "appliquer ces critères à une situation concrète"],
+    enquete: {
+      titre: "Le foyer du lycée de Mokolo",
+      svg: (function () {
+        var s = "<rect width='640' height='210' fill='#EEF3F9'/><rect x='220' y='70' width='200' height='110' rx='6' fill='#fff' stroke='#C9D2E3'/><rect x='280' y='60' width='80' height='14' rx='3' fill='#1E499B'/><path d='M300 68h40' stroke='#0E2A62' stroke-width='4'/>" + txt(320, 130, "URNE", { s: 18, c: BLEU });
+        s += perso(90, 104, "#6B4423", "#5A5F6B", "#3A3F4A") + bulle(20, 40, 150, "Je nommerai le président.") + perso(520, 104, "#5A3A1E", "#DCE6F2", "#1E499B") + perso(570, 108, "#6B4423", "#DCE6F2", "#1E499B") + bulle(470, 40, 150, "Nous voulons voter !");
+        s += txt(320, 200, "lycée de Mokolo, Extrême-Nord", { s: 11.5, c: GRIS, w: 600 });
+        return svg(640, 210, "Le proviseur veut nommer le président du foyer, des élèves réclament un vote autour d une urne", "", s);
+      })(),
+      legende: "À Mokolo, dans l'Extrême-Nord : la rentrée au lycée, et un foyer des élèves à réorganiser.",
+      contexte: "<p>Le proviseur annonce qu'il <strong>nommera lui-même</strong> le président du foyer, « pour gagner du temps ». Les élèves protestent et obtiennent un vote. Mais le candidat élu propose ensuite : « Je resterai président jusqu'au bac, je déciderai seul des dépenses, et ceux qui me critiqueront seront exclus du foyer. » Ses partisans répondent : « Il a été élu, c'est la démocratie ! »</p>",
+      documents: [{ t: "Le règlement intérieur proposé par le président élu", html: "<ol><li>Le président est élu une fois pour trois ans.</li><li>Il décide seul du budget et des sanctions.</li><li>Les critiques publiques sont interdites.</li><li>Une seule liste peut se présenter.</li></ol>" }],
+      question: "Le foyer du lycée de Mokolo fonctionne-t-il de façon démocratique ?",
+      tache: "Analyse le règlement article par article à l'aide des piliers de la démocratie, puis propose un règlement démocratique.",
+      hypotheses: ["Oui : le président a été élu, c'est suffisant.", "La démocratie, c'est que la majorité décide de tout, même contre les droits des autres.", "Non : la démocratie exige des élections régulières, la séparation des pouvoirs, le respect des lois, des libertés et du pluralisme."]
+    },
+    parties: [
+      { t: "Définition", html: "<div class='def'><b>Démocratie</b>Régime politique dans lequel le pouvoir appartient au peuple, qui l'exerce directement ou par ses représentants élus.</div>" + partie(ED_OLD, 0),
+        planches: [{ type: "2D", titre: "La formule de Lincoln", legende: "« Du peuple » : le pouvoir vient du peuple ; « par le peuple » : il l'exerce, directement ou par ses élus ; « pour le peuple » : il sert l'intérêt général.", svg: (function () {
+          var s = "", C = [["du peuple", "origine du pouvoir", "#1E499B"], ["par le peuple", "exercice du pouvoir", "#2E7D32"], ["pour le peuple", "but du pouvoir", "#C2540A"]];
+          C.forEach(function (c, i) { var x = 30 + i * 205; s += "<rect x='" + x + "' y='70' width='175' height='96' rx='16' fill='" + c[2] + "'/>" + txt(x + 87, 112, c[0], { s: 17, c: "#fff" }) + txt(x + 87, 140, c[1], { s: 12, c: "#fff", w: 500 }); if (i < 2) s += "<path d='M" + (x + 178) + " 118h24' stroke='" + NUIT + "' stroke-width='2.5' marker-end='url(#ed1f)'/>"; });
+          s += txt(320, 40, "« le gouvernement du peuple, par le peuple, pour le peuple »", { s: 14, i: true }) + txt(320, 200, "dêmos (le peuple) + kratos (le pouvoir)", { s: 12.5, c: GRIS });
+          return svg(640, 220, "Trois blocs : du peuple, par le peuple, pour le peuple", fleche("ed1f", NUIT), s);
+        })() }],
+        fil: { html: "<p>Un vote a bien eu lieu : le pouvoir vient des élèves (« du peuple »). Mais une démocratie doit aussi s'exercer avec eux et pour eux : un vote unique ne suffit pas à le garantir.</p>" },
+        retenir: "Démocratie : le pouvoir du peuple, par le peuple, pour le peuple." },
+      { t: "Les piliers de la démocratie", html: partie(ED_OLD, 1),
+        planches: [{ type: "3d", titre: "Le temple de la démocratie", legende: "Les cinq colonnes portent le toit : élections libres et régulières, séparation des pouvoirs, État de droit, libertés fondamentales, pluralisme. Le curseur soulève le toit : sans colonnes, rien ne le soutient.",
+          modele: { h: 380, rx: -14, ry: 22, echelle: 0.8, alt: "Temple grec blanc à cinq colonnes et toit rouge", eclate: "Soulever le toit", jouer: "Soulever le toit", objets: temple3D(),
+            etiquettes: PILIERS.map(function (p, k) { return { p: [-150 + k * 75, -10, 44], t: p, cote: k > 2 ? "d" : "g" }; }) } }],
+        fil: { html: "<p>Le règlement proposé abat les colonnes une à une : un mandat de trois ans sans nouvelle élection (élections régulières), un président qui décide seul du budget et des sanctions (séparation des pouvoirs, État de droit), des critiques interdites (libertés) et une liste unique (pluralisme). Une élection ne rend pas démocratique un pouvoir qui supprime ensuite les droits des autres.</p>", verdicts: [[0, "rejetee", "Une élection unique ne suffit pas : il faut aussi les quatre autres piliers."], [1, "rejetee", "La majorité ne peut pas supprimer les droits et libertés de la minorité."], [2, "validee", "Les cinq piliers sont nécessaires ensemble."]] },
+        retenir: "Élections, séparation des pouvoirs, État de droit, libertés, pluralisme : les cinq piliers." },
+      { t: "Les formes de démocratie", html: partie(ED_OLD, 2),
+        planches: [{ type: "2D", titre: "Directe, représentative, semi-directe", legende: "Dans la démocratie directe, les citoyens votent eux-mêmes les décisions ; dans la représentative, ils élisent des représentants ; la semi-directe ajoute le référendum.", svg: (function () {
+          var s = "", T = [["directe", "les citoyens décident", "Athènes antique"], ["représentative", "les citoyens élisent", "députés, conseillers"], ["semi-directe", "élus + référendum", "Cameroun, Suisse…"]];
+          T.forEach(function (t, i) {
+            var x = 20 + i * 210, k;
+            s += "<rect x='" + x + "' y='20' width='190' height='200' rx='14' fill='#F7F9FC' stroke='#C9D2E3'/>" + txt(x + 95, 46, t[0], { s: 15, c: BLEU });
+            for (k = 0; k < 9; k++) s += "<circle cx='" + (x + 35 + (k % 5) * 30) + "' cy='" + (176 - Math.floor(k / 5) * 22) + "' r='8' fill='#6B4423'/>";
+            s += "<rect x='" + (x + 65) + "' y='70' width='60' height='40' rx='6' fill='" + (i === 1 ? "#E3D8C4" : "#FFE9A8") + "' stroke='#8A6E4B'/>" + (i === 1 ? "" : txt(x + 95, 95, "décision", { s: 11 }));
+            if (i === 1) for (k = 0; k < 3; k++) s += "<circle cx='" + (x + 80 + k * 15) + "' cy='84' r='6' fill='#1E499B'/>";
+            s += "<path d='M" + (x + 95) + " 150V116' stroke='" + NUIT + "' stroke-width='2' marker-end='url(#ed3f)'/>" + txt(x + 95, 206, t[1] + " · " + t[2], { s: 10, w: 600, c: GRIS });
+          });
+          return svg(640, 236, "Trois schémas : démocratie directe, représentative et semi-directe", fleche("ed3f", NUIT), s);
+        })() }],
+        fil: { html: "<p>Au foyer, une démocratie représentative suffit : les élèves élisent un bureau pour un an, qui rend des comptes ; les décisions importantes (par exemple le prix de la cotisation) peuvent être soumises à un vote de tous les élèves, comme un référendum.</p>" },
+        retenir: "Directe, représentative, semi-directe : le Cameroun est une démocratie représentative avec référendum possible." }
+    ],
+    denouement: {
+      titre: "Un règlement démocratique pour le foyer",
+      etapes: ["Le pouvoir vient des élèves : élection (indice 1).", "Le règlement proposé viole quatre piliers (indice 2).", "Bureau élu chaque année, contrôle par une assemblée, référendum possible (indice 3)."],
+      reponse: "<p>Le foyer n'est pas démocratique, même si son président a été élu. La démocratie, « le gouvernement du peuple, par le peuple, pour le peuple », repose sur cinq piliers à la fois. Le règlement proposé les détruit : un mandat de trois ans supprime les élections régulières ; un président qui décide seul du budget et des sanctions confond les pouvoirs et se place au-dessus des règles ; l'interdiction des critiques supprime la liberté d'expression ; la liste unique supprime le pluralisme. Un règlement démocratique prévoirait l'élection du bureau chaque année avec plusieurs listes, un budget voté et contrôlé par l'assemblée des délégués, des sanctions décidées par un conseil de discipline selon le règlement, la liberté de critiquer, et un vote de tous les élèves pour les décisions importantes.</p>",
+      transfert: "<p>Rédige en cinq articles le règlement démocratique du club de ta classe (élection, durée du mandat, budget, sanctions, libertés).</p>"
+    },
+    revision: (ED_OLD ? ED_OLD.revision : []).concat(["Une élection ne suffit pas : il faut les cinq piliers ensemble.", "La majorité ne supprime pas les droits de la minorité."]),
+    exo: ED_OLD ? ED_OLD.exo : "",
+    quiz: [
+      q("« Démocratie » vient du grec…", "dêmos (peuple) et kratos (pouvoir)", "dêmos (ville) et kratos (loi)", "demo (moitié) et cratie (roi)", "Le pouvoir du peuple."),
+      q("Qui a parlé du « gouvernement du peuple, par le peuple, pour le peuple » ?", "Abraham Lincoln", "Montesquieu", "Bismarck", "Président des États-Unis."),
+      q("La séparation des pouvoirs a été théorisée par…", "Montesquieu", "Lincoln", "Rousseau seul", "De l'esprit des lois (1748)."),
+      q("Les trois pouvoirs sont…", "législatif, exécutif, judiciaire", "militaire, religieux, civil", "national, régional, local", "Ils doivent être séparés."),
+      q("Le pluralisme, c'est…", "l'existence de plusieurs partis et opinions", "un parti unique", "le vote obligatoire", "Pas de liste unique."),
+      q("Dans une démocratie directe, …", "les citoyens votent eux-mêmes les décisions", "les citoyens élisent des députés", "un roi décide", "Comme à Athènes."),
+      q("Le référendum est un trait de la démocratie…", "semi-directe", "directe pure", "autoritaire", "Élus + vote direct sur une question."),
+      q("Un président élu qui interdit toute critique…", "viole la liberté d'expression", "reste démocratique car élu", "applique l'État de droit", "Une élection ne suffit pas."),
+      q("L'État de droit signifie que…", "gouvernants et gouvernés obéissent aux mêmes lois", "l'État fait ce qu'il veut", "seuls les citoyens obéissent", "Personne n'est au-dessus des lois."),
+      q("La majorité peut-elle supprimer les droits de la minorité ?", "non", "oui, toujours", "oui, si elle est large", "Les libertés fondamentales protègent chacun.")
+    ]
+  });
+
+  /* ═══════════════════════ Tle PHILOSOPHIE — LES PASSIONS ═══════════════════════ */
+  var PP_OLD = ancien("tle-philo-passions");
+  function balance3D() {
+    var o = [], H = 150, D = 26, k;
+    o.push({ f: "boite", c: [0, -10, 0], d: [420, 8, 200], coul: "#6B4423", dessus: "#8B5A2B" });
+    o.push({ f: "cylindre", c: [0, -2, 0], r: 46, r2: 34, h: 16, n: 24, coul: "#B08D57", dessus: "#D2B07A" });
+    o.push({ f: "cylindre", c: [0, 14, 0], r: 7, h: H - 14, n: 14, coul: "#B08D57", dessus: "#D2B07A" });
+    o.push({ f: "cone", c: [0, H - 4, 0], r: 12, h: 22, n: 12, coul: "#D2B07A" });
+    for (k = -30; k <= 30; k++) { var x = k * 5, dy = -x / 150 * D; o.push({ f: "sphere", c: [x, H + dy, 0], r: 4.2, coul: "#C9A66B", ec: [0, -dy, 0] }); }
+    [[-150, D, "#C62828"], [150, -D, "#1E499B"]].forEach(function (p) {
+      var y0 = H - p[1], ec = [0, p[1], 0];
+      [[-24, 0], [24, 0], [0, 24], [0, -24]].forEach(function (d) { for (k = 0; k <= 8; k++) { var t = k / 8; o.push({ f: "sphere", c: [p[0] + d[0] * t, y0 - 80 * t, d[1] * t], r: 1.2, coul: "#8E96A6", ec: ec }); } });
+      o.push({ f: "cylindre", c: [p[0], y0 - 88, 0], r: 46, r2: 30, h: 8, n: 26, coul: "#B08D57", dessus: "#E0C38B", ec: ec });
+      o.push({ f: "sphere", c: [p[0], y0 - 64, 0], r: 16, coul: p[2], ec: ec });
+    });
+    return o;
+  }
+  remplacer("tle-philo-passions", {
+    c: "Tle A", m: "philo", titre: "Les passions : définition et manifestations", duree: 35,
+    accroche: "Junior ne vit plus que pour les paris sportifs ; Sali ne vit que pour sa guitare. La même passion ?",
+    intro: "Deux amis de Garoua te servent de fil rouge : à chaque partie, un indice t'aide à trancher entre trois thèses.",
+    objectifs: ["définir la passion et la distinguer de l'émotion", "décrire ses manifestations (exclusivité, cristallisation, logique propre, énergie)", "confronter les thèses : la passion asservit ou grandit", "construire une problématique et une réponse nuancée"],
+    enquete: {
+      titre: "Junior, Sali et leurs passions",
+      svg: (function () {
+        var s = "<rect width='640' height='210' fill='#F4F1EA'/>";
+        s += "<rect x='40' y='40' width='120' height='80' rx='10' fill='#1F2328'/><rect x='48' y='48' width='104' height='58' rx='4' fill='#123B26'/>" + txt(100, 70, "Coton Sport – Canon", { s: 9.5, c: "#E8ECF1", w: 600 }) + txt(100, 92, "cote 2,35", { s: 13, c: "#FFD54A" }) + "<rect x='92' y='120' width='16' height='14' fill='#1F2328'/>" + perso(205, 96, "#6B4423", "#DCE6F2", "#1E499B") + txt(130, 190, "Junior : les paris sportifs", { s: 12, c: ROUGE });
+        s += "<g transform='translate(470 70) rotate(-20)'><ellipse cx='0' cy='40' rx='34' ry='40' fill='#B9824A'/><circle cx='0' cy='40' r='10' fill='#3A2A1A'/><rect x='-6' y='-70' width='12' height='90' fill='#5A3A1E'/></g>" + perso(545, 96, "#5A3A1E", "#7B3F99", "#7B3F99") + txt(500, 190, "Sali : la guitare", { s: 12, c: "#7B3F99" });
+        return svg(640, 210, "À gauche un écran de paris sportifs et Junior ; à droite une guitare et Sali", "", s);
+      })(),
+      legende: "À Garoua : deux amis de Terminale A, inséparables depuis le collège.",
+      contexte: "<p><strong>Junior</strong> passe ses nuits à étudier les matchs et à parier : il a vendu son téléphone pour « se refaire », ment à ses parents et a manqué deux devoirs. « Je maîtrise, j'ai une méthode », dit-il. <strong>Sali</strong> joue de la guitare six heures par jour ; elle a monté un groupe qui joue au festival de Garoua et prépare un concours de musique. Leur professeur de philosophie leur demande : « Êtes-vous libres ou esclaves de vos passions ? »</p>",
+      documents: [
+        { t: "Hegel, La Raison dans l'histoire (1822-1830)", html: "<p>« Rien de grand ne s'est accompli dans le monde sans passion. »</p>" },
+        { t: "Kant, Anthropologie (1798)", html: "<p>« La passion est une maladie de l'âme […] qui exclut l'empire sur soi-même. »</p>" }
+      ],
+      question: "La passion est-elle une servitude ou une source de grandeur ?",
+      tache: "Rédige une introduction de dissertation (définitions, problème, plan) puis une conclusion qui tranche, en t'appuyant sur les cas de Junior et Sali.",
+      hypotheses: ["La passion est toujours une servitude : elle nous rend esclaves (Kant).", "La passion est toujours une grandeur : sans elle, rien de grand (Hegel).", "La passion est ambivalente : énergie précieuse quand la raison la gouverne, servitude quand elle gouverne la raison."]
+    },
+    parties: [
+      { t: "Définir la passion", html: partie(PP_OLD, 0),
+        planches: [{ type: "2D", titre: "Émotion et passion dans le temps", legende: "L'émotion (la peur devant un serpent) est un pic brusque qui retombe vite ; la passion est une intensité durable qui organise toute la vie autour de son objet.", svg: (function () {
+          var X = function (t) { return 70 + t * 5.3; }, Y = function (v) { return 220 - v * 1.7; }, d1 = "", d2 = "", t;
+          for (t = 0; t <= 100; t++) { d1 += (t ? "L" : "M") + X(t).toFixed(1) + " " + Y(t < 10 ? 5 : 5 + 95 * Math.exp(-(t - 10) / 3) * (t < 11 ? (t - 10) : 1)).toFixed(1); d2 += (t ? "L" : "M") + X(t).toFixed(1) + " " + Y(Math.min(80, 5 + (t > 15 ? (t - 15) * 4 : 0)) + Math.sin(t / 3) * 3).toFixed(1); }
+          return svg(640, 260, "Deux courbes : un pic bref pour l émotion, un plateau durable pour la passion", "", "<path d='M70 220H610M70 220V30' stroke='" + NUIT + "' stroke-width='1.5'/><path d='" + d1 + "' fill='none' stroke='#F2994A' stroke-width='3'/><path d='" + d2 + "' fill='none' stroke='" + ROUGE + "' stroke-width='3.5'/>" + txt(150, 54, "émotion : brusque et brève", { s: 12, c: "#C2540A", a: "start" }) + txt(600, 70, "passion : durable et exclusive", { s: 12, c: ROUGE, a: "end" }) + txt(340, 248, "temps", { s: 12 }) + txt(76, 26, "intensité", { s: 11.5, a: "start", c: GRIS }));
+        })() }],
+        fil: { html: "<p>Junior et Sali ne vivent pas une simple émotion : leur attachement dure depuis des mois et oriente toute leur vie. Ce sont deux <strong>passions</strong>, au sens propre : quelque chose qu'ils « subissent » (pati) autant qu'ils le choisissent.</p>" },
+        retenir: "Passion ≠ émotion : durable et exclusive ; étymologie pati, subir." },
+      { t: "Les manifestations de la passion", html: partie(PP_OLD, 1) +
+        "<div class='savais'><b>La cristallisation (Stendhal)</b>Dans les mines de sel de Salzbourg, un rameau d'arbre laissé quelques mois se couvre de cristaux brillants : le passionné « cristallise » de même son objet en le parant de toutes les perfections.</div>",
+        planches: [{ type: "2D", titre: "Le rameau de Salzbourg", legende: "À gauche, un rameau sec ; à droite, le même rameau après des mois dans une mine de sel, couvert de cristaux qui scintillent. Ainsi Junior ne voit plus que les gains possibles et oublie les pertes.", svg: (function () {
+          function rameau(x, cristaux) {
+            var s = "<g transform='translate(" + x + " 40)'><path d='M100 220L100 120L60 60M100 140L150 80M100 170L60 140M100 100L130 40M60 60L40 30M150 80L175 60' stroke='#6B4423' stroke-width='5' stroke-linecap='round' fill='none'/>";
+            if (cristaux) { var R = alea(7); for (var k = 0; k < 70; k++) { var pts = [[100, 120 + R() * 100], [60 + R() * 40, 60 + R() * 60], [100 + R() * 50, 80 + R() * 60], [60 + R() * 40, 140 + R() * 30], [100 + R() * 30, 40 + R() * 60]][k % 5], r = 3 + R() * 4; s += "<path d='M" + pts[0] + " " + (pts[1] - r) + "L" + (pts[0] + r * .8) + " " + pts[1] + "L" + pts[0] + " " + (pts[1] + r) + "L" + (pts[0] - r * .8) + " " + pts[1] + "Z' fill='url(#ppcr)' stroke='#9FD4F2' stroke-width='.6'/>"; } }
+            return s + "</g>";
+          }
+          return svg(640, 290, "Un rameau sec et le même rameau couvert de cristaux de sel brillants", lin("ppcr", ["#FFFFFF", "#DDF1FD", "#9FD4F2"], true), "<rect width='640' height='290' fill='#2B2B33'/>" + rameau(40, false) + rameau(360, true) + txt(160, 280, "rameau sec", { s: 12, c: "#E8ECF1" }) + txt(480, 280, "après des mois dans la mine de sel", { s: 12, c: "#E8ECF1" }) + "<path d='M300 150h50' stroke='#FFD54A' stroke-width='3' marker-end='url(#ppf)'/>").replace("</defs>", fleche("ppf", "#FFD54A") + "</defs>");
+        })() }],
+        fil: { html: "<p>Junior présente toutes les manifestations : exclusivité (il ne pense qu'aux matchs), cristallisation (il ne retient que ses gains), logique propre (« j'ai une méthode »), énergie (des nuits entières). Sali aussi : exclusivité, énergie, mais son énergie construit une œuvre, un groupe, un concours. Les manifestations sont les mêmes ; les effets diffèrent.</p>" },
+        retenir: "Exclusivité, cristallisation, logique propre, énergie." },
+      { t: "Le problème : grandeur ou servitude ?", html: partie(PP_OLD, 2),
+        planches: [{ type: "3d", titre: "La balance de la raison et de la passion", legende: "Le plateau rouge (la passion) l'emporte sur le plateau bleu (la raison) : c'est l'état de Junior. Le curseur rééquilibre la balance : la passion reste, mais la raison la gouverne, comme le veut Descartes.",
+          modele: { h: 340, rx: -12, ry: 18, echelle: 0.95, alt: "Balance en laiton à deux plateaux, l un rouge plus bas que l autre bleu", eclate: "Rééquilibrer", jouer: "Rééquilibrer", objets: balance3D(),
+            etiquettes: [{ p: [-150, 76, 0], t: "Passion", ec: [0, 26, 0] }, { p: [150, 128, 0], t: "Raison", cote: "d", ec: [0, -26, 0] }] } }],
+        fil: { html: "<p>Chez Junior, la passion a pris le pouvoir : il ment, vend ses biens, ne maîtrise plus rien ; Kant a raison de parler de « maladie de l'âme ». Chez Sali, la passion fournit l'énergie, mais sa raison l'organise (horaires, objectifs, concours) : Hegel a raison. Ni « toujours servitude » ni « toujours grandeur » : tout dépend de qui gouverne.</p>", verdicts: [[0, "rejetee", "Sali montre que la passion peut produire une œuvre."], [1, "rejetee", "Junior montre que la passion peut asservir."], [2, "validee", "Énergie gouvernée par la raison : grandeur ; raison asservie : servitude."]] },
+        retenir: "Thèse 1 : la passion asservit ; thèse 2 : elle grandit ; dépassement : la régler par la raison (Descartes)." }
+    ],
+    denouement: {
+      titre: "Une énergie à gouverner",
+      etapes: ["Passion : inclination durable et exclusive, distincte de l'émotion (indice 1).", "Mêmes manifestations chez Junior et Sali (indice 2).", "Servitude quand elle gouverne la raison, grandeur quand la raison la gouverne (indice 3)."],
+      reponse: "<p>La passion, du latin pati (subir), est une inclination durable et exclusive qui oriente toute la vie vers un objet ; elle se distingue de l'émotion, brusque et brève. Junior et Sali vivent tous deux une passion, avec ses manifestations : exclusivité, cristallisation, logique propre, énergie. Le problème est de savoir si elle nous asservit ou nous grandit. Junior illustre la thèse de Kant : sa passion du jeu a pris l'« empire sur lui-même », le pousse à mentir et à se ruiner. Sali illustre celle de Hegel : sa passion de la musique lui donne l'énergie d'accomplir quelque chose de grand. La passion n'est donc ni bonne ni mauvaise en elle-même : comme le soutient Descartes, elle est une force précieuse lorsque la raison la gouverne, et une servitude lorsqu'elle gouverne la raison.</p>",
+      transfert: "<p>Rédige un paragraphe argumenté (dix lignes) : « Peut-on être raisonnablement passionné ? », avec un exemple tiré de la vie au Cameroun (sport, études, commerce, art).</p>"
+    },
+    revision: (PP_OLD ? PP_OLD.revision : []).concat(["Kant : « maladie de l'âme » ; Hegel : « rien de grand sans passion ».", "Stendhal : la cristallisation."]),
+    exo: PP_OLD ? PP_OLD.exo : "",
+    quiz: [
+      q("Le mot « passion » vient du latin pati, qui signifie…", "subir", "aimer", "agir", "La passion est ce que l'âme subit."),
+      q("La passion se distingue de l'émotion parce qu'elle est…", "durable et exclusive", "brusque et brève", "toujours joyeuse", "L'émotion retombe vite."),
+      q("« Rien de grand ne s'est accompli dans le monde sans passion » :", "Hegel", "Kant", "Spinoza", "La passion comme moteur de l'histoire."),
+      q("Pour Kant, la passion est…", "une maladie de l'âme", "la source de toute vertu", "une émotion brève", "Elle exclut l'empire sur soi."),
+      q("La cristallisation, selon Stendhal, c'est…", "parer son objet de toutes les perfections", "oublier son objet", "transformer la passion en sel", "Le rameau de Salzbourg."),
+      q("Descartes juge les passions…", "bonnes si la raison les gouverne", "toujours mauvaises", "sans importance", "Les Passions de l'âme (1649)."),
+      q("Le passionné qui raisonne beaucoup au service de sa passion montre…", "une logique propre", "une émotion", "une indifférence", "Junior : « j'ai une méthode »."),
+      q("Les stoïciens et Spinoza voient d'abord dans la passion…", "une servitude", "une grandeur", "une vertu", "L'homme n'est plus maître de lui."),
+      q("La peur soudaine devant un serpent est…", "une émotion", "une passion", "une cristallisation", "Brusque et brève."),
+      q("Une conclusion nuancée sur les passions dira que…", "tout dépend de qui gouverne, la raison ou la passion", "la passion est toujours bonne", "il faut supprimer toute passion", "Ambivalence de la passion.")
+    ]
+  });
+
+  /* ═══════════════════════ Tle PHILOSOPHIE — LA LIBERTÉ, FONDEMENT DE LA RESPONSABILITÉ ═══════════════════════ */
+  var PL_OLD = ancien("tle-philo-liberte");
+  function marionnette3D() {
+    var o = [], fils = [0, 70, -40];
+    o.push({ f: "boite", c: [0, -10, 0], d: [360, 8, 200], coul: "#7A4A22", dessus: "#A8703A" });
+    o.push({ f: "boite", c: [0, 0, 0], d: [60, 10, 30], coul: "#5D3A1E", div: false });
+    o.push({ f: "boite", c: [0, 60, 0], d: [44, 60, 24], coul: "#C2540A", dessus: "#D9772E", div: false });
+    o.push({ f: "sphere", c: [0, 140, 0], r: 18, coul: "#8B5A2B" });
+    o.push({ f: "boite", c: [-12, 10, 0], d: [12, 50, 12], coul: "#1E499B", div: false });
+    o.push({ f: "boite", c: [12, 10, 0], d: [12, 50, 12], coul: "#1E499B", div: false });
+    o.push({ f: "boite", c: [-30, 70, 0], d: [10, 46, 10], coul: "#8B5A2B", div: false });
+    o.push({ f: "boite", c: [30, 70, 0], d: [10, 46, 10], coul: "#8B5A2B", div: false });
+    o.push({ f: "boite", c: [0, 250, 0], d: [140, 8, 10], coul: "#6B4423", dessus: "#8B5A2B", div: false, ec: fils });
+    o.push({ f: "boite", c: [0, 250, 0], d: [10, 8, 90], coul: "#6B4423", dessus: "#8B5A2B", div: false, ec: fils });
+    [[-60, 0, -30, 116], [60, 0, 30, 116], [0, 40, 0, 158], [0, -40, 0, 120]].forEach(function (f) {
+      for (var k = 0; k < 10; k++) { var t = k / 9; o.push({ f: "sphere", c: [f[0] + (f[2] - f[0]) * t, 250 - (250 - f[3]) * t, f[1] * (1 - t)], r: 1.4, coul: "#E9ECEF", ec: [fils[0], fils[1] * (1 - t), fils[2] * (1 - t)] }); }
+    });
+    o.forEach(function (x) { if (x.c) x.c[1] -= 110; });
+    return o;
+  }
+  remplacer("tle-philo-liberte", {
+    c: "Tle A", m: "philo", titre: "La liberté, fondement de la responsabilité", duree: 35,
+    accroche: "Trois chauffeurs, trois accidents à Douala : sont-ils tous également responsables ?",
+    intro: "Trois affaires jugées par la classe te servent de fil rouge : à chaque partie, un indice t'aide à trancher entre trois thèses.",
+    objectifs: ["définir la liberté et la responsabilité", "montrer qu'il n'y a pas de responsabilité sans liberté", "examiner les limites : déterminismes et inconscient", "construire une position nuancée : la liberté comme conquête"],
+    enquete: {
+      titre: "Le tribunal de la classe de Terminale A",
+      svg: (function () {
+        var s = "<rect width='640' height='210' fill='#F2EEE6'/>", C = [["freins coupés", "#8E96A6"], ["arme pointée", "#C62828"], ["alcool au volant", "#B07A00"]];
+        C.forEach(function (c, i) { var x = 30 + i * 205; s += "<g transform='translate(" + x + " 40)'><path d='M10 80h170v-22l-24-30h-110l-26 30h-10z' fill='#F7C948' stroke='#7A5A00' stroke-width='2'/><rect x='52' y='32' width='46' height='24' rx='3' fill='#CFE3F3'/><rect x='104' y='32' width='46' height='24' rx='3' fill='#CFE3F3'/><circle cx='50' cy='82' r='13' fill='#2C3138'/><circle cx='140' cy='82' r='13' fill='#2C3138'/></g>" + "<rect x='" + (x + 20) + "' y='150' width='150' height='30' rx='12' fill='#fff' stroke='" + c[1] + "' stroke-width='2'/>" + txt(x + 95, 170, "Affaire " + (i + 1) + " : " + c[0], { s: 11.5, c: c[1] }); });
+        return svg(640, 210, "Trois taxis jaunes et trois affaires : freins coupés, arme pointée, alcool au volant", "", s);
+      })(),
+      legende: "À Douala : la classe de Terminale A simule un tribunal à partir de trois faits divers.",
+      contexte: "<p>Trois chauffeurs de taxi ont renversé un piéton. <strong>Affaire 1</strong> : les freins de Paul ont lâché ; un mécanicien les avait sabotés à son insu. <strong>Affaire 2</strong> : un bandit armé a obligé Ernest à foncer pour fuir la police. <strong>Affaire 3</strong> : Bertrand avait bu six bières avant de prendre le volant.</p><p>Un élève soutient : « Ils ont tous conduit, ils sont tous responsables. » Un autre : « Personne n'est jamais vraiment libre : l'alcool, la pauvreté, l'éducation nous déterminent. Donc personne n'est responsable. »</p>",
+      documents: [
+        { t: "Sartre, L'existentialisme est un humanisme (1946)", html: "<p>« L'homme est condamné à être libre. Condamné, parce qu'il ne s'est pas créé lui-même, et par ailleurs cependant libre, parce qu'une fois jeté dans le monde, il est responsable de tout ce qu'il fait. »</p>" },
+        { t: "Un principe du droit pénal", html: "<p>N'est pas pénalement responsable la personne qui a agi sous l'empire d'une contrainte à laquelle elle n'a pu résister, ou atteinte d'un trouble ayant aboli son discernement. L'ivresse volontaire n'excuse pas.</p>" }
+      ],
+      question: "Sommes-nous responsables de nos actes à proportion de notre liberté ?",
+      tache: "Juge les trois affaires en justifiant chaque verdict par la relation entre liberté et responsabilité, puis rédige la conclusion du débat.",
+      hypotheses: ["On est toujours responsable de ce qu'on fait, quelles que soient les circonstances.", "Nous sommes entièrement déterminés : personne n'est jamais responsable.", "On est responsable dans la mesure où l'on était libre ; et l'on reste responsable d'avoir renoncé à sa liberté (ivresse volontaire)."]
+    },
+    parties: [
+      { t: "Deux notions liées", html: partie(PL_OLD, 0),
+        planches: [{ type: "2D", titre: "De la liberté à la responsabilité", legende: "Être libre, c'est pouvoir choisir ; le choix produit un acte, l'acte a des conséquences, et l'on doit en répondre (respondere) : c'est la responsabilité.", svg: (function () {
+          var E = [["Liberté", "#1E499B"], ["Choix", "#2E7D32"], ["Acte", "#C2540A"], ["Conséquences", "#7B3F99"], ["Répondre", "#C62828"]], s = "";
+          E.forEach(function (e, i) { var x = 18 + i * 124; s += "<rect x='" + x + "' y='70' width='108' height='60' rx='30' fill='" + e[1] + "'/>" + txt(x + 54, 105, e[0], { s: 13.5, c: "#fff" }); if (i < 4) s += "<path d='M" + (x + 110) + " 100h12' stroke='" + NUIT + "' stroke-width='2.5' marker-end='url(#pl1f)'/>"; });
+          s += "<path d='M560 140C560 200 72 200 72 140' fill='none' stroke='" + GRIS + "' stroke-width='2' stroke-dasharray='6 5' marker-end='url(#pl1g)'/>" + txt(320, 200, "pas de liberté → pas de responsabilité", { s: 12.5, c: GRIS });
+          return svg(640, 220, "Chaîne : liberté, choix, acte, conséquences, répondre", fleche("pl1f", NUIT) + fleche("pl1g", GRIS), s);
+        })() }],
+        retenir: "Liberté : se déterminer soi-même ; responsabilité : répondre de ses actes." },
+      { t: "Pas de responsabilité sans liberté", html: partie(PL_OLD, 1),
+        fil: { html: "<p>Paul n'a rien choisi : le sabotage lui était inconnu ; Ernest a agi sous une contrainte irrésistible, une arme sur la tempe. Sans liberté, il n'y a pas de faute : la thèse « tous responsables » ne tient pas. Bertrand, lui, a choisi de boire puis de conduire : il était libre au moment décisif.</p>", verdicts: [[0, "rejetee", "Paul et Ernest n'étaient pas libres : on ne peut leur imputer la faute."]] },
+        retenir: "Sans liberté, pas de faute (contrainte, folie) ; Kant : autonomie ; Sartre : condamné à être libre." },
+      { t: "Les limites", html: partie(PL_OLD, 2),
+        planches: [{ type: "3d", titre: "La marionnette et ses fils", legende: "Les fils représentent les déterminismes (sociaux, biologiques, psychologiques). Le curseur éloigne la croix : connaître ses fils, c'est commencer à s'en libérer. La liberté n'est pas donnée d'avance : elle se conquiert.",
+          modele: { h: 400, rx: -8, ry: 24, echelle: 0.9, alt: "Marionnette en bois suspendue à une croix par des fils", eclate: "Éloigner les fils", jouer: "Se libérer", objets: marionnette3D(),
+            etiquettes: [{ p: [0, 144, 0], t: "Croix : les déterminismes", ec: [0, 70, -40] }, { p: [0, 30, 0], t: "La personne", cote: "d" }] } }],
+        fil: { html: "<p>Oui, l'alcool, la pauvreté, l'éducation pèsent sur nos choix ; le droit en tient compte par les circonstances atténuantes. Mais conclure que personne n'est responsable, c'est nier la différence entre Paul et Bertrand. Pour Sartre (document 1), invoquer ses déterminismes est une « mauvaise foi » : Bertrand reste responsable d'avoir renoncé lui-même à sa lucidité.</p>", verdicts: [[1, "rejetee", "Les déterminismes limitent la liberté sans l'abolir ; le droit distingue contrainte et ivresse volontaire."], [2, "validee", "Responsabilité à proportion de la liberté, et responsabilité d'avoir renoncé à sa liberté."]] },
+        retenir: "Les déterminismes limitent la liberté sans l'abolir ; la liberté est une conquête." }
+    ],
+    denouement: {
+      titre: "Le verdict de la classe",
+      etapes: ["Liberté → choix → acte → répondre (indice 1).", "Paul et Ernest : pas libres, donc pas fautifs (indice 2).", "Bertrand : libre de boire et de conduire, donc responsable ; les déterminismes n'abolissent pas la liberté (indice 3)."],
+      reponse: "<p>Être responsable, c'est devoir répondre de ses actes ; or on ne peut répondre que de ce que l'on a librement choisi. Paul, dont les freins ont été sabotés à son insu, et Ernest, contraint par une arme, n'étaient pas libres : ils ne sont pas fautifs, même s'ils ont causé l'accident. Bertrand, en revanche, a choisi de boire puis de conduire : il était libre au moment décisif, et l'ivresse volontaire ne l'excuse pas. La thèse « tous responsables » oublie que la responsabilité suppose la liberté ; la thèse « personne n'est responsable » confond les déterminismes, qui limitent la liberté, avec une contrainte qui l'abolit. Comme le dit Sartre, l'homme est « condamné à être libre » : il ne peut se cacher derrière sa nature ou son milieu. Nous sommes donc responsables à proportion de notre liberté, et la liberté elle-même est une conquête : connaître ses déterminismes, c'est commencer à s'en libérer.</p>",
+      transfert: "<p>Un élève qui triche sous la pression de ses camarades est-il responsable ? Réponds en huit lignes en utilisant les notions de contrainte, de déterminisme et de mauvaise foi.</p>"
+    },
+    revision: (PL_OLD ? PL_OLD.revision : []).concat(["Droit : contrainte irrésistible ou trouble mental = pas de responsabilité ; ivresse volontaire = responsabilité.", "Sartre : invoquer ses déterminismes pour s'excuser, c'est la mauvaise foi."]),
+    exo: PL_OLD ? PL_OLD.exo : "",
+    quiz: [
+      q("« Responsabilité » vient du latin respondere, qui signifie…", "répondre", "respecter", "réfléchir", "Répondre de ses actes."),
+      q("On ne punit pas celui qui a agi sous la menace d'une arme car…", "il n'était pas libre", "l'acte était sans conséquence", "il a avoué", "Contrainte irrésistible."),
+      q("« L'homme est condamné à être libre » :", "Sartre", "Kant", "Freud", "L'existentialisme est un humanisme."),
+      q("Kant fonde la morale sur…", "l'autonomie de la volonté", "la recherche du plaisir", "l'obéissance aveugle", "Se donner sa propre loi."),
+      q("L'ivresse volontaire au volant…", "n'excuse pas", "supprime toute responsabilité", "est une contrainte", "On a choisi de boire."),
+      q("Freud montre que certains actes échappent…", "à la conscience", "aux lois physiques", "au temps", "L'inconscient."),
+      q("Les circonstances atténuantes signifient que…", "les déterminismes diminuent la responsabilité sans l'abolir", "l'accusé est innocent", "la loi ne s'applique pas", "Le droit nuance."),
+      q("Invoquer son milieu pour se déclarer irresponsable, c'est pour Sartre…", "de la mauvaise foi", "de la lucidité", "une contrainte", "On se ment à soi-même."),
+      q("Pourquoi la liberté est-elle « une conquête » ?", "connaître ses déterminismes permet de s'en libérer", "elle s'achète", "elle est donnée à la naissance", "On devient plus libre."),
+      q("Paul, dont les freins ont été sabotés à son insu, est…", "non fautif", "pleinement fautif", "de mauvaise foi", "Il n'a rien choisi.")
+    ]
+  });
+
+  /* ═══════════════════════ SIMULATIONS ═══════════════════════ */
+  function $(el, s) { return el.querySelector(s); }
+  /* Berlin : appliquer les règles */
+  VRT_A("3e-hist-partage", 1, "Applique les règles de Berlin : la revendication est-elle valable ?", function (el) {
+    var C = [["Un explorateur plante un drapeau sur une plage, puis repart.", false, "Pas d'autorité sur place : l'occupation n'est pas effective."], ["Une puissance installe un poste militaire et un administrateur, puis prévient les autres signataires.", true, "Occupation effective et notification : la revendication est conforme aux règles."], ["Une puissance occupe un territoire mais n'en informe personne.", false, "Il manque la notification aux autres puissances."], ["Une puissance interdit aux bateaux des autres de naviguer sur le fleuve Congo.", false, "La navigation sur le Congo et le Niger doit rester libre."], ["Une puissance demande l'avis des peuples africains concernés.", null, "Les règles de Berlin ne l'exigent pas : c'est justement ce qu'on leur reproche."]];
+    var i = 0, ok = 0;
+    el.innerHTML = "<p class='labo-r' data-q style='font-size:16px'></p><div style='display:flex;gap:8px;flex-wrap:wrap' data-c></div><p class='an-note' data-e></p><p class='labo-r' data-s></p>";
+    function poser() {
+      var c = C[i];
+      $(el, "[data-q]").textContent = (i + 1) + ". " + c[0];
+      $(el, "[data-e]").textContent = "";
+      $(el, "[data-s]").innerHTML = "Cas " + (i + 1) + " sur " + C.length + " · score : <b>" + ok + "</b>";
+      $(el, "[data-c]").innerHTML = "<button type='button' class='btn-l' data-v='1'>Valable selon Berlin</button><button type='button' class='btn-l' data-v='0'>Pas valable</button>" + (c[1] === null ? "<button type='button' class='btn-l' data-v='2'>Berlin ne dit rien</button>" : "");
+      el.querySelectorAll("[data-v]").forEach(function (b) {
+        b.addEventListener("click", function () {
+          var v = +b.dataset.v, bon = c[1] === null ? v === 2 : (v === 1) === c[1];
+          if (bon) ok++;
+          $(el, "[data-e]").innerHTML = (bon ? "✔ " : "✘ ") + c[2];
+          el.querySelectorAll("[data-v]").forEach(function (x) { x.disabled = true; });
+          var nx = document.createElement("button"); nx.type = "button"; nx.className = "btn-l"; nx.textContent = i + 1 < C.length ? "Cas suivant" : "Recommencer";
+          nx.addEventListener("click", function () { i = (i + 1) % C.length; if (!i) ok = 0; poser(); });
+          $(el, "[data-c]").appendChild(nx);
+          $(el, "[data-s]").innerHTML = "Cas " + (i + 1) + " sur " + C.length + " · score : <b>" + ok + "</b>";
+        });
+      });
+    }
+    poser();
+  });
+
+  /* démocratie : cocher les règles du foyer, le temple se construit */
+  VRT_A("3e-ecm-democratie", 1, "Écris le règlement du foyer : chaque règle démocratique dresse une colonne", function (el) {
+    var R = [["Le bureau est élu chaque année.", 0], ["Plusieurs listes peuvent se présenter.", 4], ["Le budget est voté et contrôlé par l'assemblée des délégués.", 1], ["Les sanctions sont décidées par un conseil, selon le règlement.", 2], ["Chacun peut critiquer le bureau librement.", 3]];
+    el.innerHTML = "<div data-l style='display:grid;gap:6px'>" + R.map(function (r, k) { return "<label style='display:flex;gap:8px;align-items:center'><input type='checkbox' data-k='" + k + "'><span>" + r[0] + "</span></label>"; }).join("") + "</div><svg viewBox='0 0 640 280' class='an-svg' data-s></svg><p class='labo-r' data-r></p>";
+    function maj() {
+      var on = [].map.call(el.querySelectorAll("[data-k]"), function (c) { return c.checked; }), n = 0;
+      var s = "<defs>" + lin("edc", ["#FBF8F2", "#E4DED2", "#C9C1B2"]) + lin("edv", ["#C9C1B2", "#F4F1EA", "#C9C1B2"], true) + "</defs><rect width='640' height='280' fill='#EEF3F9'/><rect x='0' y='236' width='640' height='44' fill='#D9CDB4'/>";
+      s += "<rect x='100' y='222' width='440' height='14' fill='#C9C1B2'/><rect x='118' y='210' width='404' height='12' fill='#E4DED2'/><rect x='136' y='198' width='368' height='12' fill='#F1ECE2'/>";
+      R.forEach(function (r, k) {
+        var x = 160 + r[1] * 80;
+        if (on[k]) { n++; s += "<rect x='" + (x - 15) + "' y='76' width='30' height='122' fill='url(#edc)'/><path d='M" + (x - 9) + " 80V196M" + (x - 1) + " 80V196M" + (x + 7) + " 80V196' stroke='#D6CFC0' stroke-width='1.2'/><rect x='" + (x - 20) + "' y='68' width='40' height='9' fill='#E4DED2'/>"; }
+        else s += "<g transform='translate(" + (x - 50 + r[1] * 4) + " 246) rotate(" + (r[1] % 2 ? 4 : -3) + ")'><rect width='100' height='22' rx='4' fill='url(#edv)'/></g>";
+        var mots = PILIERS[r[1]].split(" "), l2 = mots.length > 1 ? mots.slice(1).join(" ") : "";
+        s += txt(x, 186, mots[0], { s: 9.5, c: on[k] ? NUIT : "#9AA3B2", halo: true }) + (l2 ? txt(x, 196, l2, { s: 9.5, c: on[k] ? NUIT : "#9AA3B2", halo: true }) : "");
+      });
+      if (n === 5) s += "<rect x='126' y='58' width='388' height='12' fill='#E4DED2'/><path d='M120 58H520L320 14Z' fill='#B33A2C'/>" + txt(320, 50, "DÉMOCRATIE", { s: 14, c: "#fff" });
+      else s += "<path d='M120 58H520L320 14Z' fill='none' stroke='#B33A2C' stroke-width='2' stroke-dasharray='6 6'/>" + txt(320, 46, "le toit ne tient pas", { s: 12, c: "#B33A2C" });
+      $(el, "[data-s]").innerHTML = s;
+      $(el, "[data-r]").innerHTML = n === 5 ? "<b>Les cinq piliers sont debout : le foyer est démocratique.</b>" : "Piliers debout : <b>" + n + "/5</b>. Il manque : " + R.filter(function (r, k) { return !on[k]; }).map(function (r) { return PILIERS[r[1]].toLowerCase(); }).join(", ") + ".";
+    }
+    el.querySelectorAll("[data-k]").forEach(function (c) { c.addEventListener("change", maj); }); maj();
+  });
+
+  /* passion ou émotion ? */
+  VRT_A("tle-philo-passions", 0, "Passion ou émotion ? Classe chaque situation", function (el) {
+    var C = [["Mariam sursaute et crie en voyant un serpent dans la cour.", "émotion", "Brusque, brève, provoquée par un objet présent."], ["Depuis deux ans, Ibrahim ne pense qu'à devenir champion de lutte et organise toute sa vie autour.", "passion", "Durable, exclusive, elle oriente toute la vie."], ["Junior parie chaque nuit et ment à ses parents pour se refaire.", "passion", "Exclusive et durable ; la raison est à son service."], ["Ton cœur s'emballe quand on annonce les résultats du bac.", "émotion", "Intense mais passagère."], ["Un commerçant de Mokolo ne vit que pour accumuler de l'argent, au mépris de sa famille.", "passion", "L'avarice est une passion classique."], ["La colère te monte au visage après une injustice, puis retombe.", "émotion", "Une colère passagère ; la haine durable serait une passion."]];
+    var i = 0, ok = 0;
+    el.innerHTML = "<p class='labo-r' data-q style='font-size:16px'></p><div style='display:flex;gap:8px;flex-wrap:wrap' data-c></div><p class='an-note' data-e></p><p class='labo-r' data-s></p>";
+    function poser() {
+      var c = C[i];
+      $(el, "[data-q]").textContent = (i + 1) + ". " + c[0]; $(el, "[data-e]").textContent = "";
+      $(el, "[data-s]").innerHTML = "Situation " + (i + 1) + " sur " + C.length + " · score : <b>" + ok + "</b>";
+      $(el, "[data-c]").innerHTML = "<button type='button' class='btn-l' data-v='émotion'>Émotion</button><button type='button' class='btn-l' data-v='passion'>Passion</button>";
+      el.querySelectorAll("[data-v]").forEach(function (b) {
+        b.addEventListener("click", function () {
+          var bon = b.dataset.v === c[1]; if (bon) ok++;
+          $(el, "[data-e]").innerHTML = (bon ? "✔ " : "✘ C'est une " + c[1] + ". ") + c[2];
+          el.querySelectorAll("[data-v]").forEach(function (x) { x.disabled = true; });
+          var nx = document.createElement("button"); nx.type = "button"; nx.className = "btn-l"; nx.textContent = i + 1 < C.length ? "Situation suivante" : "Recommencer";
+          nx.addEventListener("click", function () { i = (i + 1) % C.length; if (!i) ok = 0; poser(); });
+          $(el, "[data-c]").appendChild(nx);
+          $(el, "[data-s]").innerHTML = "Situation " + (i + 1) + " sur " + C.length + " · score : <b>" + ok + "</b>";
+        });
+      });
+    }
+    poser();
+  });
+
+  /* tribunal de la classe : degré de liberté → responsabilité */
+  VRT_A("tle-philo-liberte", 1, "Le tribunal de la classe : juge chaque affaire", function (el) {
+    var A = [["Affaire 1 : Paul", "Ses freins ont été sabotés à son insu.", [["Savait-il que les freins étaient sabotés ?", false], ["Était-il menacé ?", false], ["A-t-il choisi de se mettre en danger ?", false]], "Non responsable : il n'a rien choisi de ce qui a causé l'accident."], ["Affaire 2 : Ernest", "Un bandit armé l'a forcé à foncer.", [["Savait-il ce qu'il faisait ?", true], ["Était-il menacé ?", true], ["A-t-il choisi de se mettre en danger ?", false]], "Non responsable pénalement : contrainte irrésistible (arme sur la tempe)."], ["Affaire 3 : Bertrand", "Il a bu six bières avant de conduire.", [["Savait-il ce qu'il faisait au moment de boire ?", true], ["Était-il menacé ?", false], ["A-t-il choisi de se mettre en danger ?", true]], "Responsable : il était libre de ne pas boire ou de ne pas conduire ; l'ivresse volontaire n'excuse pas."]];
+    var i = 0;
+    el.innerHTML = "<div style='display:flex;gap:6px;flex-wrap:wrap' data-t></div><div data-z style='margin-top:10px'></div>";
+    $(el, "[data-t]").innerHTML = A.map(function (a, k) { return "<button type='button' class='btn-l' data-a='" + k + "'>" + a[0] + "</button>"; }).join("");
+    function montrer() {
+      var a = A[i], h = "<p class='labo-r'><b>" + a[0] + "</b> · " + a[1] + "</p><ol>" + a[2].map(function (x) { return "<li>" + x[0] + " <b>" + (x[1] ? "oui" : "non") + "</b></li>"; }).join("") + "</ol>";
+      var lib = a[2][0][1] && !a[2][1][1] ? 1 : a[2][0][1] ? 0.15 : 0;
+      h += "<svg viewBox='0 0 640 70' class='an-svg'><rect x='20' y='26' width='600' height='18' rx='9' fill='#EEF1F6'/><rect x='20' y='26' width='" + (600 * lib) + "' height='18' rx='9' fill='" + (lib > 0.5 ? ROUGE : "#F2994A") + "'/>" + txt(20, 18, "Liberté au moment décisif → responsabilité", { s: 12, a: "start", c: GRIS }) + txt(620, 64, lib > 0.5 ? "responsable" : "non responsable", { s: 12, a: "end", c: lib > 0.5 ? ROUGE : VERT }) + "</svg><p class='an-note'>" + a[3] + "</p>";
+      $(el, "[data-z]").innerHTML = h;
+      el.querySelectorAll("[data-a]").forEach(function (b) { b.setAttribute("aria-pressed", +b.dataset.a === i); });
+    }
+    el.querySelectorAll("[data-a]").forEach(function (b) { b.addEventListener("click", function () { i = +b.dataset.a; montrer(); }); });
+    montrer();
+  });
+})();
+
+/* Leçons APPROFONDIES — lot 8, classes d'examen (17/11/2026) : présent simple et continu (anglais 3e), prépositions
+   mixtes (allemand 3e), consultation médicale et superlatif (espagnol 3e), préparation du bac (Tle).
+   Même gabarit et même mécanisme que 11-approfondies-lot4.js (remplacement EN PLACE ; ordre, clé, fiche APC, examen
+   et scènes conservés). Illustrations réalistes ; simulations VRT_A en fin de fichier. */
+(function () {
+  "use strict";
+  var NUIT = "#001136", BLEU = "#1E499B", GRIS = "#4D5163", VERT = "#17784D", ROUGE = "#C62828";
+
+  function txt(x, y, t, o) {
+    o = o || {};
+    return "<text x='" + x + "' y='" + y + "' text-anchor='" + (o.a || "middle") + "' font-size='" + (o.s || 12) + "' font-weight='" + (o.w || 700) + "' fill='" + (o.c || NUIT) + "'" + (o.i ? " font-style='italic'" : "") + (o.halo ? " stroke='#fff' stroke-width='3' paint-order='stroke'" : "") + ">" + t + "</text>";
+  }
+  function lin(id, cs, vertical) {
+    var s = "<linearGradient id='" + id + "'" + (vertical ? " x1='0' y1='0' x2='0' y2='1'" : "") + ">";
+    cs.forEach(function (c, i) { s += "<stop offset='" + (i / (cs.length - 1)).toFixed(2) + "' stop-color='" + c + "'/>"; });
+    return s + "</linearGradient>";
+  }
+  function fleche(id, c) { return "<marker id='" + id + "' markerWidth='10' markerHeight='10' refX='7' refY='5' orient='auto'><path d='M0 1L8 5L0 9Z' fill='" + c + "'/></marker>"; }
+  function svg(w, h, alt, defs, corps) {
+    return "<svg viewBox='0 0 " + w + " " + h + "' role='img' aria-label='" + alt + "' font-family='Inter,Arial,sans-serif'><rect width='" + w + "' height='" + h + "' fill='#fff'/><defs>" + defs + "</defs>" + corps +
+      "<text x='" + (w - 6) + "' y='" + (h - 5) + "' font-size='8' text-anchor='end' fill='#8A93A6'>Planche VÉRITAS</text></svg>";
+  }
+  function ancien(id) { return window.VRT_LECONS[id]; }
+  function remplacer(id, o) {
+    var a = ancien(id);
+    if (a) ["apc", "examen", "rang", "cle", "scenes"].forEach(function (k) { if (a[k] != null && o[k] == null) o[k] = a[k]; });
+    VRT_L(id, o);
+    if (a) o.ordre = a.ordre;
+  }
+  function q(qq, bonne, f1, f2, e) { return { q: qq, r: [bonne, f1, f2], b: 0, e: e }; }
+  function partie(old, i) { return old && old.parties[i] ? old.parties[i].html : ""; }
+  function bulle(x, y, w, t, c) { return "<rect x='" + x + "' y='" + y + "' width='" + w + "' height='30' rx='12' fill='#fff' stroke='" + (c || "#C9D2E3") + "'/>" + txt(x + w / 2, y + 20, t, { s: 11.5 }); }
+  /* silhouette debout : y = centre de la tête ; environ 92 px de haut */
+  function perso(x, y, peau, habit, bas) {
+    bas = bas || "#2E3445";
+    return "<g transform='translate(" + x + " " + y + ")'><ellipse cx='0' cy='84' rx='18' ry='4' fill='#001136' opacity='.18'/>" +
+      "<rect x='-9' y='44' width='8' height='36' rx='3' fill='" + bas + "'/><rect x='1' y='44' width='8' height='36' rx='3' fill='" + bas + "'/>" +
+      "<ellipse cx='-6' cy='81' rx='7' ry='3.5' fill='#1F2328'/><ellipse cx='6' cy='81' rx='7' ry='3.5' fill='#1F2328'/>" +
+      "<path d='M-13 46L-16 18C-16 13 -12 11 -6 10H6C12 11 16 13 16 18L13 46Z' fill='" + habit + "'/>" +
+      "<path d='M-15 16L-20 40' stroke='" + habit + "' stroke-width='7' stroke-linecap='round'/><path d='M15 16L20 40' stroke='" + habit + "' stroke-width='7' stroke-linecap='round'/>" +
+      "<circle cx='-20' cy='42' r='3.6' fill='" + peau + "'/><circle cx='20' cy='42' r='3.6' fill='" + peau + "'/>" +
+      "<rect x='-3.5' y='5' width='7' height='7' fill='" + peau + "'/><ellipse cx='0' cy='-2' rx='9' ry='10.5' fill='" + peau + "'/>" +
+      "<path d='M-9 -4C-10 -14 -4 -13.5 0 -13.5S10 -14 9 -4C7 -9 -7 -9 -9 -4Z' fill='#1B1410'/><ellipse cx='-9' cy='-1' rx='1.8' ry='3' fill='" + peau + "'/><ellipse cx='9' cy='-1' rx='1.8' ry='3' fill='" + peau + "'/></g>";
+  }
+  function telephone(x, y, lignes) {
+    var s = "<g transform='translate(" + x + " " + y + ")'><rect width='170' height='200' rx='22' fill='#1F2328'/><rect x='8' y='14' width='154' height='172' rx='14' fill='#ECE5DD'/><rect x='8' y='14' width='154' height='26' rx='12' fill='#075E54'/>" + txt(20, 32, "Kwame (Accra)", { s: 11, a: "start", c: "#fff" });
+    lignes.forEach(function (l, i) { var moi = l[0], w = 132, yy = 50 + i * 44; s += "<rect x='" + (moi ? 22 : 14) + "' y='" + yy + "' width='" + w + "' height='36' rx='8' fill='" + (moi ? "#DCF8C6" : "#fff") + "'/>" + txt(moi ? 28 : 20, yy + 15, l[1], { s: 9.5, a: "start", w: 500 }) + (l[2] ? txt(moi ? 28 : 20, yy + 29, l[2], { s: 9.5, a: "start", w: 500 }) : ""); });
+    return s + "</g>";
+  }
+
+  /* ═══════════════════════ 3e ANGLAIS — PRESENT SIMPLE ET PRESENT CONTINUOUS ═══════════════════════ */
+  var EN_OLD = ancien("3e-en-present");
+  function reveil3D() {
+    var o = [], k, hEc = [0, 0, 0];
+    o.push({ f: "boite", c: [0, -10, 0], d: [380, 8, 200], coul: "#7A4A22", dessus: "#A8703A" });
+    o.push({ f: "cylindre", c: [0, 70, -20], r: 70, h: 40, n: 32, axe: "z", coul: "#C62828", dessus: "#D84040" });
+    o.push({ f: "cylindre", c: [0, 70, -23], r: 60, h: 2, n: 32, axe: "z", coul: "#FBF8F2" });
+    for (k = 0; k < 12; k++) { var a = k / 12 * 2 * Math.PI; o.push({ f: "boite", c: [52 * Math.sin(a), 70 + 52 * Math.cos(a) - 3, -24.5], d: [3, k % 3 ? 4 : 8, 1], coul: "#1F2328", div: false }); }
+    o.push({ f: "poly", pts: [[-2, 70, -25], [2, 70, -25], [22, 70 + 22 * 0.9, -25], [20, 70 + 24 * 0.9, -25]], coul: "#1F2328", ec: hEc });
+    o.push({ f: "poly", pts: [[-2, 68, -25.5], [2, 72, -25.5], [-40, 56, -25.5], [-40, 52, -25.5]], coul: "#1F2328" });
+    o.push({ f: "sphere", c: [0, 70, -26], r: 4, coul: "#B08D57" });
+    [-1, 1].forEach(function (sg) { o.push({ f: "sphere", c: [sg * 46, 140, -20], r: 26, coul: "#C9CED6" }); o.push({ f: "cylindre", c: [sg * 36, 116, -20], r: 3, h: 16, n: 8, coul: "#8E96A6" }); });
+    o.push({ f: "boite", c: [0, 150, -20], d: [6, 22, 6], coul: "#8E96A6", div: false });
+    [-1, 1].forEach(function (sg) { o.push({ f: "cylindre", c: [sg * 46, -2, -20], r: 6, r2: 3, h: 10, n: 10, coul: "#8E96A6" }); });
+    return o;
+  }
+  remplacer("3e-en-present", {
+    c: "3e", m: "anglais", titre: "Revise the present tenses: simple and continuous", duree: 30,
+    accroche: "« I am knowing you since one year » : Kwame, your pen pal in Accra, does not understand your message.",
+    intro: "A WhatsApp chat with a Ghanaian pen pal is your guiding thread: in each part, a clue helps you choose between three ideas.",
+    objectifs: ["use the simple present for habits, routines and general truths", "use the present continuous for actions happening now", "recognise time markers (every day, now, at the moment…)", "avoid the continuous with state verbs (know, like, want…)"],
+    enquete: {
+      titre: "Junior's message to Kwame",
+      svg: svg(640, 230, "Écran de téléphone : conversation en anglais entre Junior et son correspondant Kwame, avec des fautes de temps", "", "<rect width='640' height='230' fill='#EEF3F8'/>" + telephone(40, 14, [[0, "Hi Junior! What do you do", "every Saturday?"], [1, "Every Saturday I am going", "to the market with Mama."], [1, "Now I write to you. I am", "knowing you since one year!"]]) + perso(330, 100, "#5A3A1E", "#DCE6F2", "#1E499B") + bulle(380, 60, 230, "Which tense is correct?") + txt(470, 200, "Junior, 3e, Bafoussam", { s: 12, c: GRIS, w: 600 })),
+      legende: "In Bafoussam: Junior chats on WhatsApp with Kwame, his pen pal in Accra, Ghana.",
+      contexte: "<p>Kwame asks: « What do you do every Saturday? » Junior answers: « Every Saturday <em>I am going</em> to the market with Mama. Now <em>I write</em> to you. <em>I am knowing</em> you since one year! » Kwame replies: « Are you going to the market right now? I don't understand. »</p><p>Junior's sister says: « The -ing form is more modern, use it everywhere! » His cousin says: « In English, both tenses mean the same thing. »</p>",
+      documents: [{ t: "Time markers", html: "<table class='donnees'><tr><th>Simple present</th><td>every day, every Saturday, always, usually, often, sometimes, never</td></tr><tr><th>Present continuous</th><td>now, right now, at the moment, today, look!, listen!</td></tr></table>" }],
+      question: "Which tense should Junior use in each sentence, and why?",
+      tache: "Correct Junior's three sentences and explain each correction with a rule and a time marker.",
+      hypotheses: ["The -ing form is more modern: use it everywhere.", "Both tenses mean the same thing.", "The simple present is for habits; the continuous is for actions happening now; state verbs stay in the simple present."]
+    },
+    parties: [
+      { t: "The simple present", html: partie(EN_OLD, 0) +
+        "<div class='attention'><b>Don't forget the -s</b>With he / she / it: she <strong>goes</strong>, he <strong>watches</strong>, Mama <strong>buys</strong>. Questions and negatives use <strong>do / does</strong>: Does she sell plantains? She doesn't sell rice.</div>",
+        planches: [{ type: "3d", titre: "The alarm clock of habits", legende: "Every day, the alarm clock rings at 6 o'clock: habits and routines are expressed with the simple present. « Every Saturday I go to the market. »",
+          modele: { h: 340, rx: -12, ry: 24, echelle: 1, alt: "Réveil rouge à deux cloches posé sur une table en bois", objets: reveil3D(), etiquettes: [{ p: [0, 166, -20], t: "Every day it rings at 6." }, { p: [60, 70, -25], t: "Habits → simple present", cote: "d" }] } }],
+        fil: { html: "<p>« Every Saturday » is a habit marker: Junior must write « Every Saturday I <strong>go</strong> to the market ». With « I am going », Kwame thought he was going right now.</p>", verdicts: [[0, "rejetee", "« Every Saturday » is a habit: the simple present is required."]] },
+        retenir: "Habits, routines, general truths → simple present (+ -s with he / she / it)." },
+      { t: "The present continuous", html: partie(EN_OLD, 1),
+        planches: [{ type: "2D", titre: "Right now at Mokolo market", legende: "At this moment: Mama is buying tomatoes, the seller is weighing them, a boy is pushing a cart, a girl is talking on the phone. Actions in progress → present continuous.", svg: (function () {
+          var s = "<rect width='640' height='300' fill='#F6EEDC'/><rect y='230' width='640' height='70' fill='#D9C49C'/><path d='M180 120h280l-20 -40h-240Z' fill='#2E7D32'/><path d='M180 120h280v10h-280z' fill='#1B5E20'/><rect x='200' y='170' width='240' height='14' fill='#8B5A2B'/><path d='M210 184v46M430 184v46' stroke='#6B4423' stroke-width='6'/>";
+          for (var k = 0; k < 14; k++) s += "<circle cx='" + (214 + (k % 7) * 18) + "' cy='" + (162 - Math.floor(k / 7) * 12) + "' r='8' fill='" + (k % 3 ? "#D7261E" : "#E8492E") + "'/>";
+          s += "<path d='M360 160h50l-6 -20h-38Z' fill='#C9CED6'/><path d='M385 140v-14' stroke='#5C6478' stroke-width='3'/>";
+          s += perso(160, 150, "#5A3A1E", "#C2540A", "#7B3F99") + perso(320, 104, "#6B4423", "#1E88E5", "#2E3445") + perso(520, 150, "#6B4423", "#F2F2F2", "#2E7D32") + "<rect x='530' y='190' width='70' height='36' rx='4' fill='#8B5A2B'/><circle cx='545' cy='232' r='8' fill='#2C3138'/><circle cx='590' cy='232' r='8' fill='#2C3138'/>" + perso(90, 150, "#5A3A1E", "#F7C948", "#1E499B") + "<rect x='106' y='152' width='7' height='12' rx='2' fill='#1F2328'/>";
+          s += bulle(110, 70, 140, "Mama is buying…", "#C2540A") + bulle(300, 30, 170, "The seller is weighing…", "#1E88E5") + bulle(470, 90, 160, "A boy is pushing…", "#2E7D32") + bulle(10, 30, 160, "A girl is phoning…", "#B07A00");
+          return svg(640, 300, "Marché animé : une mère achète des tomates, la vendeuse les pèse, un garçon pousse un pousse-pousse, une fille téléphone", "", s);
+        })() }],
+        fil: { html: "<p>« Now » marks an action in progress: « Now I <strong>am writing</strong> to you ». The two tenses do not mean the same thing: one describes habits, the other describes what is happening at the moment of speaking.</p>", verdicts: [[1, "rejetee", "« I go every Saturday » (habit) ≠ « I am going now » (in progress)."]] },
+        retenir: "Now, at the moment, look!, listen! → am / is / are + verb-ing." },
+      { t: "Verbs that don't like -ing", html: partie(EN_OLD, 2) +
+        "<div class='ex'><b>Since one year?</b>« I am knowing you since one year » has two mistakes: <em>know</em> is a state verb, and English uses the present perfect with <em>for</em>: « I <strong>have known</strong> you <strong>for</strong> one year. » At your level, you can also say: « I <strong>know</strong> you very well. »</div>",
+        fil: { html: "<p><em>Know</em> is a state verb: never « am knowing ». The sister's rule (« -ing everywhere ») creates mistakes.</p>", verdicts: [[2, "validee", "Habit → simple present; now → continuous; state verbs → simple form."]] },
+        retenir: "know, like, love, want, need, understand, believe: no -ing." }
+    ],
+    denouement: {
+      titre: "Junior's corrected message",
+      etapes: ["« Every Saturday » → habit → simple present: I go (clue 1).", "« Now » → action in progress → I am writing (clue 2).", "« know » is a state verb → I know / I have known you for one year (clue 3)."],
+      reponse: "<p>Corrected message: « Every Saturday I <strong>go</strong> to the market with Mama. Right now I <strong>am writing</strong> to you. I <strong>have known</strong> you <strong>for</strong> one year! » The simple present expresses habits and routines, with markers like <em>every Saturday</em>; the present continuous expresses an action happening at the moment of speaking, with markers like <em>now</em>; state verbs such as <em>know</em>, <em>like</em> or <em>want</em> are not used in the continuous. The two tenses do not mean the same thing, and the -ing form is not « more modern »: it is simply for actions in progress.</p>",
+      transfert: "<p>Write a WhatsApp message of five lines to Kwame: describe your usual Sunday (simple present) and what your family is doing right now (present continuous).</p>"
+    },
+    revision: (EN_OLD ? EN_OLD.revision : []).concat(["Habits: every day, always, usually → simple present.", "Now, at the moment, look!, listen! → present continuous."]),
+    exo: EN_OLD ? EN_OLD.exo : "",
+    quiz: [
+      q("She ___ to church every Sunday.", "goes", "is going", "go", "Habit: simple present with -s."),
+      q("Listen! Somebody ___ .", "is singing", "sings", "sing", "« Listen! » = now."),
+      q("I ___ the answer.", "know", "am knowing", "knowing", "State verb: no -ing."),
+      q("Every Saturday I ___ to the market.", "go", "am going", "goes", "Habit marker: every Saturday."),
+      q("Look! The baby ___ .", "is sleeping", "sleeps", "sleep", "« Look! » = now."),
+      q("My father ___ in Garoua.", "works", "is work", "working", "A general fact."),
+      q("Does she ___ plantains?", "sell", "sells", "selling", "After does: base form."),
+      q("Which marker goes with the present continuous?", "at the moment", "every day", "usually", "Action in progress."),
+      q("Which verb is a state verb?", "want", "run", "write", "want, like, know…"),
+      q("Now I ___ to you.", "am writing", "write", "writes", "« Now »: in progress.")
+    ]
+  });
+
+  /* ═══════════════════════ 3e ALLEMAND — WO? WOHIN? ═══════════════════════ */
+  var DE_OLD = ancien("3e-de-prepositions");
+  function chambre3D() {
+    var o = [], ballEc = [0, -72, 0];
+    o.push({ f: "boite", c: [0, -10, 0], d: [440, 8, 260], coul: "#9C6B3C", dessus: "#C0894F" });
+    o.push({ f: "boite", c: [0, 0, 124], d: [440, 200, 8], coul: "#E9E2D2", dessus: "#F4EFE4", div: false });
+    o.push({ f: "boite", c: [-60, 70, 0], d: [180, 8, 100], coul: "#7A4A22", dessus: "#A8703A", div: false });
+    [[-140, -40], [20, -40], [-140, 40], [20, 40]].forEach(function (p) { o.push({ f: "boite", c: [p[0], 0, p[1]], d: [8, 70, 8], coul: "#6B4423", div: false }); });
+    o.push({ f: "boite", c: [120, 0, 20], d: [60, 40, 60], coul: "#5D3A1E", dessus: "#7A5230", div: false });
+    o.push({ f: "boite", c: [120, 40, 48], d: [60, 70, 6], coul: "#5D3A1E", div: false });
+    o.push({ f: "boite", c: [-100, 78, -20], d: [40, 6, 30], coul: "#1E499B", dessus: "#2F5FBF", div: false });
+    o.push({ f: "sphere", c: [-30, 92, 10], r: 14, coul: "#E8E8E8", ec: ballEc });
+    o.push({ f: "sphere", c: [-30, 92, 10], r: 5, coul: "#1F2328", ec: ballEc });
+    o.push({ f: "boite", c: [-60, 96, 118], d: [90, 56, 4], coul: "#2E7D32", div: false });
+    return o;
+  }
+  remplacer("3e-de-prepositions", {
+    c: "3e", m: "allemand", titre: "Wo? Wohin? Les prépositions de position et de direction", duree: 30,
+    accroche: "« Der Ball liegt auf den Tisch » : Lena, la correspondante de Hambourg, sourit. Une seule lettre a tout changé.",
+    intro: "La description de ta chambre pour une correspondante allemande te sert de fil rouge : à chaque partie, un indice t'aide à trancher entre trois règles.",
+    objectifs: ["connaître les neuf prépositions mixtes", "choisir le datif (Wo?) ou l'accusatif (Wohin?)", "employer les contractions im, am, ins, ans", "décrire une pièce et des déplacements en allemand"],
+    enquete: {
+      titre: "La lettre à Lena",
+      svg: svg(640, 220, "Une lettre en allemand et un dessin de chambre avec un ballon sur la table", "", "<rect width='640' height='220' fill='#F4F1EA'/><g transform='rotate(-3 170 110)'><rect x='40' y='20' width='260' height='180' rx='6' fill='#fff' stroke='#D9CFBC'/>" + txt(56, 46, "Liebe Lena,", { s: 13, a: "start", c: BLEU, i: true }) + txt(56, 76, "Der Ball liegt auf den Tisch.", { s: 12, a: "start", w: 500, i: true }) + txt(56, 100, "Ich lege das Heft auf dem Bett.", { s: 12, a: "start", w: 500, i: true }) + txt(56, 124, "Ich gehe in die Schule…", { s: 12, a: "start", w: 500, i: true }) + "<path d='M138 80h60M196 104h48' stroke='" + ROUGE + "' stroke-width='2'/></g>" + "<rect x='360' y='40' width='240' height='150' rx='10' fill='#E9E2D2'/><rect x='360' y='150' width='240' height='40' fill='#C0894F'/><rect x='390' y='110' width='120' height='8' fill='#7A4A22'/><path d='M398 118v40M502 118v40' stroke='#6B4423' stroke-width='5'/><circle cx='450' cy='100' r='10' fill='#E8E8E8' stroke='#1F2328'/><rect x='530' y='120' width='40' height='40' fill='#5D3A1E'/>"),
+      legende: "À Buea : Brenda, élève de 3e en section bilingue, écrit à Lena, sa correspondante de Hambourg.",
+      contexte: "<p>Brenda décrit sa chambre : « Der Ball liegt <em>auf den Tisch</em>. Ich lege das Heft <em>auf dem Bett</em>. » Lena répond gentiment : « Je comprends, mais en allemand, on dirait que ton ballon est en train de voler vers la table ! » Le cousin de Brenda affirme : « Après <em>auf</em>, c'est toujours l'accusatif. » Sa camarade : « Non, ça dépend du verbe. »</p>",
+      documents: [{ t: "Le tableau des articles", html: "<table class='donnees'><tr><th></th><th>masc.</th><th>fém.</th><th>neutre</th><th>pluriel</th></tr><tr><th>datif (Wo?)</th><td>dem</td><td>der</td><td>dem</td><td>den …n</td></tr><tr><th>accusatif (Wohin?)</th><td>den</td><td>die</td><td>das</td><td>die</td></tr></table>" }],
+      question: "Comment choisir entre datif et accusatif après auf, in, unter… ?",
+      tache: "Corrige les phrases de Brenda en justifiant chaque cas par la question Wo? ou Wohin?",
+      hypotheses: ["Après auf, c'est toujours l'accusatif.", "Le cas dépend de la question : Wo? (position, sans déplacement) → datif ; Wohin? (direction, déplacement) → accusatif.", "Le cas dépend seulement du genre du nom."]
+    },
+    parties: [
+      { t: "Les neuf prépositions mixtes", html: partie(DE_OLD, 0),
+        planches: [{ type: "2D", titre: "Où est le ballon ?", legende: "Neuf positions du ballon autour d'une caisse : in, auf, unter, über, vor, hinter, neben, an, zwischen.", svg: (function () {
+          var s = "", P = [["in", 0, 6], ["auf", 0, -46], ["unter", 0, 62], ["über", 0, -96], ["vor", -6, 30], ["hinter", 30, -20], ["neben", 70, 20], ["an", 40, 14], ["zwischen", 0, 0]], k;
+          P.forEach(function (p, i) {
+            var cx = 75 + (i % 5) * 122, cy = 110 + Math.floor(i / 5) * 160, t = "<g transform='translate(" + cx + " " + cy + ")'>";
+            if (p[0] === "zwischen") t += "<rect x='-52' y='-14' width='34' height='40' fill='#C9A576' stroke='#8A6E4B'/><rect x='18' y='-14' width='34' height='40' fill='#C9A576' stroke='#8A6E4B'/>";
+            else t += (p[0] === "hinter" ? "<circle cx='" + p[1] + "' cy='" + p[2] + "' r='10' fill='#E8E8E8' stroke='#1F2328'/>" : "") + "<path d='M-30 -14l10 -10h50l-10 10Z' fill='#E3C79C' stroke='#8A6E4B'/><path d='M20 -14l10 -10v40l-10 10Z' fill='#B08A5E' stroke='#8A6E4B'/><rect x='-30' y='-14' width='50' height='40' fill='#C9A576' stroke='#8A6E4B' opacity='" + (p[0] === "in" ? .55 : 1) + "'/>";
+            if (p[0] !== "hinter") t += "<circle cx='" + p[1] + "' cy='" + p[2] + "' r='10' fill='#E8E8E8' stroke='#1F2328'/><path d='M" + (p[1] - 4) + " " + (p[2] - 4) + "l4 3l4 -3' stroke='#1F2328' fill='none'/>";
+            t += "<rect x='-34' y='26' width='68' height='4' fill='#9C6B3C' opacity='.4'/>" + txt(0, 66, p[0], { s: 15, c: BLEU }) + "</g>";
+            s += t;
+          });
+          return svg(640, 350, "Neuf petites scènes montrant un ballon dans, sur, sous, au-dessus, devant, derrière, à côté, contre une caisse, et entre deux caisses", "", s);
+        })() }],
+        fil: { html: "<p>Auf, in, unter… sont des prépositions <strong>mixtes</strong> : elles peuvent être suivies du datif <em>ou</em> de l'accusatif. Le cousin se trompe : « auf » n'impose pas toujours l'accusatif.</p>", verdicts: [[0, "rejetee", "Les neuf prépositions mixtes acceptent les deux cas."]] },
+        retenir: "in, an, auf, über, unter, vor, hinter, neben, zwischen : prépositions mixtes." },
+      { t: "Wo? → datif ; Wohin? → accusatif", html: partie(DE_OLD, 1),
+        planches: [{ type: "3d", titre: "Le ballon sur la table, puis sous la table", legende: "Tourne la chambre. Le ballon est sur la table : Wo? → « Der Ball liegt auf dem Tisch » (datif). Le curseur le fait tomber : il va sous la table, Wohin? → « Der Ball rollt unter den Tisch » (accusatif).",
+          modele: { h: 340, rx: -20, ry: 28, echelle: 0.95, alt: "Chambre avec table, chaise, cahier bleu et ballon qui passe de la table au sol", eclate: "Faire tomber le ballon", jouer: "Le ballon tombe", objets: chambre3D(),
+            etiquettes: [{ p: [-30, 108, 10], t: "auf dem Tisch (Wo?)", ec: [0, -72, 0] }, { p: [-100, 84, -20], t: "das Heft", cote: "d" }, { p: [120, 80, 48], t: "der Stuhl", cote: "d" }] } }],
+        fil: { html: "<p>« Der Ball <strong>liegt</strong> auf … Tisch » : liegen n'exprime aucun déplacement → Wo? → datif → <strong>auf dem Tisch</strong>. « Ich <strong>lege</strong> das Heft auf … Bett » : legen exprime un déplacement → Wohin? → accusatif → <strong>auf das Bett</strong>. Le genre ne suffit pas : c'est la question qui décide.</p>", verdicts: [[2, "rejetee", "Tisch est masculin dans les deux cas : dem (Wo?) ou den (Wohin?)."], [1, "validee", "Wo? → datif ; Wohin? → accusatif."]] },
+        retenir: "Position (liegen, stehen, sein) → datif ; direction (legen, stellen, gehen) → accusatif." },
+      { t: "Les contractions", html: partie(DE_OLD, 2),
+        fil: { html: "<p>« Ich gehe in die Schule » est juste (Wohin? → accusatif féminin) ; on dirait aussi « Ich bin <strong>in der</strong> Schule » (Wo?). Avec un nom neutre : « Ich gehe <strong>ins</strong> Kino », « Ich bin <strong>im</strong> Kino ».</p>" },
+        retenir: "in + dem = im ; an + dem = am ; in + das = ins ; an + das = ans." }
+    ],
+    denouement: {
+      titre: "La lettre corrigée",
+      etapes: ["Auf, in, unter… sont mixtes (indice 1).", "liegen → Wo? → auf dem Tisch ; legen → Wohin? → auf das Bett (indice 2).", "in die Schule : juste ; ins Kino / im Kino (indice 3)."],
+      reponse: "<p>Lettre corrigée : « Der Ball liegt <strong>auf dem</strong> Tisch. Ich lege das Heft <strong>auf das</strong> Bett. Ich gehe <strong>in die</strong> Schule. » Les prépositions mixtes (in, an, auf, über, unter, vor, hinter, neben, zwischen) sont suivies du datif quand on répond à la question <em>Wo?</em> (position, sans déplacement : liegen, stehen, sein) et de l'accusatif quand on répond à <em>Wohin?</em> (direction, déplacement : legen, stellen, gehen). Ce n'est ni toujours l'accusatif après auf, ni une question de genre seulement : c'est le sens du verbe qui décide.</p>",
+      transfert: "<p>Décris en cinq phrases ta salle de classe à Lena (Wo?), puis raconte en trois phrases où tu ranges tes affaires en arrivant (Wohin?).</p>"
+    },
+    revision: (DE_OLD ? DE_OLD.revision : []).concat(["liegen / stehen / sein → datif ; legen / stellen / gehen → accusatif."]),
+    exo: DE_OLD ? DE_OLD.exo : "",
+    quiz: [
+      q("Ich gehe ___ Schule (f). (wohin?)", "in die", "in der", "im", "Direction : accusatif féminin."),
+      q("Das Buch liegt auf ___ Tisch (m).", "dem", "den", "der", "Position : datif masculin."),
+      q("in + das = ?", "ins", "im", "ans", "Contraction de l'accusatif neutre."),
+      q("Ich lege das Heft auf ___ Bett (n).", "das", "dem", "den", "legen = déplacement → accusatif."),
+      q("Die Katze schläft unter ___ Bett (n).", "dem", "das", "den", "schlafen = position → datif."),
+      q("Wir sind ___ Strand (m) von Kribi.", "am", "ans", "an den", "an + dem."),
+      q("Er geht ___ Kino (n).", "ins", "im", "in dem", "Wohin? → in das → ins."),
+      q("Quelle question appelle le datif ?", "Wo?", "Wohin?", "Wer?", "Position sans déplacement."),
+      q("Lequel exprime un déplacement ?", "stellen", "stehen", "liegen", "On pose quelque chose quelque part."),
+      q("« zwischen » signifie…", "entre", "derrière", "au-dessus de", "Entre deux objets.")
+    ]
+  });
+
+  /* ═══════════════════════ 3e ESPAGNOL — EN EL MÉDICO ═══════════════════════ */
+  var ES_OLD = ancien("3e-es-medico");
+  var CORPS = [["la cabeza", 0, -82, false], ["los ojos", 0, -86, true], ["la garganta", 0, -58, false], ["el brazo", -34, -10, false], ["el estómago", 0, 0, false], ["las manos", 38, 30, true], ["la rodilla", -12, 74, false], ["los pies", 10, 122, true]];
+  function corps2D(cx, cy, sel) {
+    var s = "<g transform='translate(" + cx + " " + cy + ")'><ellipse cy='132' rx='34' ry='6' fill='#001136' opacity='.15'/>";
+    s += "<rect x='-14' y='40' width='12' height='88' rx='6' fill='#6B4423'/><rect x='2' y='40' width='12' height='88' rx='6' fill='#6B4423'/><ellipse cx='-10' cy='128' rx='11' ry='5' fill='#6B4423'/><ellipse cx='10' cy='128' rx='11' ry='5' fill='#6B4423'/>";
+    s += "<path d='M-24 -40C-26 -46 -18 -50 0 -50S26 -46 24 -40L20 44H-20Z' fill='#F2F2F2' stroke='#C9D2E3'/><path d='M-14 44H14V76H-14Z' fill='#1E499B'/>";
+    s += "<path d='M-24 -38L-40 30' stroke='#6B4423' stroke-width='10' stroke-linecap='round'/><path d='M24 -38L40 30' stroke='#6B4423' stroke-width='10' stroke-linecap='round'/><path d='M-24 -38L-34 -6' stroke='#F2F2F2' stroke-width='12' stroke-linecap='round'/><path d='M24 -38L34 -6' stroke='#F2F2F2' stroke-width='12' stroke-linecap='round'/>";
+    s += "<rect x='-6' y='-62' width='12' height='14' fill='#6B4423'/><ellipse cy='-80' rx='17' ry='20' fill='#6B4423'/><path d='M-17 -84C-18 -102 -6 -101 0 -101S18 -102 17 -84C14 -94 -14 -94 -17 -84Z' fill='#1B1410'/><circle cx='-6' cy='-82' r='2' fill='#1B1410'/><circle cx='6' cy='-82' r='2' fill='#1B1410'/>";
+    if (sel != null) { var p = CORPS[sel]; s += "<circle cx='" + p[1] + "' cy='" + p[2] + "' r='14' fill='" + ROUGE + "' opacity='.3'/><circle cx='" + p[1] + "' cy='" + p[2] + "' r='14' fill='none' stroke='" + ROUGE + "' stroke-width='2.5'/>"; }
+    return s + "</g>";
+  }
+  function trousse3D() {
+    var o = [];
+    o.push({ f: "boite", c: [0, -10, 0], d: [420, 8, 220], coul: "#E9EEF3", dessus: "#F7F9FB" });
+    o.push({ f: "cylindre", c: [-120, -2, 0], r: 26, h: 80, n: 28, coul: "#5A2A08", dessus: "#6E3610", op: 0.85 }); o.push({ f: "cylindre", c: [-120, 78, 0], r: 26, r2: 12, h: 10, n: 28, coul: "#5A2A08", op: 0.85 });
+    o.push({ f: "cylindre", c: [-120, 88, 0], r: 12, h: 14, n: 18, coul: "#FBF8F2" });
+    o.push({ f: "boite", c: [-120, 24, -27], d: [40, 34, 2], coul: "#FBF8F2", div: false });
+    o.push({ f: "boite", c: [10, -2, 10], d: [90, 30, 60], coul: "#FBF8F2", dessus: "#FFFFFF", div: false });
+    o.push({ f: "boite", c: [10, 12, 40], d: [70, 10, 1], coul: "#1E88E5", div: false });
+    o.push({ f: "cylindre", c: [60, 2, -60], r: 4, h: 110, n: 10, axe: "x", coul: "#E8F4FA", op: 0.85 });
+    o.push({ f: "sphere", c: [60, 6, -60], r: 5, coul: "#C62828" });
+    for (var k = 0; k < 22; k++) { var a = k / 21 * Math.PI * 1.4; o.push({ f: "sphere", c: [150 + 50 * Math.cos(a), 2, 40 + 50 * Math.sin(a)], r: 3.4, coul: "#1F2328" }); }
+    o.push({ f: "cylindre", c: [150 + 50 * Math.cos(Math.PI * 1.4), -2, 40 + 50 * Math.sin(Math.PI * 1.4)], r: 16, h: 6, n: 20, coul: "#C9CED6", dessus: "#E8ECF1" });
+    return o;
+  }
+  remplacer("3e-es-medico", {
+    c: "3e", m: "espagnol", titre: "En el médico : la consultation et le superlatif", duree: 30,
+    accroche: "Une médecin espagnole, un enfant fiévreux à Maroua : c'est toi l'interprète. « ¿Qué te duele? »",
+    intro: "Une consultation où tu sers d'interprète te sert de fil rouge : à chaque partie, un indice t'aide à trancher entre trois façons de dire.",
+    objectifs: ["dire où l'on a mal avec doler (me duele / me duelen)", "conduire un dialogue de consultation", "employer le superlatif relatif et absolu", "comprendre une ordonnance simple en espagnol"],
+    enquete: {
+      titre: "L'interprète du centre de santé de Maroua",
+      svg: (function () {
+        var s = "<rect width='640' height='230' fill='#EEF5F8'/><rect y='190' width='640' height='40' fill='#D9E3EA'/><rect x='250' y='130' width='170' height='16' rx='4' fill='#C9CED6'/><path d='M262 146v44M408 146v44' stroke='#8E96A6' stroke-width='5'/>";
+        s += perso(120, 104, "#E8C3A0", "#FFFFFF", "#5C6478") + "<path d='M108 120q12 22 24 0' stroke='#1F2328' stroke-width='2' fill='none'/><circle cx='120' cy='144' r='4' fill='#C9CED6' stroke='#1F2328'/>" + perso(330, 74, "#6B4423", "#F7C948", "#1E499B") + "<g transform='translate(500 104)'><ellipse cy='84' rx='18' ry='4' fill='#001136' opacity='.18'/></g>" + perso(520, 104, "#5A3A1E", "#2E7D32", "#2E7D32");
+        s += bulle(40, 30, 160, "¿Qué le duele?", "#1E88E5") + bulle(440, 30, 180, "Il a mal à la tête…", "#2E7D32") + txt(330, 222, "toi, l'interprète", { s: 12, c: GRIS, w: 600 });
+        return svg(640, 230, "Une médecin espagnole en blouse blanche, l élève interprète au centre et une mère avec son enfant", "", s);
+      })(),
+      legende: "À Maroua : une ONG espagnole tient une consultation gratuite ; ton professeur t'a recommandé comme interprète.",
+      contexte: "<p>La docteure Lucía ne parle pas français. Une maman explique que son fils a <strong>mal à la tête et à la gorge</strong>, de la <strong>fièvre</strong> depuis hier et mal aux <strong>pieds</strong> après la marche. Ton camarade propose de traduire : « Le duele los pies. » Un autre : « En espagnol, on dit “tiene mal a la cabeza”, comme en français. »</p><p>À la fin, la docteure dit que le centre est « el centro de salud más grande de la región » et que le sirop est « buenísimo ».</p>",
+      documents: [{ t: "L'ordonnance de la docteure Lucía", html: "<p><em>Jarabe : una cucharada tres veces al día, durante cinco días. Beber mucha agua y descansar.</em></p>" }],
+      question: "Comment traduire correctement les douleurs de l'enfant et l'ordonnance ?",
+      tache: "Joue l'interprète : écris les répliques en espagnol de la maman, puis traduis l'ordonnance en français.",
+      hypotheses: ["« Le duele los pies » est correct : doler ne change jamais.", "On dit « tiene mal a la cabeza », comme en français.", "Doler se construit comme gustar : le duele la cabeza, le duelen los pies."]
+    },
+    parties: [
+      { t: "¿Qué te duele?", html: partie(ES_OLD, 0),
+        planches: [{ type: "2D", titre: "El cuerpo humano", legende: "Les parties du corps en espagnol. Avec un nom singulier : me duele la cabeza ; avec un nom pluriel : me duelen los pies.", svg: (function () {
+          var s = corps2D(320, 150, null);
+          CORPS.forEach(function (p, i) { var g = p[1] <= 0 && i % 2 === 0, x = g ? 140 : 500, y = 40 + i * 30; s += "<path d='M" + (320 + p[1]) + " " + (150 + p[2]) + "L" + (g ? x + 70 : x - 4) + " " + y + "' stroke='" + GRIS + "' stroke-width='1'/><circle cx='" + (320 + p[1]) + "' cy='" + (150 + p[2]) + "' r='3' fill='" + ROUGE + "'/>" + txt(x + (g ? 66 : 0), y + 4, p[0], { s: 13, a: g ? "end" : "start", c: p[3] ? "#C2540A" : BLEU }); });
+          s += txt(320, 310, "bleu : singulier → duele · orange : pluriel → duelen", { s: 11.5, c: GRIS });
+          return svg(640, 320, "Un garçon debout avec les noms des parties du corps en espagnol", "", s);
+        })() }],
+        fil: { html: "<p>Comme <em>gustar</em>, <em>doler</em> s'accorde avec ce qui fait mal : <em>le duele <strong>la cabeza</strong></em> (singulier), <em>le duel<strong>en los pies</strong></em> (pluriel). « Le duele los pies » est faux, et « tiene mal a » est un calque du français.</p>", verdicts: [[0, "rejetee", "Avec un pluriel, doler devient duelen."], [1, "rejetee", "« Tener mal a » n'existe pas : on dit me / te / le duele(n)."], [2, "validee", "Doler se construit comme gustar."]] },
+        retenir: "me duele + singulier ; me duelen + pluriel ; tengo fiebre / tos / gripe." },
+      { t: "En la consulta", html: partie(ES_OLD, 1),
+        planches: [{ type: "3d", titre: "La table de la consultation", legende: "Tourne la table : el jarabe (le sirop, flacon brun), la caja de pastillas (la boîte de comprimés), el termómetro (le thermomètre) et el estetoscopio (le stéthoscope).",
+          modele: { h: 320, rx: -24, ry: 22, echelle: 1, alt: "Flacon de sirop brun, boîte de comprimés, thermomètre et stéthoscope sur une table blanche", objets: trousse3D(),
+            etiquettes: [{ p: [-120, 100, 0], t: "el jarabe" }, { p: [10, 30, 10], t: "la caja de pastillas" }, { p: [100, 4, -60], t: "el termómetro", cote: "d" }, { p: [190, 4, 40], t: "el estetoscopio", cote: "d" }] } }],
+        fil: { html: "<p>L'ordonnance se traduit ainsi : « Sirop : une cuillerée trois fois par jour, pendant cinq jours. Boire beaucoup d'eau et se reposer. » <em>Tres veces al día</em> = trois fois par jour.</p>" },
+        retenir: "¿Qué le pasa? ¿Desde cuándo? Tome… tres veces al día." },
+      { t: "El superlativo", html: partie(ES_OLD, 2),
+        fil: { html: "<p>« El centro de salud <strong>más grande de</strong> la región » est un superlatif relatif (le plus grand de) ; « buen<strong>ísimo</strong> » est un superlatif absolu (très, très bon).</p>" },
+        retenir: "el más… de ; -ísimo ; el mejor / el peor." }
+    ],
+    denouement: {
+      titre: "La consultation réussie",
+      etapes: ["Le duele la cabeza / la garganta ; le duelen los pies (indice 1).", "Tiene fiebre desde ayer ; l'ordonnance : trois fois par jour, cinq jours (indice 2).", "Más grande de = le plus grand de ; buenísimo = excellent (indice 3)."],
+      reponse: "<p>L'interprète dit à la docteure : « Al niño le duele la cabeza y la garganta, le duelen los pies y tiene fiebre desde ayer. » Le verbe doler se construit comme gustar : il s'accorde avec ce qui fait mal, d'où <em>le duele</em> devant un singulier et <em>le duelen</em> devant un pluriel ; « tener mal a » n'existe pas en espagnol. À la maman, il traduit l'ordonnance : une cuillerée de sirop trois fois par jour pendant cinq jours, boire beaucoup d'eau et se reposer. Enfin, il explique que le centre est « le plus grand de la région » (superlatif relatif <em>el más… de</em>) et que le sirop est « très très bon » (superlatif absolu en <em>-ísimo</em>).</p>",
+      transfert: "<p>Écris un dialogue de huit répliques entre la docteure Lucía et une élève qui a mal au ventre et aux yeux, en utilisant au moins un superlatif.</p>"
+    },
+    revision: (ES_OLD ? ES_OLD.revision : []).concat(["Doler = gustar : le duele (sing.), le duelen (plur.).", "« tener mal a » n'existe pas."]),
+    exo: ES_OLD ? ES_OLD.exo : "",
+    quiz: [
+      q("« J'ai mal aux pieds »", "Me duelen los pies.", "Me duele los pies.", "Tengo mal a los pies.", "Pluriel : duelen."),
+      q("Superlatif absolu de « cansado » :", "cansadísimo", "el más cansado", "muy cansadoísimo", "Adjectif + -ísimo."),
+      q("« Le meilleur élève de la classe »", "el mejor alumno de la clase", "el más bueno alumno", "el buenísimo alumno", "Bueno → el mejor."),
+      q("« Il a mal à la gorge »", "Le duele la garganta.", "Le duelen la garganta.", "Tiene mal a la garganta.", "Singulier : duele."),
+      q("« J'ai de la fièvre »", "Tengo fiebre.", "Me duele fiebre.", "Estoy fiebre.", "Tener fiebre / tos / gripe."),
+      q("« Tres veces al día » signifie…", "trois fois par jour", "pendant trois jours", "trois jours par semaine", "Vez = fois."),
+      q("« ¿Desde cuándo? » demande…", "depuis quand", "pourquoi", "combien", "Desde = depuis."),
+      q("« el jarabe », c'est…", "le sirop", "le comprimé", "le thermomètre", "Flacon de sirop."),
+      q("Superlatif de « malo » :", "el peor", "el más malo de todos", "malísimo seulement", "Irrégulier : el peor."),
+      q("« El hospital más grande de la ciudad » est un superlatif…", "relatif", "absolu", "comparatif", "El más… de.")
+    ]
+  });
+
+  /* ═══════════════════════ Tle — PRÉPARER LE BAC À LONG TERME ═══════════════════════ */
+  var OB_OLD = ancien("tle-orient-bac");
+  var MATS = [["Philosophie", 5, 6], ["Français", 4, 8], ["Anglais", 3, 9], ["Histoire-géo", 3, 9], ["Mathématiques", 2, 7], ["SVT", 2, 10], ["Espagnol", 2, 12.5], ["EPS", 1, 14]];
+  function moyenne(N) { var t = 0, c = 0; N.forEach(function (n, i) { t += n * MATS[i][1]; c += MATS[i][1]; }); return t / c; }
+  function calendrier3D() {
+    var o = [], C = { cours: "#1E88E5", sujet: "#C62828", conge: "#F2C94C", blanc: "#7B3F99" }, M = [["cours", "sujet"], ["cours", "sujet"], ["cours", "sujet"], ["conge"], ["cours", "sujet"], ["cours", "sujet"], ["conge"], ["cours", "sujet", "blanc"], ["cours", "sujet", "blanc"]], k;
+    o.push({ f: "boite", c: [0, -8, 0], d: [560, 8, 140], coul: "#C9A576", dessus: "#E3C79C" });
+    M.forEach(function (m, i) { var y = 0; m.forEach(function (b, n) { var h = b === "conge" ? 30 : b === "cours" ? 50 : 26; o.push({ f: "boite", c: [-240 + i * 60, y, 0], d: [46, h - 2, 60], coul: C[b], div: false, ec: [0, n * 12, 0] }); y += h; }); });
+    o.push({ f: "boite", c: [300, 0, 0], d: [30, 160, 30], coul: "#2E7D32", dessus: "#43A047", div: false });
+    return o;
+  }
+  remplacer("tle-orient-bac", {
+    c: "Tle A", m: "orientation", titre: "Préparer le baccalauréat à long terme", duree: 30,
+    accroche: "8,6 de moyenne au premier trimestre, le bac en juin : Kevin peut-il encore viser 11 ?",
+    intro: "Le bulletin d'un élève de Terminale te sert de fil rouge : à chaque partie, un indice t'aide à trancher entre trois stratégies.",
+    objectifs: ["calculer une moyenne pondérée et fixer un objectif réaliste", "se fixer des objectifs précis, mesurables et datés", "organiser l'année de préparation mois par mois", "prendre soin de sa santé pour durer jusqu'à l'examen"],
+    enquete: {
+      titre: "Le bulletin de Kevin, Terminale A à Bertoua",
+      svg: (function () {
+        var s = "<rect width='640' height='230' fill='#F4F6FA'/><rect x='40' y='16' width='280' height='200' rx='8' fill='#fff' stroke='#C9D2E3'/>" + txt(56, 40, "Bulletin du 1er trimestre", { s: 12.5, a: "start", c: BLEU });
+        MATS.forEach(function (m, i) { s += txt(56, 64 + i * 18, m[0] + " (coef. " + m[1] + ")", { s: 10.5, a: "start", w: 500 }) + txt(300, 64 + i * 18, String(m[2]), { s: 11, a: "end", c: m[2] < 10 ? ROUGE : VERT }); });
+        s += "<path d='M56 208h244' stroke='#C9D2E3'/>" + txt(300, 206, "8,6 / 20", { s: 12, a: "end", c: ROUGE });
+        s += perso(430, 100, "#5A3A1E", "#DCE6F2", "#1E499B") + bulle(470, 40, 150, "Est-ce encore possible ?");
+        return svg(640, 230, "Bulletin de Kevin avec ses notes par matière et sa moyenne de 8,6, et Kevin qui se demande si le bac est encore possible", "", s);
+      })(),
+      legende: "À Bertoua : Kevin, élève de Terminale A, reçoit son bulletin du premier trimestre avant les congés de Noël.",
+      contexte: "<p>Kevin a obtenu <strong>8,6 de moyenne</strong>, avec des notes faibles dans les matières à fort coefficient (philosophie 6, français 8). Son ami propose : « Laisse tomber cette année, tu bosseras en mai. » Sa sœur, bachelière, conseille : « Vise 20 partout dès maintenant ! » Le conseiller d'orientation lui demande plutôt de calculer ce qu'un progrès ciblé changerait.</p>",
+      documents: [{ t: "Ce que rapporte un point selon le coefficient", html: "<p>Sur un total de coefficients de 22, un point gagné en philosophie (coef. 5) fait monter la moyenne de 5/22 ≈ <strong>0,23</strong> point ; un point en EPS (coef. 1), de 1/22 ≈ <strong>0,05</strong> point.</p>" }],
+      question: "Quelle stratégie permettra à Kevin d'avoir son bac en juin ?",
+      tache: "Calcule la moyenne de Kevin avec un progrès ciblé, puis rédige son plan de l'année : objectifs, calendrier, hygiène de vie.",
+      hypotheses: ["Attendre mai pour tout réviser d'un coup.", "Viser 20 dans toutes les matières dès maintenant.", "Fixer des objectifs précis sur les matières à fort coefficient, réviser chaque mois sur des sujets d'examen, et préserver sa santé."]
+    },
+    parties: [
+      { t: "Se fixer des objectifs", html: partie(OB_OLD, 0) +
+        "<div class='methode'><b>Calculer l'effet d'un progrès</b><ol><li>Multiplie chaque note par son coefficient et additionne.</li><li>Divise par la somme des coefficients : c'est la moyenne.</li><li>Teste un progrès : +3 en philosophie (coef. 5) et +3 en français (coef. 4) rapportent (15 + 12) ÷ 22 ≈ 1,2 point.</li></ol></div>",
+        fil: { html: "<p>Avec +3 points en philosophie et en français, puis +2 en anglais et en histoire-géographie, Kevin passe de 8,6 à environ 10,4 : le bac devient accessible sans « viser 20 partout ». Utilise le calculateur pour le vérifier.</p>", verdicts: [[1, "rejetee", "Un objectif irréaliste décourage : il faut des progrès ciblés et mesurables."]] },
+        retenir: "Un objectif précis, mesurable et daté ; priorité aux forts coefficients." },
+      { t: "Organiser l'année", html: partie(OB_OLD, 1),
+        planches: [{ type: "3d", titre: "L'année de Kevin, mois par mois", legende: "De septembre à juin : chaque colonne est un mois. Bleu : cours et fiches ; rouge : un sujet d'examen par matière ; jaune : congés consacrés aux révisions ; violet : examens blancs en conditions réelles. La tour verte, au bout : le bac.",
+          modele: { h: 320, rx: -20, ry: 22, echelle: 0.9, alt: "Neuf colonnes de blocs colorés représentant les mois de l année et une tour verte pour le bac", eclate: "Séparer les activités", jouer: "Séparer", objets: calendrier3D(),
+            etiquettes: [{ p: [-240, 80, 30], t: "Septembre" }, { p: [300, 164, 0], t: "Le bac", cote: "d" }, { p: [-60, 34, 30], t: "Congés de Noël" }] } }],
+        fil: { html: "<p>Tout réviser en mai, c'est affronter seul neuf mois de programme oubliés. Un sujet d'examen par matière chaque mois, et les deux derniers mois en conditions réelles, répartissent l'effort.</p>", verdicts: [[0, "rejetee", "En mai, il est trop tard pour combler neuf mois de lacunes."]] },
+        retenir: "Chaque jour : relire ; chaque mois : un sujet par matière ; à la fin : sujets chronométrés." },
+      { t: "Prendre soin de soi", html: partie(OB_OLD, 2) +
+        "<div class='savais'><b>Le savais-tu ?</b>Pendant le sommeil, le cerveau trie et consolide ce qui a été appris dans la journée : réviser la nuit au lieu de dormir fait perdre une partie du travail.</div>",
+        fil: { html: "<p>Un plan sur neuf mois ne tient que si le corps suit : sommeil, repas, sport, détente. C'est la condition des progrès ciblés.</p>", verdicts: [[2, "validee", "Objectifs ciblés, travail régulier, santé préservée."]] },
+        retenir: "Un corps en forme apprend mieux ; parler de son stress." }
+    ],
+    denouement: {
+      titre: "Le plan de Kevin",
+      etapes: ["Objectifs ciblés : +3 en philosophie et en français, +2 en anglais et en histoire-géographie ≈ 10,4 (indice 1).", "Un sujet par matière chaque mois, examens blancs en mai-juin (indice 2).", "Sommeil, alimentation, sport, détente (indice 3)."],
+      reponse: "<p>Kevin ne doit ni attendre mai ni viser 20 partout. Il calcule l'effet de progrès ciblés : en gagnant 3 points en philosophie (coef. 5) et en français (coef. 4), et 2 points en anglais et en histoire-géographie (coef. 3 chacune), sa moyenne passe d'environ 8,6 à 10,4. Il se fixe donc des objectifs précis, mesurables et datés pour chaque trimestre. Il organise l'année : relire chaque leçon le jour même, traiter chaque mois un sujet d'examen par matière, réviser pendant les congés et faire des examens blancs chronométrés les deux derniers mois. Enfin, il protège sa santé (sommeil, repas, sport, détente), sans laquelle ce plan ne tiendrait pas jusqu'en juin.</p>",
+      transfert: "<p>Entre tes propres notes dans le calculateur, puis écris tes trois objectifs pour le prochain trimestre (matière, note visée, moyen d'y arriver).</p>"
+    },
+    revision: (OB_OLD ? OB_OLD.revision : []).concat(["Moyenne pondérée : Σ(note × coef.) ÷ Σ coef.", "Un point en matière à fort coefficient rapporte davantage."]),
+    exo: OB_OLD ? OB_OLD.exo : "",
+    quiz: [
+      q("Quand commence la préparation du bac ?", "dès le début de l'année", "en mai", "la veille", "Un effort régulier sur neuf mois."),
+      q("Un bon objectif est…", "précis, mesurable et daté", "vague et ambitieux", "le même pour tout le monde", "Par exemple : passer de 8 à 11 en philosophie au 2e trimestre."),
+      q("En fin d'année, on privilégie…", "les sujets en conditions réelles", "les nouvelles leçons", "le repos complet", "Sujets chronométrés."),
+      q("Un point en philosophie (coef. 5) sur un total de 22 rapporte…", "≈ 0,23 point de moyenne", "1 point de moyenne", "5 points de moyenne", "5 ÷ 22."),
+      q("Où gagner des points en priorité ?", "dans les matières à fort coefficient où l'on est faible", "en EPS seulement", "dans la matière préférée", "Effet maximal sur la moyenne."),
+      q("La moyenne pondérée se calcule…", "Σ(note × coef.) ÷ Σ coef.", "Σ notes ÷ nombre de matières", "note la plus haute ÷ 2", "Chaque note compte selon son coefficient."),
+      q("Chaque mois, il est conseillé de…", "traiter un sujet d'examen par matière", "changer de série", "arrêter le sport", "Annales corrigées."),
+      q("Réviser la nuit au lieu de dormir…", "fait perdre une partie du travail", "double la mémoire", "n'a aucun effet", "Le sommeil consolide."),
+      q("En cas de stress, on peut…", "en parler à un conseiller, un enseignant ou un parent", "tout arrêter", "le cacher", "Demander de l'aide."),
+      q("Pendant les congés, on…", "révise les chapitres passés et comble ses lacunes", "n'ouvre aucun cahier", "apprend seulement le programme suivant", "Les congés servent aussi à consolider.")
+    ]
+  });
+
+  /* ═══════════════════════ SIMULATIONS ═══════════════════════ */
+  function $(el, s) { return el.querySelector(s); }
+  function quiz(el, C, rep, lib) {
+    var i = 0, ok = 0;
+    el.innerHTML = "<p class='labo-r' data-q style='font-size:16px'></p><div style='display:flex;gap:8px;flex-wrap:wrap' data-c></div><p class='an-note' data-e></p><p class='labo-r' data-s></p>";
+    function poser() {
+      var c = C[i];
+      $(el, "[data-q]").innerHTML = (i + 1) + ". " + c[0].replace("___", "<b style='border-bottom:2px dashed #1E499B;padding:0 14px'>?</b>");
+      $(el, "[data-e]").textContent = ""; $(el, "[data-s]").innerHTML = lib + " " + (i + 1) + " / " + C.length + " · score : <b>" + ok + "</b>";
+      $(el, "[data-c]").innerHTML = c[1].slice().sort().map(function (x) { return "<button type='button' class='btn-l' data-v='" + x + "'>" + x + "</button>"; }).join("");
+      el.querySelectorAll("[data-v]").forEach(function (b) {
+        b.addEventListener("click", function () {
+          var bon = b.dataset.v === c[1][0]; if (bon) ok++;
+          $(el, "[data-q]").innerHTML = (i + 1) + ". " + c[0].replace("___", "<b style='color:" + (bon ? VERT : ROUGE) + "'>" + c[1][0] + "</b>");
+          $(el, "[data-e]").innerHTML = (bon ? "✔ " : "✘ ") + c[2];
+          el.querySelectorAll("[data-v]").forEach(function (x) { x.disabled = true; });
+          var nx = document.createElement("button"); nx.type = "button"; nx.className = "btn-l"; nx.textContent = i + 1 < C.length ? rep : "↺";
+          nx.addEventListener("click", function () { i = (i + 1) % C.length; if (!i) ok = 0; poser(); });
+          $(el, "[data-c]").appendChild(nx);
+          $(el, "[data-s]").innerHTML = lib + " " + (i + 1) + " / " + C.length + " · score : <b>" + ok + "</b>";
+        });
+      });
+    }
+    poser();
+  }
+  VRT_A("3e-en-present", 1, "Time markers: choose the right tense", function (el) {
+    quiz(el, [["Every Saturday I ___ to the market.", ["go", "am going"], "« Every Saturday » = habit → simple present."], ["Look! Mama ___ tomatoes.", ["is buying", "buys"], "« Look! » = now → present continuous."], ["Kwame ___ football every evening.", ["plays", "is playing"], "Habit + -s with he."], ["Right now, my brothers ___ TV.", ["are watching", "watch"], "« Right now » → continuous."], ["I ___ English and French.", ["understand", "am understanding"], "State verb: no -ing."], ["Listen! The baby ___ .", ["is crying", "cries"], "« Listen! » → continuous."], ["She usually ___ to school by taxi.", ["goes", "is going"], "« usually » → simple present."], ["We ___ rice today, not plantains.", ["are eating", "eat"], "« today » for a temporary action → continuous."]], "Next sentence", "Sentence");
+  });
+  VRT_A("3e-de-prepositions", 2, "Wo? oder Wohin? Place le ballon", function (el) {
+    var P = [["auf", "dem Tisch", "den Tisch", 0, -46], ["unter", "dem Tisch", "den Tisch", 0, 46], ["neben", "dem Tisch", "den Tisch", 120, 30], ["vor", "dem Tisch", "den Tisch", 0, 50], ["hinter", "dem Tisch", "den Tisch", 0, -10], ["über", "dem Tisch", "den Tisch", 0, -110]], p = 0, mvt = false;
+    el.innerHTML = "<div style='display:flex;flex-wrap:wrap;gap:6px' data-p>" + P.map(function (x, k) { return "<button type='button' class='btn-l' data-k='" + k + "'>" + x[0] + "</button>"; }).join("") + "</div><div style='display:flex;gap:6px;margin-top:8px'><button type='button' class='btn-l' data-m='0'>Wo? (liegen)</button><button type='button' class='btn-l' data-m='1'>Wohin? (rollen, legen)</button></div><svg viewBox='0 0 640 230' class='an-svg' data-s></svg><p class='labo-r' data-r></p>";
+    function maj() {
+      var x = P[p], s = "<rect width='640' height='230' fill='#F4EFE4'/><rect y='190' width='640' height='40' fill='#C0894F'/>" + (x[0] === "hinter" ? "" : "") + "<g transform='translate(320 140)'>";
+      var ball = "<g transform='translate(" + x[3] + " " + x[4] + ")'><circle r='14' fill='#E8E8E8' stroke='#1F2328'/><path d='M-6 -6l6 4l6 -4M0 -2v8' stroke='#1F2328' fill='none'/></g>";
+      if (x[0] === "hinter") s += ball;
+      s += "<rect x='-90' y='-30' width='180' height='12' fill='#7A4A22'/><rect x='-84' y='-18' width='10' height='68' fill='#6B4423'/><rect x='74' y='-18' width='10' height='68' fill='#6B4423'/>";
+      if (x[0] === "vor") s += "<g transform='translate(0 50)'><circle r='14' fill='#E8E8E8' stroke='#1F2328'/></g>"; else if (x[0] !== "hinter") s += ball;
+      if (mvt) s += "<path d='M-220 -60C-150 -100 " + (x[3] - 60) + " " + (x[4] - 60) + " " + (x[3] - 18) + " " + (x[4] - 8) + "' fill='none' stroke='#C2540A' stroke-width='2.5' stroke-dasharray='6 5' marker-end='url(#deA)'/>";
+      s += "</g>";
+      $(el, "[data-s]").innerHTML = "<defs>" + fleche("deA", "#C2540A") + "</defs>" + s;
+      var art = mvt ? x[2] : x[1];
+      $(el, "[data-r]").innerHTML = (mvt ? "Wohin? → accusatif : Der Ball rollt <b>" + x[0] + " " + art + "</b>." : "Wo? → datif : Der Ball liegt <b>" + x[0] + " " + art + "</b>.") + " (der Tisch, masculin)";
+      el.querySelectorAll("[data-k]").forEach(function (b) { b.setAttribute("aria-pressed", +b.dataset.k === p); });
+      el.querySelectorAll("[data-m]").forEach(function (b) { b.setAttribute("aria-pressed", +b.dataset.m === (mvt ? 1 : 0)); });
+    }
+    el.querySelectorAll("[data-k]").forEach(function (b) { b.addEventListener("click", function () { p = +b.dataset.k; maj(); }); });
+    el.querySelectorAll("[data-m]").forEach(function (b) { b.addEventListener("click", function () { mvt = b.dataset.m === "1"; maj(); }); });
+    maj();
+  });
+  VRT_A("3e-es-medico", 0, "¿Qué te duele? Toca una parte del cuerpo", function (el) {
+    el.innerHTML = "<div style='display:flex;flex-wrap:wrap;gap:6px' data-b>" + CORPS.map(function (c, k) { return "<button type='button' class='btn-l' data-k='" + k + "'>" + c[0] + "</button>"; }).join("") + "</div><svg viewBox='0 0 640 300' class='an-svg' data-s></svg><p class='labo-r' data-r></p>";
+    function maj(k) {
+      var c = CORPS[k], f = c[3] ? "Me duelen " : "Me duele ";
+      $(el, "[data-s]").innerHTML = "<rect width='640' height='300' fill='#EEF5F8'/>" + corps2D(200, 160, k) + "<rect x='330' y='110' width='280' height='80' rx='16' fill='#fff' stroke='" + (c[3] ? "#C2540A" : BLEU) + "' stroke-width='2'/>" + txt(470, 146, f + c[0] + ".", { s: 17, c: c[3] ? "#C2540A" : BLEU }) + txt(470, 172, c[3] ? "pluriel → duelen" : "singulier → duele", { s: 12, w: 500, c: GRIS });
+      $(el, "[data-r]").innerHTML = "<b>" + f + c[0] + ".</b> " + (c[3] ? "Le nom est au pluriel : le verbe aussi." : "Le nom est au singulier : duele.");
+      el.querySelectorAll("[data-k]").forEach(function (b) { b.setAttribute("aria-pressed", +b.dataset.k === k); });
+    }
+    el.querySelectorAll("[data-k]").forEach(function (b) { b.addEventListener("click", function () { maj(+b.dataset.k); }); });
+    maj(0);
+  });
+  VRT_A("tle-orient-bac", 0, "Calculateur : ta moyenne avec des progrès ciblés", function (el) {
+    el.innerHTML = "<div style='display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:2px 18px'>" + MATS.map(function (m) { return "<label class='labo-c'><span>" + m[0] + " (coef. " + m[1] + ") : <b data-v>" + m[2] + "</b></span><input type='range' min='0' max='20' step='0.5' value='" + m[2] + "'></label>"; }).join("") + "</div><svg viewBox='0 0 640 120' class='an-svg' data-s></svg><p class='labo-r' data-r></p>";
+    var I = el.querySelectorAll("input"), V = el.querySelectorAll("[data-v]");
+    function maj() {
+      var N = [].map.call(I, function (x) { return +x.value; }), m = moyenne(N), m0 = moyenne(MATS.map(function (x) { return x[2]; }));
+      N.forEach(function (n, i) { V[i].textContent = String(n).replace(".", ","); });
+      var X = function (v) { return 30 + v / 20 * 580; }, col = m >= 10 ? VERT : m >= 9 ? "#F2994A" : ROUGE;
+      var s = "<rect x='30' y='46' width='580' height='22' rx='11' fill='#EEF1F6'/><rect x='30' y='46' width='" + (X(m) - 30) + "' height='22' rx='11' fill='" + col + "'/><path d='M" + X(10) + " 36V78' stroke='" + NUIT + "' stroke-width='2' stroke-dasharray='4 3'/>" + txt(X(10), 30, "10 : admis", { s: 11.5 }) + "<path d='M" + X(m0) + " 70v12' stroke='" + GRIS + "' stroke-width='2'/>" + txt(X(m0), 98, "départ " + m0.toFixed(1).replace(".", ","), { s: 10.5, c: GRIS }) + txt(X(Math.min(m, 18.5)) + 6, 62, m.toFixed(2).replace(".", ","), { s: 12, a: "start", c: m > 1 ? "#fff" : NUIT });
+      $(el, "[data-s]").innerHTML = s;
+      $(el, "[data-r]").innerHTML = "Moyenne : <b>" + m.toFixed(2).replace(".", ",") + " / 20</b> (" + (m - m0 >= 0 ? "+" : "") + (m - m0).toFixed(2).replace(".", ",") + " point) · " + (m >= 16 ? "mention Très bien" : m >= 14 ? "mention Bien" : m >= 12 ? "mention Assez bien" : m >= 10 ? "admis" : "pas encore admis") + " · Σ coef. = 22";
+    }
+    I.forEach(function (x) { x.addEventListener("input", maj); }); maj();
+  });
+})();
+
 /* Schémas animés et manipulables — sciences. Chaque fonction reçoit le conteneur et y dessine.
    Règles : transform/opacity uniquement pour les boucles ; tout reste lisible sans animation. */
 (function () {
@@ -2962,7 +6250,7 @@ VRT_PLUS("3e-en-articles", [
 
   /* ---------- Atome : électrons en orbite, Z réglable (couches K et L) ---------- */
   var ELEM = ["", "H Hydrogène", "He Hélium", "Li Lithium", "Be Béryllium", "B Bore", "C Carbone", "N Azote", "O Oxygène", "F Fluor", "Ne Néon", "Na Sodium"];
-  VRT_A("3e-pct-atome", 0, "Choisis un élément et regarde ses électrons", function (el) {
+  VRT_A("3e-pct-atome", 2, "Choisis un élément et regarde ses électrons", function (el) {
     el.innerHTML = "<div class='an-atome'><svg viewBox='0 0 300 300' class='an-svg' style='max-width:320px;margin:auto'><circle cx='150' cy='150' r='62' fill='none' stroke='#8FB0EE' stroke-dasharray='4 6'/><circle cx='150' cy='150' r='104' fill='none' stroke='#8FB0EE' stroke-dasharray='4 6'/><circle cx='150' cy='150' r='138' fill='none' stroke='#8FB0EE' stroke-dasharray='4 6'/><g data-noyau></g><g class='an-orb an-k' data-k></g><g class='an-orb an-l' data-l></g><g class='an-orb an-m' data-mm></g></svg>" +
       "<div class='an-res'><span><b data-nom></b></span><span>Z = <b data-z></b></span><span>Couches : <b data-c></b></span></div></div>" + curseur("Numéro atomique Z :", 1, 11, 1, 3);
     var r = el.querySelector("input");

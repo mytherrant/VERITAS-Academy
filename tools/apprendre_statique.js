@@ -100,6 +100,19 @@ h3{color:var(--t);font-weight:600;font-size:17px;margin:20px 0 6px}
 .ap-encart{background:#F7F9FC;border-radius:10px;padding:14px 18px;margin:16px 0}
 .ap-quiz li{margin:10px 0}.ap-quiz .bonne{color:#007E11;font-weight:600}
 .ap-wrap img,.ap-wrap svg{max-width:100%;height:auto}
+.ap-sit{border:2px solid #F2DFA6;background:#FFFBEF;border-radius:14px;padding:6px 20px 14px;margin:20px 0}
+.ap-sit h2{margin-top:14px}.ap-sit .ap-q{font-weight:600;color:var(--t)}
+.ap-fig{margin:18px 0;padding:12px;border:1px solid var(--l);border-radius:12px;background:#fff}
+.ap-fig figcaption{font-size:14px;margin-top:8px}.ap-fig .ap-tag{display:inline-block;font-size:11px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--b);margin-bottom:6px}
+.ap-indice{border-left:4px solid var(--b);background:#F2F6FD;border-radius:0 10px 10px 0;padding:10px 16px;margin:16px 0}
+.ap-indice ul{margin:6px 0 0;padding-left:20px}.ap-v-ok{color:#007E11;font-weight:600}.ap-v-ko{color:#A31238;font-weight:600}
+.ap-resolue{border:2px solid #9FD3B3;background:#F2FBF5;border-radius:14px;padding:6px 20px 14px;margin:24px 0}
+.def,.ex,.prop,.methode,.astuce,.attention,.savais,.retiens{border-radius:10px;padding:12px 16px;margin:14px 0;background:#F7F9FC}
+.def b,.ex b,.prop b,.methode b,.astuce b,.attention b,.savais b,.retiens b{display:block;color:var(--t)}
+.attention{background:#FDF0EE}.astuce,.savais{background:#FFF8E6}.prop,.retiens{background:#EEF8F1}
+.formule{text-align:center;font-weight:600;color:var(--t)}
+table.donnees,.tab-scroll table{border-collapse:collapse;margin:8px 0;display:block;overflow-x:auto}
+table.donnees td,table.donnees th,.tab-scroll td,.tab-scroll th{border:1px solid var(--l);padding:4px 10px}
 a{color:var(--b)}
 </style>`;
 
@@ -207,10 +220,36 @@ Object.keys(LECONS).forEach(id => {
   const desc = net(L.accroche || L.intro).slice(0, 155);
   let corps = `<p class="ap-chapo">${esc(net(L.intro))}</p>`;
   if ((L.objectifs || []).length) corps += `<div class="ap-encart"><b>Objectifs</b><ul>${L.objectifs.map(o => `<li>${esc(net(o))}</li>`).join('')}</ul></div>`;
-  (L.parties || []).forEach(p => {
+  const E = L.enquete;
+  const fig = (svg, leg, tag) => svg ? `<figure class="ap-fig">${tag ? `<span class="ap-tag">${esc(tag)}</span>` : ''}${svg}${leg ? `<figcaption>${leg}</figcaption>` : ''}</figure>\n` : '';
+  if (E) {
+    corps += `<section class="ap-sit"><h2>Situation de départ : ${esc(net(E.titre || ''))}</h2>${fig(E.svg, E.legende)}${E.contexte || ''}`;
+    (E.documents || []).forEach((d, i) => { corps += `<div class="ap-encart"><b>Document ${i + 1} : ${esc(net(d.t || ''))}</b>${d.html || ''}${d.source ? `<small>${esc(d.source)}</small>` : ''}</div>`; });
+    if (E.question) corps += `<p class="ap-q">${E.question}</p>`;
+    if (E.tache) corps += `<p><b>Ta tâche</b> : ${E.tache}</p>`;
+    if ((E.hypotheses || []).length) corps += `<p><b>Les hypothèses à trancher</b></p><ol>${E.hypotheses.map(h => `<li>${h}</li>`).join('')}</ol>`;
+    corps += `</section>\n`;
+  }
+  (L.parties || []).forEach((p, ip) => {
     corps += `<h2>${esc(net(p.t))}</h2>\n${p.html || ''}\n`;
+    if (p.illus && p.illus.svg) corps += fig(p.illus.svg, p.illus.legende);
+    (p.planches || []).forEach(pl => {
+      if (pl.svg) corps += fig(pl.svg, pl.legende, `Planche · ${pl.titre || '2D'}`);
+      else if (pl.modele) corps += `<div class="ap-encart"><b>Planche 3D : ${esc(net(pl.titre || ''))}</b>${pl.legende || ''} <a href="/apprendre/lecon.html?id=${encodeURIComponent(id)}">La manipuler dans Apprendre</a>.</div>\n`;
+    });
+    if (p.anim || p.labo) corps += `<p><a href="/apprendre/lecon.html?id=${encodeURIComponent(id)}">${p.labo ? 'Laboratoire' : 'Simulation'} interactive${p.animT ? ' : ' + esc(p.animT) : ''} (dans Apprendre)</a></p>\n`;
+    if (p.fil && p.fil.html) {
+      const V = (p.fil.verdicts || []).map(v => `<li><span class="${v[1] === 'validee' ? 'ap-v-ok' : 'ap-v-ko'}">Hypothèse ${v[0] + 1} ${v[1] === 'validee' ? 'validée' : 'rejetée'}</span> : ${v[2] || ''}</li>`).join('');
+      corps += `<div class="ap-indice"><b>Indice ${ip + 1}</b>${p.fil.html}${V ? `<ul>${V}</ul>` : ''}</div>\n`;
+    }
     if (p.retenir) corps += `<div class="ap-encart"><b>À retenir</b> : ${typeof p.retenir === 'string' ? p.retenir : esc(net(p.retenir))}</div>\n`;
   });
+  const D = L.denouement;
+  if (D) {
+    corps += `<section class="ap-resolue"><h2>Situation résolue : ${esc(net(D.titre || ''))}</h2>`;
+    if ((D.etapes || []).length) corps += `<ol>${D.etapes.map(e => `<li>${e}</li>`).join('')}</ol>`;
+    corps += `${D.reponse || ''}${D.transfert ? `<p><b>À toi de transférer</b></p>${D.transfert}` : ''}</section>\n`;
+  }
   if ((L.revision || []).length) corps += `<h2>Fiche de révision</h2><ul>${L.revision.map(r => `<li>${r}</li>`).join('')}</ul>`;
   if (L.exo) corps += `<h2>Exercice</h2>${L.exo}`;
   if ((L.quiz || []).length) corps += `<h2>Quiz</h2><ol class="ap-quiz">${L.quiz.map(q => `<li>${q.q}<br><span class="bonne">Réponse : ${(q.r || [])[q.b] || ''}</span>${q.e ? ' — ' + q.e : ''}</li>`).join('')}</ol>`;

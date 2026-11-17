@@ -21,6 +21,7 @@ const GABARIT = "ressources/methode-dictee.html";
 const CONTROLE = process.argv.includes("--controle");
 const esc = s => String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
 let erreurs = 0; const err = m => { erreurs++; console.error("ERREUR : " + m); };
+const K = require("./methodes/_commun.cjs");
 
 // classes : classes d'Apprendre où l'annale est rangée quand la source ne précise pas sa série.
 const EXAMENS = { bepc: { nom: "BEPC", classe: "3e", classes: "3e", org: "MINESEC / DECC" }, probatoire: { nom: "Probatoire", classe: "1re", classes: "1re A,1re C,1re D", org: "OBC" }, bac: { nom: "Baccalauréat", classe: "Tle", classes: "Tle A,Tle C,Tle D", org: "OBC" } };
@@ -37,6 +38,7 @@ const MATIERES = {
   "physique": ["Physique", { probatoire: P + "examen-physique-chimie-probatoire.html", bac: P + "examen-physique-chimie-bac.html" }, "physique"],
   "chimie": ["Chimie", { probatoire: P + "examen-physique-chimie-probatoire.html", bac: P + "examen-physique-chimie-bac.html" }, "chimie"],
   "svt": ["SVTEEHB", { bepc: P + "examen-svt-bepc.html", probatoire: P + "examen-svt-probatoire.html", bac: P + "examen-svt-bac.html" }, "svt"],
+  "sciences": ["Sciences", { probatoire: P + "examen-svt-probatoire.html" }, "svt"],
   "histoire": ["Histoire", { bepc: P + "examen-histoire-geographie-bepc.html", probatoire: P + "examen-histoire-geographie-probatoire.html", bac: P + "examen-histoire-geographie-bac.html" }, "histoire"],
   "geographie": ["Géographie", { bepc: P + "examen-histoire-geographie-bepc.html", probatoire: P + "examen-histoire-geographie-probatoire.html", bac: P + "examen-histoire-geographie-bac.html" }, "geo"],
   "ecm": ["Éducation à la citoyenneté et à la morale", { bepc: P + "examen-ecm-bepc.html", probatoire: P + "examen-ecm-probatoire.html", bac: P + "examen-ecm-bac.html" }, "ecm"],
@@ -64,7 +66,7 @@ function grp(s, i) { // lit {…} équilibré à partir de s[i]=='{' → [conten
 }
 function arg(s, i) { while (s[i] === ' ') i++; if (s[i] === '{') return grp(s, i); return [s[i] || '', i + 1]; }
 function tex(s) {
-  const SYM = { prec: '<', succ: '>', le: '≤', leq: '≤', ge: '≥', geq: '≥', times: '×', pi: 'π', in: '∈', notin: '∉', infty: '∞', cdot: '·', approx: '≈', ne: '≠', neq: '≠', Rightarrow: '⇒', Leftrightarrow: '⇔', rightarrow: '→', to: '→', alpha: 'α', det: 'det ', Gamma: 'Γ', gamma: 'γ', Sigma: 'Σ', Pi: 'Π', phi: 'φ', varphi: 'φ', epsilon: 'ε', varepsilon: 'ε', tau: 'τ', Lambda: 'Λ', Theta: 'Θ', Rightarrow: '⇒', Longrightarrow: '⟹', mapsto: '↦', geqslant: '≥', leqslant: '≤', infty: '∞', prime: '′', ln: 'ln ', exp: 'exp', lim: 'lim', log: 'log ', 'times': '×', beta: 'β', Delta: 'Δ', delta: 'δ', Omega: 'Ω', omega: 'ω', mu: 'µ', theta: 'θ', lambda: 'λ', rho: 'ρ', sigma: 'σ', circ: '°', degree: '°', pm: '±', div: '÷', ldots: '…', cdots: '…', dots: '…', cup: '∪', cap: '∩', subset: '⊂', emptyset: '∅', cos: 'cos ', sin: 'sin ', tan: 'tan ', max: 'max', min: 'min', rm: '', sum: 'Σ', mathop: '', bf: '', it: '', varnothing: '∅', parallel: '//', perp: '⊥', mathbb: '', left: '', right: '', displaystyle: '', quad: ' ', qquad: '  ', ',': ' ', ';': ' ', ':': ' ', '!': '', ' ': ' ', '%': '%', '{': '{', '}': '}', '#': '#', '&': '&amp;', '_': '_', backslash: '\\', lt: '&lt;', gt: '&gt;' };
+  const SYM = { prec: '<', succ: '>', le: '≤', leq: '≤', ge: '≥', geq: '≥', times: '×', pi: 'π', in: '∈', notin: '∉', infty: '∞', cdot: '·', approx: '≈', ne: '≠', neq: '≠', Rightarrow: '⇒', Leftrightarrow: '⇔', rightarrow: '→', to: '→', alpha: 'α', det: 'det ', Gamma: 'Γ', gamma: 'γ', Sigma: 'Σ', Pi: 'Π', phi: 'φ', varphi: 'φ', epsilon: 'ε', varepsilon: 'ε', tau: 'τ', Lambda: 'Λ', Theta: 'Θ', Rightarrow: '⇒', Longrightarrow: '⟹', mapsto: '↦', geqslant: '≥', leqslant: '≤', infty: '∞', prime: '′', ln: 'ln ', exp: 'exp', lim: 'lim', log: 'log ', 'times': '×', beta: 'β', Delta: 'Δ', delta: 'δ', Omega: 'Ω', omega: 'ω', mu: 'µ', theta: 'θ', lambda: 'λ', nu: 'ν', eta: 'η', wedge: '∧', rho: 'ρ', sigma: 'σ', circ: '°', degree: '°', pm: '±', div: '÷', ldots: '…', cdots: '…', dots: '…', cup: '∪', cap: '∩', subset: '⊂', emptyset: '∅', cos: 'cos ', sin: 'sin ', tan: 'tan ', max: 'max', min: 'min', rm: '', sum: 'Σ', mathop: '', bf: '', it: '', varnothing: '∅', parallel: '//', perp: '⊥', mathbb: '', left: '', right: '', displaystyle: '', quad: ' ', qquad: '  ', ',': ' ', ';': ' ', ':': ' ', '!': '', ' ': ' ', '%': '%', '{': '{', '}': '}', '#': '#', '&': '&amp;', '_': '_', backslash: '\\', lt: '&lt;', gt: '&gt;' };
   let r = '', i = 0;
   while (i < s.length) {
     const c = s[i];
@@ -140,14 +142,15 @@ function habiller(html, page, titre, description, ld) {
   rep(/<style id="vrt-methode">[\s\S]*?<\/style>/, '<style id="vrt-methode">' + CSS + "</style>", "style vrt-methode");
   return html;
 }
-function article(badge, h1, chapo, parties, cta) {
+function article(badge, h1, chapo, parties, cta, opts) {
+  opts = opts || {};
   const ids = parties.map(p => [p[0], p[1]]);
   const som = '<aside class="mx-sommaire" aria-label="Sommaire"><p>Sommaire</p><ol class="mx-ol">' + ids.map(([id, ti], k) => '<li><a href="#' + id + '">' + (k + 1) + ". " + ti + "</a></li>").join("") +
     '</ol><div class="mx-lu"><span id="mxLu">Lecture : 0 %</span><div class="mx-barre"><i id="mxBar"></i></div></div></aside>';
   const nav = '<nav class="mx-som" aria-label="Sommaire">' + ids.map(([id, ti]) => '<a href="#' + id + '">' + ti + "</a>").join("") + "</nav>";
   const corps = parties.map(([id, ti, h], k) => '<section class="partie" id="' + id + '"><h2><span class="mx-num">' + (k + 1) + '</span><span class="mx-txt">' + ti + "</span></h2>" + h + "</section>\n").join("");
-  return '<div class="mx-grille" id="mx" data-vh-ignore="1">' + som + '<article class="card mx">\n<span class="badge">' + esc(badge) + "</span>\n<h1>" + esc(h1) + "</h1>\n" +
-    '<p class="mx-chapo">' + chapo + "</p>\n" + nav + "\n" + corps + cta + "\n</article></div>" + '<script src="/ressources/methode.js?v=' + JS_V + '" defer></script>';
+  return '<div class="mx-grille" id="mx" data-vh-ignore="1">' + som + '<article class="card mx">\n' + (opts.tete || '<span class="badge">' + esc(badge) + "</span>\n<h1>" + esc(h1) + "</h1>\n" +
+    '<p class="mx-chapo">' + chapo + "</p>\n") + nav + "\n" + corps + (opts.fin || "") + cta + "\n</article></div>" + '<script src="/ressources/methode.js?v=' + JS_V + '" defer></script>';
 }
 const RE_ART = /<div class="mx-grille"[^>]*>[\s\S]*?<\/article><\/div>(?:<script src="\/ressources\/methode\.js\?v=[0-9a-f]+" defer><\/script>)?/;
 const ecrites = [], identiques = [];
@@ -187,7 +190,23 @@ for (const s of sources) {
       "<li>Corrigé : " + (national ? "corrigé harmonisé national" : "les enseignants de VÉRITAS") + "</li></ul>"],
   ];
   const cta = '<a class="cta" href="/ressources/annales/">Toutes les annales corrigées<small>Par examen, par matière et par session</small></a>';
-  let html = GAB.replace(RE_ART, () => article("Annales · " + E.nom + " " + meta.annee, titre, "Le sujet officiel de la session " + meta.annee + ", puis son corrigé, à ouvrir une fois ta copie terminée.", parties, cta));
+  // En-tête carte, plan de temps, sessions voisines, autres épreuves de la session (17/11/2026).
+  const mat = MATIERES[meta.matiere][2], dureeTxt = meta.duree || (soeurs.find(o => o.meta.duree) || { meta: {} }).meta.duree || "";
+  const coef = meta.coef || (soeurs.find(o => o.meta.coef) || { meta: {} }).meta.coef;
+  const chapo = "Le sujet officiel de la session " + meta.annee + ", puis son " + (national ? "corrigé harmonisé national" : "corrigé rédigé par VÉRITAS") + ", à ouvrir une fois ta copie terminée." +
+    (soeurs.length > 1 ? " " + soeurs.length + " sessions de cette épreuve sont corrigées." : "");
+  const tete = K.entete({ mat, badge: "Annales · " + E.nom + " " + meta.annee, titre, chapo,
+    ligne: "<b>" + esc(lib) + "</b> · " + E.nom + (s.serie ? " · " + esc(s.serie) : "") + " · " + esc(s.classes.split(",").join(", ")),
+    puces: [dureeTxt && ["horloge", esc(dureeTxt)], coef && ["coef", "Coefficient " + esc(coef)], ["sceau", "Sujet officiel"], [national ? "sceau" : "crayon", national ? "Corrigé national" : "Corrigé VÉRITAS"], ["chrono", "Composer en direct", "#epreuve"]] });
+  parties[0][2] += K.planTemps(minutes(dureeTxt || ""));
+  const k = soeurs.indexOf(s), plusRecente = soeurs[k - 1], plusAncienne = soeurs[k + 1];
+  const autres = sources.filter(x => x.meta.examen === meta.examen && x.meta.annee === meta.annee && x.cle !== s.cle)
+    .sort((a, b) => ORDRE.indexOf(a.meta.matiere) - ORDRE.indexOf(b.meta.matiere) || a.cle.localeCompare(b.cle))
+    .map(x => ({ u: "/" + x.page, mat: MATIERES[x.meta.matiere][2], ti: MATIERES[x.meta.matiere][0] + (x.serie ? " (" + x.serie.replace(/^séries? /, "") + ")" : "") }));
+  const fin = K.suite(plusAncienne && { u: "/" + plusAncienne.page, mot: "Session précédente", ti: lib + " " + plusAncienne.meta.annee },
+    plusRecente && { u: "/" + plusRecente.page, mot: "Session suivante", ti: lib + " " + plusRecente.meta.annee }) +
+    K.voisins("Les autres épreuves du " + E.nom + " " + meta.annee, autres);
+  let html = GAB.replace(RE_ART, () => article("", titre, "", parties, cta, { tete, fin }));
   html = html.replace(/(<script src="\/ressources\/methode\.js\?v=[0-9a-f]+" defer><\/script>)/, (m) => m + '<script src="/ressources/annales/annales.js?v=' + AX_V + '" defer></script>');
   html = habiller(html, s.page, titre + " | VÉRITAS", description, { "@type": "LearningResource", name: titre, description, educationalLevel: s.classes, learningResourceType: "Annale d'examen", about: lib });
   ecrire(s.page, html);

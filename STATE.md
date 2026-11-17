@@ -1,3 +1,306 @@
+## Apprendre : lot 8, langues de 3e et préparation du bac (17/11/2026)
+
+Demandes de Jacques : « Oui continue » (PR #322, déjà intégrée à master, fermée avec un commentaire), puis « continue ».
+
+- **`apprendre/_src/15-approfondies-langues.js`** : 4 leçons gratuites de classes d'examen au gabarit approfondi, remplacées en place :
+  - **3e anglais, simple present / present continuous** : messages WhatsApp de Junior à Kwame (Accra) ; réveil 3D (habitudes), scène de marché « right now » ; **simulation** : choisir le temps selon le marqueur (8 phrases).
+  - **3e allemand, Wo? Wohin?** : lettre de Brenda (Buea) à Lena (Hambourg) ; neuf positions du ballon autour d'une caisse, chambre 3D où le ballon tombe de la table (datif → accusatif) ; **simulation** : placer le ballon, position ou direction.
+  - **3e espagnol, en el médico** : l'élève interprète d'une docteure espagnole à Maroua ; corps humain légendé (duele / duelen), table de consultation 3D (sirop, comprimés, thermomètre, stéthoscope) ; **simulation** : toucher une partie du corps.
+  - **Tle, préparer le bac** : bulletin de Kevin (Tle A, 8,6 → 10,4 avec des progrès ciblés, coefficients totaux 22) ; année en 3D mois par mois ; **calculateur** de moyenne pondérée.
+- `lecons.js?v=20261117f` ; 4 pages `apprendre/cours/` régénérées et habillées. Chromium (1200 et 390 px) : aucun débordement, aucune erreur JS. Bancs : réglages 29/29, verrou 18/18, gabarits 54/54, planche mobile 23/23, charte 34/34, lisibilité 7/7.
+- **Repère 3D** : dans `planche3d.js`, la vue de départ montre les faces tournées vers −z ; placer cadrans, ampoules, écrans côté −z.
+- **Suite** : 3e anglais (articles), allemand (verbes faibles), espagnol (familia), grec (Ésope, Homère) ; Tle culture nationale, arabe ; 1re langues et ESF ; puis 6e-5e-4e.
+
+## Corrigés : dessin des leçons, suivi des corrigés consultés (17/11/2026)
+
+Demande de Jacques : « Enrichis aussi les pages de corrigés ».
+
+- Les sources des corrigés (Guides .docx, pack/content) ne sont pas dans le dépôt : **nouveau script `tools/corriges_lecons.py`** (feuille `tools/corriges_lecons.css`) qui retravaille les 125 pages de séquence publiées, de façon idempotente (marqueurs `cr-ent`, `cr-style`, `cr-js`, `cr-suite`, posés AVANT les blocs de l'habillage pour que `habiller_pages.py` reste stable). `build_corriges.py` le relance à la fin ; contrôle `--controle` ajouté à l'étape « habillage » de `deploy.yml`.
+- **En-tête carte** à la place du bandeau bleu (le `<header>` dans `.wrap` empêche `vitrine.js` de recréer le bandeau) : médaille, pastille, « Français · classe · ouvrage », titre, « L'essentiel », puces (exercices corrigés, leçons, semaines, énoncés dans le cahier ou le livret, gratuit), **barre « Corrigés consultés : n / N »** avec remise à zéro.
+- **Leçons** : numéro au cercle magenta à point or, titre magenta souligné magenta → or, semaine en pastille, objectif en encadré à cible, rubriques bleu-vert, exercices en cartes ; Roboto (sélecteurs `body:has(#vrtNav):has(.cr-ent)` : l'habillage impose Poppins avec une forte spécificité).
+- **Suivi local** (localStorage `vrt_corr_<chemin>`) : un exercice dont on ouvre le corrigé passe en vert avec « Vu », la barre de l'en-tête avance ; conservé au rechargement.
+- **Séquence précédente / suivante** d'après la barre des séquences de la page.
+- Contrôlé dans Chromium (390 et 1280 px) : pas de bandeau, aucun débordement, 0 erreur JS. `corriges_lecons`, `habiller_pages`, `build_llms`, `alleger_corriges` en `--controle`, `tests/chiffres_annonces.cjs`, `tests/ci_scripts_suivis.cjs` au vert.
+
+## Apprendre : lot 7, classes d'examen, illustrations plus réalistes (17/11/2026)
+
+Demandes de Jacques : « Continue », puis « En français. Utilise les illustrations et animations plus réalistes et pertinentes ».
+
+- **`apprendre/_src/14-approfondies-examens-3.js`** : 4 leçons gratuites au gabarit approfondi, remplacées en place :
+  - **3e histoire, partage de l'Afrique** : la famille de Moussa, de Kousséri, répartie entre Nigeria, Cameroun et Tchad ; cartes de l'Afrique en 1880 (côtes, Algérie, Cap) et en 1914 (tout sauf Éthiopie et Libéria), table de la conférence de Berlin vue de dessus, frontière rectiligne 3D coupant un même pays ; **simulation** : appliquer les règles de Berlin (5 cas).
+  - **3e ECM, fondements de la démocratie** : le foyer du lycée de Mokolo et son règlement autoritaire ; formule de Lincoln, temple 3D en marbre à cinq colonnes (toit amovible), trois formes de démocratie ; **simulation** : cocher les règles du foyer, chaque règle dresse une colonne, le toit ne tient qu'avec les cinq.
+  - **Tle philosophie, les passions** : Junior (paris sportifs) et Sali (guitare) à Garoua ; courbes émotion / passion, rameau de Salzbourg (cristallisation), balance 3D en laiton dont le fléau penche puis se redresse ; **simulation** : passion ou émotion (6 situations).
+  - **Tle philosophie, la liberté** : trois taxis, trois accidents à Douala ; chaîne liberté → responsabilité, marionnette 3D dont on éloigne les fils ; **simulation** : tribunal de la classe (3 affaires, jauge de liberté).
+- **Réalisme** : personnages en silhouettes complètes (visage, cheveux, vêtements, chaussures, ombre) au lieu de pastilles ; délégués de Berlin vus de dessus (épaules, cols, drapeaux) ; cartes de l'Afrique au lieu d'un histogramme ; colonnes tombées couchées dans le simulateur du temple.
+- `lecons.js?v=20261117e` ; 4 pages `apprendre/cours/` régénérées et habillées. Chromium (1200 et 390 px) : aucun débordement, aucune erreur JS. Bancs : réglages 29/29, verrou 18/18, gabarits 54/54, planche mobile 23/23, charte 34/34, lisibilité 7/7.
+- **Suite** : 3e langues (anglais, allemand, espagnol), grec ; Tle orientation (bac), culture nationale, arabe ; 1re langues et ESF ; puis 6e-5e-4e.
+## Annales et séquentielles enrichies (17/11/2026)
+
+Demande de Jacques : « Enrichis aussi les annales et les séquences ».
+
+- **Module commun `tools/methodes/_commun.cjs`** (teintes et icônes d'Apprendre, `entete()`, `planTemps()`, `suite()`, `voisins()`), utilisé par `annales.cjs` et `sequentielles.cjs` ; `article()` des deux générateurs accepte `{ tete, fin }` (les index gardent l'ancien en-tête).
+- **Annales** (61 pages) : en-tête carte à la couleur de la matière (pastille, matière · examen · série · classes, « L'essentiel », puces durée, coefficient, sujet officiel, corrigé national ou VÉRITAS, lien « Composer en direct ») ; **plan de temps illustré** dans « L'épreuve » (barre lire / traiter / relire, environ 10 % / 78 % / 12 %, arrondis à 5 min) ; **session précédente / suivante** ; **« Les autres épreuves du <examen> <année> »** en pastilles à l'icône de chaque matière.
+- **Séquentielles** (50 pages) : même en-tête (puces durée, coefficient, nombre de leçons évaluées, « 1er exercice gratuit », « Composer en direct ») ; plan de temps ; leçons évaluées en **liste à cocher** ; épreuve précédente / suivante de la même matière ; autres matières de la même séquence.
+- Styles ajoutés en fin de `_methode.css` (`.mx-temps`, `.sq-lecons`, puces-liens).
+- Contrôlé dans Chromium (390 et 1280 px) : aucun débordement, 0 erreur JS. `annales`, `sequentielles`, `methodes_examens`, `oeuvres_statiques`, `habiller_pages`, `build_llms`, `build_apprendre_ressources`, `apprendre_carte` en `--controle` au vert.
+
+## Post-it : le titre dans le ruban blanc (17/11/2026)
+
+Demande de Jacques (capture d'une leçon de 1re D) : « Mets les titres dans le petit cadre blanc au milieu des encadrés ».
+
+- **Leçons** (`apprendre/modele.css`, fin) : sur les post-it (Astuce, Attention / Piège, À retenir, Le savais-tu, Méthode), le ruban décoratif (`::before`) est retiré ; le titre (`b:first-child`), icône illustrée comprise, devient le ruban : fond blanc translucide, légère inclinaison, centré et à cheval sur le bord du haut (`display:table`, marge négative : un titre sur deux lignes repousse le texte au lieu de le couvrir). `modele.css?v=20261117h` sur les 7 pages d'Apprendre.
+- **Œuvres** (`tools/oeuvres_statiques.css`) : même traitement pour les titres des leçons de vie.
+- Contrôlé dans Chromium (390 et 1280 px), 0 erreur JS ; `oeuvres_statiques --controle` au vert.
+
+## Annales : carte du Cameroun après 1914-1916 redessinée en SVG (17/11/2026)
+
+Retour de Jacques : « L'image du Cameroun n'est pas nette ». C'était le document 3 de l'annale d'histoire du probatoire A-ABI 2025 (`proba-2025-histoire-a-carte.jpg`, scan granuleux de 650 × 872 px).
+
+- Redessinée dans `tools/annales/_schemas.cjs` (`proba-2025-histoire-a-carte`) d'après le scan agrandi et quadrillé : mêmes tracés (lac Tchad, Guinée espagnole, bande sous mandat anglais hachurée de Buea à Dikoa, limites de la zone restituée à l'AEF en pointillés, Chari, Congo) et mêmes libellés, rose des vents et échelle 0-200 km.
+- Dessin à l'échelle 0,8 dans un cadre de 520 px : sous le seuil `ax-large` (600 px), la carte s'adapte au téléphone au lieu de défiler. `currentColor` : nette en mode sombre. « Guinée espagnole » placé dans son territoire (il chevauchait la frontière sur le scan).
+- Source : `<!--schema:proba-2025-histoire-a-carte-->` remplace la figure JPEG ; le JPEG est retiré. `annales.cjs --controle` au vert ; Chromium au téléphone (376 × 505 px, clair et sombre), 0 erreur JS.
+
+## Apprendre : lot 6, classes d'examen (17/11/2026)
+
+Demande de Jacques : « Continue » (après le lot 5, PR #337 déployée).
+
+- **`apprendre/_src/13-approfondies-examens-2.js`** : 4 leçons gratuites de classes d'examen au gabarit approfondi, remplacées en place, couleurs proches des objets réels :
+  - **3e géographie, présentation du Cameroun** : lettre de Yao, correspondant d'Abidjan (« Afrique en miniature ») ; carte simplifiée des régions naturelles et des voisins, bloc-diagramme 3D du sud au nord avec le mont Cameroun, pluies de Debundscha à Kousséri ; **simulation** : carte interactive (10 villes : milieu, altitude, pluies).
+  - **3e histoire, Cameroun allemand** : débat devant la Pagode de Douala (modernisation ou oppression ?) ; frise 1884-1916, carte des chemins de fer du Nord et du Centre, train à vapeur 3D chargé de cacao.
+  - **3e français, subordonnée relative** : avis de recherche fautif de Radio Bafang ; locomotive et wagon 3D (antécédent / relative, wagon décrochable), taxis déterminative / explicative ; **simulation** : choisir le pronom relatif (8 phrases, correction expliquée).
+  - **Tle, gérer son temps** : bilan d'Aïcha à Ngaoundéré (4 h 30 d'écran) ; journée en anneau, semaine type 3D, courbe de l'oubli et révisions espacées ; **simulateur** de semaine (sommeil, écran, cours → heures de révision réparties selon les coefficients).
+- `lecons.js?v=20261117d` ; 4 pages `apprendre/cours/` régénérées et habillées. Contrôlé dans Chromium (1200 et 390 px) : aucun débordement, aucune erreur JS. Bancs : réglages 29/29, verrou 18/18, gabarits 54/54, planche mobile 23/23, charte 34/34, lisibilité 7/7.
+- **Suite** : 3e histoire (partage de l'Afrique), ECM (démocratie), langues ; Tle philosophie (passions, liberté), orientation (bac), culture nationale ; 1re langues et ESF.
+## Œuvres analysées : dessin des leçons, carte mentale, quiz ; objectifs resserrés (17/11/2026)
+
+Suite des retours de Jacques : « Réduis l'interligne dans les objectifs. Applique aussi ce style aux pages des œuvres littéraires analysées », puis « Enrichis et illustre si nécessaire ».
+
+- **Objectifs des fiches** (`_methode.css`, fin) : interligne 1,38, 5 px entre les lignes.
+- **Pages `oeuvres/*.html`** (`tools/oeuvres_statiques.js`, nouvelle feuille source `tools/oeuvres_statiques.css` lue par le générateur, commentaires retirés) :
+  - **en-tête carte** (`<!-- oeuvre-ent -->`) : couverture en médaille, pastille, « Français · Œuvre intégrale · classe », titre, auteur surligné, puces (temps de lecture, genre, examen, liens vers la carte mentale et le quiz). Le `<header>` autour du titre empêche `vitrine.js` d'en faire le bandeau bleu ;
+  - parties numérotées par compteur CSS au **cercle magenta à point or**, titre magenta souligné magenta → or ; sous-titres bleu-vert ; Roboto ; texte justifié ;
+  - thèmes en pastilles de couleur, citation en encadré crème à guillemet or, **fiche d'identité en tuiles**, axes de lecture en cartes numérotées ;
+  - **carte mentale dessinée** (nouvelle partie) à partir de `carte` de `litt-oeuvres.js` : centre bleu nuit, branches à la couleur de l'application (remplace les listes h3/ul) ;
+  - explications des citations et procédés en **encadrés illustrés à rail en pointillés** ; leçons de vie en **post-it** ;
+  - questions de contrôle **à déplier** ; nouvelle partie **« Teste-toi »** avec les QCM de l'application, réponse et explication à déplier ;
+  - **œuvre précédente / suivante** (ordre 6e → Tle).
+  - ⚠️ Teintes pâles des branches calculées dans le générateur (`pale()`) : `veritas-medaillons.js` (correcteur de contraste) ne lit pas `color-mix()` et forçait le texte en blanc.
+- Contrôlé dans Chromium (390 et 1280 px) : aucun débordement, 0 erreur JS. `oeuvres_statiques`, `methodes_examens`, `annales`, `sequentielles`, `habiller_pages`, `build_llms`, `build_search_index` en `--controle` au vert.
+
+## Ressources gratuites : même dessin que les leçons, fiches enrichies (17/11/2026)
+
+Demande de Jacques (capture de `ressources/examen-svt-bac.html` au téléphone) : « Aligne la mise en forme des ressources gratuites comme les pages de cours. Enrichis-les si possible. »
+
+- **Feuille commune `tools/methodes/_methode.css`** (fiches de méthode, annales, séquentielles : ~150 pages) : couche « dessin des leçons » ajoutée en fin de fichier. Police **Roboto** (fichiers `assets/polices/`), titres de partie au **cercle magenta numéroté à point or** et titre magenta souligné magenta → or (toutes les parties, plus de couleurs tournantes), sous-titres `h3` bleu-vert, **encadrés à icône illustrée et rail en pointillés** (icônes reprises telles quelles d'`apprendre/modele.css`), objectifs en carte à cible et **pastilles de couleur** (la coche du site est neutralisée), texte justifié avec césure, tableaux à en-tête teinté de la matière, sources discrètes.
+- **En-tête parlant** (`methodes_examens.cjs`, `entete()`) : carte teintée de la matière (`--mt`, `--mt-pale` d'Apprendre ; matière tirée de `_classement.json`), médaille à l'icône de la matière, pastille (badge), « Matière · Examen · classes », titre, chapô encadré en pointillés « L'essentiel », puces (temps de lecture, nombre de parties, exemple traité, annales corrigées, sources officielles, bouton **Imprimer**).
+- **Fin de fiche** (`fin()`) : **fiche précédente / suivante** de la même matière (boutons des leçons, la suivante en bleu plein à flèche or) et **« Les autres épreuves du BEPC / Probatoire / Baccalauréat »** en pastilles à l'icône de chaque matière.
+- Annales et séquentielles gardent leur balisage (pastille + titre) et reçoivent le nouveau dessin par la feuille commune.
+- Contrôlé dans Chromium (390 et 1280 px) : aucun débordement horizontal, 0 erreur JS. `methodes_examens`, `annales`, `sequentielles`, `habiller_pages`, `build_llms` en `--controle` au vert.
+
+## Leçon : en-tête parlant, barre des matières sobre, offres encadrées, leçons voisines en avant (17/11/2026)
+
+Retours de Jacques (captures d'une leçon de Tle A au téléphone) : « Entête de leçons trop simple et pas assez parlant. Les icônes en bas sont touffues : enlève l'ombre et les couleurs autour et diminue un peu la taille. Encadre aussi les autres formules d'abonnement et le message adressé aux enseignants à la fin », puis « leçon suivante et précédente en bas : mets en évidence, sinon cela peut échapper ».
+
+- **En-tête** (`lecon.html`, classe `bandeau ent`) : carte teintée de la couleur de la matière (`--mt`, `--mt-pale`), filet fin tout autour (le trait foncé à gauche est retiré à la demande de Jacques, comme celui sous l'onglet actif Cours / Révision / Quiz), médaille blanche cerclée, pastille « Cours » (le texte suit toujours l'onglet par `#sur`), matière et classe, titre, **chapitre** avec son icône, **place de la leçon** (« Leçon n du programme MINESEC » et barre « i / N leçons rédigées »), **situation de départ** encadrée en pointillés, puis les puces (durée, parties, labo, quiz).
+- **Barre des matières** (`.rail`) : plus de pastille colorée ni d'ombre autour des icônes ; 40 px au lieu de 46, icônes de 24 px ; matière ouverte signalée par le trait de sa couleur.
+- **Offre** : autres formules (`.fo-mini`), note de paiement (`.offre-n`) et liens (enseignants, accompagnement, cahier : `.offre-l`) encadrés d'un filet de 1,5 px, sans ombre.
+- **Situation de vie et tâche** (`.apc`) : une carte à pictogramme (boussole), texte justifié avec césure (« N'oublie pas de justifier les textes »), comme la situation de départ de l'en-tête ; « Ta tâche » dans son propre encadré doré, pictogramme crayon, libellé au-dessus.
+- **Texte justifié partout** (« Justifie aussi tout au long de la leçon ») : listes, bulle de Kalao, énoncés de questions et pistes d'enquête rejoignent le corps du texte (déjà justifié) ; légendes de figures et formules restent centrées.
+- **Leçons voisines** (`.suite`) : deux vrais boutons avec flèche ronde ; la suivante (ou « Tout le programme ») en bleu plein, flèche or.
+- `modele.css?v=20261117f` sur les 7 pages d'Apprendre. Bancs : réglages 29/29, verrou 18/18, charte 34/34, survol 4/4, gabarits, planche mobile, lisibilité au vert ; captures au téléphone et à l'ordinateur, 0 erreur JS.
+
+## Apprendre : lot 5 (classes d'examen) et pages « cours » enrichies (17/11/2026)
+
+Demandes de Jacques : « Finalise et déploie » (lot 4 : PR #336 fusionnée, déploiement réussi), « Continue en privilégiant les classes d'examen », « Même en bas sur cours ».
+
+- **`apprendre/_src/12-approfondies-examens.js`** : 5 leçons gratuites de classes d'examen au gabarit approfondi, remplacées en place (`remplacer()` garde aussi `scenes`) :
+  - **Tle C, numération binaire** : tableau de score à 8 ampoules du gymnase de Bafoussam (45 = 00101101₂, maximum 255, 9ᵉ ampoule pour 300) ; ampoules 2D, divisions successives, tableau 3D.
+  - **Tle A, microscopie optique** : TP de Bertoua (20 mm au ×400 = 50 µm) ; microscope 3D, champ d'oignon avec barre d'échelle, joue et oignon.
+  - **Tle A, organites** : mitochondries du cœur d'un coureur de la Course de l'Espoir (5 000 contre 100 dans la peau) ; mitochondrie optique / électronique, cellule 3D en vue éclatée.
+  - **3e ECM, sièges** : conseil municipal simulé de Mbalmayo (12 000 exprimés, 7 sièges : 3, 2, 1, 1) ; barres quotient / reste, hémicycle 3D ; **simulateur** (voix des 4 listes, 3 à 21 sièges, tableau et hémicycle).
+  - **3e arts, ombres** : canari de Foumban pour l'affiche ; sphère aux six valeurs, cube et sphère 3D.
+- **Pages statiques `apprendre/cours/*.html`** (`tools/apprendre_statique.js`) : affichent désormais la situation de départ (scène, documents, question, tâche, hypothèses), les planches 2D (et un encart pour les planches 3D, simulations et labos), les indices avec les hypothèses validées ou rejetées, et **la situation résolue en bas de page** avant la fiche de révision. Styles ajoutés au bloc `STYLE` : les 288 pages statiques ont été régénérées puis habillées.
+- **Couleurs réalistes des planches 3D** (demande « couleurs plus réalistes, proches des objets réels ») : tableau à ampoules à incandescence (verre dépoli éteint, halo allumé, culots en laiton, cadre aluminium, banc en bois), microscope crème et chrome à platine noire, boussoles en laiton à cadran crème, cagettes en bois clair et mangues mûres variées, bassine bleue, établis et tables en bois, feuille d'or, plomb gris bleuté, hémicycle sur parquet.
+- `lecons.js?v=20261117c`. Contrôlé dans Chromium (1200 et 390 px) : aucun débordement, aucune erreur JS. Bancs : réglages 29/29, verrou 18/18, gabarits 54/54, planche mobile 23/23, charte 34/34, lisibilité 7/7 ; contrôles `apprendre_statique` et `habiller_pages` au vert.
+- **Suite** : autres leçons gratuites de classes d'examen (3e français, histoire, géographie, langues ; Tle philosophie, orientation ; 1re langues et ESF).
+
+## Apprendre : lot 4 des leçons approfondies — aimants, osmose, Rutherford, mesure, division euclidienne (17/11/2026)
+
+Demande de Jacques : « Continue à enrichir les leçons (avec situation de vie de départ résolue, labos, simulation, effets 2D, 3D réalistes) ».
+
+- **Nouveau fichier `apprendre/_src/11-approfondies-lot4.js`** : 5 leçons GRATUITES passées au gabarit approfondi (situation de vie, documents, hypothèses tranchées partie après partie, planches 2D et 3D, situation résolue `denouement` avec transfert, quiz de 10). Elles remplacent EN PLACE les versions courtes (`remplacer()` garde `ordre`, `cle`, `rang`, `apc`, `examen` ; parties « Entraînement au format de l'examen » et quiz d'origine repris quand ils existaient) :
+  - **4e PCT, aimants** : clé en laiton tombée dans le sable d'un chantier de Bafoussam, aimant sans marques ; spectre de limaille calculé (champ de dipôle, 2 300 grains, graine fixe), 12 boussoles en 3D, tri des matériaux ; quiz neuf.
+  - **Tle D SVT, osmose** : perfusion d'eau distillée refusée à Laquintinie, ndolè aspergé et concombre salé à Sandaga ; osmomètre de Dutrochet, globules rouges dans 4 milieux, cellules d'oignon turgescente / plasmolysée en 3D, courbe des frites (isotonie ≈ 0,28 mol/L) ; labo `osmose` branché ; quiz neuf.
+  - **2nde C chimie, Rutherford** : débat du club scientifique de Garoua (modèle de Thomson contre noyau) ; dispositif de Geiger-Marsden en 3D, zoom sur la feuille d'or, noyau ⁵⁶₂₆Fe ; **simulation** : faisceau α intégré en Coulomb (pas adaptatif), modèle Rutherford/Thomson, taille du noyau réglable (≈ 79 % traversent, 19 % déviées, 2 % renvoyées ; Thomson : 0 rebond).
+  - **5e maths, division euclidienne** : 250 mangues de Garoua en cagettes de 24 (10 cagettes, 10 mangues, 31 500 F) ; cagettes 2D, potence, cagettes 3D ; **simulation** « Range les mangues » (a et b réglables).
+  - **2nde C physique, mesure** : sac de riz « 25 kg » de Mboppi, balance non tarée (0,8 kg à vide) ; pied à coulisse 3D, cibles erreur systématique / aléatoire ; **simulations** : lecture d'un vernier au 1/10 (nouvel objet, vérification) et pesées répétées (moyenne, incertitude, balance tarée ou non).
+- `lecons.js` reconstruit (76 entrées, les 5 remplacent les anciennes au chargement) ; `lecons.js?v=20261117b` sur les 7 pages ; 5 pages `apprendre/cours/` régénérées puis habillées.
+- Contrôlé dans Chromium (1200 et 390 px) : pas de débordement, aucune erreur JS propre aux leçons (l'erreur `apprendre_config.php` vient du serveur local sans PHP). Bancs : réglages 29/29, verrou 18/18, gabarits 54/54, planche mobile 23/23, charte 34/34, lisibilité 7/7 ; `apprendre_statique --controle` et `habiller_pages --controle` au vert.
+- **Suite possible** : les ~59 autres leçons gratuites courtes (liste : `VRT_L` sans `enquete`), en priorité 2nde C maths/français, 2nde A, 6e-5e maths, 4e facteurs premiers.
+
+## Finalisation des branches cloud restées en suspens (17/11/2026)
+
+Demande de Jacques : « Identifie toutes les sessions en cours non poussées puis finalise-les » (projet VÉRITAS, dans le cloud). Inventaire : 21 branches portaient des commits absents de master ; périmètre retenu par Jacques : les 10 branches récentes (11 au 16/11). Tout est réuni dans `finalisation-2026-11-17`.
+
+- **Fusionnées telles quelles** : `apprendre-complexes-tle` (#333), `pages-annales-js-v` (#326), `fix-citations-motivation` (citation différente à chaque visite), `version-app-js` (app.js et sw.js en **1.20.83** : le nouvel Apprendre parvient aux visiteurs de retour).
+- **Fusionnées, fichiers générés régénérés à la source** : `annales-bac` (#322, BAC 2025 : maths D-TI, physique C et D, chimie, SVT, ECM, anglais), `annales-proba-2024` (#317, déjà contenue dans la précédente), `apprendre-lecons-profondes-3` (#327). Les conflits ne portaient que sur des fichiers générés : on garde master, puis `annales.cjs`, `sequentielles.cjs`, `methodes_examens.cjs`, `build_apprendre_ressources.cjs`, `build_llms.py`. ⚠️ `apprendre/lecons.js` était aussi en conflit : garder master aurait perdu le lot 3, il est **reconstruit** (`build_apprendre.py`, 75 leçons) ; pages statiques régénérées et habillées. Versions : `ressources.js?v=20261117a`, `lecons.js?v=20261117a`, habillage `1.20.83.34`.
+- **Reprise partielle** : `suite-2026-11-13` (#280) → jeux sans question en double (loi des nœuds, poussée d'Archimède) et « Voir plus » sous « Pour aller plus loin » de la leçon. Son « Voir plus » de `matiere.html` et ses versions 1.20.82 étaient déjà refaits sur master.
+- **Laissées de côté, à trancher** : `apprendre-voir-plus` (refait autrement sur master) ; `apprendre-lecons-suite` (Tle C « version dense », aperçus 4e, mode `--ajout` de `build_apprendre_payant.cjs`, bancs `banc_apprendre_schemas` et `banc_build_apprendre_ajout`). Master a réécrit les schémas zoomables le 14/11 avec une autre signature de `VRT_ILLUS` et reconstruit la Tle C le 16/11 ; `charge.js` pointe vers des JSON payants du FTP construits depuis des sources hors dépôt. La fusionner exige ces sources ; le mode `--ajout` reste à porter sur la signature actuelle.
+- **Non traitées (juillet à octobre, jusqu'à 1 191 commits de retard)** : `carte-utilisateur-sidebar` #105, `claude/audit-atelier-francais-292b6o` #89, `corriges-tle-cd` #93, `feat/manuel-est-francais-scientifique-technique` #53, `paiements-skysms`, `sobriete-mobile-atelier` #130, `starter-1200-credit-ia` #150. Branches déjà intégrées, sans rien à faire : `apprendre-carrousel-auto`, `apprendre-maths-tle-suite`, `gestion-admin-cache`, `lecons-payantes-series-1-8`.
+- Contrôles en local : syntaxe JS et PHP, 10 contrôles de générateurs du déploiement, 13 bancs (paiements, octroi, cahiers, ouvrages, sentinelle, versions), bancs Apprendre (réglages, verrou 18/18, gabarits) ; 8 pages ouvertes dans Chromium, 0 erreur JS.
+
+## Apprendre : police Roboto, titres de partie d'origine, accueil retravaillé (16/11/2026)
+
+Retours de Jacques : « Améliore aussi l'interface ci, les icônes et autres » (capture de l'accueil), puis « Conserve ceci, et utilise-en pour l'accueil d'Apprendre » (capture d'une leçon en ligne : numéros dans un cercle magenta à point or, titres magenta soulignés, police Roboto du téléphone).
+
+- **Police : Roboto**, hébergée (`assets/polices/roboto-latin(-ext)-400|500|700-normal.woff2`, `-400-italic`, licence Apache 2.0 `ROBOTO-LICENSE.txt`). « Poppins » désigne aussi Roboto pour les feuilles qui la nomment en dur. Les fichiers Poppins ajoutés plus tôt dans la même PR sont retirés.
+- **Leçons** : titres de partie remis au style d'origine (cercle magenta à point or, titre magenta souligné magenta → or) ; sous-titres `h3` en bleu-vert ; le reste (pointillés, petites icônes illustrées, pastilles des objectifs) inchangé.
+- **Accueil d'Apprendre** (`apprendre/modele.css`, fin du fichier ; `index.html` passe `--c/--cp` à la tuile de la leçon du jour) :
+  - titres de section au style des parties de leçon (cercle magenta à point or, titre magenta, trait magenta → or), aussi sur « Tout pour progresser » ;
+  - classes en vraies pastilles (classe choisie en dégradé de sa couleur) ;
+  - objectif du jour en puces à pictogramme coloré (bleu leçon, or quiz, vert une fois fait) ;
+  - icône de la leçon du jour sur tuile douce de la couleur de la matière ;
+  - barre des matières : chaque icône sur une tuile de la couleur de sa matière ; matière ouverte entourée de sa couleur.
+- `modele.css?v=20261116s`. Audit téléphone et ordinateur (10 vues) : aucun débordement, 0 erreur JS ; bancs verrou 18/18, gabarits 54/54, planche mobile 23/23, lisibilité 7/7, charte 34/34, survol 4/4, menu 19/19, calendrier 51/51, réglages 29/29.
+
+## Apprendre : retour aux pointillés, hiérarchie des titres, pastilles (16/11/2026) — police : voir l'entrée suivante (Roboto)
+
+Retour de Jacques (capture de la rubrique « Laboratoires ») : « Je préfère l'ancien système avec les pointillés. Mais conserve les icônes en diminuant la taille. Par hiérarchiser j'entendais distinguer les grands titres des sous-titres. Au niveau de l'objectif mets plutôt des puces, ou pastilles », puis « Garde aussi l'ancienne police ».
+
+- **Encadrés** : retour au rail en pointillés (ni cadre décalé, ni onglet) ; les icônes illustrées restent, en plus petit (42 px, 36 px sur téléphone).
+- **Titres en 3 niveaux**, comme « Laboratoires » / « Mathématiques » / titre de carte :
+  1. titre de partie : tuile carrée arrondie en dégradé bleu, avec le numéro, et grand titre bleu nuit ;
+  2. sous-titre (`h3`) : plus petit, en bleu ;
+  3. titre d'encadré : petit, de la couleur de l'encadré, avec sa petite icône.
+- **Objectifs** : pastilles rondes de couleur à la place des tuiles d'icônes.
+- **Police** : retour à **Poppins**, l'ancienne police d'Apprendre, désormais hébergée sur le site (`assets/polices/poppins-latin(-ext)-400|500|600|700-normal.woff2`, licence OFL `POPPINS-OFL.txt`, sans appel à Google Fonts) ; graisses ramenées à 700 pour les titres et 600 pour le gras. Les fichiers Nunito restent dans `assets/polices` mais ne sont plus utilisés.
+- `modele.css?v=20261116p`. Contrôles : aucun débordement sur les 10 vues de l'audit (téléphone et ordinateur), 0 erreur JS ; bancs gabarits 54/54, verrou 18/18, planche mobile 23/23, lisibilité 7/7, charte 34/34.
+
+## Apprendre : nombres complexes de Terminale C et D, hiérarchie des icônes façon manuel, correctif lecon.html (16/11/2026)
+
+Demandes de Jacques : « Continue », puis « Hiérarchise les icônes. Utilise les modèles plus réalistes et originaux comme sur l'image » (page de manuel Hatier : grande icône illustrée qui chevauche un onglet de couleur, cartes à cadre pastel décalé, numéros d'exercice dans des cases rouges arrondies).
+
+- **Correctif important** : `apprendre/lecon.html` ne chargeait **pas** `modele.css` (le contrôle par grep confondait `modele.css` et `lecon-modele.css`, et les montées de version touchaient la mauvaise feuille). Les leçons en ligne n'avaient donc ni Nunito ni les corrections de mise en page, et retombaient sur la police système depuis le retrait de Poppins. Lien ajouté (`modele.css?v=20261116m`, chargée en dernier).
+- **Hiérarchie des icônes en 3 niveaux** (`apprendre/modele.css`) :
+  1. **Parties** : pastille ronde orange-rouge 64 px, liseré blanc, surtitre « PARTIE » (comme « CHAPITRE 2 » du manuel) ;
+  2. **Encadrés** (définition, propriété, méthode, exemple) : carte blanche, bord pastel, cadre décalé de 8 px ; grande icône illustrée multicolore (livre, médaille, engrenages, crayon) qui chevauche un onglet dégradé portant le titre ;
+  3. **Post-it** (astuce, attention, retiens, le savais-tu) : icônes illustrées de 34 px ; étapes de méthode numérotées dans des cases rouges arrondies.
+- **16 leçons de nombres complexes** (Tle C r07-r10, r30-r33 ; Tle D r01-r04, r17-r20), source privée `71-denombrement-approfondi.js` (83 leçons) ; aperçus fusionnés en place. **Tle D r01** gratuite, entière.
+- **Écriture mathématique** : la source convertit `e^(…)` en exposant, `z_A` en indice et `AB⃗` en vecteur fléché (`span.vec`, flèche dessinée en CSS : Nunito n'a pas le caractère combinant U+20D7, qui s'affichait en carré) ; titres et légendes écrivent « vecteur AB ».
+- Livraison : `apprendre-maths-approfondies-pour-jacques.zip`, 83 JSON à déposer dans `uploads/protected/apprendre/` (80 à verrou + 3 gratuites).
+- Bancs : verrou 18/18, gabarits 54/54, planche mobile 23/23, réglages 29/29, charte 34/34, lisibilité 7/7, cartes au survol 4/4 ; `node --check` sur `apprendre/*.js` ; 0 erreur JS sur les leçons contrôlées (1200 px et 390 px).
+
+## Apprendre : corrections de mise en page (16/11/2026)
+
+Demande de Jacques : « Corrige la mise en page » (sans capture) : audit complet en émulation Pixel 7 et sur ordinateur 1280 px (accueil, matière, leçon gratuite, leçon à verrou, ressources), corrections dans `apprendre/modele.css?v=20261116h` :
+
+- **Compte à rebours** (« Mon année ») : sur ordinateur, la case des secondes débordait de la carte (chiffres Nunito 900 plus larges). Colonnes en `minmax(0, fr)`, chiffres et libellés proportionnés à la largeur de la carte (requête de conteneur `cqw`, repli `vw`).
+- **En-têtes de chapitre** (page matière, téléphone) : la tuile du numéro passait au-dessus des titres longs et restait à côté des courts ; elle reste désormais toujours à côté.
+- **Étiquettes des lignes de leçon** (« Labo », « Jeu »…) : un rond écrasé sans marge ; vraies pastilles de la couleur du chapitre.
+- **Titres de section** : « Tout voir › », « Défi express › » ne se coincent plus contre un titre long (retour à la ligne sur téléphone) ; « Calendrier officiel 2026-2027 » rapproché de son titre.
+- Aucun débordement horizontal sur les 10 vues contrôlées, 0 erreur JS. Bancs : cartes au survol 4/4, charte 34/34, lisibilité 7/7, planche mobile 23/23, verrou 18/18, gabarits 54/54, réglages 29/29, calendrier 51/51, menu 19/19.
+
+## Apprendre : police Nunito hébergée, animations et tuiles d'icônes sur toutes les pages (16/11/2026)
+
+Demande de Jacques (capture de l'accueil d'Apprendre sur Android) : « Aligne sur le style de Dénombrement : mêmes effets, style, animations ; polices scolaires lisibles et captivantes ; belles icônes » ; puis capture du panneau des formules.
+
+- **Cause** : Trebuchet MS et Segoe UI n'existent que sous Windows ; sur Android, les titres retombaient sur la police du téléphone.
+- **Police** : **Nunito** (SIL OFL 1.1, `assets/polices/NUNITO-OFL.txt`), fichiers variables woff2 200-1000 hébergés (`assets/polices/nunito-latin(-ext)-wght-normal|italic.woff2`, 4 × ≈ 38 Ko). Déclarée dans `apprendre/modele.css` ; « Poppins » y désigne aussi Nunito, pour les feuilles qui la nomment en dur (planches.css, apprendre.css). Titres en 900, texte en 500, schémas SVG dans la même police. Les 7 pages d'Apprendre ne chargent plus Poppins depuis Google Fonts (une connexion tierce de moins) mais préchargent Nunito. Les pages statiques `apprendre/cours`, `programme` gardent Poppins (CI `polices_locales.py`).
+- **Icônes de matière** sur tuile douce de leur couleur (anneau et ombre teintés), qui pivote au survol ; alignement « rédigées » + barre corrigé (sous le nom ; sans retrait sur téléphone).
+- **Animations** (comme la leçon modèle) : cartes de matières, ressources, tuiles et chapitres qui montent en fondu en cascade, trait des titres de section qui se dessine, numéros qui « sautent », cartes qui se soulèvent au survol, boutons qui s'enfoncent au toucher ; coupées si « réduire les animations » et à l'impression.
+- **Formules et « Avec un professeur »** : titres et prix en Nunito 900, boutons arrondis animés, note sous les formules lisible (interligne 1,6, encadré doux), liens « Enseignant ? » et « Cahiers » avec pictogramme en tuile dégradée.
+- `modele.css?v=20261116e`. Contrôlé en émulation Pixel 7 (accueil, matière, leçon, ressources, offre) : Nunito chargée (200), 0 erreur JS, pas de débordement. Bancs : cartes au survol 4/4, charte 34/34, lisibilité 7/7, planche mobile 23/23, verrou 18/18, gabarits 54/54, réglages 29/29, calendrier 51/51, menu 19/19.
+
+## Apprendre : suites et calcul intégral de Terminale C et D, ajoutés à la même PR (16/11/2026)
+
+Demande de Jacques : « Je ne vois pas le lien de fusion. Continue » ; lot ajouté à la PR #331 (une seule fusion).
+
+- **17 leçons** (9 contenus partagés), source privée `71-denombrement-approfondi.js` (67 leçons au total) ; aperçus fusionnés en place :
+  - **suites** (Tle C r24-r27, Tle D r12-r14) : chaises de la cérémonie à Yaoundé (récurrence, 465 chaises), caisse de la tontine de Bafia (croissante majorée, limite 500 000 F), réservoir de Maroua (point fixe, escalier, suite auxiliaire, colonnes 3D), mesures du club de Bafang (gendarmes, Tle C seulement) ;
+  - **calcul intégral** (Tle C r53-r57, Tle D r34-r38) : pompe de Ngaoundéré (7 L, aire coloriée), motif de l'artisan de Bamenda (1/6 m², vase de révolution en tranches 3D), serre de Dschang (inégalité de la moyenne, 26,7 °C), panneau solaire de Maroua (intégration par parties, 1 kWh), parcelle de Kribi (rectangles 370 m², trapèzes 365 m²).
+- **Tle D r34** (première du 3e trimestre) : gratuite, entière dans l'aperçu.
+- Générateurs : `aire` (surface coloriée), `escalier` (toile d'une suite récurrente), `revolution3D`.
+- Contrôlé dans Chromium (abonné et visiteur, 1200 et 390 px) : 0 erreur JS. Bancs : verrou 18/18, gabarits 54/54, planche mobile 23/23, réglages 29/29.
+- **Reste chez Jacques** : remplacer `71-denombrement-approfondi.js` et déposer les 65 JSON (`apprendre-maths-approfondies-pour-jacques.zip`). Labos « suite » et « integrale », exercices d'examen rédigés ici.
+
+## Apprendre : analyse de Terminale C et D au gabarit approfondi, quatre chapitres d'une traite (16/11/2026)
+
+Demande de Jacques : « Continue. Fais plusieurs d'une traite pour ne pas fusionner à chaque fois. »
+
+- **19 leçons** (10 contenus partagés), source privée `71-denombrement-approfondi.js` (50 leçons au total), aperçus `apercus-tle-c.js` et `apercus-tle-d.js` fusionnés en place, fiches APC d'origine conservées :
+  - **primitives** (Tle C r36-r37, Tle D r21-r22) : car Douala-Édéa (famille t² + 3t + C, condition x(1) = 0), pompe de Garoua (forme u'u³, V(1) = 3,75 L) ;
+  - **logarithmes** (Tle C r38-r39, Tle D r23-r24) : micro-finance de Bafoussam (1,1ⁿ ≥ 2, 8 ans), pH d'une eau de source de Yaoundé (pH 4, échelle du pH), décibels ;
+  - **exponentielles** (Tle C r45-r47, Tle D r32-r33) : culture de Douala (doublement en 2 ln 2 h, colonnes 3D), médicament t e⁻ᵗ (maximum en 1 h), fonctions aˣ (mutuelle de Bafoussam, Tle C seulement) ;
+  - **équations différentielles** (Tle C r60-r62, Tle D r39-r41) : culture de Bertoua (C e^(2x)), bouillon de Bafia (refroidissement, 10 ln 2 min, colonnes 3D), sismographe de Limbé (y'' + 4y = 0, ressort 3D animé, période π).
+- **Tle D r21** est la première leçon du 2e trimestre : gratuite, entière dans l'aperçu (comme avant).
+- Générateurs : `courbes` (repère, quadrillage, courbes rognées au cadre, points et pointillés), `ressort3D`.
+- Contrôlé dans Chromium (abonné 1200 et 390 px, visiteur) : 0 erreur JS. Bancs : verrou 18/18, gabarits 54/54, planche mobile 23/23, réglages 29/29.
+- **Reste chez Jacques** : remplacer `71-denombrement-approfondi.js` dans `apprendre_prive\sources` et déposer les 49 JSON (`apprendre-maths-approfondies-pour-jacques.zip`). Labos choisis ici : intégrale, courbe, décroissance, pendule ; exercices d'examen rédigés ici.
+
+## Apprendre : statistiques à deux variables de Terminale C et D au gabarit approfondi (16/11/2026)
+
+Demande de Jacques : « Continue » (après #329).
+
+- **4 leçons payantes** (2 contenus partagés : Tle C r19-r20 = Tle D r10-r11), source privée `71-denombrement-approfondi.js` (31 leçons au total) ; aperçus `apercus-tle-c.js` et `apercus-tle-d.js` fusionnés en place. Données de la fiche APC (coopérative de café de Foumban : x = 1…5 sacs d'engrais, y = 2, 3, 5, 6, 9 t) :
+  - tableaux d'effectifs et nuage de points : nuage et point moyen G(3 ; 5), variances 2 et 6, tableau à double entrée (âge × rendement des caféiers) en relief 3D, séries marginales et fréquences conditionnelles ;
+  - ajustements linéaires : covariance 3,4, droite des moindres carrés y = 1,7x − 0,1 tracée avec ses écarts, prévision 10,1 t pour 6 sacs (contrat de 10 t), r ≈ 0,98, trois nuages de corrélations différentes, prudence sur l'extrapolation, corrélation n'est pas causalité.
+- Générateurs : `nuage` (repère, points, G, droite et résidus), `grille3D` (tableau à double entrée en colonnes 3D).
+- Contrôlé dans Chromium (abonné 1200 et 390 px, visiteur) : 0 erreur JS ; aucun texte payant dans les aperçus. Bancs : verrou 18/18, gabarits 54/54, planche mobile 23/23.
+- **Reste chez Jacques** : remplacer `71-denombrement-approfondi.js` dans `apprendre_prive\sources` et déposer les 31 JSON (`apprendre-maths-approfondies-pour-jacques.zip`). Labo « nuage » et exercices d'examen rédigés ici (éleveur de Mbalmayo, taxi-moto de Bafoussam).
+
+## Apprendre : Probabilités de Terminale C et D au gabarit approfondi (16/11/2026)
+
+Demande de Jacques : « Déjà fusionné, continue » (après #328).
+
+- **Déploiement de #328** : toutes les vérifications passées (l'étape GEO qui bloquait #324 et #325 est au vert) ; transfert FTP lancé.
+- **Probabilités, 10 leçons payantes** (5 contenus partagés : Tle C r40-r44 = Tle D r25-r29), dans la source privée `71-denombrement-approfondi.js` ; aperçus `apercus-tle-c.js` et `apercus-tle-d.js` fusionnés en place (fiches APC d'origine conservées) :
+  - vocabulaire : tombola de Sangmélima (grille des 100 tickets, Venn, A ∪ B = 75) ;
+  - calcul : délégués du comité de Kumba (urne 3D, C(3, 2)/C(5, 2) = 0,3) ;
+  - conditionnelles : résultats du bac à Douala (arbre pondéré, P(R) = 0,62, P<sub>R</sub>(F) ≈ 0,68, indépendance ; transfert : test du paludisme) ;
+  - variables aléatoires : loterie de Bafang (loi en bâtons 2D et 3D, E(X) = −30 F, V(X) = 22 100) ;
+  - loi binomiale : semences de Dschang (arbre de 3 épreuves, loi B(5 ; 0,8) en 3D, P(X = 0) = 0,00032, E(X) = 4).
+- Nouveaux générateurs : `barres` (diagramme en bâtons), `barres3D`, `arbreP` (arbre pondéré). Notations conditionnelles en indice (P<sub>B</sub>(A)).
+- Contrôlé dans Chromium (abonné 1200 et 390 px, visiteur) : 0 erreur JS, pas de débordement. Bancs : verrou 18/18, gabarits 54/54, planche mobile 23/23, réglages 29/29.
+- **Reste chez Jacques** : remplacer `71-denombrement-approfondi.js` dans `apprendre_prive\sources` (27 leçons) et déposer les 27 JSON (`apprendre-denombrement-probabilites-pour-jacques.zip`). Les JSON ont été produits avec le labo « binomiale » et des exercices d'examen rédigés ici (roue de Bertoua, jetons, test du paludisme à Bamenda, stand de dés à Garoua, bouteilles à Douala).
+
+## Apprendre : charte du modèle sur toutes les pages, Dénombrement de 1re A et 2nde A (16/11/2026)
+
+Demandes de Jacques : « Change aussi les polices, icônes dans Apprendre, exactement comme dans Dénombrement, et finalise » ; « Applique ce style dans Apprendre lui-même ».
+
+- **`apprendre/modele.css?v=20261116c`** (nouveau, chargé en DERNIER par les 7 pages : index, matière, leçon, manuel, ressources, labo, notes) : polices Segoe UI (texte) et Trebuchet MS 800 (titres) partout ; titres de section soulignés d'un trait magenta → or ; icônes de ressources, portes de rubrique et tuiles « Tout pour progresser » en **tuiles dégradées de la couleur de la famille, pictogramme blanc** (les règles « sobriété » du 14/11 qui grisaient ces icônes sont neutralisées) ; numéros de chapitre en tuile avec pastille or, numéros de leçon en cercle à halo. Les icônes de matière (illustrations en couleur) restent nues.
+- **1re A, Dénombrement r08 à r17** (10 leçons payantes, source privée `71-denombrement-approfondi.js`, aperçus `apercus-1re-a.js` fusionnés en place) : situations des fiches existantes (quartier de Yaoundé, cadenas du marché Central, club de théâtre de Bafoussam, QCM de Mbouda, Course de l'Espoir, bibliothèque de Kribi, village de la Lékié, photo de Bamenda, ONG de Maroua, tontine du marché Mboppi) ; Venn, cases multiplicatives, podium 3D animé, méthode du bloc, délégation mixte.
+- **2nde A, Dénombrement r26 à r28** (gratuites, `apprendre/_src/10-denombrement-2nde-a.js`) : clubs de la 2nde A (Venn, tableau à double entrée), tenues de la fête (arbre de choix, arbre des parties 2³), kermesse de Garoua (intégration, pavé 3D de 24 plateaux). `lecons.js` reconstruit (75 leçons, `?v=20261116o`) ; pages statiques régénérées puis habillées (`apprendre_statique.js` → `git add` → `habiller_pages.py`) : 3 nouvelles pages de cours, et 19 pages de cours restées en retard sur #325 mises à jour.
+- Moteur : podium 3D (`podium3D`) avec boules qui montent sur leur marche (`arc`) ; cases multiplicatives sans chevauchement du signe ×.
+- Contrôlé dans Chromium (accueil, matière, ressources, leçons 2nde A, 1re A abonnée et visiteur, 1200 et 390 px) : 0 erreur JS, pas de débordement. Bancs : planche mobile 23/23, verrou 18/18, gabarits 54/54, réglages 29/29, charte 34/34, lisibilité 7/7, corpus 18/18, tunnel 57/57, empreintes 22/22, calendrier 51/51 ; étape GEO et `habiller_pages --controle` au vert.
+- **Reste chez Jacques** : copier le nouveau `71-denombrement-approfondi.js` (17 leçons) dans `apprendre_prive\sources` ; déposer les 17 JSON (`denombrement-1re-pour-jacques.zip`).
+
+## Apprendre : toutes les leçons au style du modèle « Dénombrement », 3D zoomable, déploiement débloqué (16/11/2026)
+
+Demandes de Jacques : « Utilise exactement la même mise en forme, police, icônes de ce modèle dans Apprendre, plus ergonomique, captivant pour les jeunes apprenants » ; « Que les ressources 3D et autres soient bien intégrées, bien zoomables, l'écriture bien lisible, les boutons d'agrandissement subtils » ; « Vérifie que mon enrichissement des leçons est en ligne ».
+
+- **Déploiement en panne depuis #324** : les deux derniers déploiements de master (#324 séquentielles, #325 leçons profondes 2) ont ÉCHOUÉ à l'étape GEO : 33 pages `ressources/sequentielles/3e-*.html` différaient de leur source (seule la version `annales.js?v=` avait changé). Rien de #324 ni de #325 n'est donc en ligne. Pages régénérées (`node tools/sequentielles.cjs`) ; toute l'étape GEO rejouée en local : au vert. La fusion de cette branche relance le déploiement de tout.
+- **`apprendre/lecon-modele.css`** (nouveau, chargé par lecon.html après apprendre.css et planches.css ; déployé avec `apprendre/`) : la leçon modèle transposée à TOUTES les leçons. Polices Trebuchet MS (titres) et Segoe UI (texte) ; titres de partie magenta, cercle numéroté avec halo et pastille or, trait dégradé ; définition, propriété, méthode, exemple : tuile d'icône en dégradé (icône blanche) et fil pointillé ; astuce, attention, à retenir, le savais-tu : post-it collés (scotch, inclinaison) ; méthode : étapes numérotées en cartes ; objectifs : tuiles d'icônes colorées ; en-têtes « PLANCHE n · 2D » en capitales avec filet ; indices, situation-problème et quiz en cartes (gros boutons au doigt).
+- **Ressources** : tableaux jamais plus larges que l'écran (défilement interne) ; figures 2D plus grandes (460 px), légendes 14,5 px ; « Agrandir » réduit à une icône ronde presque transparente, bouton « Image » atténué (pleins au survol). **3D** (`planche3d.js?v=20261116e`) : boutons −, +, plein écran discrets dans le coin du dessin, molette (plein écran ou Ctrl), pincement à deux doigts, Échap pour sortir ; bouton « Animer » en couleur.
+- `lecon.html` : `lecon-modele.css?v=20261116b`.
+- Contrôlé dans Chromium (1200 et 390 px ; leçon payante abonnée, Thalès, photosynthèse, 1re D r01) : 0 erreur JS, pas de débordement horizontal, plein écran 3D et zoom opérationnels. Bancs : planche mobile 23/23, verrou 18/18, gabarits 54/54, réglages 29/29, charte 34/34, lisibilité 7/7.
+
+## Apprendre : chapitre Dénombrement approfondi (1re C, 1re D), icônes redessinées, 3D réaliste (16/11/2026)
+
+Demandes de Jacques : « Continue et intègre directement dans apprendre selon les classes concernées. Sers-toi de la progression et aligne tout sous ce modèle » (modèle : corrigés illustrés, planches, dessins 2D et 3D, fantaisies des titres et astuces gardées, icônes améliorées), puis « Améliore aussi la qualité des figures, planches, animations, simulations et effets 3D, ultra réalistes comme le tirage de l'urne ».
+
+- **Contenu** (source PRIVÉE `71-denombrement-approfondi.js`, hors dépôt, livrée à part) : le chapitre Dénombrement de la progression MINESEC au gabarit des leçons approfondies (situation-problème suivie partie après partie, hypothèses tranchées, planches 2D et 3D, situation résolue, quiz de 10 questions) :
+  - 1re D r11 et 1re C r18 « Premiers outils du dénombrement » : menus de la cantine de Garoua (3 × 4 × 2 = 24, + 12 sans dessert = 36 samedis) ; arbre de choix, pavé 3D de 24 cubes, diagramme de Venn, factorielle ;
+  - 1re D r12 « Intégration : compter pour décider » (la leçon de la capture : Modèle, Démarche, Conclusion) : tirage du foyer de Mbouda, C(12, 2) = 66 tirages, 3 300 F pour 4 000 F ; planche « une urne, trois tirages », arbre de décision, urne 3D, comparaison des budgets ;
+  - 1re D r13 et 1re C r19 « p-listes, arrangements et combinaisons » : comité de la PME de Douala, C(10, 6) = C(10, 4) = 210, 21 000 F > 12 500 F ; une combinaison et ses 3! arrangements, triangle de Pascal, urne 3D, format du Probatoire ;
+  - 1re C r24 et r25 (entraînements) : représentants du club de Kumba (245 duos, piège du double comptage) ; codes de mobile money (10⁵ − 10 = 99 990 < 150 000, passer à 6 chiffres).
+- **Aperçus publics** (`apercus-1re-c.js`, `apercus-1re-d.js`) : les 7 identifiants remplacés EN PLACE (`lire` puis `compacter`, autres leçons intactes ; fiche APC d'origine conservée) ; `charge.js` et ses `?v=` recalculés. Public : situation-problème, objectifs, 1re partie et ses planches ; rangs impairs : une planche 2D offerte par partie fermée. Suite payante, planches 3D des parties fermées et situation résolue : seulement dans les JSON.
+- **Pipeline** (`tools/build_apprendre_payant.cjs`) : `VRT_LR(ids, leçon)` remplace une leçon de même identifiant, quel que soit l'ordre des fichiers (QCM, situations, examens et schémas des autres sources s'appliquent ensuite) ; `denouement` part dans le JSON (retiré de l'aperçu) ; schéma offert = `illus` ou, à défaut, la 1re planche 2D de la partie. `verrou.js` (`?v=20261116a`) fusionne `denouement`.
+- **Toutes les leçons** (`apprendre.css?v=20261116k`, bloc « Encadrés et titres de partie, icônes redessinées ») : icônes bicolores (trait + aplat léger) sur une tuile très claire pour définition, exemple, attention, astuce, le savais-tu ; nouveaux encadrés `.methode` (étapes numérotées), `.retiens`, `.prop` ; fil en points ronds qui s'efface ; numéro de partie cerclé avec halo et pastille or ; soulignement dégradé du titre. `lecon.html` : la « Situation de vie » courte n'est plus affichée quand la leçon a sa situation-problème complète (doublon).
+- **3D réaliste** (`planche3d.js?v=20261116d`, toutes les planches 3D) : sphères lisses (dégradé radial, reflet spéculaire, ombre portée au sol) au lieu de facettes ; reflets sur les faces ; verre sans traits de facettes ; bouton « Animer » (`M.jouer`) qui joue la vue éclatée en 1,5 s ; `M.arc` : les pièces déplacées suivent une parabole (les boules sortent de l'urne par le haut).
+- Contrôlé dans Chromium (visiteur, abonné simulé, téléphone 390 px) : 0 erreur JS, pas de débordement horizontal ; aucun texte payant dans les aperçus. Bancs : verrou 18/18, gabarits 54/54, réglages 29/29, empreintes 22/22, planche mobile 23/23, charte 34/34, tunnel 57/57.
+- **Reste chez Jacques** : copier `71-denombrement-approfondi.js` dans `apprendre_prive\sources` ; déposer les 7 JSON (`denombrement-1re-pour-jacques.zip`). Tant qu'ils ne sont pas déposés, un abonné voit l'ancienne suite. Les JSON ont été produits avec un exercice d'examen et un labo « denombre » choisis ici ; la prochaine reconstruction depuis le PC reprendra les fiches privées.
+- **Suite** : Dénombrement de 1re A (rangs 8 à 17) et de 2nde A (26 à 28), puis les autres chapitres de la progression au même gabarit.
+
 ## Illustrations dans toutes les matières : 2 000 leçons payantes sur 2 000 (14/11/2026)
 
 Demandes de Jacques : « Fais le point, poursuis et enrichis les autres leçons : carte, schémas, simulations, labo », « Comble ce déséquilibre », « N'oublie pas les autres matières, fais des illustrations partout », « PCT, SVT ».
