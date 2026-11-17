@@ -73,10 +73,11 @@ function tex(s) {
     if (c === '\\') {
       const m = s.slice(i + 1).match(/^([A-Za-z]+|.)/); const k = m[1]; i += 1 + k.length;
       if (k === 'frac' || k === 'dfrac' || k === 'tfrac') { const [a, i1] = arg(s, i); const [b, i2] = arg(s, i1); i = i2; r += '<span class="ax-fr"><span>' + tex(a) + '</span><span>' + tex(b) + '</span></span>'; }
+      else if (k === 'begin' && /^\{cases\}/.test(s.slice(i))) { const e = s.indexOf('\\end{cases}', i); const l = s.slice(i + 7, e).split('\\\\'); i = e + 11; r += '<span class="ax-sys" style="--n:' + l.length + '">' + l.map(x => '<span>' + tex(x) + '</span>').join('') + '</span>'; }
       else if (k === 'begin' && /^\{array\}/.test(s.slice(i))) { const e = s.indexOf('\\end{array}', i); const c = s.slice(i + 7, e).replace(/^\{[lcr|]*\}/, ''); i = e + 11; r += '<span class="ax-col">' + c.split('\\\\').map(x => '<span>' + tex(x) + '</span>').join('') + '</span>'; }
       else if (k === 'sqrt') { const [a, i1] = arg(s, i); i = i1; r += '√<span class="ax-rad">' + tex(a) + '</span>'; }
       else if (k === 'widehat' || k === 'hat') { const [a, i1] = arg(s, i); i = i1; r += '<span class="ax-ang">' + tex(a) + '</span>'; }
-      else if (k === 'overrightarrow' || k === 'vec' || k === 'overline') { const [a, i1] = arg(s, i); i = i1; r += '<span class="ax-vec">' + tex(a) + '</span>'; }
+      else if (k === 'overrightarrow' || k === 'vec' || k === 'overline' || k === 'bar') { const [a, i1] = arg(s, i); i = i1; r += '<span class="ax-vec">' + tex(a) + '</span>'; }
       else if (k === 'text' || k === 'mathrm' || k === 'textrm' || k === 'mbox' || k === 'mathbf' || k === 'textbf' || k === 'operatorname') { const [a, i1] = arg(s, i); i = i1; r += tex(a); }
       else if (k === 'mathbb') { const [a, i1] = arg(s, i); i = i1; r += ({ R: 'ℝ', N: 'ℕ', Z: 'ℤ', Q: 'ℚ', D: 'ⅅ' })[a.trim()] || a; }
       else if (k in SYM) r += SYM[k];

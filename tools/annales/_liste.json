@@ -154,6 +154,20 @@
   "u": "/ressources/annales/bepc-mathematiques-2024.html"
  },
  {
+  "id": "bac-mathematiques-aabi-2025",
+  "examen": "bac",
+  "m": "mathematiques",
+  "serie": "séries A et ABI",
+  "nomExamen": "Baccalauréat",
+  "fiche": "ressources/examen-mathematiques-bac.html",
+  "matiere": "Mathématiques (séries A et ABI)",
+  "mat": "maths",
+  "classes": "Tle A",
+  "annee": 2025,
+  "national": true,
+  "u": "/ressources/annales/bac-mathematiques-aabi-2025.html"
+ },
+ {
   "id": "probatoire-mathematiques-aabi-2025",
   "examen": "probatoire",
   "m": "mathematiques",

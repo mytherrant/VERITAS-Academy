@@ -859,4 +859,16 @@ S["proba-2025-histoire-a-carte"] = () => {
     "Document 3 : carte du Cameroun après la guerre de 1914-1916 : une bande étroite à l'ouest, le long du Nigéria, de Buea à Dikoa, sous mandat anglais ; le reste du territoire, avec Yaoundé, sous mandat français ; une zone restituée à l'AEF à l'est et au sud ; la Guinée espagnole au sud-ouest.");
 };
 
+// Maths A-ABI 2025 (BAC), exercice 3 : courbe de f(x) = 1/x + ln x et son asymptote x = 0 (axe des ordonnées).
+S["bac-2025-maths-a-courbe"] = () => {
+  const R = repere(38, -0.6, 6.4, -0.6, 5.4), { X, Y } = R;
+  let g = R.g; const p = [];
+  for (let x = 0.17; x <= 6.3; x += 0.01) p.push([X(x), Y(1 / x + Math.log(x))]);
+  g += P(p, ' stroke-width="2.2"');
+  g += L([X(0.4), Y(1)], [X(1.6), Y(1)], ' stroke-width="1"') + L([X(1), Y(0)], [X(1), Y(1)], POINTILLE + ' stroke-width="1"');
+  for (const x of [0.25, 0.5, 2, 3]) g += point(X, Y, x, 1 / x + Math.log(x), "", 0, 0);
+  g += T([X(0) + 6, Y(5.1)], "x = 0", ' font-size="11" font-style="italic"');
+  g += T([X(4.4), Y(2.1)], "(C)", ' font-size="12" font-style="italic"');
+  return svg(R.W, R.H, g, "Courbe (C) de f(x) = 1/x + ln x : elle descend depuis +∞ le long de l'axe des ordonnées (asymptote verticale x = 0), atteint son minimum 1 en x = 1 avec une tangente horizontale, puis croît lentement vers +∞ ; points placés : (0,25 ; 2,6), (0,5 ; 1,3), (2 ; 1,2), (3 ; 1,4).");
+};
 module.exports = S;
