@@ -5,8 +5,9 @@ Retours de Jacques (captures d'une leçon de Tle A au téléphone) : « Entête 
 - **En-tête** (`lecon.html`, classe `bandeau ent`) : carte teintée de la couleur de la matière (`--mt`, `--mt-pale`), filet fin tout autour (le trait foncé à gauche est retiré à la demande de Jacques, comme celui sous l'onglet actif Cours / Révision / Quiz), médaille blanche cerclée, pastille « Cours » (le texte suit toujours l'onglet par `#sur`), matière et classe, titre, **chapitre** avec son icône, **place de la leçon** (« Leçon n du programme MINESEC » et barre « i / N leçons rédigées »), **situation de départ** encadrée en pointillés, puis les puces (durée, parties, labo, quiz).
 - **Barre des matières** (`.rail`) : plus de pastille colorée ni d'ombre autour des icônes ; 40 px au lieu de 46, icônes de 24 px ; matière ouverte signalée par le trait de sa couleur.
 - **Offre** : autres formules (`.fo-mini`), note de paiement (`.offre-n`) et liens (enseignants, accompagnement, cahier : `.offre-l`) encadrés d'un filet de 1,5 px, sans ombre.
+- **Situation de vie et tâche** (`.apc`) : une carte à pictogramme (boussole), texte aligné à gauche et sans césure (la justification creusait des trous au téléphone) ; « Ta tâche » dans son propre encadré doré, pictogramme crayon, libellé au-dessus.
 - **Leçons voisines** (`.suite`) : deux vrais boutons avec flèche ronde ; la suivante (ou « Tout le programme ») en bleu plein, flèche or.
-- `modele.css?v=20261117c` sur les 7 pages d'Apprendre. Bancs : réglages 29/29, verrou 18/18, charte 34/34, survol 4/4, gabarits, planche mobile, lisibilité au vert ; captures au téléphone et à l'ordinateur, 0 erreur JS.
+- `modele.css?v=20261117d` sur les 7 pages d'Apprendre. Bancs : réglages 29/29, verrou 18/18, charte 34/34, survol 4/4, gabarits, planche mobile, lisibilité au vert ; captures au téléphone et à l'ordinateur, 0 erreur JS.
 
 ## Apprendre : lot 4 des leçons approfondies — aimants, osmose, Rutherford, mesure, division euclidienne (17/11/2026)
 
