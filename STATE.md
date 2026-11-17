@@ -1,3 +1,14 @@
+## Corrigés : dessin des leçons, suivi des corrigés consultés (17/11/2026)
+
+Demande de Jacques : « Enrichis aussi les pages de corrigés ».
+
+- Les sources des corrigés (Guides .docx, pack/content) ne sont pas dans le dépôt : **nouveau script `tools/corriges_lecons.py`** (feuille `tools/corriges_lecons.css`) qui retravaille les 125 pages de séquence publiées, de façon idempotente (marqueurs `cr-ent`, `cr-style`, `cr-js`, `cr-suite`, posés AVANT les blocs de l'habillage pour que `habiller_pages.py` reste stable). `build_corriges.py` le relance à la fin ; contrôle `--controle` ajouté à l'étape « habillage » de `deploy.yml`.
+- **En-tête carte** à la place du bandeau bleu (le `<header>` dans `.wrap` empêche `vitrine.js` de recréer le bandeau) : médaille, pastille, « Français · classe · ouvrage », titre, « L'essentiel », puces (exercices corrigés, leçons, semaines, énoncés dans le cahier ou le livret, gratuit), **barre « Corrigés consultés : n / N »** avec remise à zéro.
+- **Leçons** : numéro au cercle magenta à point or, titre magenta souligné magenta → or, semaine en pastille, objectif en encadré à cible, rubriques bleu-vert, exercices en cartes ; Roboto (sélecteurs `body:has(#vrtNav):has(.cr-ent)` : l'habillage impose Poppins avec une forte spécificité).
+- **Suivi local** (localStorage `vrt_corr_<chemin>`) : un exercice dont on ouvre le corrigé passe en vert avec « Vu », la barre de l'en-tête avance ; conservé au rechargement.
+- **Séquence précédente / suivante** d'après la barre des séquences de la page.
+- Contrôlé dans Chromium (390 et 1280 px) : pas de bandeau, aucun débordement, 0 erreur JS. `corriges_lecons`, `habiller_pages`, `build_llms`, `alleger_corriges` en `--controle`, `tests/chiffres_annonces.cjs`, `tests/ci_scripts_suivis.cjs` au vert.
+
 ## Annales et séquentielles enrichies (17/11/2026)
 
 Demande de Jacques : « Enrichis aussi les annales et les séquences ».

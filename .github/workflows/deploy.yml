@@ -817,7 +817,9 @@ jobs:
       #    — ou une barre qui ne suit plus la vitrine. Le contrôle échoue
       #    alors, et nomme la commande à lancer.
       - name: 🧥 Chaque page porte-t-elle l'habillage de la vitrine ?
-        run: python tools/habiller_pages.py --controle
+        run: |
+          python tools/habiller_pages.py --controle
+          python tools/corriges_lecons.py --controle
 
       # ── 🃏 UNE CARTE SURVOLÉE DISPARAÎT-ELLE ? Signalé le 13/09/2026 sur
       #    /corriges/ : les cartes s'effaçaient au passage de la souris.

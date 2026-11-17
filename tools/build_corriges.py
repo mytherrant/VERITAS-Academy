@@ -1191,3 +1191,6 @@ def main():
 
 if __name__ == "__main__":
     main()
+    # Dessin des leçons et suivi des corrigés consultés (17/11/2026) : à relancer après chaque génération.
+    import subprocess
+    subprocess.run([sys.executable, os.path.join(HERE, "corriges_lecons.py")], check=True)
