@@ -85,14 +85,15 @@
 
   function aimant3D() {
     var o = [], xn = -55, xs = 55, k;
-    o.push({ f: "boite", c: [0, -6, 0], d: [470, 10, 320], coul: "#C89A62", dessus: "#D9AE76" });
+    o.push({ f: "boite", c: [0, -6, 0], d: [470, 10, 320], coul: "#7A4A22", dessus: "#A8703A" });
     o.push({ f: "boite", c: [-45, 2, 0], d: [90, 22, 34], coul: "#D9472B", div: false });
     o.push({ f: "boite", c: [45, 2, 0], d: [90, 22, 34], coul: "#1E499B", div: false });
     for (k = 0; k < 12; k++) {
       var a = 2 * Math.PI * k / 12, cx = 150 * Math.cos(a), cz = 110 * Math.sin(a), e = champ(cx, cz, xn, 0, xs, 0), n = Math.sqrt(e[0] * e[0] + e[1] * e[1]), ux = e[0] / n, uz = e[1] / n, L = 15, w = 4, h = 9, ec = [0, 34, 0];
-      o.push({ f: "cylindre", c: [cx, 0, cz], r: 19, h: 6, n: 20, coul: "#B8BFCC", dessus: "#F4F2EA", ec: ec });
+      o.push({ f: "cylindre", c: [cx, 0, cz], r: 19, h: 6, n: 20, coul: "#B08D57", dessus: "#FBF6E9", ec: ec });
       o.push({ f: "poly", pts: [[cx + ux * L, h, cz + uz * L], [cx - uz * w, h, cz + ux * w], [cx + uz * w, h, cz - ux * w]], coul: "#D9472B", ec: ec });
-      o.push({ f: "poly", pts: [[cx - ux * L, h, cz - uz * L], [cx + uz * w, h, cz - ux * w], [cx - uz * w, h, cz + ux * w]], coul: "#5C6478", ec: ec });
+      o.push({ f: "poly", pts: [[cx - ux * L, h, cz - uz * L], [cx + uz * w, h, cz - ux * w], [cx - uz * w, h, cz + ux * w]], coul: "#E8ECF1", ec: ec });
+      o.push({ f: "cylindre", c: [cx, h, cz], r: 2, h: 1.5, n: 8, coul: "#B08D57", ec: ec });
     }
     [[-150, 0, 120], [170, 0, -120], [0, 0, 140]].forEach(function (p, i) { o.push({ f: "cylindre", c: p, r: 2.2, h: 40, n: 6, axe: "x", coul: "#7F8794" }); });
     return o;
@@ -382,10 +383,10 @@
   function feuille3D() {
     var o = [], k, R = alea(1911);
     o.push({ f: "boite", c: [0, -70, 0], d: [520, 8, 340], coul: "#3C4253", dessus: "#4B5266" });
-    o.push({ f: "boite", c: [-215, -10, 0], d: [70, 70, 70], coul: "#5F6672", dessus: "#737B88" });
+    o.push({ f: "boite", c: [-215, -10, 0], d: [70, 70, 70], coul: "#6E7681", dessus: "#8A929C" });
     o.push({ f: "sphere", c: [-205, 0, 0], r: 7, coul: "#F2994A" });
     o.push({ f: "cylindre", c: [-180, 0, 0], r: 1.6, h: 175, n: 6, axe: "x", coul: "#FF7A45" });
-    o.push({ f: "boite", c: [0, 0, 0], d: [2, 120, 120], coul: "#F2C94C", div: false });
+    o.push({ f: "boite", c: [0, 0, 0], d: [2, 120, 120], coul: "#D4AF37", div: false });
     o.push({ f: "cylindre", c: [0, -50, 0], r: 230, h: 100, n: 48, coul: "#9BE3B0", op: 0.12, double: true });
     /* éclairs sur l'écran : nombreux en face, quelques-uns déviés, un rare vers l'arrière */
     for (k = 0; k < 26; k++) { var a = (R() - 0.5) * 0.25, y = (R() - 0.5) * 60; o.push({ f: "sphere", c: [229 * Math.cos(a), y, 229 * Math.sin(a)], r: 3.2, coul: "#C8FF6A" }); }
@@ -508,16 +509,16 @@
   function defsCagette(id) { return defsMangue(id) + lin(id + "bo", ["#E2B57A", "#C08850", "#8A5A2D"], true); }
   function cagettes3D() {
     var o = [], i, j, k, R = alea(250);
-    o.push({ f: "boite", c: [0, -6, 0], d: [600, 8, 330], coul: "#C9A97A", dessus: "#D8BC8E" });
+    o.push({ f: "boite", c: [0, -6, 0], d: [600, 8, 330], coul: "#8C6A45", dessus: "#B08A5E" });
     for (i = 0; i < 10; i++) {
       var col = i % 5, et = Math.floor(i / 5), cx = -200 + col * 100, cz = -50, cy = et * 46, ec = [0, et * 50, et * 40];
       [[0, 0, 0, 90, 4, 64], [0, 18, -30, 90, 32, 4], [0, 18, 30, 90, 32, 4], [-43, 18, 0, 4, 32, 64], [43, 18, 0, 4, 32, 64]].forEach(function (b) {
-        o.push({ f: "boite", c: [cx + b[0], cy + b[1], cz + b[2]], d: [b[3], b[4], b[5]], coul: "#B9824A", dessus: "#D9A86A", div: false, ec: ec });
+        o.push({ f: "boite", c: [cx + b[0], cy + b[1], cz + b[2]], d: [b[3], b[4], b[5]], coul: "#C9A576", dessus: "#E3C79C", div: false, ec: ec });
       });
-      for (j = 0; j < 24; j++) { k = j % 12; o.push({ f: "sphere", c: [cx - 33 + (k % 6) * 13.2, cy + 28 + Math.floor(j / 12) * 10, cz - 18 + Math.floor(k / 6) * 26 + (R() - 0.5) * 6], r: 6.6, coul: R() < 0.3 ? "#9FBF3B" : (R() < 0.5 ? "#F2A93B" : "#F7C948"), ec: ec }); }
+      for (j = 0; j < 24; j++) { k = j % 12; o.push({ f: "sphere", c: [cx - 33 + (k % 6) * 13.2, cy + 28 + Math.floor(j / 12) * 10, cz - 18 + Math.floor(k / 6) * 26 + (R() - 0.5) * 6], r: 6.6, coul: ["#F4B63F", "#E98B2A", "#8DB33A", "#D9542B", "#F7CF4A"][Math.floor(R() * 5)], ec: ec }); }
     }
-    o.push({ f: "cylindre", c: [150, 0, 100], r: 48, r2: 58, h: 22, n: 24, coul: "#7FA6C9", dessus: "#9CC0DE" });
-    for (j = 0; j < 10; j++) { var a = j * 0.63, rr = j < 6 ? 30 : 10; o.push({ f: "sphere", c: [150 + rr * Math.cos(a), 26 + (j < 6 ? 0 : 10), 100 + rr * Math.sin(a)], r: 7, coul: j % 3 ? "#F2A93B" : "#9FBF3B" }); }
+    o.push({ f: "cylindre", c: [150, 0, 100], r: 48, r2: 58, h: 22, n: 24, coul: "#2F6DB5", dessus: "#4C8AD0" });
+    for (j = 0; j < 10; j++) { var a = j * 0.63, rr = j < 6 ? 30 : 10; o.push({ f: "sphere", c: [150 + rr * Math.cos(a), 26 + (j < 6 ? 0 : 10), 100 + rr * Math.sin(a)], r: 7, coul: ["#F4B63F", "#E98B2A", "#8DB33A", "#D9542B"][j % 4] }); }
     return o;
   }
 
@@ -609,7 +610,7 @@
   var M_OLD = ancien("2nde-c-physique-mesure");
   function piedCoulisse3D() {
     var o = [], i;
-    o.push({ f: "boite", c: [0, -14, 0], d: [560, 6, 220], coul: "#8C6A45", dessus: "#A47E54" });
+    o.push({ f: "boite", c: [0, -14, 0], d: [560, 6, 220], coul: "#6B4A2B", dessus: "#94693F" });
     o.push({ f: "boite", c: [10, 0, 0], d: [420, 6, 34], coul: "#C3C9D2", dessus: "#E3E7ED", div: false });
     for (i = 0; i <= 40; i++) o.push({ f: "boite", c: [-190 + i * 9.5, 3.4, -10 + (i % 5 ? 4 : 0)], d: [0.9, 0.6, i % 5 ? 8 : 16], coul: "#1B2233", div: false });
     o.push({ f: "boite", c: [-205, 0, 40], d: [14, 6, 120], coul: "#B5BCC7", dessus: "#D8DDE4", div: false });

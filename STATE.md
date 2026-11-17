@@ -9,6 +9,21 @@ Retours de Jacques (captures d'une leçon de Tle A au téléphone) : « Entête 
 - **Leçons voisines** (`.suite`) : deux vrais boutons avec flèche ronde ; la suivante (ou « Tout le programme ») en bleu plein, flèche or.
 - `modele.css?v=20261117e` sur les 7 pages d'Apprendre. Bancs : réglages 29/29, verrou 18/18, charte 34/34, survol 4/4, gabarits, planche mobile, lisibilité au vert ; captures au téléphone et à l'ordinateur, 0 erreur JS.
 
+## Apprendre : lot 5 (classes d'examen) et pages « cours » enrichies (17/11/2026)
+
+Demandes de Jacques : « Finalise et déploie » (lot 4 : PR #336 fusionnée, déploiement réussi), « Continue en privilégiant les classes d'examen », « Même en bas sur cours ».
+
+- **`apprendre/_src/12-approfondies-examens.js`** : 5 leçons gratuites de classes d'examen au gabarit approfondi, remplacées en place (`remplacer()` garde aussi `scenes`) :
+  - **Tle C, numération binaire** : tableau de score à 8 ampoules du gymnase de Bafoussam (45 = 00101101₂, maximum 255, 9ᵉ ampoule pour 300) ; ampoules 2D, divisions successives, tableau 3D.
+  - **Tle A, microscopie optique** : TP de Bertoua (20 mm au ×400 = 50 µm) ; microscope 3D, champ d'oignon avec barre d'échelle, joue et oignon.
+  - **Tle A, organites** : mitochondries du cœur d'un coureur de la Course de l'Espoir (5 000 contre 100 dans la peau) ; mitochondrie optique / électronique, cellule 3D en vue éclatée.
+  - **3e ECM, sièges** : conseil municipal simulé de Mbalmayo (12 000 exprimés, 7 sièges : 3, 2, 1, 1) ; barres quotient / reste, hémicycle 3D ; **simulateur** (voix des 4 listes, 3 à 21 sièges, tableau et hémicycle).
+  - **3e arts, ombres** : canari de Foumban pour l'affiche ; sphère aux six valeurs, cube et sphère 3D.
+- **Pages statiques `apprendre/cours/*.html`** (`tools/apprendre_statique.js`) : affichent désormais la situation de départ (scène, documents, question, tâche, hypothèses), les planches 2D (et un encart pour les planches 3D, simulations et labos), les indices avec les hypothèses validées ou rejetées, et **la situation résolue en bas de page** avant la fiche de révision. Styles ajoutés au bloc `STYLE` : les 288 pages statiques ont été régénérées puis habillées.
+- **Couleurs réalistes des planches 3D** (demande « couleurs plus réalistes, proches des objets réels ») : tableau à ampoules à incandescence (verre dépoli éteint, halo allumé, culots en laiton, cadre aluminium, banc en bois), microscope crème et chrome à platine noire, boussoles en laiton à cadran crème, cagettes en bois clair et mangues mûres variées, bassine bleue, établis et tables en bois, feuille d'or, plomb gris bleuté, hémicycle sur parquet.
+- `lecons.js?v=20261117c`. Contrôlé dans Chromium (1200 et 390 px) : aucun débordement, aucune erreur JS. Bancs : réglages 29/29, verrou 18/18, gabarits 54/54, planche mobile 23/23, charte 34/34, lisibilité 7/7 ; contrôles `apprendre_statique` et `habiller_pages` au vert.
+- **Suite** : autres leçons gratuites de classes d'examen (3e français, histoire, géographie, langues ; Tle philosophie, orientation ; 1re langues et ESF).
+
 ## Apprendre : lot 4 des leçons approfondies — aimants, osmose, Rutherford, mesure, division euclidienne (17/11/2026)
 
 Demande de Jacques : « Continue à enrichir les leçons (avec situation de vie de départ résolue, labos, simulation, effets 2D, 3D réalistes) ».
