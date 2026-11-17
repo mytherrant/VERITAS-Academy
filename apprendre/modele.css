@@ -282,3 +282,6 @@ html body .suite a:hover{border-color:#1E499B!important;transform:translateY(-1p
 html body .suite a.su-suiv:hover{background:#163A80!important}
 @media (prefers-reduced-motion:reduce){html body .suite a{transition:none}html body .suite a:hover{transform:none}}
 .bandeau.ent .ent-pos>span:first-child{flex:0 0 100%}
+
+/* Onglet actif (Cours, Révision, Quiz) : sans le trait foncé du bas (17/11/2026, « même en bas sur cours ») */
+html body .formats button[aria-selected=true]{box-shadow:none!important;border:1.5px solid #9FBEEA!important}
