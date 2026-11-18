@@ -13029,6 +13029,1264 @@ VRT_PLUS("3e-en-articles", [
 
 })();
 
+/* Leçons enrichies — lettres et langues, lot A (18/11/2026), consignes de Jacques : situation résolue avec les formules (règles,
+   structures) étape par étape, exemples, astuces, planches 2D. AJOUTS SEULEMENT (enrichir) : blocs def / formule / ex / astuce en
+   fin de partie, planches, denouement.formules. Partage avec la session des sciences : voir STATE.md. */
+(function () {
+  "use strict";
+  var NUIT = "#001136", BLEU = "#1E499B", GRIS = "#4D5163", VERT = "#17784D", ROUGE = "#C62828", TERRE = "#C46A2B";
+
+  function txt(x, y, t, o) {
+    o = o || {};
+    return "<text x='" + x + "' y='" + y + "' text-anchor='" + (o.a || "middle") + "' font-size='" + (o.s || 12) + "' font-weight='" + (o.w || 700) + "' fill='" + (o.c || NUIT) + "'" + (o.i ? " font-style='italic'" : "") + (o.halo ? " stroke='#fff' stroke-width='3' paint-order='stroke'" : "") + ">" + t + "</text>";
+  }
+  function lin(id, cs, vertical) {
+    var s = "<linearGradient id='" + id + "'" + (vertical ? " x1='0' y1='0' x2='0' y2='1'" : "") + ">";
+    cs.forEach(function (c, i) { s += "<stop offset='" + (i / (cs.length - 1)).toFixed(2) + "' stop-color='" + c + "'/>"; });
+    return s + "</linearGradient>";
+  }
+  function rad(id, cs) {
+    var s = "<radialGradient id='" + id + "' cx='35%' cy='30%' r='75%'>";
+    cs.forEach(function (c, i) { s += "<stop offset='" + (i / (cs.length - 1)).toFixed(2) + "' stop-color='" + c + "'/>"; });
+    return s + "</radialGradient>";
+  }
+  function fleche(id, c) { return "<marker id='" + id + "' markerWidth='10' markerHeight='10' refX='7' refY='5' orient='auto'><path d='M0 1L8 5L0 9Z' fill='" + c + "'/></marker>"; }
+  function svg(w, h, alt, defs, corps) {
+    return "<svg viewBox='0 0 " + w + " " + h + "' role='img' aria-label='" + alt + "' font-family='Inter,Arial,sans-serif'><rect width='" + w + "' height='" + h + "' fill='#fff'/><defs>" + defs + "</defs>" + corps +
+      "<text x='" + (w - 6) + "' y='" + (h - 5) + "' font-size='8' text-anchor='end' fill='#8A93A6'>Planche VÉRITAS</text></svg>";
+  }
+  function ancien(id) { return window.VRT_LECONS[id]; }
+  function remplacer(id, o) {
+    var a = ancien(id);
+    if (a) ["apc", "examen", "rang", "cle", "scenes"].forEach(function (k) { if (a[k] != null && o[k] == null) o[k] = a[k]; });
+    VRT_L(id, o);
+    if (a) o.ordre = a.ordre;
+  }
+  function q(qq, bonne, f1, f2, e) { return { q: qq, r: [bonne, f1, f2], b: 0, e: e }; }
+  function partie(old, i) { return old && old.parties[i] ? old.parties[i].html : ""; }
+  function bulle(x, y, w, t, c) { return "<rect x='" + x + "' y='" + y + "' width='" + w + "' height='30' rx='12' fill='#fff' stroke='" + (c || "#C9D2E3") + "'/>" + txt(x + w / 2, y + 20, t, { s: 11.5 }); }
+  function perso(x, y, peau, habit, bas) {
+    bas = bas || "#2E3445";
+    return "<g transform='translate(" + x + " " + y + ")'><ellipse cx='0' cy='84' rx='18' ry='4' fill='#001136' opacity='.18'/>" +
+      "<rect x='-9' y='44' width='8' height='36' rx='3' fill='" + bas + "'/><rect x='1' y='44' width='8' height='36' rx='3' fill='" + bas + "'/>" +
+      "<ellipse cx='-6' cy='81' rx='7' ry='3.5' fill='#1F2328'/><ellipse cx='6' cy='81' rx='7' ry='3.5' fill='#1F2328'/>" +
+      "<path d='M-13 46L-16 18C-16 13 -12 11 -6 10H6C12 11 16 13 16 18L13 46Z' fill='" + habit + "'/>" +
+      "<path d='M-15 16L-20 40' stroke='" + habit + "' stroke-width='7' stroke-linecap='round'/><path d='M15 16L20 40' stroke='" + habit + "' stroke-width='7' stroke-linecap='round'/>" +
+      "<circle cx='-20' cy='42' r='3.6' fill='" + peau + "'/><circle cx='20' cy='42' r='3.6' fill='" + peau + "'/>" +
+      "<rect x='-3.5' y='5' width='7' height='7' fill='" + peau + "'/><ellipse cx='0' cy='-2' rx='9' ry='10.5' fill='" + peau + "'/>" +
+      "<path d='M-9 -4C-10 -14 -4 -13.5 0 -13.5S10 -14 9 -4C7 -9 -7 -9 -9 -4Z' fill='#1B1410'/><ellipse cx='-9' cy='-1' rx='1.8' ry='3' fill='" + peau + "'/><ellipse cx='9' cy='-1' rx='1.8' ry='3' fill='" + peau + "'/></g>";
+  }
+  /* portrait en buste (arbre généalogique) */
+  function portrait(x, y, peau, habit, cheveux, age) {
+    var s = "<g transform='translate(" + x + " " + y + ")'><circle r='30' fill='#F4EFE4' stroke='#C9A576' stroke-width='3'/><clipPath id='pc" + x + "_" + y + "'><circle r='28'/></clipPath><g clip-path='url(#pc" + x + "_" + y + ")'>";
+    s += "<path d='M-26 32C-26 14 -14 10 0 10S26 14 26 32Z' fill='" + habit + "'/><rect x='-4' y='2' width='8' height='10' fill='" + peau + "'/><ellipse cy='-6' rx='11' ry='13' fill='" + peau + "'/>";
+    s += age === "vieux" ? "<path d='M-11 -10C-12 -20 -4 -21 0 -21S12 -20 11 -10C9 -14 -9 -14 -11 -10Z' fill='#D8D8D8'/>" : age === "femme" ? "<path d='M-13 -6C-15 -24 15 -24 13 -6C12 -14 -12 -14 -13 -6Z' fill='" + cheveux + "'/><path d='M-13 -14h26v-6c-6 -6 -20 -6 -26 0Z' fill='" + habit + "'/>" : "<path d='M-11 -10C-12 -20 -4 -21 0 -21S12 -20 11 -10C9 -14 -9 -14 -11 -10Z' fill='" + cheveux + "'/>";
+    s += "<circle cx='-4' cy='-6' r='1.4' fill='#1B1410'/><circle cx='4' cy='-6' r='1.4' fill='#1B1410'/><path d='M-3 2q3 2 6 0' stroke='#1B1410' fill='none'/></g></g>";
+    return s;
+  }
+  /* boucle d'exercice générique : [phrase avec ___, [bonne, autres…], explication] */
+  function exercice(el, C, suivant, lib) {
+    var i = 0, ok = 0;
+    el.innerHTML = "<p class='labo-r' data-q style='font-size:16px'></p><div style='display:flex;gap:8px;flex-wrap:wrap' data-c></div><p class='an-note' data-e></p><p class='labo-r' data-s></p>";
+    function $(s) { return el.querySelector(s); }
+    function poser() {
+      var c = C[i];
+      $("[data-q]").innerHTML = (i + 1) + ". " + c[0].replace("___", "<b style='border-bottom:2px dashed #1E499B;padding:0 14px'>?</b>");
+      $("[data-e]").textContent = ""; $("[data-s]").innerHTML = lib + " " + (i + 1) + " / " + C.length + " · score : <b>" + ok + "</b>";
+      $("[data-c]").innerHTML = c[1].slice().sort().map(function (x) { return "<button type='button' class='btn-l' data-v='" + x + "'>" + x + "</button>"; }).join("");
+      el.querySelectorAll("[data-v]").forEach(function (b) {
+        b.addEventListener("click", function () {
+          var bon = b.dataset.v === c[1][0]; if (bon) ok++;
+          $("[data-q]").innerHTML = (i + 1) + ". " + c[0].replace("___", "<b style='color:" + (bon ? VERT : ROUGE) + "'>" + c[1][0] + "</b>");
+          $("[data-e]").innerHTML = (bon ? "✔ " : "✘ ") + c[2];
+          el.querySelectorAll("[data-v]").forEach(function (x) { x.disabled = true; });
+          var nx = document.createElement("button"); nx.type = "button"; nx.className = "btn-l"; nx.textContent = i + 1 < C.length ? suivant : "↺";
+          nx.addEventListener("click", function () { i = (i + 1) % C.length; if (!i) ok = 0; poser(); });
+          $("[data-c]").appendChild(nx);
+          $("[data-s]").innerHTML = lib + " " + (i + 1) + " / " + C.length + " · score : <b>" + ok + "</b>";
+        });
+      });
+    }
+    poser();
+  }
+
+  function alea(g) { return function () { g = (g * 16807) % 2147483647; return (g - 1) / 2147483646; }; }
+  /* Consignes de Jacques (18/11/2026) : situation résolue avec les formules étape par étape, exemples, règles, astuces,
+     planches 2D et 3D. AJOUTS SEULEMENT : blocs en fin de partie, planches, denouement.formules. */
+  function enrichir(id, o) {
+    var L = ancien(id); if (!L) return;
+    (o.blocs || []).forEach(function (b) { var p = L.parties[b[0]]; if (p) p.html = (p.html || "") + b[1]; });
+    (o.planches || []).forEach(function (b) { var p = L.parties[b[0]]; if (p) p.planches = (p.planches || []).concat([b[1]]); });
+    if (o.formules && L.denouement && !(L.denouement.formules || []).length) L.denouement.formules = o.formules;
+  }
+  function def(t, h) { return "<div class='def'><b>" + t + "</b>" + h + "</div>"; }
+  function formule(h) { return "<p class='formule'>" + h + "</p>"; }
+  function ex(h, t) { return "<div class='ex'><b>" + (t || "Exemples") + "</b>" + h + "</div>"; }
+  function astuce(h, t) { return "<div class='astuce'><b>" + (t || "Astuce") + "</b>" + h + "</div>"; }
+  function attention(h, t) { return "<div class='attention'><b>" + (t || "Attention") + "</b>" + h + "</div>"; }
+  function methode(h, t) { return "<div class='methode'><b>" + (t || "Méthode") + "</b>" + h + "</div>"; }
+  function F(nom, f, calcul) { return { nom: nom, f: f, calcul: calcul }; }
+  /* fiche 2D en colonnes : [{t, c, l:[lignes]}] */
+  function colonnes(titre, cols, h, alt) {
+    var W = 640, n = cols.length, w = (W - 30 - (n - 1) * 12) / n, s = "<rect width='640' height='" + h + "' fill='#FBF8F2'/>" + txt(320, 28, titre, { s: 15 });
+    cols.forEach(function (c, i) {
+      var x = 15 + i * (w + 12);
+      s += "<rect x='" + x + "' y='44' width='" + w + "' height='" + (h - 58) + "' rx='12' fill='#fff' stroke='" + c.c + "' stroke-width='2'/><rect x='" + x + "' y='44' width='" + w + "' height='34' rx='11' fill='" + c.c + "'/>" + txt(x + w / 2, 66, c.t, { s: 14, c: "#fff" });
+      c.l.forEach(function (l, k) { s += txt(x + 12, 100 + k * 24, l, { s: 12, a: "start", w: l.charAt(0) === "→" ? 800 : 550, c: l.charAt(0) === "→" ? c.c : NUIT }); });
+    });
+    return svg(640, h, alt || titre, "", s);
+  }
+
+  /* ═══════════ 3e ANGLAIS — LES ARTICLES ═══════════ */
+  enrichir("3e-en-articles", {
+    blocs: [[0, def("Rule : a or an?", "Use <strong>a</strong> before a <strong>consonant sound</strong> and <strong>an</strong> before a <strong>vowel sound</strong>. Listen to the first sound, not the first letter.") + formule("a + consonant sound · an + vowel sound") + ex("a uniform (/juː/), a one-way street (/w/), a European country<br>an MP3 player (/em/), an umbrella, an honest answer (silent h)") + astuce("Say the word aloud before writing: <em>hour</em> starts with /aʊ/, so <strong>an hour</strong>; <em>university</em> starts with /juː/, so <strong>a university</strong>.", "Tip")],
+      [1, formule("the + noun already mentioned / unique / superlative / river, ocean, plural country") + ex("the Wouri, the Sanaga (rivers) · the Atlantic Ocean · the United States<br>but: Mount Cameroon, Lake Chad (no article)")],
+      [2, attention("No article before meals, sports and school subjects: <em>We have lunch at noon. He plays football. I like English.</em>", "Watch out")]],
+    planches: [[1, { type: "2D", titre: "Which article? A decision tree", legende: "Three questions decide the article: is the thing specific or unique? Is the noun singular and countable? Is it used in general or is it a name? Then listen to the first sound for a / an.", svg: (function () {
+      var s = "<rect width='640' height='300' fill='#FBF8F2'/>";
+      function b(x, y, w, t, c, f) { return "<rect x='" + x + "' y='" + y + "' width='" + w + "' height='44' rx='10' fill='" + (f || "#fff") + "' stroke='" + c + "' stroke-width='2'/>" + txt(x + w / 2, y + 27, t, { s: 12.5, c: f ? "#fff" : NUIT }); }
+      s += b(200, 14, 240, "Is it specific, known or unique?", BLEU) + "<path d='M320 58V80M320 80H120V100M320 80H520V100' stroke='" + NUIT + "' stroke-width='2' fill='none'/>" + txt(200, 76, "yes", { s: 11, c: VERT }) + txt(440, 76, "no", { s: 11, c: ROUGE });
+      s += b(40, 100, 160, "THE", VERT, VERT) + txt(120, 166, "the sun, the taxi I saw", { s: 11, w: 500 });
+      s += b(400, 100, 240, "Singular countable, first time?", BLEU) + "<path d='M520 144V166M520 166H440V186M520 166H600V186' stroke='" + NUIT + "' stroke-width='2' fill='none'/>" + txt(470, 162, "yes", { s: 11, c: VERT }) + txt(580, 162, "no", { s: 11, c: ROUGE });
+      s += b(330, 186, 200, "A / AN : listen!", "#C2540A", "#C2540A") + b(550, 186, 80, "Ø", GRIS, GRIS) + txt(430, 254, "a university · an hour", { s: 11, w: 500 }) + txt(590, 254, "Cameroon,", { s: 11, w: 500 }) + txt(590, 270, "mangoes", { s: 11, w: 500 });
+      return svg(640, 300, "Arbre de décision : chose précise ou unique, the ; singulier dénombrable cité pour la première fois, a ou an selon le son ; sinon pas d’article", "", s);
+    })() }]],
+    formules: [F("Premier son du nom", "a + son consonne ; an + son voyelle", "a university (/juː/) · an hour (/aʊ/)"), F("Chose unique ou connue", "the + nom unique, déjà cité ou superlatif", "the sun · the Atlantic Ocean · the Lobé Falls"), F("Sens général, nom de pays", "Ø + pluriel général, indénombrable ou pays", "Cameroon is beautiful · Mangoes are sweet")]
+  });
+
+  /* ═══════════ 3e ANGLAIS — LES PRÉSENTS ═══════════ */
+  enrichir("3e-en-present", {
+    blocs: [[0, formule("Subject + verb (-s with he / she / it) · do / does + not + verb · Do / Does + subject + verb?") + ex("Every Saturday, I go to the market with my mother.<br>My father works in a bank. Does he work on Sundays? No, he doesn't.") + attention("Spelling of -s: <em>watch → watches, go → goes, study → studies, play → plays</em>.", "Spelling")],
+      [1, formule("Subject + am / is / are + verb-ing") + def("Present continuous", "An action in progress <strong>now</strong>, or a <strong>temporary</strong> situation.") + ex("Look! The bus is coming.<br>My father usually works in Douala, but this month he is working in Garoua.") + astuce("Markers decide: <em>every day, usually, often</em> → simple present; <em>now, at the moment, look!, listen!</em> → present continuous.", "Tip")]],
+    planches: [[1, { type: "2D", titre: "Habit or now? Two timelines", legende: "Simple present: the action comes back again and again on the timeline (a habit). Present continuous: the action is happening around the moment of speaking (now).", svg: (function () {
+      var s = "<rect width='640' height='250' fill='#FBF8F2'/>", k;
+      [[70, "Simple present : I go to the market every Saturday", BLEU], [180, "Present continuous : I am writing a letter now", "#C2540A"]].forEach(function (r, i) {
+        s += txt(320, r[0] - 34, r[1], { s: 13, c: r[2] }) + "<path d='M40 " + r[0] + "H600' stroke='" + NUIT + "' stroke-width='2.5' marker-end='url(#tlF)'/><path d='M320 " + (r[0] - 12) + "V" + (r[0] + 12) + "' stroke='" + ROUGE + "' stroke-width='3'/>" + txt(320, r[0] + 30, "now", { s: 11, c: ROUGE });
+        if (!i) for (k = 0; k < 9; k++) s += "<circle cx='" + (70 + k * 62) + "' cy='" + r[0] + "' r='8' fill='" + BLEU + "'/>";
+        else s += "<rect x='270' y='" + (r[0] - 9) + "' width='100' height='18' rx='9' fill='#C2540A' opacity='.85'/>";
+      });
+      return svg(640, 250, "Deux lignes du temps : points répétés pour l’habitude, bande autour de maintenant pour l’action en cours", fleche("tlF", NUIT), s);
+    })() }]],
+    formules: [F("Habitude → présent simple", "every / usually + S + V(-s)", "« Every Saturday » → I go to the market"), F("Action en cours → présent continu", "now + S + am / is / are + V-ing", "« Now » → I am writing to you"), F("Verbe d'état", "know, like, want… → pas de -ing ; since / for → present perfect", "I know you · I have known you for one year")]
+  });
+
+  /* ═══════════ 3e ALLEMAND — PRÉPOSITIONS MIXTES ═══════════ */
+  enrichir("3e-de-prepositions", {
+    blocs: [[0, def("Règle", "Les neuf prépositions mixtes sont suivies du <strong>datif</strong> pour une position (Wo?) et de l'<strong>accusatif</strong> pour une direction (Wohin?).") + astuce("Retiens-les en chanson : <em>an, auf, hinter, in, neben, über, unter, vor, zwischen</em>.")],
+      [1, formule("Wo? + liegen, stehen, sitzen, hängen → DATIF (dem, der, dem, den)") + formule("Wohin? + legen, stellen, setzen, hängen → ACCUSATIF (den, die, das, die)") + ex("Das Buch liegt auf <strong>dem</strong> Tisch. → Ich lege das Buch auf <strong>den</strong> Tisch.<br>Die Katze sitzt unter <strong>dem</strong> Stuhl. → Die Katze läuft unter <strong>den</strong> Stuhl.") + methode("Repère le verbe, pose la question <em>Wo?</em> ou <em>Wohin?</em>, puis choisis le cas et l'article selon le genre du nom.")],
+      [2, attention("Un déplacement à l'intérieur d'un même lieu reste au datif : <em>Die Kinder laufen im Hof</em> (ils courent dans la cour, sans y entrer).")]],
+    planches: [[1, { type: "2D", titre: "Wo? ou Wohin? : verbes et articles", legende: "À gauche, les verbes de position et les articles du datif ; à droite, les verbes de déplacement et les articles de l'accusatif. Seul le masculin et le neutre changent vraiment : dem / den, dem / das, der / die.", svg: colonnes("Wo? → datif · Wohin? → accusatif", [{ t: "Wo? (position)", c: BLEU, l: ["liegen, stehen, sitzen, hängen, sein", "masculin : dem Tisch", "féminin : der Tasche", "neutre : dem Bett", "pluriel : den Bänken", "→ Das Heft liegt auf dem Tisch."] }, { t: "Wohin? (direction)", c: "#C2540A", l: ["legen, stellen, setzen, hängen, gehen", "masculin : den Tisch", "féminin : die Tasche", "neutre : das Bett (ins)", "pluriel : die Bänke", "→ Ich lege das Heft auf den Tisch."] }], 270, "Tableau : verbes de position et articles du datif, verbes de direction et articles de l’accusatif") }]],
+    formules: [F("Préposition mixte ?", "an, auf, hinter, in, neben, über, unter, vor, zwischen", "auf, in, unter : mixtes"), F("Position → datif", "Wo? + liegen / stehen → dem (m.), der (f.), dem (n.)", "Das Heft liegt auf dem Tisch"), F("Direction → accusatif", "Wohin? + legen / stellen → den (m.), die (f.), das (n.)", "Ich lege das Heft auf das Bett · ins Kino (in + das)")]
+  });
+
+  /* ═══════════ 3e ALLEMAND — VERBES FAIBLES ═══════════ */
+  enrichir("3e-de-verbes", {
+    blocs: [[0, def("Verbe faible", "Verbe régulier : son radical ne change pas ; on ajoute seulement les terminaisons du présent.") + formule("radical = infinitif − en ; ich -e · du -st · er/sie/es -t · wir -en · ihr -t · sie/Sie -en") + ex("wohnen : ich wohne, du wohnst, er wohnt, wir wohnen, ihr wohnt, sie wohnen.<br>kaufen : Du kaufst Bananen ; wir kaufen Brot.")],
+      [1, ex("arbeiten : du arbeitest, er arbeitet, ihr arbeitet · finden : er findet · tanzen : du tanzt (pas de -s- en plus)", "Cas particuliers") + astuce("Radical en -s, -ß, -z : <em>du</em> prend seulement <strong>-t</strong> : du tanzt, du heißt, du reist.") + attention("<em>Sie</em> (vous de politesse) se conjugue comme <em>sie</em> (ils) : Sie spielen, Herr Atangana.")]],
+    planches: [[0, { type: "2D", titre: "Spielen et arbeiten : les terminaisons en couleur", legende: "Le radical (en bleu) ne change pas ; seules les terminaisons (en orange) changent. Avec arbeiten, un e (en vert) s'ajoute devant -st et -t pour pouvoir prononcer.", svg: (function () {
+      var P = ["ich", "du", "er / sie / es", "wir", "ihr", "sie / Sie"], T = ["e", "st", "t", "en", "t", "en"], s = "<rect width='640' height='280' fill='#FBF8F2'/>";
+      [["spielen (jouer)", "spiel", 30], ["arbeiten (travailler)", "arbeit", 340]].forEach(function (v, j) {
+        s += "<rect x='" + v[2] + "' y='16' width='270' height='250' rx='12' fill='#fff' stroke='#C9D2E3'/>" + txt(v[2] + 135, 42, v[0], { s: 14, c: BLEU });
+        P.forEach(function (p, i) { var y = 76 + i * 32, e = j && (T[i] === "st" || T[i] === "t") ? "e" : ""; s += txt(v[2] + 20, y, p, { s: 13, a: "start", w: 600, c: GRIS }) + "<text x='" + (v[2] + 130) + "' y='" + y + "' font-size='16' font-weight='800'><tspan fill='" + BLEU + "'>" + v[1] + "</tspan><tspan fill='" + VERT + "'>" + e + "</tspan><tspan fill='#C2540A'>" + T[i] + "</tspan></text>"; });
+      });
+      return svg(640, 280, "Deux tableaux de conjugaison : spielen et arbeiten, radical en bleu, terminaisons en orange, e de liaison en vert", "", s);
+    })() }]],
+    formules: [F("Trouver le radical", "radical = infinitif − en", "spielen → spiel- · arbeiten → arbeit-"), F("Ajouter la terminaison", "ich -e · du -st · er -t · wir -en · ihr -t · sie -en", "ich spiele · du lernst · wir kaufen"), F("Radical en -t ou -d", "+ e devant -st et -t", "er arbeitet · du arbeitest")]
+  });
+
+  /* ═══════════ 3e ESPAGNOL — LA FAMILLE ═══════════ */
+  enrichir("3e-es-familia", {
+    blocs: [[0, def("Los parentescos", "On nomme chaque personne par son lien avec soi : <em>la tía</em> = la sœur de mon père ou de ma mère ; <em>el primo</em> = le fils de mon oncle ou de ma tante.") + ex("Mi tía Rose es la hermana de mi madre. Eric es su hijo : es mi primo.<br>Mis abuelos viven en el pueblo.") + astuce("Le masculin pluriel englobe les deux sexes : <em>los padres</em> = les parents ; <em>los hermanos</em> = frères et sœurs ; <em>los tíos</em> = l'oncle et la tante.")],
+      [1, formule("mi / tu / su + nom singulier · mis / tus / sus + nom pluriel (accord avec la chose possédée)") + ex("mi hermano → mis hermanos · su casa → sus casas · nuestra abuela")],
+      [2, formule("Somos + nombre (en casa) · Tengo + nombre + hermano(s) · Se llama + prénom")]],
+    planches: [[1, { type: "2D", titre: "Los posesivos : mi, mis, nuestro…", legende: "Le possessif s'accorde avec ce qui est possédé (singulier ou pluriel ; nuestro et vuestro aussi en genre), jamais avec le possesseur.", svg: colonnes("Los posesivos", [{ t: "un objet / une personne", c: BLEU, l: ["mi (mon, ma)", "tu (ton, ta)", "su (son, sa, leur, votre*)", "nuestro / nuestra", "vuestro / vuestra", "→ mi padre, su casa"] }, { t: "plusieurs", c: "#C2540A", l: ["mis (mes)", "tus (tes)", "sus (ses, leurs, vos*)", "nuestros / nuestras", "vuestros / vuestras", "→ mis hermanos, sus primos"] }], 270, "Tableau des possessifs espagnols au singulier et au pluriel") }]],
+    formules: [F("Nommer le lien de parenté", "hermana de mi madre = mi tía ; hijo de mi tía = mi primo", "Rose = la tía · Eric = el primo"), F("Accorder le possessif", "mi + singulier · mis + pluriel", "mis hermanos · mi padre"), F("COD de personne", "verbe + a + personne", "Quiero mucho a mi abuela")]
+  });
+
+  /* ═══════════ 3e ESPAGNOL — CHEZ LE MÉDECIN ═══════════ */
+  enrichir("3e-es-medico", {
+    blocs: [[0, formule("me / te / le duele + nom singulier · me / te / le duelen + nom pluriel") + astuce("<em>Doler</em> se construit comme <em>gustar</em> : c'est la partie du corps qui est sujet. Si elle est au pluriel, le verbe aussi : <em>me duelen las muelas</em>.") + ex("Me duele la espalda. — ¿Le duelen los oídos? — Al niño le duele la garganta.")],
+      [1, ex("Tome este jarabe <strong>tres veces al día</strong> durante <strong>cinco días</strong>.<br>Descanse y beba mucha agua.", "La receta (ordonnance)") + attention("<em>Desde ayer</em> = depuis hier ; <em>hace dos días</em> = il y a deux jours.")],
+      [2, def("Superlativo", "Relatif : <em>el / la / los / las + más / menos + adjectif + de</em> ; absolu : adjectif + <em>-ísimo</em>.") + formule("el hospital más grande de la ciudad · un médico buenísimo")]],
+    planches: [[1, { type: "2D", titre: "La receta del médico", legende: "Une ordonnance réelle se lit ainsi : le médicament, la dose, le nombre de prises par jour (veces al día) et la durée du traitement (durante… días).", svg: (function () {
+      var s = "<rect width='640' height='300' fill='#E9EEF4'/><g transform='rotate(-2 320 150)'><rect x='150' y='18' width='340' height='264' fill='#fff' stroke='#C9D2E3'/><rect x='150' y='18' width='340' height='40' fill='#2F6DB5'/>" + txt(320, 44, "Hospital Regional · Dr. Mbarga", { s: 13, c: "#fff" }) + txt(170, 80, "Paciente : Junior, 12 años", { s: 12, a: "start", w: 600 }) + txt(470, 80, "Fecha : 18/11", { s: 11, a: "end", c: GRIS });
+      [["1.", "Jarabe para la tos", "una cucharada, tres veces al día"], ["2.", "Paracetamol 500 mg", "un comprimido si tiene fiebre"], ["", "Durante cinco días", "beber mucha agua y descansar"]].forEach(function (r, i) { var y = 116 + i * 54; s += txt(170, y, r[0] + " " + r[1], { s: 14, a: "start", c: BLEU, i: true }) + txt(186, y + 20, r[2], { s: 12, a: "start", c: NUIT, i: true }); });
+      s += "<path d='M380 262q20 -20 40 0t40 -6' stroke='" + BLEU + "' stroke-width='2' fill='none'/>" + txt(430, 278, "firma", { s: 10, c: GRIS }) + "</g>";
+      return svg(640, 300, "Ordonnance espagnole manuscrite : sirop trois fois par jour, paracétamol en cas de fièvre, pendant cinq jours", "", s);
+    })() }]],
+    formules: [F("Douleur au singulier / au pluriel", "le duele + singulier · le duelen + pluriel", "Le duele la cabeza · le duelen los pies"), F("Durée et fréquence", "desde + moment · tres veces al día · durante + durée", "Tiene fiebre desde ayer · cinco días"), F("Superlatif", "el / la más + adj + de · adj + -ísimo", "el hospital más grande de la ciudad · buenísimo")]
+  });
+
+  /* ═══════════ 3e GREC — ÉSOPE ET HOMÈRE ═══════════ */
+  enrichir("3e-gr-esope-homere", {
+    blocs: [[1, def("Fable", "Récit court, souvent en prose chez Ésope, dont les personnages sont surtout des animaux ; il se termine par une <strong>morale</strong>, leçon de vie.") + formule("fable = récit court + animaux qui parlent + morale") + ex("<em>Le Corbeau et le Renard</em>, <em>La Cigale et la Fourmi</em> : d'Ésope à La Fontaine.") + astuce("Pour trouver la morale, demande-toi : quel défaut est puni, quelle qualité est récompensée ?")],
+      [0, ex("<em>Iliade</em> : la colère d'Achille pendant la guerre de Troie. <em>Odyssée</em> : dix ans de retour pour Ulysse.", "Les deux épopées") + attention("Une épopée n'est pas un roman : c'est un long poème chanté, transmis d'abord oralement par les aèdes.")]],
+    planches: [[2, { type: "2D", titre: "D'Homère à La Fontaine : une frise", legende: "Les deux genres traversent vingt-huit siècles : l'épopée d'Homère (VIIIᵉ siècle av. J.-C.), les fables d'Ésope (VIᵉ siècle av. J.-C.), reprises en vers par La Fontaine (XVIIᵉ siècle), tandis que les conteurs africains racontent toujours la ruse de la tortue.", svg: (function () {
+      var s = "<rect width='640' height='220' fill='#FBF8F2'/><path d='M30 110H610' stroke='" + NUIT + "' stroke-width='3' marker-end='url(#frF)'/>";
+      [[80, "VIIIᵉ s. av. J.-C.", "Homère", "Iliade, Odyssée", "#7A1F1F"], [210, "VIᵉ s. av. J.-C.", "Ésope", "fables en prose", VERT], [380, "XVIIᵉ siècle", "La Fontaine", "fables en vers", BLEU], [530, "aujourd'hui", "conteurs africains", "la tortue rusée", "#C2540A"]].forEach(function (e, i) { s += "<circle cx='" + e[0] + "' cy='110' r='9' fill='" + e[4] + "'/>" + txt(e[0], i % 2 ? 150 : 76, e[1], { s: 11, c: GRIS, w: 600 }) + txt(e[0], i % 2 ? 170 : 56, e[2], { s: 14, c: e[4] }) + txt(e[0], i % 2 ? 188 : 38, e[3], { s: 11, w: 500 }); });
+      return svg(640, 220, "Frise chronologique : Homère, Ésope, La Fontaine, conteurs africains", fleche("frF", NUIT), s);
+    })() }]],
+    formules: [F("Critères de l'épopée", "long poème + héros + dieux", "Odyssée : plus de 12 000 vers, Ulysse, Athéna → épopée"), F("Critères de la fable", "récit court + animaux + morale", "Le Lièvre et la Tortue → fable"), F("Héritage", "œuvres + mots + genre universel", "une odyssée, le talon d'Achille ; la tortue des contes africains")]
+  });
+
+  /* ═══════════ 3e FRANÇAIS — LA SUBORDONNÉE RELATIVE ═══════════ */
+  enrichir("3e-fr-relative", {
+    blocs: [[0, formule("antécédent + pronom relatif + (sujet) + verbe = subordonnée relative") + def("Antécédent", "Nom ou pronom que la relative complète ; le pronom relatif le représente dans la relative.")],
+      [1, ex("La route <strong>où</strong> l'accident a eu lieu est en travaux. (lieu)<br>Le chauffeur <strong>dont</strong> on parle est prudent. (parler <em>de</em>)<br>Le car <strong>que</strong> nous prenons part à 7 h. (COD)") + ex("La gare routière près de <strong>laquelle</strong> j'habite. · Les passagers <strong>auxquels</strong> il a parlé.", "Avec lequel")]],
+    planches: [[1, { type: "2D", titre: "Choisir le pronom relatif en trois gestes", legende: "On remplace le pronom par l'antécédent pour retrouver la phrase simple, on cherche la fonction, puis on choisit le pronom.", svg: (function () {
+      var s = "<rect width='640' height='250' fill='#FBF8F2'/>";
+      [["1. Phrase simple", "On parle du chauffeur.", BLEU], ["2. Fonction", "complément introduit par « de »", "#7B3F99"], ["3. Pronom", "le chauffeur DONT on parle", VERT]].forEach(function (e, i) { var x = 20 + i * 210; s += "<rect x='" + x + "' y='60' width='190' height='110' rx='14' fill='#fff' stroke='" + e[2] + "' stroke-width='2.5'/><rect x='" + x + "' y='60' width='190' height='34' rx='12' fill='" + e[2] + "'/>" + txt(x + 95, 82, e[0], { s: 14, c: "#fff" }) + txt(x + 95, 136, e[1], { s: 12, w: 600 }) + (i < 2 ? "<path d='M" + (x + 192) + " 115H" + (x + 208) + "' stroke='" + NUIT + "' stroke-width='3' marker-end='url(#rlF2)'/>" : ""); });
+      s += txt(320, 210, "sujet → qui · COD → que · de… → dont · lieu / temps → où · préposition → lequel", { s: 12, c: NUIT });
+      return svg(640, 250, "Trois étapes pour choisir le pronom relatif : phrase simple, fonction, pronom", fleche("rlF2", NUIT), s);
+    })() }]],
+    formules: [F("Repérer l'antécédent", "nom + pronom relatif + verbe", "« la gare … le car … les passagers … l'accident »"), F("Retrouver la fonction", "phrase simple : remplacer le pronom par l'antécédent", "on parle du car → dont ; le car part de la gare → d'où / de laquelle"), F("Ponctuer", "déterminative sans virgules ; explicative entre virgules", "les passagers qui étaient assis derrière (sans virgules)")]
+  });
+})();
+
+/* Leçons enrichies — lettres et langues, lot B (18/11/2026) : ESF, italien, chinois (1re), arabe (Tle). Même mécanisme que
+   29-enrichies-lettres-a.js : AJOUTS SEULEMENT (blocs def / formule / ex / astuce, planches 2D, denouement.formules). */
+(function () {
+  "use strict";
+  var NUIT = "#001136", BLEU = "#1E499B", GRIS = "#4D5163", VERT = "#17784D", ROUGE = "#C62828", TERRE = "#C46A2B";
+
+  function txt(x, y, t, o) {
+    o = o || {};
+    return "<text x='" + x + "' y='" + y + "' text-anchor='" + (o.a || "middle") + "' font-size='" + (o.s || 12) + "' font-weight='" + (o.w || 700) + "' fill='" + (o.c || NUIT) + "'" + (o.i ? " font-style='italic'" : "") + (o.halo ? " stroke='#fff' stroke-width='3' paint-order='stroke'" : "") + ">" + t + "</text>";
+  }
+  function lin(id, cs, vertical) {
+    var s = "<linearGradient id='" + id + "'" + (vertical ? " x1='0' y1='0' x2='0' y2='1'" : "") + ">";
+    cs.forEach(function (c, i) { s += "<stop offset='" + (i / (cs.length - 1)).toFixed(2) + "' stop-color='" + c + "'/>"; });
+    return s + "</linearGradient>";
+  }
+  function rad(id, cs) {
+    var s = "<radialGradient id='" + id + "' cx='35%' cy='30%' r='75%'>";
+    cs.forEach(function (c, i) { s += "<stop offset='" + (i / (cs.length - 1)).toFixed(2) + "' stop-color='" + c + "'/>"; });
+    return s + "</radialGradient>";
+  }
+  function fleche(id, c) { return "<marker id='" + id + "' markerWidth='10' markerHeight='10' refX='7' refY='5' orient='auto'><path d='M0 1L8 5L0 9Z' fill='" + c + "'/></marker>"; }
+  function svg(w, h, alt, defs, corps) {
+    return "<svg viewBox='0 0 " + w + " " + h + "' role='img' aria-label='" + alt + "' font-family='Inter,Arial,sans-serif'><rect width='" + w + "' height='" + h + "' fill='#fff'/><defs>" + defs + "</defs>" + corps +
+      "<text x='" + (w - 6) + "' y='" + (h - 5) + "' font-size='8' text-anchor='end' fill='#8A93A6'>Planche VÉRITAS</text></svg>";
+  }
+  function ancien(id) { return window.VRT_LECONS[id]; }
+  function remplacer(id, o) {
+    var a = ancien(id);
+    if (a) ["apc", "examen", "rang", "cle", "scenes"].forEach(function (k) { if (a[k] != null && o[k] == null) o[k] = a[k]; });
+    VRT_L(id, o);
+    if (a) o.ordre = a.ordre;
+  }
+  function q(qq, bonne, f1, f2, e) { return { q: qq, r: [bonne, f1, f2], b: 0, e: e }; }
+  function partie(old, i) { return old && old.parties[i] ? old.parties[i].html : ""; }
+  function bulle(x, y, w, t, c) { return "<rect x='" + x + "' y='" + y + "' width='" + w + "' height='30' rx='12' fill='#fff' stroke='" + (c || "#C9D2E3") + "'/>" + txt(x + w / 2, y + 20, t, { s: 11.5 }); }
+  function perso(x, y, peau, habit, bas) {
+    bas = bas || "#2E3445";
+    return "<g transform='translate(" + x + " " + y + ")'><ellipse cx='0' cy='84' rx='18' ry='4' fill='#001136' opacity='.18'/>" +
+      "<rect x='-9' y='44' width='8' height='36' rx='3' fill='" + bas + "'/><rect x='1' y='44' width='8' height='36' rx='3' fill='" + bas + "'/>" +
+      "<ellipse cx='-6' cy='81' rx='7' ry='3.5' fill='#1F2328'/><ellipse cx='6' cy='81' rx='7' ry='3.5' fill='#1F2328'/>" +
+      "<path d='M-13 46L-16 18C-16 13 -12 11 -6 10H6C12 11 16 13 16 18L13 46Z' fill='" + habit + "'/>" +
+      "<path d='M-15 16L-20 40' stroke='" + habit + "' stroke-width='7' stroke-linecap='round'/><path d='M15 16L20 40' stroke='" + habit + "' stroke-width='7' stroke-linecap='round'/>" +
+      "<circle cx='-20' cy='42' r='3.6' fill='" + peau + "'/><circle cx='20' cy='42' r='3.6' fill='" + peau + "'/>" +
+      "<rect x='-3.5' y='5' width='7' height='7' fill='" + peau + "'/><ellipse cx='0' cy='-2' rx='9' ry='10.5' fill='" + peau + "'/>" +
+      "<path d='M-9 -4C-10 -14 -4 -13.5 0 -13.5S10 -14 9 -4C7 -9 -7 -9 -9 -4Z' fill='#1B1410'/><ellipse cx='-9' cy='-1' rx='1.8' ry='3' fill='" + peau + "'/><ellipse cx='9' cy='-1' rx='1.8' ry='3' fill='" + peau + "'/></g>";
+  }
+  /* portrait en buste (arbre généalogique) */
+  function portrait(x, y, peau, habit, cheveux, age) {
+    var s = "<g transform='translate(" + x + " " + y + ")'><circle r='30' fill='#F4EFE4' stroke='#C9A576' stroke-width='3'/><clipPath id='pc" + x + "_" + y + "'><circle r='28'/></clipPath><g clip-path='url(#pc" + x + "_" + y + ")'>";
+    s += "<path d='M-26 32C-26 14 -14 10 0 10S26 14 26 32Z' fill='" + habit + "'/><rect x='-4' y='2' width='8' height='10' fill='" + peau + "'/><ellipse cy='-6' rx='11' ry='13' fill='" + peau + "'/>";
+    s += age === "vieux" ? "<path d='M-11 -10C-12 -20 -4 -21 0 -21S12 -20 11 -10C9 -14 -9 -14 -11 -10Z' fill='#D8D8D8'/>" : age === "femme" ? "<path d='M-13 -6C-15 -24 15 -24 13 -6C12 -14 -12 -14 -13 -6Z' fill='" + cheveux + "'/><path d='M-13 -14h26v-6c-6 -6 -20 -6 -26 0Z' fill='" + habit + "'/>" : "<path d='M-11 -10C-12 -20 -4 -21 0 -21S12 -20 11 -10C9 -14 -9 -14 -11 -10Z' fill='" + cheveux + "'/>";
+    s += "<circle cx='-4' cy='-6' r='1.4' fill='#1B1410'/><circle cx='4' cy='-6' r='1.4' fill='#1B1410'/><path d='M-3 2q3 2 6 0' stroke='#1B1410' fill='none'/></g></g>";
+    return s;
+  }
+  /* boucle d'exercice générique : [phrase avec ___, [bonne, autres…], explication] */
+  function exercice(el, C, suivant, lib) {
+    var i = 0, ok = 0;
+    el.innerHTML = "<p class='labo-r' data-q style='font-size:16px'></p><div style='display:flex;gap:8px;flex-wrap:wrap' data-c></div><p class='an-note' data-e></p><p class='labo-r' data-s></p>";
+    function $(s) { return el.querySelector(s); }
+    function poser() {
+      var c = C[i];
+      $("[data-q]").innerHTML = (i + 1) + ". " + c[0].replace("___", "<b style='border-bottom:2px dashed #1E499B;padding:0 14px'>?</b>");
+      $("[data-e]").textContent = ""; $("[data-s]").innerHTML = lib + " " + (i + 1) + " / " + C.length + " · score : <b>" + ok + "</b>";
+      $("[data-c]").innerHTML = c[1].slice().sort().map(function (x) { return "<button type='button' class='btn-l' data-v='" + x + "'>" + x + "</button>"; }).join("");
+      el.querySelectorAll("[data-v]").forEach(function (b) {
+        b.addEventListener("click", function () {
+          var bon = b.dataset.v === c[1][0]; if (bon) ok++;
+          $("[data-q]").innerHTML = (i + 1) + ". " + c[0].replace("___", "<b style='color:" + (bon ? VERT : ROUGE) + "'>" + c[1][0] + "</b>");
+          $("[data-e]").innerHTML = (bon ? "✔ " : "✘ ") + c[2];
+          el.querySelectorAll("[data-v]").forEach(function (x) { x.disabled = true; });
+          var nx = document.createElement("button"); nx.type = "button"; nx.className = "btn-l"; nx.textContent = i + 1 < C.length ? suivant : "↺";
+          nx.addEventListener("click", function () { i = (i + 1) % C.length; if (!i) ok = 0; poser(); });
+          $("[data-c]").appendChild(nx);
+          $("[data-s]").innerHTML = lib + " " + (i + 1) + " / " + C.length + " · score : <b>" + ok + "</b>";
+        });
+      });
+    }
+    poser();
+  }
+
+  function alea(g) { return function () { g = (g * 16807) % 2147483647; return (g - 1) / 2147483646; }; }
+  /* Consignes de Jacques (18/11/2026) : situation résolue avec les formules étape par étape, exemples, règles, astuces,
+     planches 2D et 3D. AJOUTS SEULEMENT : blocs en fin de partie, planches, denouement.formules. */
+  function enrichir(id, o) {
+    var L = ancien(id); if (!L) return;
+    (o.blocs || []).forEach(function (b) { var p = L.parties[b[0]]; if (p) p.html = (p.html || "") + b[1]; });
+    (o.planches || []).forEach(function (b) { var p = L.parties[b[0]]; if (p) p.planches = (p.planches || []).concat([b[1]]); });
+    if (o.formules && L.denouement && !(L.denouement.formules || []).length) L.denouement.formules = o.formules;
+  }
+  function def(t, h) { return "<div class='def'><b>" + t + "</b>" + h + "</div>"; }
+  function formule(h) { return "<p class='formule'>" + h + "</p>"; }
+  function ex(h, t) { return "<div class='ex'><b>" + (t || "Exemples") + "</b>" + h + "</div>"; }
+  function astuce(h, t) { return "<div class='astuce'><b>" + (t || "Astuce") + "</b>" + h + "</div>"; }
+  function attention(h, t) { return "<div class='attention'><b>" + (t || "Attention") + "</b>" + h + "</div>"; }
+  function methode(h, t) { return "<div class='methode'><b>" + (t || "Méthode") + "</b>" + h + "</div>"; }
+  function F(nom, f, calcul) { return { nom: nom, f: f, calcul: calcul }; }
+  /* fiche 2D en colonnes : [{t, c, l:[lignes]}] */
+  function colonnes(titre, cols, h, alt) {
+    var W = 640, n = cols.length, w = (W - 30 - (n - 1) * 12) / n, s = "<rect width='640' height='" + h + "' fill='#FBF8F2'/>" + txt(320, 28, titre, { s: 15 });
+    cols.forEach(function (c, i) {
+      var x = 15 + i * (w + 12);
+      s += "<rect x='" + x + "' y='44' width='" + w + "' height='" + (h - 58) + "' rx='12' fill='#fff' stroke='" + c.c + "' stroke-width='2'/><rect x='" + x + "' y='44' width='" + w + "' height='34' rx='11' fill='" + c.c + "'/>" + txt(x + w / 2, 66, c.t, { s: 14, c: "#fff" });
+      c.l.forEach(function (l, k) { s += txt(x + 12, 100 + k * 24, l, { s: 12, a: "start", w: l.charAt(0) === "→" ? 800 : 550, c: l.charAt(0) === "→" ? c.c : NUIT }); });
+    });
+    return svg(640, h, alt || titre, "", s);
+  }
+
+  /* ═══════════ 1re ESF — NOTIONS ═══════════ */
+  enrichir("1re-esf-notions", {
+    blocs: [[0, def("Économie sociale et familiale", "Discipline qui apprend à gérer les ressources du foyer (argent, temps, nourriture, santé, logement) pour le bien-être de chacun de ses membres.") + formule("solde du mois = recettes − dépenses ; épargne = solde positif mis de côté") + ex("Chez les Abena : 120 000 − 130 000 = −10 000 F (déficit) → l'argent manque dès le 20 du mois.")],
+      [1, ex("Acheter en gros au marché (sac de riz, bidon d'huile) plutôt qu'au détail chaque jour ; cuisiner les légumes de saison ; éteindre les ampoules inutiles.", "Bons gestes") + astuce("Écris le budget au début du mois et coche chaque dépense : on ne gère bien que ce que l'on note.")],
+      [2, attention("On n'économise jamais sur la santé et sur une alimentation équilibrée : un enfant malade coûte bien plus cher qu'un repas complet.")]],
+    planches: [[0, { type: "2D", titre: "Le cahier de budget des Abena", legende: "Le budget du mois écrit dans un cahier : à gauche les recettes, à droite les dépenses prévues et réelles. Le solde (recettes − dépenses) montre tout de suite si l'on peut épargner.", svg: (function () {
+      var D = [["Nourriture", 55, 48], ["Loyer", 25, 25], ["Transport", 12, 10], ["Eau, électricité", 8, 7], ["Téléphone", 10, 5], ["Santé", 5, 5], ["Divers", 15, 9]], s = "<rect width='640' height='320' fill='#E9EEF4'/><rect x='30' y='14' width='580' height='292' rx='6' fill='#FFFBEA' stroke='#E3D7A6'/><path d='M320 14V306' stroke='#E3D7A6' stroke-width='3'/>";
+      for (var k = 0; k < 11; k++) s += "<path d='M40 " + (60 + k * 22) + "H600' stroke='#D7E3F2'/>";
+      s += txt(175, 40, "Recettes", { s: 15, c: VERT, i: true }) + txt(70, 82, "Salaire et petit commerce", { s: 13, a: "start", c: BLEU, i: true }) + txt(300, 82, "120 000 F", { s: 13, a: "end", c: BLEU, i: true });
+      s += txt(465, 40, "Dépenses : avant → après", { s: 15, c: ROUGE, i: true });
+      D.forEach(function (d, i) { var y = 82 + i * 22; s += txt(334, y, d[0], { s: 12, a: "start", c: BLEU, i: true }) + txt(520, y, d[1] + " 000", { s: 12, a: "end", c: GRIS, i: true }) + txt(596, y, d[2] + " 000", { s: 12, a: "end", c: d[2] < d[1] ? VERT : BLEU, i: true }); });
+      s += "<path d='M334 246H600' stroke='" + NUIT + "'/>" + txt(334, 266, "Total", { s: 13, a: "start", i: true }) + txt(520, 266, "130 000", { s: 13, a: "end", c: ROUGE, i: true }) + txt(596, 266, "109 000", { s: 13, a: "end", c: VERT, i: true });
+      s += "<rect x='54' y='200' width='240' height='80' rx='10' fill='#fff' stroke='" + VERT + "' stroke-width='2'/>" + txt(174, 226, "Solde = 120 000 − 109 000", { s: 13, c: NUIT }) + txt(174, 252, "= 11 000 F épargnés", { s: 15, c: VERT }) + txt(174, 272, "33 000 F par trimestre", { s: 11, c: GRIS, w: 600 });
+      return svg(640, 320, "Cahier de budget : recettes 120 000 F, dépenses avant 130 000 F et après 109 000 F, épargne 11 000 F", "", s);
+    })() }]],
+    formules: [F("Faire le bilan", "solde = recettes − dépenses", "120 000 − 130 000 = −10 000 F : déficit"), F("Réduire sans nuire à la santé", "dépenses révisées = somme des postes après économies", "48 000 + 25 000 + 10 000 + 7 000 + 5 000 + 5 000 + 9 000 = 109 000 F"), F("Épargner pour la scolarité", "épargne = recettes − dépenses révisées ; × 3 pour un trimestre", "120 000 − 109 000 = 11 000 F/mois → 33 000 F/trimestre")]
+  });
+
+  /* ═══════════ 1re ESF — SIGNES D'ALARME ═══════════ */
+  enrichir("1re-esf-alarme", {
+    blocs: [[0, def("Fréquence respiratoire", "Nombre de respirations en une minute, comptées quand le bébé est calme, en regardant le ventre et la poitrine se soulever.") + formule("respiration rapide si : ≥ 60/min avant 2 mois · ≥ 50/min de 2 à 12 mois · ≥ 40/min de 1 à 5 ans")],
+      [1, ex("Nina, 6 mois, 62 respirations par minute : 62 ≥ 50 → respiration rapide, signe de danger.<br>Un bébé de 3 semaines à 55 par minute : 55 < 60, pas de respiration rapide (mais on surveille les autres signes).") + ex("Fièvre : température ≥ 38 °C ; chez un bébé de moins de 2 mois, toute fièvre impose de consulter.", "Seuils") + astuce("Compte pendant une minute entière, montre en main, bébé éveillé et calme : compter 15 secondes et multiplier par 4 donne souvent une erreur.")],
+      [2, methode("1. Repérer un signe de danger. 2. Partir tout de suite au centre de santé avec le carnet. 3. Pendant le trajet : garder le bébé au chaud, continuer à le faire téter s'il peut avaler. 4. Ne donner aucun remède sans avis.", "La conduite à tenir") + attention("Ne jamais donner de décoction, de purge ni de lavement à un nourrisson : ils peuvent aggraver la déshydratation ou l'empoisonner.")]],
+    formules: [F("Compter la respiration", "respirations comptées pendant 1 minute entière", "Nina : 62 respirations par minute"), F("Comparer au seuil de son âge", "2 à 12 mois : respiration rapide si ≥ 50/min", "62 ≥ 50 → respiration rapide, avec creusement sous les côtes"), F("Décider", "un seul signe de danger = consulter immédiatement", "ne tète plus + fièvre + respiration rapide → départ immédiat avec le carnet")]
+  });
+
+  /* ═══════════ 1re ITALIEN — ACCORD ET DÉSACCORD ═══════════ */
+  enrichir("1re-it-accordo", {
+    blocs: [[0, formule("Sono d'accordo con te / con Lei / con voi") + def("Accordo", "Formules pour montrer qu'on partage l'avis de quelqu'un : <em>Sono d'accordo, Hai ragione, Certo, Esatto, Proprio così</em>.") + ex("— I giovani devono aiutare in casa. — Sono d'accordo con Lei, professoressa!")],
+      [1, formule("Sì, però… · Da una parte…, dall'altra… · Non sono del tutto d'accordo") + ex("Da una parte i genitori decidono, dall'altra i figli devono poter parlare.<br>Non sono del tutto d'accordo : dipende dalla famiglia.") + astuce("Pour rester poli avec un adulte, utilise <em>Lei</em> (forme de politesse) et commence par une concession : <em>Capisco, però…</em>")],
+      [2, attention("<em>Penso che</em> est suivi du <strong>subjonctif</strong> : penso che <strong>sia</strong> importante, penso che i genitori <strong>abbiano</strong> ragione (et non <em>hanno</em>).")]],
+    planches: [[1, { type: "2D", titre: "De l'accord total au désaccord total", legende: "Une échelle pour choisir la bonne formule : plus on va vers la droite, plus on s'oppose. Au centre, les formules qui nuancent sont souvent les plus polies.", svg: (function () {
+      var E = [["Sono pienamente d'accordo", "#2E7D32"], ["Hai ragione", "#5AA14A"], ["Sì, però…", "#B8860B"], ["Dipende", "#E8A33D"], ["Non sono del tutto d'accordo", "#C2540A"], ["Non sono d'accordo", "#C62828"]], s = "<rect width='640' height='220' fill='#FBF8F2'/><defs><linearGradient id='acG'><stop offset='0' stop-color='#2E7D32'/><stop offset='.5' stop-color='#E8A33D'/><stop offset='1' stop-color='#C62828'/></linearGradient></defs><rect x='30' y='100' width='580' height='14' rx='7' fill='url(#acG)'/>";
+      E.forEach(function (e, i) { var x = 92 + i * 91; s += "<circle cx='" + x + "' cy='107' r='9' fill='#fff' stroke='" + e[1] + "' stroke-width='3'/>" + txt(x, i % 2 ? 150 : 76, e[0], { s: 11.5, c: e[1] }); });
+      s += txt(50, 196, "😀 d'accord", { s: 12, a: "start", c: VERT }) + txt(320, 196, "nuancer", { s: 12, c: "#B8860B" }) + txt(600, 196, "pas d'accord 🙁", { s: 12, a: "end", c: ROUGE });
+      return svg(640, 220, "Échelle des formules italiennes de l’accord total au désaccord total", "", s);
+    })() }]],
+    formules: [F("Exprimer un accord partiel", "Non sono del tutto d'accordo", "Non sono del tutto d'accordo con Lei, professoressa"), F("Nuancer poliment", "Da una parte…, dall'altra…", "Da una parte i genitori decidono, dall'altra i figli parlano"), F("Donner son opinion", "Penso che + subjonctif", "Penso che dipenda dalla famiglia")]
+  });
+
+  /* ═══════════ 1re ITALIEN — ADVERBES EN -MENTE ═══════════ */
+  enrichir("1re-it-avverbi", {
+    blocs: [[0, def("Avverbio", "Mot invariable qui précise un verbe, un adjectif ou un autre adverbe : il dit <em>comment</em> se fait l'action.") + formule("adjectif en -o → féminin -a + mente · adjectif en -e → + mente · -le / -re → on supprime le -e + mente") + ex("lento → lentamente · sicuro → sicuramente · veloce → velocemente · facile → facilmente · regolare → regolarmente")],
+      [1, astuce("Si le mot précise un <strong>nom</strong>, c'est un adjectif (<em>un buon libro</em>) ; s'il précise un <strong>verbe</strong>, c'est un adverbe (<em>legge bene</em>).") + attention("<em>Molto</em> est adverbe devant un adjectif (invariable : <em>molto belle</em>) mais adjectif devant un nom (variable : <em>molte ragazze</em>).")],
+      [2, ex("Ahmadou parla <strong>lentamente</strong> e risponde <strong>facilmente</strong> alle domande. Gioca <strong>bene</strong> a calcio.", "Phrase corrigée")]],
+    planches: [[0, { type: "2D", titre: "Fabriquer un adverbe en -mente", legende: "Trois cas selon la fin de l'adjectif, plus quelques irréguliers à apprendre par cœur.", svg: colonnes("Aggettivo → avverbio", [{ t: "-o", c: BLEU, l: ["on passe au féminin -a", "lento → lentamente", "sicuro → sicuramente", "vero → veramente"] }, { t: "-e", c: VERT, l: ["on ajoute -mente", "veloce → velocemente", "forte → fortemente", "dolce → dolcemente"] }, { t: "-le / -re", c: "#C2540A", l: ["on supprime le -e", "facile → facilmente", "regolare → regolarmente", "gentile → gentilmente"] }, { t: "irréguliers", c: ROUGE, l: ["buono → bene", "cattivo → male", "migliore → meglio", "peggiore → peggio"] }], 210, "Tableau de formation des adverbes italiens en mente") }]],
+    formules: [F("Adjectif en -o", "féminin en -a + mente", "lento → lenta → lentamente"), F("Adjectif en -e / -le", "+ mente (on supprime le -e après l ou r)", "veloce → velocemente · facile → facilmente"), F("Irrégulier", "buono → bene ; cattivo → male", "parla bene (et non buonamente)")]
+  });
+
+  /* ═══════════ 1re CHINOIS — 如果……就 ═══════════ */
+  enrichir("1re-zh-ruguo", {
+    blocs: [[0, def("Phrase conditionnelle", "La condition vient toujours <strong>en premier</strong> en chinois, la conséquence ensuite.") + ex("如果你累了，就休息一下。Rúguǒ nǐ lèi le, jiù xiūxi yíxià. — Si tu es fatigué, repose-toi un peu.") + astuce("就 se place <strong>après le sujet</strong> de la conséquence, juste avant le verbe : 我们<strong>就</strong>不去 (et non 就我们不去).")],
+      [1, formule("如果 + condition，(那么) + sujet + 就 + verbe") + ex("如果明天不下雨，我们就去克里比。Rúguǒ míngtiān bú xià yǔ, wǒmen jiù qù Kèlǐbǐ. — S'il ne pleut pas demain, nous irons à Kribi.")],
+      [2, formule("名词 + 有的 + A，有的 + B") + attention("有的 se place après le groupe dont on parle : 学生有的……（et non 有的学生有的……）.")]],
+    planches: [[2, { type: "2D", titre: "有的……有的…… : partager un groupe", legende: "Les élèves du club : certains (有的) lisent, d'autres (有的) font du sport. 有的 répété découpe le groupe en sous-groupes.", svg: (function () {
+      var s = "<rect width='640' height='240' fill='#FBF8F2'/><rect x='20' y='20' width='290' height='170' rx='14' fill='#DCE6F2'/><rect x='330' y='20' width='290' height='170' rx='14' fill='#DDEFE3'/>";
+      [0, 1, 2].forEach(function (k) { s += perso(70 + k * 80, 50, "#5A3A1E", "#1E499B", "#2E3445") + "<rect x='" + (58 + k * 80) + "' y='86' width='24' height='18' fill='#F4F1EA' stroke='#9AA3AF'/>"; });
+      [0, 1, 2].forEach(function (k) { s += perso(380 + k * 80, 50, "#6B4423", "#2E7D32", "#F4F1EA"); }); s += "<circle cx='600' cy='150' r='10' fill='#fff' stroke='#1F2328'/>";
+      s += txt(165, 212, "有的喜欢看书", { s: 16, c: BLEU }) + txt(475, 212, "有的喜欢运动", { s: 16, c: VERT }) + txt(165, 232, "yǒude xǐhuan kàn shū : certains aiment lire", { s: 10, c: GRIS, w: 600 }) + txt(475, 232, "yǒude xǐhuan yùndòng : d'autres le sport", { s: 10, c: GRIS, w: 600 });
+      return svg(640, 240, "Deux groupes d’élèves : certains lisent, d’autres font du sport, avec les phrases chinoises", "", s);
+    })() }]],
+    formules: [F("Condition en premier", "如果 + condition", "如果明天下雨 (s'il pleut demain)"), F("Conséquence avec 就", "sujet + 就 + verbe", "我们就不去 (nous n'irons pas)"), F("Partager un groupe", "groupe + 有的 A，有的 B", "学生有的坐车，有的走路")]
+  });
+
+  /* ═══════════ 1re CHINOIS — 不但……而且 ═══════════ */
+  enrichir("1re-zh-budan", {
+    blocs: [[0, def("不但……而且……", "Relie deux informations qui s'ajoutent, la seconde étant plus forte : « non seulement A, mais aussi B ».") + formule("sujet + 不但 + A，而且 + B (même sujet) · 不但 + sujet 1 + A，而且 + sujet 2 + B") + astuce("Même sujet : 不但 vient <strong>après</strong> le sujet (他不但会说……). Sujets différents : 不但 vient <strong>avant</strong> le premier sujet (不但他会说，而且我也会说).")],
+      [1, attention("第 + nombre donne un ordinal : 第一 (premier), 第二 (deuxième). Sans 第, 一、二 sont de simples nombres.") + ex("第一，要努力学习；第二，要帮助家人；第三，要尊重老人。<br>Dì yī… dì èr… dì sān… — Premièrement… deuxièmement… troisièmement…")]],
+    formules: [F("Ajouter une idée plus forte", "S + 不但 A，而且 B", "我的家人不但很热情，而且很团结"), F("Ordonner les arguments", "第一……，第二……，第三……", "第一，互相帮助；第二，尊重父母"), F("Écrire juste", "caractère + pinyin avec tons", "家 jiā · 帮助 bāngzhù · 尊重 zūnzhòng")]
+  });
+
+  /* ═══════════ Tle ARABE — LES TYPES DE خبر ═══════════ */
+  enrichir("tle-ar-khabar", {
+    blocs: [[0, def("La phrase nominale (الجملة الاسمية)", "Elle commence par un nom : le sujet (المبتدأ), puis l'attribut (الخبر) qui dit quelque chose de lui. Les deux sont مرفوع (cas sujet, en -u).") + formule("مبتدأ (مرفوع) + خبر (مرفوع) : الطالبُ مجتهدٌ") + ex("البيتُ كبيرٌ. — La maison est grande. · الشمسُ ساطعةٌ. — Le soleil brille.")],
+      [1, ex("خبر مفرد : الجوُّ جميلٌ · خبر جملة فعلية : الأمُّ تطبخُ · خبر جملة اسمية : الطالبُ أبوه طبيبٌ · خبر شبه جملة : الكتابُ على الطاولةِ", "Un exemple par type") + astuce("Pour trouver le type, regarde ce qui suit le sujet : un seul mot → مفرد ; un verbe → جملة فعلية ; un nom + son attribut → جملة اسمية ; une préposition ou un adverbe de lieu → شبه جملة.")],
+      [2, attention("Dans un خبر جملة, le pronom de rappel (الرابط) est obligatoire : الطالبُ أبوه طبيبٌ (ـه renvoie à الطالب).")]],
+    planches: [[1, { type: "2D", titre: "Quatre types de خبر", legende: "Un exemple par type, à lire de droite à gauche : l'attribut (خبر) peut être un mot, une phrase verbale, une phrase nominale ou un groupe prépositionnel.", svg: colonnes("أنواع الخبر", [{ t: "مفرد", c: BLEU, l: ["un seul mot", "الجوُّ جميلٌ", "le temps est beau"] }, { t: "جملة فعلية", c: VERT, l: ["une phrase verbale", "الأمُّ تطبخُ", "la mère cuisine"] }, { t: "جملة اسمية", c: "#7B3F99", l: ["une phrase nominale", "الطالبُ أبوه طبيبٌ", "son père est médecin"] }, { t: "شبه جملة", c: "#C2540A", l: ["préposition / lieu", "الكتابُ على الطاولةِ", "le livre est sur la table"] }], 200, "Tableau des quatre types d’attribut en arabe avec un exemple chacun") }]],
+    formules: [F("Repérer le sujet et l'attribut", "مبتدأ + خبر, tous deux مرفوع", "الجوُّ (مبتدأ) جميلٌ (خبر)"), F("Classer l'attribut", "un mot → مفرد ; phrase → جملة ; préposition / lieu → شبه جملة", "على الطاولةِ → خبر شبه جملة ; تطبخُ → خبر جملة فعلية"), F("Vérifier le lien", "خبر جملة + pronom de rappel الرابط", "الطالبُ أبوه طبيبٌ : ـه = الطالب")]
+  });
+
+  /* ═══════════ Tle ARABE — LAZIM ET MUTA'ADDI ═══════════ */
+  enrichir("tle-ar-verbes", {
+    blocs: [[0, def("الفعل اللازم", "Verbe dont l'action reste sur le sujet : il n'a pas de complément d'objet direct. Pour indiquer un lieu ou une personne, on passe par une préposition.") + formule("فعل لازم + فاعل (+ حرف جرّ + اسم مجرور)") + ex("جلسَ الولدُ على الكرسيِّ. · ذهبَ الطالبُ إلى المدرسةِ. · نامَ الطفلُ.")],
+      [1, formule("فعل متعدٍّ + فاعل (مرفوع) + مفعول به (منصوب)") + ex("كتبَ الطالبُ الدرسَ. · قرأتْ فاطمةُ الكتابَ. · أعطى الأبُ الولدَ كتاباً (deux compléments).") + astuce("Test : peut-on demander « quoi ? » ou « qui ? » directement après le verbe, sans préposition ? Oui → متعدٍّ ; non → لازم.")],
+      [2, attention("La forme IV (أفعلَ) et la forme II (فعّلَ) rendent souvent un verbe transitif : جلسَ → أجلسَ ، فرحَ → فرّحَ.")]],
+    planches: [[1, { type: "2D", titre: "لازم ou متعدٍّ : le tri des verbes d'Ibrahim", legende: "À gauche, les verbes dont l'action reste sur le sujet (complément seulement avec une préposition) ; à droite, ceux qui reçoivent un complément d'objet direct au cas direct.", svg: colonnes("اللازم والمتعدي", [{ t: "لازم (intransitif)", c: BLEU, l: ["جلسَ : s'asseoir", "ذهبَ : aller (إلى)", "نامَ : dormir", "→ ذهبَ الطالبُ إلى المدرسةِ"] }, { t: "متعدٍّ (transitif)", c: "#C2540A", l: ["كتبَ : écrire", "قرأَ : lire", "أعطى : donner (2 compléments)", "→ كتبَ الطالبُ الدرسَ"] }], 200, "Tableau : verbes intransitifs et transitifs arabes avec exemples") }]],
+    formules: [F("Tester le verbe", "complément direct possible ? oui → متعدٍّ ; non → لازم", "ذهبَ : non → لازم ; كتبَ : oui → متعدٍّ"), F("Corriger avec une préposition", "لازم + إلى / على / في + اسم مجرور", "ذهبَ الطالبُ إلى المدرسةِ"), F("Rendre transitif", "forme IV أفعلَ + مفعول به", "أجلسَ الأبُ الولدَ")]
+  });
+})();
+
+/* Leçons enrichies — lettres et sciences humaines, lot C (18/11/2026) : cultures nationales, orientation, philosophie (Tle, 2nde A),
+   ECM (2nde C). Même mécanisme que 29-enrichies-lettres-a.js : AJOUTS SEULEMENT. */
+(function () {
+  "use strict";
+  var NUIT = "#001136", BLEU = "#1E499B", GRIS = "#4D5163", VERT = "#17784D", ROUGE = "#C62828", TERRE = "#C46A2B";
+
+  function txt(x, y, t, o) {
+    o = o || {};
+    return "<text x='" + x + "' y='" + y + "' text-anchor='" + (o.a || "middle") + "' font-size='" + (o.s || 12) + "' font-weight='" + (o.w || 700) + "' fill='" + (o.c || NUIT) + "'" + (o.i ? " font-style='italic'" : "") + (o.halo ? " stroke='#fff' stroke-width='3' paint-order='stroke'" : "") + ">" + t + "</text>";
+  }
+  function lin(id, cs, vertical) {
+    var s = "<linearGradient id='" + id + "'" + (vertical ? " x1='0' y1='0' x2='0' y2='1'" : "") + ">";
+    cs.forEach(function (c, i) { s += "<stop offset='" + (i / (cs.length - 1)).toFixed(2) + "' stop-color='" + c + "'/>"; });
+    return s + "</linearGradient>";
+  }
+  function rad(id, cs) {
+    var s = "<radialGradient id='" + id + "' cx='35%' cy='30%' r='75%'>";
+    cs.forEach(function (c, i) { s += "<stop offset='" + (i / (cs.length - 1)).toFixed(2) + "' stop-color='" + c + "'/>"; });
+    return s + "</radialGradient>";
+  }
+  function fleche(id, c) { return "<marker id='" + id + "' markerWidth='10' markerHeight='10' refX='7' refY='5' orient='auto'><path d='M0 1L8 5L0 9Z' fill='" + c + "'/></marker>"; }
+  function svg(w, h, alt, defs, corps) {
+    return "<svg viewBox='0 0 " + w + " " + h + "' role='img' aria-label='" + alt + "' font-family='Inter,Arial,sans-serif'><rect width='" + w + "' height='" + h + "' fill='#fff'/><defs>" + defs + "</defs>" + corps +
+      "<text x='" + (w - 6) + "' y='" + (h - 5) + "' font-size='8' text-anchor='end' fill='#8A93A6'>Planche VÉRITAS</text></svg>";
+  }
+  function ancien(id) { return window.VRT_LECONS[id]; }
+  function remplacer(id, o) {
+    var a = ancien(id);
+    if (a) ["apc", "examen", "rang", "cle", "scenes"].forEach(function (k) { if (a[k] != null && o[k] == null) o[k] = a[k]; });
+    VRT_L(id, o);
+    if (a) o.ordre = a.ordre;
+  }
+  function q(qq, bonne, f1, f2, e) { return { q: qq, r: [bonne, f1, f2], b: 0, e: e }; }
+  function partie(old, i) { return old && old.parties[i] ? old.parties[i].html : ""; }
+  function bulle(x, y, w, t, c) { return "<rect x='" + x + "' y='" + y + "' width='" + w + "' height='30' rx='12' fill='#fff' stroke='" + (c || "#C9D2E3") + "'/>" + txt(x + w / 2, y + 20, t, { s: 11.5 }); }
+  function perso(x, y, peau, habit, bas) {
+    bas = bas || "#2E3445";
+    return "<g transform='translate(" + x + " " + y + ")'><ellipse cx='0' cy='84' rx='18' ry='4' fill='#001136' opacity='.18'/>" +
+      "<rect x='-9' y='44' width='8' height='36' rx='3' fill='" + bas + "'/><rect x='1' y='44' width='8' height='36' rx='3' fill='" + bas + "'/>" +
+      "<ellipse cx='-6' cy='81' rx='7' ry='3.5' fill='#1F2328'/><ellipse cx='6' cy='81' rx='7' ry='3.5' fill='#1F2328'/>" +
+      "<path d='M-13 46L-16 18C-16 13 -12 11 -6 10H6C12 11 16 13 16 18L13 46Z' fill='" + habit + "'/>" +
+      "<path d='M-15 16L-20 40' stroke='" + habit + "' stroke-width='7' stroke-linecap='round'/><path d='M15 16L20 40' stroke='" + habit + "' stroke-width='7' stroke-linecap='round'/>" +
+      "<circle cx='-20' cy='42' r='3.6' fill='" + peau + "'/><circle cx='20' cy='42' r='3.6' fill='" + peau + "'/>" +
+      "<rect x='-3.5' y='5' width='7' height='7' fill='" + peau + "'/><ellipse cx='0' cy='-2' rx='9' ry='10.5' fill='" + peau + "'/>" +
+      "<path d='M-9 -4C-10 -14 -4 -13.5 0 -13.5S10 -14 9 -4C7 -9 -7 -9 -9 -4Z' fill='#1B1410'/><ellipse cx='-9' cy='-1' rx='1.8' ry='3' fill='" + peau + "'/><ellipse cx='9' cy='-1' rx='1.8' ry='3' fill='" + peau + "'/></g>";
+  }
+  /* portrait en buste (arbre généalogique) */
+  function portrait(x, y, peau, habit, cheveux, age) {
+    var s = "<g transform='translate(" + x + " " + y + ")'><circle r='30' fill='#F4EFE4' stroke='#C9A576' stroke-width='3'/><clipPath id='pc" + x + "_" + y + "'><circle r='28'/></clipPath><g clip-path='url(#pc" + x + "_" + y + ")'>";
+    s += "<path d='M-26 32C-26 14 -14 10 0 10S26 14 26 32Z' fill='" + habit + "'/><rect x='-4' y='2' width='8' height='10' fill='" + peau + "'/><ellipse cy='-6' rx='11' ry='13' fill='" + peau + "'/>";
+    s += age === "vieux" ? "<path d='M-11 -10C-12 -20 -4 -21 0 -21S12 -20 11 -10C9 -14 -9 -14 -11 -10Z' fill='#D8D8D8'/>" : age === "femme" ? "<path d='M-13 -6C-15 -24 15 -24 13 -6C12 -14 -12 -14 -13 -6Z' fill='" + cheveux + "'/><path d='M-13 -14h26v-6c-6 -6 -20 -6 -26 0Z' fill='" + habit + "'/>" : "<path d='M-11 -10C-12 -20 -4 -21 0 -21S12 -20 11 -10C9 -14 -9 -14 -11 -10Z' fill='" + cheveux + "'/>";
+    s += "<circle cx='-4' cy='-6' r='1.4' fill='#1B1410'/><circle cx='4' cy='-6' r='1.4' fill='#1B1410'/><path d='M-3 2q3 2 6 0' stroke='#1B1410' fill='none'/></g></g>";
+    return s;
+  }
+  /* boucle d'exercice générique : [phrase avec ___, [bonne, autres…], explication] */
+  function exercice(el, C, suivant, lib) {
+    var i = 0, ok = 0;
+    el.innerHTML = "<p class='labo-r' data-q style='font-size:16px'></p><div style='display:flex;gap:8px;flex-wrap:wrap' data-c></div><p class='an-note' data-e></p><p class='labo-r' data-s></p>";
+    function $(s) { return el.querySelector(s); }
+    function poser() {
+      var c = C[i];
+      $("[data-q]").innerHTML = (i + 1) + ". " + c[0].replace("___", "<b style='border-bottom:2px dashed #1E499B;padding:0 14px'>?</b>");
+      $("[data-e]").textContent = ""; $("[data-s]").innerHTML = lib + " " + (i + 1) + " / " + C.length + " · score : <b>" + ok + "</b>";
+      $("[data-c]").innerHTML = c[1].slice().sort().map(function (x) { return "<button type='button' class='btn-l' data-v='" + x + "'>" + x + "</button>"; }).join("");
+      el.querySelectorAll("[data-v]").forEach(function (b) {
+        b.addEventListener("click", function () {
+          var bon = b.dataset.v === c[1][0]; if (bon) ok++;
+          $("[data-q]").innerHTML = (i + 1) + ". " + c[0].replace("___", "<b style='color:" + (bon ? VERT : ROUGE) + "'>" + c[1][0] + "</b>");
+          $("[data-e]").innerHTML = (bon ? "✔ " : "✘ ") + c[2];
+          el.querySelectorAll("[data-v]").forEach(function (x) { x.disabled = true; });
+          var nx = document.createElement("button"); nx.type = "button"; nx.className = "btn-l"; nx.textContent = i + 1 < C.length ? suivant : "↺";
+          nx.addEventListener("click", function () { i = (i + 1) % C.length; if (!i) ok = 0; poser(); });
+          $("[data-c]").appendChild(nx);
+          $("[data-s]").innerHTML = lib + " " + (i + 1) + " / " + C.length + " · score : <b>" + ok + "</b>";
+        });
+      });
+    }
+    poser();
+  }
+
+  function alea(g) { return function () { g = (g * 16807) % 2147483647; return (g - 1) / 2147483646; }; }
+  /* Consignes de Jacques (18/11/2026) : situation résolue avec les formules étape par étape, exemples, règles, astuces,
+     planches 2D et 3D. AJOUTS SEULEMENT : blocs en fin de partie, planches, denouement.formules. */
+  function enrichir(id, o) {
+    var L = ancien(id); if (!L) return;
+    (o.blocs || []).forEach(function (b) { var p = L.parties[b[0]]; if (p) p.html = (p.html || "") + b[1]; });
+    (o.planches || []).forEach(function (b) { var p = L.parties[b[0]]; if (p) p.planches = (p.planches || []).concat([b[1]]); });
+    if (o.formules && L.denouement && !(L.denouement.formules || []).length) L.denouement.formules = o.formules;
+  }
+  function def(t, h) { return "<div class='def'><b>" + t + "</b>" + h + "</div>"; }
+  function formule(h) { return "<p class='formule'>" + h + "</p>"; }
+  function ex(h, t) { return "<div class='ex'><b>" + (t || "Exemples") + "</b>" + h + "</div>"; }
+  function astuce(h, t) { return "<div class='astuce'><b>" + (t || "Astuce") + "</b>" + h + "</div>"; }
+  function attention(h, t) { return "<div class='attention'><b>" + (t || "Attention") + "</b>" + h + "</div>"; }
+  function methode(h, t) { return "<div class='methode'><b>" + (t || "Méthode") + "</b>" + h + "</div>"; }
+  function F(nom, f, calcul) { return { nom: nom, f: f, calcul: calcul }; }
+  /* fiche 2D en colonnes : [{t, c, l:[lignes]}] */
+  function colonnes(titre, cols, h, alt) {
+    var W = 640, n = cols.length, w = (W - 30 - (n - 1) * 12) / n, s = "<rect width='640' height='" + h + "' fill='#FBF8F2'/>" + txt(320, 28, titre, { s: 15 });
+    cols.forEach(function (c, i) {
+      var x = 15 + i * (w + 12);
+      s += "<rect x='" + x + "' y='44' width='" + w + "' height='" + (h - 58) + "' rx='12' fill='#fff' stroke='" + c.c + "' stroke-width='2'/><rect x='" + x + "' y='44' width='" + w + "' height='34' rx='11' fill='" + c.c + "'/>" + txt(x + w / 2, 66, c.t, { s: 14, c: "#fff" });
+      c.l.forEach(function (l, k) { s += txt(x + 12, 100 + k * 24, l, { s: 12, a: "start", w: l.charAt(0) === "→" ? 800 : 550, c: l.charAt(0) === "→" ? c.c : NUIT }); });
+    });
+    return svg(640, h, alt || titre, "", s);
+  }
+
+  function barres(titre, D, unite, h, alt) {
+    var max = Math.max.apply(null, D.map(function (d) { return d[1]; })), s = "<rect width='640' height='" + h + "' fill='#FBF8F2'/>" + txt(320, 28, titre, { s: 15 });
+    D.forEach(function (d, i) { var y = 52 + i * 36, w = d[1] / max * 330; s += txt(200, y + 18, d[0], { s: 12.5, a: "end", w: 600 }) + "<rect x='210' y='" + y + "' width='" + w.toFixed(0) + "' height='24' rx='6' fill='" + d[2] + "'/>" + txt(218 + w, y + 17, d[3] || (d[1].toLocaleString("fr-FR") + " " + unite), { s: 12, a: "start", c: NUIT }); });
+    return svg(640, h, alt || titre, "", s);
+  }
+
+  /* ═══════════ Tle CULTURES — LES FUNÉRAILLES ═══════════ */
+  enrichir("tle-cult-mort", {
+    blocs: [[0, def("Les funérailles", "Ensemble des rites qui accompagnent un décès : annonce, veillée, inhumation, deuil, puis cérémonie de fin de deuil ; elles honorent le défunt, réunissent la famille et transmettent sa mémoire.") + ex("Chez les Bamiléké, les grandes funérailles peuvent avoir lieu des mois ou des années après l'inhumation ; chez les Béti, le deuil est levé lors d'une cérémonie familiale.", "Selon les communautés")],
+      [1, formule("coût total = cérémonies + réception + tenues + morgue et transport + divers") + ex("Budget prévu : 3 000 000 F, dont réception 1 200 000 F, tenues 400 000 F, cérémonies 200 000 F.") + attention("Ce qui coûte le plus n'est pas le rite, mais la réception et l'apparence : on peut réduire sans manquer de respect.")],
+      [2, methode("1. Rappeler le sens des rites. 2. Lire le budget poste par poste. 3. Réduire ce qui n'est pas un rite. 4. Affecter les économies à une priorité (scolarité, caisse de solidarité). 5. Faire valider par le conseil de famille.", "Argumenter dans le débat") + astuce("Dans un débat familial, commence par ce qui unit (« nous voulons tous honorer Papa Kamga ») avant de proposer des économies.")]],
+    planches: [[2, { type: "2D", titre: "Le budget révisé des funérailles", legende: "Comparaison du budget prévu (3 000 000 F) et du budget révisé : une seule journée, réception limitée aux repas, pagne facultatif. Environ 900 000 F sont dégagés : 600 000 F pour la scolarité des quatre enfants, le reste pour la caisse de solidarité.", svg: barres("Prévu ou révisé ? (en F CFA)", [["Budget prévu", 3000000, "#C62828"], ["Budget révisé", 2100000, VERT], ["Économies", 900000, "#E8A33D"], ["dont scolarité", 600000, BLEU], ["dont caisse", 300000, "#7B3F99"]], "F", 240, "Barres : budget prévu 3 000 000 F, révisé 2 100 000 F, économies 900 000 F dont 600 000 F de scolarité") }]],
+    formules: [F("Lire le budget", "postes du rite / postes de l'apparence", "cérémonies 200 000 F ; réception 1 200 000 F ; tenues 400 000 F"), F("Économiser sans supprimer les rites", "économies = réductions de la réception, des tenues et de la durée", "≈ 900 000 F : 3 000 000 → 2 100 000 F"), F("Affecter les économies", "scolarité + caisse de solidarité", "600 000 F de scolarité + 300 000 F en caisse")]
+  });
+
+  /* ═══════════ Tle CULTURES — LA NAISSANCE ═══════════ */
+  enrichir("tle-cult-naissance", {
+    blocs: [[0, def("Rite de passage", "Cérémonie qui fait passer une personne d'un statut à un autre ; la nomination fait entrer le nouveau-né dans la famille et la lignée.") + ex("Présentation de l'enfant aux aînés, choix d'un nom qui honore un parent ou rappelle une circonstance, cadeaux et repas partagé.")],
+      [1, def("Acte de naissance", "Document d'état civil qui prouve l'identité de l'enfant (nom, date, lieu, parents) ; il est établi à partir de la déclaration faite au centre d'état civil dans les délais fixés par la loi.") + formule("grossesse → consultations prénatales → accouchement à la maternité → déclaration à l'état civil → nomination en famille") + ex("Sans acte de naissance, l'enfant ne pourra pas s'inscrire au CEP, au BEPC ou au baccalauréat, ni obtenir de carte d'identité.") + attention("Déclarer l'enfant est une obligation du père ou de la mère : on peut le faire avant la cérémonie de nomination, les deux ne s'opposent pas.")],
+      [2, astuce("Pour juger une pratique, pose deux questions : protège-t-elle la santé et les droits de l'enfant ? renforce-t-elle les liens de la famille ? Si oui aux deux, on la garde.")]],
+    planches: [[2, { type: "2D", titre: "Garder, adapter, abandonner", legende: "Trier les pratiques autour de la naissance selon deux critères : la santé et les droits de l'enfant, et le lien familial.", svg: colonnes("Tradition et vie moderne : trier", [{ t: "On garde", c: VERT, l: ["présentation à la famille", "nomination et transmission du nom", "solidarité autour de la mère", "repas partagé"] }, { t: "On adapte", c: "#E8A33D", l: ["nomination après la maternité", "conseils des aînées + suivi médical", "interdits alimentaires vérifiés", "fête simple et sans dettes"] }, { t: "On abandonne", c: ROUGE, l: ["accoucher seule au village", "remèdes non contrôlés", "refuser les vaccins", "ne pas déclarer l'enfant"] }], 230, "Tableau en trois colonnes : pratiques à garder, à adapter, à abandonner") }]],
+    formules: [F("Protéger la mère et l'enfant", "consultations prénatales + accouchement en maternité", "hôpital de district, sage-femme"), F("Donner une existence juridique", "déclaration à l'état civil dans les délais → acte de naissance", "inscription possible aux examens officiels"), F("Garder le lien familial", "présentation + nomination + solidarité", "cérémonie au retour de la maternité")]
+  });
+
+  /* ═══════════ Tle ORIENTATION — GÉRER SON TEMPS ═══════════ */
+  enrichir("tle-orient-temps", {
+    blocs: [[0, formule("temps d'écran par semaine = heures par jour × 7") + ex("Aïcha : 4,5 h × 7 = 31,5 h d'écran par semaine, plus que ses heures de cours.") + astuce("Note pendant une semaine ce que tu fais heure par heure : les « heures perdues » apparaissent tout de suite.")],
+      [1, formule("heures d'une matière = heures de révision × coefficient ÷ somme des coefficients") + ex("15 h × 5/15 = 5 h de philosophie ; 15 h × 4/15 = 4 h de français ; 3 h d'anglais ; 3 h d'histoire-géographie.", "Répartition d'Aïcha") + attention("Ne prends jamais le temps de révision sur le sommeil : il consolide la mémoire. Prends-le sur l'écran.")]],
+    planches: [[1, { type: "2D", titre: "15 heures de révision selon les coefficients", legende: "Les 15 heures hebdomadaires d'Aïcha réparties au prorata des coefficients (5, 4, 3, 3 : total 15) : 5 h, 4 h, 3 h et 3 h. On peut ensuite ajouter un bonus aux matières faibles.", svg: barres("Répartition des révisions de la semaine", [["Philosophie (coef. 5)", 5, "#7B3F99", "5 h"], ["Français (coef. 4)", 4, BLEU, "4 h"], ["Anglais (coef. 3)", 3, VERT, "3 h"], ["Histoire-géo (coef. 3)", 3, "#C2540A", "3 h"]], "h", 210, "Barres : 5 h de philosophie, 4 h de français, 3 h d’anglais, 3 h d’histoire-géographie") }]],
+    formules: [F("Faire le bilan", "écran par semaine = h par jour × 7", "4,5 × 7 = 31,5 h"), F("Libérer du temps sans toucher au sommeil", "gain = (4,5 − 1,5) h × 7", "3 × 7 = 21 h libérées → au moins 15 h de révision"), F("Répartir selon les coefficients", "h matière = 15 × coef ÷ 15", "philo 5 h · français 4 h · anglais 3 h · histoire-géo 3 h")]
+  });
+
+  /* ═══════════ Tle ORIENTATION — PRÉPARER LE BAC ═══════════ */
+  enrichir("tle-orient-bac", {
+    blocs: [[0, formule("moyenne = Σ (note × coefficient) ÷ Σ coefficients") + formule("gain de moyenne = Σ (points gagnés × coefficient) ÷ Σ coefficients") + ex("+3 en philosophie (coef. 5) : 15 ; +3 en français (coef. 4) : 12 ; +2 en anglais et en histoire-géo (coef. 3) : 6 + 6. Total 39 ÷ 22 ≈ 1,8 point : 8,6 → 10,4.") + def("Objectif SMART", "Spécifique, Mesurable, Atteignable, Réaliste, Temporel : « passer de 6 à 9 en philosophie au deuxième trimestre ».")],
+      [1, ex("Septembre-novembre : fiches et un sujet par mois ; décembre : réviser le trimestre ; avril-mai : examens blancs chronométrés.", "Calendrier type")]],
+    planches: [[0, { type: "2D", titre: "Ce que rapporte un point, selon le coefficient", legende: "Avec un total de coefficients de 22, un point gagné en philosophie (coef. 5) rapporte 0,23 point de moyenne, cinq fois plus qu'un point en EPS (coef. 1). Les efforts se concentrent d'abord sur les forts coefficients.", svg: barres("Gain de moyenne pour 1 point gagné", [["Philosophie (coef. 5)", 0.23, "#7B3F99", "+0,23"], ["Français (coef. 4)", 0.18, BLEU, "+0,18"], ["Anglais (coef. 3)", 0.14, VERT, "+0,14"], ["Mathématiques (coef. 2)", 0.09, "#C2540A", "+0,09"], ["EPS (coef. 1)", 0.05, GRIS, "+0,05"]], "", 240, "Barres : gain de moyenne par point selon le coefficient, de 0,23 en philosophie à 0,05 en EPS") }]],
+    formules: [F("Effet d'un progrès ciblé", "gain = Σ (points × coef) ÷ 22", "(3×5 + 3×4 + 2×3 + 2×3) ÷ 22 = 39 ÷ 22 ≈ 1,8"), F("Nouvelle moyenne", "moyenne visée = 8,6 + gain", "8,6 + 1,8 ≈ 10,4 : admis"), F("Planifier", "objectifs SMART + un sujet par mois + examens blancs", "philosophie : de 6 à 9 au 2ᵉ trimestre")]
+  });
+
+  /* ═══════════ Tle PHILOSOPHIE — LIBERTÉ ET RESPONSABILITÉ ═══════════ */
+  enrichir("tle-philo-liberte", {
+    blocs: [[1, ex("Le malade mental qui agresse sous l'effet d'un délire est jugé irresponsable ; le chauffeur qui boit avant de conduire est responsable de l'accident, car il a choisi de boire.", "Deux cas opposés") + astuce("Pour juger une responsabilité, pose deux questions : la personne savait-elle ce qu'elle faisait ? pouvait-elle faire autrement ? Si oui aux deux, elle est responsable.")],
+      [2, ex("Sartre : « L'homme est condamné à être libre » ; même conditionné par son milieu, il reste responsable de ce qu'il fait de ce qu'on a fait de lui.", "Une thèse") + attention("Expliquer un acte (par l'éducation, la pauvreté) n'est pas l'excuser : les déterminismes diminuent parfois la responsabilité, ils ne la suppriment pas.")]],
+    planches: [[1, { type: "2D", titre: "Responsable ou non ? Les deux conditions", legende: "On n'est responsable que si l'on a agi en connaissance de cause et sans contrainte. Les trois situations de la leçon passées au crible.", svg: colonnes("Savait-il ? Pouvait-il faire autrement ?", [{ t: "Paul (freins sabotés)", c: GRIS, l: ["savait : non", "(il ignorait le sabotage)", "n'a rien choisi", "→ pas responsable"] }, { t: "Ernest (arme pointée)", c: "#7B3F99", l: ["savait : oui", "pouvait autrement : non", "(sous la menace)", "→ pas responsable"] }, { t: "Bertrand (ivre)", c: ROUGE, l: ["savait : oui", "pouvait autrement : oui", "(il a choisi de boire)", "→ responsable"] }], 220, "Trois colonnes : Paul aux freins sabotés, Ernest menacé d’une arme, Bertrand ivre, et leur responsabilité") }]],
+    formules: [F("Définir", "liberté = pouvoir de choisir ; responsabilité = devoir répondre de ses actes", "pas de responsabilité sans liberté"), F("Tester les deux conditions", "responsable ⇔ il savait ET pouvait faire autrement", "Paul ignorait le sabotage ; Ernest était menacé → non responsables"), F("Conclure", "déterminisme ≠ excuse", "Bertrand a choisi de boire puis de conduire → responsable")]
+  });
+
+  /* ═══════════ Tle PHILOSOPHIE — LES PASSIONS ═══════════ */
+  enrichir("tle-philo-passions", {
+    blocs: [[0, formule("émotion = choc bref et intense · passion = inclination durable, exclusive, qui oriente toute la vie") + ex("La colère d'un supporter après un but : émotion. L'amour du football qui organise toutes ses journées : passion.")],
+      [1, ex("Junior ne pense plus qu'au jeu vidéo, néglige ses devoirs et trouve des excuses à tout ; Sali, passionnée de musique, répète des heures et joue au festival du lycée.", "Mêmes signes, deux destins") + astuce("Exclusivité, cristallisation, aveuglement : reconnais ces trois mots dans un sujet et tu sauras que l'on parle de passion.")]],
+    formules: [F("Distinguer", "passion (durable, exclusive) ≠ émotion (brève)", "le jeu de Junior dure des mois : passion"), F("Repérer les manifestations", "exclusivité + cristallisation + aveuglement", "Junior et Sali : mêmes signes"), F("Juger", "servitude si la passion gouverne la raison ; grandeur si la raison la gouverne", "Junior : servitude · Sali : grandeur (Hegel)")]
+  });
+
+  /* ═══════════ 2nde A PHILOSOPHIE — DÉFINITIONS ═══════════ */
+  enrichir("2nde-a-philo-definitions", {
+    blocs: [[1, astuce("Face à une affirmation, pose les trois questions de Socrate : Qu'est-ce que cela veut dire ? Comment le sait-on ? Existe-t-il un contre-exemple ?") + attention("Philosopher n'est pas contredire tout le monde : c'est examiner avec méthode, puis accepter l'argument le plus solide, même s'il n'est pas le sien.")]],
+    formules: [F("Définir", "philosophie = philein (aimer) + sophia (sagesse)", "amour de la sagesse, réflexion critique et rationnelle"), F("Examiner l'opinion", "qui l'affirme ? sur quelles preuves ? contre-exemple ?", "« jamais de travail » : un contre-exemple suffit"), F("Situer", "la philosophie existe partout où l'on argumente", "palabre ; Towa, Njoh-Mouelle")]
+  });
+
+  /* ═══════════ 2nde C ECM — LA PRODUCTION ═══════════ */
+  enrichir("2nde-c-ecm-production", {
+    blocs: [[0, formule("production = biens (matériels) + services (immatériels)") + ex("Biens : chocolat, ciment, savon. Services : transport des tablettes, vente au supermarché, soins à l'hôpital.")],
+      [2, def("Valeur ajoutée", "Richesse créée par une entreprise : valeur de ce qu'elle produit moins la valeur de ce qu'elle a acheté pour produire.") + formule("valeur ajoutée = valeur de la production − consommations intermédiaires") + ex("Une tablette vendue 1 000 F, fabriquée avec 400 F de fèves, de sucre et d'emballage : valeur ajoutée = 600 F, gardée au Cameroun au lieu de partir à l'étranger.", "Exemple chiffré")]],
+    planches: [[2, { type: "2D", titre: "La valeur ajoutée, de la fève à la tablette", legende: "En exportant des fèves, la coopérative ne garde que la valeur du premier maillon ; en transformant elle-même, elle garde la valeur ajoutée de la chocolaterie et de la vente (exemple chiffré).", svg: barres("Valeur ajoutée par tablette (exemple)", [["Fèves, sucre, emballage", 400, "#8B5A2B", "400 F (achats)"], ["Tablette vendue", 1000, "#7A4A1E", "1 000 F"], ["Valeur ajoutée", 600, VERT, "600 F gardés sur place"]], "F", 170, "Barres : 400 F d’achats, tablette vendue 1 000 F, valeur ajoutée 600 F") }]],
+    formules: [F("Qu'est-ce que produire ?", "production = biens + services", "tablette = bien ; transport et vente = services"), F("Les facteurs", "nature + travail + capital + esprit d'entreprise", "fèves ; ouvriers ; torréfacteur, broyeuse ; plan d'affaires"), F("Ce que rapporte la transformation", "valeur ajoutée = production − consommations intermédiaires", "1 000 − 400 = 600 F par tablette")]
+  });
+})();
+
+/* Leçons enrichies — premier cycle, lot D (18/11/2026) : langues nationales, arts, EPS, latin, grec. Même mécanisme que
+   29-enrichies-lettres-a.js : AJOUTS SEULEMENT. */
+(function () {
+  "use strict";
+  var NUIT = "#001136", BLEU = "#1E499B", GRIS = "#4D5163", VERT = "#17784D", ROUGE = "#C62828", TERRE = "#C46A2B";
+
+  function txt(x, y, t, o) {
+    o = o || {};
+    return "<text x='" + x + "' y='" + y + "' text-anchor='" + (o.a || "middle") + "' font-size='" + (o.s || 12) + "' font-weight='" + (o.w || 700) + "' fill='" + (o.c || NUIT) + "'" + (o.i ? " font-style='italic'" : "") + (o.halo ? " stroke='#fff' stroke-width='3' paint-order='stroke'" : "") + ">" + t + "</text>";
+  }
+  function lin(id, cs, vertical) {
+    var s = "<linearGradient id='" + id + "'" + (vertical ? " x1='0' y1='0' x2='0' y2='1'" : "") + ">";
+    cs.forEach(function (c, i) { s += "<stop offset='" + (i / (cs.length - 1)).toFixed(2) + "' stop-color='" + c + "'/>"; });
+    return s + "</linearGradient>";
+  }
+  function rad(id, cs) {
+    var s = "<radialGradient id='" + id + "' cx='35%' cy='30%' r='75%'>";
+    cs.forEach(function (c, i) { s += "<stop offset='" + (i / (cs.length - 1)).toFixed(2) + "' stop-color='" + c + "'/>"; });
+    return s + "</radialGradient>";
+  }
+  function fleche(id, c) { return "<marker id='" + id + "' markerWidth='10' markerHeight='10' refX='7' refY='5' orient='auto'><path d='M0 1L8 5L0 9Z' fill='" + c + "'/></marker>"; }
+  function svg(w, h, alt, defs, corps) {
+    return "<svg viewBox='0 0 " + w + " " + h + "' role='img' aria-label='" + alt + "' font-family='Inter,Arial,sans-serif'><rect width='" + w + "' height='" + h + "' fill='#fff'/><defs>" + defs + "</defs>" + corps +
+      "<text x='" + (w - 6) + "' y='" + (h - 5) + "' font-size='8' text-anchor='end' fill='#8A93A6'>Planche VÉRITAS</text></svg>";
+  }
+  function ancien(id) { return window.VRT_LECONS[id]; }
+  function remplacer(id, o) {
+    var a = ancien(id);
+    if (a) ["apc", "examen", "rang", "cle", "scenes"].forEach(function (k) { if (a[k] != null && o[k] == null) o[k] = a[k]; });
+    VRT_L(id, o);
+    if (a) o.ordre = a.ordre;
+  }
+  function q(qq, bonne, f1, f2, e) { return { q: qq, r: [bonne, f1, f2], b: 0, e: e }; }
+  function partie(old, i) { return old && old.parties[i] ? old.parties[i].html : ""; }
+  function bulle(x, y, w, t, c) { return "<rect x='" + x + "' y='" + y + "' width='" + w + "' height='30' rx='12' fill='#fff' stroke='" + (c || "#C9D2E3") + "'/>" + txt(x + w / 2, y + 20, t, { s: 11.5 }); }
+  function perso(x, y, peau, habit, bas) {
+    bas = bas || "#2E3445";
+    return "<g transform='translate(" + x + " " + y + ")'><ellipse cx='0' cy='84' rx='18' ry='4' fill='#001136' opacity='.18'/>" +
+      "<rect x='-9' y='44' width='8' height='36' rx='3' fill='" + bas + "'/><rect x='1' y='44' width='8' height='36' rx='3' fill='" + bas + "'/>" +
+      "<ellipse cx='-6' cy='81' rx='7' ry='3.5' fill='#1F2328'/><ellipse cx='6' cy='81' rx='7' ry='3.5' fill='#1F2328'/>" +
+      "<path d='M-13 46L-16 18C-16 13 -12 11 -6 10H6C12 11 16 13 16 18L13 46Z' fill='" + habit + "'/>" +
+      "<path d='M-15 16L-20 40' stroke='" + habit + "' stroke-width='7' stroke-linecap='round'/><path d='M15 16L20 40' stroke='" + habit + "' stroke-width='7' stroke-linecap='round'/>" +
+      "<circle cx='-20' cy='42' r='3.6' fill='" + peau + "'/><circle cx='20' cy='42' r='3.6' fill='" + peau + "'/>" +
+      "<rect x='-3.5' y='5' width='7' height='7' fill='" + peau + "'/><ellipse cx='0' cy='-2' rx='9' ry='10.5' fill='" + peau + "'/>" +
+      "<path d='M-9 -4C-10 -14 -4 -13.5 0 -13.5S10 -14 9 -4C7 -9 -7 -9 -9 -4Z' fill='#1B1410'/><ellipse cx='-9' cy='-1' rx='1.8' ry='3' fill='" + peau + "'/><ellipse cx='9' cy='-1' rx='1.8' ry='3' fill='" + peau + "'/></g>";
+  }
+  /* portrait en buste (arbre généalogique) */
+  function portrait(x, y, peau, habit, cheveux, age) {
+    var s = "<g transform='translate(" + x + " " + y + ")'><circle r='30' fill='#F4EFE4' stroke='#C9A576' stroke-width='3'/><clipPath id='pc" + x + "_" + y + "'><circle r='28'/></clipPath><g clip-path='url(#pc" + x + "_" + y + ")'>";
+    s += "<path d='M-26 32C-26 14 -14 10 0 10S26 14 26 32Z' fill='" + habit + "'/><rect x='-4' y='2' width='8' height='10' fill='" + peau + "'/><ellipse cy='-6' rx='11' ry='13' fill='" + peau + "'/>";
+    s += age === "vieux" ? "<path d='M-11 -10C-12 -20 -4 -21 0 -21S12 -20 11 -10C9 -14 -9 -14 -11 -10Z' fill='#D8D8D8'/>" : age === "femme" ? "<path d='M-13 -6C-15 -24 15 -24 13 -6C12 -14 -12 -14 -13 -6Z' fill='" + cheveux + "'/><path d='M-13 -14h26v-6c-6 -6 -20 -6 -26 0Z' fill='" + habit + "'/>" : "<path d='M-11 -10C-12 -20 -4 -21 0 -21S12 -20 11 -10C9 -14 -9 -14 -11 -10Z' fill='" + cheveux + "'/>";
+    s += "<circle cx='-4' cy='-6' r='1.4' fill='#1B1410'/><circle cx='4' cy='-6' r='1.4' fill='#1B1410'/><path d='M-3 2q3 2 6 0' stroke='#1B1410' fill='none'/></g></g>";
+    return s;
+  }
+  /* boucle d'exercice générique : [phrase avec ___, [bonne, autres…], explication] */
+  function exercice(el, C, suivant, lib) {
+    var i = 0, ok = 0;
+    el.innerHTML = "<p class='labo-r' data-q style='font-size:16px'></p><div style='display:flex;gap:8px;flex-wrap:wrap' data-c></div><p class='an-note' data-e></p><p class='labo-r' data-s></p>";
+    function $(s) { return el.querySelector(s); }
+    function poser() {
+      var c = C[i];
+      $("[data-q]").innerHTML = (i + 1) + ". " + c[0].replace("___", "<b style='border-bottom:2px dashed #1E499B;padding:0 14px'>?</b>");
+      $("[data-e]").textContent = ""; $("[data-s]").innerHTML = lib + " " + (i + 1) + " / " + C.length + " · score : <b>" + ok + "</b>";
+      $("[data-c]").innerHTML = c[1].slice().sort().map(function (x) { return "<button type='button' class='btn-l' data-v='" + x + "'>" + x + "</button>"; }).join("");
+      el.querySelectorAll("[data-v]").forEach(function (b) {
+        b.addEventListener("click", function () {
+          var bon = b.dataset.v === c[1][0]; if (bon) ok++;
+          $("[data-q]").innerHTML = (i + 1) + ". " + c[0].replace("___", "<b style='color:" + (bon ? VERT : ROUGE) + "'>" + c[1][0] + "</b>");
+          $("[data-e]").innerHTML = (bon ? "✔ " : "✘ ") + c[2];
+          el.querySelectorAll("[data-v]").forEach(function (x) { x.disabled = true; });
+          var nx = document.createElement("button"); nx.type = "button"; nx.className = "btn-l"; nx.textContent = i + 1 < C.length ? suivant : "↺";
+          nx.addEventListener("click", function () { i = (i + 1) % C.length; if (!i) ok = 0; poser(); });
+          $("[data-c]").appendChild(nx);
+          $("[data-s]").innerHTML = lib + " " + (i + 1) + " / " + C.length + " · score : <b>" + ok + "</b>";
+        });
+      });
+    }
+    poser();
+  }
+
+  function alea(g) { return function () { g = (g * 16807) % 2147483647; return (g - 1) / 2147483646; }; }
+  /* Consignes de Jacques (18/11/2026) : situation résolue avec les formules étape par étape, exemples, règles, astuces,
+     planches 2D et 3D. AJOUTS SEULEMENT : blocs en fin de partie, planches, denouement.formules. */
+  function enrichir(id, o) {
+    var L = ancien(id); if (!L) return;
+    (o.blocs || []).forEach(function (b) { var p = L.parties[b[0]]; if (p) p.html = (p.html || "") + b[1]; });
+    (o.planches || []).forEach(function (b) { var p = L.parties[b[0]]; if (p) p.planches = (p.planches || []).concat([b[1]]); });
+    if (o.formules && L.denouement && !(L.denouement.formules || []).length) L.denouement.formules = o.formules;
+  }
+  function def(t, h) { return "<div class='def'><b>" + t + "</b>" + h + "</div>"; }
+  function formule(h) { return "<p class='formule'>" + h + "</p>"; }
+  function ex(h, t) { return "<div class='ex'><b>" + (t || "Exemples") + "</b>" + h + "</div>"; }
+  function astuce(h, t) { return "<div class='astuce'><b>" + (t || "Astuce") + "</b>" + h + "</div>"; }
+  function attention(h, t) { return "<div class='attention'><b>" + (t || "Attention") + "</b>" + h + "</div>"; }
+  function methode(h, t) { return "<div class='methode'><b>" + (t || "Méthode") + "</b>" + h + "</div>"; }
+  function F(nom, f, calcul) { return { nom: nom, f: f, calcul: calcul }; }
+  /* fiche 2D en colonnes : [{t, c, l:[lignes]}] */
+  function colonnes(titre, cols, h, alt) {
+    var W = 640, n = cols.length, w = (W - 30 - (n - 1) * 12) / n, s = "<rect width='640' height='" + h + "' fill='#FBF8F2'/>" + txt(320, 28, titre, { s: 15 });
+    cols.forEach(function (c, i) {
+      var x = 15 + i * (w + 12);
+      s += "<rect x='" + x + "' y='44' width='" + w + "' height='" + (h - 58) + "' rx='12' fill='#fff' stroke='" + c.c + "' stroke-width='2'/><rect x='" + x + "' y='44' width='" + w + "' height='34' rx='11' fill='" + c.c + "'/>" + txt(x + w / 2, 66, c.t, { s: 14, c: "#fff" });
+      c.l.forEach(function (l, k) { s += txt(x + 12, 100 + k * 24, l, { s: 12, a: "start", w: l.charAt(0) === "→" ? 800 : 550, c: l.charAt(0) === "→" ? c.c : NUIT }); });
+    });
+    return svg(640, h, alt || titre, "", s);
+  }
+
+  function etapes(titre, E, h, alt) {
+    var n = E.length, w = (600 - (n - 1) * 16) / n, s = "<rect width='640' height='" + h + "' fill='#FBF8F2'/>" + txt(320, 28, titre, { s: 15 });
+    E.forEach(function (e, i) { var x = 20 + i * (w + 16); s += "<rect x='" + x + "' y='46' width='" + w + "' height='" + (h - 62) + "' rx='14' fill='#fff' stroke='" + e[2] + "' stroke-width='2.5'/><circle cx='" + (x + 24) + "' cy='70' r='14' fill='" + e[2] + "'/>" + txt(x + 24, 75, String(i + 1), { s: 13, c: "#fff" }) + txt(x + w / 2 + 12, 76, e[0], { s: 13, c: e[2] }) + (e[3] ? "<g transform='translate(" + (x + w / 2) + " " + (h / 2 + 8) + ")'>" + e[3] + "</g>" : "") + txt(x + w / 2, h - 30, e[1], { s: 11, w: 600 }) + (i < n - 1 ? "<path d='M" + (x + w + 2) + " " + (h / 2 + 10) + "h12' stroke='" + NUIT + "' stroke-width='2.5' marker-end='url(#etF)'/>" : ""); });
+    return svg(640, h, alt || titre, fleche("etF", NUIT), s);
+  }
+  function bonhomme(pose) {
+    var P = { course: "M0 -30V0M0 0l-10 18M0 0l12 14l-2 8M0 -22l-12 10M0 -22l12 -6", genoux: "M0 -30V0M0 0l0 24M0 0l14 -4l2 14M0 -22l-12 10M0 -22l12 10", talons: "M0 -30V0M0 0l-2 24M0 0l6 12l-12 4M0 -22l-12 10M0 -22l12 10", bras: "M0 -30V0M0 0l-8 24M0 0l8 24M0 -22l-16 -10M0 -22l16 -10" };
+    return "<circle cx='0' cy='-38' r='7' fill='#6B4423'/><path d='" + P[pose] + "' stroke='" + NUIT + "' stroke-width='4' stroke-linecap='round' fill='none'/>";
+  }
+
+  /* ═══════════ 4e LANGUES NATIONALES — LES TONS ═══════════ */
+  enrichir("4e-ln-tons", {
+    blocs: [[0, def("Ton", "Hauteur musicale d'une syllabe ; dans une langue à tons, changer le ton peut changer le sens du mot.") + ex("En français déjà, l'intonation change le sens d'une phrase : « Il vient. » (affirmation) / « Il vient ? » (question). Dans nos langues, c'est le mot lui-même qui change.")],
+      [1, formule("haut : ´ (á) · bas : ` (à) · moyen : ¯ (ā) · montant : ˇ (ǎ) · descendant : ˆ (â)") + ex("bá (haut), bà (bas), bā (moyen), bǎ (montant), bâ (descendant) : cinq mélodies sur la même syllabe.") + astuce("Accent aigu = la voix monte en haut ; accent grave = elle descend en bas ; le signe dessine la mélodie : ˇ monte, ˆ descend.")],
+      [2, attention("Ne confonds pas ton et accent tonique : en français, on appuie sur la dernière syllabe sans changer le sens ; le ton, lui, distingue des mots.")]],
+    planches: [[2, { type: "2D", titre: "Noter le ton d'un mot en quatre gestes", legende: "La méthode de la leçon en quatre gestes : écouter le mot, le fredonner sur « la-la », tracer sa mélodie avec la main, puis noter le signe AGLC sur la voyelle.", svg: etapes("Noter le ton d'un mot en quatre gestes", [["Écouter", "le mot dit par l'enseignant", "#1E499B", "<path d='M-14 -6q6 -10 14 0M-20 -12q12 -18 26 0' stroke='#1E499B' stroke-width='3' fill='none'/><circle r='5' fill='#1E499B'/>"], ["Fredonner", "« la-la » sur la mélodie", "#7B3F99", "<path d='M-18 6q10 -20 18 -6t18 -10' stroke='#7B3F99' stroke-width='3' fill='none'/><circle cx='-18' cy='6' r='4' fill='#7B3F99'/>"], ["Tracer", "la courbe avec la main", "#C2540A", "<path d='M-20 10L0 -10L20 10' stroke='#C2540A' stroke-width='4' fill='none' stroke-linecap='round'/>"], ["Noter", "le signe AGLC sur la voyelle", "#2E7D32", "<text y='8' text-anchor='middle' font-size='30' font-weight='800' fill='#2E7D32'>bâ</text>"]], 200, "Quatre étapes pour noter un ton : écouter, fredonner, tracer, noter") }]],
+    formules: [F("Définir", "ton = hauteur musicale d'une syllabe", "le volume (fort / doux) ne change pas le ton"), F("Vérifier l'effet sur le sens", "mêmes sons + ton différent = mot différent", "bá ≠ bà ≠ bā ≠ bǎ ≠ bâ"), F("Noter selon l'AGLC", "´ haut · ` bas · ¯ moyen · ˇ montant · ˆ descendant", "les signes de l'affiche restent")]
+  });
+
+  /* ═══════════ 6e ARTS — LES BRANCHES ═══════════ */
+  enrichir("6e-arts-branches", {
+    blocs: [[0, def("Arts plastiques", "Arts qui façonnent la matière, les formes et les couleurs pour créer une œuvre que l'on regarde : dessin, peinture, sculpture, poterie, tissage, photographie, architecture.") + ex("Les sculptures en bois de Foumban, les poteries décorées, les pagnes ndop teints à l'indigo.")],
+      [1, def("Arts musicaux et arts scéniques", "Arts musicaux : on organise des sons (chant, instruments). Arts scéniques : on donne un spectacle devant un public (théâtre, danse, conte, mime, marionnettes).") + ex("Musical : un air de balafon, un chant de chorale. Scénique : un conte de la tortue dit à la veillée, une danse bikutsi.") + astuce("Demande-toi ce que reçoit le public : il regarde une œuvre → plastique ; il écoute → musical ; il assiste à un spectacle joué → scénique.")]],
+    planches: [[2, { type: "2D", titre: "Quel jury ? L'arbre de décision", legende: "Deux questions suffisent pour ranger une œuvre : le public la regarde-t-il comme un objet ? sinon, l'écoute-t-il seulement ou assiste-t-il à un spectacle ?", svg: (function () {
+      var s = "<rect width='640' height='260' fill='#FBF8F2'/>";
+      function b(x, y, w, t, c, f) { return "<rect x='" + x + "' y='" + y + "' width='" + w + "' height='44' rx='10' fill='" + (f ? c : "#fff") + "' stroke='" + c + "' stroke-width='2'/>" + txt(x + w / 2, y + 27, t, { s: 12.5, c: f ? "#fff" : NUIT }); }
+      s += b(170, 14, 300, "Le public regarde un objet créé ?", BLEU) + "<path d='M320 58V78H120V96M320 78H470V96' stroke='" + NUIT + "' stroke-width='2' fill='none'/>" + txt(210, 74, "oui", { s: 11, c: VERT }) + txt(420, 74, "non", { s: 11, c: ROUGE });
+      s += b(30, 96, 180, "ARTS PLASTIQUES", "#352C72", true) + txt(120, 160, "bronze, ndop, photo", { s: 11, w: 500 });
+      s += b(340, 96, 260, "Il écoute seulement ?", BLEU) + "<path d='M470 140V160H380V178M470 160H560V178' stroke='" + NUIT + "' stroke-width='2' fill='none'/>" + txt(415, 156, "oui", { s: 11, c: VERT }) + txt(525, 156, "non", { s: 11, c: ROUGE });
+      s += b(300, 178, 160, "ARTS MUSICAUX", "#6B4E00", true) + b(470, 178, 160, "ARTS SCÉNIQUES", "#6E1F43", true) + txt(380, 242, "balafon, chant", { s: 11, w: 500 }) + txt(550, 242, "conte, danse, théâtre", { s: 11, w: 500 });
+      return svg(640, 260, "Arbre de décision : objet regardé, arts plastiques ; sinon, écoute seule, arts musicaux ; spectacle, arts scéniques", "", s);
+    })() }]],
+    formules: [F("Ce que perçoit le public", "regarder → plastique ; écouter → musical ; spectacle → scénique", "statuette → plastique · balafon → musical"), F("Ne pas se fier à la matière", "on classe l'œuvre, pas l'objet", "balafon en bois sculpté → air de musique → musical"), F("Reconnaître le conte", "parole + gestes + public = spectacle", "conte de la tortue → scénique")]
+  });
+
+  /* ═══════════ 6e EPS — COORDINATION BRAS-JAMBES ═══════════ */
+  enrichir("6e-eps-bras-jambes", {
+    blocs: [[0, def("Coordination croisée", "En course, le bras qui avance est toujours opposé à la jambe qui avance : bras gauche avec jambe droite, bras droit avec jambe gauche.") + formule("jambe droite devant ⇔ bras gauche devant · jambe gauche devant ⇔ bras droit devant") + ex("Observe un sprinteur au ralenti : à chaque foulée, son épaule gauche avance avec son genou droit.")],
+      [2, ex("Footing 5 minutes, rotations des chevilles, genoux et épaules, 2 × 20 m de montées de genoux, 2 × 20 m de talons-fesses, puis deux accélérations progressives.", "Un échauffement de 10 minutes") + astuce("Pour retrouver la coordination, marche d'abord en exagérant le balancement des bras, puis trottine, puis accélère.")]],
+    planches: [[2, { type: "2D", titre: "L'échauffement en quatre exercices", legende: "Un échauffement simple avant de courir : footing lent, montées de genoux, talons-fesses, rotations des articulations.", svg: etapes("L'échauffement en quatre exercices", [["Footing", "5 min, allure lente", "#1E499B", bonhomme("course")], ["Montées de genoux", "2 × 20 m", "#7B3F99", bonhomme("genoux")], ["Talons-fesses", "2 × 20 m", "#C2540A", bonhomme("talons")], ["Rotations", "chevilles, épaules", "#2E7D32", bonhomme("bras")]], 210, "Quatre silhouettes : footing, montées de genoux, talons-fesses, rotations des bras") }]],
+    formules: [F("Rôle des bras", "bras = équilibre + rythme", "bras collés de Samuel → course freinée"), F("Coordination croisée", "bras opposé à la jambe", "Aboubakar, bras du même côté → le buste tourne, il zigzague"), F("Prévenir les crampes", "échauffement progressif avant, récupération après", "footing, montées de genoux, talons-fesses")]
+  });
+
+  /* ═══════════ 6e EPS — LA PISTE ═══════════ */
+  enrichir("6e-eps-piste", {
+    blocs: [[0, def("Piste réglementaire", "Anneau de 400 m mesuré dans le couloir 1, composé de deux lignes droites et de deux virages, avec en général huit couloirs de 1,22 m.") + ex("Un tour de piste = 400 m ; le 800 m = deux tours ; le 1 500 m = trois tours trois quarts.")],
+      [1, formule("décalage au 200 m ≈ π × (rayon du couloir − rayon du couloir 1)") + ex("Couloir 8 : π × (45,24 − 36,80) ≈ 26,5 m d'avance au départ du 200 m ; au 400 m (deux virages) : environ 53 m.") + astuce("Le coureur qui part le plus loin devant (couloir 8) ne voit pas ses adversaires : il doit courir « à l'aveugle » et garder son allure.") + attention("Au 200 m et au 400 m, mettre le pied dans le couloir voisin, surtout à l'intérieur du virage, entraîne la disqualification.")]],
+    planches: [[1, { type: "2D", titre: "La piste vue de dessus : son vocabulaire", legende: "Vue de dessus d'une piste : deux lignes droites, deux virages, huit couloirs, la corde à l'intérieur, la ligne d'arrivée au bout de la ligne droite et le sens de course (inverse des aiguilles d'une montre).", svg: (function () {
+      var s = "<rect width='640' height='300' fill='#6E9B45'/>", cy = 150, cx1 = 200, cx2 = 440;
+      function st(r) { return "M" + cx1 + " " + (cy - r) + "H" + cx2 + "A" + r + " " + r + " 0 0 1 " + cx2 + " " + (cy + r) + "H" + cx1 + "A" + r + " " + r + " 0 0 1 " + cx1 + " " + (cy - r) + "Z"; }
+      s += "<path d='" + st(126) + "' fill='#B5442C'/><path d='" + st(90) + "' fill='#5E9E4E'/>"; for (var k = 0; k <= 8; k++) s += "<path d='" + st(90 + k * 4.5) + "' fill='none' stroke='#F4F1EA' stroke-width='1'/>";
+      s += "<path d='M" + cx2 + " " + (cy + 90) + "V" + (cy + 126) + "' stroke='#fff' stroke-width='4'/><path d='M260 " + (cy + 108) + "H380' stroke='#fff' stroke-width='3' marker-end='url(#psF)'/>";
+      [[320, cy - 108, "ligne droite", "#fff"], [90, cy, "virage", "#fff"], [320, cy, "pelouse", "#fff"], [470, cy + 140, "ligne d'arrivée", "#fff"], [320, cy + 140, "sens de course", "#fff"], [560, cy - 70, "couloir 8", "#fff"], [540, cy + 60, "corde (couloir 1)", "#F7C948"]].forEach(function (e) { s += txt(e[0], e[1] + 4, e[2], { s: 12, c: e[3] }); });
+      return svg(640, 300, "Vue de dessus d’une piste rouge à huit couloirs avec le vocabulaire : ligne droite, virage, corde, ligne d’arrivée, sens de course", fleche("psF", "#fff"), s);
+    })() }]],
+    formules: [F("Longueur d'un tour", "400 m mesurés dans le couloir 1", "les couloirs extérieurs sont plus longs dans les virages"), F("Décalage au 200 m", "π × (R du couloir − R du couloir 1)", "couloir 8 : π × (45,24 − 36,80) ≈ 26,5 m"), F("Règle du couloir", "rester dans son couloir du départ à l'arrivée", "couper le virage → disqualification")]
+  });
+
+  /* ═══════════ 6e LATIN — JOURS ET MOIS ═══════════ */
+  enrichir("6e-la-jours", {
+    blocs: [[0, formule("jour = nom de l'astre (au génitif) + dies : Lunae dies → lundi") + ex("Martis dies → mardi · Mercurii dies → mercredi · Iovis dies → jeudi · Veneris dies → vendredi") + astuce("Cherche l'astre caché dans le nom du jour : lun- (Lune), mar- (Mars), mercre- (Mercure), jeu- (Jupiter), vendre- (Vénus).")],
+      [1, def("Calendrier romain primitif", "L'année de Romulus commençait en mars (Martius) et comptait dix mois ; janvier et février furent ajoutés plus tard, puis placés en tête de l'année.") + ex("September (7ᵉ) → 9ᵉ mois ; October (8ᵉ) → 10ᵉ ; November (9ᵉ) → 11ᵉ ; December (10ᵉ) → 12ᵉ.", "Le glissement de deux rangs") + attention("Samedi ne vient pas de Saturne en français (sambati dies, jour du sabbat) ; mais l'anglais Saturday garde Saturne.")]],
+    planches: [[0, { type: "2D", titre: "Un jour latin, quatre langues romanes", legende: "Les noms latins des jours se retrouvent dans toutes les langues romanes : on reconnaît la Lune, Mars, Mercure, Jupiter et Vénus.", svg: colonnes("Un jour latin, quatre langues romanes", [{ t: "latin", c: "#7A1F1F", l: ["Lunae dies", "Martis dies", "Mercurii dies", "Iovis dies", "Veneris dies"] }, { t: "français", c: BLEU, l: ["lundi", "mardi", "mercredi", "jeudi", "vendredi"] }, { t: "italien", c: VERT, l: ["lunedì", "martedì", "mercoledì", "giovedì", "venerdì"] }, { t: "espagnol", c: "#C2540A", l: ["lunes", "martes", "miércoles", "jueves", "viernes"] }], 230, "Tableau : noms latins des jours et leurs équivalents en français, italien, espagnol") }]],
+    formules: [F("Origine des jours", "astre + dies (le jour)", "Lunae dies → lundi : le jour de la Lune"), F("Calendrier primitif", "l'année commence en mars", "Martius 1ᵉʳ … September 7ᵉ"), F("Glissement", "début en janvier → les numéros glissent de deux rangs", "September devient le 9ᵉ mois")]
+  });
+
+  /* ═══════════ 6e LATIN — ORIGINE ═══════════ */
+  enrichir("6e-la-origine", {
+    blocs: [[0, def("Langue romane", "Langue issue du latin parlé dans les provinces de l'Empire romain : français, italien, espagnol, portugais, roumain.") + ex("Le Latium, région de Rome, a donné son nom au latin ; la Gaule conquise par César (58-51 av. J.-C.) a peu à peu parlé latin.")],
+      [2, formule("racine latine + suffixe français = mot savant : aqua + -rium → aquarium") + ex("terra → territoire, terrestre, enterrer · manus → manuel, manuscrit, manucure · vita → vital, vitamine") + astuce("Quand un mot te paraît difficile, cherche la racine latine cachée dedans : elle te donne souvent le sens.")]],
+    planches: [[2, { type: "2D", titre: "Trois racines latines et leurs familles de mots", legende: "Une racine latine donne toute une famille de mots français : connaître la racine, c'est deviner le sens.", svg: colonnes("Trois racines latines et leurs familles de mots", [{ t: "aqua (l'eau)", c: BLEU, l: ["aquarium", "aquatique", "aqueduc", "aquarelle"] }, { t: "terra (la terre)", c: "#8B5A2B", l: ["territoire", "terrestre", "enterrer", "terrasse"] }, { t: "manus (la main)", c: "#C2540A", l: ["manuel", "manuscrit", "manucure", "manœuvre"] }], 200, "Tableau : familles de mots français issues de aqua, terra et manus") }]],
+    formules: [F("Origine", "latin = langue du Latium et de Rome", "répandu par la conquête jusqu'en Gaule"), F("Filiation", "latin parlé → langues romanes", "noctem → nuit, notte, noche, noite, noapte"), F("Présence aujourd'hui", "racine latine → mot français", "agenda, et cetera, aquarium, Homo sapiens")]
+  });
+
+  /* ═══════════ 6e LANGUES NATIONALES — LA CARTE ═══════════ */
+  enrichir("6e-ln-carte", {
+    blocs: [[0, def("Langue officielle, langue nationale", "Langue officielle : langue de l'administration, de la justice et de l'école (français, anglais). Langue nationale : langue parlée par une communauté du pays (ewondo, duala, fulfulde…).") + ex("Au marché de Ngaoundéré, on achète en fulfulde ; au tribunal, on plaide en français ou en anglais.")],
+      [1, def("Famille de langues", "Ensemble de langues qui descendent d'une même langue ancienne et se ressemblent dans leurs mots et leur grammaire.") + ex("Bantoues : ewondo, bulu, duala, basaa · Grassfields : ghomálá', medumba · Tchadiques : mafa, giziga · Adamawa-oubanguiennes : mbum, gbaya") + astuce("Pour retenir les familles, pense à la carte du Sud au Nord : bantou (Sud, Centre, côte), Grassfields (Ouest), adamawa (Adamaoua, Est), tchadique (Extrême-Nord).")],
+      [3, attention("Écrire une langue nationale n'est pas « franciser » les sons : l'AGLC a ses propres lettres (ɛ, ɔ, ŋ…) et ses signes de tons.")]],
+    planches: [[3, { type: "2D", titre: "Les grandes familles, du Sud au Nord", legende: "Les quatre grandes familles de langues du Cameroun, leurs régions et quelques langues de chacune (limites approximatives).", svg: colonnes("Les grandes familles, du Sud au Nord", [{ t: "bantoues", c: "#2E7D32", l: ["Sud, Centre, Littoral", "ewondo, bulu", "duala, basaa"] }, { t: "Grassfields", c: "#C2540A", l: ["Ouest, Nord-Ouest", "ghomálá', medumba", "lamnso'"] }, { t: "adamawa", c: "#B8860B", l: ["Adamaoua, Est", "mbum, gbaya"] }, { t: "tchadiques", c: "#7B3F99", l: ["Extrême-Nord", "mafa, giziga"] }], 180, "Tableau des grandes familles de langues du Cameroun, de leurs régions et de quelques langues") }]],
+    formules: [F("Langues officielles et nationales", "2 langues officielles + plus de 250 langues nationales", "français, anglais ; ewondo, fulfulde…"), F("Classer par famille", "langue → famille → région", "ewondo → bantoue → Centre ; fulfulde → atlantique → Nord"), F("Écrire", "AGLC (1979) : un alphabet commun avec les tons", "toutes nos langues peuvent s'écrire")]
+  });
+
+  /* ═══════════ 4e GREC — L'ALPHABET ═══════════ */
+  enrichir("4e-gr-alphabet", {
+    blocs: [[1, formule("Η η = ê · Ρ ρ = r · Χ χ = kh · Θ θ = th · Φ φ = ph · Ψ ψ = ps · Ξ ξ = ks") + def("Faux amis", "Capitales grecques qui ressemblent à des lettres latines mais ne se lisent pas pareil : Η (êta), Ρ (rhô), Χ (khi), Ν (nu).") + ex("ΑΘΗΝΑ → Athêna · ΑΚΡΟΠΟΛΙΣ → Akropolis · ΧΑΙΡΕ → khaïré (bonjour)") + astuce("Lis chaque lettre séparément en disant son nom (alpha, thêta, êta…) avant de prononcer le mot entier.")],
+      [2, ex("τῆλε (loin) + φωνή (voix) → téléphone · γῆ (terre) + γράφω (écrire) → géographie", "Racines") + attention("En fin de mot, le sigma s'écrit ς : λόγος ; au milieu, σ : σοφία.")]],
+    formules: [F("Lire lettre par lettre", "nom de la lettre → son", "Α a · Θ th · Η ê · Ν n · Α a"), F("Éviter les faux amis", "Η = ê, Ρ = r, Χ = kh", "ΑΘΗΝΑ = Athêna, pas « Athhna »"), F("Relier au français", "racine grecque + racine grecque = mot savant", "ἄκρος + πόλις → acropole")]
+  });
+})();
+
+/* Leçons enrichies — 3e, lot E (18/11/2026) : arts, ECM, français, histoire, géographie. Même mécanisme que
+   29-enrichies-lettres-a.js : AJOUTS SEULEMENT. */
+(function () {
+  "use strict";
+  var NUIT = "#001136", BLEU = "#1E499B", GRIS = "#4D5163", VERT = "#17784D", ROUGE = "#C62828", TERRE = "#C46A2B";
+
+  function txt(x, y, t, o) {
+    o = o || {};
+    return "<text x='" + x + "' y='" + y + "' text-anchor='" + (o.a || "middle") + "' font-size='" + (o.s || 12) + "' font-weight='" + (o.w || 700) + "' fill='" + (o.c || NUIT) + "'" + (o.i ? " font-style='italic'" : "") + (o.halo ? " stroke='#fff' stroke-width='3' paint-order='stroke'" : "") + ">" + t + "</text>";
+  }
+  function lin(id, cs, vertical) {
+    var s = "<linearGradient id='" + id + "'" + (vertical ? " x1='0' y1='0' x2='0' y2='1'" : "") + ">";
+    cs.forEach(function (c, i) { s += "<stop offset='" + (i / (cs.length - 1)).toFixed(2) + "' stop-color='" + c + "'/>"; });
+    return s + "</linearGradient>";
+  }
+  function rad(id, cs) {
+    var s = "<radialGradient id='" + id + "' cx='35%' cy='30%' r='75%'>";
+    cs.forEach(function (c, i) { s += "<stop offset='" + (i / (cs.length - 1)).toFixed(2) + "' stop-color='" + c + "'/>"; });
+    return s + "</radialGradient>";
+  }
+  function fleche(id, c) { return "<marker id='" + id + "' markerWidth='10' markerHeight='10' refX='7' refY='5' orient='auto'><path d='M0 1L8 5L0 9Z' fill='" + c + "'/></marker>"; }
+  function svg(w, h, alt, defs, corps) {
+    return "<svg viewBox='0 0 " + w + " " + h + "' role='img' aria-label='" + alt + "' font-family='Inter,Arial,sans-serif'><rect width='" + w + "' height='" + h + "' fill='#fff'/><defs>" + defs + "</defs>" + corps +
+      "<text x='" + (w - 6) + "' y='" + (h - 5) + "' font-size='8' text-anchor='end' fill='#8A93A6'>Planche VÉRITAS</text></svg>";
+  }
+  function ancien(id) { return window.VRT_LECONS[id]; }
+  function remplacer(id, o) {
+    var a = ancien(id);
+    if (a) ["apc", "examen", "rang", "cle", "scenes"].forEach(function (k) { if (a[k] != null && o[k] == null) o[k] = a[k]; });
+    VRT_L(id, o);
+    if (a) o.ordre = a.ordre;
+  }
+  function q(qq, bonne, f1, f2, e) { return { q: qq, r: [bonne, f1, f2], b: 0, e: e }; }
+  function partie(old, i) { return old && old.parties[i] ? old.parties[i].html : ""; }
+  function bulle(x, y, w, t, c) { return "<rect x='" + x + "' y='" + y + "' width='" + w + "' height='30' rx='12' fill='#fff' stroke='" + (c || "#C9D2E3") + "'/>" + txt(x + w / 2, y + 20, t, { s: 11.5 }); }
+  function perso(x, y, peau, habit, bas) {
+    bas = bas || "#2E3445";
+    return "<g transform='translate(" + x + " " + y + ")'><ellipse cx='0' cy='84' rx='18' ry='4' fill='#001136' opacity='.18'/>" +
+      "<rect x='-9' y='44' width='8' height='36' rx='3' fill='" + bas + "'/><rect x='1' y='44' width='8' height='36' rx='3' fill='" + bas + "'/>" +
+      "<ellipse cx='-6' cy='81' rx='7' ry='3.5' fill='#1F2328'/><ellipse cx='6' cy='81' rx='7' ry='3.5' fill='#1F2328'/>" +
+      "<path d='M-13 46L-16 18C-16 13 -12 11 -6 10H6C12 11 16 13 16 18L13 46Z' fill='" + habit + "'/>" +
+      "<path d='M-15 16L-20 40' stroke='" + habit + "' stroke-width='7' stroke-linecap='round'/><path d='M15 16L20 40' stroke='" + habit + "' stroke-width='7' stroke-linecap='round'/>" +
+      "<circle cx='-20' cy='42' r='3.6' fill='" + peau + "'/><circle cx='20' cy='42' r='3.6' fill='" + peau + "'/>" +
+      "<rect x='-3.5' y='5' width='7' height='7' fill='" + peau + "'/><ellipse cx='0' cy='-2' rx='9' ry='10.5' fill='" + peau + "'/>" +
+      "<path d='M-9 -4C-10 -14 -4 -13.5 0 -13.5S10 -14 9 -4C7 -9 -7 -9 -9 -4Z' fill='#1B1410'/><ellipse cx='-9' cy='-1' rx='1.8' ry='3' fill='" + peau + "'/><ellipse cx='9' cy='-1' rx='1.8' ry='3' fill='" + peau + "'/></g>";
+  }
+  /* portrait en buste (arbre généalogique) */
+  function portrait(x, y, peau, habit, cheveux, age) {
+    var s = "<g transform='translate(" + x + " " + y + ")'><circle r='30' fill='#F4EFE4' stroke='#C9A576' stroke-width='3'/><clipPath id='pc" + x + "_" + y + "'><circle r='28'/></clipPath><g clip-path='url(#pc" + x + "_" + y + ")'>";
+    s += "<path d='M-26 32C-26 14 -14 10 0 10S26 14 26 32Z' fill='" + habit + "'/><rect x='-4' y='2' width='8' height='10' fill='" + peau + "'/><ellipse cy='-6' rx='11' ry='13' fill='" + peau + "'/>";
+    s += age === "vieux" ? "<path d='M-11 -10C-12 -20 -4 -21 0 -21S12 -20 11 -10C9 -14 -9 -14 -11 -10Z' fill='#D8D8D8'/>" : age === "femme" ? "<path d='M-13 -6C-15 -24 15 -24 13 -6C12 -14 -12 -14 -13 -6Z' fill='" + cheveux + "'/><path d='M-13 -14h26v-6c-6 -6 -20 -6 -26 0Z' fill='" + habit + "'/>" : "<path d='M-11 -10C-12 -20 -4 -21 0 -21S12 -20 11 -10C9 -14 -9 -14 -11 -10Z' fill='" + cheveux + "'/>";
+    s += "<circle cx='-4' cy='-6' r='1.4' fill='#1B1410'/><circle cx='4' cy='-6' r='1.4' fill='#1B1410'/><path d='M-3 2q3 2 6 0' stroke='#1B1410' fill='none'/></g></g>";
+    return s;
+  }
+  /* boucle d'exercice générique : [phrase avec ___, [bonne, autres…], explication] */
+  function exercice(el, C, suivant, lib) {
+    var i = 0, ok = 0;
+    el.innerHTML = "<p class='labo-r' data-q style='font-size:16px'></p><div style='display:flex;gap:8px;flex-wrap:wrap' data-c></div><p class='an-note' data-e></p><p class='labo-r' data-s></p>";
+    function $(s) { return el.querySelector(s); }
+    function poser() {
+      var c = C[i];
+      $("[data-q]").innerHTML = (i + 1) + ". " + c[0].replace("___", "<b style='border-bottom:2px dashed #1E499B;padding:0 14px'>?</b>");
+      $("[data-e]").textContent = ""; $("[data-s]").innerHTML = lib + " " + (i + 1) + " / " + C.length + " · score : <b>" + ok + "</b>";
+      $("[data-c]").innerHTML = c[1].slice().sort().map(function (x) { return "<button type='button' class='btn-l' data-v='" + x + "'>" + x + "</button>"; }).join("");
+      el.querySelectorAll("[data-v]").forEach(function (b) {
+        b.addEventListener("click", function () {
+          var bon = b.dataset.v === c[1][0]; if (bon) ok++;
+          $("[data-q]").innerHTML = (i + 1) + ". " + c[0].replace("___", "<b style='color:" + (bon ? VERT : ROUGE) + "'>" + c[1][0] + "</b>");
+          $("[data-e]").innerHTML = (bon ? "✔ " : "✘ ") + c[2];
+          el.querySelectorAll("[data-v]").forEach(function (x) { x.disabled = true; });
+          var nx = document.createElement("button"); nx.type = "button"; nx.className = "btn-l"; nx.textContent = i + 1 < C.length ? suivant : "↺";
+          nx.addEventListener("click", function () { i = (i + 1) % C.length; if (!i) ok = 0; poser(); });
+          $("[data-c]").appendChild(nx);
+          $("[data-s]").innerHTML = lib + " " + (i + 1) + " / " + C.length + " · score : <b>" + ok + "</b>";
+        });
+      });
+    }
+    poser();
+  }
+
+  function alea(g) { return function () { g = (g * 16807) % 2147483647; return (g - 1) / 2147483646; }; }
+  /* Consignes de Jacques (18/11/2026) : situation résolue avec les formules étape par étape, exemples, règles, astuces,
+     planches 2D et 3D. AJOUTS SEULEMENT : blocs en fin de partie, planches, denouement.formules. */
+  function enrichir(id, o) {
+    var L = ancien(id); if (!L) return;
+    (o.blocs || []).forEach(function (b) { var p = L.parties[b[0]]; if (p) p.html = (p.html || "") + b[1]; });
+    (o.planches || []).forEach(function (b) { var p = L.parties[b[0]]; if (p) p.planches = (p.planches || []).concat([b[1]]); });
+    if (o.formules && L.denouement && !(L.denouement.formules || []).length) L.denouement.formules = o.formules;
+  }
+  function def(t, h) { return "<div class='def'><b>" + t + "</b>" + h + "</div>"; }
+  function formule(h) { return "<p class='formule'>" + h + "</p>"; }
+  function ex(h, t) { return "<div class='ex'><b>" + (t || "Exemples") + "</b>" + h + "</div>"; }
+  function astuce(h, t) { return "<div class='astuce'><b>" + (t || "Astuce") + "</b>" + h + "</div>"; }
+  function attention(h, t) { return "<div class='attention'><b>" + (t || "Attention") + "</b>" + h + "</div>"; }
+  function methode(h, t) { return "<div class='methode'><b>" + (t || "Méthode") + "</b>" + h + "</div>"; }
+  function F(nom, f, calcul) { return { nom: nom, f: f, calcul: calcul }; }
+  /* fiche 2D en colonnes : [{t, c, l:[lignes]}] */
+  function colonnes(titre, cols, h, alt) {
+    var W = 640, n = cols.length, w = (W - 30 - (n - 1) * 12) / n, s = "<rect width='640' height='" + h + "' fill='#FBF8F2'/>" + txt(320, 28, titre, { s: 15 });
+    cols.forEach(function (c, i) {
+      var x = 15 + i * (w + 12);
+      s += "<rect x='" + x + "' y='44' width='" + w + "' height='" + (h - 58) + "' rx='12' fill='#fff' stroke='" + c.c + "' stroke-width='2'/><rect x='" + x + "' y='44' width='" + w + "' height='34' rx='11' fill='" + c.c + "'/>" + txt(x + w / 2, 66, c.t, { s: 14, c: "#fff" });
+      c.l.forEach(function (l, k) { s += txt(x + 12, 100 + k * 24, l, { s: 12, a: "start", w: l.charAt(0) === "→" ? 800 : 550, c: l.charAt(0) === "→" ? c.c : NUIT }); });
+    });
+    return svg(640, h, alt || titre, "", s);
+  }
+
+  /* ═══════════ 3e ARTS — OMBRE ET LUMIÈRE ═══════════ */
+  enrichir("3e-arts-ombre", {
+    blocs: [[0, ex("Un canari posé sur une table au soleil de 16 h : la face tournée vers le soleil est claire (lumière), l'autre face est sombre (ombre propre), et une tache sombre s'allonge sur la table du côté opposé (ombre portée).", "Au quotidien")],
+      [2, astuce("Plisse les yeux en regardant ton modèle : les détails disparaissent et il ne reste que les grandes masses de lumière et d'ombre, plus faciles à dessiner.") + ex("Crayon 2H pour la pénombre légère, HB pour les gris moyens, 4B pour le plus sombre de l'ombre propre et le pied de l'ombre portée.", "Choisir ses crayons")]],
+    planches: [[2, { type: "2D", titre: "Ombrer un canari en quatre étapes", legende: "1. Repérer la lumière ; 2. tracer la limite lumière-ombre ; 3. ombrer progressivement du clair au foncé ; 4. ajouter l'ombre portée, opposée à la lumière et plus longue si le soleil est bas.", svg: (function () {
+      var s = "<rect width='640' height='240' fill='#FBF8F2'/><defs><radialGradient id='cnG' cx='30%' cy='30%' r='80%'><stop offset='0' stop-color='#F2D2B0'/><stop offset='.5' stop-color='#B07A4A'/><stop offset='1' stop-color='#4A2E1A'/></radialGradient></defs>", k;
+      for (k = 0; k < 4; k++) {
+        var x = 80 + k * 160, y = 130;
+        s += "<path d='M" + (x - 40) + " " + (y + 60) + "H" + (x + 60) + "' stroke='#C9B28A' stroke-width='2'/>" + txt(x, 222, ["1. la lumière", "2. la limite", "3. le dégradé", "4. l'ombre portée"][k], { s: 12 });
+        if (k === 3) s += "<ellipse cx='" + (x + 50) + "' cy='" + (y + 58) + "' rx='56' ry='8' fill='#3B2A1A' opacity='.35'/>";
+        var fill = k < 2 ? "#fff" : "url(#cnG)";
+        s += "<path d='M" + (x - 34) + " " + (y + 10) + "q0 -44 34 -44q34 0 34 44q0 48 -34 48q-34 0 -34 -48Z' fill='" + fill + "' stroke='#4A2E1A' stroke-width='2'/><path d='M" + (x - 14) + " " + (y - 34) + "q14 -8 28 0v-10h-28Z' fill='" + fill + "' stroke='#4A2E1A' stroke-width='2'/>";
+        if (k === 1) s += "<path d='M" + (x + 6) + " " + (y - 33) + "q20 30 -8 90' stroke='#4A2E1A' stroke-dasharray='4 3' fill='none'/>";
+        if (k === 0) s += "<circle cx='" + (x - 50) + "' cy='" + (y - 70) + "' r='10' fill='#F7C948'/><path d='M" + (x - 40) + " " + (y - 62) + "l22 18' stroke='#F7C948' stroke-width='3' marker-end='url(#omF)'/>";
+      }
+      return svg(640, 240, "Quatre canaris : la flèche de lumière, la limite lumière-ombre, le dégradé, puis l’ombre portée sur la table", fleche("omF", "#E8A33D"), s);
+    })() }]],
+    formules: [F("Repérer la source", "flèche de lumière sur le dessin", "soleil en haut à gauche"), F("Ombre propre", "face opposée à la lumière, en dégradé lumière → pénombre → ombre", "côté droit du canari, crayons 2H → 4B"), F("Ombre portée", "du côté opposé à la lumière ; source basse = ombre longue", "sur la table, vers la droite, allongée en fin d'après-midi")]
+  });
+
+  /* ═══════════ 3e ECM — FONDEMENTS DE LA DÉMOCRATIE ═══════════ */
+  enrichir("3e-ecm-democratie", {
+    blocs: [[0, formule("démocratie = gouvernement du peuple, par le peuple, pour le peuple (Abraham Lincoln)") + ex("Au Cameroun, les citoyens élisent le président de la République, les députés et les conseillers municipaux.")],
+      [1, ex("Un bureau du foyer élu à vie viole l'alternance ; un président qui fait aussi les règles et juge les élèves viole la séparation des pouvoirs ; interdire de critiquer viole la liberté d'expression.", "Les piliers dans le règlement du foyer") + astuce("Pour juger si une organisation est démocratique, passe-la au crible : élection libre ? mandat limité ? pouvoirs séparés ? libertés respectées ? minorité protégée ?") + attention("La démocratie n'est pas la loi du plus grand nombre sans limites : la majorité décide, mais elle doit respecter les droits de la minorité.")]],
+    formules: [F("Définir", "pouvoir du peuple, exercé directement ou par des élus", "les élèves élisent leur bureau"), F("Vérifier les piliers", "élections libres + alternance + séparation des pouvoirs + libertés", "le règlement proposé en viole quatre"), F("Proposer", "bureau élu chaque année + contrôle par une assemblée + référendum", "le foyer redevient démocratique")]
+  });
+
+  /* ═══════════ 3e ECM — SIÈGES AU SCRUTIN PROPORTIONNEL ═══════════ */
+  enrichir("3e-ecm-sieges", {
+    blocs: [[1, ex("Quotient 12 000 ÷ 7 ≈ 1 714. A : 5 300 ÷ 1 714 = 3,09 → 3 sièges, reste ≈ 157 ; B : 3 900 → 2 sièges, reste ≈ 471 ; C : 1 800 → 1 siège, reste ≈ 86 ; D : 1 000 → 0 siège, reste 1 000. Le 7ᵉ siège va au plus fort reste : D.", "Le calcul complet")],
+      [2, ex("Avec 6 sièges au lieu de 7, le quotient serait 2 000 : A 2 (reste 1 300), B 1 (reste 1 900), C 0 (reste 1 800), D 0 (reste 1 000) ; les 3 sièges restants iraient à B, C et A.", "Et si l'on changeait le nombre de sièges ?")]],
+    planches: [[2, { type: "2D", titre: "Part des voix et part des sièges", legende: "Les pourcentages de voix (barres pleines) et de sièges (barres claires) sont proches mais pas identiques : avec 7 sièges entiers, la proportionnelle n'est qu'approchée. B obtient 2 sièges pour 32,5 % des voix (2,28 sièges « idéaux »).", svg: (function () {
+      var D = [["A", 5300, 3, "#1E499B"], ["B", 3900, 2, "#C2540A"], ["C", 1800, 1, "#2E7D32"], ["D", 1000, 1, "#7B3F99"]], s = "<rect width='640' height='260' fill='#FBF8F2'/>" + txt(320, 26, "% des voix et % des sièges (12 000 exprimés, 7 sièges)", { s: 14 });
+      D.forEach(function (d, i) { var y = 50 + i * 50, pv = d[1] / 120, ps = d[2] / 7 * 100; s += txt(46, y + 26, "Liste " + d[0], { s: 13, a: "end" }) + "<rect x='56' y='" + y + "' width='" + (pv * 5.2).toFixed(0) + "' height='18' rx='4' fill='" + d[3] + "'/>" + txt(62 + pv * 5.2, y + 14, pv.toFixed(1).replace(".", ",") + " % des voix", { s: 11, a: "start" }) + "<rect x='56' y='" + (y + 20) + "' width='" + (ps * 5.2).toFixed(0) + "' height='16' rx='4' fill='" + d[3] + "' opacity='.4'/>" + txt(62 + ps * 5.2, y + 33, d[2] + " siège" + (d[2] > 1 ? "s" : "") + " = " + ps.toFixed(1).replace(".", ",") + " %", { s: 11, a: "start", c: GRIS }); });
+      return svg(640, 260, "Barres comparant le pourcentage de voix et de sièges des listes A, B, C, D", "", s);
+    })() }]],
+    formules: [F("Suffrages exprimés", "votants − bulletins blancs et nuls", "12 600 − 600 = 12 000"), F("Quotient électoral", "suffrages exprimés ÷ nombre de sièges", "12 000 ÷ 7 ≈ 1 714 → A 3, B 2, C 1, D 0"), F("Plus fort reste", "sièges restants aux restes les plus grands", "7ᵉ siège : D (reste 1 000) → A 3, B 2, C 1, D 1")]
+  });
+
+  /* ═══════════ 3e FRANÇAIS — VILLE CRUELLE ═══════════ */
+  enrichir("3e-fr-ville-cruelle", {
+    blocs: [[0, def("Roman réaliste", "Récit qui peint fidèlement une société et ses injustices, à travers des personnages ordinaires et des lieux précis.") + ex("<em>Ville cruelle</em> (1954) peint la société coloniale du Cameroun à travers un jeune planteur, Banda, à Tanga.")],
+      [1, def("Personnage type", "Personnage qui représente tout un groupe social : Banda, le jeune paysan ; le contrôleur et ses gardes, l'oppression coloniale ; les commerçants grecs, l'exploitation.") + astuce("Pour analyser un personnage, note ce qu'il fait, ce qu'il dit, ce qu'on dit de lui et ce qu'il représente.")],
+      [3, ex("« Tanga-Nord » et « Tanga-Sud » : la ville elle-même raconte la séparation ; le feu qui brûle le cacao de Banda dit l'injustice mieux qu'un long discours.", "Le sens par les images") + methode("Justifier un titre : 1. relever les lieux ; 2. relever les épisodes de violence ; 3. montrer à qui elle profite ; 4. nuancer (le village étouffe aussi).", "Commenter le titre")]],
+    formules: [F("Le cadre", "ville coupée en deux : colons / Africains", "Tanga-Sud et Tanga-Nord"), F("Les faits", "violence + injustice + mort", "cacao brûlé, coups des gardes, mort de Koumé"), F("Le système", "colonisation + relais africains + poids du village", "« ville cruelle » : une cruauté organisée")]
+  });
+
+  /* ═══════════ 3e HISTOIRE — LE KAMERUN ═══════════ */
+  enrichir("3e-hist-kamerun", {
+    blocs: [[0, def("Protectorat", "Territoire placé sous la « protection » d'une puissance étrangère, qui en contrôle en réalité la politique extérieure, puis l'administration.") + ex("12 juillet 1884 : traité germano-douala signé par les rois Ndumbé Lobé Bell et Ngando Akwa ; Gustav Nachtigal hisse le drapeau allemand.")],
+      [1, ex("Chemin de fer du Nord (Bonabéri–Nkongsamba) et du Centre (Douala–Éséka), wharfs de Douala et de Kribi, plantations de cacao et de bananes autour du mont Cameroun.", "Les réalisations") + attention("Ces infrastructures servaient d'abord l'exportation vers l'Allemagne ; elles ont été construites par le travail forcé, dans lequel beaucoup d'ouvriers sont morts.")],
+      [2, astuce("Pour répondre à « modernisation ou oppression ? », ne choisis pas un camp : montre les deux faces (réalisations / prix payé) puis conclus en historien, avec des faits et des dates.", "Rédiger la réponse")]],
+    formules: [F("Le point de départ", "traité du 12 juillet 1884 + conditions des rois douala", "protectorat allemand"), F("Le bilan matériel", "rails + wharfs + plantations, orientés vers l'exportation", "chemin de fer du Nord, wharf de Douala"), F("Le prix humain", "travail forcé + expropriation + répression", "8 août 1914 : Rudolf Duala Manga Bell, Ngoso Din, Martin-Paul Samba ; 1916 : fin du Kamerun")]
+  });
+
+  /* ═══════════ 3e HISTOIRE — PARTAGE DE L'AFRIQUE ═══════════ */
+  enrichir("3e-hist-partage", {
+    blocs: [[1, def("Occupation effective", "Règle fixée à Berlin : pour revendiquer une côte d'Afrique, une puissance doit l'occuper réellement et le notifier aux autres signataires.") + formule("revendication = occupation effective + notification aux autres puissances") + ex("Aucun Africain n'est invité à Berlin ; quatorze États, surtout européens, y décident des règles du partage.")],
+      [2, def("Frontière artificielle", "Limite tracée sans tenir compte des peuples, souvent en ligne droite ou le long d'un fleuve, sur des cartes encore incomplètes.") + ex("La frontière entre le Cameroun et le Nigeria sépare des familles kanuri, peules ou haoussa ; la famille de Moussa vit des deux côtés.") + astuce("Une frontière parfaitement droite sur une carte d'Afrique est presque toujours un héritage de la colonisation.")]],
+    formules: [F("L'ampleur", "part de l'Afrique contrôlée par les Européens", "1880 : environ 10 % ; 1914 : environ 90 %"), F("Les règles", "occupation effective + notification (Berlin, 1884-1885)", "sans aucun représentant africain"), F("Le tracé", "traités entre Européens + lignes droites ou fleuves", "peuples séparés : la famille de Moussa")]
+  });
+
+  /* ═══════════ 3e GÉOGRAPHIE — PRÉSENTATION DU CAMEROUN ═══════════ */
+  enrichir("3e-geo-cameroun", {
+    blocs: [[0, def("Situation", "Position d'un pays sur le globe et par rapport à ses voisins : latitude, longitude, continent, océan, frontières.") + ex("Le Cameroun s'étend d'environ 2° à 13° de latitude Nord, du golfe de Guinée au lac Tchad ; il touche six pays : Nigeria, Tchad, RCA, Congo, Gabon, Guinée équatoriale.")],
+      [1, formule("densité = population ÷ superficie") + ex("Environ 29 millions d'habitants ÷ 475 650 km² ≈ 61 habitants par km² (moyenne : bien plus au Littoral et à l'Ouest, beaucoup moins à l'Est).", "Calcul")],
+      [2, def("Afrique en miniature", "Expression qui désigne le Cameroun parce qu'on y trouve presque tous les milieux du continent : forêt dense, mangrove, montagnes, plateaux, savanes et Sahel.")]],
+    formules: [F("Situer", "latitude + façade maritime + voisins", "de 2° à 13° Nord ; golfe de Guinée ; 6 voisins"), F("Mesurer", "superficie + régions + densité = population ÷ superficie", "475 650 km² ; 10 régions ; ≈ 61 hab./km²"), F("Expliquer le surnom", "diversité des milieux du sud au nord", "forêt, mangrove, montagnes, savane, Sahel ; pluies de 10 000 à 600 mm")]
+  });
+
+  /* ═══════════ 3e GÉOGRAPHIE — LA MANGROVE ═══════════ */
+  enrichir("3e-geo-mangrove", {
+    blocs: [[1, ex("Les palétuviers aux racines-échasses retiennent la vase et cassent les vagues ; entre leurs racines, les jeunes crevettes et poissons grandissent à l'abri.", "Le rôle des palétuviers")],
+      [2, ex("Une fumeuse de poisson coupe du bois de palétuvier parce qu'il brûle bien et longtemps ; un promoteur remblaie pour construire des maisons.", "Des acteurs aux besoins réels") + astuce("Dans un dossier de géographie, présente toujours chaque menace avec son acteur, sa raison et sa conséquence : c'est ce que demande l'examen.")]],
+    formules: [F("Identifier le milieu", "forêt littorale de la zone de balancement des marées", "mangrove de l'estuaire du Wouri à Youpwe"), F("Mesurer ses services", "nurserie + digue naturelle + bois", "moins de mangrove → moins de crevettes, plus d'inondations"), F("Concilier", "fumoirs améliorés + reboisement + urbanisme hors zones inondables", "refuser la destruction des 10 ha et proposer des solutions")]
+  });
+})();
+
+/* Leçons enrichies — 5e et 2nde, lot F (18/11/2026) : histoire, français, géographie. Même mécanisme que
+   29-enrichies-lettres-a.js : AJOUTS SEULEMENT. */
+(function () {
+  "use strict";
+  var NUIT = "#001136", BLEU = "#1E499B", GRIS = "#4D5163", VERT = "#17784D", ROUGE = "#C62828", TERRE = "#C46A2B";
+
+  function txt(x, y, t, o) {
+    o = o || {};
+    return "<text x='" + x + "' y='" + y + "' text-anchor='" + (o.a || "middle") + "' font-size='" + (o.s || 12) + "' font-weight='" + (o.w || 700) + "' fill='" + (o.c || NUIT) + "'" + (o.i ? " font-style='italic'" : "") + (o.halo ? " stroke='#fff' stroke-width='3' paint-order='stroke'" : "") + ">" + t + "</text>";
+  }
+  function lin(id, cs, vertical) {
+    var s = "<linearGradient id='" + id + "'" + (vertical ? " x1='0' y1='0' x2='0' y2='1'" : "") + ">";
+    cs.forEach(function (c, i) { s += "<stop offset='" + (i / (cs.length - 1)).toFixed(2) + "' stop-color='" + c + "'/>"; });
+    return s + "</linearGradient>";
+  }
+  function rad(id, cs) {
+    var s = "<radialGradient id='" + id + "' cx='35%' cy='30%' r='75%'>";
+    cs.forEach(function (c, i) { s += "<stop offset='" + (i / (cs.length - 1)).toFixed(2) + "' stop-color='" + c + "'/>"; });
+    return s + "</radialGradient>";
+  }
+  function fleche(id, c) { return "<marker id='" + id + "' markerWidth='10' markerHeight='10' refX='7' refY='5' orient='auto'><path d='M0 1L8 5L0 9Z' fill='" + c + "'/></marker>"; }
+  function svg(w, h, alt, defs, corps) {
+    return "<svg viewBox='0 0 " + w + " " + h + "' role='img' aria-label='" + alt + "' font-family='Inter,Arial,sans-serif'><rect width='" + w + "' height='" + h + "' fill='#fff'/><defs>" + defs + "</defs>" + corps +
+      "<text x='" + (w - 6) + "' y='" + (h - 5) + "' font-size='8' text-anchor='end' fill='#8A93A6'>Planche VÉRITAS</text></svg>";
+  }
+  function ancien(id) { return window.VRT_LECONS[id]; }
+  function remplacer(id, o) {
+    var a = ancien(id);
+    if (a) ["apc", "examen", "rang", "cle", "scenes"].forEach(function (k) { if (a[k] != null && o[k] == null) o[k] = a[k]; });
+    VRT_L(id, o);
+    if (a) o.ordre = a.ordre;
+  }
+  function q(qq, bonne, f1, f2, e) { return { q: qq, r: [bonne, f1, f2], b: 0, e: e }; }
+  function partie(old, i) { return old && old.parties[i] ? old.parties[i].html : ""; }
+  function bulle(x, y, w, t, c) { return "<rect x='" + x + "' y='" + y + "' width='" + w + "' height='30' rx='12' fill='#fff' stroke='" + (c || "#C9D2E3") + "'/>" + txt(x + w / 2, y + 20, t, { s: 11.5 }); }
+  function perso(x, y, peau, habit, bas) {
+    bas = bas || "#2E3445";
+    return "<g transform='translate(" + x + " " + y + ")'><ellipse cx='0' cy='84' rx='18' ry='4' fill='#001136' opacity='.18'/>" +
+      "<rect x='-9' y='44' width='8' height='36' rx='3' fill='" + bas + "'/><rect x='1' y='44' width='8' height='36' rx='3' fill='" + bas + "'/>" +
+      "<ellipse cx='-6' cy='81' rx='7' ry='3.5' fill='#1F2328'/><ellipse cx='6' cy='81' rx='7' ry='3.5' fill='#1F2328'/>" +
+      "<path d='M-13 46L-16 18C-16 13 -12 11 -6 10H6C12 11 16 13 16 18L13 46Z' fill='" + habit + "'/>" +
+      "<path d='M-15 16L-20 40' stroke='" + habit + "' stroke-width='7' stroke-linecap='round'/><path d='M15 16L20 40' stroke='" + habit + "' stroke-width='7' stroke-linecap='round'/>" +
+      "<circle cx='-20' cy='42' r='3.6' fill='" + peau + "'/><circle cx='20' cy='42' r='3.6' fill='" + peau + "'/>" +
+      "<rect x='-3.5' y='5' width='7' height='7' fill='" + peau + "'/><ellipse cx='0' cy='-2' rx='9' ry='10.5' fill='" + peau + "'/>" +
+      "<path d='M-9 -4C-10 -14 -4 -13.5 0 -13.5S10 -14 9 -4C7 -9 -7 -9 -9 -4Z' fill='#1B1410'/><ellipse cx='-9' cy='-1' rx='1.8' ry='3' fill='" + peau + "'/><ellipse cx='9' cy='-1' rx='1.8' ry='3' fill='" + peau + "'/></g>";
+  }
+  /* portrait en buste (arbre généalogique) */
+  function portrait(x, y, peau, habit, cheveux, age) {
+    var s = "<g transform='translate(" + x + " " + y + ")'><circle r='30' fill='#F4EFE4' stroke='#C9A576' stroke-width='3'/><clipPath id='pc" + x + "_" + y + "'><circle r='28'/></clipPath><g clip-path='url(#pc" + x + "_" + y + ")'>";
+    s += "<path d='M-26 32C-26 14 -14 10 0 10S26 14 26 32Z' fill='" + habit + "'/><rect x='-4' y='2' width='8' height='10' fill='" + peau + "'/><ellipse cy='-6' rx='11' ry='13' fill='" + peau + "'/>";
+    s += age === "vieux" ? "<path d='M-11 -10C-12 -20 -4 -21 0 -21S12 -20 11 -10C9 -14 -9 -14 -11 -10Z' fill='#D8D8D8'/>" : age === "femme" ? "<path d='M-13 -6C-15 -24 15 -24 13 -6C12 -14 -12 -14 -13 -6Z' fill='" + cheveux + "'/><path d='M-13 -14h26v-6c-6 -6 -20 -6 -26 0Z' fill='" + habit + "'/>" : "<path d='M-11 -10C-12 -20 -4 -21 0 -21S12 -20 11 -10C9 -14 -9 -14 -11 -10Z' fill='" + cheveux + "'/>";
+    s += "<circle cx='-4' cy='-6' r='1.4' fill='#1B1410'/><circle cx='4' cy='-6' r='1.4' fill='#1B1410'/><path d='M-3 2q3 2 6 0' stroke='#1B1410' fill='none'/></g></g>";
+    return s;
+  }
+  /* boucle d'exercice générique : [phrase avec ___, [bonne, autres…], explication] */
+  function exercice(el, C, suivant, lib) {
+    var i = 0, ok = 0;
+    el.innerHTML = "<p class='labo-r' data-q style='font-size:16px'></p><div style='display:flex;gap:8px;flex-wrap:wrap' data-c></div><p class='an-note' data-e></p><p class='labo-r' data-s></p>";
+    function $(s) { return el.querySelector(s); }
+    function poser() {
+      var c = C[i];
+      $("[data-q]").innerHTML = (i + 1) + ". " + c[0].replace("___", "<b style='border-bottom:2px dashed #1E499B;padding:0 14px'>?</b>");
+      $("[data-e]").textContent = ""; $("[data-s]").innerHTML = lib + " " + (i + 1) + " / " + C.length + " · score : <b>" + ok + "</b>";
+      $("[data-c]").innerHTML = c[1].slice().sort().map(function (x) { return "<button type='button' class='btn-l' data-v='" + x + "'>" + x + "</button>"; }).join("");
+      el.querySelectorAll("[data-v]").forEach(function (b) {
+        b.addEventListener("click", function () {
+          var bon = b.dataset.v === c[1][0]; if (bon) ok++;
+          $("[data-q]").innerHTML = (i + 1) + ". " + c[0].replace("___", "<b style='color:" + (bon ? VERT : ROUGE) + "'>" + c[1][0] + "</b>");
+          $("[data-e]").innerHTML = (bon ? "✔ " : "✘ ") + c[2];
+          el.querySelectorAll("[data-v]").forEach(function (x) { x.disabled = true; });
+          var nx = document.createElement("button"); nx.type = "button"; nx.className = "btn-l"; nx.textContent = i + 1 < C.length ? suivant : "↺";
+          nx.addEventListener("click", function () { i = (i + 1) % C.length; if (!i) ok = 0; poser(); });
+          $("[data-c]").appendChild(nx);
+          $("[data-s]").innerHTML = lib + " " + (i + 1) + " / " + C.length + " · score : <b>" + ok + "</b>";
+        });
+      });
+    }
+    poser();
+  }
+
+  function alea(g) { return function () { g = (g * 16807) % 2147483647; return (g - 1) / 2147483646; }; }
+  /* Consignes de Jacques (18/11/2026) : situation résolue avec les formules étape par étape, exemples, règles, astuces,
+     planches 2D et 3D. AJOUTS SEULEMENT : blocs en fin de partie, planches, denouement.formules. */
+  function enrichir(id, o) {
+    var L = ancien(id); if (!L) return;
+    (o.blocs || []).forEach(function (b) { var p = L.parties[b[0]]; if (p) p.html = (p.html || "") + b[1]; });
+    (o.planches || []).forEach(function (b) { var p = L.parties[b[0]]; if (p) p.planches = (p.planches || []).concat([b[1]]); });
+    if (o.formules && L.denouement && !(L.denouement.formules || []).length) L.denouement.formules = o.formules;
+  }
+  function def(t, h) { return "<div class='def'><b>" + t + "</b>" + h + "</div>"; }
+  function formule(h) { return "<p class='formule'>" + h + "</p>"; }
+  function ex(h, t) { return "<div class='ex'><b>" + (t || "Exemples") + "</b>" + h + "</div>"; }
+  function astuce(h, t) { return "<div class='astuce'><b>" + (t || "Astuce") + "</b>" + h + "</div>"; }
+  function attention(h, t) { return "<div class='attention'><b>" + (t || "Attention") + "</b>" + h + "</div>"; }
+  function methode(h, t) { return "<div class='methode'><b>" + (t || "Méthode") + "</b>" + h + "</div>"; }
+  function F(nom, f, calcul) { return { nom: nom, f: f, calcul: calcul }; }
+  /* fiche 2D en colonnes : [{t, c, l:[lignes]}] */
+  function colonnes(titre, cols, h, alt) {
+    var W = 640, n = cols.length, w = (W - 30 - (n - 1) * 12) / n, s = "<rect width='640' height='" + h + "' fill='#FBF8F2'/>" + txt(320, 28, titre, { s: 15 });
+    cols.forEach(function (c, i) {
+      var x = 15 + i * (w + 12);
+      s += "<rect x='" + x + "' y='44' width='" + w + "' height='" + (h - 58) + "' rx='12' fill='#fff' stroke='" + c.c + "' stroke-width='2'/><rect x='" + x + "' y='44' width='" + w + "' height='34' rx='11' fill='" + c.c + "'/>" + txt(x + w / 2, 66, c.t, { s: 14, c: "#fff" });
+      c.l.forEach(function (l, k) { s += txt(x + 12, 100 + k * 24, l, { s: 12, a: "start", w: l.charAt(0) === "→" ? 800 : 550, c: l.charAt(0) === "→" ? c.c : NUIT }); });
+    });
+    return svg(640, h, alt || titre, "", s);
+  }
+
+  function barres(titre, D, unite, h, alt) {
+    var max = Math.max.apply(null, D.map(function (d) { return d[1]; })), s = "<rect width='640' height='" + h + "' fill='#FBF8F2'/>" + txt(320, 28, titre, { s: 15 });
+    D.forEach(function (d, i) { var y = 52 + i * 36, w = d[1] / max * 330; s += txt(200, y + 18, d[0], { s: 12.5, a: "end", w: 600 }) + "<rect x='210' y='" + y + "' width='" + w.toFixed(0) + "' height='24' rx='6' fill='" + d[2] + "'/>" + txt(218 + w, y + 17, d[3] || (d[1].toLocaleString("fr-FR") + " " + unite), { s: 12, a: "start", c: NUIT }); });
+    return svg(640, h, alt || titre, "", s);
+  }
+  function P2(titre, legende, s) { return { type: "2D", titre: titre, legende: legende, svg: s }; }
+
+  /* ═══════════ 5e HISTOIRE — PYGMÉES ET SAO ═══════════ */
+  enrichir("5e-histoire-pygmees-sao", {
+    blocs: [[0, def("Chasseurs-cueilleurs semi-nomades", "Peuples qui vivent de la chasse, de la pêche et de la cueillette et déplacent leurs campements selon les ressources de la forêt.") + ex("Les Baka de l'Est récoltent le miel sauvage, chassent au filet et connaissent des centaines de plantes médicinales.")],
+      [1, def("Cire perdue", "Technique de fonderie : on modèle l'objet en cire, on l'enrobe d'argile, on chauffe pour faire fondre la cire, on coule le bronze dans le vide, puis on casse le moule.") + formule("modèle en cire → moule d'argile → cire fondue → bronze coulé → moule cassé") + ex("Les statuettes sao exposées au Musée national ont été coulées ainsi ; chaque pièce est unique, car le moule est détruit.")]],
+    planches: [[2, P2("Comment connaît-on les Sao ?", "Sans écrits, l'historien croise deux sources : l'archéologie (ce que l'on trouve dans le sol) et la tradition orale (ce que racontent les peuples voisins). La seconde exagère parfois : la première permet de la vérifier.", colonnes("Deux sources à croiser", [{ t: "Archéologie", c: "#8B5A2B", l: ["fouilles des buttes", "jarres funéraires", "bronzes à la cire perdue", "squelettes de taille ordinaire", "→ des agriculteurs et des artisans"] }, { t: "Tradition orale", c: "#7B3F99", l: ["récits des Kotoko, des voisins", "les Sao « géants », très forts", "fondateurs de villes", "souvenir de leur prestige", "→ une image à vérifier"] }], 250, "Tableau : ce que disent l’archéologie et la tradition orale sur les Sao"))]],
+    formules: [F("Situer", "peuples pygmées : forêt du Sud et de l'Est ; Sao : sud du lac Tchad", "plus de 1 000 km les séparent"), F("Décrire", "chasse, pêche, cueillette / agriculture, buttes, bronze", "deux modes de vie différents"), F("Critiquer les sources", "tradition orale confrontée à l'archéologie", "« géants » : non confirmé par les fouilles")]
+  });
+
+  /* ═══════════ 5e FRANÇAIS — LA RELATIVE ═══════════ */
+  enrichir("5e-francais-subordonnee-relative", {
+    blocs: [[1, def("Pronom relatif", "Mot qui reprend l'antécédent et introduit la relative ; sa forme dépend de sa fonction dans la relative.")]],
+    planches: [[2, P2("Les quatre pronoms relatifs simples", "Pour chaque pronom : sa fonction dans la relative, le test pour le trouver et un exemple tiré de la lettre de Junior.", colonnes("qui · que · dont · où", [{ t: "qui", c: BLEU, l: ["sujet", "« … qui fait l'action »", "le village qui s'appelle", "Bandjoun"] }, { t: "que", c: VERT, l: ["COD", "« on … quoi ? »", "les masques que nous", "portons"] }, { t: "dont", c: "#C2540A", l: ["complément avec « de »", "« parler de… »", "le chef dont je t'ai", "parlé"] }, { t: "où", c: "#7B3F99", l: ["lieu ou temps", "« aller où ? quand ? »", "le marché où vont", "les femmes"] }], 210, "Tableau des pronoms relatifs qui, que, dont, où avec leur fonction et un exemple"))]],
+    formules: [F("Relier sans répéter", "antécédent + pronom relatif + verbe", "le chef dont je t'ai parlé habite la chefferie"), F("Choisir le pronom", "remplacer par l'antécédent → fonction → pronom", "parler du chef → dont ; aller au marché → où"), F("Repérer un faux relatif", "pas d'antécédent → « que » conjonction", "Je pense que tu aimeras Bandjoun")]
+  });
+
+  /* ═══════════ 5e GÉOGRAPHIE — CROISSANCE DE LA POPULATION ═══════════ */
+  enrichir("5e-geo-croissance-population", {
+    planches: [[1, P2("Natalité, mortalité, accroissement à Garoua", "Les trois taux de la commune, en pour mille : l'accroissement naturel est la différence entre natalité et mortalité, et non leur somme.", barres("En ‰ par an", [["Natalité", 36, "#2E7D32", "36 ‰"], ["Mortalité", 9, "#C62828", "9 ‰"], ["Accroissement naturel", 27, BLEU, "36 − 9 = 27 ‰ = 2,7 %"]], "", 180, "Barres : natalité 36 pour mille, mortalité 9 pour mille, accroissement naturel 27 pour mille"))]],
+    formules: [F("Calculer l'accroissement", "accroissement naturel = natalité − mortalité", "36 − 9 = 27 ‰"), F("Convertir", "‰ ÷ 10 = %", "27 ‰ = 2,7 % par an"), F("Prévoir", "temps de doublement ≈ 70 ÷ taux en %", "70 ÷ 2,7 ≈ 26 ans : planifier écoles et enseignants")]
+  });
+
+  /* ═══════════ 2nde A HISTOIRE — LES DISCIPLINES ═══════════ */
+  enrichir("2nde-a-histoire-disciplines", {
+    blocs: [[0, def("Source historique", "Toute trace du passé qui renseigne l'historien : écrit, objet, parole, paysage, nom de lieu.") + def("Critique des sources", "Examen d'une source avant de l'utiliser : qui l'a produite, quand, pourquoi, et que disent les autres sources ?")],
+      [2, formule("âge ≈ 5 730 × log₂(100 ÷ pourcentage restant)") + def("Stratigraphie", "Étude de l'ordre des couches du sol : sauf bouleversement, la couche la plus basse est la plus ancienne.") + ex("88 % de carbone 14 restant : 5 730 × log₂(100 ÷ 88) ≈ 1 060 ans ; 25 % : deux demi-vies, ≈ 11 460 ans.")]],
+    planches: [[2, P2("Les couches de la tranchée et leur date", "Chaque couche est datée par ce qu'elle contient : objets récents en haut, perles de traite au milieu (XVIIIᵉ-XIXᵉ siècles), tessons et charbon en bas, datés au carbone 14.", colonnes("De haut en bas : du plus récent au plus ancien", [{ t: "Couche 1", c: "#3B2A1E", l: ["0 à 30 cm", "sachets plastique", "→ aujourd'hui"] }, { t: "Couche 2", c: "#B5651D", l: ["30 à 80 cm", "perles de traite", "→ XVIIIᵉ-XIXᵉ s."] }, { t: "Couche 3", c: "#6E6A63", l: ["80 à 140 cm", "tessons, charbon", "→ vers l'an 970"] }], 190, "Tableau : trois couches de la tranchée, leur contenu et leur date"))]],
+    formules: [F("Toute trace est une source", "vestiges + paroles + langues + noms de lieux", "tessons et charbon : à protéger"), F("Ordonner", "stratigraphie : la couche la plus basse est la plus ancienne", "tessons (couche 3) plus anciens que les perles (couche 2)"), F("Dater", "âge ≈ 5 730 × log₂(100 ÷ % restant)", "88 % → ≈ 1 060 ans → vers l'an 970")]
+  });
+
+  /* ═══════════ 2nde A FRANÇAIS — L'ÉNONCIATION ═══════════ */
+  enrichir("2nde-a-francais-enonciation", {
+    blocs: [[2, astuce("Pour transformer un énoncé ancré en énoncé coupé : je/tu → il/elle ; ici → là, à cet endroit ; demain → le lendemain ; hier → la veille ; présent ou passé composé → imparfait ou passé simple.")]],
+    planches: [[2, P2("Ancré ou coupé : le tableau de conversion", "Chaque marque de l'énoncé ancré a son équivalent dans l'énoncé coupé, qui ne dépend plus de la situation d'énonciation.", colonnes("Du billet au récit", [{ t: "Énoncé ancré", c: BLEU, l: ["je, tu, nous, vous", "ici", "aujourd'hui, maintenant", "demain / hier", "présent, passé composé"] }, { t: "Énoncé coupé", c: "#7B3F99", l: ["il, elle, ils, elles", "là, à cet endroit", "ce jour-là, alors", "le lendemain / la veille", "imparfait, passé simple"] }], 230, "Tableau de conversion des marques d’un énoncé ancré vers un énoncé coupé"))]],
+    formules: [F("Situation d'énonciation", "qui ? à qui ? où ? quand ?", "billet sans nom ni date : on ne peut pas répondre"), F("Marques explicites", "pronoms + déictiques + temps + modalisateurs + ponctuation", "Je, t', ici, demain, sans doute, !"), F("Réécrire en énoncé coupé", "je → il ; demain → le lendemain ; ici → la cour", "« Il lui avait donné rendez-vous le lendemain »")]
+  });
+
+  /* ═══════════ 2nde A GÉOGRAPHIE — LIRE UNE CARTE ═══════════ */
+  enrichir("2nde-a-geo-cartes", {
+    planches: [[1, P2("Grande ou petite échelle ?", "Plus le dénominateur est petit, plus la carte est à grande échelle : elle montre un petit espace avec beaucoup de détails. Quelques échelles courantes et ce que représente 1 cm.", colonnes("1 cm sur la carte représente…", [{ t: "1/10 000", c: VERT, l: ["100 m", "plan de quartier", "→ grande échelle"] }, { t: "1/50 000", c: BLEU, l: ["500 m", "carte topographique", "région de Douala"] }, { t: "1/200 000", c: "#C2540A", l: ["2 km", "carte routière", "d'une région"] }, { t: "1/50 000 000", c: "#7B3F99", l: ["500 km", "planisphère", "→ petite échelle"] }], 190, "Tableau : quatre échelles et la distance représentée par 1 centimètre"))]],
+    formules: [F("Compléter la carte", "TOLES : titre, orientation, légende, échelle, source", "le brouillon devient lisible"), F("Calculer la distance", "distance réelle = distance carte × dénominateur", "3,5 × 10 000 = 35 000 cm = 350 m"), F("S'orienter", "le Nord en haut, sauf indication de la flèche", "refuge au Nord-Est du marché")]
+  });
+
+  /* ═══════════ 2nde C FRANÇAIS — LE THÉÂTRE ═══════════ */
+  enrichir("2nde-c-francais-theatre", {
+    blocs: [[1, ex("Dans <em>Trois prétendants… un mari</em> de Guillaume Oyônô Mbia, les répliques vives entre le père et les prétendants font rire le public, qui comprend plus que les personnages.", "Un exemple camerounais")]],
+    formules: [F("Lire une page", "nom du personnage + réplique + didascalies", "les italiques ne se disent pas"), F("Identifier la parole", "tirade, stichomythie, monologue, aparté", "« Pas un franc… » au public : aparté"), F("Situer dans la pièce", "exposition → nœud → dénouement", "la répétition du club : mettre en scène la structure")]
+  });
+})();
+
+/* Planches 3D (18/11/2026) : les deux leçons d'orientation de Tle avaient perdu leur 3D au lot 20 (blocs illisibles remplacés par
+   des plannings 2D) ; deux modèles 3D lisibles et légendés les remplacent. AJOUTS SEULEMENT. */
+(function () {
+  "use strict";
+  var NUIT = "#001136", BLEU = "#1E499B", GRIS = "#4D5163", VERT = "#17784D", ROUGE = "#C62828", TERRE = "#C46A2B";
+
+  function txt(x, y, t, o) {
+    o = o || {};
+    return "<text x='" + x + "' y='" + y + "' text-anchor='" + (o.a || "middle") + "' font-size='" + (o.s || 12) + "' font-weight='" + (o.w || 700) + "' fill='" + (o.c || NUIT) + "'" + (o.i ? " font-style='italic'" : "") + (o.halo ? " stroke='#fff' stroke-width='3' paint-order='stroke'" : "") + ">" + t + "</text>";
+  }
+  function lin(id, cs, vertical) {
+    var s = "<linearGradient id='" + id + "'" + (vertical ? " x1='0' y1='0' x2='0' y2='1'" : "") + ">";
+    cs.forEach(function (c, i) { s += "<stop offset='" + (i / (cs.length - 1)).toFixed(2) + "' stop-color='" + c + "'/>"; });
+    return s + "</linearGradient>";
+  }
+  function rad(id, cs) {
+    var s = "<radialGradient id='" + id + "' cx='35%' cy='30%' r='75%'>";
+    cs.forEach(function (c, i) { s += "<stop offset='" + (i / (cs.length - 1)).toFixed(2) + "' stop-color='" + c + "'/>"; });
+    return s + "</radialGradient>";
+  }
+  function fleche(id, c) { return "<marker id='" + id + "' markerWidth='10' markerHeight='10' refX='7' refY='5' orient='auto'><path d='M0 1L8 5L0 9Z' fill='" + c + "'/></marker>"; }
+  function svg(w, h, alt, defs, corps) {
+    return "<svg viewBox='0 0 " + w + " " + h + "' role='img' aria-label='" + alt + "' font-family='Inter,Arial,sans-serif'><rect width='" + w + "' height='" + h + "' fill='#fff'/><defs>" + defs + "</defs>" + corps +
+      "<text x='" + (w - 6) + "' y='" + (h - 5) + "' font-size='8' text-anchor='end' fill='#8A93A6'>Planche VÉRITAS</text></svg>";
+  }
+  function ancien(id) { return window.VRT_LECONS[id]; }
+  function remplacer(id, o) {
+    var a = ancien(id);
+    if (a) ["apc", "examen", "rang", "cle", "scenes"].forEach(function (k) { if (a[k] != null && o[k] == null) o[k] = a[k]; });
+    VRT_L(id, o);
+    if (a) o.ordre = a.ordre;
+  }
+  function q(qq, bonne, f1, f2, e) { return { q: qq, r: [bonne, f1, f2], b: 0, e: e }; }
+  function partie(old, i) { return old && old.parties[i] ? old.parties[i].html : ""; }
+  function bulle(x, y, w, t, c) { return "<rect x='" + x + "' y='" + y + "' width='" + w + "' height='30' rx='12' fill='#fff' stroke='" + (c || "#C9D2E3") + "'/>" + txt(x + w / 2, y + 20, t, { s: 11.5 }); }
+  function perso(x, y, peau, habit, bas) {
+    bas = bas || "#2E3445";
+    return "<g transform='translate(" + x + " " + y + ")'><ellipse cx='0' cy='84' rx='18' ry='4' fill='#001136' opacity='.18'/>" +
+      "<rect x='-9' y='44' width='8' height='36' rx='3' fill='" + bas + "'/><rect x='1' y='44' width='8' height='36' rx='3' fill='" + bas + "'/>" +
+      "<ellipse cx='-6' cy='81' rx='7' ry='3.5' fill='#1F2328'/><ellipse cx='6' cy='81' rx='7' ry='3.5' fill='#1F2328'/>" +
+      "<path d='M-13 46L-16 18C-16 13 -12 11 -6 10H6C12 11 16 13 16 18L13 46Z' fill='" + habit + "'/>" +
+      "<path d='M-15 16L-20 40' stroke='" + habit + "' stroke-width='7' stroke-linecap='round'/><path d='M15 16L20 40' stroke='" + habit + "' stroke-width='7' stroke-linecap='round'/>" +
+      "<circle cx='-20' cy='42' r='3.6' fill='" + peau + "'/><circle cx='20' cy='42' r='3.6' fill='" + peau + "'/>" +
+      "<rect x='-3.5' y='5' width='7' height='7' fill='" + peau + "'/><ellipse cx='0' cy='-2' rx='9' ry='10.5' fill='" + peau + "'/>" +
+      "<path d='M-9 -4C-10 -14 -4 -13.5 0 -13.5S10 -14 9 -4C7 -9 -7 -9 -9 -4Z' fill='#1B1410'/><ellipse cx='-9' cy='-1' rx='1.8' ry='3' fill='" + peau + "'/><ellipse cx='9' cy='-1' rx='1.8' ry='3' fill='" + peau + "'/></g>";
+  }
+  /* portrait en buste (arbre généalogique) */
+  function portrait(x, y, peau, habit, cheveux, age) {
+    var s = "<g transform='translate(" + x + " " + y + ")'><circle r='30' fill='#F4EFE4' stroke='#C9A576' stroke-width='3'/><clipPath id='pc" + x + "_" + y + "'><circle r='28'/></clipPath><g clip-path='url(#pc" + x + "_" + y + ")'>";
+    s += "<path d='M-26 32C-26 14 -14 10 0 10S26 14 26 32Z' fill='" + habit + "'/><rect x='-4' y='2' width='8' height='10' fill='" + peau + "'/><ellipse cy='-6' rx='11' ry='13' fill='" + peau + "'/>";
+    s += age === "vieux" ? "<path d='M-11 -10C-12 -20 -4 -21 0 -21S12 -20 11 -10C9 -14 -9 -14 -11 -10Z' fill='#D8D8D8'/>" : age === "femme" ? "<path d='M-13 -6C-15 -24 15 -24 13 -6C12 -14 -12 -14 -13 -6Z' fill='" + cheveux + "'/><path d='M-13 -14h26v-6c-6 -6 -20 -6 -26 0Z' fill='" + habit + "'/>" : "<path d='M-11 -10C-12 -20 -4 -21 0 -21S12 -20 11 -10C9 -14 -9 -14 -11 -10Z' fill='" + cheveux + "'/>";
+    s += "<circle cx='-4' cy='-6' r='1.4' fill='#1B1410'/><circle cx='4' cy='-6' r='1.4' fill='#1B1410'/><path d='M-3 2q3 2 6 0' stroke='#1B1410' fill='none'/></g></g>";
+    return s;
+  }
+  /* boucle d'exercice générique : [phrase avec ___, [bonne, autres…], explication] */
+  function exercice(el, C, suivant, lib) {
+    var i = 0, ok = 0;
+    el.innerHTML = "<p class='labo-r' data-q style='font-size:16px'></p><div style='display:flex;gap:8px;flex-wrap:wrap' data-c></div><p class='an-note' data-e></p><p class='labo-r' data-s></p>";
+    function $(s) { return el.querySelector(s); }
+    function poser() {
+      var c = C[i];
+      $("[data-q]").innerHTML = (i + 1) + ". " + c[0].replace("___", "<b style='border-bottom:2px dashed #1E499B;padding:0 14px'>?</b>");
+      $("[data-e]").textContent = ""; $("[data-s]").innerHTML = lib + " " + (i + 1) + " / " + C.length + " · score : <b>" + ok + "</b>";
+      $("[data-c]").innerHTML = c[1].slice().sort().map(function (x) { return "<button type='button' class='btn-l' data-v='" + x + "'>" + x + "</button>"; }).join("");
+      el.querySelectorAll("[data-v]").forEach(function (b) {
+        b.addEventListener("click", function () {
+          var bon = b.dataset.v === c[1][0]; if (bon) ok++;
+          $("[data-q]").innerHTML = (i + 1) + ". " + c[0].replace("___", "<b style='color:" + (bon ? VERT : ROUGE) + "'>" + c[1][0] + "</b>");
+          $("[data-e]").innerHTML = (bon ? "✔ " : "✘ ") + c[2];
+          el.querySelectorAll("[data-v]").forEach(function (x) { x.disabled = true; });
+          var nx = document.createElement("button"); nx.type = "button"; nx.className = "btn-l"; nx.textContent = i + 1 < C.length ? suivant : "↺";
+          nx.addEventListener("click", function () { i = (i + 1) % C.length; if (!i) ok = 0; poser(); });
+          $("[data-c]").appendChild(nx);
+          $("[data-s]").innerHTML = lib + " " + (i + 1) + " / " + C.length + " · score : <b>" + ok + "</b>";
+        });
+      });
+    }
+    poser();
+  }
+
+  function decaler(pl, dy) { pl.modele.objets.forEach(function (o) { o.c[1] -= dy; }); (pl.modele.etiquettes || []).forEach(function (e) { e.p[1] -= dy; }); return pl; }
+  function ajouter3D(id, partie, planche) { var L = ancien(id); if (L && L.parties[partie]) L.parties[partie].planches = (L.parties[partie].planches || []).concat([planche]); }
+  function bureau3D() {
+    var o = [], k;
+    o.push({ f: "boite", c: [0, -6, 0], d: [460, 6, 300], coul: "#B88A5A", dessus: "#C9A06E" });
+    o.push({ f: "boite", c: [0, 120, 110], d: [460, 260, 10], coul: "#EFE6D6", dessus: "#EFE6D6", div: false });
+    o.push({ f: "boite", c: [0, 70, 20], d: [260, 8, 120], coul: "#8B5A2B", dessus: "#A06A38" });
+    [[-120, -30], [120, -30], [-120, 70], [120, 70]].forEach(function (p) { o.push({ f: "boite", c: [p[0], 33, p[1] + 20], d: [8, 66, 8], coul: "#6B4423" }); });
+    o.push({ f: "boite", c: [0, 170, 103], d: [200, 110, 2], coul: "#FBF8F2", div: false });
+    var C = ["#3A4E8C", "#1E88E5", "#2E7D32", "#F2994A"];
+    for (k = 0; k < 7; k++) [0, 1, 2, 3].forEach(function (j) { o.push({ f: "boite", c: [-84 + k * 28, 205 - j * 22, 101], d: [22, 18, 1], coul: C[j], div: false }); });
+    o.push({ f: "boite", c: [-60, 80, 10], d: [70, 10, 50], coul: "#C62828", dessus: "#F4F1EA" });
+    o.push({ f: "boite", c: [-60, 90, 10], d: [66, 8, 46], coul: "#1E499B", dessus: "#F4F1EA" });
+    o.push({ f: "cylindre", c: [40, 74, 0], r: 14, h: 4, n: 16, coul: "#F7C948" });
+    o.push({ f: "cylindre", c: [40, 78, 0], r: 12, h: 2, n: 16, coul: "#FBF8F2" });
+    o.push({ f: "sphere", c: [100, 92, 30], r: 16, coul: "#C62828" });
+    o.push({ f: "sphere", c: [100, 92, 14], r: 12, coul: "#F4F1EA" });
+    o.push({ f: "boite", c: [180, 20, -60], d: [60, 40, 50], coul: "#8B6B4A", dessus: "#A68A5E" });
+    o.push({ f: "boite", c: [180, 42, -60], d: [20, 2, 36], coul: "#1F2328", dessus: "#2A2F36", div: false });
+    o.push({ f: "cylindre", c: [-110, 74, 60], r: 10, h: 4, n: 12, coul: "#3A3F47" });
+    o.push({ f: "cylindre", c: [-110, 78, 60], r: 2, h: 60, n: 6, coul: "#3A3F47" });
+    o.push({ f: "cone", c: [-110, 128, 46], r: 18, h: 16, n: 14, coul: "#F7C948" });
+    return o;
+  }
+  ajouter3D("tle-orient-temps", 2, decaler({ type: "3d", titre: "Le bureau de révision d'Aïcha", legende: "Tourne le coin de révision d'Aïcha : son planning de la semaine punaisé au mur (bleu nuit : sommeil, bleu : cours, vert : révisions, orange : sport), ses cahiers ouverts, un minuteur réglé sur 45 minutes, le réveil qui rappelle l'heure du coucher, et le téléphone rangé dans une boîte, hors de portée pendant la séance.",
+    modele: { h: 360, rx: -14, ry: 26, echelle: 0.85, alt: "Bureau de révision : planning au mur, cahiers, minuteur, réveil, lampe, téléphone rangé dans une boîte", objets: bureau3D(),
+      etiquettes: [{ p: [0, 225, 100], t: "planning de la semaine", cote: "g" }, { p: [40, 80, 0], t: "minuteur : 45 min", cote: "d" }, { p: [100, 104, 30], t: "réveil : coucher à 22 h", cote: "d" }, { p: [180, 44, -60], t: "téléphone rangé", cote: "d" }, { p: [-60, 96, 10], t: "cahiers et fiches", cote: "g" }] } }, 110));
+  function escalier3D() {
+    var o = [], M = [["T1", 8.6, "#C62828"], ["T2", 9.4, "#E8A33D"], ["T3", 10.4, "#2E7D32"]], k;
+    o.push({ f: "boite", c: [0, -6, 0], d: [460, 6, 200], coul: "#C9B28A", dessus: "#E9DFCF" });
+    M.forEach(function (m, i) { var h = (m[1] - 7) * 40; o.push({ f: "boite", c: [-150 + i * 110, h / 2, 0], d: [100, h, 120], coul: m[2], dessus: m[2] }); });
+    o.push({ f: "boite", c: [180, 70, 0], d: [100, 140, 120], coul: "#1E499B", dessus: "#2F6DB5" });
+    o.push({ f: "cylindre", c: [180, 140, 0], r: 2, h: 60, n: 6, coul: "#9AA3AF" });
+    o.push({ f: "boite", c: [200, 190, 0], d: [40, 22, 2], coul: "#F7C948", div: false });
+    o.push({ f: "boite", c: [0, 120, -62], d: [420, 1.5, 1.5], coul: "#1F2328", div: false });
+    o.push({ f: "cylindre", c: [-40, 70, 0], r: 8, r2: 6, h: 30, n: 10, coul: "#F4F1EA" });
+    o.push({ f: "sphere", c: [-40, 108, 0], r: 8, coul: "#5A3A1E" });
+    return o;
+  }
+  ajouter3D("tle-orient-bac", 0, decaler({ type: "3d", titre: "L'escalier de Kevin, trimestre par trimestre", legende: "Tourne l'escalier : chaque marche est une moyenne trimestrielle visée (8,6 au premier trimestre, environ 9,4 au deuxième, 10,4 au troisième), puis la marche bleue du bac, en juin. Le fil noir marque la barre des 10 : on la franchit marche après marche, grâce aux progrès ciblés sur les forts coefficients.",
+    modele: { h: 340, rx: -18, ry: 28, echelle: 0.85, alt: "Escalier de trois marches de couleur pour les moyennes trimestrielles et une marche bleue avec un drapeau pour le bac", objets: escalier3D(),
+      etiquettes: [{ p: [-150, 66, -60], t: "1ᵉʳ trimestre : 8,6", cote: "g" }, { p: [-40, 98, -60], t: "2ᵉ trimestre : ≈ 9,4", cote: "g" }, { p: [70, 138, -60], t: "3ᵉ trimestre : 10,4", cote: "d" }, { p: [200, 200, 0], t: "juin : le bac", cote: "d" }, { p: [-200, 121, -62], t: "barre des 10", cote: "g" }] } }, 90));
+})();
+
 /* ENRICHISSEMENT des leçons de sciences (18/11/2026), consignes de Jacques :
    « Résoudre la situation-problème de départ en donnant des formules avec les étapes de la leçon ; illustrer par des
      exemples ; formules, détails précis, astuces pour mieux retenir ; planches 2D et 3D. »
