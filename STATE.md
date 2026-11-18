@@ -1,3 +1,15 @@
+## Apprendre : lot 13, 2nde (18/11/2026)
+
+Demande de Jacques : « continue ». Lot 12 (PR #358) fusionné et déployé.
+
+- **`apprendre/_src/21-approfondies-2nde.js`** : 4 leçons gratuites de 2nde au gabarit approfondi, remplacées en place (partie « Entraînement au format de l'examen » et quiz de 10 d'origine repris) :
+  - **2nde C maths, ℝ et ses sous-ensembles** : les partages de la coopérative de Santa (5/8 décimal, 5/6 non, « 0,8333333 » n'est qu'un arrondi) ; ensembles emboîtés, parcelle carrée 3D et sa diagonale √2 ; labo « ensembles » branché ; **testeur de décimaux** (fraction irréductible, facteurs du dénominateur, période surlignée).
+  - **2nde C français, le texte théâtral** : répétition du club théâtre de Mbalmayo (didascalies lues à voix haute, aparté) ; page annotée, scène 3D aux rideaux qui s'ouvrent, courbe exposition / nœud / dénouement ; **exercice** sur les formes de la parole. Dialogue de la page inventé pour la leçon (pas d'extrait d'œuvre).
+  - **2nde C ECM, la production** : projet de chocolaterie de Nadège à Ebolowa ; filière cacao 3D sur les trois secteurs ; **exercice** primaire / secondaire / tertiaire (8 activités).
+  - **2nde A français, l'énonciation** : billet anonyme trouvé au lycée de Kribi (« je t'attends ici demain ») ; schéma qui / à qui / où / quand, cour du lycée 3D (mât au drapeau camerounais) ; **exercice** sur les marques de l'énonciation.
+- `lecons.js?v=20261118l13` ; 4 pages `apprendre/cours/` régénérées et habillées. Chromium (1200 et 390 px) : aucun débordement, aucune erreur JS. Bancs : réglages 29/29, verrou 18/18, gabarits 54/54, planche mobile 23/23, charte 34/34, lisibilité 7/7 ; contrôles GEO au vert.
+- **Suite** : 2nde A (ℝ, disciplines de l'histoire, philosophie, cartes) ; puis, si Jacques le souhaite, 6e-5e-4e restantes après accord avec l'autre session.
+
 ## Apprendre : lot 12, chinois de 1re et arabe de Tle (18/11/2026)
 
 Demande de Jacques : « continue ».
