@@ -34,6 +34,77 @@
   "u": "/ressources/sequentielles/3e-seq2-etudetexte.html"
  },
  {
+  "id": "3e-seq3-etudetexte",
+  "classe": "3e",
+  "m": "etudetexte",
+  "mat": "francais",
+  "matiere": "Français : étude de texte",
+  "seq": 3,
+  "rangs": [
+   36,
+   38,
+   39,
+   42,
+   47,
+   48,
+   49
+  ],
+  "u": "/ressources/sequentielles/3e-seq3-etudetexte.html"
+ },
+ {
+  "id": "3e-seq4-etudetexte",
+  "classe": "3e",
+  "m": "etudetexte",
+  "mat": "francais",
+  "matiere": "Français : étude de texte",
+  "seq": 4,
+  "rangs": [
+   70,
+   71,
+   74,
+   75,
+   77,
+   78,
+   79
+  ],
+  "u": "/ressources/sequentielles/3e-seq4-etudetexte.html"
+ },
+ {
+  "id": "3e-seq5-etudetexte",
+  "classe": "3e",
+  "m": "etudetexte",
+  "mat": "francais",
+  "matiere": "Français : étude de texte",
+  "seq": 5,
+  "rangs": [
+   81,
+   82,
+   86,
+   89,
+   90,
+   91
+  ],
+  "u": "/ressources/sequentielles/3e-seq5-etudetexte.html"
+ },
+ {
+  "id": "3e-seq6-etudetexte",
+  "classe": "3e",
+  "m": "etudetexte",
+  "mat": "francais",
+  "matiere": "Français : étude de texte",
+  "seq": 6,
+  "rangs": [
+   99,
+   100,
+   101,
+   104,
+   106,
+   107,
+   108
+  ],
+  "u": "/ressources/sequentielles/3e-seq6-etudetexte.html"
+ },
+ {
   "id": "3e-seq1-orthographe",
   "classe": "3e",
   "m": "orthographe",
@@ -58,6 +129,59 @@
    27
   ],
   "u": "/ressources/sequentielles/3e-seq2-orthographe.html"
+ },
+ {
+  "id": "3e-seq3-orthographe",
+  "classe": "3e",
+  "m": "orthographe",
+  "mat": "francais",
+  "matiere": "Français : correction orthographique",
+  "seq": 3,
+  "rangs": [
+   38,
+   39,
+   42
+  ],
+  "u": "/ressources/sequentielles/3e-seq3-orthographe.html"
+ },
+ {
+  "id": "3e-seq4-orthographe",
+  "classe": "3e",
+  "m": "orthographe",
+  "mat": "francais",
+  "matiere": "Français : correction orthographique",
+  "seq": 4,
+  "rangs": [
+   71,
+   72
+  ],
+  "u": "/ressources/sequentielles/3e-seq4-orthographe.html"
+ },
+ {
+  "id": "3e-seq5-orthographe",
+  "classe": "3e",
+  "m": "orthographe",
+  "mat": "francais",
+  "matiere": "Français : correction orthographique",
+  "seq": 5,
+  "rangs": [
+   82,
+   83
+  ],
+  "u": "/ressources/sequentielles/3e-seq5-orthographe.html"
+ },
+ {
+  "id": "3e-seq6-orthographe",
+  "classe": "3e",
+  "m": "orthographe",
+  "mat": "francais",
+  "matiere": "Français : correction orthographique",
+  "seq": 6,
+  "rangs": [
+   101,
+   104
+  ],
+  "u": "/ressources/sequentielles/3e-seq6-orthographe.html"
  },
  {
   "id": "3e-seq1-expression",
@@ -86,6 +210,61 @@
    29
   ],
   "u": "/ressources/sequentielles/3e-seq2-expression.html"
+ },
+ {
+  "id": "3e-seq3-expression",
+  "classe": "3e",
+  "m": "expression",
+  "mat": "francais",
+  "matiere": "Français : expression écrite",
+  "seq": 3,
+  "rangs": [
+   40,
+   45,
+   50
+  ],
+  "u": "/ressources/sequentielles/3e-seq3-expression.html"
+ },
+ {
+  "id": "3e-seq4-expression",
+  "classe": "3e",
+  "m": "expression",
+  "mat": "francais",
+  "matiere": "Français : expression écrite",
+  "seq": 4,
+  "rangs": [
+   63,
+   73,
+   80
+  ],
+  "u": "/ressources/sequentielles/3e-seq4-expression.html"
+ },
+ {
+  "id": "3e-seq5-expression",
+  "classe": "3e",
+  "m": "expression",
+  "mat": "francais",
+  "matiere": "Français : expression écrite",
+  "seq": 5,
+  "rangs": [
+   84,
+   88,
+   92
+  ],
+  "u": "/ressources/sequentielles/3e-seq5-expression.html"
+ },
+ {
+  "id": "3e-seq6-expression",
+  "classe": "3e",
+  "m": "expression",
+  "mat": "francais",
+  "matiere": "Français : expression écrite",
+  "seq": 6,
+  "rangs": [
+   102,
+   109
+  ],
+  "u": "/ressources/sequentielles/3e-seq6-expression.html"
  },
  {
   "id": "3e-seq1-mathematiques",
@@ -1029,6 +1208,73 @@
   "u": "/ressources/sequentielles/3e-seq1-espagnol.html"
  },
  {
+  "id": "3e-seq2-espagnol",
+  "classe": "3e",
+  "m": "espagnol",
+  "mat": "espagnol",
+  "matiere": "Espagnol",
+  "seq": 2,
+  "rangs": [
+   5,
+   6,
+   7
+  ],
+  "u": "/ressources/sequentielles/3e-seq2-espagnol.html"
+ },
+ {
+  "id": "3e-seq3-espagnol",
+  "classe": "3e",
+  "m": "espagnol",
+  "mat": "espagnol",
+  "matiere": "Espagnol",
+  "seq": 3,
+  "rangs": [
+   8,
+   9,
+   10
+  ],
+  "u": "/ressources/sequentielles/3e-seq3-espagnol.html"
+ },
+ {
+  "id": "3e-seq4-espagnol",
+  "classe": "3e",
+  "m": "espagnol",
+  "mat": "espagnol",
+  "matiere": "Espagnol",
+  "seq": 4,
+  "rangs": [
+   11,
+   12,
+   13
+  ],
+  "u": "/ressources/sequentielles/3e-seq4-espagnol.html"
+ },
+ {
+  "id": "3e-seq5-espagnol",
+  "classe": "3e",
+  "m": "espagnol",
+  "mat": "espagnol",
+  "matiere": "Espagnol",
+  "seq": 5,
+  "rangs": [
+   14,
+   15
+  ],
+  "u": "/ressources/sequentielles/3e-seq5-espagnol.html"
+ },
+ {
+  "id": "3e-seq6-espagnol",
+  "classe": "3e",
+  "m": "espagnol",
+  "mat": "espagnol",
+  "matiere": "Espagnol",
+  "seq": 6,
+  "rangs": [
+   16
+  ],
+  "u": "/ressources/sequentielles/3e-seq6-espagnol.html"
+ },
+ {
   "id": "3e-seq1-allemand",
   "classe": "3e",
   "m": "allemand",
@@ -1043,5 +1289,109 @@
    5
   ],
   "u": "/ressources/sequentielles/3e-seq1-allemand.html"
+ },
+ {
+  "id": "3e-seq2-allemand",
+  "classe": "3e",
+  "m": "allemand",
+  "mat": "allemand",
+  "matiere": "Allemand",
+  "seq": 2,
+  "rangs": [
+   6,
+   7,
+   8,
+   9,
+   10
+  ],
+  "u": "/ressources/sequentielles/3e-seq2-allemand.html"
+ },
+ {
+  "id": "3e-seq3-allemand",
+  "classe": "3e",
+  "m": "allemand",
+  "mat": "allemand",
+  "matiere": "Allemand",
+  "seq": 3,
+  "rangs": [
+   11,
+   12,
+   13,
+   14,
+   15,
+   16,
+   17,
+   18,
+   19,
+   20,
+   21
+  ],
+  "u": "/ressources/sequentielles/3e-seq3-allemand.html"
+ },
+ {
+  "id": "3e-seq4-allemand",
+  "classe": "3e",
+  "m": "allemand",
+  "mat": "allemand",
+  "matiere": "Allemand",
+  "seq": 4,
+  "rangs": [
+   22,
+   23,
+   24,
+   25,
+   26,
+   27,
+   28,
+   29,
+   30,
+   31,
+   32
+  ],
+  "u": "/ressources/sequentielles/3e-seq4-allemand.html"
+ },
+ {
+  "id": "3e-seq5-allemand",
+  "classe": "3e",
+  "m": "allemand",
+  "mat": "allemand",
+  "matiere": "Allemand",
+  "seq": 5,
+  "rangs": [
+   33,
+   34,
+   35,
+   36,
+   37,
+   38,
+   39,
+   40,
+   41,
+   42,
+   43,
+   44,
+   45,
+   46,
+   47,
+   48
+  ],
+  "u": "/ressources/sequentielles/3e-seq5-allemand.html"
+ },
+ {
+  "id": "3e-seq6-allemand",
+  "classe": "3e",
+  "m": "allemand",
+  "mat": "allemand",
+  "matiere": "Allemand",
+  "seq": 6,
+  "rangs": [
+   49,
+   50,
+   51,
+   52,
+   53,
+   54
+  ],
+  "u": "/ressources/sequentielles/3e-seq6-allemand.html"
  }
 ]
