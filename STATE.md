@@ -1,3 +1,15 @@
+## Apprendre : lot 14, 2nde A (18/11/2026)
+
+Demande de Jacques : « continue », puis « voir ce qui a été fait pour éviter les doublons ». Vérification faite avant d'écrire : aucune PR ouverte, aucune branche non fusionnée et aucune autre session ne touchait ces 4 leçons (seules 6e-5e-4e sont chez l'autre session).
+
+- **`apprendre/_src/22-approfondies-2nde-a.js`** : les 4 dernières leçons gratuites de 2nde A au gabarit approfondi, remplacées en place (partie « Entraînement au format de l'examen » et quiz de 10 d'origine repris) :
+  - **Maths, ℝ et ses sous-ensembles** : tontine des couturières de Bafoussam (100 000/6 « tout rond », dette de −3 000 F, biais d'un pagne carré) ; droite graduée, labo ensembles, table de coupe 3D (pagne wax, diagonale √2) ; **simulation** de partage (décimal ou non, part en francs, reste en caisse).
+  - **Histoire, les disciplines affinitaires** : tessons du chantier de Mbalmayo (« des débris » / « sept générations ») ; l'historien et ses 8 alliés, coupe stratigraphique 3D (couches, perles de traite, tessons, charbon, mire) ; **simulation** carbone 14 (88 % → environ 1 060 ans).
+  - **Philosophie, définitions** : rumeur WhatsApp reçue à Ngaoundéré ; philein + sophia, escalier de Socrate appliqué au message, arbre à palabres 3D ; **exercice** opinion / question philosophique / fait (7 phrases).
+  - **Géographie, lire une carte** : plan d'évacuation d'un quartier riverain du Wouri (3,5 cm au 1/10 000 = 350 m, pas 3,5 km) ; carte complète TOLES avec légende, maquette 3D du quartier (fleuve, mangrove, colline-refuge, rose des vents) ; **simulation** règle et échelles.
+- `lecons.js?v=20261118l14` ; 4 pages `apprendre/cours/` régénérées et habillées. Chromium (1200 et 390 px) : aucun débordement, aucune erreur JS. Contrôles GEO et bancs au vert.
+- **État** : toutes les leçons gratuites de 3e, 2nde, 1re et Tle sont au gabarit approfondi. Restent 6e (10), 5e (3), 4e (2), confiées à l'autre session.
+
 ## Apprendre : lot 13, 2nde (18/11/2026)
 
 Demande de Jacques : « continue ». Lot 12 (PR #358) fusionné et déployé.
