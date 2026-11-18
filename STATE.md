@@ -1,3 +1,15 @@
+## Apprendre : lot 18, 6e — toutes les leçons gratuites au gabarit approfondi (18/11/2026)
+
+Demande de Jacques : « Continue ». L'autre session crée de NOUVELLES leçons de maths de 6e (`16c-approfondies-6e-maths.js` : cercle, proportionnalité, pavé droit) ; aucun recouvrement (coordination confirmée par message).
+
+- **`apprendre/_src/26-approfondies-premier-cycle-5.js`** : les 3 dernières leçons gratuites sans situation de départ, remplacées en place (schémas d'origine `illus` conservés, quiz portés à 10 questions) :
+  - **EPS, coordination bras-jambes** : séance de vitesse à Bafia (bras collés, bras du même côté, crampes) ; foulée décomposée, coureur articulé 3D (membres en chaînes de sphères) ; **simulation animée** (requestAnimationFrame, arrêt si l'élément quitte la page) : bras collés / même côté / opposés et torsion du buste vue de dessus.
+  - **Technologie, matériel de dessin** : plan raté du kiosque à Bafoussam (4B pour construire, couvercle, angles « à l'œil ») ; planche à dessin 3D (règle, équerre évidée, rapporteur, compas, crayons H / HB / 4B, gomme) ; **simulation** dureté du crayon et gommage ; **exercice** « quel instrument ? » (6 traits).
+  - **Technologie, site d'une pépinière** : club agricole de Mbalmayo (fromager du bas-fond contre terrain près du forage) ; pépinière 3D (sachets, ombrière de palmes, clôture, forage, fût, piste) ; **simulation** grille notée 0-2 sur 6 critères (A = 5/12, B = 11/12).
+- **Pièges rencontrés (moteur 3D)** : une grande face unique (`div:false`, ou un `poly` étendu) posée sous de petits objets plats les recouvre selon l'angle (tri par profondeur des centres) ; mieux vaut un plateau subdivisé (par défaut) et des objets un peu épais (barres, petits blocs) plutôt que des lamelles ou des polygones plats. Les modèles dont l'origine est au sol doivent être recentrés (coureur décalé de −105 en y).
+- `lecons.js?v=20261118m18` ; 3 pages `apprendre/cours/` régénérées et habillées. Chromium (1200 et 390 px) : aucun débordement, aucune erreur JS. Contrôles GEO et bancs au vert.
+- **Bilan** : les 91 leçons de `lecons.js` ont toutes une situation de départ résolue (`enquete` + `denouement`).
+
 ## Apprendre : lot 17, 6e (18/11/2026)
 
 Demande de Jacques : « Continue ». L'autre session (retouches de leçons) a confirmé par message qu'elle laisse les leçons de 6e-5e-4e à cette session ; sa PR #357 ajoutera une carte mentale automatique en fin de leçon (pas besoin de planche récapitulative).
