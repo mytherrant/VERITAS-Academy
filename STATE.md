@@ -11,6 +11,13 @@ Demandes de Jacques : « Continue », puis « continue ».
 - `lecons.js?v=20261118l11` ; 4 pages `apprendre/cours/` régénérées et habillées. Chromium (1200 et 390 px) : aucun débordement, aucune erreur JS. Bancs : réglages 29/29, verrou 18/18, gabarits 54/54, planche mobile 23/23, charte 34/34, lisibilité 7/7 ; contrôles GEO au vert.
 - **Suite** : 1re chinois (budan, ruguo), Tle arabe (khabar, verbes) ; 2nde (maths, français, ECM, histoire, philosophie, géographie).
 
+## 18/11/2026 — Vraies cartes mentales : œuvres et leçons (branche offres-entetes)
+- apprendre/_src/00-carte-mentale.js (VRT_CM) : nuage central, flèches courbes, étiquettes entourées à main levée et numérotées, mots en éventail en italique, fond de cahier pointé ; en étoile sur grand écran, en arbre sur téléphone (bascule CSS à 640 px) ; animation de tracé (désactivée si mouvement réduit).
+- Pages d'œuvres (tools/oeuvres_statiques.js) : la grille de 4 boîtes remplacée par VRT_CM (même source litt-oeuvres.js), CSS du module injecté dans OE_CSS.
+- Leçons (apprendre/lecon.html) : « La carte mentale de la leçon » en fin de cours et en tête de la révision, tirée des parties (hors entraînement/parties verrouillées) et de « à retenir » (coupé aux « ; » et aux phrases), à défaut des mots-clés en gras. Pas de carte derrière un mur.
+- Marges mesurées avec Poppins chargée : ≥ 54 px de chaque côté ; branches rapprochées du noyau (« recentre plus vers l'intérieur »).
+- Reste à faire : la carte de l'application (_showLittCarte, app.js) garde son ancien dessin.
+
 ## 18/11/2026 — Formules compactes : en-tête teinté plus foncé, milieu blanc (branche offres-entetes)
 - Starter vert, Pro bleu, Élite violet : seul l'en-tête (nom, prix, public) garde la teinte, un peu plus foncée ; la liste des avantages est sur fond blanc.
 - Avantages alignés à gauche (plus de mots étirés).
