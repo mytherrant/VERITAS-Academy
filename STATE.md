@@ -1,3 +1,6 @@
+## Leçons : étiquettes de planche sans « 2D » ni « 3D » (17/11/2026)
+
+Demande de Jacques : « pour toutes les fiches, enlève 2d, 3d ». `apprendre/lecon.html`, fonction `planche()` : l'étiquette devient « Planche n » (au lieu de « Planche n · 2D / 3D » ; les planches de type « Planche » affichaient même « Planche n · Planche »). Le type reste dans les données (`type: "3d"` pilote toujours le moteur 3D). Bancs gabarits, planche mobile, réglages, charte au vert ; 0 erreur JS.
 ## Apprendre : premier cycle, lot 1 — divisibilité (6e), PGCD (5e), facteurs premiers (4e) (17/11/2026)
 
 Demande de Jacques : « continue l'enrichissement de mes leçons et visuels 2D, 3D », précisée par « juste les leçons dans la progression nationale des classes ». Pour ne pas croiser la session « Enrichissement des leçons » (3e, 1re, Tle), cette série prend la **6e, la 5e et la 4e** (message envoyé à l'autre session).
