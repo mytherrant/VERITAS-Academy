@@ -15,7 +15,8 @@ function compte(h, re) { return (h.match(re) || []).length; }
 const lignes = [];
 for (const [id, l] of Object.entries(L)) {
   const parties = l.parties || [], html = parties.map(p => p.html || "").join(" ") + " " + JSON.stringify(l.denouement || {}) + " " + (l.intro || "");
-  const pl = parties.flatMap(p => p.planches || []);
+  /* seules les planches affichables comptent : un objet avec un titre et un dessin (svg, modele 3D ou ref) */
+  const pl = parties.flatMap(p => p.planches || []).filter(x => x && typeof x === "object" && x.titre && (x.svg || x.modele || x.ref));
   const D = l.denouement || {};
   const r = {
     id, classe: l.c, matiere: l.m, titre: l.titre,
