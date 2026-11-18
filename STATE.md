@@ -43,6 +43,7 @@ Demandes de Jacques : « Continue », puis « continue ».
 - Leçons (apprendre/lecon.html) : « La carte mentale de la leçon » en fin de cours et en tête de la révision, tirée des parties (hors entraînement/parties verrouillées) et de « à retenir » (coupé aux « ; » et aux phrases), à défaut des mots-clés en gras. Pas de carte derrière un mur.
 - Marges mesurées avec Poppins chargée : ≥ 54 px de chaque côté ; branches rapprochées du noyau (« recentre plus vers l'intérieur »).
 - 18/11 (suite) « varie les styles de cartes » : 11 formes (radiale, organigramme, bulles, accolade « { », alvéoles, flux, causes-conséquences, roue, arête de poisson, arbre dessiné, frise chronologique) × 3 styles (main levée, coloré, sobre), tirés du titre (stables) ; 4 palettes harmonieuses remplacent les couleurs ternes ; traits et flèches épaissis. Leçons : frise pour l'histoire, flux pour les étapes, causes-conséquences seulement si deux parties distinctes. Titres longs passés à la ligne ; contrôle des marges sur 33 cartes × 2 tailles : 0 débordement.
+- « Trop classique, mets de la fantaisie » : style sobre retiré du tirage ; deux styles ajoutés, post-it (notes inclinées, ruban adhésif, coin corné, fond kraft) et ardoise (tableau vert encadré de bois, craie de couleur, nuage pointillé). Tirage actuel des leçons : ardoise 18, coloré 21, post-it 20, main levée 15.
 - Carte de la leçon : une seule fois, en fin de cours (pas dans la Révision : règle « pas de doublon »).
 - Reste à faire : la carte de l'application (_showLittCarte, app.js) garde son ancien dessin.
 

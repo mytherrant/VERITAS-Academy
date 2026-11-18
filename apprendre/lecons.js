@@ -16,12 +16,17 @@
     if (c) l.push(c);
     return l;
   }
+  /* styles fantaisie (18/11/2026, « trop classique, mets de la fantaisie ») : post-it et ardoise */
+  var ARD = function () { return STYLE === "ardoise"; }, PIT = function () { return STYLE === "postit"; }, MAINL = function () { return STYLE === "main" || STYLE === "ardoise" || STYLE === "postit"; };
+  function encre(c) { return STYLE === "ardoise" ? "#F3EFE4" : STYLE === "postit" ? "#2B2B2B" : c; }
+  function alpha(hex, a) { var n = parseInt(hex.slice(1), 16); return "rgba(" + (n >> 16 & 255) + "," + (n >> 8 & 255) + "," + (n & 255) + "," + a + ")"; }
+  function teinte(col, k) { return STYLE === "ardoise" ? "rgba(255,255,255,.07)" : STYLE === "postit" ? clair(col, Math.min(k, .7)) : clair(col, k); }
   function clair(hex, k) {
     var n = parseInt(hex.slice(1), 16), r = n >> 16 & 255, g = n >> 8 & 255, b = n & 255;
     return "rgb(" + [r, g, b].map(function (v) { return Math.round(v + (255 - v) * k); }).join(",") + ")";
   }
   function texte(x, y, lignes, o) {
-    var s = "<text x='" + f1(x) + "' y='" + f1(y) + "' text-anchor='" + (o.a || "start") + "' font-size='" + o.t + "'" + (STYLE === "main" ? " font-style='italic'" : "") + (o.g ? " font-weight='" + o.g + "'" : "") + " fill='" + (o.c || (STYLE === "sobre" ? "#3B4456" : "#2E3445")) + "'>";
+    var s = "<text x='" + f1(x) + "' y='" + f1(y) + "' text-anchor='" + (o.a || "start") + "' font-size='" + o.t + "'" + (MAINL() ? " font-style='italic'" : "") + (o.g ? " font-weight='" + o.g + "'" : "") + " fill='" + (o.c || (STYLE === "sobre" ? encre("#3B4456") : encre("#2E3445"))) + "'>";
     lignes.forEach(function (l, i) { s += "<tspan x='" + f1(x) + "' dy='" + (i ? f1(o.t * 1.24) : 0) + "'>" + esc(l) + "</tspan>"; });
     return s + "</text>";
   }
@@ -32,14 +37,15 @@
       var j = 1 + 0.045 * Math.sin(3 * t + graine) + 0.02 * Math.cos(5 * t + graine * 2), sp = t > 2 * Math.PI - 0.2 ? 1 + 6 / Math.max(rx, ry) : 1;
       d += (k ? "L" : "M") + f1(cx + rx * j * sp * Math.cos(t)) + " " + f1(cy + ry * j * sp * Math.sin(t));
     }
-    return "<path d='" + d + "' fill='" + clair(col, .9) + "' stroke='" + col + "' stroke-width='2.6' stroke-linecap='round' stroke-linejoin='round'/>";
+    return "<path d='" + d + "' fill='" + teinte(col, .9) + "' stroke='" + col + "' stroke-width='2.6' stroke-linecap='round' stroke-linejoin='round'/>";
   }
   function etiquette(cx, cy, t, col, n, max) {
     var L = t.length > (max || 99) ? couper(t, Math.ceil(t.length / 2) + 2) : [t], ry = L.length > 1 ? 31 : 21;
     var w = Math.round(Math.max.apply(null, L.map(function (l) { return l.length; })) * 9.2 + 40), s = "<g class='cm-h'>", tc = col;
-    if (STYLE === "main") s += boucle(cx, cy, w / 2, ry, col, n * 1.7);
+    if (PIT()) { var rot = (n % 2 ? -2.2 : 1.8); s = "<g class='cm-h' transform='rotate(" + rot + " " + f1(cx) + " " + f1(cy) + ")'><rect x='" + f1(cx - w / 2 + 3) + "' y='" + f1(cy - ry + 6) + "' width='" + w + "' height='" + (ry * 2 - 2) + "' fill='#000' opacity='.12'/><rect x='" + f1(cx - w / 2) + "' y='" + f1(cy - ry + 2) + "' width='" + w + "' height='" + (ry * 2 - 2) + "' fill='" + clair(col, .62) + "'/><rect x='" + f1(cx - 22) + "' y='" + f1(cy - ry - 5) + "' width='44' height='13' fill='rgba(255,255,255,.65)' transform='rotate(-4 " + f1(cx) + " " + f1(cy - ry) + ")'/>"; tc = "#2B2B2B"; }
+    else if (STYLE === "main" || ARD()) s += boucle(cx, cy, w / 2, ry, col, n * 1.7);
     else if (STYLE === "colore") { s += "<rect x='" + f1(cx - w / 2) + "' y='" + f1(cy - ry + 2) + "' width='" + w + "' height='" + (ry * 2 - 4) + "' rx='" + (ry - 2) + "' fill='" + col + "'/>"; tc = "#fff"; }
-    else { s += "<rect x='" + f1(cx - w / 2) + "' y='" + f1(cy - ry + 3) + "' width='" + w + "' height='" + (ry * 2 - 6) + "' rx='8' fill='#fff' stroke='#AEB6C6' stroke-width='1.3'/><rect x='" + f1(cx - w / 2) + "' y='" + f1(cy - ry + 3) + "' width='5' height='" + (ry * 2 - 6) + "' rx='2' fill='" + col + "'/>"; tc = "#1D2330"; }
+    else { s += "<rect x='" + f1(cx - w / 2) + "' y='" + f1(cy - ry + 3) + "' width='" + w + "' height='" + (ry * 2 - 6) + "' rx='8' fill='#fff' stroke='#AEB6C6' stroke-width='1.3'/><rect x='" + f1(cx - w / 2) + "' y='" + f1(cy - ry + 3) + "' width='5' height='" + (ry * 2 - 6) + "' rx='2' fill='" + col + "'/>"; tc = encre("#1D2330"); }
     L.forEach(function (l, k) { s += "<text x='" + f1(cx) + "' y='" + f1(cy + 5.5 + (k - (L.length - 1) / 2) * 19) + "' text-anchor='middle' font-size='16' font-weight='" + (STYLE === "sobre" ? 700 : 800) + "' fill='" + tc + "'>" + esc(l) + "</text>"; });
     s += "<circle cx='" + f1(cx - w / 2 + 6) + "' cy='" + f1(cy - ry + 2) + "' r='11.5' fill='" + (STYLE === "colore" ? "#fff" : col) + "' stroke='" + (STYLE === "colore" ? col : "#fff") + "' stroke-width='2'/>" +
       "<text x='" + f1(cx - w / 2 + 6) + "' y='" + f1(cy - ry + 6.5) + "' text-anchor='middle' font-size='13' font-weight='800' fill='" + (STYLE === "colore" ? col : "#fff") + "'>" + n + "</text></g>";
@@ -52,7 +58,7 @@
     d = "M" + f1(pts[0][0]) + " " + f1(pts[0][1]);
     for (i = 1; i <= n; i++) { var c = Math.hypot(pts[i][0] - pts[i - 1][0], pts[i][1] - pts[i - 1][1]) * 0.62; d += "A" + f1(c) + " " + f1(c) + " 0 0 1 " + f1(pts[i][0]) + " " + f1(pts[i][1]); }
     var s = "<g class='cm-c'><path d='" + d + "Z' fill='#001136' opacity='.12' transform='translate(3 5)'/>" +
-      "<path d='" + d + "Z' fill='url(#" + P + "g)' stroke='#fff' stroke-width='2.5'/>";
+      "<path d='" + d + "Z' fill='" + (ARD() ? "rgba(255,255,255,.1)" : "url(#" + P + "g)") + "' stroke='" + (ARD() ? "#FFE08A" : "#fff") + "' stroke-width='" + (ARD() ? 3 : 2.5) + "'" + (ARD() ? " stroke-dasharray='14 4'" : "") + "/>";
     lignes.forEach(function (l, k) {
       var sub = k >= (lignes.nt || 1);
       s += "<text x='" + f1(cx) + "' y='" + f1(cy - h / 2 + 31 + k * 21) + "' text-anchor='middle' font-size='" + (sub ? 13.5 : 19) + "' font-weight='" + (sub ? 600 : 800) + "' fill='" + (sub ? "#FFE08A" : "#fff") + "'>" + esc(l) + "</text>";
@@ -62,11 +68,13 @@
   function largeurC(C, min, max) { return Math.min(max || 999, Math.max(min, Math.round(Math.max.apply(null, C.map(function (l, i) { return l.length * (i ? 7.8 : 11.2); })) + 30))); }
   function defs(B) {
     return "<defs><linearGradient id='" + P + "g' x1='0' y1='0' x2='1' y2='1'><stop offset='0' stop-color='#3D5BD8'/><stop offset='.55' stop-color='#2A2F9E'/><stop offset='1' stop-color='#0C1F55'/></linearGradient>" +
-      "<pattern id='" + P + "q' width='18' height='18' patternUnits='userSpaceOnUse'><circle cx='9' cy='9' r='1.1' fill='#DCE3EF'/></pattern>" +
+      "<pattern id='" + P + "q' width='18' height='18' patternUnits='userSpaceOnUse'><circle cx='9' cy='9' r='1.1' fill='" + (ARD() ? "rgba(255,255,255,.08)" : PIT() ? "#D2B482" : "#DCE3EF") + "'/></pattern>" +
       "<linearGradient id='" + P + "p' x1='0' y1='0' x2='1' y2='1'><stop offset='0' stop-color='#FFF6E8'/><stop offset='.5' stop-color='#FDF2FA'/><stop offset='1' stop-color='#EAF3FF'/></linearGradient>" +
       B.map(function (b, i) { return "<marker id='" + P + "f" + i + "' markerWidth='18' markerHeight='18' refX='11' refY='9' orient='auto' markerUnits='userSpaceOnUse'><path d='M2 2.5L14 9L2 15.5' fill='none' stroke='" + trait(b.color) + "' stroke-width='3.4' stroke-linecap='round' stroke-linejoin='round'/></marker>"; }).join("") + "</defs>";
   }
   function fond(Wd, H) {
+    if (ARD()) return "<rect width='" + Wd + "' height='" + Math.round(H) + "' rx='18' fill='#6B4423'/><rect x='9' y='9' width='" + (Wd - 18) + "' height='" + Math.round(H - 18) + "' rx='10' fill='#24453B'/><rect x='9' y='9' width='" + (Wd - 18) + "' height='" + Math.round(H - 18) + "' rx='10' fill='url(#" + P + "q)'/>";
+    if (PIT()) return "<rect width='" + Wd + "' height='" + Math.round(H) + "' rx='18' fill='#EFD9B0'/><rect width='" + Wd + "' height='" + Math.round(H) + "' rx='18' fill='url(#" + P + "q)'/>";
     if (STYLE === "sobre") return "<rect x='.5' y='.5' width='" + (Wd - 1) + "' height='" + Math.round(H - 1) + "' rx='14' fill='#fff' stroke='#E3E8F1'/>";
     if (STYLE === "colore") return "<rect width='" + Wd + "' height='" + Math.round(H) + "' rx='18' fill='url(#" + P + "p)'/>";
     return "<rect width='" + Wd + "' height='" + Math.round(H) + "' rx='18' fill='#FCFDFF'/><rect width='" + Wd + "' height='" + Math.round(H) + "' rx='18' fill='url(#" + P + "q)'/>";
@@ -78,7 +86,12 @@
     lignes.forEach(function (l, k) { couper(l, Math.floor((lim - 40) / (k ? 7.8 : 11.2))).forEach(function (x) { L2.push(k && !L2.length ? x : x); }); if (!k && L2.length > 1) L2.titre = L2.length; });
     L2.nt = L2.titre || 1; lignes = L2;
     w = Math.min(lim, Math.max(w, largeurC(lignes, 0, lim)));
-    if (STYLE === "main") return nuage(cx, cy, lignes, w);
+    if (STYLE === "main" || ARD()) return nuage(cx, cy, lignes, w);
+    if (PIT()) {
+      var hp = 30 + lignes.length * 21, sp = "<g class='cm-c' transform='rotate(-2 " + f1(cx) + " " + f1(cy) + ")'><rect x='" + f1(cx - w / 2 + 5) + "' y='" + f1(cy - hp / 2 + 7) + "' width='" + w + "' height='" + hp + "' fill='#000' opacity='.15'/><rect x='" + f1(cx - w / 2) + "' y='" + f1(cy - hp / 2) + "' width='" + w + "' height='" + hp + "' fill='#FFE066'/><path d='M" + f1(cx + w / 2 - 22) + " " + f1(cy + hp / 2) + " L" + f1(cx + w / 2) + " " + f1(cy + hp / 2 - 22) + " V" + f1(cy + hp / 2) + "Z' fill='#E8C53A'/><rect x='" + f1(cx - 34) + "' y='" + f1(cy - hp / 2 - 8) + "' width='68' height='16' fill='rgba(255,255,255,.7)' transform='rotate(3 " + f1(cx) + " " + f1(cy - hp / 2) + ")'/>";
+      lignes.forEach(function (l, k) { var sub = k >= (lignes.nt || 1); sp += "<text x='" + f1(cx) + "' y='" + f1(cy - hp / 2 + 34 + k * 21) + "' text-anchor='middle' font-size='" + (sub ? 13.5 : 19) + "' font-weight='" + (sub ? 600 : 800) + "' fill='" + (sub ? "#8A5A00" : "#142554") + "'>" + esc(l) + "</text>"; });
+      return { s: sp + "</g>", h: hp, a: w / 2, b: hp / 2 };
+    }
     var h = 26 + lignes.length * 21, sob = STYLE === "sobre", s = "<g class='cm-c'>" + (sob ? "" : "<rect x='" + f1(cx - w / 2 + 3) + "' y='" + f1(cy - h / 2 + 5) + "' width='" + w + "' height='" + h + "' rx='" + (h / 2) + "' fill='#001136' opacity='.12'/>") +
       "<rect x='" + f1(cx - w / 2) + "' y='" + f1(cy - h / 2) + "' width='" + w + "' height='" + h + "' rx='" + (sob ? 10 : h / 2) + "' fill='" + (sob ? "#1D2B53" : "url(#" + P + "g)") + "'" + (sob ? "" : " stroke='#FFC93C' stroke-width='3'") + "/>";
     lignes.forEach(function (l, k) { var sub = k >= (lignes.nt || 1); s += "<text x='" + f1(cx) + "' y='" + f1(cy - h / 2 + 31 + k * 21) + "' text-anchor='middle' font-size='" + (sub ? 13.5 : 19) + "' font-weight='" + (sub ? 600 : 800) + "' fill='" + (sub ? (sob ? "#C9D3EA" : "#FFE08A") : "#fff") + "'>" + esc(l) + "</text>"; });
@@ -159,13 +172,14 @@
   }
   /* cadre : bords à main levée, coloré (bandeau) ou sobre */
   function cadre(x, y, w, h, col, coupe) {
-    if (STYLE === "main") {
+    if (PIT()) { var r = ((x + y) % 3) - 1; return "<g transform='rotate(" + (r * 1.2) + " " + f1(x + w / 2) + " " + f1(y + h / 2) + ")'><rect x='" + (x + 4) + "' y='" + (y + 6) + "' width='" + w + "' height='" + h + "' fill='#000' opacity='.12'/><rect x='" + x + "' y='" + y + "' width='" + w + "' height='" + h + "' fill='" + clair(col, .72) + "'/><path d='M" + (x + w - 26) + " " + (y + h) + " L" + (x + w) + " " + (y + h - 26) + " V" + (y + h) + "Z' fill='" + clair(col, .45) + "'/><rect x='" + (x + w / 2 - 36) + "' y='" + (y - 8) + "' width='72' height='16' fill='rgba(255,255,255,.7)' transform='rotate(" + (-r * 3) + " " + (x + w / 2) + " " + y + ")'/></g>"; }
+    if (STYLE === "main" || ARD()) {
       var d = "", k = 0, pts = [[x, y], [x + w, y], [x + w, y + h], [x, y + h], [x, y + 1]];
       for (var i = 0; i < 4; i++) for (var t = 0; t <= 1; t += 0.1, k++) {
         var px = pts[i][0] + (pts[i + 1][0] - pts[i][0]) * t, py = pts[i][1] + (pts[i + 1][1] - pts[i][1]) * t, j = 1.4 * Math.sin(k * 1.7 + x);
         d += (k ? "L" : "M") + f1(px + (i % 2 ? j : 0)) + " " + f1(py + (i % 2 ? 0 : j));
       }
-      return "<path d='" + d + "' fill='" + clair(col, .93) + "' stroke='" + col + "' stroke-width='2.2' stroke-linejoin='round'/>";
+      return "<path d='" + d + "' fill='" + teinte(col, .93) + "' stroke='" + col + "' stroke-width='2.2' stroke-linejoin='round'/>";
     }
     if (coupe) { var c = 16; return "<path d='M" + (x + c) + " " + y + "H" + (x + w - c) + "L" + (x + w) + " " + (y + c) + "V" + (y + h - c) + "L" + (x + w - c) + " " + (y + h) + "H" + (x + c) + "L" + x + " " + (y + h - c) + "V" + (y + c) + "Z' fill='" + (STYLE === "colore" ? clair(col, .9) : "#fff") + "' stroke='" + (STYLE === "colore" ? col : "#AEB6C6") + "' stroke-width='" + (STYLE === "colore" ? 2 : 1.2) + "'/>"; }
     if (STYLE === "colore") return "<rect x='" + x + "' y='" + y + "' width='" + w + "' height='" + h + "' rx='16' fill='#fff' stroke='" + col + "' stroke-width='2'/><path d='M" + x + " " + (y + 16) + "a16 16 0 0 1 16 -16H" + (x + w - 16) + "a16 16 0 0 1 16 16V" + (y + 46) + "H" + x + "Z' fill='" + col + "'/>";
@@ -177,7 +191,7 @@
     var NC = Math.floor((w - 44) / 8.2), Lt = couper(b.label, Math.floor((w - 60) / 9.4)), h = hImpose || hBoite(b, w), col = b.color, s = "<g class='cm-h'>" + cadre(x, y, w, h, col, hex);
     var badge = hex ? "<path d='" + hexa(x + 26, y + 26, 14) + "' fill='" + col + "'/>" : "<circle cx='" + (x + 26) + "' cy='" + (y + 25) + "' r='13' fill='" + (STYLE === "colore" ? "#fff" : col) + "'/>";
     s += badge + "<text x='" + (x + 26) + "' y='" + (y + 30) + "' text-anchor='middle' font-size='14' font-weight='800' fill='" + (STYLE === "colore" && !hex ? col : "#fff") + "'>" + n + "</text>";
-    Lt.forEach(function (l, k) { s += "<text x='" + (x + 48) + "' y='" + (y + 30 + k * 19) + "' font-size='16' font-weight='800' fill='" + (STYLE === "colore" && !hex ? "#fff" : STYLE === "sobre" ? "#1D2330" : col) + "'>" + esc(l) + "</text>"; });
+    Lt.forEach(function (l, k) { s += "<text x='" + (x + 48) + "' y='" + (y + 30 + k * 19) + "' font-size='16' font-weight='800' fill='" + (STYLE === "colore" && !hex ? "#fff" : STYLE === "sobre" ? encre("#1D2330") : col) + "'>" + esc(l) + "</text>"; });
     return { s: s + "</g>" + liste(b.items, x + 16, y + 38 + Lt.length * 19 + 14, NC, col), h: h };
   }
   function hexa(cx, cy, r) { var d = ""; for (var i = 0; i < 6; i++) { var a = Math.PI / 3 * i; d += (i ? "L" : "M") + f1(cx + r * Math.cos(a)) + " " + f1(cy + r * Math.sin(a)); } return d + "Z"; }
@@ -207,9 +221,9 @@
   function bulle(cx, cy, rx, ry, b, n, NC) {
     var col = b.color, Lt = couper(b.label, NC - 6), s = "<g class='cm-h'>";
     if (STYLE === "main") s += boucle(cx, cy, rx, ry, col, n * 2.3).replace("stroke-width='2.6'", "stroke-width='2.4'");
-    else s += "<ellipse cx='" + f1(cx) + "' cy='" + f1(cy) + "' rx='" + f1(rx) + "' ry='" + f1(ry) + "' fill='" + (STYLE === "colore" ? clair(col, .86) : "#fff") + "' stroke='" + (STYLE === "sobre" ? "#AEB6C6" : col) + "' stroke-width='" + (STYLE === "sobre" ? 1.3 : 2.4) + "'/>";
+    else s += "<ellipse cx='" + f1(cx) + "' cy='" + f1(cy) + "' rx='" + f1(rx) + "' ry='" + f1(ry) + "' fill='" + (STYLE === "colore" ? clair(col, .86) : teinte(col, .9)) + "' stroke='" + (STYLE === "sobre" ? "#AEB6C6" : col) + "' stroke-width='" + (STYLE === "sobre" ? 1.3 : 2.4) + "'/>";
     var h = Lt.length * 19 + 10 + hListe(b.items, NC), y = cy - h / 2 + 14;
-    Lt.forEach(function (l, k) { s += "<text x='" + f1(cx) + "' y='" + f1(y + k * 19) + "' text-anchor='middle' font-size='16' font-weight='800' fill='" + (STYLE === "sobre" ? "#1D2330" : col) + "'>" + esc(l) + "</text>"; });
+    Lt.forEach(function (l, k) { s += "<text x='" + f1(cx) + "' y='" + f1(y + k * 19) + "' text-anchor='middle' font-size='16' font-weight='800' fill='" + (STYLE === "sobre" ? encre("#1D2330") : col) + "'>" + esc(l) + "</text>"; });
     var bx = cx - rx * .78, by = cy - ry * .66;
     s += "<circle cx='" + f1(bx) + "' cy='" + f1(by) + "' r='13' fill='" + col + "' stroke='#fff' stroke-width='2'/><text x='" + f1(bx) + "' y='" + f1(by + 5) + "' text-anchor='middle' font-size='13' font-weight='800' fill='#fff'>" + n + "</text></g>";
     return s + liste(b.items, cx, y + Lt.length * 19 + 10, NC, col, true);
@@ -251,7 +265,7 @@
     var Wd = 920, cw = largeurC(C, 170, 250), xb = 20 + cw + 30, xl = xb + 40, lw = 190, xs = xl + lw + 14, xi = xs + 34, NC = Math.floor((Wd - xi - 30) / 8.2);
     var blocs = B.map(function (b) { return Math.max(70, hListe(b.items, NC) + 16) + 22; }), H = blocs.reduce(function (a, b) { return a + b; }, 0) + 40, y = 20, s = "", dessus = "";
     var cen = centre(20 + cw / 2 + (STYLE === "main" ? 14 : 0), H / 2, C, cw);
-    s += accol(xb, 24, H - 24, "#5B6478", 14);
+    s += accol(xb, 24, H - 24, encre("#5B6478"), 14);
     B.forEach(function (b, i) {
       var h = blocs[i] - 22, ym = y + h / 2, et = etiquette(xl + lw / 2, ym, b.label, b.color, i + 1, 15), hl = hListe(b.items, NC);
       s += accol(xs, ym - hl / 2 - 8, ym + hl / 2 + 8, b.color, 10) + liste(b.items, xi, ym - hl / 2 + 11, NC, b.color);
@@ -338,15 +352,15 @@
     var n = B.length, s = "", dA = 2 * Math.PI / n;
     B.forEach(function (b, i) {
       var a0 = -Math.PI / 2 + i * dA + .015, a1 = a0 + dA - .03, am = (a0 + a1) / 2, rm = (r0 + R) / 2, L = couper(b.label, 11).slice(0, 3);
-      s += "<path class='cm-h' d='" + secteur(cx, cy, r0, R, a0, a1) + "' fill='" + (STYLE === "sobre" ? clair(b.color, .82) : STYLE === "colore" ? b.color : clair(b.color, .55)) + "' stroke='#fff' stroke-width='3'/>";
-      L.forEach(function (l, k) { s += "<text x='" + f1(cx + rm * Math.cos(am)) + "' y='" + f1(cy + rm * Math.sin(am) - (L.length - 1) * 7.5 + 4 + k * 15) + "' text-anchor='middle' font-size='12.5' font-weight='800' fill='" + (STYLE === "colore" ? "#fff" : "#1D2330") + "'>" + esc(l) + "</text>"; });
+      s += "<path class='cm-h' d='" + secteur(cx, cy, r0, R, a0, a1) + "' fill='" + (STYLE === "sobre" ? clair(b.color, .82) : STYLE === "colore" ? b.color : ARD() ? alpha(b.color, .45) : clair(b.color, .55)) + "' stroke='#fff' stroke-width='3'/>";
+      L.forEach(function (l, k) { s += "<text x='" + f1(cx + rm * Math.cos(am)) + "' y='" + f1(cy + rm * Math.sin(am) - (L.length - 1) * 7.5 + 4 + k * 15) + "' text-anchor='middle' font-size='12.5' font-weight='800' fill='" + (STYLE === "colore" ? "#fff" : encre("#1D2330")) + "'>" + esc(l) + "</text>"; });
       s += "<circle cx='" + f1(cx + (R + 14) * Math.cos(am)) + "' cy='" + f1(cy + (R + 14) * Math.sin(am)) + "' r='12' fill='" + b.color + "' stroke='#fff' stroke-width='2.5'/><text x='" + f1(cx + (R + 14) * Math.cos(am)) + "' y='" + f1(cy + (R + 14) * Math.sin(am) + 4.5) + "' text-anchor='middle' font-size='12' font-weight='800' fill='#fff'>" + (i + 1) + "</text>";
     });
     return s;
   }
   function blocTexte(x, y, w, b, n, anc) {
     var NC = Math.floor((w - 20) / 8.2), Lt = couper(b.label, NC), s = "";
-    Lt.forEach(function (l, k) { s += "<text x='" + f1(x) + "' y='" + f1(y + k * 19) + "' font-size='16' font-weight='800' fill='" + (STYLE === "sobre" ? "#1D2330" : b.color) + "'>" + (k ? "" : n + ". ") + esc(l) + "</text>"; });
+    Lt.forEach(function (l, k) { s += "<text x='" + f1(x) + "' y='" + f1(y + k * 19) + "' font-size='16' font-weight='800' fill='" + (STYLE === "sobre" ? encre("#1D2330") : b.color) + "'>" + (k ? "" : n + ". ") + esc(l) + "</text>"; });
     return { s: s + liste(b.items, x, y + Lt.length * 19 + 8, NC - 2, b.color), h: Lt.length * 19 + 8 + hListe(b.items, NC - 2) };
   }
   function roue(C, B, alt, Wd) {
@@ -374,14 +388,14 @@
 
   /* ARÊTE DE POISSON : la tête porte le sujet, chaque arête une branche, les mots en arêtes secondaires */
   function poisson(C, B, alt, Wd) {
-    var s = "", etr = Wd < 500, enc = "#2E3A55";
+    var s = "", etr = Wd < 500, enc = encre("#2E3A55");
     if (etr) {
       var y = 26, sx = 34, out = "", dessus = "";
       B.forEach(function (b, i) {
         var Lt = couper(b.label, 24), by = y + 10, hl = hListe(b.items, 30);
         out += "<path class='cm-t' d='M" + sx + " " + f1(by + 46) + " L" + (sx + 46) + " " + f1(by + 6) + "' stroke='" + trait(b.color) + "' stroke-width='3.5' stroke-linecap='round'/>";
         dessus += "<circle cx='" + (sx + 58) + "' cy='" + f1(by) + "' r='12' fill='" + b.color + "'/><text x='" + (sx + 58) + "' y='" + f1(by + 4.5) + "' text-anchor='middle' font-size='12.5' font-weight='800' fill='#fff'>" + (i + 1) + "</text>";
-        Lt.forEach(function (l, k) { dessus += "<text x='" + (sx + 78) + "' y='" + f1(by + 5 + k * 19) + "' font-size='16' font-weight='800' fill='" + (STYLE === "sobre" ? "#1D2330" : b.color) + "'>" + esc(l) + "</text>"; });
+        Lt.forEach(function (l, k) { dessus += "<text x='" + (sx + 78) + "' y='" + f1(by + 5 + k * 19) + "' font-size='16' font-weight='800' fill='" + (STYLE === "sobre" ? encre("#1D2330") : b.color) + "'>" + esc(l) + "</text>"; });
         out += liste(b.items, sx + 74, by + Lt.length * 19 + 22, 30, b.color);
         y = by + Lt.length * 19 + 22 + hl + 22;
       });
@@ -422,11 +436,11 @@
   function feuillage(cx, cy, rx, ry, b, n, NC) {
     var col = b.color, s = "<g class='cm-h'>", k, d = "";
     for (k = 0; k <= 72; k++) { var u = 2 * Math.PI * k / 72, j = 1 + .045 * Math.sin(7 * u + n) + .02 * Math.sin(13 * u); d += (k ? "L" : "M") + f1(cx + rx * j * Math.cos(u)) + " " + f1(cy + ry * j * Math.sin(u)); }
-    var fill = STYLE === "sobre" ? "#F4F8F2" : STYLE === "colore" ? clair(col, .78) : clair(col, .88);
+    var fill = STYLE === "sobre" ? "#F4F8F2" : STYLE === "colore" ? clair(col, .78) : teinte(col, .88);
     s += "<path d='" + d + "Z' fill='" + fill + "' stroke='" + (STYLE === "sobre" ? "#9DB59A" : col) + "' stroke-width='" + (STYLE === "sobre" ? 1.4 : 2.4) + "' stroke-linejoin='round'/>";
     for (k = 0; k < 5; k++) { var a = -2.6 + k * .45, lx = cx + rx * .98 * Math.cos(a), ly = cy + ry * .98 * Math.sin(a); s += "<path d='M" + f1(lx) + " " + f1(ly) + " q6 -10 14 -4 q-4 9 -14 4z' fill='" + (STYLE === "sobre" ? "#9DB59A" : col) + "' opacity='.75'/>"; }
     var Lt = couper(b.label, NC - 4), h = Lt.length * 19 + 10 + hListe(b.items, NC), y = cy - h / 2 + 14;
-    Lt.forEach(function (l, q) { s += "<text x='" + f1(cx) + "' y='" + f1(y + q * 19) + "' text-anchor='middle' font-size='16' font-weight='800' fill='" + (STYLE === "sobre" ? "#1D2330" : col) + "'>" + (q ? "" : n + ". ") + esc(l) + "</text>"; });
+    Lt.forEach(function (l, q) { s += "<text x='" + f1(cx) + "' y='" + f1(y + q * 19) + "' text-anchor='middle' font-size='16' font-weight='800' fill='" + (STYLE === "sobre" ? encre("#1D2330") : col) + "'>" + (q ? "" : n + ". ") + esc(l) + "</text>"; });
     return s + "</g>" + liste(b.items, cx, y + Lt.length * 19 + 10, NC, col, true);
   }
   function tronc(cx, yTop, yBas, C) {
@@ -458,7 +472,7 @@
 
   /* FRISE CHRONOLOGIQUE : un axe fléché, les moments en cartes, alternées dessus / dessous */
   function frise(C, B, alt, Wd) {
-    var n = B.length, s = "", dessus = "", col0 = "#2E3A55";
+    var n = B.length, s = "", dessus = "", col0 = encre("#2E3A55");
     if (Wd < 500) {
       var pc = placerCentre(200, C, largeurC(C, 240, 360)), y = pc.y + pc.c.b + 30, x = 30, d0 = y;
       B.forEach(function (b, i) { var bx = boite(56, y, 326, b, i + 1, false); dessus += "<circle cx='" + x + "' cy='" + f1(y + 25) + "' r='9' fill='#fff' stroke='" + b.color + "' stroke-width='4'/><path d='M" + (x + 10) + " " + f1(y + 25) + " H54' stroke='" + trait(b.color) + "' stroke-width='2.5'/>" + bx.s; y += bx.h + 22; });
@@ -477,7 +491,7 @@
     return svgDe("cm-large", Wd, H, alt, B, s + dessus + pc2.s);
   }
 
-  var FORMES = ["radiale", "organigramme", "bulles", "accolade", "alveoles", "roue", "poisson", "arbre"], STYLES = ["main", "colore", "sobre"];
+  var FORMES = ["radiale", "organigramme", "bulles", "accolade", "alveoles", "roue", "poisson", "arbre"], STYLES = ["main", "colore", "postit", "ardoise"];
   function hache(t) { var h = 7; for (var i = 0; i < t.length; i++) h = (h * 31 + t.charCodeAt(i)) % 100003; return h; }
 
   /* carte = { centre: "Titre\nSous-titre" | [lignes], branches: [{ label, color?, items: [] }] } */
@@ -496,6 +510,7 @@
     if (forme === "causes" && (gauche.indexOf(true) < 0 || gauche.indexOf(false) < 0)) forme = "radiale";
     if (forme === "organigramme" && B.length > 5) forme = "radiale";
     var n = ++NUM, h = "", cp = function () { return B.map(function (b) { return Object.assign({}, b); }); };
+    if (st === "ardoise" && !carte.garderCouleurs) B.forEach(function (b, i) { b.color = ["#FFD166", "#FF8FA3", "#8BE9FD", "#B9F18C", "#FFB86B", "#D0A9FF"][i % 6]; });
     STYLE = st;
     P = "cm" + n + "a";
     h += forme === "organigramme" ? arbre(C, cp(), alt) : forme === "roue" ? roue(C, cp(), alt, 920) : forme === "poisson" ? poisson(C, cp(), alt, 920) : forme === "arbre" ? arbreDessin(C, cp(), alt, 920) : forme === "frise" ? frise(C, cp(), alt, 920) : forme === "bulles" ? bulles(C, cp(), alt) : forme === "accolade" ? accolade(C, cp(), alt) : forme === "alveoles" ? alveoles(C, cp(), alt, 920) : forme === "flux" ? flux(C, cp(), alt, 920) : forme === "causes" ? causes(C, cp(), alt, 920, gauche) : large(C, cp(), alt);
