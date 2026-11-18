@@ -1,3 +1,15 @@
+## Apprendre : lot 9, langues de 3e (17/11/2026)
+
+Demande de Jacques : « continue ». Coordination : une autre session (« Enrichissement leçons et visuels 2D/3D ») prend la 6e, la 5e et la 4e dans `apprendre/_src/16-approfondies-premier-cycle.js` ; cette session reste sur la 3e, la 1re et la Tle.
+
+- **`apprendre/_src/17-approfondies-langues-2.js`** : 4 leçons gratuites de 3e au gabarit approfondi, remplacées en place :
+  - **anglais, a / an / the** : dépliant touristique de Kribi plein de fautes ; six images (a university, an hour…), plage de Kribi en 3D (the sun, the Atlantic, the Lobé Falls, a pirogue) ; **exercice** : compléter le dépliant (8 phrases).
+  - **allemand, verbes faibles** : message vocal de Paul à Jonas (Berlin) ; radical et terminaisons en blocs 3D détachables, scène de marché ; **machine à conjuguer** (7 verbes × 6 personnes, e intercalé après -t / -d).
+  - **espagnol, mi familia** : photo de famille envoyée à Ana (Séville) ; arbre généalogique en portraits, arbre 3D à trois générations ; **simulation** : « ¿Quién es? ».
+  - **grec, Ésope et Homère** : soirée contes à Ebolowa (la tortue Kulu et Ulysse) ; amphore grecque 3D, voyage d'Ulysse et fable du lièvre côte à côte ; **exercice** : épopée ou fable (6 extraits).
+- `lecons.js?v=20261117g` ; 4 pages `apprendre/cours/` régénérées et habillées. Chromium (1200 et 390 px) : aucun débordement, aucune erreur JS. Bancs : réglages 29/29, verrou 18/18, gabarits 54/54, planche mobile 23/23, charte 34/34, lisibilité 7/7.
+- **Suite** : 3e français (Ville cruelle), Tle culture nationale (naissance, funérailles), arabe ; 1re italien, chinois, ESF.
+
 ## Apprendre : lot 8, langues de 3e et préparation du bac (17/11/2026)
 
 Demandes de Jacques : « Oui continue » (PR #322, déjà intégrée à master, fermée avec un commentaire), puis « continue ».
