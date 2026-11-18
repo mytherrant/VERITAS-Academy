@@ -1,3 +1,14 @@
+## Apprendre : premier cycle, lot 1 — divisibilité (6e), PGCD (5e), facteurs premiers (4e) (17/11/2026)
+
+Demande de Jacques : « continue l'enrichissement de mes leçons et visuels 2D, 3D », précisée par « juste les leçons dans la progression nationale des classes ». Pour ne pas croiser la session « Enrichissement des leçons » (3e, 1re, Tle), cette série prend la **6e, la 5e et la 4e** (message envoyé à l'autre session).
+
+- **`apprendre/_src/16-approfondies-premier-cycle.js`** : 3 leçons gratuites au gabarit approfondi, remplacées en place (même identifiant, même rang ; APC, examen et scènes repris ; parties d'origine conservées et enrichies) :
+  - **6e, critères de divisibilité** : les 1 260 beignets de la kermesse du CES de Bafia, sachets de 2, 3, 5, 9 ou 10 ; planches 2D (reste nul ou non, dernier chiffre / somme des chiffres, nombre de sachets par taille), **boulier 3D** de 1 260 (1 + 2 + 6 + 0 = 9 perles) ; **simulation** : emballer a beignets par sachets de b, reste et critère affichés.
+  - **5e, PGCD** : le carrelage 360 cm × 240 cm de la salle de 5e à Bertoua ; dalles de 240 (ne tombent pas juste), de 60 (justes mais pas les plus grandes), de 120 (PGCD) ; diviseurs communs en pastilles, **sol 3D** en 6 dalles de 120 cm ; **simulation** : choisir la taille de dalle (coupes en rose, nombre de dalles, coût de pose).
+  - **4e, décomposition en facteurs premiers** : 360 élèves du lycée de Kribi pour le défilé du 20 mai ; crible jusqu'à 50, arbre de 360 = 2³ × 3² × 5, 4 × 3 × 2 = 24 diviseurs donc 24 dispositions, **défilé 3D** en 18 rangées de 20 ; **simulation** : l'arbre de n'importe quel nombre de 2 à 600, nombre de diviseurs, disposition la plus proche du carré.
+- Quiz de 10 questions pour chacune (au lieu de 3 pour la 6e et la 5e). Simulations VRT_A sur la partie 0 (6e, 5e) et 1 (4e) : les animations existantes de `91-animations-2.js` restent sur la partie 1.
+- `lecons.js?v=20261117pc1` ; 3 pages `apprendre/cours/` régénérées et habillées. Chromium (390 et 1280 px) : aucun débordement, aucune erreur JS. Bancs : réglages 29/29, verrou 18/18, gabarits, planche mobile, charte 34/34, lisibilité au vert.
+- **Suite (premier cycle)** : 6e informatique (composants, IA), 6e technologie, 5e français (subordonnée relative), 5e histoire (Pygmées, Sao), 5e géographie (population), 4e langues nationales et grec.
 ## Apprendre : lot 10, Ville cruelle et culture nationale (18/11/2026)
 
 Demande de Jacques : « Continue ». La 6e, la 5e et la 4e restent à l'autre session (`16-approfondies-premier-cycle.js`).
