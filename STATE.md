@@ -1,3 +1,13 @@
+## Apprendre : classes d'examen, lot 1 — philosophie de Terminale (18/11/2026)
+
+Demande de Jacques : « Continue avec les autres matières et leçons non rédigées ou non enrichies. Finalise d'abord les classes d'examen ».
+
+- **État des lieux** (toutes leçons, gratuites `lecons.js` + payantes `apprendre/apercus-*.js`, 2 000 aperçus) : dans les classes d'examen, les vrais trous de la part « lettres » sont la philosophie de Tle A (37 lignes, 6 leçons), le français (115 à 142 lignes, une dizaine de leçons), l'anglais (moins de 10 leçons), et rien en orientation, cultures, langues anciennes et rares, arts, EPS, littérature en 3e, 1re, Tle. Pour compter les aperçus en Node : définir `global.VRT_L` avant `require("./apprendre/apercus-*.js")`.
+- **`apprendre/_src/36-examens-philo-tle.js`** : 9 leçons NOUVELLES au gabarit complet (enquête, 3 parties + « Entraînement au format du bac » avec dissertation et exercice sur texte, 2 planches 2D, 1 planche 3D, simulation, situation résolue avec formules, quiz de 10). Notions communes déclinées par `poser(base, [[classe, rang, id]…])` : la science (Tle A 23, Tle C/D 22), l'existence et la mort (A 32, C/D 26), Dieu et la religion (A 34, C/D 28). Rattachement par `rang` (numéro de ligne de la progression : exact).
+- Partage confirmé avec la session des sciences : elle crée les leçons de maths, PCT, SVT, informatique et TM des classes d'examen.
+- `lecons.js?v=20261118X36`. Chromium : aucune erreur, aucun débordement ; la page matière Tle A les place dans leurs chapitres. Audit : 89 leçons, 89 complètes.
+- **Suite** : Tle A (Towa, Njoh-Mouelle, nature et culture, art et travail, vérité, espace et temps, histoire), Tle C/D (État, panafricanisme, logique), puis français, anglais et autres matières des classes d'examen.
+
 ## Apprendre : audit et enrichissement des leçons, lettres et sciences humaines (18/11/2026)
 
 Demande de Jacques : « Audite et corrige partout », puis « Continue ». Grille de l'audit `tools/audit_lecons.cjs` (session des sciences, PR #370) : situation de départ, situation résolue avec étapes, au moins 2 formules ou définitions, 2 exemples, 2 astuces, 2 planches 2D, 1 planche 3D, 1 simulation, et la nouvelle rubrique `denouement.formules` (« Les formules utilisées, étape par étape »).
