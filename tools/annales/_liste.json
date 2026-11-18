@@ -154,6 +154,20 @@
   "u": "/ressources/annales/probatoire-langue-francaise-cdeti-2025.html"
  },
  {
+  "id": "probatoire-langue-francaise-cdeti-2024",
+  "examen": "probatoire",
+  "m": "langue-francaise",
+  "serie": "séries C, D, E et TI",
+  "nomExamen": "Probatoire",
+  "fiche": "ressources/probatoire-francais.html",
+  "matiere": "Langue française (séries C, D, E et TI)",
+  "mat": "francais",
+  "classes": "1re C,1re D",
+  "annee": 2024,
+  "national": true,
+  "u": "/ressources/annales/probatoire-langue-francaise-cdeti-2024.html"
+ },
+ {
   "id": "bepc-mathematiques-2026",
   "examen": "bepc",
   "m": "mathematiques",
