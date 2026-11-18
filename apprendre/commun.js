@@ -396,8 +396,12 @@
   }
   function carteFormule(f, conseillee, c, mini) {
     var idM = "abo_" + f.g + "_m", idA = "abo_" + f.g + "_a";
-    if (mini) return '<div class="fo fo-mini"><p class="fo-nom">' + esc(f.nom) + ' <span class="fo-pm"><b data-vrt-prix="' + idM + '">' + prixConnu(idM, f.mois) + '</b> F / mois</span></p>' +
-      '<p class="fo-cle">' + esc(f.cle || f.pour) + '</p><a class="fo-btn" href="/app.html#abonnement?plan=' + idM + '">Choisir ' + esc(f.nom) + '</a></div>';
+    if (mini) return '<div class="fo fo-mini fo-' + f.g + '"><p class="fo-nom">' + esc(f.nom) + ' <span class="fo-pm"><b data-vrt-prix="' + idM + '">' + prixConnu(idM, f.mois) + '</b> F / mois</span></p>' +
+      '<p class="fo-cle">' + esc(f.pour) + '</p>' + (f.base ? '<p class="fo-base">' + esc(f.base) + '</p>' : '') +
+      /* 18/11/2026 « encadre aussi les autres plans et leurs offres » : la liste des avantages, en entier. */
+      '<ul class="fo-av">' + avantages(f, c).map(function (x) { return "<li>" + esc(x) + "</li>"; }).join("") +
+        f.non.map(function (x) { return '<li class="fo-non">' + esc(x) + "</li>"; }).join("") + '</ul>' +
+      '<a class="fo-btn" href="/app.html#abonnement?plan=' + idM + '">Choisir ' + esc(f.nom) + '</a></div>';
     return '<div class="fo' + (conseillee ? " fo-c" : "") + '">' +
       (conseillee ? '<span class="fo-badge">Conseillée pour toi</span>' : "") +
       '<p class="fo-nom">' + esc(f.nom) + '</p><p class="fo-pour">' + esc(f.pour) + '</p>' +
@@ -430,16 +434,16 @@
       carteFormule(fc, true, c) +
       '<div class="offre-autres">' + FORMULES.filter(function (f) { return f !== fc; }).map(function (f) { return carteFormule(f, false, c, true); }).join("") + '</div>' +
       '<p class="offre-n">Paiement Orange Money ou MTN MoMo, sans engagement. L\'année payée en une fois revient à un peu plus de huit mois. <a href="/app.html#abonnement?plan=abo_famille_m">Formule Famille</a> : jusqu\'à 4 enfants.</p>' +
-      (oc.humainActif === false ? "" : lienOffre("https://wa.me/" + WA_VERITAS + "?text=" + encodeURIComponent("Bonjour VÉRITAS, je souhaite un devis pour un accompagnement" + (c ? " en " + c : "") + " : suivi particulier en ligne / répétitions à domicile. Ville et quartier : "), "Besoin d'un professeur à côté de toi ?", HUMAIN.tarif + " Suivi en ligne ou répétitions à domicile.", PICTO_CLE)) +
-      (cah ? lienOffre(cah.h, cah.t, cah.d, PICTO_LIVRE) : "") + '</aside>';
+      (oc.humainActif === false ? "" : lienOffre("https://wa.me/" + WA_VERITAS + "?text=" + encodeURIComponent("Bonjour VÉRITAS, je souhaite un devis pour un accompagnement" + (c ? " en " + c : "") + " : suivi particulier en ligne / répétitions à domicile. Ville et quartier : "), "Besoin d'un professeur à côté de toi ?", HUMAIN.tarif + " Suivi en ligne ou répétitions à domicile.", PICTO_CLE, "or ol-prof")) +
+      (cah ? lienOffre(cah.h, cah.t, cah.d, PICTO_LIVRE, "ol-cahier") : "") + '</aside>';
     return '<aside class="offre offre-' + ctx + '" aria-label="' + esc(titre) + '"><p class="offre-t">' + esc(titre) + '</p>' +
       '<h2 class="offre-h">' + esc(txt(oc.titre) || "Choisis ta formule") + '</h2>' +
       '<div class="offre-grille"><div class="offre-plans">' +
       FORMULES.map(function (f) { return carteFormule(f, f.g === conseil, c); }).join("") +
       '</div>' + (oc.humainActif === false ? "" : carteHumain(c, m)) + '</div>' +
       (txt(oc.note) ? '<p class="offre-n">' + gras(txt(oc.note)) + '</p>' : '<p class="offre-n">Payer l\'année en une fois revient à un peu plus de huit mois (Starter : 10 000 F au lieu de 14 400 F). Plusieurs enfants ? La <a href="/app.html#abonnement?plan=abo_famille_m">formule Famille</a> couvre jusqu\'à 4 enfants au niveau Élite pour <span data-vrt-prix="abo_famille_m">' + prixConnu("abo_famille_m", "6 000") + '</span> F par mois. Paiement Orange Money ou MTN MoMo, sans engagement.</p>') +
-      (cah ? lienOffre(cah.h, cah.t, cah.d, PICTO_LIVRE) : "") +
-      (ens.actif === false ? "" : lienOffre(txt(ens.h) || "/app.html#tarifs", txt(ens.t) || "Enseignant ? Les formules multi-classes", txt(ens.d) || "3 classes, 6 classes ou toutes, dès 2 500 F par mois : leçons à projeter, fiches à distribuer, épreuves corrigées.", PICTO_CLE)) +
+      (cah ? lienOffre(cah.h, cah.t, cah.d, PICTO_LIVRE, "ol-cahier") : "") +
+      (ens.actif === false ? "" : lienOffre(txt(ens.h) || "/app.html#tarifs", txt(ens.t) || "Enseignant ? Les formules multi-classes", txt(ens.d) || "3 classes, 6 classes ou toutes, dès 2 500 F par mois : leçons à projeter, fiches à distribuer, épreuves corrigées.", PICTO_CLE, "ol-ens")) +
       '</aside>';
   }
   /* Les bonnes réponses étaient rangées en 1ʳᵉ ou 2ᵉ position (3ᵉ : 5 fois sur 177) :
