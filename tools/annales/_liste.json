@@ -882,6 +882,20 @@
   "u": "/ressources/annales/probatoire-anglais-acdti-2025.html"
  },
  {
+  "id": "probatoire-anglais-acdti-2024",
+  "examen": "probatoire",
+  "m": "anglais",
+  "serie": "séries A, C, D et TI",
+  "nomExamen": "Probatoire",
+  "fiche": "ressources/examen-anglais-probatoire.html",
+  "matiere": "Anglais (séries A, C, D et TI)",
+  "mat": "anglais",
+  "classes": "1re A,1re C,1re D",
+  "annee": 2024,
+  "national": true,
+  "u": "/ressources/annales/probatoire-anglais-acdti-2024.html"
+ },
+ {
   "id": "bac-anglais-cdeti-2025",
   "examen": "bac",
   "m": "anglais",
