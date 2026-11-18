@@ -8,7 +8,7 @@ Demande de Jacques : « Continue ». L'autre session (retouches de leçons) a co
   - **Arts, les branches** : trois jurys du festival de Foumban (conte, balafon) ; bronze, ndop indigo, jarre ; balafon 3D (lames et calebasses) ; **exercice** « quel jury ? » (8 œuvres).
   - **EPS, la piste** : finale du 200 m à Ngaoundéré (décalage du couloir 8, coureur qui coupe le virage) ; stade 3D (huit couloirs en `poly`, corde, arrivée) ; **simulation** du décalage (200 / 400 m, couloirs 1 à 8, rayons de course réglementaires : 36,80 m puis 36,5 + 1,22 (i − 1) + 0,2).
 - Partie 1 de `6e-eps-piste` : l'animation de `91-animations-2.js` est conservée ; la simulation du décalage est en partie 2.
-- `lecons.js?v=20261118l17` ; 4 pages `apprendre/cours/` régénérées et habillées. Chromium (1200 et 390 px) : aucun débordement, aucune erreur JS. Contrôles GEO et bancs au vert.
+- `lecons.js?v=20261118m17` (après fusion de master : PR #357, cartes mentales) ; 4 pages `apprendre/cours/` régénérées et habillées. Chromium (1200 et 390 px) : aucun débordement, aucune erreur JS. Contrôles GEO et bancs au vert.
 - **Suite** : 3 dernières leçons de 6e (coordination bras-jambes, matériel de dessin, site d'une pépinière).
 
 ## Apprendre : lot 16, 4e et 6e (18/11/2026)
@@ -86,6 +86,24 @@ Demandes de Jacques : « Continue », puis « continue ».
   - **Italien, accordo e disaccordo** : débat du club d'italien de Deïdo ; salle de débat 3D, réaction en trois temps ; **exercice** accordo / disaccordo / sfumatura.
 - `lecons.js?v=20261118l11` ; 4 pages `apprendre/cours/` régénérées et habillées. Chromium (1200 et 390 px) : aucun débordement, aucune erreur JS. Bancs : réglages 29/29, verrou 18/18, gabarits 54/54, planche mobile 23/23, charte 34/34, lisibilité 7/7 ; contrôles GEO au vert.
 - **Suite** : 1re chinois (budan, ruguo), Tle arabe (khabar, verbes) ; 2nde (maths, français, ECM, histoire, philosophie, géographie).
+
+## 18/11/2026 — Vraies cartes mentales : œuvres et leçons (branche offres-entetes)
+- apprendre/_src/00-carte-mentale.js (VRT_CM) : nuage central, flèches courbes, étiquettes entourées à main levée et numérotées, mots en éventail en italique, fond de cahier pointé ; en étoile sur grand écran, en arbre sur téléphone (bascule CSS à 640 px) ; animation de tracé (désactivée si mouvement réduit).
+- Pages d'œuvres (tools/oeuvres_statiques.js) : la grille de 4 boîtes remplacée par VRT_CM (même source litt-oeuvres.js), CSS du module injecté dans OE_CSS.
+- Leçons (apprendre/lecon.html) : « La carte mentale de la leçon » en fin de cours et en tête de la révision, tirée des parties (hors entraînement/parties verrouillées) et de « à retenir » (coupé aux « ; » et aux phrases), à défaut des mots-clés en gras. Pas de carte derrière un mur.
+- Marges mesurées avec Poppins chargée : ≥ 54 px de chaque côté ; branches rapprochées du noyau (« recentre plus vers l'intérieur »).
+- 18/11 (suite) « varie les styles de cartes » : 11 formes (radiale, organigramme, bulles, accolade « { », alvéoles, flux, causes-conséquences, roue, arête de poisson, arbre dessiné, frise chronologique) × 3 styles (main levée, coloré, sobre), tirés du titre (stables) ; 4 palettes harmonieuses remplacent les couleurs ternes ; traits et flèches épaissis. Leçons : frise pour l'histoire, flux pour les étapes, causes-conséquences seulement si deux parties distinctes. Titres longs passés à la ligne ; contrôle des marges sur 33 cartes × 2 tailles : 0 débordement.
+- « Trop classique, mets de la fantaisie » : style sobre retiré du tirage ; deux styles ajoutés, post-it (notes inclinées, ruban adhésif, coin corné, fond kraft) et ardoise (tableau vert encadré de bois, craie de couleur, nuage pointillé). Tirage actuel des leçons : ardoise 18, coloré 21, post-it 20, main levée 15.
+- « Arrière-fond en blanc pour plus de lisibilité » : fond blanc pur pour tous les styles (plus de kraft, de pointillés ni de dégradé) ; l'ardoise (craie claire, illisible sur blanc) sort du tirage. Tirage : main levée, coloré, post-it.
+- Carte de la leçon : une seule fois, en fin de cours (pas dans la Révision : règle « pas de doublon »).
+- Reste à faire : la carte de l'application (_showLittCarte, app.js) garde son ancien dessin.
+
+## 18/11/2026 — Formules compactes : en-tête teinté plus foncé, milieu blanc (branche offres-entetes)
+- Starter vert, Pro bleu, Élite violet : seul l'en-tête (nom, prix, public) garde la teinte, un peu plus foncée ; la liste des avantages est sur fond blanc.
+- Avantages alignés à gauche (plus de mots étirés).
+- « Pour commencer » et « Situation de vie » : titre dans un petit cadre posé sur le bord de l'encadré, comme les notes.
+- « Ta tâche » (situation de vie et enquête) : plus d'encadré, pastille crayon + texte en italique. modele.css?v=20261118t.
+- Tableaux des fiches de méthode, annales et séquentielles (tools/methodes/_methode.css, 166 pages régénérées) : quadrillage fin comme dans la leçon de dénombrement, en-tête et première colonne bleu pâle en gras.
 
 ## Leçons : étiquettes de planche sans « 2D » ni « 3D » (17/11/2026)
 

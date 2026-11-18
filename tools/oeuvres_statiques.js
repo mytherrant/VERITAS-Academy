@@ -79,7 +79,8 @@ const SYMBOLES = {
    d'habillage, présente sur chaque page d'œuvre) donne la spécificité d'un id :
    les règles de veritas-habillage.css (0,5,4 + !important) cèdent. */
 // Dessin des leçons d'Apprendre (17/11/2026) : tools/oeuvres_statiques.css, commentaires retirés.
-const OE_CSS = fs.readFileSync(path.join(__dirname, 'oeuvres_statiques.css'), 'utf8').replace(/\r/g, '').replace(/\/\*[\s\S]*?\*\//g, '').replace(/\n\s*\n/g, '\n').trim();
+const VRT_CM = require(path.join(RACINE, 'apprendre', '_src', '00-carte-mentale.js'));
+const OE_CSS = VRT_CM.css + '\n' + fs.readFileSync(path.join(__dirname, 'oeuvres_statiques.css'), 'utf8').replace(/\r/g, '').replace(/\/\*[\s\S]*?\*\//g, '').replace(/\n\s*\n/g, '\n').trim();
 const STYLE = '<!-- oeuvre-style -->\n<style>'
   + OE_CSS
   + '.lecons{display:grid;gap:12px;margin:8px 0 6px}'
@@ -149,10 +150,9 @@ function bloc(o, cle, nom) {
   if (branches.length) {
     const centre = String(carte.centre || o.titre || '').split('\n').map(net).filter(Boolean);
     out.push(h2('carte', 'compass', 'La carte mentale de l’œuvre'));
-    out.push('<div class="oe-carte"><div class="oe-centre"><b>' + esc(centre[0] || o.titre) + '</b>'
-      + (centre.length > 1 ? '<small>' + esc(centre.slice(1).join(' · ')) + '</small>' : '') + '</div><div class="oe-branches">'
-      + branches.map(b => { const k = /^#[0-9a-f]{6}$/i.test(b.color || '') ? b.color : '#1E499B'; return '<div class="oe-br" style="--c:' + k + ';--cp:' + pale(k, .07) + ';--cb:' + pale(k, .3) + '"><b>' + esc(net(b.label)) + '</b><ul>'
-        + b.items.map(i => '<li>' + esc(net(i)) + '</li>').join('') + '</ul></div>'; }).join('') + '</div></div>');
+    /* 18/11/2026 « de vraies cartes mentales » : réseau en étoile (écran large) et en arbre (téléphone),
+       dessiné par apprendre/_src/00-carte-mentale.js (même module que les leçons). */
+    out.push(VRT_CM({ centre: centre, branches: branches.map(b => ({ label: net(b.label), color: b.color, items: b.items.map(net) })) }));
   }
 
   const an = o.analyse || {};
