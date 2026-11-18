@@ -354,3 +354,11 @@ html body section.tuteur{background:#F3F0FD!important;border:1.5px solid #D6CCF3
 html body .carte ul.objectifs{gap:0!important;row-gap:0!important}
 html body .carte .objectifs li{margin:0!important;padding:2px 0 2px 30px!important;line-height:1.4!important}
 html body .carte .objectifs li::before{top:.5em!important}
+
+/* ── 18/11/2026 « dispose comme les encadrés » : l'introduction en encadré, comme la situation de vie ── */
+html body .carte .info-b{margin:0 0 22px;padding:16px 18px 16px;border:1.5px solid #C9D8F2;border-radius:18px;background:linear-gradient(180deg,#F2F6FD,#fff 75%)}
+html body .carte .info-b h2{display:flex;align-items:center;gap:10px;margin:0 0 10px;padding:0;border:0;font:700 19px/1.3 var(--vm-titre,var(--sans));color:#1E499B}
+html body .carte .info-b h2::before,html body .carte .info-b h2::after{content:none!important}
+html body .carte .info-b .apc-i{flex:none;display:grid;place-items:center;width:36px;height:36px;border-radius:12px;background:#DCE6F8;color:#1E499B}
+html body .carte .info-b p.info{margin:0!important;padding:0!important;background:none!important;border:0!important;font-size:16.5px!important;line-height:1.65!important;color:#22283A;text-align:justify;hyphens:auto;-webkit-hyphens:auto}
+html body .carte .objectifs li{text-align:left!important;hyphens:manual!important;-webkit-hyphens:manual!important}
