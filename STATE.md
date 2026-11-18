@@ -1,3 +1,25 @@
+## Apprendre : réalisme, lot 21 — zoom HD de la cellule au gène (18/11/2026)
+
+Demande de Jacques : « Continue » (suite du lot 20).
+
+- **`apprendre/_src/92-animations-realisme.js`** : l'animation « Zoome de la cellule jusqu'au gène » (3e ADN, partie 4) est refaite en haute définition et remplace celle de `90-animations-sciences.js` : 1) cellule animale HD avec le noyau encadré ; 2) noyau en division et 46 chromosomes en X à bandes ; 3) un chromosome agrandi (chromatides, centromère, filament d'ADN qui se déroule) ; 4) double hélice d'ADN avec paires de bases colorées (A-T, G-C) et un gène encadré.
+- `28-realisme-premiers-lots.js` exporte aussi `chromosome`, `LONG`, `CENT` dans `window.VRT_CELLULES` pour cette animation.
+- `lecons.js?v=20261118r21`. Chromium : aucune erreur JS. Contrôles GEO et bancs au vert.
+
+## Apprendre : réalisme des premiers lots, lot 20 (18/11/2026)
+
+Demandes de Jacques : « Oui améliore et rend les plus réalistes pertinentes », « Surtout les jours de semaine en orientation », « Même la structure HD de la cellule, cellule animale et végétale », « Continue ».
+
+- **`apprendre/_src/28-realisme-premiers-lots.js`** : remplace SEULEMENT des dessins (`dessinEnquete`, `dessinPlanche` par titre, `remplacerPlanche`) ou en ajoute ; aucun texte retiré.
+  - Situations de départ redessinées avec des personnages complets : ADN (salon d'Ebolowa, grand-mère, bébé), ressemblances (centre de Limbé, chimpanzé réaliste, jumelles), atome (fil de cuivre dénudé, chaîne en or), racines (carré à la ficelle, vraies poules), pH (cuvette de soude, huile de palme, pains de savon).
+  - ADN : **caryotypes** en vrais chromosomes en X (deux chromatides, centromère, bandes, longueurs relatives réelles, rangés en 4 lignes, XX / XY) ; **transfert de noyau** avec de vraies grenouilles (verte, albinos aux yeux rouges, têtard).
+  - pH : verrerie réaliste (balance, bécher, fiole jaugée, pissette, pipette jaugée et poire).
+  - **Orientation** : les planches 3D sans légende de jours / mois sont remplacées par un **planning de semaine** (Lundi à Dimanche, 0 h à 24 h, 15 h 30 de révisions) et un **calendrier de Septembre à Juin**, punaisés sur un tableau en liège.
+  - **Cellules en haute définition** (ultrastructure) : cellule animale (membrane, noyau à pores, nucléole, chromatine, mitochondries à crêtes, réticulum rugueux et lisse, Golgi, vésicules, lysosomes, centrosome, ribosomes) et cellule végétale (paroi, plasmodesmes, vacuole et tonoplaste, chloroplastes à grana et amidon…) ajoutées à `tle-sc-microscopie` (partie 4) et `tle-sc-organites` (partie 2).
+- **`apprendre/_src/92-animations-realisme.js`** (chargé après 90 et 91) : l'**explorateur de cellules** (animale / végétale, clic sur un organite → surbrillance + rôle) remplace l'animation simple « Clique sur un organite ».
+- **Piège** : certains titres de planches contiennent une espace insécable (« 500 mL ») ; la comparaison des titres normalise désormais U+00A0 et U+202F.
+- `lecons.js?v=20261118r20` ; 9 pages `apprendre/cours/` régénérées. Chromium (1200 et 390 px) : aucun débordement, aucune erreur JS. Contrôles GEO et bancs au vert.
+
 ## Apprendre : révision des leçons approfondies, lot 19 (18/11/2026)
 
 Demande de Jacques : « Oui » (mettre les premières leçons au niveau des derniers lots). Audit automatique des 91 leçons (planche 3D, planche 2D ou schéma, simulation ou labo, quiz de 10, indices) : 8 leçons en dessous du niveau.
