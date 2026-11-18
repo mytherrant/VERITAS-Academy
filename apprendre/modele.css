@@ -403,3 +403,4 @@ html body .carte .den-formules .df-f{display:inline-block;margin:0 0 4px;padding
 html body .carte .den-formules .df-c{display:block;font:500 15.5px/1.55 var(--sans);color:#22283A}
 html body .carte .den-formules .df-c::before{content:"→ ";color:#C2540A;font-weight:800}
 html body .carte .den-formules,html body .carte .den-formules *{text-align:left!important;hyphens:manual!important;-webkit-hyphens:manual!important}
+html body .carte figure.illus .cm svg,html body figure.mur-schema .cm svg{max-height:none!important;width:100%!important}

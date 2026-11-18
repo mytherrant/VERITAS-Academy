@@ -102,12 +102,14 @@
     var Wd = 920, cx = 460, T = 15, LH = T * 1.24, NC = 16, cotes = [[], []];
     B.forEach(function (b, i) { b.n = i + 1; b.i = i; cotes[i % 2].push(b); });
     function bloc(b) { var h = 0; b.items.forEach(function (it) { h += couper(it, NC).length * LH + 14; }); return Math.max(h, 70) + 28; }
-    var hauts = cotes.map(function (c) { return c.reduce(function (a, b) { return a + bloc(b); }, 0); });
-    var cw = largeurC(C, 180, 260), H = Math.max(hauts[0], hauts[1], 300) + 40, cy = H / 2, s = "", dessus = "";
+    var cw = largeurC(C, 180, 260), cen0 = centre(cx, 0, C, cw), trou = cen0.h + 56;
+    var hauts = cotes.map(function (c) { return c.reduce(function (a, b) { return a + bloc(b); }, 0) + (c.length >= 2 ? trou : 0); });
+    var H = Math.max(hauts[0], hauts[1], 300) + 40, cy = H / 2, s = "", dessus = "";
     var cen = centre(cx, cy, C, cw);
     cotes.forEach(function (liste, cote) {
       var sg = cote ? 1 : -1, col0 = cx + sg * 248, y0 = (H - hauts[cote]) / 2;
-      liste.forEach(function (b) {
+      liste.forEach(function (b, kb) {
+        if (liste.length >= 2 && kb === Math.ceil(liste.length / 2)) y0 += trou;
         var h = bloc(b), hy = y0 + h / 2, col = b.color, ly = y0 + 14, hmax = h / 2;
         var et = etiquette(0, 0, b.label, col, b.n, 17), w = et.w, ox = col0 - sg * 44, hx = ox - sg * w / 2, ix = hx - sg * w / 2;
         /* étiquette qui mordrait sur le nuage : on la monte (ou descend) au-dessus de lui */
@@ -266,7 +268,7 @@
     s += accol(xb, 24, H - 24, encre("#5B6478"), 14);
     B.forEach(function (b, i) {
       var h = blocs[i] - 22, ym = y + h / 2, et = etiquette(xl + lw / 2, ym, b.label, b.color, i + 1, 15), hl = hListe(b.items, NC);
-      s += accol(xs, ym - hl / 2 - 8, ym + hl / 2 + 8, b.color, 10) + liste(b.items, xi, ym - hl / 2 + 11, NC, b.color);
+      s += (b.items.length ? accol(xs, ym - hl / 2 - 8, ym + hl / 2 + 8, b.color, 10) : "") + liste(b.items, xi, ym - hl / 2 + 11, NC, b.color);
       dessus += et.s; y += blocs[i];
     });
     return svgDe("cm-large", Wd, H, alt, B, s + dessus + cen.s);
@@ -495,9 +497,9 @@
   /* carte = { centre: "Titre\nSous-titre" | [lignes], branches: [{ label, color?, items: [] }] } */
   function VRT_CM(carte) {
     var C = (Array.isArray(carte.centre) ? carte.centre : String(carte.centre || "").split("\n")).map(function (x) { return String(x).trim(); }).filter(Boolean);
-    var B = (carte.branches || []).filter(function (b) { return b && (b.items || []).length; }).map(function (b, i) {
+    var B = (carte.branches || []).filter(function (b) { return b && ((b.items || []).length || (carte.depuisSchema && b.label)); }).map(function (b, i) {
       return { label: String(b.label || "").trim(), color: /^#[0-9a-f]{6}$/i.test(b.color || "") ? b.color : COUL[i % COUL.length], items: b.items.map(function (x) { return String(x).replace(/\s+/g, " ").trim(); }).filter(Boolean) };
-    }).filter(function (b) { return b.items.length; });
+    }).filter(function (b) { return b.items.length || (carte.depuisSchema && b.label); });
     if (!B.length) return "";
     var alt = "Carte mentale : " + C.join(", ") + ". " + B.map(function (b) { return b.label + " : " + b.items.join(" ; "); }).join(". ");
     /* forme et style : imposés par la carte, sinon tirés du titre (stables d'une génération à l'autre et variés d'une carte à l'autre) */
@@ -543,6 +545,100 @@
     return VRT_CM({ centre: [nu(L.cle || L.titre)].concat(L.c ? [L.c] : []), branches: B.slice(0, 6), forme: forme });
   }
   VRT_CM.lecon = VRT_CM_LECON;
+  /* ════════ SCHÉMAS EN CARTES MENTALES (18/11/2026, « change en vraies cartes mentales esthétiques ») ════════
+     Les schémas des leçons (p.illus.svg, générés hors dépôt : titre, cadres, titres en gras, listes à puces, notes,
+     flèches) sont relus dans le navigateur et redessinés en carte mentale. Un schéma non reconnu reste tel quel. */
+  function depuisSvg(src) {
+    if (typeof DOMParser === "undefined" || !src) return "";
+    try {
+      var doc = new DOMParser().parseFromString(src, "image/svg+xml"), root = doc.documentElement;
+      if (!root || root.nodeName.toLowerCase() !== "svg" || doc.getElementsByTagName("parsererror").length) return "";
+      var vb = (root.getAttribute("viewBox") || "0 0 480 312").split(/[\s,]+/).map(Number), Wv = vb[2] || 480, Hv = vb[3] || 312;
+      function n(e, a) { return +(e.getAttribute(a) || 0); }
+      var boites = [].slice.call(root.getElementsByTagName("rect")).map(function (r) { return { x: n(r, "x"), y: n(r, "y"), w: n(r, "width"), h: n(r, "height"), t: [] }; })
+        .filter(function (r) { return r.w > 24 && r.h > 12 && r.w < Wv * .96; });
+      /* seulement les schémas en cadres : pas de courbe, de tracé, de quadrillage, d'ellipse ni de dessin */
+      var chemins = [].slice.call(root.getElementsByTagName("path")).map(function (e) { return e.getAttribute("d") || ""; });
+      if (chemins.some(function (d) { return /[CcQqAaSsTt]/.test(d) || (d.match(/[LlHhVv]/g) || []).length > 3; })) return "";
+      if (chemins.length > boites.length * 2 + 6) return "";
+      if (["ellipse", "polygon", "polyline", "image", "use"].some(function (t) { return root.getElementsByTagName(t).length; })) return "";
+      var grandsRonds = [].slice.call(root.getElementsByTagName("circle")).filter(function (c) { return n(c, "r") >= 18; }).length;
+      if ((root.getElementsByTagName("line").length > 4 && !grandsRonds) || root.getElementsByTagName("circle").length > 1) return "";
+      /* tableaux, échelles et grilles : leurs lignes et colonnes ont un sens, on les garde */
+      if (/^(Tableau|Table |Échiquier|Échelle|Les \d+ premiers éléments|Comparaison entre)/i.test(root.getAttribute("aria-label") || "")) return "";
+      /* grille de pixels (≥ 6 petits carrés) ou tableau (≥ 6 lignes de même taille empilées dans une même colonne) */
+      var tous = [].slice.call(root.getElementsByTagName("rect")).map(function (r) { return { x: n(r, "x"), w: n(r, "width"), h: n(r, "height") }; });
+      if (tous.filter(function (b) { return b.w < 24 && b.h < 24 && b.w > 0; }).length >= 6) return "";
+      var formats = {}; tous.filter(function (b) { return b.w >= 24 && b.w < Wv * .96; }).forEach(function (b) { var k = Math.round(b.x) + ":" + Math.round(b.w) + "x" + Math.round(b.h); formats[k] = (formats[k] || 0) + 1; });
+      if (Object.keys(formats).some(function (k) { return formats[k] >= 5; })) return "";
+      var ronds = [].slice.call(root.getElementsByTagName("circle")).map(function (c) { return { cx: n(c, "cx"), cy: n(c, "cy"), r: n(c, "r"), t: [] }; }).filter(function (c) { return c.r >= 18; });
+      var titre = "", libres = [], textes = [].slice.call(root.getElementsByTagName("text"));
+      if (textes.length < 4) return "";
+      textes.forEach(function (t) {
+        var x = n(t, "x"), y = n(t, "y"), fs = +(t.getAttribute("font-size") || 10), g = /600|700|800|900|bold/.test(t.getAttribute("font-weight") || ""), an = t.getAttribute("text-anchor") || "start", lignes = [];
+        var propre = ""; [].slice.call(t.childNodes).forEach(function (c) { if (c.nodeType === 3) propre += c.nodeValue; });
+        var brutes = []; if (propre.trim()) brutes.push(propre.trim());
+        [].slice.call(t.getElementsByTagName("tspan")).forEach(function (s) { var v = (s.textContent || "").trim(); if (v) brutes.push(v); });
+        /* une ligne coupée continue la précédente ; seule une puce (•, –) ouvre un nouvel élément */
+        brutes.forEach(function (v, k) { if (k && !/^[•·–\-]\s/.test(v)) lignes[lignes.length - 1] += " " + v; else lignes.push(v); });
+        if (!lignes.length || fs < 7.6 || /^Schéma VÉRITAS$/.test(lignes[0])) return;
+        var lg = Math.max.apply(null, brutes.map(function (l) { return l.length; })) * fs * .5, cx = an === "middle" ? x : an === "end" ? x - lg / 2 : x + lg / 2;
+        var T = { x: cx, y: y, g: g, fs: fs, l: lignes, br: brutes, lmax: Math.max.apply(null, brutes.map(function (v) { return v.length; })) };
+        if (!titre && y < 28 && g) { titre = lignes.join(" "); return; }
+        if (/^[\d\s,.\-−+%°]+$/.test(lignes.join(" "))) return;
+        var rd = ronds.filter(function (c) { return Math.hypot(cx - c.cx, y - 3 - c.cy) < c.r; })[0];
+        if (rd) { rd.t.push(T); return; }
+        var dans = boites.filter(function (b) { return cx >= b.x - 2 && cx <= b.x + b.w + 2 && y - 3 >= b.y && y - 3 <= b.y + b.h; }).sort(function (a, b) { return a.w * a.h - b.w * b.h; })[0];
+        if (dans) dans.t.push(T); else libres.push(T);
+      });
+      var net = function (s) { return String(s).replace(/^[•·\-–]\s*/, "").replace(/\s+/g, " ").trim(); };
+      var B = [];
+      boites.filter(function (b) { return b.t.length; }).forEach(function (b) {
+        b.t.sort(function (p, q) { return p.y - q.y; });
+        var tout = [].concat.apply([], b.t.map(function (t) { return t.l.map(function (l) { return { v: l, g: t.g }; }); })), label, items;
+        if (b.t.length === 1 && b.t[0].g) { label = net(b.t[0].br.join(" ")); items = []; }
+        else if (b.t.length === 1 && b.t[0].br.length >= 2 && !/^[•·–\-]/.test(b.t[0].br[1])) {
+          /* texte normal sur plusieurs lignes : une ligne terminée par « : » appelle la suivante */
+          var L2 = []; b.t[0].br.forEach(function (v) { if (L2.length && /:\s*$/.test(L2[L2.length - 1])) L2[L2.length - 1] += " " + v; else L2.push(v); });
+          var m0 = L2[0].match(/^(.{3,40}?)\s*:\s*(.+)$/);
+          if (m0) { label = net(m0[1]); items = [net(m0[2])].concat(L2.slice(1).map(net)); } else { label = net(L2[0]); items = L2.slice(1).map(net); }
+        }
+        else if (tout.length === 1) { label = net(tout[0].v); items = []; }
+        else if (b.t[0].g || b.t.length > 1) { label = net(b.t[0].l.join(" ")); items = [].concat.apply([], b.t.slice(1).map(function (t) { return t.l; })).map(net); }
+        else { label = net(tout[0].v); items = tout.slice(1).map(function (o) { return net(o.v); }); }
+        B.push({ label: label, items: items, x: b.x + b.w / 2, y: b.y, bas: b.y + b.h, b: b });
+      });
+      /* textes libres sous un cadre : ses explications ; les autres : à retenir */
+      var notes = [];
+      libres.sort(function (p, q) { return p.y - q.y; }).forEach(function (t) {
+        var lt = t.lmax * t.fs * .5;
+        var br = B.filter(function (o) { return o.b && t.y > o.bas && t.y - o.bas < 64 && Math.abs(t.x - o.x) < o.b.w * .35 + 6 && lt < o.b.w * 1.4; }).sort(function (p, q) { return (t.y - p.bas) - (t.y - q.bas); })[0];
+        if (br) br.items = br.items.concat(t.l.map(net)); else notes.push(t.l.map(net).join(" "));
+      });
+      B.forEach(function (o) {
+        if (o.items.length) return;
+        var m = o.label.match(/^(.{3,40}?)\s*:\s*(.{3,})$/), p = o.label.match(/^(.{2,40}?)\s*\(([^)]{2,40})\)$/);
+        if (m) { o.label = m[1]; o.items = [m[2]]; } else if (p) { o.label = p[1]; o.items = [p[2]]; }
+      });
+      if (notes.length) B.push({ label: "À retenir", items: notes });
+      if (B.length < 2) return "";
+      var C = [titre || (ronds[0] && ronds[0].t.length ? [].concat.apply([], ronds[0].t.map(function (t) { return t.l; })).join(" ") : "Schéma")];
+      /* forme : une suite de cadres alignés reliés par des flèches → flux ; un rond central → radiale */
+      var avecB = B.filter(function (o) { return o.b; }), lig = [];
+      avecB.forEach(function (o) { var g = avecB.filter(function (q) { return Math.abs(q.y - o.y) < 8; }); if (g.length > lig.length) lig = g; });
+      lig.sort(function (p, q) { return p.x - q.x; });
+      var segs = [].slice.call(root.getElementsByTagName("path")).map(function (e) { var m = (e.getAttribute("d") || "").match(/^M\s*([\d.]+)[\s,]+([\d.]+)\s*L\s*([\d.]+)[\s,]+([\d.]+)/); return m ? m.slice(1).map(Number) : null; }).filter(Boolean);
+      var liens = 0;
+      for (var q = 0; q + 1 < lig.length; q++) { var A = lig[q].b, Bq = lig[q + 1].b; if (segs.some(function (g) { return Math.abs(g[1] - g[3]) < 4 && g[0] >= A.x + A.w - 12 && g[2] <= Bq.x + 12; })) liens++; }
+      var memeLigne = lig.length >= 3 && liens >= Math.ceil((lig.length - 1) / 2);
+      var fleches = root.getElementsByTagName("path").length >= lig.length - 1, forme = memeLigne && fleches ? "flux" : ronds.length ? "radiale" : null;
+      if (memeLigne) B = lig.sort(function (p, q) { return p.x - q.x; }).concat(B.filter(function (o) { return lig.indexOf(o) < 0; }));
+      if (typeof document !== "undefined" && !document.getElementById("cmCss")) { var st = document.createElement("style"); st.id = "cmCss"; st.textContent = VRT_CM.css; document.head.appendChild(st); }
+      return VRT_CM({ centre: C, branches: B.map(function (o) { return { label: o.label, items: o.items }; }), forme: forme, depuisSchema: true });
+    } catch (e) { return ""; }
+  }
+  VRT_CM.depuisSvg = depuisSvg;
+
   VRT_CM.css = ".cm{margin:6px 0}.cm svg{display:block;width:100%;height:auto;border-radius:18px}.cm .cm-etroit{display:none}" +
     "@media (max-width:640px){.cm .cm-large{display:none}.cm .cm-etroit{display:block}}" +
     "@media (prefers-reduced-motion:no-preference){.cm .cm-t,.cm .cm-l{stroke-dasharray:1200;stroke-dashoffset:1200;animation:cmTrace 1.2s ease-out forwards}" +

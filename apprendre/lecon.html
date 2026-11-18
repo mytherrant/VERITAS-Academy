@@ -12,7 +12,7 @@
 <link rel="stylesheet" href="jeu.css?v=20261112v">
 <link rel="stylesheet" href="planches.css?v=20261116b">
 <link rel="stylesheet" href="lecon-modele.css?v=20261118u">
-<link rel="stylesheet" href="modele.css?v=20261118u">
+<link rel="stylesheet" href="modele.css?v=20261118v">
 <style>
 /* ── Vue Enseignant, français : évaluer la leçon dans l'Atelier (10/11/2026) ── */
 .atelier-prof{display:none}
@@ -52,7 +52,7 @@
 <script src="/api/apprendre_config.php"></script>
 <script src="scenes.js?v=20261112a"></script>
 <script src="progressions.js?v=20261110g"></script>
-<script src="lecons.js?v=20261118e1"></script>
+<script src="lecons.js?v=20261118e2"></script>
 <script src="ressources.js?v=20261117a"></script>
 <script src="atelier.js?v=20261110a"></script>
 <script src="charge.js?v=31ea7845"></script>
@@ -60,7 +60,7 @@
 <script src="jeu.js?v=20261110g"></script>
 <script src="labo.js?v=20261111c"></script>
 <script src="planche3d.js?v=20261116e"></script>
-<script src="verrou.js?v=20261116a"></script>
+<script src="verrou.js?v=20261118cm"></script>
 <script src="tuteur.js?v=20261113b"></script>
 <script>
 (function(){
@@ -112,7 +112,7 @@
     return '<div class="partie" id="p'+(k+1)+'"><h2><span class="num">'+(k+1)+'</span><span class="txt">'+esc(p.t)+'</span></h2>'+p.html+
       (p.planches?p.planches.map(function(pl,i){return planche(pl,k,i)}).join(""):'')+
       (p.fil?'<aside class="fil" data-fil="'+(++kFil)+'"><div class="fil-t"><span class="fil-n">Indice '+kFil+' / '+nFil+'</span>Retour à la situation</div>'+filHtml(p.fil)+'</aside>':'')+
-      (p.illus?'<figure class="illus">'+p.illus.svg+'<figcaption>'+esc(p.illus.legende||"")+'</figcaption></figure>':'')+
+      (p.illus?'<figure class="illus">'+((window.VRT_CM&&VRT_CM.depuisSvg&&VRT_CM.depuisSvg(p.illus.svg))||p.illus.svg)+'<figcaption>'+esc(p.illus.legende||"")+'</figcaption></figure>':'')+
       (p.labo?'<div class="anim"><div class="anim-t"><span class="anim-p" aria-hidden="true">'+A.pic("lecture",14)+'</span>Activité d\'apprentissage : à toi de manipuler</div><div class="anim-c" data-labo="'+k+'"></div></div>':'')+(p.anim?'<div class="anim"><div class="anim-t"><span class="anim-p" aria-hidden="true">'+A.pic("lecture",14)+'</span>'+esc(p.animT||"À toi de manipuler")+'</div><div class="anim-c" data-anim="'+k+'"></div></div>':'')+
       (p.retenir?'<p class="retenir">'+p.retenir+'</p>':'')+'</div>';
   }).join("");
