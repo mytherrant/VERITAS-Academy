@@ -13301,6 +13301,81 @@ VRT_PLUS("3e-en-articles", [
     }
   });
 
+
+  /* ─────────────── Lot 3 : 2nde, 3e, Tle ─────────────── */
+  enrichir("3e-maths-thales", {
+    formules: [
+      F("Vérifier la configuration", "P ∈ [EA], B ∈ [ES] et (PB) // (AS)", "manche et mât verticaux, donc parallèles"),
+      F("Écrire l'égalité de Thalès", "EP / EA = EB / ES = PB / AS", "0,8 / 6,4 = 1,2 / AS"),
+      F("Calculer la longueur inaccessible (produit en croix)", "AS = EA × PB ÷ EP", "AS = 6,4 × 1,2 ÷ 0,8 = 9,6 m"),
+      F("Calculer la corde", "corde = 2 × hauteur + marge pour les nœuds", "2 × 9,6 + 1 = 20,2 m : acheter 21 m")
+    ]
+  });
+
+  enrichir("tle-maths-binaire", {
+    formules: [
+      F("Donner la valeur de chaque ampoule", "le rang k (en partant de 0, à droite) vaut 2ᵏ", "128, 64, 32, 16, 8, 4, 2, 1"),
+      F("Convertir 45 en base 2 (divisions successives par 2)", "on lit les restes de bas en haut", "45 = 2 × 22 + 1 ; 22 = 2 × 11 + 0 ; 11 = 2 × 5 + 1 ; 5 = 2 × 2 + 1 ; 2 = 2 × 1 + 0 ; 1 = 2 × 0 + 1 → 101101₂"),
+      F("Vérifier la conversion", "N = Σ bₖ × 2ᵏ", "32 + 8 + 4 + 1 = 45 ✓"),
+      F("Calculer la capacité de n ampoules", "2ⁿ combinaisons, de 0 à 2ⁿ − 1", "8 ampoules : 0 à 255 ; 300 > 255 → 9 ampoules (jusqu'à 511)")
+    ],
+    ajouts: {
+      0: def("Définition", "En <strong>base 2</strong>, un nombre s'écrit avec les seuls chiffres 0 et 1 (les <strong>bits</strong>) : N = bₙ × 2ⁿ + … + b₁ × 2 + b₀. Un <strong>octet</strong> est un groupe de 8 bits.") +
+        formule("N = bₙ × 2ⁿ + bₙ₋₁ × 2ⁿ⁻¹ + … + b₁ × 2¹ + b₀ × 2⁰, avec bₖ ∈ {0 ; 1}")
+    }
+  });
+
+  enrichir("tle-svt-osmose", {
+    formules: [
+      F("Prévoir le sens du mouvement de l'eau", "l'eau va du milieu le moins concentré (hypotonique) vers le plus concentré (hypertonique)", "eau distillée (≈ 0 g/L) → globule rouge (≈ 9 g/L) : l'eau entre"),
+      F("Comparer au plasma", "isotonique : même concentration de part et d'autre, pas de flux net", "sérum physiologique à 9 g/L de NaCl, comme le plasma"),
+      F("Calculer la concentration molaire du sérum", "C = Cm ÷ M", "C = 9 g/L ÷ 58,5 g/mol ≈ 0,15 mol/L de NaCl"),
+      F("Lire l'expérience des frites", "concentration interne ≈ concentration où la masse ne varie pas", "les frites ne changent pas de masse vers 0,28 mol/L : c'est la concentration de leurs cellules")
+    ],
+    ajouts: {
+      0: def("Définition", "L'<strong>osmose</strong> est le passage de l'eau à travers une membrane semi-perméable, du milieu le moins concentré en solutés vers le milieu le plus concentré. Un milieu est <strong>hypotonique</strong> s'il est moins concentré que la cellule, <strong>hypertonique</strong> s'il l'est plus, <strong>isotonique</strong> s'il a la même concentration."),
+      1: ex("Exemple", "Des globules rouges dans de l'eau salée à 20 g/L (hypertonique) perdent de l'eau et se ratatinent (crénelure) ; dans l'eau distillée, ils gonflent et éclatent (hémolyse)."),
+      2: ex("Exemple au quotidien", "On sale les aubergines avant de les frire : le sel (hypertonique) fait sortir leur eau, elles ramollissent et boivent moins d'huile. Des feuilles de laitue fanées redeviennent croquantes dans l'eau fraîche (turgescence).")
+    }
+  });
+
+  enrichir("2nde-c-maths-reels", {
+    formules: [
+      F("Rendre la fraction irréductible", "diviser numérateur et dénominateur par leur PGCD", "5/8 et 5/6 sont déjà irréductibles"),
+      F("Tester si c'est un décimal", "a/b irréductible est décimal ⇔ b ne contient que les facteurs 2 et 5", "8 = 2³ → 5/8 = 0,625 ∈ 𝔻 ; 6 = 2 × 3 → 5/6 ∉ 𝔻"),
+      F("Calculer la diagonale (Pythagore)", "d² = c² + c²", "d² = 1² + 1² = 2, donc d = √2 hm"),
+      F("Classer √2", "√2 n'est le quotient d'aucun couple d'entiers : irrationnel", "√2 ∈ ℝ \\ ℚ ; √2 ≈ 1,414 hm ≈ 141 m")
+    ],
+    planches: {
+      1: [pl2("Les ensembles emboîtés", "Chaque ensemble contient le précédent : ℕ ⊂ ℤ ⊂ 𝔻 ⊂ ℚ ⊂ ℝ. On y range les nombres de la situation.", 640, 260, "Cinq ensembles emboîtés N, Z, D, Q, R avec des exemples de nombres",
+        [["ℝ", 620, 240, "#F4F1FB", "#7B2CBF"], ["ℚ", 500, 200, "#EEF4FC", BLEU], ["𝔻", 380, 160, "#ECF7F0", VERT], ["ℤ", 260, 120, "#FFF6E3", "#C2540A"], ["ℕ", 140, 80, "#FCE8EC", ROUGE]].map(function (e, k) { return "<rect x='" + (10 + k * 24) + "' y='" + (10 + k * 22) + "' width='" + e[1] + "' height='" + e[2] + "' rx='16' fill='" + e[3] + "' stroke='" + e[4] + "' stroke-width='2'/>" + txt(26 + k * 24, 34 + k * 22, e[0], { s: 16, c: e[4], a: "start" }); }).join("") +
+        txt(176, 150, "3", { s: 16 }) + txt(294, 150, "−2", { s: 16, c: "#C2540A" }) + txt(390, 142, "5/8", { s: 15, c: VERT }) + txt(390, 162, "= 0,625", { s: 12, c: VERT }) + txt(486, 142, "5/6", { s: 15, c: BLEU }) + txt(486, 162, "= 0,833…", { s: 12, c: BLEU }) + txt(582, 152, "√2", { s: 17, c: "#7B2CBF" }))]
+    }
+  });
+
+  enrichir("2nde-a-maths-reels", {
+    formules: [
+      F("Classer le solde", "entier négatif ⇒ ℤ (donc aussi 𝔻, ℚ, ℝ)", "−3 000 ∈ ℤ"),
+      F("Calculer la part de chacune", "part = total ÷ nombre de personnes", "100 000 ÷ 6 = 50 000/3"),
+      F("Tester si c'est un décimal", "dénominateur irréductible fait seulement de 2 et de 5 ⇔ décimal", "3 n'est ni 2 ni 5 : 50 000/3 = 16 666,666… ∉ 𝔻"),
+      F("Payer justement (division euclidienne)", "100 000 = 6 × 16 666 + 4", "16 666 F chacune, 4 F restent dans la caisse"),
+      F("Calculer la diagonale", "d = √(c² + c²) = c√2", "d = √2 m ≈ 1,41 m, irrationnel")
+    ],
+    planches: {
+      1: [pl2("Décimal ou pas ? La règle des dénominateurs", "On rend la fraction irréductible, puis on décompose le dénominateur : seulement des 2 et des 5 → décimal.", 640, 220, "Trois fractions testées par la décomposition de leur dénominateur",
+        [["7/20", "20 = 2² × 5", "0,35 ∈ 𝔻", VERT], ["3/8", "8 = 2³", "0,375 ∈ 𝔻", VERT], ["50 000/3", "3 = 3", "16 666,6… ∉ 𝔻", ROUGE]].map(function (r, k) { var x = 20 + k * 210; return "<rect x='" + x + "' y='30' width='190' height='160' rx='14' fill='#fff' stroke='" + r[3] + "' stroke-width='2'/>" + txt(x + 95, 72, r[0], { s: 22 }) + txt(x + 95, 116, r[1], { s: 14, c: GRIS }) + txt(x + 95, 160, r[2], { s: 15, c: r[3] }); }).join(""))]
+    }
+  });
+
+  enrichir("2nde-c-chimie-rutherford", {
+    formules: [
+      F("Compter les couches traversées", "nombre de couches = épaisseur de la feuille ÷ diamètre d'un atome", "≈ 0,3 µm ÷ 0,3 nm ≈ 1 000 couches d'atomes d'or"),
+      F("Interpréter les rebonds", "proportion de rebonds ≈ 1 sur 10 000", "presque tout l'atome est vide ; la masse et la charge + sont concentrées dans le noyau"),
+      F("Comparer les tailles", "rayon de l'atome ÷ rayon du noyau ≈ 10⁻¹⁰ m ÷ 10⁻¹⁵ m", "≈ 100 000 : un noyau d'1 cm dans un atome d'1 km"),
+      F("Lire la notation du noyau", "ᴬ_Z X : Z protons, N = A − Z neutrons", "¹⁹⁷₇₉Au : 79 protons, 197 − 79 = 118 neutrons")
+    ]
+  });
+
   /* ─────────────── 2nde C Physique (formules déjà complètes) ─────────────── */
 })();
 
