@@ -337,6 +337,6 @@
     vacuole: ["Vacuole (cellule végétale)", "Grande poche d'eau et de substances dissoutes : réserve, et turgescence qui maintient la plante droite."],
     chloroplaste: ["Chloroplaste (cellule végétale)", "Siège de la photosynthèse : ses thylakoïdes, empilés en grana, captent la lumière ; il stocke l'amidon."]
   };
-  window.VRT_CELLULES = { DEFC: DEFC, animale: celluleAnimale, vegetale: celluleVegetale, ORG: ORG };
+  window.VRT_CELLULES = { DEFC: DEFC, animale: celluleAnimale, vegetale: celluleVegetale, ORG: ORG, chromosome: chromosome, LONG: LONG, CENT: CENT };
 
 })();
