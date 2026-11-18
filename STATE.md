@@ -1,3 +1,14 @@
+## Apprendre : révision des leçons approfondies, lot 19 (18/11/2026)
+
+Demande de Jacques : « Oui » (mettre les premières leçons au niveau des derniers lots). Audit automatique des 91 leçons (planche 3D, planche 2D ou schéma, simulation ou labo, quiz de 10, indices) : 8 leçons en dessous du niveau.
+
+- **`apprendre/_src/27-revision-approfondies.js`** : fonction `completer(id, [[partie, planches]], questions)` qui AJOUTE des planches et des questions (sans doublon, quiz plafonné à 10) ; rien n'est retiré.
+  - **2nde A dénombrement** : r26 (Venn) : classe rangée en 3D sur quatre tapis (7 / 13 / 11 / 17) + **simulation** Venn réglable avec contrôle de cohérence ; r27 (arbres) : 12 mannequins 3D (ndop, kaba, wax ; robe / ensemble ; coiffe) + **simulation** arbre de choix réglable ; r28 (kermesse) : **tableau de bord** Venn + plateaux / tickets ; quiz des trois portés de 8 à 10.
+  - **3e Kamerun** : **exercice** de frise (1884 traité ; 1891 Kuva Likenye à Buea ; 1899-1901 révolte bulu ; 1910-1914 plateau Joss ; août 1914 Duala Manga Bell, Ngoso Din, Samba ; 1916 Mora).
+  - **3e mangrove** : **modèle simplifié** coupe de la mangrove → crevettes, inondation, bois (indices / 100, présentés comme tels), option foyers améliorés et reboisement.
+  - **Tle bac** : journée équilibrée de 24 h (2D) ; **6e piste** : relais et zone de transmission de 30 m (2D) ; **2nde C production** : nature, travail, capital (2D).
+- `lecons.js?v=20261118r19` (master était passé à `m6f` avec la PR #366 de l'autre session) ; 8 pages `apprendre/cours/` régénérées. Chromium (1200 et 390 px) : aucun débordement, aucune erreur JS. Contrôles GEO et bancs au vert. L'audit ne signale plus aucune leçon en dessous du niveau.
+
 ## Apprendre : lot 18, 6e — toutes les leçons gratuites au gabarit approfondi (18/11/2026)
 
 Demande de Jacques : « Continue ». L'autre session crée de NOUVELLES leçons de maths de 6e (`16c-approfondies-6e-maths.js` : cercle, proportionnalité, pavé droit) ; aucun recouvrement (coordination confirmée par message).
