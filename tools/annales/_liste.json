@@ -84,6 +84,20 @@
   "u": "/ressources/annales/bepc-expression-ecrite-2024.html"
  },
  {
+  "id": "bac-litterature-cdeti-2025",
+  "examen": "bac",
+  "m": "litterature",
+  "serie": "séries C, D, E et TI",
+  "nomExamen": "Baccalauréat",
+  "fiche": "ressources/bac-francais.html",
+  "matiere": "Littérature (séries C, D, E et TI)",
+  "mat": "francais",
+  "classes": "Tle C,Tle D",
+  "annee": 2025,
+  "national": true,
+  "u": "/ressources/annales/bac-litterature-cdeti-2025.html"
+ },
+ {
   "id": "probatoire-langue-francaise-aabi-2025",
   "examen": "probatoire",
   "m": "langue-francaise",
@@ -96,6 +110,20 @@
   "annee": 2025,
   "national": true,
   "u": "/ressources/annales/probatoire-langue-francaise-aabi-2025.html"
+ },
+ {
+  "id": "bac-langue-francaise-cdeti-2025",
+  "examen": "bac",
+  "m": "langue-francaise",
+  "serie": "séries C, D, E et TI",
+  "nomExamen": "Baccalauréat",
+  "fiche": "ressources/bac-francais.html",
+  "matiere": "Langue française (séries C, D, E et TI)",
+  "mat": "francais",
+  "classes": "Tle C,Tle D",
+  "annee": 2025,
+  "national": true,
+  "u": "/ressources/annales/bac-langue-francaise-cdeti-2025.html"
  },
  {
   "id": "probatoire-langue-francaise-cdeti-2025",
@@ -560,6 +588,34 @@
   "u": "/ressources/annales/bepc-geographie-2026.html"
  },
  {
+  "id": "bac-geographie-aabi-2025",
+  "examen": "bac",
+  "m": "geographie",
+  "serie": "séries A et ABI",
+  "nomExamen": "Baccalauréat",
+  "fiche": "ressources/examen-histoire-geographie-bac.html",
+  "matiere": "Géographie (séries A et ABI)",
+  "mat": "geo",
+  "classes": "Tle A",
+  "annee": 2025,
+  "national": true,
+  "u": "/ressources/annales/bac-geographie-aabi-2025.html"
+ },
+ {
+  "id": "bac-geographie-cdti-2025",
+  "examen": "bac",
+  "m": "geographie",
+  "serie": "séries C, D et TI",
+  "nomExamen": "Baccalauréat",
+  "fiche": "ressources/examen-histoire-geographie-bac.html",
+  "matiere": "Géographie (séries C, D et TI)",
+  "mat": "geo",
+  "classes": "Tle C,Tle D",
+  "annee": 2025,
+  "national": true,
+  "u": "/ressources/annales/bac-geographie-cdti-2025.html"
+ },
+ {
   "id": "bepc-ecm-2026",
   "examen": "bepc",
   "m": "ecm",
@@ -642,6 +698,20 @@
   "annee": 2025,
   "national": true,
   "u": "/ressources/annales/probatoire-philosophie-aabi-2025.html"
+ },
+ {
+  "id": "bac-philosophie-cdeti-2025",
+  "examen": "bac",
+  "m": "philosophie",
+  "serie": "séries C, D, E et TI",
+  "nomExamen": "Baccalauréat",
+  "fiche": "ressources/examen-philosophie-bac.html",
+  "matiere": "Philosophie (séries C, D, E et TI)",
+  "mat": "philo",
+  "classes": "Tle C,Tle D",
+  "annee": 2025,
+  "national": true,
+  "u": "/ressources/annales/bac-philosophie-cdeti-2025.html"
  },
  {
   "id": "probatoire-philosophie-cdeti-2025",

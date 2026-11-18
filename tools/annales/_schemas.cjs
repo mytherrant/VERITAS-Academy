@@ -871,4 +871,32 @@ S["bac-2025-maths-a-courbe"] = () => {
   g += T([X(4.4), Y(2.1)], "(C)", ' font-size="12" font-style="italic"');
   return svg(R.W, R.H, g, "Courbe (C) de f(x) = 1/x + ln x : elle descend depuis +∞ le long de l'axe des ordonnées (asymptote verticale x = 0), atteint son minimum 1 en x = 1 avec une tangente horizontale, puis croît lentement vers +∞ ; points placés : (0,25 ; 2,6), (0,5 ; 1,3), (2 ; 1,2), (3 ; 1,4).");
 };
+// Géographie C-D-TI 2025 (BAC), document 2 : part de l'Afrique dans le commerce mondial de marchandises (en %), source OMC.
+S["bac-2025-geo-cdti-afrique"] = () => {
+  const x0 = 46, y0 = 276, u = 24, fs = ' font-size="12"';
+  let g = L([x0, y0], [x0, y0 - 8.4 * u]) + fleche([x0, y0 - 8.4 * u - 6], [x0, y0 - 8.4 * u], 6) + L([x0, y0], [x0 + 300, y0]);
+  for (let k = 0; k <= 8; k++) g += L([x0 - 4, y0 - k * u], [x0, y0 - k * u], ' stroke-width="1"') + T([x0 - 16, y0 - k * u + 4], String(k), ' font-size="11"');
+  g += T([x0 + 10, y0 - 8.4 * u + 4], "En %", fs);
+  [["1953", 6.5], ["1973", 4.8], ["1993", 2.5], ["2013", 3.3]].forEach(([a, v], i) => {
+    const x = x0 + 22 + i * 70;
+    g += '<rect x="' + x + '" y="' + f(y0 - v * u) + '" width="40" height="' + f(v * u) + '" fill="currentColor" fill-opacity="0.18"/>';
+    g += T([x + 20, y0 - v * u - 6], String(v).replace(".", ",") + " %", fs + ' text-anchor="middle"') + T([x + 20, y0 + 16], a, fs + ' text-anchor="middle"');
+  });
+  g += T([180, 16], "Part de l'Afrique dans le commerce", ' font-size="12" font-weight="700" text-anchor="middle"') + T([180, 32], "mondial de marchandises", ' font-size="12" font-weight="700" text-anchor="middle"');
+  return svg(360, 300, g, "Histogramme : part de l'Afrique dans le commerce mondial de marchandises, en pourcentage : 6,5 % en 1953, 4,8 % en 1973, 2,5 % en 1993, 3,3 % en 2013 (source : OMC).");
+};
+// Corrigé : diagramme en bâtons des densités (échelle 1 cm pour 10 hab./km²).
+S["bac-2025-geo-cdti-densites"] = () => {
+  const x0 = 56, y0 = 330, u = 2.1, fs = ' font-size="12"';
+  let g = L([x0, y0], [x0, y0 - 145 * u]) + fleche([x0, y0 - 145 * u - 6], [x0, y0 - 145 * u], 6) + L([x0, y0], [x0 + 330, y0]) + fleche([x0 + 336, y0], [x0 + 326, y0], 6);
+  for (let k = 0; k <= 120; k += 20) g += L([x0 - 4, y0 - k * u], [x0, y0 - k * u], ' stroke-width="1"') + T([x0 - 8, y0 - k * u + 4], String(k), ' font-size="11" text-anchor="end"');
+  g += T([x0 + 10, y0 - 145 * u + 4], "Densité (hab./km²)", fs);
+  [["Littoral", 124], ["Nord-Ouest", 99.9], ["Centre", 44.8], ["Nord", 26]].forEach(([r, v], i) => {
+    const x = x0 + 30 + i * 76;
+    g += '<rect x="' + x + '" y="' + f(y0 - v * u) + '" width="34" height="' + f(v * u) + '" fill="currentColor" fill-opacity="0.18"/>';
+    g += T([x + 17, y0 - v * u - 6], String(v).replace(".", ","), fs + ' text-anchor="middle"') + T([x + 17, y0 + 16], r, fs + ' text-anchor="middle"');
+  });
+  g += T([x0 + 330, y0 + 32], "Régions", fs + ' text-anchor="end"');
+  return svg(400, 370, g, "Diagramme en bâtons des densités de population : Littoral 124, Nord-Ouest 99,9, Centre 44,8 et Nord 26 habitants au km² ; à l'échelle 1 cm pour 10 hab./km², les bâtons mesurent 12,4 cm, 9,99 cm, 4,48 cm et 2,6 cm.");
+};
 module.exports = S;
