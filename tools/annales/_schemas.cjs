@@ -1056,4 +1056,41 @@ S["proba-2024-svt-d-enzyme"] = () => {
   g += T([X(0) + 6, Y(38)], "Vitesse (unités relatives)", fs) + T([X(8.6), Y(0) + 30], "[lactose] (u.a.)", fs);
   return svg(X(13.4) + 6, Y(0) + 38, g, "Courbe de la vitesse de la réaction en fonction de la concentration en substrat : la vitesse croît presque proportionnellement jusqu'à la concentration 6 (30 unités), puis atteint un plateau à 32 unités à partir de la concentration 7.");
 };
+// Probatoire 2024 SVT C-TI : vitesse des ondes P et S en fonction de la profondeur (document du sujet, mêmes valeurs lues sur le scan).
+function sismique() {
+  const x0 = 60, y0 = 250, ux = 0.075, uy = 16, X = d => x0 + d * ux, Y = v => y0 - v * uy, fs = ' font-size="11"';
+  let g = L([X(0), Y(0)], [X(6450), Y(0)], ' stroke-width="1.2"') + L([X(0), Y(0)], [X(0), Y(15)], ' stroke-width="1.2"') + fleche([X(0), Y(15.6)], [X(0), Y(15)], 6) + L([X(6371), Y(0)], [X(6371), Y(15)], ' stroke-width="1.2"') + fleche([X(6371), Y(15.6)], [X(6371), Y(15)], 6);
+  for (let v = 2; v <= 14; v += 2) g += L([X(0) - 4, Y(v)], [X(0), Y(v)], ' stroke-width="1"') + T([X(0) - 20, Y(v) + 4], String(v), fs) + L([X(6371), Y(v)], [X(6371) + 4, Y(v)], ' stroke-width="1"') + T([X(6371) + 8, Y(v) + 4], String(v), fs);
+  for (let d = 1000; d <= 6000; d += 1000) g += L([X(d), Y(0)], [X(d), Y(0) + 4], ' stroke-width="1"') + T([X(d) - 14, Y(0) + 16], (d / 1000) + " 000", fs);
+  g += T([X(6371) + 4, Y(0) + 16], "(km)", fs) + '<text transform="translate(18 ' + Y(5) + ') rotate(-90)" fill="currentColor" stroke="none" font-size="11">Vitesse sismique (km/s)</text>';
+  const P1 = [[0, 6], [15, 6.4], [30, 8.1], [70, 8.3], [100, 7.8], [150, 8.1], [220, 8.6], [400, 9.1], [450, 9.6], [600, 10.2], [670, 10.8], [1200, 11.4], [2000, 12.6], [2890, 13.7]];
+  const P2 = [[2890, 8.0], [3500, 9.0], [4200, 9.8], [5150, 10.3], [5150, 10.9], [5600, 11.1], [6000, 11.1], [6371, 11.3]];
+  const S1 = [[0, 3.4], [15, 3.7], [30, 4.6], [70, 4.7], [100, 4.3], [200, 4.5], [400, 5.0], [600, 5.6], [670, 6.0], [1200, 6.4], [2000, 6.9], [2890, 7.3]];
+  const S2 = [[5150, 0], [5150, 3.6], [6371, 3.6]];
+  const p = a => P(a.map(([d, v]) => [X(d), Y(v)]), ' stroke-width="1.8"');
+  g += p(P1) + L([X(2890), Y(13.7)], [X(2890), Y(8.0)], ' stroke-width="1.8"') + p(P2) + p(S1) + L([X(2890), Y(7.3)], [X(2890), Y(0)], ' stroke-width="1.8"') + p(S2);
+  g += T([X(1500), Y(12.4)], "P", ' font-size="12" font-weight="700"') + T([X(4100), Y(10.2)], "P", ' font-size="12" font-weight="700"') + T([X(1500), Y(7.0)], "S", ' font-size="12" font-weight="700"') + T([X(5700), Y(3.9)], "S", ' font-size="12" font-weight="700"');
+  return { g, X, Y, W: X(6371) + 40, H: Y(0) + 26 };
+}
+S["proba-2024-svt-c-sismique"] = () => {
+  const R = sismique();
+  return svg(R.W, R.H, R.g, "Vitesse des ondes sismiques P et S en fonction de la profondeur : les ondes P passent d'environ 6 à 13,7 km/s jusqu'à 2 900 km, chutent brusquement à 8 km/s, remontent à 10,3 km/s vers 5 150 km puis à 11 km/s ; les ondes S passent de 3,4 à 7,3 km/s jusqu'à 2 900 km, disparaissent entre 2 900 et 5 150 km, puis réapparaissent à 3,6 km/s jusqu'au centre (6 371 km). Une zone de ralentissement apparaît vers 100 km.");
+};
+// Corrigé : le graphe avec les discontinuités, et en dessous la coupe du globe (de la surface au centre).
+S["proba-2024-svt-c-coupe"] = () => {
+  const R = sismique(), { X, Y } = R, fs = ' font-size="11"', fb = ' font-size="11" font-weight="700"';
+  let g = R.g;
+  for (const [d, n] of [[30, "Moho"], [2890, "Gutenberg"], [5150, "Lehmann"]]) g += L([X(d), Y(15)], [X(d), Y(0) + 110], ' stroke-width="1" stroke-dasharray="4 3"') + T([X(d) + 3, Y(14.6)], n, fb);
+  const y1 = Y(0) + 46, y2 = y1 + 60;
+  g += '<rect x="' + X(0) + '" y="' + y1 + '" width="' + (X(6371) - X(0)) + '" height="60" stroke-width="1.4"/>';
+  g += '<rect x="' + X(0) + '" y="' + y1 + '" width="' + (X(30) - X(0) + 1) + '" height="60" fill="currentColor" stroke="none"/>';
+  g += '<rect x="' + X(100) + '" y="' + y1 + '" width="' + (X(250) - X(100)) + '" height="60" fill="currentColor" fill-opacity="0.12" stroke="none"/>';
+  g += '<rect x="' + X(2890) + '" y="' + y1 + '" width="' + (X(5150) - X(2890)) + '" height="60" fill="currentColor" fill-opacity="0.18" stroke="none"/>';
+  g += '<rect x="' + X(5150) + '" y="' + y1 + '" width="' + (X(6371) - X(5150)) + '" height="60" fill="currentColor" fill-opacity="0.35" stroke="none"/>';
+  for (const d of [670, 2890, 5150]) g += L([X(d), y1], [X(d), y2], ' stroke-width="1.4"');
+  g += L([X(15), y2], [X(15), y2 + 8], ' stroke-width="0.9"') + T([X(0), y2 + 20], "croûte", fs) + L([X(175), y2], [X(900), y2 + 8], ' stroke-width="0.9"') + T([X(900), y2 + 20], "LVZ (asthénosphère)", fs);
+  g += L([X(400), y1], [X(400), y1 - 6], ' stroke-width="0.9"') + T([X(150), y1 - 9], "manteau sup.", fs) + T([X(1050), y1 + 34], "manteau inférieur", fb) + T([X(3500), y1 + 26], "noyau externe", fb) + T([X(3500), y1 + 42], "(liquide)", fs) + T([X(5200), y1 + 26], "noyau", fb) + T([X(5200), y1 + 40], "interne", fb) + T([X(5200), y1 + 54], "(solide)", fs);
+  g += T([X(0), y2 + 36], "surface", fs) + T([X(6371) - 30, y2 + 36], "centre", fs);
+  return svg(R.W, y2 + 44, g, "Le graphe des vitesses sismiques et, en dessous, une coupe du globe de la surface au centre : croûte jusqu'au Moho (vers 30 km), manteau supérieur avec la zone de faible vitesse (LVZ, asthénosphère) vers 100 à 250 km, manteau inférieur jusqu'à la discontinuité de Gutenberg (2 900 km), noyau externe liquide jusqu'à la discontinuité de Lehmann (5 150 km), noyau interne solide jusqu'au centre (6 371 km).");
+};
 module.exports = S;

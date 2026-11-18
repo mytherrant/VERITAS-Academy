@@ -560,6 +560,20 @@
   "u": "/ressources/annales/probatoire-svt-cti-2025.html"
  },
  {
+  "id": "probatoire-svt-cti-2024",
+  "examen": "probatoire",
+  "m": "svt",
+  "serie": "séries C et TI",
+  "nomExamen": "Probatoire",
+  "fiche": "ressources/examen-svt-probatoire.html",
+  "matiere": "SVTEEHB (séries C et TI)",
+  "mat": "svt",
+  "classes": "1re C",
+  "annee": 2024,
+  "national": false,
+  "u": "/ressources/annales/probatoire-svt-cti-2024.html"
+ },
+ {
   "id": "bac-svt-d-2025",
   "examen": "bac",
   "m": "svt",
