@@ -1,3 +1,11 @@
+## Apprendre : réalisme, lot 21 — zoom HD de la cellule au gène (18/11/2026)
+
+Demande de Jacques : « Continue » (suite du lot 20).
+
+- **`apprendre/_src/92-animations-realisme.js`** : l'animation « Zoome de la cellule jusqu'au gène » (3e ADN, partie 4) est refaite en haute définition et remplace celle de `90-animations-sciences.js` : 1) cellule animale HD avec le noyau encadré ; 2) noyau en division et 46 chromosomes en X à bandes ; 3) un chromosome agrandi (chromatides, centromère, filament d'ADN qui se déroule) ; 4) double hélice d'ADN avec paires de bases colorées (A-T, G-C) et un gène encadré.
+- `28-realisme-premiers-lots.js` exporte aussi `chromosome`, `LONG`, `CENT` dans `window.VRT_CELLULES` pour cette animation.
+- `lecons.js?v=20261118r21`. Chromium : aucune erreur JS. Contrôles GEO et bancs au vert.
+
 ## Apprendre : réalisme des premiers lots, lot 20 (18/11/2026)
 
 Demandes de Jacques : « Oui améliore et rend les plus réalistes pertinentes », « Surtout les jours de semaine en orientation », « Même la structure HD de la cellule, cellule animale et végétale », « Continue ».
