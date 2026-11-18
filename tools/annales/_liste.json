@@ -434,6 +434,20 @@
   "u": "/ressources/annales/probatoire-physique-dti-2025.html"
  },
  {
+  "id": "probatoire-physique-dti-2024",
+  "examen": "probatoire",
+  "m": "physique",
+  "serie": "séries D et TI",
+  "nomExamen": "Probatoire",
+  "fiche": "ressources/examen-physique-chimie-probatoire.html",
+  "matiere": "Physique (séries D et TI)",
+  "mat": "physique",
+  "classes": "1re D",
+  "annee": 2024,
+  "national": false,
+  "u": "/ressources/annales/probatoire-physique-dti-2024.html"
+ },
+ {
   "id": "bac-chimie-cde-2025",
   "examen": "bac",
   "m": "chimie",

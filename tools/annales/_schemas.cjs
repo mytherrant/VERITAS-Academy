@@ -1003,4 +1003,15 @@ S["proba-2024-physique-ce-circuit"] = () => {
   g += L([144, 62], [144, 76], ' stroke-width="1"') + fleche([144, 80], [144, 72], 5) + T([150, 78], "I", ' font-size="12" font-style="italic"');
   return svg(280, 220, g, "Circuit électrique : entre les bornes A et B de l'alimentation sont branchés en série un ampèremètre, le moteur M et un résistor R.");
 };
+// Probatoire 2024 physique D-TI, partie II : le manège (figure du sujet).
+S["proba-2024-physique-dti-manege"] = () => {
+  const fs = ' font-size="12" font-weight="700"';
+  let g = L([10, 210], [180, 210], ' stroke-width="1.8"');
+  g += '<path d="M180 210 Q196 210 198 180 L204 60 Q210 20 222 20 Q234 20 240 60 L248 180 Q250 210 268 210 L380 210" stroke-width="1.8"/>';
+  g += L([216, 18], [380, 18], ' stroke-width="1.2"') + L([360, 22], [360, 206], ' stroke-width="1.1"') + fleche([360, 18], [360, 28], 7) + fleche([360, 210], [360, 200], 7) + T([368, 108], "h", ' font-size="14" font-weight="700"');
+  g += L([186, 170], [192, 72], ' stroke-width="1.1"') + fleche([192, 64], [191.5, 74], 6) + L([254, 74], [260, 172], ' stroke-width="1.1"') + fleche([260, 180], [259.5, 170], 6);
+  g += T([40, 204], "A", fs) + T([168, 204], "B", fs) + T([216, 12], "C", fs) + T([272, 204], "D", fs);
+  g += T([24, 226], "Départ", fs) + T([150, 230], "Propulsion", fs);
+  return svg(392, 240, g, "Le manège : la locomotive part de A, est propulsée sur la portion rectiligne horizontale AB, monte jusqu'au sommet C situé à la hauteur h au-dessus de la voie, puis redescend vers D.");
+};
 module.exports = S;
