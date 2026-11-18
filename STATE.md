@@ -1,3 +1,13 @@
+## Apprendre : audit et enrichissement des leçons, lettres et sciences humaines (18/11/2026)
+
+Demande de Jacques : « Audite et corrige partout », puis « Continue ». Grille de l'audit `tools/audit_lecons.cjs` (session des sciences, PR #370) : situation de départ, situation résolue avec étapes, au moins 2 formules ou définitions, 2 exemples, 2 astuces, 2 planches 2D, 1 planche 3D, 1 simulation, et la nouvelle rubrique `denouement.formules` (« Les formules utilisées, étape par étape »).
+
+- **Partage** avec la session des sciences (accepté par message) : à elle les maths, la physique, la chimie, les SVT, l'informatique et la technologie ; à cette session le français, les langues, l'histoire-géo, l'ECM, la philosophie, les arts, l'EPS, les cultures, l'orientation et l'ESF.
+- **`apprendre/_src/29` à `34-enrichies-*.js`** : 47 leçons enrichies par AJOUT (`enrichir(id, {blocs, planches, formules})`) : règles et structures encadrées (`def`, `formule`), exemples (`ex`), astuces (`astuce`, `attention`, `methode`), une planche 2D de plus (tableaux, schémas de décision, ordonnance, frise, bureau, budget…), et 3 étapes de formules appliquées à la situation de départ.
+- **`35-orientation-3d.js`** : bureau de révision d'Aïcha et escalier des moyennes de Kevin en 3D (ces leçons avaient perdu leur 3D au lot 20).
+- **Pièges** : (1) une planche doit être un OBJET `{type, titre, legende, svg}` ; une chaîne SVG brute poussée dans `planches` est comptée par l'audit mais n'est pas affichée (corrigé, contrôle ajouté : 0 planche invalide) ; (2) éviter les doublons : relire les titres des planches existantes avant d'ajouter (3 doublons retirés : prépositions, arbre de famille, corps humain).
+- Audit : **80 leçons, 80 complètes**. `lecons.js?v=20261118L35` ; 47 pages `apprendre/cours/` régénérées. Chromium (1200 et 390 px) : aucun débordement, aucune erreur JS. Contrôles GEO et bancs au vert.
+
 ## Apprendre : réalisme, lot 21 — zoom HD de la cellule au gène (18/11/2026)
 
 Demande de Jacques : « Continue » (suite du lot 20).
