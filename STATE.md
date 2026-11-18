@@ -6,7 +6,8 @@ Demande de Jacques : « pour toutes les fiches, enlève 2d, 3d ». `apprendre/le
 - Formules en fin de leçon : Pro et Élite (ou Starter) affichent maintenant toute leur liste d'avantages, encadrée.
 - Nouvelles puces : pastille ronde pleine avec coche blanche (compris), pastille grise avec croix (non compris), plus de texte barré.
 - Couleurs légères par service : Starter vert, Pro bleu, Élite violet, note de paiement verte, professeur orange, cahier jaune, enseignants turquoise, tuteur Ambassa violet clair.
-- commun.js?v=20261118p, modele.css?v=20261118p.
+- Objectifs de la leçon : interligne resserré.
+- commun.js?v=20261118p, modele.css?v=20261118q.
 
 ## Apprendre : premier cycle, lot 1 — divisibilité (6e), PGCD (5e), facteurs premiers (4e) (17/11/2026)
 

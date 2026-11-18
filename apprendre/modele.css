@@ -349,3 +349,8 @@ html body .offre-l.ol-ens{background:#EAF7F7!important;border-color:#B5DEDE!impo
 html body .offre-l.ol-ens>svg{background:linear-gradient(145deg,#2BA3A3,#127272)!important}
 html body .offre-l.ol-cahier>svg{background:linear-gradient(145deg,#E3B53C,#A87800)!important}
 html body section.tuteur{background:#F3F0FD!important;border:1.5px solid #D6CCF3!important}
+
+/* ── 18/11/2026 « réduis l'interligne dans l'objectif » ── */
+html body .carte ul.objectifs{gap:0!important;row-gap:0!important}
+html body .carte .objectifs li{margin:0!important;padding:2px 0 2px 30px!important;line-height:1.4!important}
+html body .carte .objectifs li::before{top:.5em!important}
