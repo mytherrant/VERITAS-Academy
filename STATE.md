@@ -16,6 +16,7 @@ Demandes de Jacques : « Continue », puis « continue ».
 - Avantages alignés à gauche (plus de mots étirés).
 - « Pour commencer » et « Situation de vie » : titre dans un petit cadre posé sur le bord de l'encadré, comme les notes.
 - « Ta tâche » (situation de vie et enquête) : plus d'encadré, pastille crayon + texte en italique. modele.css?v=20261118t.
+- Tableaux des fiches de méthode, annales et séquentielles (tools/methodes/_methode.css, 166 pages régénérées) : quadrillage fin comme dans la leçon de dénombrement, en-tête et première colonne bleu pâle en gras.
 
 ## Leçons : étiquettes de planche sans « 2D » ni « 3D » (17/11/2026)
 
