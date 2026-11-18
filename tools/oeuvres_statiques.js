@@ -406,6 +406,17 @@ for (const nom of fs.readdirSync(DOSSIER).filter(n => n.endsWith('.html') && n !
   }
 }
 
+/* Module de l'application (18/11/2026) : chunks/carte-mentale.js = copie EXACTE de apprendre/_src/00-carte-mentale.js,
+   chargée à la demande par app.js (_showLittCarte) pour dessiner la même carte mentale que les pages d'œuvres. */
+{
+  const src = fs.readFileSync(path.join(RACINE, 'apprendre', '_src', '00-carte-mentale.js'), 'utf8');
+  const dest = path.join(RACINE, 'chunks', 'carte-mentale.js');
+  const entete = '/* Fichier GÉNÉRÉ par tools/oeuvres_statiques.js depuis apprendre/_src/00-carte-mentale.js : ne pas éditer. */\n';
+  const voulu = entete + src;
+  const actuel = fs.existsSync(dest) ? fs.readFileSync(dest, 'utf8') : '';
+  if (actuel !== voulu) { changees++; if (!CONTROLE) fs.writeFileSync(dest, voulu); }
+}
+
 if (manquantes.length) {
   console.error('oeuvres_statiques : pages sans analyse rattachée :', manquantes.join(', '));
   process.exit(1);
