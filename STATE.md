@@ -31,6 +31,15 @@ Demande de Jacques : « Oui » (mettre les premières leçons au niveau des dern
   - **Tle bac** : journée équilibrée de 24 h (2D) ; **6e piste** : relais et zone de transmission de 30 m (2D) ; **2nde C production** : nature, travail, capital (2D).
 - `lecons.js?v=20261118r19` (master était passé à `m6f` avec la PR #366 de l'autre session) ; 8 pages `apprendre/cours/` régénérées. Chromium (1200 et 390 px) : aucun débordement, aucune erreur JS. Contrôles GEO et bancs au vert. L'audit ne signale plus aucune leçon en dessous du niveau.
 
+## 18/11/2026 — Consignes d'enrichissement de TOUTES les leçons (branche lecons-enrichies)
+Jacques : « Résoudre la situation-problème de départ en donnant des formules avec les étapes de la leçon ; illustrer par des exemples ; formules, détails précis, astuces ; planches animées en 2D et 3D. » (exemple cité : « Mesurer une grandeur et estimer l'erreur », 2nde C physique).
+- **Grille** (tools/audit_lecons.cjs) : situation de départ ; situation résolue (étapes + réponse) ; ≥ 2 formules/définitions (class formule|def) ; ≥ 2 exemples (class ex) ; ≥ 2 astuces (astuce|attention|savais|methode) ; ≥ 2 planches 2D ; ≥ 1 planche 3D ; ≥ 1 simulation. État initial : 80 leçons, 7 complètes, 73 à enrichir.
+- **Gabarit** (lecon.html) : `denouement.formules = [{ nom, f, calcul }]` → bloc « Les formules utilisées, étape par étape » (formule générale puis application chiffrée) dans la situation résolue. modele.css?v=20261118u.
+- **2nde-c-physique-mesure** complète : définition, exemples (vernier 23,7 mm, balance non tarée, chronomètre en retard, parallaxe, pendule), formules (moyenne, incertitude absolue et relative, écriture du résultat), astuces (test du vide, « M-É-R »), planches 2D « Lire 23,7 mm sur le vernier » et « L'intervalle de mesure du sac », résolution en 6 étapes chiffrées.
+- « Change en vraies cartes mentales esthétiques » (schémas offerts et schémas des leçons payantes, p.illus.svg, générés HORS dépôt) : `VRT_CM.depuisSvg(svg)` (00-carte-mentale.js) relit le schéma dans le navigateur (titre, cadres, titres, listes, notes, flèches) et le redessine en carte mentale ; appelé dans lecon.html (p.illus) et verrou.js (« Schéma offert »). Ne convertit que les schémas en cadres et listes : courbes, tracés, cartes, frises, dessins, tableaux et grilles restent tels quels. 57 schémas sur 296 convertis (flux 16, radiale 11, roue 8, arbre 8, bulles 6…). verrou.js?v=20261118cm, modele.css?v=20261118v.
+- « Audite et corrige partout » : audit renforcé (exige aussi ≥ 2 formules de résolution dans denouement.formules). apprendre/_src/89-enrichissements-sciences.js (ajouts seulement, après les sources et avant les animations) complète TOUTES les leçons de sciences (maths, physique, chimie, PCT, SVT, sciences, informatique, technologie, 33 leçons) : résolution étape par étape avec formules et calculs chiffrés, définitions, formules, exemples, astuces, et planches 2D ajoutées (carré √50, atomes Cu/Au, caractères de l'espèce, ensembles emboîtés, décimaux, diagrammes de Venn, IA, entrée-sortie, RAM/disque, crayons, outils, grille et sites de pépinière). Audit : 0 leçon de sciences incomplète ; 33/80 complètes, les 47 restantes (lettres, langues, histoire-géo, ECM, philo, arts, EPS, cultures, orientation, ESF) sont prises par la session « Enrichissement des leçons » (fichiers 29-…).
+- Partage proposé à la session « Enrichissement des leçons » : moi = sciences (maths, physique, chimie, PCT, SVT, informatique, technologie) ; elle = lettres, langues, histoire-géo, ECM, philo, arts, EPS, cultures nationales, orientation, ESF.
+
 ## Apprendre : lot 18, 6e — toutes les leçons gratuites au gabarit approfondi (18/11/2026)
 
 Demande de Jacques : « Continue ». L'autre session crée de NOUVELLES leçons de maths de 6e (`16c-approfondies-6e-maths.js` : cercle, proportionnalité, pavé droit) ; aucun recouvrement (coordination confirmée par message).
@@ -42,6 +51,13 @@ Demande de Jacques : « Continue ». L'autre session crée de NOUVELLES leçons 
 - **Pièges rencontrés (moteur 3D)** : une grande face unique (`div:false`, ou un `poly` étendu) posée sous de petits objets plats les recouvre selon l'angle (tri par profondeur des centres) ; mieux vaut un plateau subdivisé (par défaut) et des objets un peu épais (barres, petits blocs) plutôt que des lamelles ou des polygones plats. Les modèles dont l'origine est au sol doivent être recentrés (coureur décalé de −105 en y).
 - `lecons.js?v=20261118m18` ; 3 pages `apprendre/cours/` régénérées et habillées. Chromium (1200 et 390 px) : aucun débordement, aucune erreur JS. Contrôles GEO et bancs au vert.
 - **Bilan** : les 91 leçons de `lecons.js` ont toutes une situation de départ résolue (`enquete` + `denouement`).
+
+## 18/11/2026 — Apprendre : 6e Mathématiques, lot 3 (branche apprendre-6e-maths-3)
+- apprendre/_src/16d-approfondies-6e-maths-2.js : 3 leçons NOUVELLES au gabarit approfondi (mêmes outils que 16c) :
+  - 6e-maths-fractions (ligne 26, « Numérateur, dénominateur, fractions égales ») : jus de foléré du CES de Mora, 3/4 = 6/8, bidon 3D en quarts, simulation de comparaison.
+  - 6e-maths-angles (ligne 30, « Notions d'angle ou de secteur angulaire ») : horloge de l'école de Kribi, six familles d'angles, rapporteur, horloge 3D (cadran carré découpé en tuiles : un grand disque se trie mal dans planche3d.js), simulation heure → angle.
+  - 6e-maths-symetrie-axiale (ligne 74, « Points symétriques par rapport à une droite ») : motif ndop de Bamenda, miroir 3D, motif complété, axes de symétrie, simulation du point et de son symétrique.
+- Rattachement vérifié, 0 doublon sur les 7 leçons de 6e maths ; 0 erreur, 0 débordement à 390 et 1280 px ; bancs verts.
 
 ## Apprendre : lot 17, 6e (18/11/2026)
 

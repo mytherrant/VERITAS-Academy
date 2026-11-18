@@ -669,20 +669,52 @@
     },
     parties: [
       { t: "Grandeur, unité, instrument", html: (M_OLD ? M_OLD.parties[0].html : "") +
-        "<div class='methode'><b>Lire un pied à coulisse au 1/10 de mm</b><ol><li>Lis sur la règle les millimètres entiers placés <strong>avant</strong> le zéro du vernier.</li><li>Cherche le trait du vernier qui est <strong>exactement aligné</strong> avec un trait de la règle.</li><li>Son numéro donne les dixièmes de millimètre.</li></ol></div>",
-        planches: [{ type: "3d", titre: "Le pied à coulisse", legende: "Tourne l'instrument : la règle graduée en mm, le coulisseau portant le vernier (10 divisions sur 9 mm) et les deux becs qui serrent un tuyau en cuivre. Le curseur fait glisser le coulisseau.",
+        "<div class='methode'><b>Lire un pied à coulisse au 1/10 de mm</b><ol><li>Lis sur la règle les millimètres entiers placés <strong>avant</strong> le zéro du vernier.</li><li>Cherche le trait du vernier qui est <strong>exactement aligné</strong> avec un trait de la règle.</li><li>Son numéro donne les dixièmes de millimètre.</li></ol></div>" +
+        "<div class='def'><b>Définition</b><strong>Mesurer</strong> une grandeur, c'est la comparer à une grandeur de même nature choisie comme <strong>unité</strong>. Un résultat s'écrit toujours : <strong>grandeur = nombre × unité</strong>, par exemple m = 24,2 kg ; L = 23,7 mm.</div>" +
+        "<div class='ex'><b>Exemple : lire le vernier</b>Le zéro du vernier est juste après le trait <strong>23 mm</strong> de la règle, et c'est le <strong>7ᵉ trait</strong> du vernier qui est aligné : diamètre du tuyau L = 23 + 0,7 = <strong>23,7 mm</strong>. La précision de l'instrument est 0,1 mm.</div>" +
+        "<div class='ex'><b>Exemple : la balance non tarée</b>À vide, la balance affiche 0,8 kg. Un sac posé dessus affiche 25,0 kg : sa masse réelle est 25,0 − 0,8 = <strong>24,2 kg</strong>.</div>" +
+        "<div class='astuce'><b>Astuce</b>Avant de mesurer, fais toujours le « test du vide » : l'instrument doit indiquer 0 sans rien dessus (balance, ampèremètre, pied à coulisse fermé). Sinon, tare-le ou retranche le décalage.</div>",
+        planches: [{ type: "2D", titre: "Lire 23,7 mm sur le vernier", legende: "Le zéro du vernier dépasse 23 mm ; le 7ᵉ trait du vernier coïncide avec un trait de la règle : 23 mm + 7 dixièmes = 23,7 mm.", svg: (function () {
+          var s = "<rect x='20' y='40' width='600' height='60' rx='6' fill='#E3E7ED' stroke='#8C95A3'/>", i, x0 = 40, mm = 13;
+          for (i = 0; i <= 44; i++) { var x = x0 + i * mm; s += "<path d='M" + x + " 40V" + (i % 10 === 0 ? 72 : i % 5 === 0 ? 64 : 56) + "' stroke='" + NUIT + "' stroke-width='" + (i % 10 ? 1.2 : 2) + "'/>"; if (i % 10 === 0) s += txt(x, 90, i, { s: 11 }); }
+          var xv = x0 + 23.7 * mm;
+          s += "<rect x='" + (xv - 6) + "' y='100' width='" + (9 * mm * 1 + 24) + "' height='54' rx='6' fill='#C6CCD6' stroke='#8C95A3'/>";
+          for (i = 0; i <= 10; i++) { var xx = xv + i * 0.9 * mm; s += "<path d='M" + xx.toFixed(1) + " 100V" + (i % 5 === 0 ? 126 : 116) + "' stroke='" + (i === 7 ? ROUGE : NUIT) + "' stroke-width='" + (i === 7 ? 2.6 : 1.2) + "'/>"; if (i % 5 === 0) s += txt(xx.toFixed(1), 142, i, { s: 11 }); }
+          s += "<path d='M" + (x0 + 30 * mm) + " 36V100' stroke='" + ROUGE + "' stroke-width='2' stroke-dasharray='4 3'/>" + txt(x0 + 30 * mm + 6, 30, "7ᵉ trait aligné", { s: 12, c: ROUGE, a: "start" });
+          s += "<path d='M" + xv + " 168V150' stroke='" + BLEU + "' stroke-width='2'/>" + txt(xv - 8, 184, "zéro du vernier : après 23 mm", { s: 12, c: BLEU, a: "end" });
+          s += "<rect x='420' y='160' width='190' height='40' rx='10' fill='#ECF7F0' stroke='#BFDCC9'/>" + txt(515, 186, "L = 23 + 0,7 = 23,7 mm", { s: 14, c: "#17784D" });
+          return svg(640, 210, "Règle graduée en millimètres et vernier au dixième : le zéro du vernier après 23 millimètres, le septième trait aligné", "", s);
+        })() }, { type: "3d", titre: "Le pied à coulisse", legende: "Tourne l'instrument : la règle graduée en mm, le coulisseau portant le vernier (10 divisions sur 9 mm) et les deux becs qui serrent un tuyau en cuivre. Le curseur fait glisser le coulisseau.",
           modele: { h: 340, rx: -46, ry: 8, echelle: 1.05, alt: "Pied à coulisse en trois dimensions serrant un tuyau de cuivre", eclate: "Ouvrir les becs", jouer: "Ouvrir les becs", objets: piedCoulisse3D(),
             etiquettes: [{ p: [120, 6, -10], t: "Règle (mm)", cote: "d" }, { p: [-140, 12, 16], t: "Vernier au 1/10", ec: [44, 0, 0] }, { p: [-192, 30, 70], t: "Tuyau mesuré" }, { p: [-205, 4, 100], t: "Bec fixe" }] } }],
         fil: { html: "<p>Samuel commence par vérifier sa balance : à vide, l'aiguille est sur <strong>0</strong>. Celle du commerçant affiche 0,8 kg à vide : elle n'est pas « remise à zéro » (tarée). Un instrument électronique peut donc se tromper s'il est mal réglé.</p>", verdicts: [[0, "rejetee", "La balance affiche 0,8 kg à vide : elle est mal tarée, toutes ses pesées sont faussées."]] },
         retenir: "Grandeur + nombre + unité ; vérifier le zéro de l'instrument avant de mesurer." },
 
-      { t: "Les différents types d'erreur", html: (M_OLD ? M_OLD.parties[1].html : ""),
+      { t: "Les différents types d'erreur", html: (M_OLD ? M_OLD.parties[1].html : "") +
+        "<div class='ex'><b>Exemple d'erreur systématique</b>Un chronomètre déclenché toujours 0,04 s en retard donne des durées toutes trop courtes de 0,04 s : T lue = 1,36 s, T corrigée = 1,36 + 0,04 = <strong>1,40 s</strong>. Répéter la mesure ne corrige rien : il faut corriger l'instrument ou la méthode.</div>" +
+        "<div class='ex'><b>Exemple d'erreur aléatoire</b>Lire l'aiguille d'une balance un peu de côté (erreur de <strong>parallaxe</strong>) donne 24,1 kg, puis 24,3 kg : l'écart change de sens d'une lecture à l'autre. On répète et on fait la moyenne.</div>" +
+        "<div class='attention'><b>Attention</b>Une erreur systématique ne se voit pas en répétant la mesure : toutes les valeurs sont décalées du même côté. Seule une comparaison avec un autre instrument ou un test à vide la révèle.</div>",
         planches: [{ type: "2D", titre: "Erreur systématique ou erreur aléatoire ?", legende: "Des mesures groupées mais décalées trahissent une erreur systématique (on corrige l'instrument) ; des mesures dispersées autour du centre trahissent une erreur aléatoire (on répète et on fait la moyenne).", svg: PLANCHE_CIBLES }],
         fil: { html: "<p>Les 0,8 kg affichés à vide s'ajoutent à <strong>chaque</strong> pesée du commerçant, toujours dans le même sens : c'est une erreur <strong>systématique</strong>. 25,0 − 0,8 = <strong>24,2 kg</strong>. Les petits écarts entre les pesées de Samuel (24,0 à 24,4) vont tantôt en plus, tantôt en moins : erreur <strong>aléatoire</strong> (lecture de l'aiguille, position du sac). Elle ne rend pas la balance inutilisable : on la réduit en faisant la moyenne.</p>", verdicts: [[1, "rejetee", "Des écarts aléatoires sont normaux : on les réduit par la moyenne, l'instrument reste utilisable."]] },
         retenir: "Systématique : même sens, on corrige l'instrument. Aléatoire : on répète et on fait la moyenne." },
 
       { t: "Écrire un résultat de mesure", html: (M_OLD ? M_OLD.parties[2].html : "") +
-        "<div class='methode'><b>Exploiter une série de mesures</b><ol><li>Calcule la <strong>moyenne</strong> m̄ des mesures.</li><li>Prends comme incertitude ΔG le plus grand écart entre une mesure et la moyenne (ou la demi-étendue).</li><li>Écris G = (m̄ ± ΔG) unité, puis l'incertitude relative ΔG/m̄ en %.</li></ol></div>",
+        "<div class='methode'><b>Exploiter une série de mesures</b><ol><li>Calcule la <strong>moyenne</strong> m̄ des mesures.</li><li>Prends comme incertitude ΔG le plus grand écart entre une mesure et la moyenne (ou la demi-étendue).</li><li>Écris G = (m̄ ± ΔG) unité, puis l'incertitude relative ΔG/m̄ en %.</li></ol></div>" +
+        "<p class='formule'>Valeur moyenne : m̄ = (m₁ + m₂ + … + mₙ) ÷ n</p>" +
+        "<p class='formule'>Incertitude absolue : Δm = plus grand écart |mᵢ − m̄| &nbsp;·&nbsp; Incertitude relative : (Δm ÷ m̄) × 100 %</p>" +
+        "<p class='formule'>Résultat : m = (m̄ ± Δm) unité &nbsp;⇔&nbsp; m̄ − Δm ≤ m ≤ m̄ + Δm</p>" +
+        "<div class='ex'><b>Exemple : la période d'un pendule</b>Mesures : 1,42 s ; 1,38 s ; 1,40 s ; 1,40 s (le groupe 4 corrigé). Moyenne : 5,60 ÷ 4 = 1,40 s. Plus grand écart : 0,02 s. Résultat : <strong>T = (1,40 ± 0,02) s</strong>, incertitude relative 0,02 ÷ 1,40 × 100 ≈ <strong>1,4 %</strong>.</div>" +
+        "<div class='astuce'><b>Astuce pour retenir</b>« <strong>M-É-R</strong> » : <strong>M</strong>oyenne, <strong>É</strong>cart le plus grand, <strong>R</strong>ésultat entre parenthèses avec son unité. Et garde pour la moyenne autant de décimales que l'incertitude.</div>",
+        planches: [{ type: "2D", titre: "L'intervalle de mesure du sac", legende: "Les cinq pesées (points bleus), leur moyenne 24,2 kg et l'intervalle [24,0 ; 24,4] kg : les 25 kg annoncés sont en dehors.", svg: (function () {
+          var s = "", x0 = 60, k = 520 / 1.2, X = function (v) { return (x0 + (v - 23.9) * k).toFixed(1); }, i;
+          s += "<path d='M40 120H610' stroke='" + NUIT + "' stroke-width='2.5'/>";
+          for (i = 0; i <= 12; i++) { var v = 23.9 + i * 0.1; s += "<path d='M" + X(v) + " 114V126' stroke='" + NUIT + "' stroke-width='1.5'/>" + txt(X(v), 144, v.toFixed(1).replace(".", ","), { s: 11 }); }
+          s += "<rect x='" + X(24.0) + "' y='92' width='" + (0.4 * k).toFixed(1) + "' height='22' rx='6' fill='#ECF7F0' stroke='#17784D' stroke-width='2'/>" + txt(X(24.2), 86, "m = (24,2 ± 0,2) kg", { s: 13, c: "#17784D" });
+          [24.1, 24.3, 24.2, 24.4, 24.0].forEach(function (v, j) { s += "<circle cx='" + X(v) + "' cy='" + (164 + j * 9) + "' r='5' fill='" + BLEU + "'/>"; });
+          s += "<path d='M" + X(24.2) + " 90V210' stroke='" + BLEU + "' stroke-width='2' stroke-dasharray='5 4'/>" + txt(X(24.2), 222, "moyenne 24,2", { s: 11.5, c: BLEU });
+          s += "<path d='M" + X(25.0) + " 60V130' stroke='" + ROUGE + "' stroke-width='3'/>" + txt(X(25.0), 52, "25 kg annoncés", { s: 12.5, c: ROUGE });
+          return svg(640, 232, "Axe gradué de 23,9 à 25,1 kilogrammes avec les cinq pesées, leur moyenne, l'intervalle de 24,0 à 24,4 et la valeur annoncée de 25 kilogrammes hors de l'intervalle", "", s);
+        })() }],
         fil: { html: "<p>Moyenne des cinq pesées : (24,1 + 24,3 + 24,2 + 24,4 + 24,0) ÷ 5 = 121,0 ÷ 5 = <strong>24,2 kg</strong>. Plus grand écart à la moyenne : 0,2 kg. Donc <strong>m = (24,2 ± 0,2) kg</strong>, soit une incertitude relative de 0,2 ÷ 24,2 ≈ 0,8 %. Les 25 kg annoncés sont hors de l'intervalle [24,0 ; 24,4] : il manque environ 800 g, soit 3,2 %, bien au-delà des 0,2 % tolérés.</p>", verdicts: [[2, "validee", "Balance corrigée : 25,0 − 0,8 = 24,2 kg, exactement la moyenne de Samuel : m = (24,2 ± 0,2) kg."]] },
         retenir: "G = (valeur moyenne ± incertitude) unité ; deux mesures sont compatibles si leurs intervalles se recouvrent." },
       M_OLD && M_OLD.parties[3] ? M_OLD.parties[3] : { t: "Entraînement", html: "" }
@@ -694,6 +726,14 @@
         "Cette erreur systématique fausse toutes ses pesées : 25,0 − 0,8 = 24,2 kg (indice 2).",
         "Les écarts de Samuel sont aléatoires : on fait la moyenne (indice 2).",
         "Moyenne 24,2 kg, incertitude 0,2 kg : m = (24,2 ± 0,2) kg, 25 kg est exclu (indice 3)."
+      ],
+      formules: [
+        { nom: "Corriger l'erreur systématique de la balance du commerçant", f: "masse vraie = valeur lue − décalage à vide", calcul: "25,0 − 0,8 = 24,2 kg" },
+        { nom: "Calculer la valeur moyenne des pesées de Samuel", f: "m̄ = (m₁ + m₂ + m₃ + m₄ + m₅) ÷ 5", calcul: "(24,1 + 24,3 + 24,2 + 24,4 + 24,0) ÷ 5 = 121,0 ÷ 5 = 24,2 kg" },
+        { nom: "Calculer l'incertitude absolue", f: "Δm = plus grand écart |mᵢ − m̄|", calcul: "|24,4 − 24,2| = 0,2 kg et |24,0 − 24,2| = 0,2 kg, donc Δm = 0,2 kg" },
+        { nom: "Écrire le résultat de mesure", f: "m = (m̄ ± Δm) unité", calcul: "m = (24,2 ± 0,2) kg, soit 24,0 kg ≤ m ≤ 24,4 kg" },
+        { nom: "Calculer l'incertitude relative", f: "(Δm ÷ m̄) × 100 %", calcul: "0,2 ÷ 24,2 × 100 ≈ 0,8 % : la mesure est précise" },
+        { nom: "Comparer à l'étiquette et à la loi", f: "écart relatif = (m annoncée − m mesurée) ÷ m annoncée × 100 %", calcul: "(25 − 24,2) ÷ 25 × 100 = 3,2 %, bien plus que les 0,2 % tolérés : il manque 800 g" }
       ],
       reponse: "<p>La balance du commerçant affiche 0,8 kg à vide : elle n'est pas tarée et ajoute 0,8 kg à chaque pesée. C'est une erreur systématique, qui ne disparaît pas en répétant la mesure ; corrigée, sa lecture donne 25,0 − 0,8 = 24,2 kg. Les cinq pesées de Samuel, faites sur une balance bien tarée, varient de 24,0 à 24,4 kg : ce sont des erreurs aléatoires de lecture, que l'on réduit en calculant la moyenne, 24,2 kg. Le plus grand écart à la moyenne est de 0,2 kg, d'où le résultat <strong>m = (24,2 ± 0,2) kg</strong>, avec une incertitude relative d'environ 0,8 %. Les deux balances sont donc d'accord une fois l'erreur corrigée, et le sac ne pèse pas 25 kg : il manque environ 800 g, bien au-delà de la tolérance légale.</p>",
       transfert: "<p>Au laboratoire, quatre groupes mesurent la période d'un pendule : 1,42 s ; 1,38 s ; 1,40 s ; 1,44 s. Le chronomètre du groupe 4 démarre toujours 0,04 s en retard. Corrige la mesure du groupe 4, puis donne le résultat avec son incertitude. <em>(1,40 s ; T = (1,40 ± 0,02) s.)</em></p>"

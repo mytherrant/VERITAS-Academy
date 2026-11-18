@@ -102,12 +102,14 @@
     var Wd = 920, cx = 460, T = 15, LH = T * 1.24, NC = 16, cotes = [[], []];
     B.forEach(function (b, i) { b.n = i + 1; b.i = i; cotes[i % 2].push(b); });
     function bloc(b) { var h = 0; b.items.forEach(function (it) { h += couper(it, NC).length * LH + 14; }); return Math.max(h, 70) + 28; }
-    var hauts = cotes.map(function (c) { return c.reduce(function (a, b) { return a + bloc(b); }, 0); });
-    var cw = largeurC(C, 180, 260), H = Math.max(hauts[0], hauts[1], 300) + 40, cy = H / 2, s = "", dessus = "";
+    var cw = largeurC(C, 180, 260), cen0 = centre(cx, 0, C, cw), trou = cen0.h + 56;
+    var hauts = cotes.map(function (c) { return c.reduce(function (a, b) { return a + bloc(b); }, 0) + (c.length >= 2 ? trou : 0); });
+    var H = Math.max(hauts[0], hauts[1], 300) + 40, cy = H / 2, s = "", dessus = "";
     var cen = centre(cx, cy, C, cw);
     cotes.forEach(function (liste, cote) {
       var sg = cote ? 1 : -1, col0 = cx + sg * 248, y0 = (H - hauts[cote]) / 2;
-      liste.forEach(function (b) {
+      liste.forEach(function (b, kb) {
+        if (liste.length >= 2 && kb === Math.ceil(liste.length / 2)) y0 += trou;
         var h = bloc(b), hy = y0 + h / 2, col = b.color, ly = y0 + 14, hmax = h / 2;
         var et = etiquette(0, 0, b.label, col, b.n, 17), w = et.w, ox = col0 - sg * 44, hx = ox - sg * w / 2, ix = hx - sg * w / 2;
         /* étiquette qui mordrait sur le nuage : on la monte (ou descend) au-dessus de lui */
@@ -266,7 +268,7 @@
     s += accol(xb, 24, H - 24, encre("#5B6478"), 14);
     B.forEach(function (b, i) {
       var h = blocs[i] - 22, ym = y + h / 2, et = etiquette(xl + lw / 2, ym, b.label, b.color, i + 1, 15), hl = hListe(b.items, NC);
-      s += accol(xs, ym - hl / 2 - 8, ym + hl / 2 + 8, b.color, 10) + liste(b.items, xi, ym - hl / 2 + 11, NC, b.color);
+      s += (b.items.length ? accol(xs, ym - hl / 2 - 8, ym + hl / 2 + 8, b.color, 10) : "") + liste(b.items, xi, ym - hl / 2 + 11, NC, b.color);
       dessus += et.s; y += blocs[i];
     });
     return svgDe("cm-large", Wd, H, alt, B, s + dessus + cen.s);
@@ -495,9 +497,9 @@
   /* carte = { centre: "Titre\nSous-titre" | [lignes], branches: [{ label, color?, items: [] }] } */
   function VRT_CM(carte) {
     var C = (Array.isArray(carte.centre) ? carte.centre : String(carte.centre || "").split("\n")).map(function (x) { return String(x).trim(); }).filter(Boolean);
-    var B = (carte.branches || []).filter(function (b) { return b && (b.items || []).length; }).map(function (b, i) {
+    var B = (carte.branches || []).filter(function (b) { return b && ((b.items || []).length || (carte.depuisSchema && b.label)); }).map(function (b, i) {
       return { label: String(b.label || "").trim(), color: /^#[0-9a-f]{6}$/i.test(b.color || "") ? b.color : COUL[i % COUL.length], items: b.items.map(function (x) { return String(x).replace(/\s+/g, " ").trim(); }).filter(Boolean) };
-    }).filter(function (b) { return b.items.length; });
+    }).filter(function (b) { return b.items.length || (carte.depuisSchema && b.label); });
     if (!B.length) return "";
     var alt = "Carte mentale : " + C.join(", ") + ". " + B.map(function (b) { return b.label + " : " + b.items.join(" ; "); }).join(". ");
     /* forme et style : imposés par la carte, sinon tirés du titre (stables d'une génération à l'autre et variés d'une carte à l'autre) */
@@ -543,6 +545,100 @@
     return VRT_CM({ centre: [nu(L.cle || L.titre)].concat(L.c ? [L.c] : []), branches: B.slice(0, 6), forme: forme });
   }
   VRT_CM.lecon = VRT_CM_LECON;
+  /* ════════ SCHÉMAS EN CARTES MENTALES (18/11/2026, « change en vraies cartes mentales esthétiques ») ════════
+     Les schémas des leçons (p.illus.svg, générés hors dépôt : titre, cadres, titres en gras, listes à puces, notes,
+     flèches) sont relus dans le navigateur et redessinés en carte mentale. Un schéma non reconnu reste tel quel. */
+  function depuisSvg(src) {
+    if (typeof DOMParser === "undefined" || !src) return "";
+    try {
+      var doc = new DOMParser().parseFromString(src, "image/svg+xml"), root = doc.documentElement;
+      if (!root || root.nodeName.toLowerCase() !== "svg" || doc.getElementsByTagName("parsererror").length) return "";
+      var vb = (root.getAttribute("viewBox") || "0 0 480 312").split(/[\s,]+/).map(Number), Wv = vb[2] || 480, Hv = vb[3] || 312;
+      function n(e, a) { return +(e.getAttribute(a) || 0); }
+      var boites = [].slice.call(root.getElementsByTagName("rect")).map(function (r) { return { x: n(r, "x"), y: n(r, "y"), w: n(r, "width"), h: n(r, "height"), t: [] }; })
+        .filter(function (r) { return r.w > 24 && r.h > 12 && r.w < Wv * .96; });
+      /* seulement les schémas en cadres : pas de courbe, de tracé, de quadrillage, d'ellipse ni de dessin */
+      var chemins = [].slice.call(root.getElementsByTagName("path")).map(function (e) { return e.getAttribute("d") || ""; });
+      if (chemins.some(function (d) { return /[CcQqAaSsTt]/.test(d) || (d.match(/[LlHhVv]/g) || []).length > 3; })) return "";
+      if (chemins.length > boites.length * 2 + 6) return "";
+      if (["ellipse", "polygon", "polyline", "image", "use"].some(function (t) { return root.getElementsByTagName(t).length; })) return "";
+      var grandsRonds = [].slice.call(root.getElementsByTagName("circle")).filter(function (c) { return n(c, "r") >= 18; }).length;
+      if ((root.getElementsByTagName("line").length > 4 && !grandsRonds) || root.getElementsByTagName("circle").length > 1) return "";
+      /* tableaux, échelles et grilles : leurs lignes et colonnes ont un sens, on les garde */
+      if (/^(Tableau|Table |Échiquier|Échelle|Les \d+ premiers éléments|Comparaison entre)/i.test(root.getAttribute("aria-label") || "")) return "";
+      /* grille de pixels (≥ 6 petits carrés) ou tableau (≥ 6 lignes de même taille empilées dans une même colonne) */
+      var tous = [].slice.call(root.getElementsByTagName("rect")).map(function (r) { return { x: n(r, "x"), w: n(r, "width"), h: n(r, "height") }; });
+      if (tous.filter(function (b) { return b.w < 24 && b.h < 24 && b.w > 0; }).length >= 6) return "";
+      var formats = {}; tous.filter(function (b) { return b.w >= 24 && b.w < Wv * .96; }).forEach(function (b) { var k = Math.round(b.x) + ":" + Math.round(b.w) + "x" + Math.round(b.h); formats[k] = (formats[k] || 0) + 1; });
+      if (Object.keys(formats).some(function (k) { return formats[k] >= 5; })) return "";
+      var ronds = [].slice.call(root.getElementsByTagName("circle")).map(function (c) { return { cx: n(c, "cx"), cy: n(c, "cy"), r: n(c, "r"), t: [] }; }).filter(function (c) { return c.r >= 18; });
+      var titre = "", libres = [], textes = [].slice.call(root.getElementsByTagName("text"));
+      if (textes.length < 4) return "";
+      textes.forEach(function (t) {
+        var x = n(t, "x"), y = n(t, "y"), fs = +(t.getAttribute("font-size") || 10), g = /600|700|800|900|bold/.test(t.getAttribute("font-weight") || ""), an = t.getAttribute("text-anchor") || "start", lignes = [];
+        var propre = ""; [].slice.call(t.childNodes).forEach(function (c) { if (c.nodeType === 3) propre += c.nodeValue; });
+        var brutes = []; if (propre.trim()) brutes.push(propre.trim());
+        [].slice.call(t.getElementsByTagName("tspan")).forEach(function (s) { var v = (s.textContent || "").trim(); if (v) brutes.push(v); });
+        /* une ligne coupée continue la précédente ; seule une puce (•, –) ouvre un nouvel élément */
+        brutes.forEach(function (v, k) { if (k && !/^[•·–\-]\s/.test(v)) lignes[lignes.length - 1] += " " + v; else lignes.push(v); });
+        if (!lignes.length || fs < 7.6 || /^Schéma VÉRITAS$/.test(lignes[0])) return;
+        var lg = Math.max.apply(null, brutes.map(function (l) { return l.length; })) * fs * .5, cx = an === "middle" ? x : an === "end" ? x - lg / 2 : x + lg / 2;
+        var T = { x: cx, y: y, g: g, fs: fs, l: lignes, br: brutes, lmax: Math.max.apply(null, brutes.map(function (v) { return v.length; })) };
+        if (!titre && y < 28 && g) { titre = lignes.join(" "); return; }
+        if (/^[\d\s,.\-−+%°]+$/.test(lignes.join(" "))) return;
+        var rd = ronds.filter(function (c) { return Math.hypot(cx - c.cx, y - 3 - c.cy) < c.r; })[0];
+        if (rd) { rd.t.push(T); return; }
+        var dans = boites.filter(function (b) { return cx >= b.x - 2 && cx <= b.x + b.w + 2 && y - 3 >= b.y && y - 3 <= b.y + b.h; }).sort(function (a, b) { return a.w * a.h - b.w * b.h; })[0];
+        if (dans) dans.t.push(T); else libres.push(T);
+      });
+      var net = function (s) { return String(s).replace(/^[•·\-–]\s*/, "").replace(/\s+/g, " ").trim(); };
+      var B = [];
+      boites.filter(function (b) { return b.t.length; }).forEach(function (b) {
+        b.t.sort(function (p, q) { return p.y - q.y; });
+        var tout = [].concat.apply([], b.t.map(function (t) { return t.l.map(function (l) { return { v: l, g: t.g }; }); })), label, items;
+        if (b.t.length === 1 && b.t[0].g) { label = net(b.t[0].br.join(" ")); items = []; }
+        else if (b.t.length === 1 && b.t[0].br.length >= 2 && !/^[•·–\-]/.test(b.t[0].br[1])) {
+          /* texte normal sur plusieurs lignes : une ligne terminée par « : » appelle la suivante */
+          var L2 = []; b.t[0].br.forEach(function (v) { if (L2.length && /:\s*$/.test(L2[L2.length - 1])) L2[L2.length - 1] += " " + v; else L2.push(v); });
+          var m0 = L2[0].match(/^(.{3,40}?)\s*:\s*(.+)$/);
+          if (m0) { label = net(m0[1]); items = [net(m0[2])].concat(L2.slice(1).map(net)); } else { label = net(L2[0]); items = L2.slice(1).map(net); }
+        }
+        else if (tout.length === 1) { label = net(tout[0].v); items = []; }
+        else if (b.t[0].g || b.t.length > 1) { label = net(b.t[0].l.join(" ")); items = [].concat.apply([], b.t.slice(1).map(function (t) { return t.l; })).map(net); }
+        else { label = net(tout[0].v); items = tout.slice(1).map(function (o) { return net(o.v); }); }
+        B.push({ label: label, items: items, x: b.x + b.w / 2, y: b.y, bas: b.y + b.h, b: b });
+      });
+      /* textes libres sous un cadre : ses explications ; les autres : à retenir */
+      var notes = [];
+      libres.sort(function (p, q) { return p.y - q.y; }).forEach(function (t) {
+        var lt = t.lmax * t.fs * .5;
+        var br = B.filter(function (o) { return o.b && t.y > o.bas && t.y - o.bas < 64 && Math.abs(t.x - o.x) < o.b.w * .35 + 6 && lt < o.b.w * 1.4; }).sort(function (p, q) { return (t.y - p.bas) - (t.y - q.bas); })[0];
+        if (br) br.items = br.items.concat(t.l.map(net)); else notes.push(t.l.map(net).join(" "));
+      });
+      B.forEach(function (o) {
+        if (o.items.length) return;
+        var m = o.label.match(/^(.{3,40}?)\s*:\s*(.{3,})$/), p = o.label.match(/^(.{2,40}?)\s*\(([^)]{2,40})\)$/);
+        if (m) { o.label = m[1]; o.items = [m[2]]; } else if (p) { o.label = p[1]; o.items = [p[2]]; }
+      });
+      if (notes.length) B.push({ label: "À retenir", items: notes });
+      if (B.length < 2) return "";
+      var C = [titre || (ronds[0] && ronds[0].t.length ? [].concat.apply([], ronds[0].t.map(function (t) { return t.l; })).join(" ") : "Schéma")];
+      /* forme : une suite de cadres alignés reliés par des flèches → flux ; un rond central → radiale */
+      var avecB = B.filter(function (o) { return o.b; }), lig = [];
+      avecB.forEach(function (o) { var g = avecB.filter(function (q) { return Math.abs(q.y - o.y) < 8; }); if (g.length > lig.length) lig = g; });
+      lig.sort(function (p, q) { return p.x - q.x; });
+      var segs = [].slice.call(root.getElementsByTagName("path")).map(function (e) { var m = (e.getAttribute("d") || "").match(/^M\s*([\d.]+)[\s,]+([\d.]+)\s*L\s*([\d.]+)[\s,]+([\d.]+)/); return m ? m.slice(1).map(Number) : null; }).filter(Boolean);
+      var liens = 0;
+      for (var q = 0; q + 1 < lig.length; q++) { var A = lig[q].b, Bq = lig[q + 1].b; if (segs.some(function (g) { return Math.abs(g[1] - g[3]) < 4 && g[0] >= A.x + A.w - 12 && g[2] <= Bq.x + 12; })) liens++; }
+      var memeLigne = lig.length >= 3 && liens >= Math.ceil((lig.length - 1) / 2);
+      var fleches = root.getElementsByTagName("path").length >= lig.length - 1, forme = memeLigne && fleches ? "flux" : ronds.length ? "radiale" : null;
+      if (memeLigne) B = lig.sort(function (p, q) { return p.x - q.x; }).concat(B.filter(function (o) { return lig.indexOf(o) < 0; }));
+      if (typeof document !== "undefined" && !document.getElementById("cmCss")) { var st = document.createElement("style"); st.id = "cmCss"; st.textContent = VRT_CM.css; document.head.appendChild(st); }
+      return VRT_CM({ centre: C, branches: B.map(function (o) { return { label: o.label, items: o.items }; }), forme: forme, depuisSchema: true });
+    } catch (e) { return ""; }
+  }
+  VRT_CM.depuisSvg = depuisSvg;
+
   VRT_CM.css = ".cm{margin:6px 0}.cm svg{display:block;width:100%;height:auto;border-radius:18px}.cm .cm-etroit{display:none}" +
     "@media (max-width:640px){.cm .cm-large{display:none}.cm .cm-etroit{display:block}}" +
     "@media (prefers-reduced-motion:no-preference){.cm .cm-t,.cm .cm-l{stroke-dasharray:1200;stroke-dashoffset:1200;animation:cmTrace 1.2s ease-out forwards}" +
@@ -4617,20 +4713,52 @@ VRT_PLUS("3e-en-articles", [
     },
     parties: [
       { t: "Grandeur, unité, instrument", html: (M_OLD ? M_OLD.parties[0].html : "") +
-        "<div class='methode'><b>Lire un pied à coulisse au 1/10 de mm</b><ol><li>Lis sur la règle les millimètres entiers placés <strong>avant</strong> le zéro du vernier.</li><li>Cherche le trait du vernier qui est <strong>exactement aligné</strong> avec un trait de la règle.</li><li>Son numéro donne les dixièmes de millimètre.</li></ol></div>",
-        planches: [{ type: "3d", titre: "Le pied à coulisse", legende: "Tourne l'instrument : la règle graduée en mm, le coulisseau portant le vernier (10 divisions sur 9 mm) et les deux becs qui serrent un tuyau en cuivre. Le curseur fait glisser le coulisseau.",
+        "<div class='methode'><b>Lire un pied à coulisse au 1/10 de mm</b><ol><li>Lis sur la règle les millimètres entiers placés <strong>avant</strong> le zéro du vernier.</li><li>Cherche le trait du vernier qui est <strong>exactement aligné</strong> avec un trait de la règle.</li><li>Son numéro donne les dixièmes de millimètre.</li></ol></div>" +
+        "<div class='def'><b>Définition</b><strong>Mesurer</strong> une grandeur, c'est la comparer à une grandeur de même nature choisie comme <strong>unité</strong>. Un résultat s'écrit toujours : <strong>grandeur = nombre × unité</strong>, par exemple m = 24,2 kg ; L = 23,7 mm.</div>" +
+        "<div class='ex'><b>Exemple : lire le vernier</b>Le zéro du vernier est juste après le trait <strong>23 mm</strong> de la règle, et c'est le <strong>7ᵉ trait</strong> du vernier qui est aligné : diamètre du tuyau L = 23 + 0,7 = <strong>23,7 mm</strong>. La précision de l'instrument est 0,1 mm.</div>" +
+        "<div class='ex'><b>Exemple : la balance non tarée</b>À vide, la balance affiche 0,8 kg. Un sac posé dessus affiche 25,0 kg : sa masse réelle est 25,0 − 0,8 = <strong>24,2 kg</strong>.</div>" +
+        "<div class='astuce'><b>Astuce</b>Avant de mesurer, fais toujours le « test du vide » : l'instrument doit indiquer 0 sans rien dessus (balance, ampèremètre, pied à coulisse fermé). Sinon, tare-le ou retranche le décalage.</div>",
+        planches: [{ type: "2D", titre: "Lire 23,7 mm sur le vernier", legende: "Le zéro du vernier dépasse 23 mm ; le 7ᵉ trait du vernier coïncide avec un trait de la règle : 23 mm + 7 dixièmes = 23,7 mm.", svg: (function () {
+          var s = "<rect x='20' y='40' width='600' height='60' rx='6' fill='#E3E7ED' stroke='#8C95A3'/>", i, x0 = 40, mm = 13;
+          for (i = 0; i <= 44; i++) { var x = x0 + i * mm; s += "<path d='M" + x + " 40V" + (i % 10 === 0 ? 72 : i % 5 === 0 ? 64 : 56) + "' stroke='" + NUIT + "' stroke-width='" + (i % 10 ? 1.2 : 2) + "'/>"; if (i % 10 === 0) s += txt(x, 90, i, { s: 11 }); }
+          var xv = x0 + 23.7 * mm;
+          s += "<rect x='" + (xv - 6) + "' y='100' width='" + (9 * mm * 1 + 24) + "' height='54' rx='6' fill='#C6CCD6' stroke='#8C95A3'/>";
+          for (i = 0; i <= 10; i++) { var xx = xv + i * 0.9 * mm; s += "<path d='M" + xx.toFixed(1) + " 100V" + (i % 5 === 0 ? 126 : 116) + "' stroke='" + (i === 7 ? ROUGE : NUIT) + "' stroke-width='" + (i === 7 ? 2.6 : 1.2) + "'/>"; if (i % 5 === 0) s += txt(xx.toFixed(1), 142, i, { s: 11 }); }
+          s += "<path d='M" + (x0 + 30 * mm) + " 36V100' stroke='" + ROUGE + "' stroke-width='2' stroke-dasharray='4 3'/>" + txt(x0 + 30 * mm + 6, 30, "7ᵉ trait aligné", { s: 12, c: ROUGE, a: "start" });
+          s += "<path d='M" + xv + " 168V150' stroke='" + BLEU + "' stroke-width='2'/>" + txt(xv - 8, 184, "zéro du vernier : après 23 mm", { s: 12, c: BLEU, a: "end" });
+          s += "<rect x='420' y='160' width='190' height='40' rx='10' fill='#ECF7F0' stroke='#BFDCC9'/>" + txt(515, 186, "L = 23 + 0,7 = 23,7 mm", { s: 14, c: "#17784D" });
+          return svg(640, 210, "Règle graduée en millimètres et vernier au dixième : le zéro du vernier après 23 millimètres, le septième trait aligné", "", s);
+        })() }, { type: "3d", titre: "Le pied à coulisse", legende: "Tourne l'instrument : la règle graduée en mm, le coulisseau portant le vernier (10 divisions sur 9 mm) et les deux becs qui serrent un tuyau en cuivre. Le curseur fait glisser le coulisseau.",
           modele: { h: 340, rx: -46, ry: 8, echelle: 1.05, alt: "Pied à coulisse en trois dimensions serrant un tuyau de cuivre", eclate: "Ouvrir les becs", jouer: "Ouvrir les becs", objets: piedCoulisse3D(),
             etiquettes: [{ p: [120, 6, -10], t: "Règle (mm)", cote: "d" }, { p: [-140, 12, 16], t: "Vernier au 1/10", ec: [44, 0, 0] }, { p: [-192, 30, 70], t: "Tuyau mesuré" }, { p: [-205, 4, 100], t: "Bec fixe" }] } }],
         fil: { html: "<p>Samuel commence par vérifier sa balance : à vide, l'aiguille est sur <strong>0</strong>. Celle du commerçant affiche 0,8 kg à vide : elle n'est pas « remise à zéro » (tarée). Un instrument électronique peut donc se tromper s'il est mal réglé.</p>", verdicts: [[0, "rejetee", "La balance affiche 0,8 kg à vide : elle est mal tarée, toutes ses pesées sont faussées."]] },
         retenir: "Grandeur + nombre + unité ; vérifier le zéro de l'instrument avant de mesurer." },
 
-      { t: "Les différents types d'erreur", html: (M_OLD ? M_OLD.parties[1].html : ""),
+      { t: "Les différents types d'erreur", html: (M_OLD ? M_OLD.parties[1].html : "") +
+        "<div class='ex'><b>Exemple d'erreur systématique</b>Un chronomètre déclenché toujours 0,04 s en retard donne des durées toutes trop courtes de 0,04 s : T lue = 1,36 s, T corrigée = 1,36 + 0,04 = <strong>1,40 s</strong>. Répéter la mesure ne corrige rien : il faut corriger l'instrument ou la méthode.</div>" +
+        "<div class='ex'><b>Exemple d'erreur aléatoire</b>Lire l'aiguille d'une balance un peu de côté (erreur de <strong>parallaxe</strong>) donne 24,1 kg, puis 24,3 kg : l'écart change de sens d'une lecture à l'autre. On répète et on fait la moyenne.</div>" +
+        "<div class='attention'><b>Attention</b>Une erreur systématique ne se voit pas en répétant la mesure : toutes les valeurs sont décalées du même côté. Seule une comparaison avec un autre instrument ou un test à vide la révèle.</div>",
         planches: [{ type: "2D", titre: "Erreur systématique ou erreur aléatoire ?", legende: "Des mesures groupées mais décalées trahissent une erreur systématique (on corrige l'instrument) ; des mesures dispersées autour du centre trahissent une erreur aléatoire (on répète et on fait la moyenne).", svg: PLANCHE_CIBLES }],
         fil: { html: "<p>Les 0,8 kg affichés à vide s'ajoutent à <strong>chaque</strong> pesée du commerçant, toujours dans le même sens : c'est une erreur <strong>systématique</strong>. 25,0 − 0,8 = <strong>24,2 kg</strong>. Les petits écarts entre les pesées de Samuel (24,0 à 24,4) vont tantôt en plus, tantôt en moins : erreur <strong>aléatoire</strong> (lecture de l'aiguille, position du sac). Elle ne rend pas la balance inutilisable : on la réduit en faisant la moyenne.</p>", verdicts: [[1, "rejetee", "Des écarts aléatoires sont normaux : on les réduit par la moyenne, l'instrument reste utilisable."]] },
         retenir: "Systématique : même sens, on corrige l'instrument. Aléatoire : on répète et on fait la moyenne." },
 
       { t: "Écrire un résultat de mesure", html: (M_OLD ? M_OLD.parties[2].html : "") +
-        "<div class='methode'><b>Exploiter une série de mesures</b><ol><li>Calcule la <strong>moyenne</strong> m̄ des mesures.</li><li>Prends comme incertitude ΔG le plus grand écart entre une mesure et la moyenne (ou la demi-étendue).</li><li>Écris G = (m̄ ± ΔG) unité, puis l'incertitude relative ΔG/m̄ en %.</li></ol></div>",
+        "<div class='methode'><b>Exploiter une série de mesures</b><ol><li>Calcule la <strong>moyenne</strong> m̄ des mesures.</li><li>Prends comme incertitude ΔG le plus grand écart entre une mesure et la moyenne (ou la demi-étendue).</li><li>Écris G = (m̄ ± ΔG) unité, puis l'incertitude relative ΔG/m̄ en %.</li></ol></div>" +
+        "<p class='formule'>Valeur moyenne : m̄ = (m₁ + m₂ + … + mₙ) ÷ n</p>" +
+        "<p class='formule'>Incertitude absolue : Δm = plus grand écart |mᵢ − m̄| &nbsp;·&nbsp; Incertitude relative : (Δm ÷ m̄) × 100 %</p>" +
+        "<p class='formule'>Résultat : m = (m̄ ± Δm) unité &nbsp;⇔&nbsp; m̄ − Δm ≤ m ≤ m̄ + Δm</p>" +
+        "<div class='ex'><b>Exemple : la période d'un pendule</b>Mesures : 1,42 s ; 1,38 s ; 1,40 s ; 1,40 s (le groupe 4 corrigé). Moyenne : 5,60 ÷ 4 = 1,40 s. Plus grand écart : 0,02 s. Résultat : <strong>T = (1,40 ± 0,02) s</strong>, incertitude relative 0,02 ÷ 1,40 × 100 ≈ <strong>1,4 %</strong>.</div>" +
+        "<div class='astuce'><b>Astuce pour retenir</b>« <strong>M-É-R</strong> » : <strong>M</strong>oyenne, <strong>É</strong>cart le plus grand, <strong>R</strong>ésultat entre parenthèses avec son unité. Et garde pour la moyenne autant de décimales que l'incertitude.</div>",
+        planches: [{ type: "2D", titre: "L'intervalle de mesure du sac", legende: "Les cinq pesées (points bleus), leur moyenne 24,2 kg et l'intervalle [24,0 ; 24,4] kg : les 25 kg annoncés sont en dehors.", svg: (function () {
+          var s = "", x0 = 60, k = 520 / 1.2, X = function (v) { return (x0 + (v - 23.9) * k).toFixed(1); }, i;
+          s += "<path d='M40 120H610' stroke='" + NUIT + "' stroke-width='2.5'/>";
+          for (i = 0; i <= 12; i++) { var v = 23.9 + i * 0.1; s += "<path d='M" + X(v) + " 114V126' stroke='" + NUIT + "' stroke-width='1.5'/>" + txt(X(v), 144, v.toFixed(1).replace(".", ","), { s: 11 }); }
+          s += "<rect x='" + X(24.0) + "' y='92' width='" + (0.4 * k).toFixed(1) + "' height='22' rx='6' fill='#ECF7F0' stroke='#17784D' stroke-width='2'/>" + txt(X(24.2), 86, "m = (24,2 ± 0,2) kg", { s: 13, c: "#17784D" });
+          [24.1, 24.3, 24.2, 24.4, 24.0].forEach(function (v, j) { s += "<circle cx='" + X(v) + "' cy='" + (164 + j * 9) + "' r='5' fill='" + BLEU + "'/>"; });
+          s += "<path d='M" + X(24.2) + " 90V210' stroke='" + BLEU + "' stroke-width='2' stroke-dasharray='5 4'/>" + txt(X(24.2), 222, "moyenne 24,2", { s: 11.5, c: BLEU });
+          s += "<path d='M" + X(25.0) + " 60V130' stroke='" + ROUGE + "' stroke-width='3'/>" + txt(X(25.0), 52, "25 kg annoncés", { s: 12.5, c: ROUGE });
+          return svg(640, 232, "Axe gradué de 23,9 à 25,1 kilogrammes avec les cinq pesées, leur moyenne, l'intervalle de 24,0 à 24,4 et la valeur annoncée de 25 kilogrammes hors de l'intervalle", "", s);
+        })() }],
         fil: { html: "<p>Moyenne des cinq pesées : (24,1 + 24,3 + 24,2 + 24,4 + 24,0) ÷ 5 = 121,0 ÷ 5 = <strong>24,2 kg</strong>. Plus grand écart à la moyenne : 0,2 kg. Donc <strong>m = (24,2 ± 0,2) kg</strong>, soit une incertitude relative de 0,2 ÷ 24,2 ≈ 0,8 %. Les 25 kg annoncés sont hors de l'intervalle [24,0 ; 24,4] : il manque environ 800 g, soit 3,2 %, bien au-delà des 0,2 % tolérés.</p>", verdicts: [[2, "validee", "Balance corrigée : 25,0 − 0,8 = 24,2 kg, exactement la moyenne de Samuel : m = (24,2 ± 0,2) kg."]] },
         retenir: "G = (valeur moyenne ± incertitude) unité ; deux mesures sont compatibles si leurs intervalles se recouvrent." },
       M_OLD && M_OLD.parties[3] ? M_OLD.parties[3] : { t: "Entraînement", html: "" }
@@ -4642,6 +4770,14 @@ VRT_PLUS("3e-en-articles", [
         "Cette erreur systématique fausse toutes ses pesées : 25,0 − 0,8 = 24,2 kg (indice 2).",
         "Les écarts de Samuel sont aléatoires : on fait la moyenne (indice 2).",
         "Moyenne 24,2 kg, incertitude 0,2 kg : m = (24,2 ± 0,2) kg, 25 kg est exclu (indice 3)."
+      ],
+      formules: [
+        { nom: "Corriger l'erreur systématique de la balance du commerçant", f: "masse vraie = valeur lue − décalage à vide", calcul: "25,0 − 0,8 = 24,2 kg" },
+        { nom: "Calculer la valeur moyenne des pesées de Samuel", f: "m̄ = (m₁ + m₂ + m₃ + m₄ + m₅) ÷ 5", calcul: "(24,1 + 24,3 + 24,2 + 24,4 + 24,0) ÷ 5 = 121,0 ÷ 5 = 24,2 kg" },
+        { nom: "Calculer l'incertitude absolue", f: "Δm = plus grand écart |mᵢ − m̄|", calcul: "|24,4 − 24,2| = 0,2 kg et |24,0 − 24,2| = 0,2 kg, donc Δm = 0,2 kg" },
+        { nom: "Écrire le résultat de mesure", f: "m = (m̄ ± Δm) unité", calcul: "m = (24,2 ± 0,2) kg, soit 24,0 kg ≤ m ≤ 24,4 kg" },
+        { nom: "Calculer l'incertitude relative", f: "(Δm ÷ m̄) × 100 %", calcul: "0,2 ÷ 24,2 × 100 ≈ 0,8 % : la mesure est précise" },
+        { nom: "Comparer à l'étiquette et à la loi", f: "écart relatif = (m annoncée − m mesurée) ÷ m annoncée × 100 %", calcul: "(25 − 24,2) ÷ 25 × 100 = 3,2 %, bien plus que les 0,2 % tolérés : il manque 800 g" }
       ],
       reponse: "<p>La balance du commerçant affiche 0,8 kg à vide : elle n'est pas tarée et ajoute 0,8 kg à chaque pesée. C'est une erreur systématique, qui ne disparaît pas en répétant la mesure ; corrigée, sa lecture donne 25,0 − 0,8 = 24,2 kg. Les cinq pesées de Samuel, faites sur une balance bien tarée, varient de 24,0 à 24,4 kg : ce sont des erreurs aléatoires de lecture, que l'on réduit en calculant la moyenne, 24,2 kg. Le plus grand écart à la moyenne est de 0,2 kg, d'où le résultat <strong>m = (24,2 ± 0,2) kg</strong>, avec une incertitude relative d'environ 0,8 %. Les deux balances sont donc d'accord une fois l'erreur corrigée, et le sac ne pèse pas 25 kg : il manque environ 800 g, bien au-delà de la tolérance légale.</p>",
       transfert: "<p>Au laboratoire, quatre groupes mesurent la période d'un pendule : 1,42 s ; 1,38 s ; 1,40 s ; 1,44 s. Le chronomètre du groupe 4 démarre toujours 0,04 s en retard. Corrige la mesure du groupe 4, puis donne le résultat avec son incertitude. <em>(1,40 s ; T = (1,40 ± 0,02) s.)</em></p>"
@@ -7682,6 +7818,402 @@ VRT_PLUS("3e-en-articles", [
       s += "<text x='420' y='60' font-size='15' font-weight='700' fill='#17784D'>Aire : " + A.toLocaleString("fr-FR") + " cm²</text><text x='420' y='100' font-size='15' font-weight='700' fill='#1E499B'>Volume : " + Vo.toLocaleString("fr-FR") + " cm³</text><text x='420' y='140' font-size='15' font-weight='700' fill='#C2540A'>Savons de 4 cm : " + n + "</text>";
       sv.innerHTML = s;
       $(el, "[data-r]").innerHTML = "Aire = 2 × (" + L + "×" + l + " + " + L + "×" + h + " + " + l + "×" + h + ") = <b>" + A + " cm²</b> · volume = " + L + " × " + l + " × " + h + " = <b>" + Vo + " cm³</b> · " + (L / 4) + " × " + (l / 4) + " × " + (h / 4) + " = <b>" + n + " savons</b>.";
+    }
+    I.forEach(function (x) { x.addEventListener("input", maj); }); maj();
+  });
+})();
+
+/* Leçons APPROFONDIES — 6e Mathématiques, lot 3 (18/11/2026) : trois lignes de la progression qui n'avaient aucune leçon.
+   - « Numérateur, dénominateur, fractions égales » (le jus de foléré du CES de Mora)
+   - « Notions d'angle ou de secteur angulaire » (l'horloge de l'école de Kribi)
+   - « Points symétriques par rapport à une droite » (le motif ndop de Bamenda)
+   Même gabarit et mêmes outils de dessin que 16c-approfondies-6e-maths.js. Simulations en fin de fichier. */
+(function () {
+  "use strict";
+  "use strict";
+  var NUIT = "#001136", BLEU = "#1E499B", GRIS = "#4D5163", VERT = "#17784D", ORANGE = "#C2540A";
+
+  function txt(x, y, t, o) {
+    o = o || {};
+    return "<text x='" + x + "' y='" + y + "' text-anchor='" + (o.a || "middle") + "' font-size='" + (o.s || 12) + "' font-weight='" + (o.w || 700) + "' fill='" + (o.c || NUIT) + "'" + (o.i ? " font-style='italic'" : "") + ">" + t + "</text>";
+  }
+  function rad(id, cs) {
+    var s = "<radialGradient id='" + id + "' cx='35%' cy='30%' r='75%'>";
+    cs.forEach(function (c, i) { s += "<stop offset='" + (i / (cs.length - 1)).toFixed(2) + "' stop-color='" + c + "'/>"; });
+    return s + "</radialGradient>";
+  }
+  function lin(id, cs, vertical) {
+    var s = "<linearGradient id='" + id + "'" + (vertical ? " x1='0' y1='0' x2='0' y2='1'" : "") + ">";
+    cs.forEach(function (c, i) { s += "<stop offset='" + (i / (cs.length - 1)).toFixed(2) + "' stop-color='" + c + "'/>"; });
+    return s + "</linearGradient>";
+  }
+  function fleche(id, c) { return "<marker id='" + id + "' markerWidth='10' markerHeight='10' refX='7' refY='5' orient='auto'><path d='M0 1L8 5L0 9Z' fill='" + c + "'/></marker>"; }
+  function svg(w, h, alt, defs, corps) {
+    return "<svg viewBox='0 0 " + w + " " + h + "' role='img' aria-label='" + alt + "' font-family='Inter,Arial,sans-serif'><rect width='" + w + "' height='" + h + "' fill='#fff'/><defs>" + defs + "</defs>" + corps +
+      "<text x='" + (w - 6) + "' y='" + (h - 5) + "' font-size='8' text-anchor='end' fill='#8A93A6'>Planche VÉRITAS</text></svg>";
+  }
+  function q(qq, bonne, f1, f2, e) { return { q: qq, r: [bonne, f1, f2], b: 0, e: e }; }
+  function perso(x, y, peau, habit, bas, s) {
+    bas = bas || "#2E3445";
+    return "<g transform='translate(" + x + " " + y + ") scale(" + (s || 1) + ")'><ellipse cx='0' cy='84' rx='18' ry='4' fill='#001136' opacity='.18'/>" +
+      "<rect x='-9' y='44' width='8' height='36' rx='3' fill='" + bas + "'/><rect x='1' y='44' width='8' height='36' rx='3' fill='" + bas + "'/>" +
+      "<ellipse cx='-6' cy='81' rx='7' ry='3.5' fill='#1F2328'/><ellipse cx='6' cy='81' rx='7' ry='3.5' fill='#1F2328'/>" +
+      "<path d='M-13 46L-16 18C-16 13 -12 11 -6 10H6C12 11 16 13 16 18L13 46Z' fill='" + habit + "'/>" +
+      "<path d='M-15 16L-20 40' stroke='" + habit + "' stroke-width='7' stroke-linecap='round'/><path d='M15 16L20 40' stroke='" + habit + "' stroke-width='7' stroke-linecap='round'/>" +
+      "<circle cx='-20' cy='42' r='3.6' fill='" + peau + "'/><circle cx='20' cy='42' r='3.6' fill='" + peau + "'/>" +
+      "<rect x='-3.5' y='5' width='7' height='7' fill='" + peau + "'/><ellipse cx='0' cy='-2' rx='9' ry='10.5' fill='" + peau + "'/>" +
+      "<path d='M-9 -4C-10 -14 -4 -13.5 0 -13.5S10 -14 9 -4C7 -9 -7 -9 -9 -4Z' fill='#1B1410'/></g>";
+  }
+  var PEAU = ["#6B4226", "#8A5A36", "#5A3620", "#7A4B2C"];
+  function entrainement(a, b) { return "<div class='integ'><h3>Partie A : évaluation des ressources</h3>" + a + "<h3>Partie B : évaluation des compétences</h3>" + b + "</div>"; }
+
+
+  /* ═══════════════════════ 6e — FRACTIONS : NUMÉRATEUR, DÉNOMINATEUR, FRACTIONS ÉGALES ═══════════════════════ */
+  function bidon(x, y, h, part, n, col, lab) {
+    var s = "<g transform='translate(" + x + " " + y + ")'><rect x='0' y='0' width='70' height='" + h + "' rx='10' fill='#F4F7FC' stroke='" + NUIT + "' stroke-width='2.5'/>", i, hp = h / n;
+    for (i = 0; i < n; i++) s += "<rect x='2' y='" + (h - (i + 1) * hp + 1).toFixed(1) + "' width='66' height='" + (hp - 2).toFixed(1) + "' rx='4' fill='" + (i < part ? col : "transparent") + "' opacity='.85'/>" + (i ? "<path d='M0 " + (h - i * hp).toFixed(1) + "H70' stroke='" + NUIT + "' stroke-width='1' stroke-dasharray='4 3'/>" : "");
+    return s + "<rect x='22' y='-12' width='26' height='14' rx='4' fill='" + NUIT + "'/>" + (lab ? txt(35, h + 22, lab, { s: 15, c: col }) : "") + "</g>";
+  }
+  VRT_L("6e-maths-fractions", {
+    c: "6e", m: "maths", cle: "Numérateur, dénominateur, fractions égales", titre: "Les fractions : numérateur, dénominateur, fractions égales", duree: 30,
+    accroche: "Aïcha verse les 3/4 du bidon, Paul les 6/8 : qui a versé le plus de jus de foléré ?",
+    intro: "Pour la fête de fin d'année du CES de Mora, deux élèves remplissent la grande marmite de jus. Partie après partie, tu vas comparer leurs versements.",
+    objectifs: ["lire et écrire une fraction (numérateur, dénominateur)", "reconnaître et fabriquer des fractions égales", "simplifier une fraction", "trouver l'inverse d'une fraction"],
+    enquete: {
+      titre: "Le jus de foléré de la fête",
+      svg: (function () {
+        var s = "<rect width='640' height='220' fill='#FFF3F6'/><rect y='176' width='640' height='44' fill='#E8D3AE'/>";
+        s += bidon(70, 40, 120, 3, 4, "#C2185B", "3/4") + bidon(200, 40, 120, 6, 8, "#7B2CBF", "6/8");
+        s += "<ellipse cx='470' cy='150' rx='100' ry='20' fill='#5A3620'/><path d='M370 150V110Q470 90 570 110V150Z' fill='#8A5A2D'/><ellipse cx='470' cy='110' rx='100' ry='20' fill='#B4245A'/>";
+        s += perso(330, 92, PEAU[0], "#E07B1F", "#3A2A20", .85) + perso(600, 92, PEAU[2], "#1E6FD0", "#24324A", .85);
+        s += "<rect x='300' y='14' width='320' height='34' rx='12' fill='#fff' stroke='#F2C1D1'/>" + txt(460, 36, "Bidons de 12 L · jus de foléré", { s: 12.5, c: "#C2185B" });
+        return svg(640, 220, "Deux bidons de douze litres remplis aux trois quarts et aux six huitièmes, et une grande marmite", "", s);
+      })(),
+      legende: "CES de Mora : la marmite de jus de foléré pour la fête de fin d'année.",
+      contexte: "<p>Chaque bidon contient <strong>12 L</strong>. Aïcha verse les <strong>3/4</strong> de son bidon dans la marmite ; Paul verse les <strong>6/8</strong> du sien.</p><p>Paul se vante : « 6 est plus grand que 3, j'ai versé plus ! » Aïcha répond : « Mes quarts sont plus gros que tes huitièmes, c'est moi ! »</p>",
+      documents: [{ t: "Le bidon gradué", html: "<table class='donnees'><tr><td>Contenance</td><td>12 L</td></tr><tr><td>Graduation d'Aïcha</td><td>4 parts égales de 3 L</td></tr><tr><td>Graduation de Paul</td><td>8 parts égales de 1,5 L</td></tr></table>" }],
+      question: "Qui a versé le plus de jus : Aïcha avec 3/4 ou Paul avec 6/8 ?",
+      tache: "Explique ce que disent le numérateur et le dénominateur, compare les deux fractions et calcule les litres versés.",
+      hypotheses: ["Paul a versé plus : 6 est plus grand que 3.", "Aïcha a versé plus : un quart est plus gros qu'un huitième.", "Ils ont versé autant : 3/4 et 6/8 sont deux écritures du même nombre."]
+    },
+    parties: [
+      { t: "Numérateur et dénominateur",
+        html: "<div class='def'><b>Définition</b>Dans la fraction <strong>a/b</strong> (b ≠ 0), le <strong>dénominateur</strong> b dit en combien de <strong>parts égales</strong> on partage l'unité ; le <strong>numérateur</strong> a dit combien de parts on prend.</div><div class='ex'><b>Les bidons</b>3/4 : le bidon est partagé en 4 parts de 3 L, Aïcha en verse 3, soit 3 × 3 = <strong>9 L</strong>. 6/8 : 8 parts de 1,5 L, Paul en verse 6, soit 6 × 1,5 = <strong>9 L</strong>.</div>",
+        planches: [{ type: "2D", titre: "Ce que disent les deux nombres", legende: "Le dénominateur fixe la taille des parts, le numérateur leur nombre : 3 grosses parts ou 6 petites parts donnent la même quantité.", svg: (function () {
+          var s = bidon(60, 30, 150, 3, 4, "#C2185B", "") + bidon(200, 30, 150, 6, 8, "#7B2CBF", "");
+          s += txt(95, 206, "3 parts de 3 L", { s: 12, c: "#C2185B" }) + txt(235, 206, "6 parts de 1,5 L", { s: 12, c: "#7B2CBF" });
+          s += "<rect x='340' y='40' width='270' height='140' rx='14' fill='#FFF6E3' stroke='#F2DFA6'/>" + txt(475, 86, "numérateur", { s: 13, c: "#C2185B" }) + "<text x='475' y='118' text-anchor='middle' font-size='34' font-weight='800' fill='" + NUIT + "'>3</text><path d='M445 128H505' stroke='" + NUIT + "' stroke-width='3'/><text x='475' y='160' text-anchor='middle' font-size='34' font-weight='800' fill='" + NUIT + "'>4</text>" + txt(560, 152, "dénominateur", { s: 12, c: BLEU });
+          return svg(640, 222, "Deux bidons partagés en quatre et en huit parts, et la fraction trois quarts annotée", "", s);
+        })() }, { type: "3d", titre: "Le bidon en quatre parts", legende: "Le bidon découpé en 4 tranches égales : 3 sont pleines de jus, 1 est vide. Le curseur sépare les tranches.",
+          modele: { h: 340, rx: -20, ry: 26, echelle: .62, dy: 46, alt: "Bidon cylindrique découpé en quatre tranches dont trois remplies", eclate: "Séparer les quarts", jouer: "Découper le bidon",
+            objets: [{ f: "boite", c: [0, -6, 0], d: [300, 8, 220], coul: "#C9B48A", dessus: "#D9C59E", div: false },
+              { f: "cylindre", c: [0, 0, 0], r: 60, h: 48, n: 26, coul: "#C2185B", dessus: "#E05589", ec: [0, 0, 0] },
+              { f: "cylindre", c: [0, 50, 0], r: 60, h: 48, n: 26, coul: "#C2185B", dessus: "#E05589", ec: [0, 30, 0] },
+              { f: "cylindre", c: [0, 100, 0], r: 60, h: 48, n: 26, coul: "#C2185B", dessus: "#E05589", ec: [0, 60, 0] },
+              { f: "cylindre", c: [0, 150, 0], r: 60, h: 48, n: 26, coul: "#DCE6F5", dessus: "#EEF3FA", op: .45, ec: [0, 90, 0] }],
+            etiquettes: [{ p: [62, 24, 0], t: "1er quart : 3 L", cote: "d" }, { p: [62, 124, 0], t: "3e quart : 3 L", cote: "d", ec: [0, 60, 0] }, { p: [-62, 174, 0], t: "4e quart : vide", ec: [0, 90, 0] }] } }],
+        fil: { html: "<p>Comparer seulement les numérateurs n'a pas de sens : les parts de Paul sont <strong>deux fois plus petites</strong>. Il faut tenir compte du dénominateur.</p>", verdicts: [[0, "rejetee", "6 > 3, mais 6 huitièmes sont des parts deux fois plus petites que 3 quarts."]] },
+        retenir: "Dénominateur : nombre de parts égales ; numérateur : parts prises." },
+
+      { t: "Les fractions égales",
+        html: "<p class='formule'>On ne change pas une fraction en multipliant (ou en divisant) son numérateur et son dénominateur par un même nombre non nul.</p><div class='ex'><b>Exemple</b>3/4 = (3 × 2)/(4 × 2) = 6/8 = (3 × 3)/(4 × 3) = 9/12.</div><div class='astuce'><b>Astuce</b>Pour comparer deux fractions, on les écrit avec le <strong>même dénominateur</strong>, puis on compare les numérateurs.</div>",
+        planches: [{ type: "2D", titre: "Trois écritures, une même quantité", legende: "3/4, 6/8 et 9/12 colorient exactement la même longueur de bande.", svg: (function () {
+          var s = "", L = 480, rows = [[4, 3, "#C2185B"], [8, 6, "#7B2CBF"], [12, 9, "#1B998B"]], i, k;
+          rows.forEach(function (r, j) { var y = 30 + j * 56, w = L / r[0]; for (k = 0; k < r[0]; k++) s += "<rect x='" + (110 + k * w).toFixed(1) + "' y='" + y + "' width='" + (w - 2).toFixed(1) + "' height='34' rx='4' fill='" + (k < r[1] ? r[2] : "#EEF1F6") + "'/>"; s += txt(70, y + 24, r[1] + "/" + r[0], { s: 18, c: r[2] }); });
+          s += "<path d='M" + (110 + L * .75) + " 20V200' stroke='" + NUIT + "' stroke-width='2' stroke-dasharray='6 4'/>" + txt(110 + L * .75, 214, "même trait : même quantité", { s: 12 });
+          return svg(640, 226, "Trois bandes coloriées aux trois quarts, aux six huitièmes et aux neuf douzièmes", "", s);
+        })() }],
+        fil: { html: "<p>3/4 = (3 × 2)/(4 × 2) = 6/8 : les deux fractions sont <strong>égales</strong>. Les quarts d'Aïcha sont plus gros, mais elle en verse deux fois moins.</p>", verdicts: [[1, "rejetee", "Les quarts sont plus gros, mais Aïcha en prend deux fois moins : 3 quarts = 6 huitièmes."]] },
+        retenir: "a/b = (a × k)/(b × k) : multiplier en haut et en bas par le même nombre." },
+
+      { t: "Simplifier ; l'inverse d'une fraction",
+        html: "<p><strong>Simplifier</strong> une fraction, c'est diviser le numérateur et le dénominateur par un même nombre : 6/8 = (6 ÷ 2)/(8 ÷ 2) = <strong>3/4</strong>. Une fraction est <strong>irréductible</strong> quand on ne peut plus la simplifier.</p><div class='def'><b>Définition</b>L'<strong>inverse</strong> de a/b (a et b non nuls) est b/a : on échange numérateur et dénominateur. Leur produit vaut 1 : 3/4 × 4/3 = 12/12 = 1.</div>",
+        planches: [{ type: "2D", titre: "Simplifier, puis inverser", legende: "6/8 se simplifie par 2 en 3/4, irréductible ; l'inverse de 3/4 est 4/3, et 3/4 × 4/3 = 1.", svg: (function () {
+          var s = "<rect x='20' y='30' width='290' height='150' rx='14' fill='#EEF4FC' stroke='#C9D8EE'/>" + txt(165, 62, "simplifier par 2", { s: 13, c: BLEU });
+          s += "<text x='90' y='120' text-anchor='middle' font-size='30' font-weight='800' fill='#7B2CBF'>6/8</text><path d='M130 112H190' stroke='" + BLEU + "' stroke-width='3' marker-end='url(#frF)'/>" + txt(160, 100, "÷ 2", { s: 13, c: BLEU }) + "<text x='240' y='120' text-anchor='middle' font-size='30' font-weight='800' fill='#C2185B'>3/4</text>" + txt(165, 160, "3/4 est irréductible", { s: 12.5, c: GRIS });
+          s += "<rect x='330' y='30' width='290' height='150' rx='14' fill='#ECF7F0' stroke='#BFDCC9'/>" + txt(475, 62, "inverse", { s: 13, c: VERT }) + "<text x='420' y='120' text-anchor='middle' font-size='30' font-weight='800' fill='#C2185B'>3/4</text><path d='M455 112H500' stroke='" + VERT + "' stroke-width='3' marker-end='url(#frF2)'/><text x='540' y='120' text-anchor='middle' font-size='30' font-weight='800' fill='" + VERT + "'>4/3</text>" + txt(475, 160, "3/4 × 4/3 = 1", { s: 14 });
+          return svg(640, 200, "Simplification de six huitièmes en trois quarts et inverse de trois quarts", fleche("frF", BLEU) + fleche("frF2", VERT), s);
+        })() }],
+        fil: { html: "<p>6/8 se simplifie en 3/4 : Aïcha et Paul ont versé <strong>9 L chacun</strong>, soit 18 L dans la marmite.</p>", verdicts: [[2, "validee", "3/4 = 6/8 : 9 L chacun, versements égaux."]] },
+        retenir: "Simplifier : diviser en haut et en bas ; inverse de a/b : b/a." },
+
+      { t: "Entraînement", html: entrainement(
+        "<p><strong>Question de cours.</strong> Que représente le dénominateur d'une fraction ?</p><details><summary>Voir la réponse</summary><p>Le nombre de parts égales dans lesquelles on partage l'unité.</p></details><p><strong>Exercice.</strong> Complète : 2/5 = …/15 ; 12/18 = 2/… ; donne l'inverse de 5/7.</p><details><summary>Voir la réponse</summary><p>2/5 = 6/15 ; 12/18 = 2/3 ; l'inverse de 5/7 est 7/5.</p></details>",
+        "<p><strong>Situation.</strong> Au champ de Mbouda, grand-père laisse 2/6 du terrain en jachère ; son voisin laisse 1/3 du sien. Les deux champs ont la même taille.</p><p><strong>Tâche.</strong> Qui laisse le plus de terrain en jachère ? Justifie avec des fractions égales.</p><details><summary>Voir une réponse attendue</summary><p>2/6 = (2 ÷ 2)/(6 ÷ 2) = 1/3 : ils laissent <strong>la même part</strong>.</p></details>"),
+        retenir: "Savoir-être : partager équitablement." }
+    ],
+    denouement: {
+      titre: "Égalité : 9 L chacun",
+      etapes: ["Dénominateur = parts égales, numérateur = parts prises (indice 1).", "3/4 = 6/8 en multipliant en haut et en bas par 2 (indice 2).", "6/8 se simplifie en 3/4 : 9 L chacun (indice 3)."],
+      reponse: "<p>Aïcha et Paul ont versé <strong>autant</strong> : 3/4 = 6/8, car 6/8 = (3 × 2)/(4 × 2). Chacun a versé 9 L sur 12 L. Paul ne regardait que les numérateurs ; Aïcha ne regardait que la taille des parts.</p>",
+      transfert: "<p>Un troisième élève verse les 10/12 de son bidon. A-t-il versé plus ? <em>(10/12 = 5/6 et 3/4 = 9/12 : oui, 10 L contre 9 L.)</em></p>"
+    },
+    revision: ["Fraction a/b : <strong>dénominateur</strong> b = parts égales ; <strong>numérateur</strong> a = parts prises.", "Fractions égales : multiplier (ou diviser) numérateur et dénominateur par le <strong>même nombre</strong>.", "Simplifier : diviser en haut et en bas ; irréductible quand ce n'est plus possible.", "Inverse de a/b : <strong>b/a</strong> ; leur produit vaut 1."],
+    exo: "<p>Range 1/2, 3/8 et 5/8 dans l'ordre croissant. <em>(1/2 = 4/8 : 3/8 < 1/2 < 5/8.)</em></p>",
+    quiz: [
+      q("Dans 5/7, le dénominateur est :", "7", "5", "12", "Le nombre de parts égales."),
+      q("3/4 est égal à :", "6/8", "3/8", "4/3", "On multiplie en haut et en bas par 2."),
+      q("12/16 simplifié au maximum donne :", "3/4", "6/8", "4/3", "On divise par 4."),
+      q("L'inverse de 2/9 est :", "9/2", "2/9", "−2/9", "On échange les deux nombres."),
+      q("2/3 × 3/2 vaut :", "1", "6/6 + 1", "4/9", "Un nombre fois son inverse = 1."),
+      q("Les 3/4 de 12 L font :", "9 L", "4 L", "3 L", "12 ÷ 4 × 3."),
+      q("Quelle fraction est la plus grande ?", "5/8", "1/2", "3/8", "1/2 = 4/8."),
+      q("Une fraction irréductible :", "ne se simplifie plus", "a un numérateur nul", "est plus grande que 1", "Ex. : 3/4."),
+      q("Pour comparer 2/5 et 3/10, on écrit :", "4/10 et 3/10", "2/10 et 3/10", "2/5 et 3/5", "Même dénominateur."),
+      q("2/6 et 1/3 sont :", "égales", "différentes", "inverses", "2/6 = 1/3.")
+    ],
+    apc: { module: "Mathématiques de 6e", famille: "Vie sociale et économique", agir: "Partager et comparer des quantités", situation: "Deux élèves versent du jus de deux bidons gradués différemment.", tache: "Comparer deux fractions et calculer les quantités versées." }
+  });
+
+  /* ═══════════════════════ 6e — LES ANGLES ═══════════════════════ */
+  function horloge(cx, cy, r, h, m) {
+    var s = "<circle cx='" + cx + "' cy='" + cy + "' r='" + r + "' fill='#fff' stroke='" + NUIT + "' stroke-width='3'/>", i;
+    for (i = 0; i < 12; i++) { var a = i * Math.PI / 6; s += "<path d='M" + (cx + r * .82 * Math.sin(a)).toFixed(1) + " " + (cy - r * .82 * Math.cos(a)).toFixed(1) + "L" + (cx + r * .94 * Math.sin(a)).toFixed(1) + " " + (cy - r * .94 * Math.cos(a)).toFixed(1) + "' stroke='" + NUIT + "' stroke-width='" + (i % 3 ? 1.5 : 3) + "'/>"; }
+    var ah = (h % 12 + m / 60) * Math.PI / 6, am = m * Math.PI / 30;
+    s += "<path d='M" + cx + " " + cy + "L" + (cx + r * .5 * Math.sin(ah)).toFixed(1) + " " + (cy - r * .5 * Math.cos(ah)).toFixed(1) + "' stroke='#C62828' stroke-width='5' stroke-linecap='round'/>";
+    s += "<path d='M" + cx + " " + cy + "L" + (cx + r * .78 * Math.sin(am)).toFixed(1) + " " + (cy - r * .78 * Math.cos(am)).toFixed(1) + "' stroke='" + BLEU + "' stroke-width='3.5' stroke-linecap='round'/><circle cx='" + cx + "' cy='" + cy + "' r='4' fill='" + NUIT + "'/>";
+    return s;
+  }
+  function typeAngle(d) { return d === 0 ? "nul" : d < 90 ? "aigu" : d === 90 ? "droit" : d < 180 ? "obtus" : d === 180 ? "plat" : "rentrant"; }
+  VRT_L("6e-maths-angles", {
+    c: "6e", m: "maths", cle: "Notions d'angle ou de secteur angulaire", titre: "Les angles : nommer, classer, mesurer", duree: 30,
+    accroche: "À 4 heures, les aiguilles de l'horloge forment-elles un angle aigu ? Plus elles sont longues, plus l'angle est grand ?",
+    intro: "La grande horloge de l'école publique de Kribi sert de rapporteur géant : à chaque heure, ses aiguilles dessinent un angle.",
+    objectifs: ["nommer un angle par son sommet et ses côtés", "reconnaître un angle nul, aigu, droit, obtus, plat, rentrant", "mesurer un angle en degrés avec le rapporteur"],
+    enquete: {
+      titre: "L'horloge de l'école de Kribi",
+      svg: (function () {
+        var s = "<rect width='640' height='220' fill='#EAF4FB'/><rect y='180' width='640' height='40' fill='#E8D3AE'/><rect x='60' y='40' width='180' height='140' fill='#F3DDB0' stroke='#B9A57C'/>";
+        s += horloge(150, 100, 52, 4, 0) + horloge(400, 110, 46, 1, 0) + horloge(520, 110, 46, 3, 0);
+        s += txt(400, 176, "1 h", { s: 13 }) + txt(520, 176, "3 h", { s: 13 }) + txt(150, 170, "4 h : la cloche", { s: 12.5, c: "#C62828" });
+        s += perso(300, 102, PEAU[1], "#1B998B", "#24324A", .85);
+        return svg(640, 220, "La grande horloge de l'école marquant quatre heures et deux petites horloges à une heure et trois heures", "", s);
+      })(),
+      legende: "École publique de Kribi : la cloche sonne à 4 heures.",
+      contexte: "<p>Le maître demande de classer les angles formés par les aiguilles à <strong>1 h, 3 h, 4 h et 6 h</strong>.</p><p>Ebanda dit : « Sur la grande horloge, les aiguilles sont plus longues, donc l'angle est plus grand. » Ngo Mbia ajoute : « À 4 h, l'angle est aigu, il est encore petit. »</p>",
+      documents: [{ t: "Le cadran", html: "<table class='donnees'><tr><td>Tour complet</td><td>360°</td></tr><tr><td>12 heures</td><td>360° ÷ 12 = 30° par heure</td></tr></table>" }],
+      question: "Quel angle forment les aiguilles à 1 h, 3 h, 4 h et 6 h, et de quel type est-il ?",
+      tache: "Mesure ou calcule chaque angle en degrés, puis classe-le (aigu, droit, obtus, plat).",
+      hypotheses: ["Plus les aiguilles sont longues, plus l'angle est grand.", "À 4 h, l'angle est aigu.", "L'angle dépend seulement de l'ouverture : 30° par heure, soit 30°, 90°, 120° et 180°."]
+    },
+    parties: [
+      { t: "Nommer un angle",
+        html: "<div class='def'><b>Définition</b>Deux demi-droites [Ox) et [Oy) de même origine O forment un <strong>angle</strong>, noté <strong>x̂Oy</strong>. O est le <strong>sommet</strong>, [Ox) et [Oy) sont les <strong>côtés</strong>. La partie du plan comprise entre les côtés est le <strong>secteur angulaire</strong>.</div><div class='attention'><b>Attention</b>La taille d'un angle ne dépend pas de la longueur de ses côtés : on peut prolonger les côtés sans changer l'angle.</div>",
+        planches: [{ type: "2D", titre: "Sommet, côtés, secteur", legende: "L'angle x̂Oy : prolonger les côtés (en pointillés) ne change pas son ouverture.", svg: (function () {
+          var s = "<path d='M120 190L300 190A180 180 0 0 0 247 63Z' fill='#EEF4FC'/><path d='M120 190H420' stroke='" + NUIT + "' stroke-width='3'/><path d='M120 190L300 30' stroke='" + NUIT + "' stroke-width='3'/><path d='M300 30L360 -23M420 190H520' stroke='" + NUIT + "' stroke-width='2' stroke-dasharray='6 5'/>";
+          s += "<path d='M180 190A60 60 0 0 0 165 150' fill='none' stroke='#C62828' stroke-width='3'/>" + txt(112, 208, "O (sommet)", { s: 13 }) + txt(430, 182, "x", { s: 14 }) + txt(312, 34, "y", { s: 14 }) + txt(250, 150, "secteur angulaire", { s: 12, c: BLEU });
+          s += "<rect x='470' y='40' width='150' height='70' rx='12' fill='#FFF6E3' stroke='#F2DFA6'/>" + txt(545, 82, "angle x̂Oy", { s: 16, c: "#8A6200" });
+          return svg(640, 220, "Un angle de sommet O et de côtés Ox et Oy avec son secteur angulaire", "", s);
+        })() }, { type: "3d", titre: "L'horloge de l'école à 4 heures", legende: "Fais tourner l'horloge : l'ouverture entre les aiguilles reste la même quelle que soit la vue. Le curseur avance les aiguilles.",
+          modele: { h: 320, rx: -62, ry: 0, echelle: .85, dy: 10, alt: "Horloge murale carrée en relief avec ses deux aiguilles à quatre heures", eclate: "Décoller les aiguilles", jouer: "Voir l'angle",
+            objets: (function () {
+              var o = [{ f: "boite", c: [0, 7, 0], d: [250, 14, 250], coul: "#8A5A2D", dessus: "#FFFFFF" }], k;
+              for (k = 0; k < 12; k++) o.push({ f: "boite", c: [Math.round(104 * Math.sin(k * Math.PI / 6)), 19, Math.round(104 * Math.cos(k * Math.PI / 6))], d: [k % 3 ? 6 : 10, 8, k % 3 ? 6 : 10], coul: "#001136", dessus: "#001136", div: false });
+              for (k = 1; k <= 7; k++) o.push({ f: "sphere", c: [Math.round(k * 10 * .866), 24, Math.round(-k * 10 * .5)], r: 6, coul: "#C62828", ec: [0, 30, 0] });
+              for (k = 1; k <= 10; k++) o.push({ f: "sphere", c: [0, 22, k * 9.5], r: 4.5, coul: "#1E499B", ec: [0, 50, 0] });
+              o.push({ f: "sphere", c: [0, 24, 0], r: 8, coul: "#001136" });
+              return o; })(),
+            etiquettes: [{ p: [61, 24, -35], t: "petite aiguille sur 4", cote: "d", ec: [0, 30, 0] }, { p: [0, 22, 95], t: "grande aiguille sur 12", ec: [0, 50, 0] }] } }],
+        fil: { html: "<p>Les aiguilles de la grande horloge sont plus longues, mais à la même heure leur <strong>ouverture</strong> est identique à celle des petites horloges : la longueur des côtés ne compte pas.</p>", verdicts: [[0, "rejetee", "Un angle mesure une ouverture, pas une longueur : à la même heure, grande et petite horloge font le même angle."]] },
+        retenir: "Angle x̂Oy : sommet O, côtés [Ox) et [Oy) ; la longueur des côtés ne compte pas." },
+
+      { t: "Classer les angles",
+        html: "<table class='donnees'><tr><th>Angle</th><th>Mesure</th></tr><tr><td>nul</td><td>0°</td></tr><tr><td>aigu</td><td>entre 0° et 90°</td></tr><tr><td>droit</td><td>90°</td></tr><tr><td>obtus</td><td>entre 90° et 180°</td></tr><tr><td>plat</td><td>180°</td></tr><tr><td>rentrant</td><td>entre 180° et 360°</td></tr></table><div class='ex'><b>L'horloge</b>Entre deux chiffres voisins : 360° ÷ 12 = 30°. À 1 h : 30° (aigu) ; à 3 h : 90° (droit) ; à 4 h : 120° (<strong>obtus</strong>) ; à 6 h : 180° (plat).</div>",
+        planches: [{ type: "2D", titre: "Les six familles d'angles", legende: "Du nul au rentrant : la mesure dit la famille.", svg: (function () {
+          var s = "", T = [[0, "nul"], [40, "aigu"], [90, "droit"], [130, "obtus"], [180, "plat"], [250, "rentrant"]], i;
+          T.forEach(function (t, k) { var cx = 60 + (k % 3) * 200, cy = 90 + Math.floor(k / 3) * 110, a = t[0] * Math.PI / 180, L = 70;
+            s += "<path d='M" + cx + " " + cy + "H" + (cx + L) + "' stroke='" + NUIT + "' stroke-width='3'/><path d='M" + cx + " " + cy + "L" + (cx + L * Math.cos(a)).toFixed(1) + " " + (cy - L * Math.sin(a)).toFixed(1) + "' stroke='" + NUIT + "' stroke-width='3'/>";
+            if (t[0] === 90) s += "<path d='M" + (cx + 14) + " " + cy + "V" + (cy - 14) + "H" + cx + "' fill='none' stroke='#C62828' stroke-width='2.5'/>";
+            else if (t[0] > 0) s += "<path d='M" + (cx + 24) + " " + cy + "A24 24 0 " + (t[0] > 180 ? 1 : 0) + " 0 " + (cx + 24 * Math.cos(a)).toFixed(1) + " " + (cy - 24 * Math.sin(a)).toFixed(1) + "' fill='none' stroke='#C62828' stroke-width='2.5'/>";
+            s += txt(cx + 40, cy + 30, t[1] + " · " + t[0] + "°", { s: 13, c: BLEU }); });
+          return svg(640, 240, "Six angles : nul, aigu, droit, obtus, plat et rentrant avec leur mesure", "", s);
+        })() }],
+        fil: { html: "<p>À 4 h, l'écart vaut 4 × 30° = <strong>120°</strong> : plus que l'angle droit, c'est un angle <strong>obtus</strong>.</p>", verdicts: [[1, "rejetee", "4 × 30° = 120° > 90° : l'angle de 4 h est obtus, pas aigu."]] },
+        retenir: "Aigu < 90° < obtus < 180° = plat ; droit = 90°." },
+
+      { t: "Mesurer avec le rapporteur",
+        html: "<ol><li>Placer le <strong>centre</strong> du rapporteur sur le sommet de l'angle.</li><li>Aligner la <strong>graduation 0</strong> sur un côté.</li><li>Lire la mesure sur la graduation qui part de ce 0, là où passe l'autre côté.</li></ol><div class='astuce'><b>Astuce</b>Avant de lire, estime : aigu ou obtus ? Tu évites de lire sur la mauvaise graduation (60° au lieu de 120°).</div>",
+        planches: [{ type: "2D", titre: "Lire 120° sur le rapporteur", legende: "Le 0 de la graduation intérieure est sur le côté horizontal : l'autre côté passe par 120°.", svg: (function () {
+          var cx = 320, cy = 190, R = 150, s = "<path d='M" + (cx - R) + " " + cy + "A" + R + " " + R + " 0 0 1 " + (cx + R) + " " + cy + "Z' fill='#EEF4FC' stroke='" + BLEU + "' stroke-width='2'/>", i;
+          for (i = 0; i <= 180; i += 10) { var a = i * Math.PI / 180; s += "<path d='M" + (cx + R * Math.cos(a)).toFixed(1) + " " + (cy - R * Math.sin(a)).toFixed(1) + "L" + (cx + (R - (i % 30 ? 8 : 16)) * Math.cos(a)).toFixed(1) + " " + (cy - (R - (i % 30 ? 8 : 16)) * Math.sin(a)).toFixed(1) + "' stroke='" + BLEU + "' stroke-width='1.5'/>"; if (i % 30 === 0) s += txt((cx + (R - 30) * Math.cos(a)).toFixed(1), (cy - (R - 30) * Math.sin(a) + 4).toFixed(1), i, { s: 11, c: BLEU }); }
+          var b = 120 * Math.PI / 180;
+          s += "<path d='M" + cx + " " + cy + "H" + (cx + R + 30) + "' stroke='" + NUIT + "' stroke-width='3'/><path d='M" + cx + " " + cy + "L" + (cx + (R + 30) * Math.cos(b)).toFixed(1) + " " + (cy - (R + 30) * Math.sin(b)).toFixed(1) + "' stroke='#C62828' stroke-width='3'/><circle cx='" + cx + "' cy='" + cy + "' r='4' fill='" + NUIT + "'/>" + txt(cx + 10, cy + 18, "centre sur le sommet", { s: 11.5, a: "start" });
+          return svg(640, 214, "Un rapporteur placé sur un angle de 120 degrés", "", s);
+        })() }],
+        fil: { html: "<p>Les mesures sont 30° (1 h), 90° (3 h), 120° (4 h) et 180° (6 h) : seule l'ouverture compte.</p>", verdicts: [[2, "validee", "30° par heure : 30° aigu, 90° droit, 120° obtus, 180° plat."]] },
+        retenir: "Rapporteur : centre sur le sommet, 0 sur un côté, lire sur la même graduation." },
+
+      { t: "Entraînement", html: entrainement(
+        "<p><strong>Question de cours.</strong> Qu'est-ce qu'un angle obtus ?</p><details><summary>Voir la réponse</summary><p>Un angle dont la mesure est comprise entre 90° et 180°.</p></details><p><strong>Exercice.</strong> Quel angle forment les aiguilles à 2 h ? à 5 h ? Classe-les.</p><details><summary>Voir la réponse</summary><p>2 h : 60°, aigu ; 5 h : 150°, obtus.</p></details>",
+        "<p><strong>Situation.</strong> Le menuisier de Sangmélima fabrique le toit d'une case : les deux pentes doivent former au sommet un angle de 120°.</p><p><strong>Tâche.</strong> Dis de quel type est cet angle et explique comment le vérifier avec un rapporteur.</p><details><summary>Voir une réponse attendue</summary><p>120° est un angle <strong>obtus</strong>. On place le centre du rapporteur au sommet du toit, le 0 sur une pente, et on lit 120° là où passe l'autre pente.</p></details>"),
+        retenir: "Savoir-être : soin et précision dans les tracés." }
+    ],
+    denouement: {
+      titre: "30°, 90°, 120°, 180°",
+      etapes: ["Un angle mesure une ouverture, pas une longueur (indice 1).", "30° par heure : 4 h → 120°, obtus (indice 2).", "Rapporteur : centre au sommet, 0 sur un côté (indice 3)."],
+      reponse: "<p>À <strong>1 h</strong> : 30°, aigu ; à <strong>3 h</strong> : 90°, droit ; à <strong>4 h</strong> : 120°, obtus ; à <strong>6 h</strong> : 180°, plat. La longueur des aiguilles ne change rien (Ebanda avait tort) et 120° n'est pas aigu (Ngo Mbia avait tort).</p>",
+      transfert: "<p>Quel angle forment les aiguilles à 9 h ? à 10 h ? <em>(9 h : 90°, droit ; 10 h : 60°, aigu, car on prend le plus petit angle.)</em></p>"
+    },
+    revision: ["Angle x̂Oy : <strong>sommet</strong> O, <strong>côtés</strong> [Ox) et [Oy).", "Nul 0° ; aigu < 90° ; <strong>droit 90°</strong> ; obtus entre 90° et 180° ; <strong>plat 180°</strong> ; rentrant > 180°.", "Rapporteur : centre sur le sommet, 0 sur un côté.", "La longueur des côtés ne change pas l'angle."],
+    exo: "<p>Un angle de 75° et un angle de 105° : de quel type sont-ils, et que vaut leur somme ? <em>(Aigu et obtus ; 180°, un angle plat.)</em></p>",
+    quiz: [
+      q("Un angle de 90° est :", "droit", "aigu", "plat", "Le coin d'une feuille."),
+      q("Un angle de 120° est :", "obtus", "aigu", "rentrant", "Entre 90° et 180°."),
+      q("À 3 h, les aiguilles forment :", "90°", "30°", "180°", "3 × 30°."),
+      q("Le sommet de l'angle x̂Oy est :", "O", "x", "y", "La lettre du milieu."),
+      q("Allonger les côtés d'un angle :", "ne change pas sa mesure", "l'agrandit", "le rend plat", "Seule l'ouverture compte."),
+      q("Un angle plat mesure :", "180°", "90°", "360°", "Une demi-droite et son prolongement."),
+      q("Pour mesurer, on place le centre du rapporteur :", "sur le sommet", "sur un côté", "n'importe où", "Puis le 0 sur un côté."),
+      q("Un angle de 30° est :", "aigu", "obtus", "droit", "Inférieur à 90°."),
+      q("À 6 h, les aiguilles forment :", "un angle plat", "un angle droit", "un angle nul", "180°."),
+      q("Un angle de 250° est :", "rentrant", "obtus", "plat", "Plus de 180°.")
+    ],
+    apc: { module: "Mathématiques de 6e", famille: "Environnement et vie quotidienne", agir: "Lire et mesurer des angles autour de soi", situation: "Les aiguilles de l'horloge de l'école.", tache: "Mesurer et classer les angles formés à différentes heures." }
+  });
+
+  /* ═══════════════════════ 6e — SYMÉTRIE ORTHOGONALE ═══════════════════════ */
+  function grille(x, y, n, m, c) { var s = "", i; for (i = 0; i <= n; i++) s += "<path d='M" + (x + i * c) + " " + y + "V" + (y + m * c) + "' stroke='#DCE3EF'/>"; for (i = 0; i <= m; i++) s += "<path d='M" + x + " " + (y + i * c) + "H" + (x + n * c) + "' stroke='#DCE3EF'/>"; return s; }
+  VRT_L("6e-maths-symetrie-axiale", {
+    c: "6e", m: "maths", cle: "Points symétriques par rapport à une droite", titre: "La symétrie orthogonale (par rapport à une droite)", duree: 30,
+    accroche: "L'artisan a peint la moitié du motif ndop sur le mur : comment l'apprenti doit-il peindre l'autre moitié, exactement ?",
+    intro: "À Bamenda, on décore la façade de la maison du chef avec un motif symétrique. Partie après partie, tu deviens l'apprenti qui complète le dessin.",
+    objectifs: ["construire le symétrique d'un point par rapport à une droite", "construire le symétrique d'une figure sur quadrillage", "utiliser la conservation des longueurs et des angles", "trouver les axes de symétrie d'une figure"],
+    enquete: {
+      titre: "Le motif ndop de la façade",
+      svg: (function () {
+        var s = "<rect width='640' height='220' fill='#F4F1EA'/><rect x='120' y='20' width='400' height='170' fill='#1C2A55'/>";
+        s += "<path d='M320 20V190' stroke='#FFC93C' stroke-width='3' stroke-dasharray='8 6'/>";
+        s += "<path d='M320 50L260 80L300 105L240 140L320 170' fill='none' stroke='#fff' stroke-width='6' stroke-linejoin='round'/><circle cx='270' cy='60' r='9' fill='#fff'/><path d='M200 120h30v30h-30z' fill='none' stroke='#fff' stroke-width='5'/>";
+        s += "<path d='M320 50L380 80L340 105L400 140L320 170' fill='none' stroke='#fff' stroke-width='3' stroke-dasharray='4 6' opacity='.55'/>";
+        s += perso(570, 100, PEAU[3], "#7B2CBF", "#3A2A20", .9) + txt(320, 210, "axe de symétrie", { s: 12, c: "#8A6200" });
+        return svg(640, 220, "Un mur indigo portant la moitié gauche d'un motif ndop blanc et un axe vertical en pointillés", "", s);
+      })(),
+      legende: "Bamenda : la façade décorée au motif ndop, indigo et blanc.",
+      contexte: "<p>Le maître-artisan a peint la moitié gauche du motif. L'apprenti doit peindre la moitié droite pour que le motif soit <strong>symétrique par rapport à l'axe</strong> jaune.</p><p>Tamo propose : « Je recopie le dessin à côté, en le faisant glisser. » Fon propose : « Je le recopie à l'envers, de haut en bas. »</p>",
+      documents: [{ t: "Les mesures du maître", html: "<table class='donnees'><tr><td>Le rond</td><td>à 50 cm à gauche de l'axe, à 40 cm du haut</td></tr><tr><td>Le carré</td><td>côté 30 cm, à 90 cm de l'axe</td></tr></table>" }],
+      question: "Comment placer exactement chaque point de la moitié droite ?",
+      tache: "Pour chaque point du motif, construis son symétrique par rapport à l'axe et vérifie les longueurs.",
+      hypotheses: ["On fait glisser le dessin vers la droite.", "On retourne le dessin de haut en bas.", "Chaque point a son symétrique de l'autre côté de l'axe, sur la perpendiculaire à l'axe, à la même distance."]
+    },
+    parties: [
+      { t: "Le symétrique d'un point",
+        html: "<div class='def'><b>Définition</b>Le <strong>symétrique</strong> du point A par rapport à la droite (d) est le point A' tel que (d) soit la <strong>médiatrice</strong> du segment [AA'] : [AA'] est perpendiculaire à (d) et coupé en son milieu par (d). Si A est sur (d), il est son propre symétrique.</div><ol><li>Tracer la perpendiculaire à (d) passant par A (équerre).</li><li>Reporter de l'autre côté la même distance (compas ou règle).</li></ol>",
+        planches: [{ type: "2D", titre: "A et son symétrique A'", legende: "(d) coupe [AA'] en son milieu H, à angle droit : HA = HA'.", svg: (function () {
+          var s = grille(40, 20, 28, 9, 20) + "<path d='M320 10V210' stroke='#C62828' stroke-width='3'/>" + txt(334, 26, "(d)", { s: 14, c: "#C62828", a: "start" });
+          s += "<path d='M200 110H440' stroke='" + BLEU + "' stroke-width='2.5' stroke-dasharray='6 4'/><circle cx='200' cy='110' r='6' fill='" + BLEU + "'/><circle cx='440' cy='110' r='6' fill='" + VERT + "'/>" + txt(190, 100, "A", { s: 15 }) + txt(452, 100, "A'", { s: 15 }) + "<path d='M320 98H332V110' fill='none' stroke='" + NUIT + "' stroke-width='2'/>" + txt(308, 128, "H", { s: 13 });
+          s += txt(260, 150, "6 carreaux", { s: 12, c: BLEU }) + txt(380, 150, "6 carreaux", { s: 12, c: VERT });
+          return svg(640, 220, "Un point A, sa perpendiculaire à la droite d et son symétrique A prime à la même distance", "", s);
+        })() }, { type: "3d", titre: "Le miroir", legende: "Le plan de l'axe agit comme un miroir : chaque cube a son jumeau à la même distance de l'autre côté. Le curseur éloigne les jumeaux du miroir… ensemble.",
+          modele: { h: 320, rx: -22, ry: 34, echelle: .75, dy: 20, alt: "Un miroir vertical avec des cubes colorés et leurs images symétriques", eclate: "Éloigner du miroir", jouer: "Voir les jumeaux",
+            objets: [{ f: "boite", c: [0, -6, 0], d: [420, 8, 260], coul: "#C9B48A", dessus: "#E3D6B6", div: false },
+              { f: "boite", c: [0, 70, 0], d: [4, 150, 240], coul: "#9EC9E8", dessus: "#CFE6F6", op: .35, div: false },
+              { f: "boite", c: [-80, 20, -60], d: [40, 40, 40], coul: "#C62828", dessus: "#E05555", ec: [-40, 0, 0] },
+              { f: "boite", c: [80, 20, -60], d: [40, 40, 40], coul: "#C62828", dessus: "#E05555", ec: [40, 0, 0] },
+              { f: "sphere", c: [-140, 25, 60], r: 25, coul: "#1B998B", ec: [-40, 0, 0] },
+              { f: "sphere", c: [140, 25, 60], r: 25, coul: "#1B998B", ec: [40, 0, 0] }],
+            etiquettes: [{ p: [0, 150, 0], t: "l'axe (plan miroir)" }, { p: [80, 40, -60], t: "même distance au miroir", cote: "d", ec: [40, 0, 0] }] } }],
+        fil: { html: "<p>Faire glisser le dessin le décale entier vers la droite : le rond, collé à 50 cm à gauche de l'axe, se retrouverait loin à droite, pas à 50 cm. La symétrie <strong>retourne</strong> le dessin autour de l'axe.</p>", verdicts: [[0, "rejetee", "Un glissement (translation) n'est pas une symétrie : le motif doit se retourner autour de l'axe."]] },
+        retenir: "A' symétrique de A : (d) est la médiatrice de [AA']." },
+
+      { t: "Construire le symétrique d'une figure",
+        html: "<p>Pour construire le symétrique d'une figure, on construit le symétrique de ses <strong>points importants</strong> (sommets, centre d'un cercle…), puis on relie.</p><div class='ex'><b>Sur quadrillage</b>Avec un axe vertical, on compte les carreaux horizontalement de chaque côté ; la hauteur ne change pas.</div><div class='attention'><b>Attention</b>Retourner de haut en bas, c'est une symétrie par rapport à un axe <strong>horizontal</strong> : ce n'est pas l'axe de la façade.</div>",
+        planches: [{ type: "2D", titre: "Le motif complété", legende: "Chaque sommet de la moitié gauche a son image à la même distance de l'axe, à la même hauteur.", svg: (function () {
+          var s = grille(40, 10, 28, 10, 20) + "<path d='M320 0V220' stroke='#C62828' stroke-width='3'/>";
+          var P = [[320, 30], [260, 70], [300, 110], [220, 150], [320, 190]];
+          s += "<path d='M" + P.map(function (p) { return p.join(" "); }).join("L") + "' fill='none' stroke='" + BLEU + "' stroke-width='5' stroke-linejoin='round'/>";
+          s += "<path d='M" + P.map(function (p) { return (640 - p[0]) + " " + p[1]; }).join("L") + "' fill='none' stroke='" + VERT + "' stroke-width='5' stroke-linejoin='round'/>";
+          P.forEach(function (p) { if (p[0] !== 320) s += "<path d='M" + p[0] + " " + p[1] + "H" + (640 - p[0]) + "' stroke='#8A93A6' stroke-width='1.2' stroke-dasharray='3 4'/>"; });
+          s += "<circle cx='270' cy='50' r='9' fill='" + BLEU + "'/><circle cx='370' cy='50' r='9' fill='" + VERT + "'/><rect x='140' y='130' width='30' height='30' fill='none' stroke='" + BLEU + "' stroke-width='4'/><rect x='470' y='130' width='30' height='30' fill='none' stroke='" + VERT + "' stroke-width='4'/>";
+          return svg(640, 222, "Motif en zigzag, rond et carré à gauche de l'axe et leurs symétriques à droite", "", s);
+        })() }],
+        fil: { html: "<p>Retourner de haut en bas mettrait le rond en bas : ce n'est pas la symétrie par rapport à l'axe <strong>vertical</strong> de la façade.</p>", verdicts: [[1, "rejetee", "De haut en bas, c'est la symétrie par rapport à un axe horizontal, pas l'axe vertical du mur."]] },
+        retenir: "Symétrique d'une figure : symétriques des sommets, puis on relie." },
+
+      { t: "Propriétés et axes de symétrie",
+        html: "<p>La symétrie orthogonale <strong>conserve</strong> les longueurs, les angles, l'alignement et les aires : le symétrique d'un segment est un segment de même longueur, celui d'un cercle un cercle de même rayon.</p><div class='def'><b>Axe de symétrie</b>Une droite est un <strong>axe de symétrie</strong> d'une figure si la figure est son propre symétrique par rapport à elle (pliage : les deux moitiés se superposent).</div><ul><li>Rectangle : 2 axes ; carré : 4 ; losange : 2 ; triangle équilatéral : 3 ; cercle : une infinité (tous ses diamètres).</li></ul>",
+        planches: [{ type: "2D", titre: "Combien d'axes ?", legende: "Les axes de symétrie en pointillés rouges : 2 pour le rectangle, 4 pour le carré, 3 pour le triangle équilatéral.", svg: (function () {
+          var s = "<rect x='40' y='60' width='140' height='90' fill='#EEF4FC' stroke='" + BLEU + "' stroke-width='3'/><path d='M110 40V170M20 105H200' stroke='#C62828' stroke-width='2' stroke-dasharray='6 4'/>" + txt(110, 196, "rectangle : 2", { s: 13 });
+          s += "<rect x='260' y='45' width='110' height='110' fill='#ECF7F0' stroke='" + VERT + "' stroke-width='3'/><path d='M315 30V170M245 100H385M250 35L380 165M380 35L250 165' stroke='#C62828' stroke-width='2' stroke-dasharray='6 4'/>" + txt(315, 196, "carré : 4", { s: 13 });
+          s += "<path d='M520 45L585 155H455Z' fill='#FFF6E3' stroke='#C2540A' stroke-width='3'/><path d='M520 30V170M600 168L470 95M440 168L570 95' stroke='#C62828' stroke-width='2' stroke-dasharray='6 4'/>" + txt(520, 196, "équilatéral : 3", { s: 13 });
+          return svg(640, 210, "Un rectangle avec deux axes, un carré avec quatre axes et un triangle équilatéral avec trois axes", "", s);
+        })() }],
+        fil: { html: "<p>Chaque point de droite est le symétrique d'un point de gauche : le rond à 50 cm de l'axe, le carré de 30 cm de côté à 90 cm, à la même hauteur. Les longueurs se conservent.</p>", verdicts: [[2, "validee", "Perpendiculaire à l'axe, même distance : le motif complet est symétrique."]] },
+        retenir: "La symétrie conserve longueurs, angles, alignement et aires." },
+
+      { t: "Entraînement", html: entrainement(
+        "<p><strong>Question de cours.</strong> Quand dit-on que A' est le symétrique de A par rapport à (d) ?</p><details><summary>Voir la réponse</summary><p>Quand (d) est la médiatrice du segment [AA'].</p></details><p><strong>Exercice.</strong> Combien d'axes de symétrie ont un losange, un cercle et la lettre H ?</p><details><summary>Voir la réponse</summary><p>Losange : 2 ; cercle : une infinité ; H : 2.</p></details>",
+        "<p><strong>Situation.</strong> Le club de dessin de Bafoussam reproduit un masque bamiléké dont on ne voit que la moitié gauche, avec son axe vertical.</p><p><strong>Tâche.</strong> Explique la méthode pour compléter le masque et cite deux propriétés que tu vérifies.</p><details><summary>Voir une réponse attendue</summary><p>Pour chaque point important, on trace la perpendiculaire à l'axe et on reporte la même distance de l'autre côté, puis on relie. On vérifie que les longueurs et les angles du côté droit sont égaux à ceux du côté gauche.</p></details>"),
+        retenir: "Savoir-être : valoriser le patrimoine artistique camerounais." }
+    ],
+    denouement: {
+      titre: "Perpendiculaire, même distance",
+      etapes: ["Symétrique d'un point : (d) médiatrice de [AA'] (indice 1).", "On construit les symétriques des sommets, puis on relie (indice 2).", "Longueurs et angles conservés : le motif est complet (indice 3)."],
+      reponse: "<p>Pour chaque point du motif, l'apprenti trace la <strong>perpendiculaire à l'axe</strong> et reporte la <strong>même distance</strong> de l'autre côté : le rond va à 50 cm à droite de l'axe, à 40 cm du haut ; le carré de 30 cm à 90 cm à droite. Ni glissement (Tamo) ni retournement de haut en bas (Fon).</p>",
+      transfert: "<p>Le maître ajoute un triangle dont un sommet est sur l'axe. Où est le symétrique de ce sommet ? <em>(Il reste à sa place : un point de l'axe est son propre symétrique.)</em></p>"
+    },
+    revision: ["A' symétrique de A par rapport à (d) : <strong>(d) médiatrice de [AA']</strong>.", "Construction : perpendiculaire à (d), puis même distance de l'autre côté.", "Un point de l'axe est son propre symétrique.", "La symétrie conserve <strong>longueurs, angles, alignement, aires</strong>.", "Axes : rectangle 2, carré 4, triangle équilatéral 3, cercle infinité."],
+    exo: "<p>Sur un quadrillage, A est à 3 carreaux à gauche d'un axe vertical. Où est A' ? <em>(À 3 carreaux à droite, sur la même ligne.)</em></p>",
+    quiz: [
+      q("Le symétrique de A par rapport à (d) est A' si :", "(d) est la médiatrice de [AA']", "A et A' sont du même côté", "AA' = 2 cm", "Perpendiculaire et milieu."),
+      q("Un point situé sur l'axe a pour symétrique :", "lui-même", "aucun point", "un point au loin", "Distance nulle."),
+      q("La symétrie orthogonale conserve :", "les longueurs et les angles", "seulement les angles", "rien", "Et l'alignement, les aires."),
+      q("Le carré a :", "4 axes de symétrie", "2 axes", "1 axe", "Médianes et diagonales."),
+      q("Le cercle a :", "une infinité d'axes", "2 axes", "aucun axe", "Tous ses diamètres."),
+      q("A est à 5 carreaux de l'axe : A' est à", "5 carreaux de l'autre côté", "10 carreaux", "2,5 carreaux", "Même distance."),
+      q("Faire glisser un dessin, c'est :", "une translation, pas une symétrie", "une symétrie", "une rotation", "Le dessin n'est pas retourné."),
+      q("Le symétrique d'un segment de 4 cm mesure :", "4 cm", "8 cm", "2 cm", "Conservation des longueurs."),
+      q("Le rectangle (non carré) a :", "2 axes", "4 axes", "aucun", "Ses médianes."),
+      q("Pour construire A', on trace d'abord :", "la perpendiculaire à (d) passant par A", "la parallèle à (d)", "un cercle de centre A", "Avec l'équerre.")
+    ],
+    apc: { module: "Mathématiques de 6e", famille: "Art et culture", agir: "Reproduire un motif symétrique", situation: "Compléter un motif ndop symétrique sur une façade.", tache: "Construire les symétriques des points du motif et vérifier les longueurs." }
+  });
+
+  /* ═══════════════════════ SIMULATIONS ═══════════════════════ */
+  function $(el, s) { return el.querySelector(s); }
+  function curseur(lib, min, max, pas, val, unite) {
+    return "<label class='labo-c'><span>" + lib + " : <b data-v>" + val + "</b>" + (unite || "") + "</span><input type='range' min='" + min + "' max='" + max + "' step='" + pas + "' value='" + val + "'></label>";
+  }
+  /* Fractions : deux fractions côte à côte, comparées en litres */
+  VRT_A("6e-maths-fractions", 1, "Compare deux fractions du bidon de 12 L", function (el) {
+    el.innerHTML = "<div style='display:flex;flex-wrap:wrap;gap:6px 18px'>" + curseur("Numérateur A", 0, 12, 1, 3) + curseur("Dénominateur A", 1, 12, 1, 4) + curseur("Numérateur B", 0, 12, 1, 6) + curseur("Dénominateur B", 1, 12, 1, 8) + "</div><svg viewBox='0 0 640 170' class='an-svg' data-s></svg><p class='labo-r' data-r></p>";
+    var I = el.querySelectorAll("input"), V = el.querySelectorAll("[data-v]"), sv = $(el, "[data-s]");
+    function maj() {
+      var a = +I[0].value, b = +I[1].value, c = +I[2].value, d = +I[3].value; if (a > b) { a = b; I[0].value = a; } if (c > d) { c = d; I[2].value = c; }
+      [a, b, c, d].forEach(function (v, k) { V[k].textContent = v; });
+      sv.innerHTML = bidon(150, 20, 120, a, b, "#C2185B", a + "/" + b) + bidon(420, 20, 120, c, d, "#7B2CBF", c + "/" + d);
+      var la = 12 * a / b, lb = 12 * c / d, f = function (x) { return x.toLocaleString("fr-FR", { maximumFractionDigits: 2 }); };
+      $(el, "[data-r]").innerHTML = a + "/" + b + " de 12 L = <b>" + f(la) + " L</b> · " + c + "/" + d + " de 12 L = <b>" + f(lb) + " L</b> · " + (Math.abs(la - lb) < 1e-9 ? "<b>fractions égales</b> : " + a + " × " + d + " = " + b + " × " + c + " = " + (a * d) + "." : la > lb ? "A est plus grand." : "B est plus grand.");
+    }
+    I.forEach(function (x) { x.addEventListener("input", maj); }); maj();
+  });
+  /* Angles : l'heure → l'angle, son type, et le dessin */
+  VRT_A("6e-maths-angles", 1, "Choisis l'heure : quel angle font les aiguilles ?", function (el) {
+    el.innerHTML = curseur("Heure", 0, 11, 1, 4, " h") + "<svg viewBox='0 0 640 200' class='an-svg' data-s></svg><p class='labo-r' data-r></p>";
+    var I = $(el, "input"), V = $(el, "[data-v]"), sv = $(el, "[data-s]");
+    function maj() {
+      var h = +I.value, a = h * 30, pa = a > 180 ? 360 - a : a;
+      V.textContent = h;
+      var s = horloge(150, 100, 80, h, 0), cx = 420, cy = 150, r = pa * Math.PI / 180;
+      s += "<path d='M" + cx + " " + cy + "H" + (cx + 140) + "' stroke='#001136' stroke-width='3'/><path d='M" + cx + " " + cy + "L" + (cx + 140 * Math.cos(r)).toFixed(1) + " " + (cy - 140 * Math.sin(r)).toFixed(1) + "' stroke='#C62828' stroke-width='3'/>";
+      if (pa > 0 && pa !== 90) s += "<path d='M" + (cx + 40) + " " + cy + "A40 40 0 0 0 " + (cx + 40 * Math.cos(r)).toFixed(1) + " " + (cy - 40 * Math.sin(r)).toFixed(1) + "' fill='none' stroke='#1E499B' stroke-width='3'/>";
+      if (pa === 90) s += "<path d='M" + (cx + 18) + " " + cy + "V" + (cy - 18) + "H" + cx + "' fill='none' stroke='#1E499B' stroke-width='3'/>";
+      sv.innerHTML = s;
+      $(el, "[data-r]").innerHTML = "À " + h + " h : " + h + " × 30° = " + a + "°" + (a > 180 ? ", soit le petit angle 360° − " + a + "° = " + pa + "°" : "") + " · angle <b>" + typeAngle(pa) + "</b>.";
+    }
+    I.addEventListener("input", maj); maj();
+  });
+  /* Symétrie : place un point, vois son symétrique */
+  VRT_A("6e-maths-symetrie-axiale", 0, "Déplace le point A : où est son symétrique ?", function (el) {
+    el.innerHTML = "<div style='display:flex;flex-wrap:wrap;gap:6px 18px'>" + curseur("Distance à l'axe", -12, 12, 1, -6, " carreaux") + curseur("Hauteur", 1, 8, 1, 4) + "</div><svg viewBox='0 0 640 220' class='an-svg' data-s></svg><p class='labo-r' data-r></p>";
+    var I = el.querySelectorAll("input"), V = el.querySelectorAll("[data-v]"), sv = $(el, "[data-s]");
+    function maj() {
+      var dx = +I[0].value, y = +I[1].value, c = 20, ax = 320, py = 200 - y * c, x = ax + dx * c, x2 = ax - dx * c;
+      V[0].textContent = dx; V[1].textContent = y;
+      var s = grille(40, 20, 28, 9, 20) + "<path d='M320 10V210' stroke='#C62828' stroke-width='3'/>";
+      s += "<path d='M" + x + " " + py + "H" + x2 + "' stroke='#1E499B' stroke-width='2' stroke-dasharray='5 4'/><circle cx='" + x + "' cy='" + py + "' r='7' fill='#1E499B'/><circle cx='" + x2 + "' cy='" + py + "' r='7' fill='#17784D'/>";
+      s += "<text x='" + x + "' y='" + (py - 12) + "' font-size='14' font-weight='700' text-anchor='middle'>A</text><text x='" + x2 + "' y='" + (py - 12) + "' font-size='14' font-weight='700' text-anchor='middle' fill='#17784D'>A'</text>";
+      sv.innerHTML = s;
+      $(el, "[data-r]").innerHTML = dx === 0 ? "A est sur l'axe : <b>il est son propre symétrique</b>." : "A est à " + Math.abs(dx) + " carreau" + (Math.abs(dx) > 1 ? "x" : "") + " " + (dx < 0 ? "à gauche" : "à droite") + " de l'axe : A' est à <b>" + Math.abs(dx) + " carreau" + (Math.abs(dx) > 1 ? "x" : "") + " " + (dx < 0 ? "à droite" : "à gauche") + "</b>, à la même hauteur. [AA'] mesure " + (2 * Math.abs(dx)) + " carreaux et l'axe le coupe en son milieu, à angle droit.";
     }
     I.forEach(function (x) { x.addEventListener("input", maj); }); maj();
   });
@@ -12495,6 +13027,529 @@ VRT_PLUS("3e-en-articles", [
   };
   window.VRT_CELLULES = { DEFC: DEFC, animale: celluleAnimale, vegetale: celluleVegetale, ORG: ORG, chromosome: chromosome, LONG: LONG, CENT: CENT };
 
+})();
+
+/* ENRICHISSEMENT des leçons de sciences (18/11/2026), consignes de Jacques :
+   « Résoudre la situation-problème de départ en donnant des formules avec les étapes de la leçon ; illustrer par des
+     exemples ; formules, détails précis, astuces pour mieux retenir ; planches 2D et 3D. »
+   Ce fichier passe APRÈS les sources des leçons (ordre alphabétique) et AVANT les animations (90-…) :
+   - formules : denouement.formules = [{ nom, f, calcul }] (affichées par lecon.html, « étape par étape ») ;
+   - ajouts   : HTML ajouté à la fin d'une partie (définitions, formules, exemples, astuces) ;
+   - planches : planches ajoutées à une partie (l'ordre des parties ne change pas : les VRT_A restent valides).
+   Contrôle : node tools/audit_lecons.cjs */
+(function () {
+  "use strict";
+  function enrichir(id, o) {
+    var L = window.VRT_LECONS[id];
+    if (!L) return;
+    if (o.formules && L.denouement) L.denouement.formules = o.formules;
+    Object.keys(o.ajouts || {}).forEach(function (k) { var p = L.parties[+k]; if (p) p.html = (p.html || "") + o.ajouts[k]; });
+    Object.keys(o.planches || {}).forEach(function (k) { var p = L.parties[+k]; if (p) p.planches = (p.planches || []).concat(o.planches[k]); });
+  }
+  function F(nom, f, calcul) { return { nom: nom, f: f, calcul: calcul }; }
+  function ex(t, h) { return "<div class='ex'><b>" + t + "</b>" + h + "</div>"; }
+  function astuce(h) { return "<div class='astuce'><b>Astuce pour retenir</b>" + h + "</div>"; }
+  function attention(h) { return "<div class='attention'><b>Attention</b>" + h + "</div>"; }
+  function def(t, h) { return "<div class='def'><b>" + t + "</b>" + h + "</div>"; }
+  function formule(h) { return "<p class='formule'>" + h + "</p>"; }
+  var NUIT = "#001136", BLEU = "#1E499B", GRIS = "#4D5163", VERT = "#17784D", ORANGE = "#C2540A", ROUGE = "#C62828";
+  function txt(x, y, t, o) { o = o || {}; return "<text x='" + x + "' y='" + y + "' text-anchor='" + (o.a || "middle") + "' font-size='" + (o.s || 12) + "' font-weight='" + (o.w || 700) + "' fill='" + (o.c || NUIT) + "'>" + t + "</text>"; }
+  function svg(w, h, alt, corps) { return "<svg viewBox='0 0 " + w + " " + h + "' role='img' aria-label='" + alt + "' font-family='Inter,Arial,sans-serif'><rect width='" + w + "' height='" + h + "' fill='#fff'/>" + corps + "<text x='" + (w - 6) + "' y='" + (h - 5) + "' font-size='8' text-anchor='end' fill='#8A93A6'>Planche VÉRITAS</text></svg>"; }
+  function pl2(titre, legende, w, h, alt, corps) { return { type: "2D", titre: titre, legende: legende, svg: svg(w, h, alt, corps) }; }
+
+  /* ─────────────── 6e Mathématiques ─────────────── */
+  enrichir("6e-maths-divisibilite", {
+    formules: [
+      F("Tester la divisibilité par 2, 5 et 10 (dernier chiffre)", "n divisible par 2 ⇔ chiffre des unités pair ; par 5 ⇔ unités 0 ou 5 ; par 10 ⇔ unités 0", "1 260 se termine par 0 : divisible par 2, par 5 et par 10"),
+      F("Tester la divisibilité par 3 et 9 (somme des chiffres)", "n divisible par 3 (ou 9) ⇔ la somme de ses chiffres est divisible par 3 (ou 9)", "1 + 2 + 6 + 0 = 9 : divisible par 3 et par 9"),
+      F("Calculer le nombre de sachets", "nombre de sachets = nombre de beignets ÷ beignets par sachet", "1 260 ÷ 2 = 630 ; ÷ 3 = 420 ; ÷ 5 = 252 ; ÷ 9 = 140 ; ÷ 10 = 126"),
+      F("Comparer les recettes", "recette = nombre de sachets × prix d'un sachet", "140 × 450 F = 63 000 F et 126 × 500 F = 63 000 F")
+    ],
+    ajouts: {
+      0: def("Définition", "a est <strong>divisible</strong> par b (b ≠ 0) lorsque le reste de la division de a par b est <strong>nul</strong> : a = b × q. On dit aussi que b est un <strong>diviseur</strong> de a et que a est un <strong>multiple</strong> de b."),
+      1: formule("Par 2 : unités 0, 2, 4, 6, 8 · par 5 : unités 0 ou 5 · par 10 : unités 0 · par 100 : se termine par 00 · par 1 000 : par 000") +
+        formule("Par 3 : somme des chiffres divisible par 3 · par 9 : somme des chiffres divisible par 9") +
+        ex("Exemple", "4 725 : unités 5 → divisible par 5, pas par 2 ni 10 ; 4 + 7 + 2 + 5 = 18 → divisible par 3 et par 9.") +
+        astuce("« <strong>Les petits regardent la queue, les grands font la somme</strong> » : 2, 5, 10 regardent le dernier chiffre ; 3 et 9 additionnent tous les chiffres. Si la somme est encore grande, recommence : 9 999 → 36 → 9.")
+    }
+  });
+
+  enrichir("6e-maths-fractions", {
+    formules: [
+      F("Calculer une fraction d'une quantité", "a/b de Q = Q ÷ b × a", "3/4 de 12 L = 12 ÷ 4 × 3 = 9 L ; 6/8 de 12 L = 12 ÷ 8 × 6 = 9 L"),
+      F("Fabriquer une fraction égale", "a/b = (a × k)/(b × k)", "3/4 = (3 × 2)/(4 × 2) = 6/8"),
+      F("Vérifier l'égalité par les produits en croix", "a/b = c/d ⇔ a × d = b × c", "3 × 8 = 24 et 4 × 6 = 24 : 3/4 = 6/8"),
+      F("Conclure", "même valeur ⇒ même quantité versée", "Aïcha et Paul versent chacun 9 L : 18 L dans la marmite")
+    ],
+    ajouts: {
+      1: astuce("Pour savoir si deux fractions sont égales, fais le <strong>produit en croix</strong> : 3/4 et 6/8 → 3 × 8 = 24 et 4 × 6 = 24, c'est égal. Pour 2/3 et 3/4 : 8 ≠ 9, elles sont différentes.") +
+        ex("Exemple", "Comparer 5/6 et 7/9 : dénominateur commun 18 → 15/18 et 14/18, donc 5/6 > 7/9.")
+    }
+  });
+
+  enrichir("6e-maths-angles", {
+    formules: [
+      F("Angle entre deux chiffres voisins du cadran", "360° ÷ 12 = 30°", "le tour complet (360°) est partagé en 12 heures"),
+      F("Angle des aiguilles à h heures pile", "angle = h × 30° (si plus de 180°, on prend 360° − angle)", "1 h → 30° ; 3 h → 90° ; 4 h → 120° ; 6 h → 180°"),
+      F("Classer l'angle", "aigu < 90° = droit < obtus < 180° = plat", "30° aigu ; 90° droit ; 120° obtus ; 180° plat")
+    ],
+    ajouts: {
+      0: def("Définition", "Deux angles sont <strong>adjacents</strong> s'ils ont le même sommet, un côté commun et sont de part et d'autre de ce côté. Deux angles sont <strong>complémentaires</strong> si leur somme vaut 90°, <strong>supplémentaires</strong> si elle vaut 180°."),
+      1: formule("aigu : 0° &lt; a &lt; 90° · droit : a = 90° · obtus : 90° &lt; a &lt; 180° · plat : a = 180°") +
+        ex("Exemple", "À 10 h, 10 × 30° = 300° : le petit angle vaut 360° − 300° = 60°, angle aigu.") +
+        ex("Exemple", "Deux angles de 35° et 55° sont complémentaires : 35° + 55° = 90°.")
+    }
+  });
+
+  enrichir("6e-maths-symetrie-axiale", {
+    formules: [
+      F("Mesurer la distance de chaque point à l'axe", "d(A ; axe) = longueur de la perpendiculaire [AH]", "le rond est à 50 cm de l'axe, le carré à 90 cm"),
+      F("Placer le symétrique de l'autre côté", "A' sur (AH), de l'autre côté de l'axe, avec HA' = HA", "rond à 50 cm à droite, à 40 cm du haut ; carré à 90 cm à droite"),
+      F("Vérifier par la conservation des longueurs", "A'B' = AB", "le carré symétrique garde 30 cm de côté")
+    ],
+    ajouts: {
+      0: ex("Exemple sur quadrillage", "Axe vertical ; A est 4 carreaux à gauche de l'axe et 2 carreaux au-dessus du bas : A' est 4 carreaux à droite, toujours 2 carreaux au-dessus du bas.") +
+        astuce("« <strong>Plier, piquer, déplier</strong> » : plie la feuille le long de l'axe, pique le point avec la pointe du compas, déplie : le trou de l'autre côté est le symétrique."),
+      2: ex("Exemple dans la vie", "Les lettres A, M, T, U, V, W, Y ont un axe de symétrie vertical ; B, C, D, E, K un axe horizontal ; H, I, O, X en ont deux.") +
+        attention("Le parallélogramme quelconque n'a <strong>aucun</strong> axe de symétrie, même s'il « paraît » régulier.")
+    }
+  });
+
+  enrichir("6e-maths-proportionnalite", {
+    formules: [
+      F("Calculer le coefficient (prix d'un kilo)", "coefficient = prix ÷ quantité", "1 500 F ÷ 3 kg = 500 F/kg ; 2 500 ÷ 5 = 500 : même coefficient, proportionnel"),
+      F("Tester les mangues", "prix ÷ quantité pour chaque colonne", "500 ÷ 3 ≈ 167 F ; 900 ÷ 6 = 150 F : coefficients différents, pas proportionnel"),
+      F("Calculer la quatrième proportionnelle", "prix = quantité × coefficient", "7 kg × 500 F = 3 500 F"),
+      F("Vérifier par les produits en croix", "3 × 3 500 = 7 × 1 500", "10 500 = 10 500 ✓")
+    ],
+    ajouts: {
+      0: formule("y = k × x &nbsp;·&nbsp; k = y ÷ x (le même pour toutes les colonnes)"),
+      1: formule("Produit en croix : si a/b = c/x alors x = b × c ÷ a") +
+        astuce("« <strong>Un kilo d'abord</strong> » : quand tu hésites, cherche toujours le prix d'UNE unité (passage à l'unité), puis multiplie. Et vérifie : plus de kilos doit donner plus cher, jamais moins.") +
+        attention("Proportionnel ne veut pas dire « augmente ensemble » : l'âge et la taille augmentent ensemble, mais ne sont pas proportionnels.")
+    }
+  });
+
+  enrichir("6e-maths-cercle", {
+    formules: [
+      F("Calculer le rayon", "r = d ÷ 2", "r = 1,40 ÷ 2 = 0,70 m"),
+      F("Calculer le périmètre (bordure en fer)", "P = π × d", "P = 3,14 × 1,40 = 4,396 ≈ 4,40 m"),
+      F("Calculer l'aire (couvercle en tôle)", "A = π × r × r", "A = 3,14 × 0,70 × 0,70 = 1,5386 ≈ 1,54 m²"),
+      F("Calculer le coût total", "coût = P × prix du mètre + A × prix du m²", "4,40 × 1 500 + 1,54 × 6 000 = 6 600 + 9 240 = 15 840 F")
+    ],
+    ajouts: {
+      2: astuce("« <strong>Le tour prend le diamètre, l'aire prend le rayon deux fois</strong> » : P = π × d ; A = π × r × r. Et l'unité te trahit : une longueur en m, une aire en m².")
+    }
+  });
+
+  enrichir("6e-maths-pave-droit", {
+    formules: [
+      F("Calculer l'aire des trois faces différentes", "L × l ; L × h ; l × h", "20 × 12 = 240 cm² ; 20 × 8 = 160 cm² ; 12 × 8 = 96 cm²"),
+      F("Calculer l'aire totale (carton)", "A = 2 × (L × l + L × h + l × h)", "2 × (240 + 160 + 96) = 2 × 496 = 992 cm²"),
+      F("Calculer le volume de la boîte", "V = L × l × h", "20 × 12 × 8 = 1 920 cm³"),
+      F("Calculer le nombre de savons", "volume de la boîte ÷ volume d'un savon (a × a × a)", "1 920 ÷ (4 × 4 × 4) = 1 920 ÷ 64 = 30 savons, soit 5 × 3 × 2")
+    ],
+    ajouts: {
+      2: astuce("« <strong>Aire = papier, volume = remplissage</strong> » : pour emballer, on additionne des surfaces (cm²) ; pour remplir, on multiplie trois longueurs (cm³).")
+    }
+  });
+
+  /* ─────────────── 5e / 4e Mathématiques ─────────────── */
+  enrichir("5e-maths-pgcd", {
+    formules: [
+      F("Écrire la condition « tomber juste »", "le côté c de la dalle divise 360 et 240", "c est un diviseur commun de 360 et 240"),
+      F("Calculer le PGCD par l'algorithme d'Euclide", "PGCD(a ; b) = PGCD(b ; r), avec a = b × q + r", "360 = 240 × 1 + 120 ; 240 = 120 × 2 + 0 → PGCD = 120"),
+      F("Calculer le nombre de dalles", "(longueur ÷ c) × (largeur ÷ c)", "(360 ÷ 120) × (240 ÷ 120) = 3 × 2 = 6 dalles"),
+      F("Calculer le coût de la pose", "nombre de dalles × prix de pose", "6 × 1 500 F = 9 000 F")
+    ],
+    ajouts: {
+      1: ex("Exemple : algorithme d'Euclide", "PGCD(84 ; 36) : 84 = 36 × 2 + 12 ; 36 = 12 × 3 + 0. Le dernier reste non nul est <strong>12</strong>.") +
+        ex("Exemple : partage équitable", "Avec 84 cahiers et 36 stylos, on fait au plus PGCD(84 ; 36) = 12 lots identiques de 7 cahiers et 3 stylos."),
+      2: ex("Exemple : fraction irréductible", "84/36 = (84 ÷ 12)/(36 ÷ 12) = 7/3 : en divisant par le PGCD, on obtient directement la fraction irréductible.")
+    }
+  });
+
+  enrichir("4e-maths-facteurs-premiers", {
+    formules: [
+      F("Décomposer par divisions successives", "diviser par 2, puis 3, puis 5… tant que c'est possible", "360 ÷ 2 = 180 ; ÷ 2 = 90 ; ÷ 2 = 45 ; ÷ 3 = 15 ; ÷ 3 = 5 ; ÷ 5 = 1"),
+      F("Écrire la décomposition", "n = p₁^a × p₂^b × p₃^c", "360 = 2³ × 3² × 5"),
+      F("Compter les diviseurs", "nombre de diviseurs = (a + 1) × (b + 1) × (c + 1)", "(3 + 1) × (2 + 1) × (1 + 1) = 4 × 3 × 2 = 24 dispositions"),
+      F("Trouver la disposition la plus proche du carré", "le diviseur d le plus proche de √n, avec n ÷ d élèves par rangée", "√360 ≈ 19 : 18 rangées de 20 élèves")
+    ]
+  });
+
+
+  /* ─────────────── Lot 2 : 5e-3e sciences ─────────────── */
+  enrichir("5e-maths-division-euclidienne", {
+    formules: [
+      F("Poser l'égalité de la division euclidienne", "a = b × q + r, avec 0 ≤ r < b", "250 = 24 × q + r"),
+      F("Trouver le quotient", "q = le plus grand entier tel que b × q ≤ a", "24 × 10 = 240 ≤ 250 et 24 × 11 = 264 > 250 : q = 10"),
+      F("Calculer le reste", "r = a − b × q", "r = 250 − 240 = 10, et 10 < 24 ✓"),
+      F("Calculer la recette", "q × prix d'une cagette + r × prix d'une mangue", "10 × 3 000 + 10 × 150 = 30 000 + 1 500 = 31 500 F")
+    ],
+    ajouts: { 1: astuce("« <strong>Le reste est toujours plus petit que le diviseur</strong> » : si ton reste dépasse le diviseur, ton quotient est trop petit d'au moins 1. Vérifie toujours : b × q + r doit redonner a.") }
+  });
+
+  enrichir("4e-pct-aimants", {
+    formules: [
+      F("Identifier le pôle Nord de l'aimant", "aimant suspendu librement : le pôle Nord se tourne vers le nord géographique", "l'extrémité qui pointe vers le nord est le pôle N"),
+      F("Confirmer avec la boussole", "pôles de même nom ⇒ répulsion ; pôles de noms contraires ⇒ attraction", "le bout coloré (N) de l'aiguille est repoussé : l'extrémité testée est bien N"),
+      F("Choisir où pêcher", "le champ magnétique est le plus intense près des pôles", "on plonge une extrémité de l'aimant, pas son milieu"),
+      F("Prévoir ce qui est attiré", "attirés : fer, acier, nickel, cobalt · non attirés : cuivre, laiton, aluminium, or", "anneau en acier attiré, clé en laiton non : la clé remonte par son anneau")
+    ],
+    ajouts: {
+      1: ex("Exemple", "On approche le pôle N d'un aimant du pôle S d'un autre aimant posé sur des crayons : il roule vers lui (attraction). On le retourne : il s'éloigne (répulsion).") +
+        ex("Exemple", "Une aiguille à coudre frottée 20 fois dans le même sens sur un aimant devient à son tour un petit aimant : posée sur un bouchon dans l'eau, elle s'oriente nord-sud.") +
+        astuce("« <strong>Les contraires s'attirent, les pareils se repoussent</strong> » : N-S s'attirent, N-N et S-S se repoussent."),
+      3: ex("Exemple au quotidien", "La porte du réfrigérateur, les haut-parleurs du téléphone et les cartes bancaires utilisent des aimants ; c'est pourquoi on n'approche pas un aimant d'une carte à piste magnétique.")
+    }
+  });
+
+  enrichir("4e-svt-photosynthese", {
+    formules: [
+      F("Faire le bilan de masse", "gain du plant = masse finale − masse initiale ; perte de la terre = masse initiale − masse finale", "le plant gagne 450 g ; la terre ne perd que 4 g (sels minéraux)"),
+      F("Séparer l'eau de la matière sèche", "masse fraîche = eau + matière sèche", "450 g = environ 360 g d'eau + 90 g de matière sèche"),
+      F("Trouver l'origine du carbone", "matière sèche ≈ 45 % de carbone, venu du CO₂ de l'air", "≈ 0,45 × 90 ≈ 40 g de carbone pris dans l'air"),
+      F("Écrire le bilan de la photosynthèse", "eau + dioxyde de carbone → (lumière, chlorophylle) → matière organique + dioxygène", "6 CO₂ + 6 H₂O → C₆H₁₂O₆ + 6 O₂")
+    ],
+    ajouts: {
+      4: ex("Exemple", "Une plante aquatique (élodée) éclairée dans l'eau dégage des bulles de dioxygène ; à l'obscurité, plus de bulles.") +
+        ex("Exemple", "Une feuille de manioc cachée deux jours par un papier aluminium puis testée à l'eau iodée ne bleuit pas là où elle était cachée : sans lumière, pas d'amidon.")
+    }
+  });
+
+  enrichir("3e-pct-ph", {
+    formules: [
+      F("Calculer la quantité de matière", "n = m ÷ M", "n = 40 g ÷ 40 g/mol = 1 mol de NaOH"),
+      F("Calculer la concentration molaire", "C = n ÷ V", "C = 1 mol ÷ 0,5 L = 2 mol/L"),
+      F("Classer la solution par son pH", "pH < 7 acide · pH = 7 neutre · pH > 7 basique", "pH > 13 : très basique, corrosive"),
+      F("Calculer la dilution", "C₁ × V₁ = C₂ × V₂", "2 × 50 mL = C₂ × 500 mL → C₂ = 0,2 mol/L (dix fois moins concentrée)")
+    ],
+    ajouts: {
+      0: ex("Exemple", "15 g de sel (NaCl, M = 58,5 g/mol) dans 250 mL : n = 15 ÷ 58,5 ≈ 0,26 mol ; C = 0,26 ÷ 0,25 ≈ 1,0 mol/L."),
+      2: ex("Exemple : facteur de dilution", "Pour diviser la concentration par 10, on prélève 10 mL de solution et on complète à 100 mL avec de l'eau : V₂ = 10 × V₁.") +
+        astuce("« <strong>Toujours l'acide (ou la soude) dans l'eau, jamais l'eau dedans</strong> » : on verse le produit concentré lentement dans beaucoup d'eau, pour éviter les projections brûlantes.")
+    }
+  });
+
+  enrichir("3e-svt-adn", {
+    formules: [
+      F("Compter les chromosomes reçus", "cellule-œuf = 23 chromosomes du père + 23 de la mère", "23 + 23 = 46 chromosomes, soit 23 paires"),
+      F("Écrire les gamètes possibles", "mère XX → ovules tous X ; père XY → spermatozoïdes X ou Y", "ovule X ; spermatozoïde X (50 %) ou Y (50 %)"),
+      F("Faire le tableau de croisement", "gamète du père × gamète de la mère", "X × X = XX (fille) ; Y × X = XY (garçon)"),
+      F("Calculer la probabilité", "probabilité = cas favorables ÷ cas possibles", "fille : 1 ÷ 2 = 50 % à chaque naissance, quel que soit le rang")
+    ],
+    ajouts: {
+      2: ex("Exemple", "Une famille a déjà trois filles. La probabilité que le 4ᵉ enfant soit un garçon reste 1 sur 2 : chaque fécondation est indépendante.") +
+        ex("Exemple : caryotype", "Un caryotype montre 22 paires semblables (autosomes) et une 23ᵉ paire XX : c'est une fille ; XY : un garçon. 47 chromosomes avec trois chromosomes 21 : trisomie 21.")
+    }
+  });
+
+  enrichir("3e-maths-racines", {
+    formules: [
+      F("Calculer l'aire nécessaire", "aire = nombre de poules ÷ densité", "200 ÷ 4 = 50 m²"),
+      F("Calculer le côté du carré", "c = √A", "c = √50 = √(25 × 2) = 5√2 ≈ 7,07 m"),
+      F("Encadrer pour vérifier", "a² < A < b² ⇒ a < √A < b", "49 < 50 < 64 donc 7 < √50 < 8"),
+      F("Calculer le grillage", "P = 4 × c", "4 × 7,07 ≈ 28,3 m : acheter 29 m"),
+      F("Calculer la diagonale", "d = c × √2", "5√2 × √2 = 5 × 2 = 10 m de fil")
+    ],
+    planches: {
+      1: [pl2("Le carré de 50 m² et sa diagonale", "Un carré d'aire 50 m² a un côté de √50 ≈ 7,07 m ; sa diagonale mesure exactement 10 m.", 640, 260, "Carré de côté racine de 50 avec sa diagonale de 10 mètres, encadré entre les carrés de 7 et 8 mètres",
+        "<rect x='70' y='30' width='196' height='196' fill='#EEF4FC' stroke='" + BLEU + "' stroke-width='3'/><rect x='70' y='30' width='224' height='224' fill='none' stroke='#9AA4B6' stroke-dasharray='6 4'/><rect x='70' y='30' width='186' height='186' fill='none' stroke='#C9D0DC' stroke-dasharray='3 4'/>" +
+        "<path d='M70 226L266 30' stroke='" + ROUGE + "' stroke-width='3'/>" + txt(168, 140, "50 m²", { s: 18, c: BLEU }) + txt(150, 106, "d = 10 m", { s: 13, c: ROUGE }) + txt(168, 248, "c = √50 ≈ 7,07 m", { s: 13 }) +
+        "<rect x='330' y='40' width='280' height='180' rx='14' fill='#FFF6E3' stroke='#F2DFA6'/>" + txt(470, 76, "7² = 49 < 50 < 64 = 8²", { s: 15, c: '#8A6200' }) + txt(470, 108, "donc 7 < √50 < 8", { s: 15 }) + txt(470, 146, "√50 = √25 × √2 = 5√2", { s: 15, c: BLEU }) + txt(470, 184, "d = 5√2 × √2 = 10 m", { s: 15, c: ROUGE }))]
+    },
+    ajouts: { 2: attention("√(a + b) ≠ √a + √b : √(9 + 16) = √25 = 5, alors que √9 + √16 = 3 + 4 = 7.") + astuce("« <strong>On sort les carrés parfaits</strong> » : √50 = √(25 × 2) = 5√2 ; √72 = √(36 × 2) = 6√2. Connais par cœur les carrés de 1 à 15.") }
+  });
+
+  enrichir("3e-pct-atome", {
+    formules: [
+      F("Compter les atomes sur une longueur", "nombre d'atomes = longueur ÷ diamètre d'un atome", "1 mm ÷ 0,000 000 25 mm ≈ 4 millions d'atomes de cuivre"),
+      F("Écrire la neutralité de l'atome", "nombre d'électrons = nombre de protons = Z", "cuivre : 29 protons et 29 électrons"),
+      F("Identifier l'élément par Z", "Z = numéro atomique, propre à chaque élément", "Z = 29 : cuivre (Cu) ; Z = 79 : or (Au)"),
+      F("Comparer les tailles", "taille de l'atome ≈ 100 000 × taille du noyau", "noyau d'1 mm ⇒ atome de 100 m, un stade")
+    ],
+    planches: {
+      2: [pl2("Deux atomes, deux éléments", "Le cuivre (Z = 29) et l'or (Z = 79) ont la même architecture, mais pas le même nombre de protons : ce sont deux éléments différents.", 640, 240, "Schéma comparé d'un atome de cuivre et d'un atome d'or avec leur numéro atomique",
+        (function () { var s = "", k; [[160, "Cu", 29, "#C77B30"], [480, "Au", 79, "#D4A017"]].forEach(function (a) { s += "<circle cx='" + a[0] + "' cy='110' r='86' fill='#F7F9FC' stroke='#C9D0DC' stroke-dasharray='4 4'/><circle cx='" + a[0] + "' cy='110' r='14' fill='" + a[3] + "'/>"; for (k = 0; k < 10; k++) { var t = k * Math.PI / 5; s += "<circle cx='" + (a[0] + 70 * Math.cos(t)).toFixed(1) + "' cy='" + (110 + 70 * Math.sin(t)).toFixed(1) + "' r='4' fill='" + BLEU + "'/>"; } s += txt(a[0], 115, a[1], { s: 13, c: "#fff" }) + txt(a[0], 220, a[1] + " : Z = " + a[2] + " protons, " + a[2] + " électrons", { s: 13 }); }); return s + txt(320, 112, "≠", { s: 30, c: ROUGE }); })())]
+    },
+    ajouts: {
+      2: def("Définition", "Le <strong>numéro atomique Z</strong> est le nombre de protons du noyau. L'atome est <strong>électriquement neutre</strong> : il a autant d'électrons (charge −e) que de protons (charge +e).") +
+        ex("Exemple", "L'atome d'oxygène (Z = 8) a 8 protons et 8 électrons ; l'atome de fer (Z = 26) a 26 protons et 26 électrons.") +
+        astuce("« <strong>Z, c'est la carte d'identité</strong> » : change le nombre de protons, et tu changes d'élément ; change le nombre d'électrons, et tu obtiens un ion du même élément.")
+    }
+  });
+
+  enrichir("3e-svt-ressemblances", {
+    formules: [
+      F("Tester l'appartenance à une espèce", "même espèce ⇔ interfécondité et descendance fertile", "humain × chimpanzé : pas de descendance → espèces différentes"),
+      F("Classer les caractères", "caractère de l'espèce : tous l'ont · caractère individuel : varie d'une personne à l'autre", "bipédie, pouce opposable, langage : espèce ; lobe d'oreille, fossettes : individuel"),
+      F("Séparer hérédité et milieu", "caractère observé = information génétique + influence du milieu", "jumelles : même information génétique ; sport et soleil changent leur peau et leurs muscles"),
+      F("Retrouver l'origine des caractères héréditaires", "cellule-œuf = information du père + information de la mère", "les caractères viennent des deux familles")
+    ],
+    planches: {
+      1: [pl2("Caractères de l'espèce et caractères individuels", "Tous les humains partagent les caractères de l'espèce ; les caractères individuels varient et partagent la classe en groupes.", 640, 230, "Deux colonnes : caractères de l'espèce humaine et caractères individuels",
+        "<rect x='20' y='20' width='290' height='190' rx='14' fill='#EEF4FC' stroke='#C9D8EE'/><rect x='330' y='20' width='290' height='190' rx='14' fill='#ECF7F0' stroke='#BFDCC9'/>" + txt(165, 50, "Caractères de l'espèce", { s: 15, c: BLEU }) + txt(475, 50, "Caractères individuels", { s: 15, c: VERT }) +
+        ["marcher debout (bipédie)", "pouce opposable", "langage articulé", "46 chromosomes"].map(function (t, k) { return txt(40, 86 + k * 30, "• " + t, { s: 13, a: "start", w: 500 }); }).join("") +
+        ["lobe d'oreille libre ou attaché", "fossettes ou non", "groupe sanguin A, B, AB, O", "enrouler la langue ou non"].map(function (t, k) { return txt(350, 86 + k * 30, "• " + t, { s: 13, a: "start", w: 500 }); }).join(""))]
+    },
+    ajouts: {
+      2: ex("Exemple", "Le groupe sanguin est héréditaire : il ne change pas avec l'alimentation. La couleur de la peau peut foncer au soleil (influence du milieu), mais la couleur de base est héréditaire.") +
+        ex("Exemple", "Deux vrais jumeaux, l'un footballeur, l'autre non, ont le même groupe sanguin mais pas la même musculature.") +
+        astuce("« <strong>Héritage + vie = ce que tu es</strong> » : pour chaque caractère, demande-toi s'il peut changer pendant la vie (milieu) ou s'il est fixé dès la cellule-œuf (hérédité).") +
+        attention("Un caractère « de famille » n'est pas toujours héréditaire : une famille peut partager un accent ou des habitudes alimentaires sans gène commun.")
+    }
+  });
+
+
+  /* ─────────────── Lot 3 : 2nde, 3e, Tle ─────────────── */
+  enrichir("3e-maths-thales", {
+    formules: [
+      F("Vérifier la configuration", "P ∈ [EA], B ∈ [ES] et (PB) // (AS)", "manche et mât verticaux, donc parallèles"),
+      F("Écrire l'égalité de Thalès", "EP / EA = EB / ES = PB / AS", "0,8 / 6,4 = 1,2 / AS"),
+      F("Calculer la longueur inaccessible (produit en croix)", "AS = EA × PB ÷ EP", "AS = 6,4 × 1,2 ÷ 0,8 = 9,6 m"),
+      F("Calculer la corde", "corde = 2 × hauteur + marge pour les nœuds", "2 × 9,6 + 1 = 20,2 m : acheter 21 m")
+    ]
+  });
+
+  enrichir("tle-maths-binaire", {
+    formules: [
+      F("Donner la valeur de chaque ampoule", "le rang k (en partant de 0, à droite) vaut 2ᵏ", "128, 64, 32, 16, 8, 4, 2, 1"),
+      F("Convertir 45 en base 2 (divisions successives par 2)", "on lit les restes de bas en haut", "45 = 2 × 22 + 1 ; 22 = 2 × 11 + 0 ; 11 = 2 × 5 + 1 ; 5 = 2 × 2 + 1 ; 2 = 2 × 1 + 0 ; 1 = 2 × 0 + 1 → 101101₂"),
+      F("Vérifier la conversion", "N = Σ bₖ × 2ᵏ", "32 + 8 + 4 + 1 = 45 ✓"),
+      F("Calculer la capacité de n ampoules", "2ⁿ combinaisons, de 0 à 2ⁿ − 1", "8 ampoules : 0 à 255 ; 300 > 255 → 9 ampoules (jusqu'à 511)")
+    ],
+    ajouts: {
+      0: def("Définition", "En <strong>base 2</strong>, un nombre s'écrit avec les seuls chiffres 0 et 1 (les <strong>bits</strong>) : N = bₙ × 2ⁿ + … + b₁ × 2 + b₀. Un <strong>octet</strong> est un groupe de 8 bits.") +
+        formule("N = bₙ × 2ⁿ + bₙ₋₁ × 2ⁿ⁻¹ + … + b₁ × 2¹ + b₀ × 2⁰, avec bₖ ∈ {0 ; 1}")
+    }
+  });
+
+  enrichir("tle-svt-osmose", {
+    formules: [
+      F("Prévoir le sens du mouvement de l'eau", "l'eau va du milieu le moins concentré (hypotonique) vers le plus concentré (hypertonique)", "eau distillée (≈ 0 g/L) → globule rouge (≈ 9 g/L) : l'eau entre"),
+      F("Comparer au plasma", "isotonique : même concentration de part et d'autre, pas de flux net", "sérum physiologique à 9 g/L de NaCl, comme le plasma"),
+      F("Calculer la concentration molaire du sérum", "C = Cm ÷ M", "C = 9 g/L ÷ 58,5 g/mol ≈ 0,15 mol/L de NaCl"),
+      F("Lire l'expérience des frites", "concentration interne ≈ concentration où la masse ne varie pas", "les frites ne changent pas de masse vers 0,28 mol/L : c'est la concentration de leurs cellules")
+    ],
+    ajouts: {
+      0: def("Définition", "L'<strong>osmose</strong> est le passage de l'eau à travers une membrane semi-perméable, du milieu le moins concentré en solutés vers le milieu le plus concentré. Un milieu est <strong>hypotonique</strong> s'il est moins concentré que la cellule, <strong>hypertonique</strong> s'il l'est plus, <strong>isotonique</strong> s'il a la même concentration."),
+      1: ex("Exemple", "Des globules rouges dans de l'eau salée à 20 g/L (hypertonique) perdent de l'eau et se ratatinent (crénelure) ; dans l'eau distillée, ils gonflent et éclatent (hémolyse)."),
+      2: ex("Exemple au quotidien", "On sale les aubergines avant de les frire : le sel (hypertonique) fait sortir leur eau, elles ramollissent et boivent moins d'huile. Des feuilles de laitue fanées redeviennent croquantes dans l'eau fraîche (turgescence).")
+    }
+  });
+
+  enrichir("2nde-c-maths-reels", {
+    formules: [
+      F("Rendre la fraction irréductible", "diviser numérateur et dénominateur par leur PGCD", "5/8 et 5/6 sont déjà irréductibles"),
+      F("Tester si c'est un décimal", "a/b irréductible est décimal ⇔ b ne contient que les facteurs 2 et 5", "8 = 2³ → 5/8 = 0,625 ∈ 𝔻 ; 6 = 2 × 3 → 5/6 ∉ 𝔻"),
+      F("Calculer la diagonale (Pythagore)", "d² = c² + c²", "d² = 1² + 1² = 2, donc d = √2 hm"),
+      F("Classer √2", "√2 n'est le quotient d'aucun couple d'entiers : irrationnel", "√2 ∈ ℝ \\ ℚ ; √2 ≈ 1,414 hm ≈ 141 m")
+    ],
+    planches: {
+      1: [pl2("Les ensembles emboîtés", "Chaque ensemble contient le précédent : ℕ ⊂ ℤ ⊂ 𝔻 ⊂ ℚ ⊂ ℝ. On y range les nombres de la situation.", 640, 260, "Cinq ensembles emboîtés N, Z, D, Q, R avec des exemples de nombres",
+        [["ℝ", 620, 240, "#F4F1FB", "#7B2CBF"], ["ℚ", 500, 200, "#EEF4FC", BLEU], ["𝔻", 380, 160, "#ECF7F0", VERT], ["ℤ", 260, 120, "#FFF6E3", "#C2540A"], ["ℕ", 140, 80, "#FCE8EC", ROUGE]].map(function (e, k) { return "<rect x='" + (10 + k * 24) + "' y='" + (10 + k * 22) + "' width='" + e[1] + "' height='" + e[2] + "' rx='16' fill='" + e[3] + "' stroke='" + e[4] + "' stroke-width='2'/>" + txt(26 + k * 24, 34 + k * 22, e[0], { s: 16, c: e[4], a: "start" }); }).join("") +
+        txt(176, 150, "3", { s: 16 }) + txt(294, 150, "−2", { s: 16, c: "#C2540A" }) + txt(390, 142, "5/8", { s: 15, c: VERT }) + txt(390, 162, "= 0,625", { s: 12, c: VERT }) + txt(486, 142, "5/6", { s: 15, c: BLEU }) + txt(486, 162, "= 0,833…", { s: 12, c: BLEU }) + txt(582, 152, "√2", { s: 17, c: "#7B2CBF" }))]
+    }
+  });
+
+  enrichir("2nde-a-maths-reels", {
+    formules: [
+      F("Classer le solde", "entier négatif ⇒ ℤ (donc aussi 𝔻, ℚ, ℝ)", "−3 000 ∈ ℤ"),
+      F("Calculer la part de chacune", "part = total ÷ nombre de personnes", "100 000 ÷ 6 = 50 000/3"),
+      F("Tester si c'est un décimal", "dénominateur irréductible fait seulement de 2 et de 5 ⇔ décimal", "3 n'est ni 2 ni 5 : 50 000/3 = 16 666,666… ∉ 𝔻"),
+      F("Payer justement (division euclidienne)", "100 000 = 6 × 16 666 + 4", "16 666 F chacune, 4 F restent dans la caisse"),
+      F("Calculer la diagonale", "d = √(c² + c²) = c√2", "d = √2 m ≈ 1,41 m, irrationnel")
+    ],
+    planches: {
+      1: [pl2("Décimal ou pas ? La règle des dénominateurs", "On rend la fraction irréductible, puis on décompose le dénominateur : seulement des 2 et des 5 → décimal.", 640, 220, "Trois fractions testées par la décomposition de leur dénominateur",
+        [["7/20", "20 = 2² × 5", "0,35 ∈ 𝔻", VERT], ["3/8", "8 = 2³", "0,375 ∈ 𝔻", VERT], ["50 000/3", "3 = 3", "16 666,6… ∉ 𝔻", ROUGE]].map(function (r, k) { var x = 20 + k * 210; return "<rect x='" + x + "' y='30' width='190' height='160' rx='14' fill='#fff' stroke='" + r[3] + "' stroke-width='2'/>" + txt(x + 95, 72, r[0], { s: 22 }) + txt(x + 95, 116, r[1], { s: 14, c: GRIS }) + txt(x + 95, 160, r[2], { s: 15, c: r[3] }); }).join(""))]
+    }
+  });
+
+  enrichir("2nde-c-chimie-rutherford", {
+    formules: [
+      F("Compter les couches traversées", "nombre de couches = épaisseur de la feuille ÷ diamètre d'un atome", "≈ 0,3 µm ÷ 0,3 nm ≈ 1 000 couches d'atomes d'or"),
+      F("Interpréter les rebonds", "proportion de rebonds ≈ 1 sur 10 000", "presque tout l'atome est vide ; la masse et la charge + sont concentrées dans le noyau"),
+      F("Comparer les tailles", "rayon de l'atome ÷ rayon du noyau ≈ 10⁻¹⁰ m ÷ 10⁻¹⁵ m", "≈ 100 000 : un noyau d'1 cm dans un atome d'1 km"),
+      F("Lire la notation du noyau", "ᴬ_Z X : Z protons, N = A − Z neutrons", "¹⁹⁷₇₉Au : 79 protons, 197 − 79 = 118 neutrons")
+    ]
+  });
+
+
+  /* ─────────────── Lot 4 : 2nde A dénombrement, Tle sciences ─────────────── */
+  function venn(a, b, i, la, lb, tot) {
+    return "<rect x='20' y='20' width='600' height='200' rx='14' fill='#FBFAF7' stroke='#C9D0DC'/>" + txt(40, 44, "U : " + tot, { s: 13, a: "start", c: GRIS }) +
+      "<circle cx='250' cy='125' r='85' fill='" + ROUGE + "' fill-opacity='.14' stroke='" + ROUGE + "' stroke-width='2.5'/><circle cx='370' cy='125' r='85' fill='" + BLEU + "' fill-opacity='.14' stroke='" + BLEU + "' stroke-width='2.5'/>" +
+      txt(215, 130, a - i, { s: 22, c: ROUGE }) + txt(310, 130, i, { s: 22 }) + txt(405, 130, b - i, { s: 22, c: BLEU }) + txt(150, 50, la, { s: 13, c: ROUGE }) + txt(470, 50, lb, { s: 13, c: BLEU }) + txt(560, 200, tot - (a + b - i), { s: 20, c: VERT }) + txt(560, 176, "aucun", { s: 12, c: VERT });
+  }
+  enrichir("2nde-a-maths-r26", {
+    formules: [
+      F("Placer l'intersection d'abord", "card(L ∩ D)", "7 élèves font les deux clubs"),
+      F("Calculer les parties propres", "card(L seul) = card(L) − card(L ∩ D)", "lecture seule : 20 − 7 = 13 ; danse seule : 18 − 7 = 11"),
+      F("Calculer la réunion", "card(L ∪ D) = card(L) + card(D) − card(L ∩ D)", "20 + 18 − 7 = 31 élèves font au moins un club"),
+      F("Calculer le complémentaire", "card(aucun) = card(U) − card(L ∪ D)", "48 − 31 = 17 ≥ 15 : on ouvre le troisième club")
+    ],
+    planches: { 0: [pl2("Le diagramme de Venn de la classe", "On place d'abord les 7 élèves des deux clubs, puis 13 et 11 dans les parties propres ; 17 élèves restent hors des cercles.", 640, 240, "Diagramme de Venn de deux clubs dans une classe de 48 élèves", venn(20, 18, 7, "Lecture : 20", "Danse : 18", 48))] },
+    ajouts: {
+      0: def("Définition", "Le <strong>cardinal</strong> d'un ensemble fini A, noté card(A), est son nombre d'éléments. A ∩ B (intersection) : éléments communs ; A ∪ B (réunion) : éléments d'au moins un des deux.") +
+        ex("Exemple", "Sur 40 élèves, 25 aiment le football, 18 le handball et 10 les deux : card(F ∪ H) = 25 + 18 − 10 = 33 ; 7 n'aiment aucun des deux.") +
+        attention("Ne pas additionner simplement 20 + 18 = 38 : les 7 élèves des deux clubs seraient comptés deux fois."),
+      1: ex("Exemple : tableau à double entrée", "Lignes : garçons / filles ; colonnes : club / pas de club. Le total de chaque ligne et de chaque colonne se vérifie, et le total général vaut card(U).")
+    }
+  });
+
+  enrichir("2nde-a-maths-r27", {
+    formules: [
+      F("Identifier les choix successifs", "une tenue = pagne puis modèle puis coiffe", "3 choix, puis 2, puis 2"),
+      F("Appliquer le principe multiplicatif", "nombre de résultats = n₁ × n₂ × … × nₖ", "3 × 2 × 2 = 12 tenues"),
+      F("Comparer au besoin", "nombre de tenues ≥ nombre de filles ?", "12 = 12 : chaque fille a une tenue différente")
+    ],
+    ajouts: { 1: astuce("« <strong>Et → je multiplie, ou → j'additionne</strong> » : un pagne ET un modèle ET une coiffe : on multiplie. Un pagne en wax OU en kita : on additionne les possibilités.") }
+  });
+
+  enrichir("2nde-a-maths-r28", {
+    formules: [
+      F("Calculer les participants (réunion)", "card(S ∪ D) = card(S) + card(D) − card(S ∩ D)", "75 + 50 − 30 = 95 élèves"),
+      F("Calculer les non-participants", "card(U) − card(S ∪ D)", "120 − 95 = 25 élèves"),
+      F("Compter les plateaux (principe multiplicatif)", "boissons × plats × desserts", "4 × 3 × 2 = 24 plateaux"),
+      F("Conclure", "24 ≤ 25", "les 25 modèles de tickets suffisent")
+    ],
+    planches: { 0: [pl2("Les participants de la kermesse", "75 tiennent un stand, 50 jouent aux dames, 30 font les deux : 95 participent, 25 ne font rien.", 640, 240, "Diagramme de Venn de la kermesse sur 120 élèves", venn(75, 50, 30, "Stand : 75", "Dames : 50", 120))] },
+    ajouts: {
+      0: def("Choisir l'outil", "<strong>Diagramme de Venn</strong> : pour des ensembles qui se chevauchent (au moins un, aucun, les deux). <strong>Arbre</strong> ou <strong>principe multiplicatif</strong> : pour des choix successifs (un élément de chaque catégorie).") +
+        formule("card(A ∪ B) = card(A) + card(B) − card(A ∩ B) · nombre de choix = n₁ × n₂ × … × nₖ") +
+        ex("Exemple", "Un code de cadenas à 3 chiffres (0 à 9) : 10 × 10 × 10 = 1 000 codes possibles."),
+      1: ex("Exemple", "Avec 2 boissons, 3 plats et 2 desserts : 2 × 3 × 2 = 12 menus ; si l'on ajoute une boisson, 3 × 3 × 2 = 18.")
+    }
+  });
+
+  enrichir("tle-sc-microscopie", {
+    formules: [
+      F("Calculer le grossissement", "G = grossissement de l'objectif × grossissement de l'oculaire", "G = 40 × 10 = 400"),
+      F("Calculer la taille réelle", "taille réelle = taille sur le dessin ÷ G", "20 mm ÷ 400 = 0,05 mm"),
+      F("Convertir en micromètres", "1 mm = 1 000 µm", "0,05 mm × 1 000 = 50 µm"),
+      F("Comparer à un objet connu", "rapport = taille de l'objet ÷ taille de la cellule", "grain de riz ≈ 6 mm : 6 ÷ 0,05 = 120 fois plus grand")
+    ]
+  });
+
+  enrichir("tle-sc-organites", {
+    formules: [
+      F("Comparer les pouvoirs de séparation", "rapport = pouvoir du microscope optique ÷ celui du microscope électronique", "0,2 µm ÷ 0,2 nm = 1 000 : 1 000 fois plus précis"),
+      F("Relier structure et fonction", "beaucoup d'énergie nécessaire ⇒ beaucoup de mitochondries", "cœur ≈ 5 000 mitochondries par cellule, peau ≈ 100"),
+      F("Écrire le bilan de la respiration cellulaire", "glucose + dioxygène → dioxyde de carbone + eau + énergie (ATP)", "C₆H₁₂O₆ + 6 O₂ → 6 CO₂ + 6 H₂O + énergie")
+    ],
+    ajouts: {
+      1: def("Définition", "Un <strong>organite</strong> est un compartiment de la cellule, limité par une ou deux membranes, qui remplit une fonction précise : la <strong>mitochondrie</strong> produit l'énergie, le <strong>ribosome</strong> fabrique les protéines, l'<strong>appareil de Golgi</strong> les emballe et les exporte, le <strong>chloroplaste</strong> (cellule végétale) réalise la photosynthèse.") +
+        formule("Respiration : C₆H₁₂O₆ + 6 O₂ → 6 CO₂ + 6 H₂O + énergie") +
+        ex("Exemple", "Les cellules du foie, très actives, comptent environ 2 000 mitochondries ; un spermatozoïde en concentre une cinquantaine dans sa pièce intermédiaire pour faire battre son flagelle.") +
+        ex("Exemple", "Les cellules du pancréas qui sécrètent l'insuline ont un réticulum endoplasmique et un appareil de Golgi très développés.") +
+        astuce("« <strong>Usine cellulaire</strong> » : le noyau est le bureau des plans, les ribosomes les ouvriers, le Golgi le service d'emballage, la mitochondrie la centrale électrique, la membrane le portail.") +
+        attention("La mitochondrie ne « stocke » pas l'énergie comme une réserve de graisse : elle la libère au fur et à mesure à partir du glucose et du dioxygène.")
+    }
+  });
+
+
+  /* ─────────────── Lot 5 : 6e Informatique et Technologie ─────────────── */
+  function boites(items, y, h, w0) {
+    var n = items.length, w = w0 || (600 - (n - 1) * 30) / n;
+    return items.map(function (it, k) {
+      var x = 20 + k * (w + 30), s = "<rect x='" + x.toFixed(1) + "' y='" + y + "' width='" + w.toFixed(1) + "' height='" + h + "' rx='12' fill='" + it[2] + "' stroke='" + it[3] + "' stroke-width='2'/>" + txt((x + w / 2).toFixed(1), y + 28, it[0], { s: 14, c: it[3] });
+      (it[1] || []).forEach(function (l, j) { s += txt((x + w / 2).toFixed(1), y + 54 + j * 18, l, { s: 11.5, w: 500, c: NUIT }); });
+      if (k < n - 1) s += "<path d='M" + (x + w + 4).toFixed(1) + " " + (y + h / 2) + "H" + (x + w + 24).toFixed(1) + "' stroke='" + NUIT + "' stroke-width='2.5'/><path d='M" + (x + w + 26).toFixed(1) + " " + (y + h / 2) + "l-8 -5v10z' fill='" + NUIT + "'/>";
+      return s;
+    }).join("");
+  }
+  enrichir("6e-info-ia", {
+    formules: [
+      F("Reconnaître une IA", "IA = programme + données d'exemples + calcul de la réponse la plus probable", "le correcteur, la traduction, l'assistant vocal sont des IA ; elles ne pensent pas"),
+      F("Comprendre pourquoi elle se trompe", "réponse = ce qui ressemble le plus aux exemples appris", "exemples insuffisants ou mélangés ⇒ réponse fausse mais bien rédigée"),
+      F("Vérifier une réponse (méthode des 3 sources)", "réponse de l'IA + manuel ou enseignant + site officiel", "si les trois concordent, on peut l'utiliser ; sinon, on garde le manuel")
+    ],
+    planches: {
+      1: [pl2("Comment une IA apprend", "On lui montre des milliers d'exemples étiquetés ; elle en tire un modèle ; devant un cas nouveau, elle donne la réponse la plus probable, qui peut être fausse.", 640, 190, "Trois étapes : exemples étiquetés, entraînement, prédiction",
+        boites([["Exemples", ["10 000 photos", "« mangue » / « papaye »"], "#EEF4FC", BLEU], ["Entraînement", ["le programme cherche", "les ressemblances"], "#FFF6E3", "#C2540A"], ["Prédiction", ["photo nouvelle →", "« mangue » à 92 %"], "#ECF7F0", VERT]], 30, 130))]
+    },
+    ajouts: {
+      0: def("Définition", "Une <strong>intelligence artificielle</strong> (IA) est un programme informatique qui imite certaines capacités humaines (reconnaître, traduire, répondre) en calculant à partir de très nombreux <strong>exemples</strong>. Elle n'a ni conscience, ni émotions, ni expérience du monde.") +
+        ex("Exemple", "L'appareil photo du téléphone qui reconnaît un visage, le traducteur qui passe du français à l'anglais, le GPS qui propose le chemin le plus rapide."),
+      1: def("Apprentissage automatique", "La machine <strong>apprend</strong> en comparant des milliers d'exemples déjà classés par des humains, puis applique ce qu'elle a trouvé à des cas nouveaux.") +
+        ex("Exemple d'erreur", "Une IA entraînée surtout avec des photos de mangues mûres jaunes peut prendre une mangue verte pour une papaye : ses exemples étaient incomplets.") +
+        astuce("« <strong>L'IA propose, je vérifie</strong> » : avant de recopier une réponse, compare-la avec ton manuel ou demande à ton enseignant.") +
+        attention("Ne donne jamais ton nom complet, ton adresse ou tes mots de passe à une application d'IA.")
+    }
+  });
+
+  enrichir("6e-info-composants", {
+    formules: [
+      F("Situer l'ordinateur", "ordinateur = unité centrale (processeur + mémoire vive + disque)", "l'écran n'est qu'un périphérique : il affiche"),
+      F("Classer un périphérique selon le trajet de l'information", "vers l'unité centrale → entrée ; vers l'utilisateur → sortie ; les deux → entrée-sortie", "souris, clavier : entrée ; écran, imprimante : sortie ; clé USB : entrée-sortie"),
+      F("Éviter de perdre son travail", "mémoire vive = effacée sans courant ; disque = conservé", "enregistrer souvent (Ctrl + S), éteindre par le menu, brancher un onduleur")
+    ],
+    planches: {
+      1: [pl2("Entrée, traitement, sortie", "L'information entre par le clavier ou la souris, est traitée par l'unité centrale, puis sort par l'écran ou l'imprimante.", 640, 190, "Schéma entrée, unité centrale, sortie avec exemples de périphériques",
+        boites([["Entrée", ["clavier, souris,", "micro, scanner"], "#EEF4FC", BLEU], ["Unité centrale", ["processeur : calcule", "RAM et disque : gardent"], "#FFF6E3", "#C2540A"], ["Sortie", ["écran, imprimante,", "haut-parleurs"], "#ECF7F0", VERT]], 30, 130))],
+      2: [pl2("Mémoire vive ou disque ?", "La mémoire vive (RAM) garde le travail en cours mais s'efface quand le courant coupe ; le disque conserve les fichiers enregistrés.", 640, 200, "Comparaison mémoire vive et disque dur",
+        "<rect x='20' y='20' width='290' height='160' rx='14' fill='#FCE8EC' stroke='" + ROUGE + "' stroke-width='2'/><rect x='330' y='20' width='290' height='160' rx='14' fill='#ECF7F0' stroke='" + VERT + "' stroke-width='2'/>" +
+        txt(165, 52, "Mémoire vive (RAM)", { s: 15, c: ROUGE }) + txt(165, 88, "travail en cours", { s: 13, w: 500 }) + txt(165, 114, "rapide", { s: 13, w: 500 }) + txt(165, 146, "s'efface sans courant ✗", { s: 13, c: ROUGE }) +
+        txt(475, 52, "Disque (HDD, SSD)", { s: 15, c: VERT }) + txt(475, 88, "fichiers enregistrés", { s: 13, w: 500 }) + txt(475, 114, "plus lent, très grand", { s: 13, w: 500 }) + txt(475, 146, "conserve tout ✓", { s: 13, c: VERT }))]
+    },
+    ajouts: {
+      0: def("Définition", "L'<strong>unité centrale</strong> contient le <strong>processeur</strong> (qui calcule), la <strong>mémoire vive</strong> ou RAM (qui garde le travail en cours) et le <strong>disque</strong> (qui conserve les fichiers). Un <strong>périphérique</strong> est un appareil branché à l'unité centrale."),
+      1: ex("Exemple", "Le clavier envoie les lettres tapées à l'unité centrale : c'est un périphérique d'<strong>entrée</strong>. L'imprimante reçoit le document à imprimer : <strong>sortie</strong>.") +
+        ex("Exemple", "Un écran tactile reçoit tes doigts (entrée) et affiche l'image (sortie) : c'est un périphérique d'<strong>entrée-sortie</strong>, comme la clé USB.") +
+        astuce("« <strong>Suis la flèche</strong> » : demande-toi dans quel sens voyage l'information. Vers l'ordinateur → entrée ; vers toi → sortie."),
+      2: formule("ordinateur = processeur + mémoire vive + disque + périphériques d'entrée et de sortie") + attention("Ne jamais éteindre en coupant le courant : le travail non enregistré, gardé dans la mémoire vive, est perdu. Enregistre (Ctrl + S) toutes les 5 minutes.")
+    }
+  });
+
+  enrichir("6e-tm-materiel-dessin", {
+    formules: [
+      F("Choisir le crayon", "H (dur) : traits fins de construction · HB ou B (tendre) : traits définitifs", "construire au H en appuyant peu, repasser au HB"),
+      F("Choisir l'outil de chaque tracé", "segment → règle · angle droit → équerre · cercle → compas · angle → rapporteur", "murs à la règle, angles à l'équerre, toit au compas, porte à 60° au rapporteur"),
+      F("Régler le compas", "écartement du compas = rayon = diamètre ÷ 2", "toit de 8 cm de diamètre : compas ouvert à 4 cm")
+    ],
+    planches: {
+      1: [pl2("Les crayons, du plus dur au plus tendre", "Plus le chiffre suivi de H est grand, plus la mine est dure et le trait clair ; plus le chiffre suivi de B est grand, plus la mine est tendre et le trait foncé.", 640, 180, "Échelle des mines de crayon de 4H à 4B",
+        ["4H", "2H", "H", "HB", "B", "2B", "4B"].map(function (m, k) { var g = 200 - k * 28, x = 30 + k * 86; return "<rect x='" + x + "' y='40' width='70' height='18' rx='4' fill='#E8C547'/><path d='M" + (x + 70) + " 40l14 9-14 9z' fill='#E3C9A0'/><path d='M" + (x + 80) + " 46l4 3-4 3z' fill='rgb(" + g + "," + g + "," + g + ")'/>" + txt(x + 35, 85, m, { s: 15 }) + "<path d='M" + x + " 110H" + (x + 70) + "' stroke='rgb(" + g + "," + g + "," + g + ")' stroke-width='" + (1 + k * .5) + "'/>"; }).join("") +
+        txt(80, 150, "dur, trait clair : construction", { s: 12, c: BLEU, a: "start" }) + txt(600, 150, "tendre, trait foncé : définitif", { s: 12, c: ROUGE, a: "end" }))],
+      2: [pl2("Choisir le bon outil", "Chaque tracé a son outil : la règle pour les segments, l'équerre pour l'angle droit, le compas pour le cercle, le rapporteur pour un angle mesuré.", 640, 200, "Quatre outils de dessin et leur usage",
+        boites([["Règle", ["segments", "et mesures"], "#EEF4FC", BLEU], ["Équerre", ["angles droits,", "perpendiculaires"], "#FFF6E3", "#C2540A"], ["Compas", ["cercles,", "reports de longueur"], "#ECF7F0", VERT], ["Rapporteur", ["angles en", "degrés"], "#F4F1FB", "#7B2CBF"]], 30, 130))]
+    },
+    ajouts: {
+      0: def("Définition", "Le <strong>matériel de dessin</strong> comprend les outils de tracé (règle, équerre, compas, rapporteur), les crayons (mines H, HB, B) et le matériel de correction (gomme, taille-crayon).") +
+        ex("Exemple", "Pour tracer un cercle de 3 cm de rayon, on ouvre le compas à 3 cm sur la règle graduée, on plante la pointe au centre et on tourne en tenant la tête du compas.") +
+        astuce("« <strong>H comme Hard (dur), B comme Black (noir)</strong> » : H pour construire léger, B pour repasser foncé."),
+      2: formule("rayon = diamètre ÷ 2 · écartement du compas = rayon") + ex("Exemple", "Une mine bien taillée trace un trait de moins de 0,5 mm ; une mine émoussée donne des traits épais qui faussent les mesures.") +
+        attention("La pointe sèche du compas se range protégée (bouchon ou étui) : elle peut blesser.")
+    }
+  });
+
+  enrichir("6e-tm-site-pepiniere", {
+    formules: [
+      F("Lister les critères d'un bon site", "eau · sol meuble et drainé · terrain plat · lumière filtrée · accès · protection", "6 critères notés sur 2 points, sauf l'accès sur 2 et la protection sur 2 : total sur 12"),
+      F("Noter chaque terrain (grille)", "note du terrain = somme des points obtenus", "terrain A : 5/12 ; terrain B : 11/12"),
+      F("Choisir et justifier", "on choisit la meilleure note et on cite les critères décisifs", "terrain B : pas inondable, lumière filtrée, loin du fromager")
+    ],
+    planches: {
+      1: [pl2("La grille de choix du site", "On note chaque terrain critère par critère ; la somme désigne le meilleur site.", 640, 240, "Grille de notation de deux terrains pour une pépinière",
+        (function () { var crit = [["Eau toute l'année", 2, 2], ["Sol meuble, drainé", 0, 2], ["Terrain plat", 1, 2], ["Lumière filtrée", 0, 2], ["Accès facile", 2, 2], ["Protection", 0, 1]], s = "<rect x='20' y='14' width='600' height='212' rx='12' fill='#fff' stroke='#C9D0DC'/>" + txt(40, 40, "Critère", { s: 13, a: "start" }) + txt(470, 40, "Terrain A", { s: 13, c: ROUGE }) + txt(570, 40, "Terrain B", { s: 13, c: VERT });
+          crit.forEach(function (c, k) { var y = 66 + k * 24; s += "<path d='M30 " + (y - 16) + "H610' stroke='#EEF1F6'/>" + txt(40, y, c[0], { s: 12.5, a: "start", w: 500 }) + txt(470, y, c[1] + " / 2", { s: 12.5, c: ROUGE }) + txt(570, y, c[2] + " / 2", { s: 12.5, c: VERT }); });
+          return s + "<path d='M30 200H610' stroke='" + NUIT + "'/>" + txt(40, 218, "Total", { s: 14, a: "start" }) + txt(470, 218, "5 / 12", { s: 15, c: ROUGE }) + txt(570, 218, "11 / 12", { s: 15, c: VERT }); })())],
+      2: [pl2("Le bon et le mauvais site", "À gauche, un bas-fond inondable sous un grand arbre ; à droite, un terrain plat, drainé, à mi-ombre, près d'un point d'eau et clôturé.", 640, 200, "Comparaison de deux terrains pour une pépinière",
+        "<rect x='20' y='20' width='290' height='160' rx='14' fill='#FCE8EC'/><path d='M20 150Q165 120 310 150V180H20Z' fill='#7FB3D5'/><circle cx='200' cy='70' r='44' fill='#2E7D32'/><rect x='194' y='100' width='12' height='50' fill='#6B4423'/>" + txt(110, 50, "Terrain A ✗", { s: 14, c: ROUGE }) + txt(110, 170, "inondable, trop d'ombre", { s: 11.5, w: 500 }) +
+        "<rect x='330' y='20' width='290' height='160' rx='14' fill='#ECF7F0'/><rect x='350' y='130' width='250' height='30' fill='#B8916A'/>" + [0, 1, 2, 3, 4, 5].map(function (k) { return "<path d='M" + (370 + k * 40) + " 130v-16' stroke='#2E7D32' stroke-width='3'/><circle cx='" + (370 + k * 40) + "' cy='110' r='7' fill='#43A047'/>"; }).join("") + "<path d='M350 80H600' stroke='#C9A227' stroke-width='3' stroke-dasharray='8 4'/>" + txt(475, 50, "Terrain B ✓", { s: 14, c: VERT }) + txt(475, 170, "plat, drainé, ombrière, clôturé", { s: 11.5, w: 500 }))]
+    },
+    ajouts: {
+      0: def("Définition", "Une <strong>pépinière</strong> est un lieu aménagé où l'on fait germer et grandir de jeunes plants (cacaoyers, caféiers, arbres fruitiers) avant de les repiquer au champ.") +
+        ex("Exemple", "Une pépinière de 500 jeunes cacaoyers en sachets, sous une ombrière de palmes, arrosée matin et soir pendant 5 à 6 mois."),
+      1: ex("Exemple", "Un terrain en pente forte est déconseillé : l'eau d'arrosage ruisselle et emporte la terre des sachets.") +
+        astuce("« <strong>EAU-SOL-PLAT-OMBRE-ACCÈS-CLÔTURE</strong> » : récite les six critères dans l'ordre et note chaque terrain sur chacun.") +
+        attention("Évite le pied d'un grand arbre : ses racines prennent l'eau, ses branches peuvent tomber et il peut transmettre des maladies aux jeunes plants.")
+    }
+  });
+
+  /* ─────────────── 2nde C Physique (formules déjà complètes) ─────────────── */
 })();
 
 /* Schémas animés et manipulables — sciences. Chaque fonction reçoit le conteneur et y dessine.
