@@ -9,6 +9,13 @@ Demande de Jacques : « Oui » (mettre les premières leçons au niveau des dern
   - **Tle bac** : journée équilibrée de 24 h (2D) ; **6e piste** : relais et zone de transmission de 30 m (2D) ; **2nde C production** : nature, travail, capital (2D).
 - `lecons.js?v=20261118r19` (master était passé à `m6f` avec la PR #366 de l'autre session) ; 8 pages `apprendre/cours/` régénérées. Chromium (1200 et 390 px) : aucun débordement, aucune erreur JS. Contrôles GEO et bancs au vert. L'audit ne signale plus aucune leçon en dessous du niveau.
 
+## 18/11/2026 — Consignes d'enrichissement de TOUTES les leçons (branche lecons-enrichies)
+Jacques : « Résoudre la situation-problème de départ en donnant des formules avec les étapes de la leçon ; illustrer par des exemples ; formules, détails précis, astuces ; planches animées en 2D et 3D. » (exemple cité : « Mesurer une grandeur et estimer l'erreur », 2nde C physique).
+- **Grille** (tools/audit_lecons.cjs) : situation de départ ; situation résolue (étapes + réponse) ; ≥ 2 formules/définitions (class formule|def) ; ≥ 2 exemples (class ex) ; ≥ 2 astuces (astuce|attention|savais|methode) ; ≥ 2 planches 2D ; ≥ 1 planche 3D ; ≥ 1 simulation. État initial : 80 leçons, 7 complètes, 73 à enrichir.
+- **Gabarit** (lecon.html) : `denouement.formules = [{ nom, f, calcul }]` → bloc « Les formules utilisées, étape par étape » (formule générale puis application chiffrée) dans la situation résolue. modele.css?v=20261118u.
+- **2nde-c-physique-mesure** complète : définition, exemples (vernier 23,7 mm, balance non tarée, chronomètre en retard, parallaxe, pendule), formules (moyenne, incertitude absolue et relative, écriture du résultat), astuces (test du vide, « M-É-R »), planches 2D « Lire 23,7 mm sur le vernier » et « L'intervalle de mesure du sac », résolution en 6 étapes chiffrées.
+- Partage proposé à la session « Enrichissement des leçons » : moi = sciences (maths, physique, chimie, PCT, SVT, informatique, technologie) ; elle = lettres, langues, histoire-géo, ECM, philo, arts, EPS, cultures nationales, orientation, ESF.
+
 ## Apprendre : lot 18, 6e — toutes les leçons gratuites au gabarit approfondi (18/11/2026)
 
 Demande de Jacques : « Continue ». L'autre session crée de NOUVELLES leçons de maths de 6e (`16c-approfondies-6e-maths.js` : cercle, proportionnalité, pavé droit) ; aucun recouvrement (coordination confirmée par message).
