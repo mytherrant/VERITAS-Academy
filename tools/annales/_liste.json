@@ -154,6 +154,20 @@
   "u": "/ressources/annales/probatoire-langue-francaise-cdeti-2025.html"
  },
  {
+  "id": "probatoire-langue-francaise-cdeti-2024",
+  "examen": "probatoire",
+  "m": "langue-francaise",
+  "serie": "séries C, D, E et TI",
+  "nomExamen": "Probatoire",
+  "fiche": "ressources/probatoire-francais.html",
+  "matiere": "Langue française (séries C, D, E et TI)",
+  "mat": "francais",
+  "classes": "1re C,1re D",
+  "annee": 2024,
+  "national": true,
+  "u": "/ressources/annales/probatoire-langue-francaise-cdeti-2024.html"
+ },
+ {
   "id": "bepc-mathematiques-2026",
   "examen": "bepc",
   "m": "mathematiques",
@@ -392,6 +406,20 @@
   "u": "/ressources/annales/probatoire-physique-ce-2025.html"
  },
  {
+  "id": "probatoire-physique-ce-2024",
+  "examen": "probatoire",
+  "m": "physique",
+  "serie": "séries C et E",
+  "nomExamen": "Probatoire",
+  "fiche": "ressources/examen-physique-chimie-probatoire.html",
+  "matiere": "Physique (séries C et E)",
+  "mat": "physique",
+  "classes": "1re C",
+  "annee": 2024,
+  "national": false,
+  "u": "/ressources/annales/probatoire-physique-ce-2024.html"
+ },
+ {
   "id": "bac-physique-d-2025",
   "examen": "bac",
   "m": "physique",
@@ -420,6 +448,20 @@
   "u": "/ressources/annales/probatoire-physique-dti-2025.html"
  },
  {
+  "id": "probatoire-physique-dti-2024",
+  "examen": "probatoire",
+  "m": "physique",
+  "serie": "séries D et TI",
+  "nomExamen": "Probatoire",
+  "fiche": "ressources/examen-physique-chimie-probatoire.html",
+  "matiere": "Physique (séries D et TI)",
+  "mat": "physique",
+  "classes": "1re D",
+  "annee": 2024,
+  "national": false,
+  "u": "/ressources/annales/probatoire-physique-dti-2024.html"
+ },
+ {
   "id": "bac-chimie-cde-2025",
   "examen": "bac",
   "m": "chimie",
@@ -446,6 +488,20 @@
   "annee": 2025,
   "national": true,
   "u": "/ressources/annales/probatoire-chimie-cde-2025.html"
+ },
+ {
+  "id": "probatoire-chimie-cde-2024",
+  "examen": "probatoire",
+  "m": "chimie",
+  "serie": "séries C, D et E",
+  "nomExamen": "Probatoire",
+  "fiche": "ressources/examen-physique-chimie-probatoire.html",
+  "matiere": "Chimie (séries C, D et E)",
+  "mat": "chimie",
+  "classes": "1re C,1re D",
+  "annee": 2024,
+  "national": false,
+  "u": "/ressources/annales/probatoire-chimie-cde-2024.html"
  },
  {
   "id": "bepc-svt-2026",
@@ -518,6 +574,20 @@
   "u": "/ressources/annales/probatoire-svt-cti-2025.html"
  },
  {
+  "id": "probatoire-svt-cti-2024",
+  "examen": "probatoire",
+  "m": "svt",
+  "serie": "séries C et TI",
+  "nomExamen": "Probatoire",
+  "fiche": "ressources/examen-svt-probatoire.html",
+  "matiere": "SVTEEHB (séries C et TI)",
+  "mat": "svt",
+  "classes": "1re C",
+  "annee": 2024,
+  "national": false,
+  "u": "/ressources/annales/probatoire-svt-cti-2024.html"
+ },
+ {
   "id": "bac-svt-d-2025",
   "examen": "bac",
   "m": "svt",
@@ -544,6 +614,20 @@
   "annee": 2025,
   "national": true,
   "u": "/ressources/annales/probatoire-svt-d-2025.html"
+ },
+ {
+  "id": "probatoire-svt-d-2024",
+  "examen": "probatoire",
+  "m": "svt",
+  "serie": "série D",
+  "nomExamen": "Probatoire",
+  "fiche": "ressources/examen-svt-probatoire.html",
+  "matiere": "SVTEEHB (série D)",
+  "mat": "svt",
+  "classes": "1re D",
+  "annee": 2024,
+  "national": false,
+  "u": "/ressources/annales/probatoire-svt-d-2024.html"
  },
  {
   "id": "probatoire-sciences-aabi-2025",
@@ -714,6 +798,20 @@
   "u": "/ressources/annales/bepc-ecm-2024.html"
  },
  {
+  "id": "probatoire-ecm-2024",
+  "examen": "probatoire",
+  "m": "ecm",
+  "serie": "",
+  "nomExamen": "Probatoire",
+  "fiche": "ressources/examen-ecm-probatoire.html",
+  "matiere": "Éducation à la citoyenneté et à la morale",
+  "mat": "ecm",
+  "classes": "1re A,1re C,1re D",
+  "annee": 2024,
+  "national": true,
+  "u": "/ressources/annales/probatoire-ecm-2024.html"
+ },
+ {
   "id": "probatoire-philosophie-aabi-2025",
   "examen": "probatoire",
   "m": "philosophie",
@@ -756,6 +854,20 @@
   "u": "/ressources/annales/probatoire-philosophie-cdeti-2025.html"
  },
  {
+  "id": "probatoire-philosophie-cdeti-2024",
+  "examen": "probatoire",
+  "m": "philosophie",
+  "serie": "séries C, D, E et TI",
+  "nomExamen": "Probatoire",
+  "fiche": "ressources/examen-philosophie-probatoire.html",
+  "matiere": "Philosophie (séries C, D, E et TI)",
+  "mat": "philo",
+  "classes": "1re C,1re D",
+  "annee": 2024,
+  "national": false,
+  "u": "/ressources/annales/probatoire-philosophie-cdeti-2024.html"
+ },
+ {
   "id": "bepc-anglais-2025",
   "examen": "bepc",
   "m": "anglais",
@@ -782,6 +894,20 @@
   "annee": 2025,
   "national": true,
   "u": "/ressources/annales/probatoire-anglais-acdti-2025.html"
+ },
+ {
+  "id": "probatoire-anglais-acdti-2024",
+  "examen": "probatoire",
+  "m": "anglais",
+  "serie": "séries A, C, D et TI",
+  "nomExamen": "Probatoire",
+  "fiche": "ressources/examen-anglais-probatoire.html",
+  "matiere": "Anglais (séries A, C, D et TI)",
+  "mat": "anglais",
+  "classes": "1re A,1re C,1re D",
+  "annee": 2024,
+  "national": true,
+  "u": "/ressources/annales/probatoire-anglais-acdti-2024.html"
  },
  {
   "id": "bac-anglais-cdeti-2025",

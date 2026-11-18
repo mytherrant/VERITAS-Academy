@@ -1,3 +1,29 @@
+## Apprendre : lot 13, 2nde (18/11/2026)
+
+Demande de Jacques : « continue ». Lot 12 (PR #358) fusionné et déployé.
+
+- **`apprendre/_src/21-approfondies-2nde.js`** : 4 leçons gratuites de 2nde au gabarit approfondi, remplacées en place (partie « Entraînement au format de l'examen » et quiz de 10 d'origine repris) :
+  - **2nde C maths, ℝ et ses sous-ensembles** : les partages de la coopérative de Santa (5/8 décimal, 5/6 non, « 0,8333333 » n'est qu'un arrondi) ; ensembles emboîtés, parcelle carrée 3D et sa diagonale √2 ; labo « ensembles » branché ; **testeur de décimaux** (fraction irréductible, facteurs du dénominateur, période surlignée).
+  - **2nde C français, le texte théâtral** : répétition du club théâtre de Mbalmayo (didascalies lues à voix haute, aparté) ; page annotée, scène 3D aux rideaux qui s'ouvrent, courbe exposition / nœud / dénouement ; **exercice** sur les formes de la parole. Dialogue de la page inventé pour la leçon (pas d'extrait d'œuvre).
+  - **2nde C ECM, la production** : projet de chocolaterie de Nadège à Ebolowa ; filière cacao 3D sur les trois secteurs ; **exercice** primaire / secondaire / tertiaire (8 activités).
+  - **2nde A français, l'énonciation** : billet anonyme trouvé au lycée de Kribi (« je t'attends ici demain ») ; schéma qui / à qui / où / quand, cour du lycée 3D (mât au drapeau camerounais) ; **exercice** sur les marques de l'énonciation.
+- `lecons.js?v=20261118l13` ; 4 pages `apprendre/cours/` régénérées et habillées. Chromium (1200 et 390 px) : aucun débordement, aucune erreur JS. Bancs : réglages 29/29, verrou 18/18, gabarits 54/54, planche mobile 23/23, charte 34/34, lisibilité 7/7 ; contrôles GEO au vert.
+- **Suite** : 2nde A (ℝ, disciplines de l'histoire, philosophie, cartes) ; puis, si Jacques le souhaite, 6e-5e-4e restantes après accord avec l'autre session.
+
+## Apprendre : lot 12, chinois de 1re et arabe de Tle (18/11/2026)
+
+Demande de Jacques : « continue ».
+
+- **`apprendre/_src/20-approfondies-langues-3.js`** : 4 leçons gratuites au gabarit approfondi, remplacées en place :
+  - **1re chinois, 不但……而且 / 第一……第二** : discours de Marie pour le concours « Pont du chinois » (汉语桥) ; blocs de la structure avec pinyin, estrade 3D aux lanternes rouges, famille en portraits avec les mots chinois ; **constructeur de phrases** (sujet, qualité A, qualité B).
+  - **1re chinois, 如果……就** : message sur la sortie du club à Kribi ; blocs de la structure, car 3D sous la pluie ; **exercice** : choisir la phrase correcte (5 phrases).
+  - **Tle arabe, أنواع الخبر** : description de la salle de classe d'Aminatou à Maroua ; مبتدأ / خبر en blocs (lecture de droite à gauche), salle de classe 3D ; **exercice** : type du خبر (8 phrases).
+  - **Tle arabe, اللازم والمتعدي** : journal d'Ibrahim à Garoua (« ذهبَ الطالبُ المدرسةَ » corrigé en « إلى المدرسةِ ») ; schéma لازم / متعدٍّ, scène 3D جلسَ → أجلسَ ; **exercice** : لازم ou متعدٍّ (8 phrases).
+- Textes arabes des planches : `direction='rtl'`, police Amiri / Noto Naskh Arabic avec repli ; vérifiés à l'écran (lettres liées, sens de lecture correct).
+- **Piège rencontré** : la fonction `alea()` n'est pas dans l'en-tête commun des fichiers 17 à 20 ; une erreur au chargement d'un fichier `_src` arrête toutes ses leçons suivantes (le test « enquete / denouement » de Chromium le révèle). Dans `planche3d.js`, `boite.c` est le **centre** de la boîte.
+- `lecons.js?v=20261118l12` ; 4 pages `apprendre/cours/` régénérées et habillées. Chromium (1200 et 390 px) : aucun débordement, aucune erreur JS. Bancs : réglages 29/29, verrou 18/18, gabarits 54/54, planche mobile 23/23, charte 34/34, lisibilité 7/7 ; contrôles GEO au vert.
+- **Suite** : 2nde C (maths, français, ECM) et 2nde A (maths, énonciation, histoire, philosophie, géographie) ; les leçons de 6e-5e-4e restent à l'autre session.
+
 ## Apprendre : lot 11, économie sociale et familiale et italien de 1re ; déploiement débloqué (18/11/2026)
 
 Demandes de Jacques : « Continue », puis « continue ».
@@ -16,6 +42,8 @@ Demandes de Jacques : « Continue », puis « continue ».
 - Pages d'œuvres (tools/oeuvres_statiques.js) : la grille de 4 boîtes remplacée par VRT_CM (même source litt-oeuvres.js), CSS du module injecté dans OE_CSS.
 - Leçons (apprendre/lecon.html) : « La carte mentale de la leçon » en fin de cours et en tête de la révision, tirée des parties (hors entraînement/parties verrouillées) et de « à retenir » (coupé aux « ; » et aux phrases), à défaut des mots-clés en gras. Pas de carte derrière un mur.
 - Marges mesurées avec Poppins chargée : ≥ 54 px de chaque côté ; branches rapprochées du noyau (« recentre plus vers l'intérieur »).
+- 18/11 (suite) « varie les styles de cartes » : 11 formes (radiale, organigramme, bulles, accolade « { », alvéoles, flux, causes-conséquences, roue, arête de poisson, arbre dessiné, frise chronologique) × 3 styles (main levée, coloré, sobre), tirés du titre (stables) ; 4 palettes harmonieuses remplacent les couleurs ternes ; traits et flèches épaissis. Leçons : frise pour l'histoire, flux pour les étapes, causes-conséquences seulement si deux parties distinctes. Titres longs passés à la ligne ; contrôle des marges sur 33 cartes × 2 tailles : 0 débordement.
+- Carte de la leçon : une seule fois, en fin de cours (pas dans la Révision : règle « pas de doublon »).
 - Reste à faire : la carte de l'application (_showLittCarte, app.js) garde son ancien dessin.
 
 ## 18/11/2026 — Formules compactes : en-tête teinté plus foncé, milieu blanc (branche offres-entetes)

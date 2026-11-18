@@ -6,7 +6,8 @@
    tools/oeuvres_statiques.js (pages d'œuvres), qui charge ce fichier sous Node. Aucune dépendance. */
 (function (W) {
   "use strict";
-  var NUM = 0, P = "cm", COUL = ["#E0475B", "#0E9AA7", "#7B4FC4", "#E07B1F", "#2E9A5B", "#1E6FD0", "#C2387A"];
+  var PALETTES = [["#D7263D", "#F46036", "#1B998B", "#2E86AB", "#7B2CBF", "#C2185B"], ["#E76F51", "#2A9D8F", "#D4891A", "#3A86FF", "#9C27B0", "#264653"], ["#EF476F", "#118AB2", "#06A77D", "#F78C1F", "#6A4C93", "#D62828"], ["#FF5A5F", "#00A6A6", "#F29E4C", "#5465FF", "#B5179E", "#2B9348"]];
+  var NUM = 0, P = "cm", STYLE = "main", COUL = ["#E0475B", "#0E9AA7", "#7B4FC4", "#E07B1F", "#2E9A5B", "#1E6FD0", "#C2387A"];
   function esc(s) { return String(s == null ? "" : s).replace(/[&<>"']/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]; }); }
   function f1(v) { return Math.round(v * 10) / 10; }
   function couper(s, n) {
@@ -20,7 +21,7 @@
     return "rgb(" + [r, g, b].map(function (v) { return Math.round(v + (255 - v) * k); }).join(",") + ")";
   }
   function texte(x, y, lignes, o) {
-    var s = "<text x='" + f1(x) + "' y='" + f1(y) + "' text-anchor='" + (o.a || "start") + "' font-size='" + o.t + "' font-style='italic' fill='#2E3445'>";
+    var s = "<text x='" + f1(x) + "' y='" + f1(y) + "' text-anchor='" + (o.a || "start") + "' font-size='" + o.t + "'" + (STYLE === "main" ? " font-style='italic'" : "") + (o.g ? " font-weight='" + o.g + "'" : "") + " fill='" + (o.c || (STYLE === "sobre" ? "#3B4456" : "#2E3445")) + "'>";
     lignes.forEach(function (l, i) { s += "<tspan x='" + f1(x) + "' dy='" + (i ? f1(o.t * 1.24) : 0) + "'>" + esc(l) + "</tspan>"; });
     return s + "</text>";
   }
@@ -28,17 +29,20 @@
   function boucle(cx, cy, rx, ry, col, graine) {
     var d = "", t, k = 0;
     for (t = -0.5; t <= 2 * Math.PI + 0.3; t += 0.16, k++) {
-      var j = 1 + 0.045 * Math.sin(3 * t + graine) + 0.02 * Math.cos(5 * t + graine * 2), sp = t > 2 * Math.PI - 0.2 ? 1.06 : 1;
+      var j = 1 + 0.045 * Math.sin(3 * t + graine) + 0.02 * Math.cos(5 * t + graine * 2), sp = t > 2 * Math.PI - 0.2 ? 1 + 6 / Math.max(rx, ry) : 1;
       d += (k ? "L" : "M") + f1(cx + rx * j * sp * Math.cos(t)) + " " + f1(cy + ry * j * sp * Math.sin(t));
     }
     return "<path d='" + d + "' fill='" + clair(col, .9) + "' stroke='" + col + "' stroke-width='2.6' stroke-linecap='round' stroke-linejoin='round'/>";
   }
   function etiquette(cx, cy, t, col, n, max) {
     var L = t.length > (max || 99) ? couper(t, Math.ceil(t.length / 2) + 2) : [t], ry = L.length > 1 ? 31 : 21;
-    var w = Math.round(Math.max.apply(null, L.map(function (l) { return l.length; })) * 9.2 + 40), s = "<g class='cm-h'>" + boucle(cx, cy, w / 2, ry, col, n * 1.7);
-    L.forEach(function (l, k) { s += "<text x='" + f1(cx) + "' y='" + f1(cy + 5.5 + (k - (L.length - 1) / 2) * 19) + "' text-anchor='middle' font-size='16' font-weight='800' fill='" + col + "'>" + esc(l) + "</text>"; });
-    s += "<circle cx='" + f1(cx - w / 2 + 6) + "' cy='" + f1(cy - ry + 2) + "' r='11.5' fill='" + col + "' stroke='#fff' stroke-width='2'/>" +
-      "<text x='" + f1(cx - w / 2 + 6) + "' y='" + f1(cy - ry + 6.5) + "' text-anchor='middle' font-size='13' font-weight='800' fill='#fff'>" + n + "</text></g>";
+    var w = Math.round(Math.max.apply(null, L.map(function (l) { return l.length; })) * 9.2 + 40), s = "<g class='cm-h'>", tc = col;
+    if (STYLE === "main") s += boucle(cx, cy, w / 2, ry, col, n * 1.7);
+    else if (STYLE === "colore") { s += "<rect x='" + f1(cx - w / 2) + "' y='" + f1(cy - ry + 2) + "' width='" + w + "' height='" + (ry * 2 - 4) + "' rx='" + (ry - 2) + "' fill='" + col + "'/>"; tc = "#fff"; }
+    else { s += "<rect x='" + f1(cx - w / 2) + "' y='" + f1(cy - ry + 3) + "' width='" + w + "' height='" + (ry * 2 - 6) + "' rx='8' fill='#fff' stroke='#AEB6C6' stroke-width='1.3'/><rect x='" + f1(cx - w / 2) + "' y='" + f1(cy - ry + 3) + "' width='5' height='" + (ry * 2 - 6) + "' rx='2' fill='" + col + "'/>"; tc = "#1D2330"; }
+    L.forEach(function (l, k) { s += "<text x='" + f1(cx) + "' y='" + f1(cy + 5.5 + (k - (L.length - 1) / 2) * 19) + "' text-anchor='middle' font-size='16' font-weight='" + (STYLE === "sobre" ? 700 : 800) + "' fill='" + tc + "'>" + esc(l) + "</text>"; });
+    s += "<circle cx='" + f1(cx - w / 2 + 6) + "' cy='" + f1(cy - ry + 2) + "' r='11.5' fill='" + (STYLE === "colore" ? "#fff" : col) + "' stroke='" + (STYLE === "colore" ? col : "#fff") + "' stroke-width='2'/>" +
+      "<text x='" + f1(cx - w / 2 + 6) + "' y='" + f1(cy - ry + 6.5) + "' text-anchor='middle' font-size='13' font-weight='800' fill='" + (STYLE === "colore" ? col : "#fff") + "'>" + n + "</text></g>";
     return { s: s, w: w, h: ry * 2 };
   }
   /* nuage central : contour en festons autour d'une ellipse */
@@ -50,7 +54,8 @@
     var s = "<g class='cm-c'><path d='" + d + "Z' fill='#001136' opacity='.12' transform='translate(3 5)'/>" +
       "<path d='" + d + "Z' fill='url(#" + P + "g)' stroke='#fff' stroke-width='2.5'/>";
     lignes.forEach(function (l, k) {
-      s += "<text x='" + f1(cx) + "' y='" + f1(cy - h / 2 + 31 + k * 21) + "' text-anchor='middle' font-size='" + (k ? 13.5 : 19) + "' font-weight='" + (k ? 600 : 800) + "' fill='" + (k ? "#FFE08A" : "#fff") + "'>" + esc(l) + "</text>";
+      var sub = k >= (lignes.nt || 1);
+      s += "<text x='" + f1(cx) + "' y='" + f1(cy - h / 2 + 31 + k * 21) + "' text-anchor='middle' font-size='" + (sub ? 13.5 : 19) + "' font-weight='" + (sub ? 600 : 800) + "' fill='" + (sub ? "#FFE08A" : "#fff") + "'>" + esc(l) + "</text>";
     });
     return { s: s + "</g>", h: h, a: a, b: b };
   }
@@ -58,9 +63,28 @@
   function defs(B) {
     return "<defs><linearGradient id='" + P + "g' x1='0' y1='0' x2='1' y2='1'><stop offset='0' stop-color='#3D5BD8'/><stop offset='.55' stop-color='#2A2F9E'/><stop offset='1' stop-color='#0C1F55'/></linearGradient>" +
       "<pattern id='" + P + "q' width='18' height='18' patternUnits='userSpaceOnUse'><circle cx='9' cy='9' r='1.1' fill='#DCE3EF'/></pattern>" +
-      B.map(function (b, i) { return "<marker id='" + P + "f" + i + "' markerWidth='12' markerHeight='12' refX='8' refY='6' orient='auto' markerUnits='userSpaceOnUse'><path d='M1 1.5L10 6L1 10.5' fill='none' stroke='" + b.color + "' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'/></marker>"; }).join("") + "</defs>";
+      "<linearGradient id='" + P + "p' x1='0' y1='0' x2='1' y2='1'><stop offset='0' stop-color='#FFF6E8'/><stop offset='.5' stop-color='#FDF2FA'/><stop offset='1' stop-color='#EAF3FF'/></linearGradient>" +
+      B.map(function (b, i) { return "<marker id='" + P + "f" + i + "' markerWidth='18' markerHeight='18' refX='11' refY='9' orient='auto' markerUnits='userSpaceOnUse'><path d='M2 2.5L14 9L2 15.5' fill='none' stroke='" + trait(b.color) + "' stroke-width='3.4' stroke-linecap='round' stroke-linejoin='round'/></marker>"; }).join("") + "</defs>";
   }
-  function fond(Wd, H) { return "<rect width='" + Wd + "' height='" + Math.round(H) + "' rx='18' fill='#FCFDFF'/><rect width='" + Wd + "' height='" + Math.round(H) + "' rx='18' fill='url(#" + P + "q)'/>"; }
+  function fond(Wd, H) {
+    if (STYLE === "sobre") return "<rect x='.5' y='.5' width='" + (Wd - 1) + "' height='" + Math.round(H - 1) + "' rx='14' fill='#fff' stroke='#E3E8F1'/>";
+    if (STYLE === "colore") return "<rect width='" + Wd + "' height='" + Math.round(H) + "' rx='18' fill='url(#" + P + "p)'/>";
+    return "<rect width='" + Wd + "' height='" + Math.round(H) + "' rx='18' fill='#FCFDFF'/><rect width='" + Wd + "' height='" + Math.round(H) + "' rx='18' fill='url(#" + P + "q)'/>";
+  }
+  /* centre selon le style : nuage (main levée), cartouche dégradé (coloré), cartouche sobre */
+  function centre(cx, cy, lignes, w) {
+    /* titre trop long pour la place : il passe à la ligne au lieu de déborder */
+    var lim = cx < 300 ? Math.max(200, 2 * cx - 40) : 420, L2 = [];
+    lignes.forEach(function (l, k) { couper(l, Math.floor((lim - 40) / (k ? 7.8 : 11.2))).forEach(function (x) { L2.push(k && !L2.length ? x : x); }); if (!k && L2.length > 1) L2.titre = L2.length; });
+    L2.nt = L2.titre || 1; lignes = L2;
+    w = Math.min(lim, Math.max(w, largeurC(lignes, 0, lim)));
+    if (STYLE === "main") return nuage(cx, cy, lignes, w);
+    var h = 26 + lignes.length * 21, sob = STYLE === "sobre", s = "<g class='cm-c'>" + (sob ? "" : "<rect x='" + f1(cx - w / 2 + 3) + "' y='" + f1(cy - h / 2 + 5) + "' width='" + w + "' height='" + h + "' rx='" + (h / 2) + "' fill='#001136' opacity='.12'/>") +
+      "<rect x='" + f1(cx - w / 2) + "' y='" + f1(cy - h / 2) + "' width='" + w + "' height='" + h + "' rx='" + (sob ? 10 : h / 2) + "' fill='" + (sob ? "#1D2B53" : "url(#" + P + "g)") + "'" + (sob ? "" : " stroke='#FFC93C' stroke-width='3'") + "/>";
+    lignes.forEach(function (l, k) { var sub = k >= (lignes.nt || 1); s += "<text x='" + f1(cx) + "' y='" + f1(cy - h / 2 + 31 + k * 21) + "' text-anchor='middle' font-size='" + (sub ? 13.5 : 19) + "' font-weight='" + (sub ? 600 : 800) + "' fill='" + (sub ? (sob ? "#C9D3EA" : "#FFE08A") : "#fff") + "'>" + esc(l) + "</text>"; });
+    return { s: s + "</g>", h: h, a: w / 2, b: h / 2 };
+  }
+  function trait(col) { return STYLE === "sobre" ? "#8A93A6" : col; }
 
   /* écran large : en étoile, branches paires à gauche, impaires à droite */
   function large(C, B, alt) {
@@ -69,7 +93,7 @@
     function bloc(b) { var h = 0; b.items.forEach(function (it) { h += couper(it, NC).length * LH + 14; }); return Math.max(h, 70) + 28; }
     var hauts = cotes.map(function (c) { return c.reduce(function (a, b) { return a + bloc(b); }, 0); });
     var cw = largeurC(C, 180, 260), H = Math.max(hauts[0], hauts[1], 300) + 40, cy = H / 2, s = "", dessus = "";
-    var cen = nuage(cx, cy, C, cw);
+    var cen = centre(cx, cy, C, cw);
     cotes.forEach(function (liste, cote) {
       var sg = cote ? 1 : -1, col0 = cx + sg * 248, y0 = (H - hauts[cote]) / 2;
       liste.forEach(function (b) {
@@ -78,10 +102,10 @@
         /* étiquette qui mordrait sur le nuage : on la monte (ou descend) au-dessus de lui */
         if (Math.abs(ix - cx) < cen.a + 18 && Math.abs(hy - cy) < cen.b + et.h / 2 + 8) hy = cy + (hy > cy + 1 ? 1 : -1) * (cen.b + et.h / 2 + 10);
         var th = Math.atan2((hy - cy) / cen.b, (ix - cx) / cen.a), sx = cx + cen.a * Math.cos(th), sy = cy + cen.b * Math.sin(th), ex = ix - sg * 10;
-        s += "<path class='cm-t' d='M" + f1(sx) + " " + f1(sy) + " C" + f1(sx + (ex - sx) * 0.25) + " " + f1(sy + (hy - sy) * 0.85) + " " + f1(ex - sg * 40) + " " + f1(hy) + " " + f1(ex) + " " + f1(hy) + "' fill='none' stroke='" + col + "' stroke-width='3.4' stroke-linecap='round' marker-end='url(#" + P + "f" + b.i + ")'/>";
+        s += "<path class='cm-t' d='M" + f1(sx) + " " + f1(sy) + " C" + f1(sx + (ex - sx) * 0.25) + " " + f1(sy + (hy - sy) * 0.85) + " " + f1(ex - sg * 40) + " " + f1(hy) + " " + f1(ex) + " " + f1(hy) + "' fill='none' stroke='" + trait(col) + "' stroke-width='" + (STYLE === "sobre" ? 3 : 5) + "' stroke-linecap='round' marker-end='url(#" + P + "f" + b.i + ")'/>";
         b.items.forEach(function (it) {
           var L = couper(it, NC), hh = L.length * LH, my = ly + hh / 2 - 4, d = (my - hy) / hmax, dx = col0 - sg * 26 * d * d;
-          s += "<path class='cm-l' d='M" + f1(ox) + " " + f1(hy) + " Q" + f1(ox + (dx - ox) * 0.55) + " " + f1(my) + " " + f1(dx) + " " + f1(my) + "' fill='none' stroke='" + clair(col, .3) + "' stroke-width='1.8' stroke-linecap='round'/>" +
+          s += "<path class='cm-l' d='M" + f1(ox) + " " + f1(hy) + " Q" + f1(ox + (dx - ox) * 0.55) + " " + f1(my) + " " + f1(dx) + " " + f1(my) + "' fill='none' stroke='" + clair(col, .3) + "' stroke-width='2.6' stroke-linecap='round'/>" +
             "<circle class='cm-p' cx='" + f1(dx) + "' cy='" + f1(my) + "' r='5' fill='" + col + "' stroke='#fff' stroke-width='1.6'/>" +
             texte(dx + sg * 11, my + 5 - (L.length - 1) * LH / 2, L, { t: T, a: cote ? "start" : "end" });
           ly += hh + 14;
@@ -96,16 +120,16 @@
   /* téléphone : en arbre, tronc pointillé à gauche, mots en éventail sous chaque étiquette */
   function etroit(C, B, alt) {
     var Wd = 400, T = 15, LH = T * 1.24, NC = 32, tronc = 30;
-    var cen = nuage(200, 0, C, largeurC(C, 240, 330)), haut = cen.h / 2 + cen.b - cen.h / 2 + 22, y = haut + cen.b + 30, s = "", dessus = "", avant = haut + cen.b;
+    var cen = centre(200, 0, C, largeurC(C, 240, 330)), haut = cen.h / 2 + cen.b - cen.h / 2 + 22, y = haut + cen.b + 30, s = "", dessus = "", avant = haut + cen.b;
     B.forEach(function (b, i) {
       var col = b.color, et = etiquette(0, 0, b.label, col, i + 1), hy = y + 22, hx = 52 + et.w / 2;
       s += "<path class='cm-t' d='M" + tronc + " " + f1(avant) + " V" + f1(hy) + "' stroke='#C3CBDA' stroke-width='3' stroke-dasharray='2 7' stroke-linecap='round' fill='none'/>" +
-        "<path class='cm-t' d='M" + tronc + " " + f1(hy) + " H" + f1(hx - et.w / 2 - 10) + "' stroke='" + col + "' stroke-width='3' fill='none' stroke-linecap='round' marker-end='url(#" + P + "f" + i + ")'/>";
+        "<path class='cm-t' d='M" + tronc + " " + f1(hy) + " H" + f1(hx - et.w / 2 - 10) + "' stroke='" + trait(col) + "' stroke-width='4.6' fill='none' stroke-linecap='round' marker-end='url(#" + P + "f" + i + ")'/>";
       var ly = hy + 38;
       avant = hy;
       b.items.forEach(function (it) {
         var L = couper(it, NC), hh = L.length * LH, my = ly + 4;
-        s += "<path class='cm-l' d='M" + (tronc + 22) + " " + f1(hy + 16) + " Q" + (tronc + 22) + " " + f1(my) + " 58 " + f1(my) + "' fill='none' stroke='" + clair(col, .3) + "' stroke-width='1.8'/>" +
+        s += "<path class='cm-l' d='M" + (tronc + 22) + " " + f1(hy + 16) + " Q" + (tronc + 22) + " " + f1(my) + " 58 " + f1(my) + "' fill='none' stroke='" + clair(col, .3) + "' stroke-width='2.6'/>" +
           "<circle class='cm-p' cx='64' cy='" + f1(my) + "' r='5' fill='" + col + "' stroke='#fff' stroke-width='1.6'/>" + texte(78, my + 5, L, { t: T });
         ly += hh + 12;
       });
@@ -116,6 +140,346 @@
     return "<svg class='cm-etroit' viewBox='0 0 " + Wd + " " + Math.round(y) + "' role='img' aria-label='" + esc(alt) + "' font-family='Poppins,Inter,Roboto,Arial,sans-serif'>" + defs(B) + fond(Wd, y) + s + dessus + cs + "</svg>";
   }
 
+  /* ════════ AUTRES FORMES (18/11/2026, « varie les styles de cartes ») ════════ */
+  var T2 = 15, LH2 = T2 * 1.24;
+  function puce(x, y, col) {
+    if (STYLE === "sobre") return "<rect class='cm-p' x='" + f1(x - 4) + "' y='" + f1(y - 1) + "' width='8' height='2.2' rx='1' fill='#8A93A6'/>";
+    return "<circle class='cm-p' cx='" + f1(x) + "' cy='" + f1(y) + "' r='" + (STYLE === "colore" ? 5 : 4) + "' fill='" + col + "'" + (STYLE === "colore" ? " stroke='#fff' stroke-width='1.5'" : "") + "/>";
+  }
+  function hListe(items, NC) { return items.reduce(function (a, it) { return a + couper(it, NC).length * LH2 + 8; }, 0) - 8; }
+  /* liste à puces : y = ligne de base du premier élément */
+  function liste(items, x, y, NC, col, centre) {
+    var s = "", yy = y;
+    items.forEach(function (it) {
+      var L = couper(it, NC);
+      s += centre ? texte(x, yy, L, { t: T2, a: "middle" }) : puce(x + 5, yy - 5, col) + texte(x + 17, yy, L, { t: T2 });
+      yy += L.length * LH2 + 8;
+    });
+    return s;
+  }
+  /* cadre : bords à main levée, coloré (bandeau) ou sobre */
+  function cadre(x, y, w, h, col, coupe) {
+    if (STYLE === "main") {
+      var d = "", k = 0, pts = [[x, y], [x + w, y], [x + w, y + h], [x, y + h], [x, y + 1]];
+      for (var i = 0; i < 4; i++) for (var t = 0; t <= 1; t += 0.1, k++) {
+        var px = pts[i][0] + (pts[i + 1][0] - pts[i][0]) * t, py = pts[i][1] + (pts[i + 1][1] - pts[i][1]) * t, j = 1.4 * Math.sin(k * 1.7 + x);
+        d += (k ? "L" : "M") + f1(px + (i % 2 ? j : 0)) + " " + f1(py + (i % 2 ? 0 : j));
+      }
+      return "<path d='" + d + "' fill='" + clair(col, .93) + "' stroke='" + col + "' stroke-width='2.2' stroke-linejoin='round'/>";
+    }
+    if (coupe) { var c = 16; return "<path d='M" + (x + c) + " " + y + "H" + (x + w - c) + "L" + (x + w) + " " + (y + c) + "V" + (y + h - c) + "L" + (x + w - c) + " " + (y + h) + "H" + (x + c) + "L" + x + " " + (y + h - c) + "V" + (y + c) + "Z' fill='" + (STYLE === "colore" ? clair(col, .9) : "#fff") + "' stroke='" + (STYLE === "colore" ? col : "#AEB6C6") + "' stroke-width='" + (STYLE === "colore" ? 2 : 1.2) + "'/>"; }
+    if (STYLE === "colore") return "<rect x='" + x + "' y='" + y + "' width='" + w + "' height='" + h + "' rx='16' fill='#fff' stroke='" + col + "' stroke-width='2'/><path d='M" + x + " " + (y + 16) + "a16 16 0 0 1 16 -16H" + (x + w - 16) + "a16 16 0 0 1 16 16V" + (y + 46) + "H" + x + "Z' fill='" + col + "'/>";
+    return "<rect x='" + x + "' y='" + y + "' width='" + w + "' height='" + h + "' rx='10' fill='#fff' stroke='#C9D0DC' stroke-width='1.2'/><rect x='" + x + "' y='" + y + "' width='" + w + "' height='4' rx='2' fill='" + col + "'/>";
+  }
+  /* boîte de branche : numéro, titre, liste ; retourne { s, h } */
+  function hBoite(b, w) { var NC = Math.floor((w - 44) / 8.2); return 52 + couper(b.label, Math.floor((w - 60) / 9.4)).length * 19 + hListe(b.items, NC) + 18; }
+  function boite(x, y, w, b, n, hex, hImpose) {
+    var NC = Math.floor((w - 44) / 8.2), Lt = couper(b.label, Math.floor((w - 60) / 9.4)), h = hImpose || hBoite(b, w), col = b.color, s = "<g class='cm-h'>" + cadre(x, y, w, h, col, hex);
+    var badge = hex ? "<path d='" + hexa(x + 26, y + 26, 14) + "' fill='" + col + "'/>" : "<circle cx='" + (x + 26) + "' cy='" + (y + 25) + "' r='13' fill='" + (STYLE === "colore" ? "#fff" : col) + "'/>";
+    s += badge + "<text x='" + (x + 26) + "' y='" + (y + 30) + "' text-anchor='middle' font-size='14' font-weight='800' fill='" + (STYLE === "colore" && !hex ? col : "#fff") + "'>" + n + "</text>";
+    Lt.forEach(function (l, k) { s += "<text x='" + (x + 48) + "' y='" + (y + 30 + k * 19) + "' font-size='16' font-weight='800' fill='" + (STYLE === "colore" && !hex ? "#fff" : STYLE === "sobre" ? "#1D2330" : col) + "'>" + esc(l) + "</text>"; });
+    return { s: s + "</g>" + liste(b.items, x + 16, y + 38 + Lt.length * 19 + 14, NC, col), h: h };
+  }
+  function hexa(cx, cy, r) { var d = ""; for (var i = 0; i < 6; i++) { var a = Math.PI / 3 * i; d += (i ? "L" : "M") + f1(cx + r * Math.cos(a)) + " " + f1(cy + r * Math.sin(a)); } return d + "Z"; }
+  function fleche(x1, y1, x2, y2, col, i, courbe) {
+    var d = courbe ? "M" + f1(x1) + " " + f1(y1) + " C" + f1(x1) + " " + f1((y1 + y2) / 2) + " " + f1(x2) + " " + f1((y1 + y2) / 2) + " " + f1(x2) + " " + f1(y2) : "M" + f1(x1) + " " + f1(y1) + " L" + f1(x2) + " " + f1(y2);
+    return "<path class='cm-t' d='" + d + "' fill='none' stroke='" + trait(col) + "' stroke-width='" + (STYLE === "sobre" ? 2.8 : 4.6) + "' stroke-linecap='round'" + (i == null ? "" : " marker-end='url(#" + P + "f" + i + ")'") + "/>";
+  }
+  function svgDe(cls, Wd, H, alt, B, corps) {
+    return "<svg class='" + cls + "' viewBox='0 0 " + Wd + " " + Math.round(H) + "' role='img' aria-label='" + esc(alt) + "' font-family='Poppins,Inter,Roboto,Arial,sans-serif'>" + defs(B) + fond(Wd, H) + corps + "</svg>";
+  }
+  function placerCentre(cx, C, w) { var c0 = centre(cx, 0, C, w); return { c: c0, y: c0.b + 20, s: "<g transform='translate(0 " + f1(c0.b + 20) + ")'>" + c0.s + "</g>" }; }
+
+  /* ARBORESCENTE : organigramme de haut en bas */
+  function arbre(C, B, alt) {
+    var Wd = 920, n = B.length, colW = (Wd - 40) / n, NC = Math.max(12, Math.floor((colW - 44) / 8.2)), pc = placerCentre(460, C, largeurC(C, 220, 460)), s = "", dessus = "", bas = 0;
+    var bus = pc.y + pc.c.b + 30, labY = bus + 56;
+    s += fleche(460, pc.y + pc.c.b, 460, bus, "#8A93A6") + "<path class='cm-t' d='M" + f1(20 + colW / 2) + " " + bus + " H" + f1(20 + colW * (n - .5)) + "' stroke='" + (STYLE === "sobre" ? "#8A93A6" : "#9AA4B6") + "' stroke-width='" + (STYLE === "sobre" ? 2.8 : 4.6) + "' fill='none' stroke-linecap='round'/>";
+    B.forEach(function (b, i) {
+      var x = 20 + colW * (i + .5), et = etiquette(x, labY, b.label, b.color, i + 1, Math.max(8, Math.floor((colW - 50) / 9.2))), y0 = labY + et.h / 2 + 30, hl = hListe(b.items, NC);
+      s += fleche(x, bus, x, labY - et.h / 2 - 8, b.color, i) + "<path class='cm-l' d='M" + f1(x - colW / 2 + 24) + " " + f1(labY + et.h / 2 + 2) + " V" + f1(y0 + hl - 6) + "' stroke='" + clair(trait(b.color), .45) + "' stroke-width='2' fill='none'/>" + liste(b.items, x - colW / 2 + 20, y0, NC, b.color);
+      dessus += et.s; bas = Math.max(bas, y0 + hl);
+    });
+    return svgDe("cm-large", Wd, bas + 24, alt, B, s + dessus + pc.s);
+  }
+
+  /* EN BULLES / EN TOILE : bulles ovales reliées souplement autour du centre (deux colonnes) */
+  function bulle(cx, cy, rx, ry, b, n, NC) {
+    var col = b.color, Lt = couper(b.label, NC - 6), s = "<g class='cm-h'>";
+    if (STYLE === "main") s += boucle(cx, cy, rx, ry, col, n * 2.3).replace("stroke-width='2.6'", "stroke-width='2.4'");
+    else s += "<ellipse cx='" + f1(cx) + "' cy='" + f1(cy) + "' rx='" + f1(rx) + "' ry='" + f1(ry) + "' fill='" + (STYLE === "colore" ? clair(col, .86) : "#fff") + "' stroke='" + (STYLE === "sobre" ? "#AEB6C6" : col) + "' stroke-width='" + (STYLE === "sobre" ? 1.3 : 2.4) + "'/>";
+    var h = Lt.length * 19 + 10 + hListe(b.items, NC), y = cy - h / 2 + 14;
+    Lt.forEach(function (l, k) { s += "<text x='" + f1(cx) + "' y='" + f1(y + k * 19) + "' text-anchor='middle' font-size='16' font-weight='800' fill='" + (STYLE === "sobre" ? "#1D2330" : col) + "'>" + esc(l) + "</text>"; });
+    var bx = cx - rx * .78, by = cy - ry * .66;
+    s += "<circle cx='" + f1(bx) + "' cy='" + f1(by) + "' r='13' fill='" + col + "' stroke='#fff' stroke-width='2'/><text x='" + f1(bx) + "' y='" + f1(by + 5) + "' text-anchor='middle' font-size='13' font-weight='800' fill='#fff'>" + n + "</text></g>";
+    return s + liste(b.items, cx, y + Lt.length * 19 + 10, NC, col, true);
+  }
+  function tBulle(b, NC, w) { var h = couper(b.label, NC - 6).length * 19 + 10 + hListe(b.items, NC); return { rx: w / 2, ry: h / 2 + 52 }; }
+  function bulles(C, B, alt) {
+    var Wd = 920, cx = 460, W0 = 290, NC = 26, cotes = [[], []], s = "", dessus = "", cw = largeurC(C, 170, 240);
+    B.forEach(function (b, i) { b.i = i; b.t = tBulle(b, NC, W0); cotes[i % 2].push(b); });
+    var hauts = cotes.map(function (c) { return c.reduce(function (a, b) { return a + b.t.ry * 2 + 26; }, 0); }), H = Math.max(hauts[0], hauts[1], 320) + 20, cy = H / 2, cen = centre(cx, cy, C, cw);
+    cotes.forEach(function (liste, cote) {
+      var sg = cote ? 1 : -1, bx = cx + sg * (450 - W0 / 2 - 14), y = (H - hauts[cote]) / 2 + 13, prev = null;
+      liste.forEach(function (b) {
+        var by = y + b.t.ry, ex = bx - sg * b.t.rx * .92, ey = by + (cy - by) * .15, sx = cx + sg * cen.a * .8, sy = cy + (by - cy) * .12;
+        s += "<path class='cm-t' d='M" + f1(sx) + " " + f1(sy) + " C" + f1(sx + sg * 40) + " " + f1(sy) + " " + f1(ex - sg * 50) + " " + f1(ey) + " " + f1(ex) + " " + f1(ey) + "' fill='none' stroke='" + trait(b.color) + "' stroke-width='" + (STYLE === "sobre" ? 2.8 : 4.6) + "' stroke-linecap='round' marker-end='url(#" + P + "f" + b.i + ")'/>";
+        if (prev) s += "<path class='cm-l' d='M" + f1(bx + sg * 30) + " " + f1(prev) + " Q" + f1(bx + sg * 110) + " " + f1((prev + by) / 2) + " " + f1(bx + sg * 30) + " " + f1(by - b.t.ry + 4) + "' fill='none' stroke='#C9D0DC' stroke-width='1.5' stroke-dasharray='3 6'/>";
+        dessus += bulle(bx, by, b.t.rx, b.t.ry, b, b.i + 1, NC); prev = by + b.t.ry - 4; y += b.t.ry * 2 + 26;
+      });
+    });
+    return svgDe("cm-large", Wd, H, alt, B, s + dessus + cen.s);
+  }
+  function bullesEtroit(C, B, alt) {
+    var Wd = 400, NC = 32, pc = placerCentre(200, C, largeurC(C, 240, 340)), y = pc.y + pc.c.b + 34, s = "", dessus = "", prev = [200, pc.y + pc.c.b];
+    B.forEach(function (b, i) {
+      var t = tBulle(b, NC, 330), bx = 200 + (i % 2 ? 14 : -14), by = y + t.ry;
+      s += "<path class='cm-t' d='M" + f1(prev[0]) + " " + f1(prev[1]) + " Q" + f1(prev[0] + (i % 2 ? -50 : 50)) + " " + f1((prev[1] + by - t.ry) / 2) + " " + f1(bx) + " " + f1(by - t.ry - 4) + "' fill='none' stroke='" + trait(b.color) + "' stroke-width='4.6' marker-end='url(#" + P + "f" + i + ")'/>";
+      dessus += bulle(bx, by, t.rx, t.ry, b, i + 1, NC); prev = [bx, by + t.ry]; y = by + t.ry + 36;
+    });
+    return svgDe("cm-etroit", Wd, y - 10, alt, B, s + dessus + pc.s);
+  }
+
+  /* EN ACCOLADE : le tout et ses parties */
+  function accol(x, y1, y2, col, w) {
+    /* « { » : pointe en x (vers le tout, à gauche), bras en x + 2w (vers les parties) */
+    w = w || 12; var ym = (y1 + y2) / 2, r = Math.min(16, (y2 - y1) / 4), xa = x + 2 * w, xm = x + w;
+    return "<path class='cm-t' d='M" + f1(xa) + " " + f1(y1) + " C" + f1(xm) + " " + f1(y1) + " " + f1(xm) + " " + f1(y1 + r * .4) + " " + f1(xm) + " " + f1(y1 + r) + " V" + f1(ym - r) + " C" + f1(xm) + " " + f1(ym - r * .3) + " " + f1(x + w * .4) + " " + f1(ym) + " " + f1(x) + " " + f1(ym) +
+      " C" + f1(x + w * .4) + " " + f1(ym) + " " + f1(xm) + " " + f1(ym + r * .3) + " " + f1(xm) + " " + f1(ym + r) + " V" + f1(y2 - r) + " C" + f1(xm) + " " + f1(y2 - r * .4) + " " + f1(xm) + " " + f1(y2) + " " + f1(xa) + " " + f1(y2) + "' fill='none' stroke='" + trait(col) + "' stroke-width='" + (STYLE === "sobre" ? 2.8 : 4.6) + "' stroke-linecap='round' stroke-linejoin='round'/>";
+  }
+  function accolade(C, B, alt) {
+    var Wd = 920, cw = largeurC(C, 170, 250), xb = 20 + cw + 30, xl = xb + 40, lw = 190, xs = xl + lw + 14, xi = xs + 34, NC = Math.floor((Wd - xi - 30) / 8.2);
+    var blocs = B.map(function (b) { return Math.max(70, hListe(b.items, NC) + 16) + 22; }), H = blocs.reduce(function (a, b) { return a + b; }, 0) + 40, y = 20, s = "", dessus = "";
+    var cen = centre(20 + cw / 2 + (STYLE === "main" ? 14 : 0), H / 2, C, cw);
+    s += accol(xb, 24, H - 24, "#5B6478", 14);
+    B.forEach(function (b, i) {
+      var h = blocs[i] - 22, ym = y + h / 2, et = etiquette(xl + lw / 2, ym, b.label, b.color, i + 1, 15), hl = hListe(b.items, NC);
+      s += accol(xs, ym - hl / 2 - 8, ym + hl / 2 + 8, b.color, 10) + liste(b.items, xi, ym - hl / 2 + 11, NC, b.color);
+      dessus += et.s; y += blocs[i];
+    });
+    return svgDe("cm-large", Wd, H, alt, B, s + dessus + cen.s);
+  }
+  function accoladeEtroit(C, B, alt) {
+    var Wd = 400, NC = 34, pc = placerCentre(200, C, largeurC(C, 240, 340)), y = pc.y + pc.c.b + 24, s = "", dessus = "";
+    B.forEach(function (b, i) {
+      var et = etiquette(0, 0, b.label, b.color, i + 1), ly = y + et.h / 2 + 4, hl = hListe(b.items, NC), y1 = ly + et.h / 2 + 12;
+      dessus += "<g transform='translate(" + f1(24 + et.w / 2) + " " + f1(ly) + ")'>" + et.s + "</g>";
+      s += accol(22, y1, y1 + hl + 10, b.color, 9) + liste(b.items, 50, y1 + 15, NC, b.color);
+      y = y1 + hl + 34;
+    });
+    return svgDe("cm-etroit", Wd, y, alt, B, s + dessus + pc.s);
+  }
+
+  /* MODULAIRE EN ALVÉOLES : centre hexagonal, cellules à pans coupés */
+  function alveoles(C, B, alt, Wd) {
+    var n = B.length, cols = Wd < 500 ? 1 : (n === 4 || n === 2 ? 2 : 3), g = 18, w = (Wd - 40 - (cols - 1) * g) / cols, pc0 = centre(0, 0, C, largeurC(C, 220, Wd - 60));
+    var hy = pc0.b + 30, s = "", dessus = "", top = hy * 2 + 34, y = top;
+    var r6 = Math.min(Wd / 2 - 20, pc0.a + 34), cen = "<g class='cm-c'><path d='" + hexa(Wd / 2, hy, r6).replace(/(\d+(\.\d+)?) (\d+(\.\d+)?)/g, function (m, a, _, b) { return f1(Wd / 2 + (a - Wd / 2)) + " " + f1(hy + (b - hy) * (pc0.b + 18) / r6); }) + "' fill='" + (STYLE === "sobre" ? "#1D2B53" : "url(#" + P + "g)") + "' stroke='" + (STYLE === "sobre" ? "#1D2B53" : "#FFC93C") + "' stroke-width='3'/>";
+    C.forEach(function (l, k) { cen += "<text x='" + Wd / 2 + "' y='" + f1(hy - (C.length - 1) * 10.5 + 6 + k * 21) + "' text-anchor='middle' font-size='" + (k ? 13.5 : 19) + "' font-weight='" + (k ? 600 : 800) + "' fill='" + (k ? "#FFE08A" : "#fff") + "'>" + esc(l) + "</text>"; });
+    cen += "</g>";
+    for (var r0 = 0; r0 < n; r0 += cols) {
+      var rang = B.slice(r0, r0 + cols), hr = Math.max.apply(null, rang.map(function (b) { return hBoite(b, w); }));
+      rang.forEach(function (b, k) {
+        var x = 20 + k * (w + g), bx = boite(x, y, w, b, r0 + k + 1, true, hr);
+        if (r0 === 0) s += fleche(Wd / 2, hy + pc0.b + 18, x + w / 2, y - 6, b.color, r0 + k, true);
+        dessus += bx.s;
+      });
+      y += hr + g;
+    }
+    return svgDe(Wd < 500 ? "cm-etroit" : "cm-large", Wd, y + 2, alt, B, s + dessus + cen);
+  }
+
+  /* EN FLUX : étapes enchaînées par des flèches (serpentin) */
+  function flux(C, B, alt, Wd) {
+    var n = B.length, cols = Wd < 500 ? 1 : Math.min(n, 3), g = 46, w = (Wd - 40 - (cols - 1) * g) / cols, pc = placerCentre(Wd / 2, C, largeurC(C, 220, Wd - 60)), y = pc.y + pc.c.b + 30, s = "", dessus = "", prev = null;
+    for (var r0 = 0, rg = 0; r0 < n; r0 += cols, rg++) {
+      var rang = B.slice(r0, r0 + cols), hr = Math.max.apply(null, rang.map(function (b) { return hBoite(b, w); }));
+      rang.forEach(function (b, k) {
+        var kk = rg % 2 ? cols - 1 - k : k, x = 20 + kk * (w + g), bx = boite(x, y, w, b, r0 + k + 1, false, hr);
+        if (prev) s += prev.y === y ? fleche(prev.x + (kk > prev.k ? w + 4 : -4), y + 30, x + (kk > prev.k ? -8 : w + 8), y + 30, b.color, r0 + k) : fleche(prev.x + w / 2, prev.y + prev.h + 4, x + w / 2, y - 8, b.color, r0 + k, true);
+        dessus += bx.s; prev = { x: x, y: y, h: hr, k: kk };
+      });
+      y += hr + 40;
+    }
+    return svgDe(Wd < 500 ? "cm-etroit" : "cm-large", Wd, y - 14, alt, B, s + dessus + pc.s);
+  }
+
+  /* CAUSES ET CONSÉQUENCES (multi-flux) */
+  function causes(C, B, alt, Wd, gauche) {
+    var g0 = B.filter(function (b, i) { return gauche[i]; }), d0 = B.filter(function (b, i) { return !gauche[i]; }), s = "", dessus = "";
+    if (Wd < 500) {
+      var w1 = Wd - 40, y = 18, out = "";
+      g0.forEach(function (b) { var bx = boite(20, y, w1, b, B.indexOf(b) + 1, false); out += bx.s; y += bx.h + 14; });
+      out += fleche(Wd / 2, y - 4, Wd / 2, y + 24, g0[0].color, B.indexOf(g0[0])); y += 34;
+      var c = centre(Wd / 2, 0, C, largeurC(C, 240, Wd - 40)); dessus += "<g transform='translate(0 " + f1(y + c.b) + ")'>" + c.s + "</g>"; y += c.b * 2 + 14;
+      out += fleche(Wd / 2, y - 6, Wd / 2, y + 22, d0[0].color, B.indexOf(d0[0])); y += 32;
+      d0.forEach(function (b) { var bx = boite(20, y, w1, b, B.indexOf(b) + 1, false); out += bx.s; y += bx.h + 14; });
+      return svgDe("cm-etroit", Wd, y + 6, alt, B, out + dessus);
+    }
+    var w = 290, hg = g0.reduce(function (a, b) { return a + hBoite(b, w) + 16; }, 0), hd = d0.reduce(function (a, b) { return a + hBoite(b, w) + 16; }, 0), H = Math.max(hg, hd, 240) + 30, cy = H / 2;
+    var cen = centre(Wd / 2, cy, C, 250), yg = (H - hg) / 2 + 8, yd = (H - hd) / 2 + 8;
+    g0.forEach(function (b) { var i = B.indexOf(b), bx = boite(20, yg, w, b, i + 1, false); s += fleche(20 + w + 4, yg + bx.h / 2, Wd / 2 - cen.a - 10, cy, b.color, i, false); dessus += bx.s; yg += bx.h + 16; });
+    d0.forEach(function (b) { var i = B.indexOf(b), bx = boite(Wd - 20 - w, yd, w, b, i + 1, false); s += fleche(Wd / 2 + cen.a + 4, cy, Wd - 20 - w - 10, yd + bx.h / 2, b.color, i, false); dessus += bx.s; yd += bx.h + 16; });
+    return svgDe("cm-large", Wd, H, alt, B, s + dessus + cen.s);
+  }
+
+  /* ════════ ROUE, ARÊTE DE POISSON, ARBRE DESSINÉ, FRISE (18/11/2026, « varie les formes : roue, poisson, arbre, frise ») ════════ */
+  function secteur(cx, cy, r0, r1, a0, a1) {
+    var g = a1 - a0 > Math.PI ? 1 : 0, c = Math.cos, s = Math.sin;
+    return "M" + f1(cx + r1 * c(a0)) + " " + f1(cy + r1 * s(a0)) + " A" + r1 + " " + r1 + " 0 " + g + " 1 " + f1(cx + r1 * c(a1)) + " " + f1(cy + r1 * s(a1)) + " L" + f1(cx + r0 * c(a1)) + " " + f1(cy + r0 * s(a1)) + " A" + r0 + " " + r0 + " 0 " + g + " 0 " + f1(cx + r0 * c(a0)) + " " + f1(cy + r0 * s(a0)) + "Z";
+  }
+  function moyeu(cx, cy, r, C) {
+    var s = "<g class='cm-c'><circle cx='" + f1(cx) + "' cy='" + f1(cy) + "' r='" + r + "' fill='" + (STYLE === "sobre" ? "#1D2B53" : "url(#" + P + "g)") + "' stroke='" + (STYLE === "sobre" ? "#fff" : "#FFC93C") + "' stroke-width='3'/>", L = [];
+    C.forEach(function (l, k) { couper(l, k ? 16 : 13).forEach(function (x) { L.push([x, k]); }); });
+    L.forEach(function (x, k) { s += "<text x='" + f1(cx) + "' y='" + f1(cy - (L.length - 1) * 8.5 + 5 + k * 17) + "' text-anchor='middle' font-size='" + (x[1] ? 11.5 : 14.5) + "' font-weight='" + (x[1] ? 600 : 800) + "' fill='" + (x[1] ? "#FFE08A" : "#fff") + "'>" + esc(x[0]) + "</text>"; });
+    return s + "</g>";
+  }
+  function roueSvg(cx, cy, R, r0, B) {
+    var n = B.length, s = "", dA = 2 * Math.PI / n;
+    B.forEach(function (b, i) {
+      var a0 = -Math.PI / 2 + i * dA + .015, a1 = a0 + dA - .03, am = (a0 + a1) / 2, rm = (r0 + R) / 2, L = couper(b.label, 11).slice(0, 3);
+      s += "<path class='cm-h' d='" + secteur(cx, cy, r0, R, a0, a1) + "' fill='" + (STYLE === "sobre" ? clair(b.color, .82) : STYLE === "colore" ? b.color : clair(b.color, .55)) + "' stroke='#fff' stroke-width='3'/>";
+      L.forEach(function (l, k) { s += "<text x='" + f1(cx + rm * Math.cos(am)) + "' y='" + f1(cy + rm * Math.sin(am) - (L.length - 1) * 7.5 + 4 + k * 15) + "' text-anchor='middle' font-size='12.5' font-weight='800' fill='" + (STYLE === "colore" ? "#fff" : "#1D2330") + "'>" + esc(l) + "</text>"; });
+      s += "<circle cx='" + f1(cx + (R + 14) * Math.cos(am)) + "' cy='" + f1(cy + (R + 14) * Math.sin(am)) + "' r='12' fill='" + b.color + "' stroke='#fff' stroke-width='2.5'/><text x='" + f1(cx + (R + 14) * Math.cos(am)) + "' y='" + f1(cy + (R + 14) * Math.sin(am) + 4.5) + "' text-anchor='middle' font-size='12' font-weight='800' fill='#fff'>" + (i + 1) + "</text>";
+    });
+    return s;
+  }
+  function blocTexte(x, y, w, b, n, anc) {
+    var NC = Math.floor((w - 20) / 8.2), Lt = couper(b.label, NC), s = "";
+    Lt.forEach(function (l, k) { s += "<text x='" + f1(x) + "' y='" + f1(y + k * 19) + "' font-size='16' font-weight='800' fill='" + (STYLE === "sobre" ? "#1D2330" : b.color) + "'>" + (k ? "" : n + ". ") + esc(l) + "</text>"; });
+    return { s: s + liste(b.items, x, y + Lt.length * 19 + 8, NC - 2, b.color), h: Lt.length * 19 + 8 + hListe(b.items, NC - 2) };
+  }
+  function roue(C, B, alt, Wd) {
+    var n = B.length, dA = 2 * Math.PI / n, s = "", etr = Wd < 500;
+    if (etr) {
+      var R = 156, r0 = 66, cy = R + 32, y = cy + R + 46;
+      s += roueSvg(200, cy, R, r0, B) + moyeu(200, cy, r0 - 6, C);
+      B.forEach(function (b, i) { var bt = blocTexte(24, y, 360, b, i + 1); s += "<rect x='14' y='" + f1(y - 22) + "' width='6' height='" + f1(bt.h + 14) + "' rx='3' fill='" + b.color + "'/>" + bt.s; y += bt.h + 30; });
+      return svgDe("cm-etroit", Wd, y - 6, alt, B, s);
+    }
+    var R = 165, r0 = 72, cx = 460, cols = [[], []];
+    B.forEach(function (b, i) { var am = -Math.PI / 2 + (i + .5) * dA; cols[Math.cos(am) < -1e-6 ? 0 : 1].push({ b: b, i: i, am: am }); });
+    cols[0].sort(function (p, q) { return Math.sin(p.am) - Math.sin(q.am); }); cols[1].sort(function (p, q) { return Math.sin(p.am) - Math.sin(q.am); });
+    var bw = 230, hs = cols.map(function (c) { return c.reduce(function (a, e) { return a + blocTexte(0, 0, bw, e.b, 1).h + 34; }, 0); }), H = Math.max(hs[0], hs[1], 2 * R + 60) + 20, cy = H / 2;
+    cols.forEach(function (c, cote) {
+      var y = (H - hs[cote]) / 2 + 26, x = cote ? cx + R + 50 : 20;
+      c.forEach(function (e) {
+        var bt = blocTexte(x, y, bw, e.b, e.i + 1), ax = cx + (R + 28) * Math.cos(e.am), ay = cy + (R + 28) * Math.sin(e.am), tx = cote ? x - 10 : x + bw - 6, ty = y - 6;
+        s += "<path class='cm-l' d='M" + f1(ax) + " " + f1(ay) + " Q" + f1((ax + tx) / 2) + " " + f1(ty) + " " + f1(tx) + " " + f1(ty) + "' fill='none' stroke='" + trait(e.b.color) + "' stroke-width='2' stroke-dasharray='1 5' stroke-linecap='round'/>" + bt.s;
+        y += bt.h + 34;
+      });
+    });
+    return svgDe("cm-large", Wd, H, alt, B, roueSvg(cx, cy, R, r0, B) + moyeu(cx, cy, r0 - 6, C) + s);
+  }
+
+  /* ARÊTE DE POISSON : la tête porte le sujet, chaque arête une branche, les mots en arêtes secondaires */
+  function poisson(C, B, alt, Wd) {
+    var s = "", etr = Wd < 500, enc = "#2E3A55";
+    if (etr) {
+      var y = 26, sx = 34, out = "", dessus = "";
+      B.forEach(function (b, i) {
+        var Lt = couper(b.label, 24), by = y + 10, hl = hListe(b.items, 30);
+        out += "<path class='cm-t' d='M" + sx + " " + f1(by + 46) + " L" + (sx + 46) + " " + f1(by + 6) + "' stroke='" + trait(b.color) + "' stroke-width='3.5' stroke-linecap='round'/>";
+        dessus += "<circle cx='" + (sx + 58) + "' cy='" + f1(by) + "' r='12' fill='" + b.color + "'/><text x='" + (sx + 58) + "' y='" + f1(by + 4.5) + "' text-anchor='middle' font-size='12.5' font-weight='800' fill='#fff'>" + (i + 1) + "</text>";
+        Lt.forEach(function (l, k) { dessus += "<text x='" + (sx + 78) + "' y='" + f1(by + 5 + k * 19) + "' font-size='16' font-weight='800' fill='" + (STYLE === "sobre" ? "#1D2330" : b.color) + "'>" + esc(l) + "</text>"; });
+        out += liste(b.items, sx + 74, by + Lt.length * 19 + 22, 30, b.color);
+        y = by + Lt.length * 19 + 22 + hl + 22;
+      });
+      var hy = y + 10, hh = 44 + C.length * 18;
+      out = "<path class='cm-t' d='M" + sx + " 14 V" + f1(hy) + "' stroke='" + enc + "' stroke-width='6' stroke-linecap='round'/><path d='M" + (sx - 16) + " 4 L" + sx + " 22 L" + (sx + 16) + " 4' fill='none' stroke='" + enc + "' stroke-width='4' stroke-linejoin='round'/>" + out;
+      var head = "<path class='cm-c' d='M16 " + f1(hy) + " H384 Q384 " + f1(hy + hh) + " 200 " + f1(hy + hh + 26) + " Q16 " + f1(hy + hh) + " 16 " + f1(hy) + "Z' fill='" + (STYLE === "sobre" ? "#1D2B53" : "url(#" + P + "g)") + "' stroke='#FFC93C' stroke-width='3'/>";
+      C.forEach(function (l, k) { head += "<text x='200' y='" + f1(hy + 32 + k * 19) + "' text-anchor='middle' font-size='" + (k ? 13 : 17) + "' font-weight='" + (k ? 600 : 800) + "' fill='" + (k ? "#FFE08A" : "#fff") + "'>" + esc(l) + "</text>"; });
+      head += "<circle cx='364' cy='" + f1(hy + 16) + "' r='6' fill='#fff'/><circle cx='365' cy='" + f1(hy + 17) + "' r='3' fill='#001136'/>";
+      return svgDe("cm-etroit", Wd, hy + hh + 40, alt, B, out + dessus + head);
+    }
+    var haut = B.filter(function (b, i) { return i % 2 === 0; }), bas = B.filter(function (b, i) { return i % 2 === 1; }), m = Math.max(haut.length, bas.length), x0 = 40, xh = 680, S = (xh - x0) / m, NC = Math.max(14, Math.floor((S - 130) / 8.2));
+    function hBras(b) { return couper(b.label, NC + 2).length * 19 + 22 + hListe(b.items, NC) + 26; }
+    var Ht = Math.max.apply(null, haut.map(hBras).concat([90])), Hb = bas.length ? Math.max.apply(null, bas.map(hBras).concat([90])) : 60, cy = Ht + 30, H = cy + Hb + 30, dessus = "";
+    function bras(b, j, sg) {
+      var i = B.indexOf(b), bx = x0 + S * (j + 1) - 12, Lb = hBras(b) - 6, ex = bx - .42 * Lb, ey = cy - sg * Lb, Lt = couper(b.label, NC + 2), col = b.color;
+      s += "<path class='cm-t' d='M" + f1(bx) + " " + f1(cy) + " L" + f1(ex) + " " + f1(ey + sg * 8) + "' stroke='" + trait(col) + "' stroke-width='5.5' stroke-linecap='round'/>";
+      var tw = Math.max.apply(null, Lt.map(function (l) { return l.length; })) * 9 + 30, lx = ex - tw / 2, ly = ey - (sg > 0 ? Lt.length * 19 + 2 : -8);
+      dessus += "<g class='cm-h'><rect x='" + f1(lx) + "' y='" + f1(ly - 4) + "' width='" + f1(tw) + "' height='" + f1(Lt.length * 19 + 10) + "' rx='9' fill='" + (STYLE === "colore" ? col : "#fff") + "' stroke='" + col + "' stroke-width='2'/>";
+      Lt.forEach(function (l, k) { dessus += "<text x='" + f1(ex) + "' y='" + f1(ly + 14 + k * 19) + "' text-anchor='middle' font-size='15' font-weight='800' fill='" + (STYLE === "colore" ? "#fff" : col) + "'>" + (k ? "" : (i + 1) + ". ") + esc(l) + "</text>"; });
+      dessus += "</g>";
+      var yy = sg > 0 ? ey + Lt.length * 19 + 30 : ey - Lt.length * 19 - 22 - hListe(b.items, NC) + 4;
+      b.items.forEach(function (it) {
+        var L = couper(it, NC), xb = bx - .42 * Math.abs(cy - (yy - 5));
+        s += "<path class='cm-l' d='M" + f1(xb - 2) + " " + f1(yy - 5) + " H" + f1(xb - 18) + "' stroke='" + clair(trait(col), .3) + "' stroke-width='2'/>" + texte(xb - 24, yy, L, { t: T2, a: "end" });
+        yy += L.length * LH2 + 8;
+      });
+    }
+    haut.forEach(function (b, j) { bras(b, j, 1); }); bas.forEach(function (b, j) { bras(b, j, -1); });
+    var head = "<path class='cm-c' d='M" + (xh - 10) + " " + f1(cy - 64) + " Q" + (xh + 190) + " " + f1(cy - 70) + " 906 " + f1(cy) + " Q" + (xh + 190) + " " + f1(cy + 70) + " " + (xh - 10) + " " + f1(cy + 64) + " Q" + (xh + 14) + " " + f1(cy) + " " + (xh - 10) + " " + f1(cy - 64) + "Z' fill='" + (STYLE === "sobre" ? "#1D2B53" : "url(#" + P + "g)") + "' stroke='#FFC93C' stroke-width='3'/>";
+    var LC = []; C.forEach(function (l, k) { couper(l, k ? 22 : 16).forEach(function (x) { LC.push([x, k]); }); });
+    LC.forEach(function (x, k) { head += "<text x='" + (xh + 98) + "' y='" + f1(cy - (LC.length - 1) * 9 + 5 + k * 18) + "' text-anchor='middle' font-size='" + (x[1] ? 12.5 : 16) + "' font-weight='" + (x[1] ? 600 : 800) + "' fill='" + (x[1] ? "#FFE08A" : "#fff") + "'>" + esc(x[0]) + "</text>"; });
+    head += "<circle cx='" + (xh + 176) + "' cy='" + f1(cy - 22) + "' r='7' fill='#fff'/><circle cx='" + (xh + 178) + "' cy='" + f1(cy - 21) + "' r='3.5' fill='#001136'/>";
+    var dos = "<path class='cm-t' d='M" + (x0 - 6) + " " + f1(cy) + " H" + (xh + 4) + "' stroke='" + enc + "' stroke-width='7' stroke-linecap='round'/><path d='M" + (x0 + 12) + " " + f1(cy) + " L" + (x0 - 22) + " " + f1(cy - 30) + " M" + (x0 + 12) + " " + f1(cy) + " L" + (x0 - 22) + " " + f1(cy + 30) + "' stroke='" + enc + "' stroke-width='5' stroke-linecap='round'/>";
+    return svgDe("cm-large", Wd, H, alt, B, dos + s + dessus + head);
+  }
+
+  /* ARBRE DESSINÉ : un tronc qui porte le sujet, des branches qui montent vers des feuillages (une idée chacun) */
+  function feuillage(cx, cy, rx, ry, b, n, NC) {
+    var col = b.color, s = "<g class='cm-h'>", k, d = "";
+    for (k = 0; k <= 72; k++) { var u = 2 * Math.PI * k / 72, j = 1 + .045 * Math.sin(7 * u + n) + .02 * Math.sin(13 * u); d += (k ? "L" : "M") + f1(cx + rx * j * Math.cos(u)) + " " + f1(cy + ry * j * Math.sin(u)); }
+    var fill = STYLE === "sobre" ? "#F4F8F2" : STYLE === "colore" ? clair(col, .78) : clair(col, .88);
+    s += "<path d='" + d + "Z' fill='" + fill + "' stroke='" + (STYLE === "sobre" ? "#9DB59A" : col) + "' stroke-width='" + (STYLE === "sobre" ? 1.4 : 2.4) + "' stroke-linejoin='round'/>";
+    for (k = 0; k < 5; k++) { var a = -2.6 + k * .45, lx = cx + rx * .98 * Math.cos(a), ly = cy + ry * .98 * Math.sin(a); s += "<path d='M" + f1(lx) + " " + f1(ly) + " q6 -10 14 -4 q-4 9 -14 4z' fill='" + (STYLE === "sobre" ? "#9DB59A" : col) + "' opacity='.75'/>"; }
+    var Lt = couper(b.label, NC - 4), h = Lt.length * 19 + 10 + hListe(b.items, NC), y = cy - h / 2 + 14;
+    Lt.forEach(function (l, q) { s += "<text x='" + f1(cx) + "' y='" + f1(y + q * 19) + "' text-anchor='middle' font-size='16' font-weight='800' fill='" + (STYLE === "sobre" ? "#1D2330" : col) + "'>" + (q ? "" : n + ". ") + esc(l) + "</text>"; });
+    return s + "</g>" + liste(b.items, cx, y + Lt.length * 19 + 10, NC, col, true);
+  }
+  function tronc(cx, yTop, yBas, C) {
+    var bois = STYLE === "sobre" ? "#8B7B6B" : "#8A5A2D", s = "<path d='M" + (cx - 34) + " " + yBas + " C" + (cx - 26) + " " + (yBas - 40) + " " + (cx - 22) + " " + (yTop + 40) + " " + (cx - 16) + " " + yTop + " H" + (cx + 16) + " C" + (cx + 22) + " " + (yTop + 40) + " " + (cx + 26) + " " + (yBas - 40) + " " + (cx + 34) + " " + yBas + " Q" + (cx + 60) + " " + (yBas + 4) + " " + (cx + 76) + " " + (yBas + 10) + " H" + (cx - 76) + " Q" + (cx - 60) + " " + (yBas + 4) + " " + (cx - 34) + " " + yBas + "Z' fill='" + bois + "'/>";
+    s += "<path d='M" + (cx - 8) + " " + (yTop + 30) + " q6 40 -2 80 M" + (cx + 9) + " " + (yTop + 60) + " q-5 30 3 60' stroke='#6B4423' stroke-width='2' fill='none' opacity='.6'/><rect x='" + (cx - 200) + "' y='" + (yBas + 10) + "' width='400' height='6' rx='3' fill='#7FB069' opacity='.5'/>";
+    var LC = []; C.forEach(function (l, k) { couper(l, k ? 26 : 22).forEach(function (x) { LC.push([x, k]); }); });
+    var ph = LC.length * 19 + 18, pw = Math.min(380, Math.max.apply(null, LC.map(function (x) { return x[0].length * (x[1] ? 7.8 : 10.4); })) + 40), py = (yTop + yBas) / 2 - ph / 2;
+    s += "<g class='cm-c'><rect x='" + f1(cx - pw / 2) + "' y='" + f1(py) + "' width='" + f1(pw) + "' height='" + f1(ph) + "' rx='8' fill='" + (STYLE === "sobre" ? "#1D2B53" : "url(#" + P + "g)") + "' stroke='#FFC93C' stroke-width='2.5'/>";
+    LC.forEach(function (x, k) { s += "<text x='" + cx + "' y='" + f1(py + 24 + k * 19) + "' text-anchor='middle' font-size='" + (x[1] ? 12.5 : 16) + "' font-weight='" + (x[1] ? 600 : 800) + "' fill='" + (x[1] ? "#FFE08A" : "#fff") + "'>" + esc(x[0]) + "</text>"; });
+    return s + "</g>";
+  }
+  function arbreDessin(C, B, alt, Wd) {
+    var etr = Wd < 500, n = B.length, cols = etr ? 1 : (n <= 2 ? n : n === 4 ? 2 : 3), g = 22, w = (Wd - 30 - (cols - 1) * g) / cols, NC = Math.floor((w - 96) / 8), rangs = [], y = 18;
+    for (var r0 = 0; r0 < n; r0 += cols) rangs.push(B.slice(r0, r0 + cols));
+    var pos = [];
+    rangs.forEach(function (rg, ri) {
+      var hs = rg.map(function (b) { return couper(b.label, NC - 4).length * 19 + 10 + hListe(b.items, NC) + 70; }), hr = Math.max.apply(null, hs), dec = cols > 1 && rg.length < cols ? (cols - rg.length) * (w + g) / 2 : 0;
+      rg.forEach(function (b, k) { pos.push({ b: b, cx: 15 + dec + k * (w + g) + w / 2, cy: y + hr / 2, rx: w / 2, ry: hs[k] / 2 }); });
+      y += hr + (etr ? 26 : 30);
+    });
+    var yTop = y + 10, yBas = yTop + 150, cx = Wd / 2, bois = STYLE === "sobre" ? "#8B7B6B" : "#8A5A2D", s = "", dessus = "";
+    pos.forEach(function (p, i) {
+      var ex = etr ? cx : p.cx, ey = p.cy + p.ry * .6, sw = etr ? 9 : 12 - Math.min(5, (yTop - ey) / 90);
+      s += "<path class='cm-t' d='M" + f1(cx + (etr ? 0 : (p.cx - cx) * .04)) + " " + f1(yTop + 4) + " C" + f1(cx + (p.cx - cx) * .1) + " " + f1(yTop - 60) + " " + f1(ex - (ex - cx) * .2) + " " + f1(ey + 70) + " " + f1(ex) + " " + f1(ey) + "' fill='none' stroke='" + bois + "' stroke-width='" + f1(sw) + "' stroke-linecap='round'/>";
+      dessus += feuillage(p.cx, p.cy, p.rx, p.ry, p.b, i + 1, NC);
+    });
+    return svgDe(etr ? "cm-etroit" : "cm-large", Wd, yBas + 24, alt, B, s + dessus + tronc(cx, yTop, yBas, C));
+  }
+
+  /* FRISE CHRONOLOGIQUE : un axe fléché, les moments en cartes, alternées dessus / dessous */
+  function frise(C, B, alt, Wd) {
+    var n = B.length, s = "", dessus = "", col0 = "#2E3A55";
+    if (Wd < 500) {
+      var pc = placerCentre(200, C, largeurC(C, 240, 360)), y = pc.y + pc.c.b + 30, x = 30, d0 = y;
+      B.forEach(function (b, i) { var bx = boite(56, y, 326, b, i + 1, false); dessus += "<circle cx='" + x + "' cy='" + f1(y + 25) + "' r='9' fill='#fff' stroke='" + b.color + "' stroke-width='4'/><path d='M" + (x + 10) + " " + f1(y + 25) + " H54' stroke='" + trait(b.color) + "' stroke-width='2.5'/>" + bx.s; y += bx.h + 22; });
+      s += "<path class='cm-t' d='M" + x + " " + f1(d0 - 6) + " V" + f1(y + 4) + "' stroke='" + col0 + "' stroke-width='4' stroke-linecap='round' marker-end='url(#" + P + "fx)'/>";
+      return svgDe("cm-etroit", Wd, y + 22, alt, B, s.replace("#" + P + "fx", "#" + P + "f0") + dessus + pc.s);
+    }
+    var pc2 = placerCentre(Wd / 2, C, largeurC(C, 240, 600)), x0 = 60, x1 = Wd - 70, pas = n > 1 ? (x1 - x0) / (n - 1) : 0, cw = Math.min(268, n > 1 ? pas * 2 - 24 : 300);
+    var hs = B.map(function (b) { return hBoite(b, cw); }), Hh = Math.max.apply(null, hs.filter(function (h, i) { return i % 2 === 0; }).concat([60])), Hb = Math.max.apply(null, hs.filter(function (h, i) { return i % 2 === 1; }).concat([40]));
+    var top = pc2.y + pc2.c.b + 24, ay = top + Hh + 40, H = ay + 40 + Hb + 20;
+    s += "<path class='cm-t' d='M24 " + f1(ay) + " H" + (Wd - 26) + "' stroke='" + col0 + "' stroke-width='5' stroke-linecap='round'/><path d='M" + (Wd - 40) + " " + f1(ay - 12) + " L" + (Wd - 20) + " " + f1(ay) + " L" + (Wd - 40) + " " + f1(ay + 12) + "' fill='none' stroke='" + col0 + "' stroke-width='5' stroke-linejoin='round' stroke-linecap='round'/>";
+    B.forEach(function (b, i) {
+      var x = x0 + i * pas, haut = i % 2 === 0, bx0 = Math.max(16, Math.min(Wd - 16 - cw, x - cw / 2)), by = haut ? ay - 40 - hs[i] : ay + 40, bx = boite(bx0, by, cw, b, i + 1, false, hs[i]);
+      s += "<path class='cm-l' d='M" + f1(x) + " " + f1(ay + (haut ? -12 : 12)) + " V" + f1(haut ? ay - 40 : ay + 40) + "' stroke='" + trait(b.color) + "' stroke-width='2.5' stroke-dasharray='2 5' stroke-linecap='round'/>";
+      dessus += "<circle cx='" + f1(x) + "' cy='" + f1(ay) + "' r='11' fill='#fff' stroke='" + b.color + "' stroke-width='5'/>" + bx.s;
+    });
+    return svgDe("cm-large", Wd, H, alt, B, s + dessus + pc2.s);
+  }
+
+  var FORMES = ["radiale", "organigramme", "bulles", "accolade", "alveoles", "roue", "poisson", "arbre"], STYLES = ["main", "colore", "sobre"];
+  function hache(t) { var h = 7; for (var i = 0; i < t.length; i++) h = (h * 31 + t.charCodeAt(i)) % 100003; return h; }
+
   /* carte = { centre: "Titre\nSous-titre" | [lignes], branches: [{ label, color?, items: [] }] } */
   function VRT_CM(carte) {
     var C = (Array.isArray(carte.centre) ? carte.centre : String(carte.centre || "").split("\n")).map(function (x) { return String(x).trim(); }).filter(Boolean);
@@ -124,10 +488,21 @@
     }).filter(function (b) { return b.items.length; });
     if (!B.length) return "";
     var alt = "Carte mentale : " + C.join(", ") + ". " + B.map(function (b) { return b.label + " : " + b.items.join(" ; "); }).join(". ");
-    var n = ++NUM, h = "";
-    P = "cm" + n + "a"; h += large(C, B.map(function (b) { return Object.assign({}, b); }), alt);
-    P = "cm" + n + "b"; h += etroit(C, B, alt);
-    return "<div class='cm'>" + h + "</div>";
+    /* forme et style : imposés par la carte, sinon tirés du titre (stables d'une génération à l'autre et variés d'une carte à l'autre) */
+    var hh = hache(C.join(" ")), pal = PALETTES[Math.floor(hh / 13) % PALETTES.length];
+    if (!carte.garderCouleurs) B.forEach(function (b, i) { b.color = pal[i % pal.length]; });
+    var forme = carte.forme || FORMES[hh % FORMES.length], st = carte.style || STYLES[Math.floor(hh / 7) % STYLES.length];
+    var gauche = B.map(function (b) { return /cause|origine|facteur|pourquoi/i.test(b.label) && !/conséquence|effet|impact/i.test(b.label); });
+    if (forme === "causes" && (gauche.indexOf(true) < 0 || gauche.indexOf(false) < 0)) forme = "radiale";
+    if (forme === "organigramme" && B.length > 5) forme = "radiale";
+    var n = ++NUM, h = "", cp = function () { return B.map(function (b) { return Object.assign({}, b); }); };
+    STYLE = st;
+    P = "cm" + n + "a";
+    h += forme === "organigramme" ? arbre(C, cp(), alt) : forme === "roue" ? roue(C, cp(), alt, 920) : forme === "poisson" ? poisson(C, cp(), alt, 920) : forme === "arbre" ? arbreDessin(C, cp(), alt, 920) : forme === "frise" ? frise(C, cp(), alt, 920) : forme === "bulles" ? bulles(C, cp(), alt) : forme === "accolade" ? accolade(C, cp(), alt) : forme === "alveoles" ? alveoles(C, cp(), alt, 920) : forme === "flux" ? flux(C, cp(), alt, 920) : forme === "causes" ? causes(C, cp(), alt, 920, gauche) : large(C, cp(), alt);
+    P = "cm" + n + "b";
+    h += forme === "roue" ? roue(C, cp(), alt, 400) : forme === "poisson" ? poisson(C, cp(), alt, 400) : forme === "arbre" ? arbreDessin(C, cp(), alt, 400) : forme === "frise" ? frise(C, cp(), alt, 400) : forme === "bulles" ? bullesEtroit(C, cp(), alt) : forme === "accolade" ? accoladeEtroit(C, cp(), alt) : forme === "alveoles" ? alveoles(C, cp(), alt, 400) : forme === "flux" ? flux(C, cp(), alt, 400) : forme === "causes" ? causes(C, cp(), alt, 400, gauche) : etroit(C, cp(), alt);
+    STYLE = "main";
+    return "<div class='cm cm-" + forme + " cm-s-" + st + "' data-forme='" + forme + "'>" + h + "</div>";
   }
 
   /* carte d'une leçon : une branche par partie (hors entraînement), les mots tirés de « à retenir »
@@ -150,7 +525,9 @@
       if (it.length) B.push({ label: nu(p.t).replace(/^\d+\.\s*/, "").slice(0, 42), items: it.slice(0, 6) });
     });
     if (B.length < 2) return "";
-    return VRT_CM({ centre: [nu(L.cle || L.titre)].concat(L.c ? [L.c] : []), branches: B.slice(0, 6) });
+    /* forme selon le contenu : étapes → flux ; causes et conséquences → multi-flux ; sinon variée selon le titre */
+    var lab = B.map(function (b) { return b.label; }).join(" | "), forme = /étape|méthode|démarche|procédure|phase/i.test(lab) ? "flux" : (B.some(function (b) { return /cause|origine/i.test(b.label) && !/conséquence|effet|impact/i.test(b.label); }) && B.some(function (b) { return /conséquence|effet|impact/i.test(b.label) && !/cause|origine/i.test(b.label); })) ? "causes" : /hist/i.test(L.m || "") || /\b1[0-9]{3}\b|siècle/.test(lab) ? "frise" : null;
+    return VRT_CM({ centre: [nu(L.cle || L.titre)].concat(L.c ? [L.c] : []), branches: B.slice(0, 6), forme: forme });
   }
   VRT_CM.lecon = VRT_CM_LECON;
   VRT_CM.css = ".cm{margin:6px 0}.cm svg{display:block;width:100%;height:auto;border-radius:18px}.cm .cm-etroit{display:none}" +
@@ -8141,6 +8518,809 @@ VRT_PLUS("3e-en-articles", [
   });
   VRT_A("1re-it-accordo", 1, "Accordo, disaccordo o sfumatura ?", function (el) {
     exercice(el, ESPR.map(function (e) { return ["« " + e[0] + " » exprime : ___", [e[1], "accordo", "disaccordo", "sfumatura"].filter(function (x, i, a) { return a.indexOf(x) === i; }), e[1] === "accordo" ? "Formule d'accord." : e[1] === "disaccordo" ? "Formule de désaccord." : "Formule qui nuance."]; }), "Espressione seguente", "Espressione");
+  });
+})();
+
+/* Leçons APPROFONDIES — lot 12, classes d'examen (18/11/2026) : chinois de 1re (不但……而且, 如果……就) et arabe de Tle
+   (أنواع الخبر, اللازم والمتعدي). Même gabarit et même mécanisme que 11-approfondies-lot4.js (remplacement EN PLACE ;
+   ordre, clé, fiche APC, examen et scènes conservés). Textes arabes en SVG avec direction rtl. Simulations VRT_A en fin
+   de fichier. */
+(function () {
+  "use strict";
+  var NUIT = "#001136", BLEU = "#1E499B", GRIS = "#4D5163", VERT = "#17784D", ROUGE = "#C62828", TERRE = "#C46A2B";
+
+  function txt(x, y, t, o) {
+    o = o || {};
+    return "<text x='" + x + "' y='" + y + "' text-anchor='" + (o.a || "middle") + "' font-size='" + (o.s || 12) + "' font-weight='" + (o.w || 700) + "' fill='" + (o.c || NUIT) + "'" + (o.i ? " font-style='italic'" : "") + (o.halo ? " stroke='#fff' stroke-width='3' paint-order='stroke'" : "") + ">" + t + "</text>";
+  }
+  function lin(id, cs, vertical) {
+    var s = "<linearGradient id='" + id + "'" + (vertical ? " x1='0' y1='0' x2='0' y2='1'" : "") + ">";
+    cs.forEach(function (c, i) { s += "<stop offset='" + (i / (cs.length - 1)).toFixed(2) + "' stop-color='" + c + "'/>"; });
+    return s + "</linearGradient>";
+  }
+  function rad(id, cs) {
+    var s = "<radialGradient id='" + id + "' cx='35%' cy='30%' r='75%'>";
+    cs.forEach(function (c, i) { s += "<stop offset='" + (i / (cs.length - 1)).toFixed(2) + "' stop-color='" + c + "'/>"; });
+    return s + "</radialGradient>";
+  }
+  function fleche(id, c) { return "<marker id='" + id + "' markerWidth='10' markerHeight='10' refX='7' refY='5' orient='auto'><path d='M0 1L8 5L0 9Z' fill='" + c + "'/></marker>"; }
+  function svg(w, h, alt, defs, corps) {
+    return "<svg viewBox='0 0 " + w + " " + h + "' role='img' aria-label='" + alt + "' font-family='Inter,Arial,sans-serif'><rect width='" + w + "' height='" + h + "' fill='#fff'/><defs>" + defs + "</defs>" + corps +
+      "<text x='" + (w - 6) + "' y='" + (h - 5) + "' font-size='8' text-anchor='end' fill='#8A93A6'>Planche VÉRITAS</text></svg>";
+  }
+  function ancien(id) { return window.VRT_LECONS[id]; }
+  function remplacer(id, o) {
+    var a = ancien(id);
+    if (a) ["apc", "examen", "rang", "cle", "scenes"].forEach(function (k) { if (a[k] != null && o[k] == null) o[k] = a[k]; });
+    VRT_L(id, o);
+    if (a) o.ordre = a.ordre;
+  }
+  function q(qq, bonne, f1, f2, e) { return { q: qq, r: [bonne, f1, f2], b: 0, e: e }; }
+  function partie(old, i) { return old && old.parties[i] ? old.parties[i].html : ""; }
+  function bulle(x, y, w, t, c) { return "<rect x='" + x + "' y='" + y + "' width='" + w + "' height='30' rx='12' fill='#fff' stroke='" + (c || "#C9D2E3") + "'/>" + txt(x + w / 2, y + 20, t, { s: 11.5 }); }
+  function perso(x, y, peau, habit, bas) {
+    bas = bas || "#2E3445";
+    return "<g transform='translate(" + x + " " + y + ")'><ellipse cx='0' cy='84' rx='18' ry='4' fill='#001136' opacity='.18'/>" +
+      "<rect x='-9' y='44' width='8' height='36' rx='3' fill='" + bas + "'/><rect x='1' y='44' width='8' height='36' rx='3' fill='" + bas + "'/>" +
+      "<ellipse cx='-6' cy='81' rx='7' ry='3.5' fill='#1F2328'/><ellipse cx='6' cy='81' rx='7' ry='3.5' fill='#1F2328'/>" +
+      "<path d='M-13 46L-16 18C-16 13 -12 11 -6 10H6C12 11 16 13 16 18L13 46Z' fill='" + habit + "'/>" +
+      "<path d='M-15 16L-20 40' stroke='" + habit + "' stroke-width='7' stroke-linecap='round'/><path d='M15 16L20 40' stroke='" + habit + "' stroke-width='7' stroke-linecap='round'/>" +
+      "<circle cx='-20' cy='42' r='3.6' fill='" + peau + "'/><circle cx='20' cy='42' r='3.6' fill='" + peau + "'/>" +
+      "<rect x='-3.5' y='5' width='7' height='7' fill='" + peau + "'/><ellipse cx='0' cy='-2' rx='9' ry='10.5' fill='" + peau + "'/>" +
+      "<path d='M-9 -4C-10 -14 -4 -13.5 0 -13.5S10 -14 9 -4C7 -9 -7 -9 -9 -4Z' fill='#1B1410'/><ellipse cx='-9' cy='-1' rx='1.8' ry='3' fill='" + peau + "'/><ellipse cx='9' cy='-1' rx='1.8' ry='3' fill='" + peau + "'/></g>";
+  }
+  /* portrait en buste (arbre généalogique) */
+  function portrait(x, y, peau, habit, cheveux, age) {
+    var s = "<g transform='translate(" + x + " " + y + ")'><circle r='30' fill='#F4EFE4' stroke='#C9A576' stroke-width='3'/><clipPath id='pc" + x + "_" + y + "'><circle r='28'/></clipPath><g clip-path='url(#pc" + x + "_" + y + ")'>";
+    s += "<path d='M-26 32C-26 14 -14 10 0 10S26 14 26 32Z' fill='" + habit + "'/><rect x='-4' y='2' width='8' height='10' fill='" + peau + "'/><ellipse cy='-6' rx='11' ry='13' fill='" + peau + "'/>";
+    s += age === "vieux" ? "<path d='M-11 -10C-12 -20 -4 -21 0 -21S12 -20 11 -10C9 -14 -9 -14 -11 -10Z' fill='#D8D8D8'/>" : age === "femme" ? "<path d='M-13 -6C-15 -24 15 -24 13 -6C12 -14 -12 -14 -13 -6Z' fill='" + cheveux + "'/><path d='M-13 -14h26v-6c-6 -6 -20 -6 -26 0Z' fill='" + habit + "'/>" : "<path d='M-11 -10C-12 -20 -4 -21 0 -21S12 -20 11 -10C9 -14 -9 -14 -11 -10Z' fill='" + cheveux + "'/>";
+    s += "<circle cx='-4' cy='-6' r='1.4' fill='#1B1410'/><circle cx='4' cy='-6' r='1.4' fill='#1B1410'/><path d='M-3 2q3 2 6 0' stroke='#1B1410' fill='none'/></g></g>";
+    return s;
+  }
+  /* boucle d'exercice générique : [phrase avec ___, [bonne, autres…], explication] */
+  function exercice(el, C, suivant, lib) {
+    var i = 0, ok = 0;
+    el.innerHTML = "<p class='labo-r' data-q style='font-size:16px'></p><div style='display:flex;gap:8px;flex-wrap:wrap' data-c></div><p class='an-note' data-e></p><p class='labo-r' data-s></p>";
+    function $(s) { return el.querySelector(s); }
+    function poser() {
+      var c = C[i];
+      $("[data-q]").innerHTML = (i + 1) + ". " + c[0].replace("___", "<b style='border-bottom:2px dashed #1E499B;padding:0 14px'>?</b>");
+      $("[data-e]").textContent = ""; $("[data-s]").innerHTML = lib + " " + (i + 1) + " / " + C.length + " · score : <b>" + ok + "</b>";
+      $("[data-c]").innerHTML = c[1].slice().sort().map(function (x) { return "<button type='button' class='btn-l' data-v='" + x + "'>" + x + "</button>"; }).join("");
+      el.querySelectorAll("[data-v]").forEach(function (b) {
+        b.addEventListener("click", function () {
+          var bon = b.dataset.v === c[1][0]; if (bon) ok++;
+          $("[data-q]").innerHTML = (i + 1) + ". " + c[0].replace("___", "<b style='color:" + (bon ? VERT : ROUGE) + "'>" + c[1][0] + "</b>");
+          $("[data-e]").innerHTML = (bon ? "✔ " : "✘ ") + c[2];
+          el.querySelectorAll("[data-v]").forEach(function (x) { x.disabled = true; });
+          var nx = document.createElement("button"); nx.type = "button"; nx.className = "btn-l"; nx.textContent = i + 1 < C.length ? suivant : "↺";
+          nx.addEventListener("click", function () { i = (i + 1) % C.length; if (!i) ok = 0; poser(); });
+          $("[data-c]").appendChild(nx);
+          $("[data-s]").innerHTML = lib + " " + (i + 1) + " / " + C.length + " · score : <b>" + ok + "</b>";
+        });
+      });
+    }
+    poser();
+  }
+
+  function alea(g) { return function () { g = (g * 16807) % 2147483647; return (g - 1) / 2147483646; }; }
+  function txtAr(x, y, t, o) {
+    o = o || {};
+    return "<text x='" + x + "' y='" + y + "' direction='rtl' text-anchor='" + (o.a || "middle") + "' font-size='" + (o.s || 16) + "' font-weight='" + (o.w || 700) + "' fill='" + (o.c || NUIT) + "' font-family='Amiri,Noto Naskh Arabic,Scheherazade,Arial,sans-serif'>" + t + "</text>";
+  }
+  function bloc(x, y, w, h, c, l1, l2, l3) {
+    return "<rect x='" + x + "' y='" + y + "' width='" + w + "' height='" + h + "' rx='12' fill='" + c + "'/>" + txt(x + w / 2, y + h / 2 - (l2 ? 4 : -6), l1, { s: 20, c: "#fff" }) + (l2 ? txt(x + w / 2, y + h / 2 + 16, l2, { s: 11.5, c: "#fff", w: 500 }) : "") + (l3 ? txt(x + w / 2, y + h + 18, l3, { s: 11, c: GRIS, w: 600 }) : "");
+  }
+
+  /* ═══════════════════════ 1re CHINOIS — 不但……而且 / 第一……第二 ═══════════════════════ */
+  var ZB_OLD = ancien("1re-zh-budan");
+  function lanterne3D() {
+    var o = [], k;
+    o.push({ f: "boite", c: [0, -10, 0], d: [460, 8, 220], coul: "#7A1F1F", dessus: "#9E2A2A" });
+    o.push({ f: "boite", c: [0, -2, 40], d: [240, 26, 90], coul: "#5D3A1E", dessus: "#7A5230", div: false });
+    o.push({ f: "boite", c: [0, 24, 40], d: [60, 70, 40], coul: "#6B4423", dessus: "#8B5A2B", div: false });
+    o.push({ f: "boite", c: [0, 60, 18], d: [52, 26, 2], coul: "#F2C94C", div: false });
+    [-150, 150].forEach(function (x) {
+      o.push({ f: "cylindre", c: [x, 140, -40], r: 2, h: 60, n: 6, coul: "#1F2328" });
+      o.push({ f: "cylindre", c: [x, 128, -40], r: 16, h: 12, n: 18, coul: "#C9A227", dessus: "#E0BE4A" });
+      o.push({ f: "sphere", c: [x, 92, -40], r: [40, 36, 40], n: 22, m: 12, coul: "#D7261E" });
+      for (k = 0; k < 8; k++) { var a = k / 8 * 2 * Math.PI; o.push({ f: "sphere", c: [x + 40 * Math.cos(a), 92, -40 + 40 * Math.sin(a)], r: 1.6, coul: "#C9A227" }); }
+      o.push({ f: "cylindre", c: [x, 50, -40], r: 16, h: 8, n: 18, coul: "#C9A227", dessus: "#E0BE4A" });
+      for (k = 0; k < 6; k++) o.push({ f: "cylindre", c: [x + (k - 2.5) * 3, 14, -40], r: 1.2, h: 36, n: 4, coul: "#E0BE4A" });
+    });
+    o.forEach(function (x) { x.c[1] -= 50; });
+    return o;
+  }
+  remplacer("1re-zh-budan", {
+    c: "1re A", m: "chinois", titre: "不但……而且 et 第一……第二 : enchaîner ses idées", duree: 30,
+    accroche: "« 他会说汉语。他会说英语。» Le discours de Marie pour le concours « Pont du chinois » sonne comme une liste. Deux structures vont le faire chanter.",
+    intro: "La préparation d'un discours pour le concours « Pont du chinois » te sert de fil rouge : à chaque partie, un indice t'aide à trancher entre trois façons d'écrire.",
+    objectifs: ["employer 不但……而且…… (non seulement… mais aussi…)", "placer 不但 selon que le sujet change ou non", "ordonner ses idées avec 第一、第二、第三", "présenter sa famille en chinois avec ces structures"],
+    enquete: {
+      titre: "Le discours de Marie pour le « Pont du chinois »",
+      svg: svg(640, 230, "Une élève répète un discours en chinois sur une estrade décorée de lanternes rouges", lin("zhF", ["#9E2A2A", "#6E1A1A"], true), "<rect width='640' height='230' fill='url(#zhF)'/><rect x='0' y='180' width='640' height='50' fill='#5D3A1E'/>" + [120, 520].map(function (x) { return "<path d='M" + x + " 0v26' stroke='#1F2328' stroke-width='2'/><rect x='" + (x - 12) + "' y='26' width='24' height='6' fill='#C9A227'/><ellipse cx='" + x + "' cy='58' rx='30' ry='26' fill='#D7261E'/><path d='M" + (x - 30) + " 58h60M" + (x - 26) + " 46h52M" + (x - 26) + " 70h52' stroke='#B01C14'/><rect x='" + (x - 12) + "' y='82' width='24' height='6' fill='#C9A227'/><path d='M" + x + " 88v22' stroke='#E0BE4A' stroke-width='3'/>"; }).join("") + perso(320, 90, "#5A3A1E", "#F2F2F2", "#1E499B") + "<rect x='290' y='150' width='60' height='40' fill='#6B4423'/>" + "<rect x='380' y='40' width='120' height='70' rx='8' fill='#FBF8F2' stroke='#C9A227'/>" + txt(440, 66, "汉语桥", { s: 22, c: "#B01C14" }) + txt(440, 92, "Hànyǔ Qiáo", { s: 11, c: GRIS, w: 500 })),
+      legende: "À Yaoundé : Marie, élève de 1re A, prépare le concours « Pont du chinois » (汉语桥) avec son professeur de chinois.",
+      contexte: "<p>Le discours de Marie présente sa famille : « 我哥哥会说汉语。我哥哥会说英语。我们要帮助爸爸妈妈。我们要尊重爸爸妈妈。» Le professeur sourit : « C'est juste, mais ce sont des phrases qui se suivent sans lien. » Son camarade conseille : « Ajoute simplement 也 partout. » Une autre : « Pour numéroter, écris 一、二, ça suffit. »</p>",
+      documents: [{ t: "La grille du jury", html: "<table class='donnees'><tr><td>Prononciation et tons</td><td>/5</td></tr><tr><td>Richesse des structures (liaisons, ordinaux…)</td><td>/5</td></tr><tr><td>Organisation des idées</td><td>/5</td></tr><tr><td>Aisance</td><td>/5</td></tr></table>" }],
+      question: "Comment relier et ordonner les idées du discours de Marie ?",
+      tache: "Réécris le discours en quatre phrases avec 不但……而且…… et 第一、第二, en donnant le pinyin.",
+      hypotheses: ["Il suffit d'ajouter 也 (aussi) dans chaque phrase.", "Pour numéroter, 一、二 suffisent, sans 第.", "不但 A，而且 B relie deux qualités ; 第一、第二 ordonnent les idées."]
+    },
+    parties: [
+      { t: "不但……而且……", html: partie(ZB_OLD, 0) +
+        "<div class='prop'><b>Où placer 不但 ?</b>Même sujet dans les deux parties : 不但 se place <strong>après</strong> le sujet (他不但会说汉语，而且会说英语). Sujets différents : 不但 se place <strong>avant</strong> le premier sujet (不但哥哥会说汉语，而且姐姐也会说).</div>",
+        planches: [{ type: "2D", titre: "La structure 不但 A，而且 B", legende: "Le sujet, puis 不但 et la première qualité, puis 而且 et la seconde : « Mon grand frère parle non seulement chinois, mais aussi anglais. »", svg: (function () {
+          var s = "<rect width='640' height='200' fill='#FBF5EC'/>";
+          s += bloc(14, 50, 108, 70, "#5C6478", "我哥哥", "wǒ gēge", "sujet") + bloc(130, 50, 90, 70, "#B01C14", "不但", "bùdàn", "non seulement") + bloc(228, 50, 140, 70, "#1E499B", "会说汉语", "huì shuō Hànyǔ", "qualité A") + bloc(376, 50, 90, 70, "#C9A227", "而且", "érqiě", "mais aussi") + bloc(474, 50, 152, 70, "#2E7D32", "会说英语", "huì shuō Yīngyǔ", "qualité B");
+          s += txt(320, 30, "我哥哥不但会说汉语，而且会说英语。", { s: 18 });
+          return svg(640, 200, "Cinq blocs colorés : sujet, bùdàn, qualité A, érqiě, qualité B", "", s);
+        })() }],
+        fil: { html: "<p>Avec 也 seul (我哥哥会说汉语，也会说英语), la phrase est juste mais plate. 不但……而且…… montre que la seconde qualité <strong>s'ajoute</strong> à la première : c'est ce que le jury appelle la richesse des structures.</p>", verdicts: [[0, "rejetee", "也 ajoute, mais 不但……而且…… met en valeur la seconde idée."]] },
+        retenir: "不但 A，而且 B ; 不但 après le sujet s'il est le même." },
+      { t: "第一……第二……", html: partie(ZB_OLD, 1),
+        planches: [{ type: "3d", titre: "L'estrade du concours « Pont du chinois »", legende: "Tourne l'estrade : le pupitre doré, deux lanternes rouges à franges. Un discours bien ordonné (第一、第二、第三) se suit facilement, même par un jury qui écoute vingt candidats.",
+          modele: { h: 340, rx: -12, ry: 22, echelle: 0.95, alt: "Estrade rouge avec un pupitre en bois et deux lanternes chinoises rouges et dorées", objets: lanterne3D(),
+            etiquettes: [{ p: [-150, 82, -40], t: "灯笼 dēnglong (lanterne)" }, { p: [0, 24, 18], t: "讲台 jiǎngtái (pupitre)", cote: "d" }] } }],
+        fil: { html: "<p>« 一、二 » ne sont que des nombres ; pour dire « premièrement, deuxièmement », il faut le préfixe des ordinaux : <strong>第一、第二</strong>. Sans 第, le jury entend « un, deux », pas un plan.</p>", verdicts: [[1, "rejetee", "Les ordinaux exigent 第 : 第一 (premièrement), 第二 (deuxièmement)."]] },
+        retenir: "第 + nombre = ordinal : 第一、第二、第三." },
+      { t: "Vocabulaire de la famille", html: partie(ZB_OLD, 2),
+        planches: [{ type: "2D", titre: "我的家 Wǒ de jiā", legende: "La famille de Marie avec les mots chinois et leur pinyin.", svg: (function () {
+          var F = [["爸爸", "bàba", 160, 70, "#6B4423", "#1E499B", "#1B1410", "homme"], ["妈妈", "māma", 480, 70, "#5A3A1E", "#C2540A", "#1B1410", "femme"], ["哥哥", "gēge", 110, 210, "#6B4423", "#2E7D32", "#1B1410", "homme"], ["姐姐", "jiějie", 270, 210, "#5A3A1E", "#7B3F99", "#1B1410", "femme"], ["我", "wǒ (Marie)", 430, 210, "#5A3A1E", "#F7C948", "#1B1410", "femme"]], s = "<rect width='640' height='300' fill='#FBF7EE'/><path d='M160 70H480M320 70V140M110 140H430M110 140V180M270 140V180M430 140V180' stroke='#8A6E4B' stroke-width='3' fill='none'/>";
+          F.forEach(function (f) { s += portrait(f[2], f[3], f[4], f[5], f[6], f[7]) + txt(f[2], f[3] + 52, f[0], { s: 18, c: "#B01C14", halo: true }) + txt(f[2], f[3] + 70, f[1], { s: 11.5, w: 500, c: GRIS, halo: true }); });
+          s += txt(560, 210, "家 jiā", { s: 22, c: "#B01C14" }) + txt(560, 232, "famille, maison", { s: 11, c: GRIS });
+          return svg(640, 300, "Arbre de famille avec les mots chinois baba, mama, gege, jiejie et wo", "", s);
+        })() }],
+        fil: { html: "<p>Avec ce vocabulaire et les deux structures, le discours devient : « 第一，我哥哥不但会说汉语，而且会说英语。第二，我们不但要帮助爸爸妈妈，而且要尊重他们。»</p>", verdicts: [[2, "validee", "不但……而且…… pour relier, 第一、第二 pour ordonner."]] },
+        retenir: "家 jiā, 爸爸, 妈妈, 哥哥, 姐姐, 帮助 bāngzhù, 尊重 zūnzhòng." }
+    ],
+    denouement: {
+      titre: "Le discours réécrit",
+      etapes: ["不但……而且…… relie deux qualités (indice 1).", "第一、第二 ordonnent les idées (indice 2).", "Vocabulaire de la famille et pinyin (indice 3)."],
+      reponse: "<p>Discours réécrit : « 第一，我哥哥不但会说汉语，而且会说英语。(Dì yī, wǒ gēge bùdàn huì shuō Hànyǔ, érqiě huì shuō Yīngyǔ.) 第二，我们不但要帮助爸爸妈妈，而且要尊重他们。(Dì èr, wǒmen bùdàn yào bāngzhù bàba māma, érqiě yào zūnzhòng tāmen.) » La structure 不但 A，而且 B (« non seulement A, mais aussi B ») relie et met en valeur deux idées, mieux qu'une simple répétition avec 也 ; comme le sujet est le même, 不但 se place après lui. Le préfixe 第 transforme les nombres en ordinaux : 第一 (premièrement), 第二 (deuxièmement). Le jury entend ainsi un discours lié et organisé.</p>",
+      transfert: "<p>Écris trois phrases sur ton école avec 第一、第二、第三, dont une avec 不但……而且……, et donne le pinyin.</p>"
+    },
+    revision: (ZB_OLD ? ZB_OLD.revision : []).concat(["Même sujet : 他不但…，而且… ; sujets différents : 不但他…，而且她也…"]),
+    exo: ZB_OLD ? ZB_OLD.exo : "",
+    quiz: [
+      q("不但……而且…… signifie…", "non seulement… mais aussi…", "si… alors…", "certains… d'autres…", "bùdàn… érqiě…"),
+      q("« Deuxièmement » se dit…", "第二", "二", "二第", "第 + nombre."),
+      q("帮助 (bāngzhù) signifie…", "aider", "respecter", "parler", "Vocabulaire de la famille."),
+      q("尊重 (zūnzhòng) signifie…", "respecter", "aider", "aimer", "尊重父母 : respecter ses parents."),
+      q("哥哥 désigne…", "le grand frère", "la grande sœur", "le père", "gēge."),
+      q("他不但会说汉语，___ 会说英语。", "而且", "第一", "如果", "Seconde partie de la structure."),
+      q("Le pinyin de 第一 est…", "dì yī", "dì èr", "yī dì", "Premièrement."),
+      q("家 (jiā) signifie…", "famille, maison", "école", "pays", "我的家 : ma famille."),
+      q("Quand le sujet est le même, 不但 se place…", "après le sujet", "avant le sujet", "à la fin de la phrase", "他不但…"),
+      q("姐姐 désigne…", "la grande sœur", "la mère", "le grand frère", "jiějie.")
+    ]
+  });
+
+  /* ═══════════════════════ 1re CHINOIS — 如果……就…… ═══════════════════════ */
+  var ZR_OLD = ancien("1re-zh-ruguo");
+  function bus3D() {
+    var o = [], k, R = alea(9);
+    o.push({ f: "boite", c: [0, -10, 0], d: [520, 8, 260], coul: "#5C6478", dessus: "#6E7684" });
+    o.push({ f: "boite", c: [0, -4, 0], d: [520, 1, 30], coul: "#E8E8E8", div: false });
+    o.push({ f: "boite", c: [0, 52, -60], d: [260, 80, 90], coul: "#F2C94C", dessus: "#F7F7F7", div: false });
+    for (k = 0; k < 5; k++) o.push({ f: "boite", c: [-100 + k * 46, 60, -106], d: [36, 28, 2], coul: "#9FC5E8", div: false });
+    o.push({ f: "boite", c: [118, 30, -106], d: [20, 50, 2], coul: "#5C6478", div: false });
+    [[-90, -106], [90, -106], [-90, -14], [90, -14]].forEach(function (p) { o.push({ f: "cylindre", c: [p[0], 14, p[1]], r: 16, h: 6, n: 18, axe: "z", coul: "#1F2328" }); });
+    o.push({ f: "sphere", c: [-40, 200, -40], r: [70, 30, 50], n: 18, m: 10, coul: "#8E96A6" });
+    o.push({ f: "sphere", c: [40, 210, -60], r: [60, 28, 44], n: 18, m: 10, coul: "#7A8392" });
+    for (k = 0; k < 40; k++) o.push({ f: "cylindre", c: [-110 + R() * 220, 30 + R() * 150, -120 + R() * 140], r: 1, h: 10, n: 4, coul: "#5BA3D9" });
+    o.forEach(function (x) { x.c[1] -= 70; });
+    return o;
+  }
+  remplacer("1re-zh-ruguo", {
+    c: "1re A", m: "chinois", titre: "如果……那么/就…… : exprimer la condition", duree: 30,
+    accroche: "« 我们就如果下雨不去。» Le message de Junior sur la sortie à Kribi est incompréhensible : il faut remettre 如果 et 就 à leur place.",
+    intro: "L'organisation d'une sortie de classe te sert de fil rouge : à chaque partie, un indice t'aide à trancher entre trois façons de construire la phrase.",
+    objectifs: ["construire une phrase conditionnelle avec 如果……（那么）……就……", "placer 就 après le sujet de la conséquence", "donner un conseil avec 如果……就……", "employer 有的……有的…… pour présenter des groupes"],
+    enquete: {
+      titre: "La sortie du club de chinois à Kribi",
+      svg: svg(640, 220, "Un car jaune sous un nuage de pluie et un message en chinois mal construit", lin("zrC", ["#C9D6E3", "#EAF1F7"], true), "<rect width='640' height='220' fill='url(#zrC)'/><rect y='176' width='640' height='44' fill='#6E7684'/><ellipse cx='200' cy='50' rx='90' ry='30' fill='#8E96A6'/><ellipse cx='260' cy='60' rx='70' ry='26' fill='#7A8392'/>" + Array.apply(null, Array(24)).map(function (_, k) { var x = 130 + (k * 37) % 200, y = 90 + (k * 23) % 60; return "<path d='M" + x + " " + y + "l-4 12' stroke='#5BA3D9' stroke-width='2'/>"; }).join("") + "<rect x='120' y='120' width='220' height='56' rx='8' fill='#F2C94C'/>" + [0, 1, 2, 3].map(function (k) { return "<rect x='" + (134 + k * 48) + "' y='128' width='36' height='22' rx='3' fill='#9FC5E8'/>"; }).join("") + "<circle cx='160' cy='178' r='12' fill='#1F2328'/><circle cx='300' cy='178' r='12' fill='#1F2328'/><rect x='380' y='40' width='230' height='110' rx='10' fill='#fff' stroke='#C9D2E3'/>" + txt(395, 64, "Junior :", { s: 12, a: "start", c: BLEU }) + txt(395, 92, "我们就如果下雨不去。", { s: 17, a: "start" }) + txt(395, 118, "如果下雨了 ? 去 ?", { s: 15, a: "start", c: GRIS }) + "<path d='M396 98h200' stroke='" + ROUGE + "' stroke-width='2'/>"),
+      legende: "À Yaoundé : le club de chinois du lycée prépare une sortie à Kribi ; la météo annonce de la pluie.",
+      contexte: "<p>Junior écrit dans le groupe du club : « 我们就如果下雨不去。» Personne ne comprend s'ils partent ou non. Sa camarade propose : « Mets 如果 à la fin, comme le “if” anglais qu'on peut placer après. » Un autre : « 就 doit toujours venir en premier. » Le professeur demande aussi un conseil pour ceux qui ont des questions sur le voyage.</p>",
+      documents: [{ t: "Le modèle du manuel", html: "<p>如果 + condition，(那么) + sujet + 就 + conséquence.<br><em>Rúguǒ míngtiān xià yǔ, wǒmen jiù bú qù.</em> S'il pleut demain, nous n'irons pas.</p>" }],
+      question: "Comment écrire correctement le message de Junior et le conseil du professeur ?",
+      tache: "Réécris le message, puis donne deux conseils avec 如果……就……, avec le pinyin.",
+      hypotheses: ["如果 peut se placer à la fin de la phrase, comme « if » en anglais.", "就 se place en tête de phrase, avant le sujet.", "如果 ouvre la condition ; 就 se place après le sujet de la conséquence."]
+    },
+    parties: [
+      { t: "La structure", html: partie(ZR_OLD, 0),
+        planches: [{ type: "2D", titre: "如果 + condition，sujet + 就 + conséquence", legende: "La condition vient d'abord, introduite par 如果 ; dans la conséquence, 就 se place après le sujet 我们 et avant le verbe.", svg: (function () {
+          var s = "<rect width='640' height='200' fill='#FBF5EC'/>";
+          s += bloc(14, 50, 90, 70, "#B01C14", "如果", "rúguǒ", "si") + bloc(112, 50, 170, 70, "#1E499B", "明天下雨", "míngtiān xià yǔ", "condition") + bloc(290, 50, 100, 70, "#5C6478", "我们", "wǒmen", "sujet") + bloc(398, 50, 80, 70, "#C9A227", "就", "jiù", "alors") + bloc(486, 50, 140, 70, "#2E7D32", "不去", "bú qù", "conséquence");
+          s += txt(320, 30, "如果明天下雨，我们就不去。", { s: 18 });
+          return svg(640, 200, "Cinq blocs : rúguǒ, condition, sujet, jiù, conséquence", "", s);
+        })() }],
+        fil: { html: "<p>En chinois, la condition se place <strong>avant</strong> la conséquence : 如果 ne peut pas finir la phrase comme le « if » anglais. « 我们就如果下雨不去 » mélange les deux parties.</p>", verdicts: [[0, "rejetee", "La condition introduite par 如果 vient en premier."]] },
+        retenir: "如果 + condition，(那么) + sujet + 就 + conséquence." },
+      { t: "Donner un conseil", html: partie(ZR_OLD, 1),
+        planches: [{ type: "3d", titre: "S'il pleut, le car ne part pas", legende: "Tourne la scène : le car jaune du club attend sous le nuage. 如果明天下雨，我们就不去 ; 如果不下雨，我们就去克里比 (Kèlǐbǐ, Kribi).",
+          modele: { h: 360, rx: -16, ry: 20, echelle: 0.8, alt: "Car scolaire jaune sur une route sous un nuage de pluie", objets: bus3D(),
+            etiquettes: [{ p: [-40, 160, -40], t: "下雨 xià yǔ (il pleut)" }, { p: [118, -20, -106], t: "汽车 qìchē (le car)", cote: "d" }] } }],
+        fil: { html: "<p>Quand la conséquence n'a pas de sujet exprimé, 就 vient juste après la virgule : « 如果你有问题，<strong>就</strong>问老师。» Quand elle a un sujet, 就 se place après lui : « 我们<strong>就</strong>不去 ». Jamais avant le sujet.</p>", verdicts: [[1, "rejetee", "就 se place après le sujet de la conséquence, pas en tête."]] },
+        retenir: "Conseil : 如果你……，就……" },
+      { t: "Les nombres et 有的……有的……", html: partie(ZR_OLD, 2),
+        fil: { html: "<p>Message final : « 如果明天下雨，我们就不去。如果不下雨，我们就去克里比。有的同学坐汽车，有的同学坐火车。» (certains camarades prennent le car, d'autres le train).</p>", verdicts: [[2, "validee", "如果 + condition，sujet + 就 + conséquence."]] },
+        retenir: "有的……有的…… = certains… d'autres…" }
+    ],
+    denouement: {
+      titre: "Le message corrigé",
+      etapes: ["如果 + condition en premier (indice 1).", "就 après le sujet de la conséquence (indice 2).", "有的……有的…… pour les groupes (indice 3)."],
+      reponse: "<p>Message corrigé : « 如果明天下雨，我们就不去。(Rúguǒ míngtiān xià yǔ, wǒmen jiù bú qù.) 如果你有问题，就问老师。(Rúguǒ nǐ yǒu wèntí, jiù wèn lǎoshī.) » En chinois, la condition introduite par 如果 vient toujours avant la conséquence ; on ne peut pas la rejeter à la fin comme le « if » anglais. Dans la conséquence, 就 se place après le sujet (我们就不去) ou, s'il n'y a pas de sujet, juste au début de la conséquence (就问老师), jamais devant le sujet. 那么 est facultatif. Pour dire que certains prennent le car et d'autres le train : 有的同学坐汽车，有的同学坐火车。</p>",
+      transfert: "<p>Donne trois conseils à un camarade qui prépare le Probatoire, avec 如果……就……, et écris le pinyin.</p>"
+    },
+    revision: (ZR_OLD ? ZR_OLD.revision : []).concat(["La condition vient toujours avant la conséquence."]),
+    exo: ZR_OLD ? ZR_OLD.exo : "",
+    quiz: [
+      q("如果 signifie…", "si", "mais", "donc seulement", "rúguǒ."),
+      q("Où se place 就 ?", "après le sujet de la conséquence", "en tête de phrase", "à la fin de la phrase", "我们就不去."),
+      q("有的……有的…… veut dire…", "certains… d'autres…", "non seulement… mais aussi…", "si… alors…", "有的同学…，有的同学…"),
+      q("如果明天下雨，我们就不去 signifie…", "S'il pleut demain, nous n'irons pas.", "Il pleut, donc nous partons.", "Nous irons même s'il pleut.", "Phrase du manuel."),
+      q("下雨 (xià yǔ) signifie…", "pleuvoir", "neiger", "partir", "下 + 雨."),
+      q("Quelle phrase est correcte ?", "如果你有问题，就问老师。", "就你有问题，如果问老师。", "你有问题就如果问老师。", "Condition puis 就."),
+      q("那么 dans la structure est…", "facultatif", "obligatoire", "interdit", "如果……(那么)……就……"),
+      q("问 (wèn) signifie…", "demander", "répondre", "aller", "问老师 : demander au professeur."),
+      q("老师 (lǎoshī) signifie…", "professeur", "élève", "parent", "Vocabulaire scolaire."),
+      q("明天 (míngtiān) signifie…", "demain", "aujourd'hui", "hier", "Repère de temps.")
+    ]
+  });
+
+  /* ═══════════════════════ Tle ARABE — أنواع الخبر ═══════════════════════ */
+  var AK_OLD = ancien("tle-ar-khabar");
+  function classe3D() {
+    var o = [];
+    o.push({ f: "boite", c: [0, -10, 0], d: [520, 8, 300], coul: "#9C6B3C", dessus: "#C0894F" });
+    o.push({ f: "boite", c: [0, 0, 140], d: [520, 180, 6], coul: "#E9E2D2", div: false });
+    o.push({ f: "boite", c: [0, 60, 134], d: [260, 90, 4], coul: "#23402F", div: false });
+    o.push({ f: "boite", c: [0, 56, 132], d: [270, 6, 6], coul: "#8B5A2B", div: false });
+    o.push({ f: "boite", c: [-60, 0, 20], d: [140, 50, 70], coul: "#6B4423", dessus: "#8B5A2B", div: false });
+    o.push({ f: "boite", c: [-80, 50, 20], d: [44, 8, 32], coul: "#C62828", dessus: "#E8492E", div: false });
+    o.push({ f: "boite", c: [-30, 50, 26], d: [10, 3, 30], coul: "#1E499B", div: false });
+    o.push({ f: "boite", c: [110, 0, 30], d: [40, 46, 40], coul: "#5D3A1E", div: false });
+    o.push({ f: "cylindre", c: [110, 46, 30], r: 9, h: 50, n: 14, coul: "#1E499B" });
+    o.push({ f: "sphere", c: [110, 108, 30], r: 13, coul: "#6B4423" });
+    o.push({ f: "boite", c: [150, 0, 100], d: [40, 70, 30], coul: "#1F2328", div: false });
+    o.push({ f: "cylindre", c: [150, 70, 100], r: 9, h: 52, n: 14, coul: "#FFFFFF" });
+    o.push({ f: "sphere", c: [150, 134, 100], r: 13, coul: "#5A3A1E" });
+    return o;
+  }
+  var KHABAR = [["الجوُّ جميلٌ", "مفرد", "un seul mot"], ["البيتُ كبيرٌ", "مفرد", "un seul mot"], ["الأمُّ تطبخُ", "جملة فعلية", "phrase verbale"], ["الطالبُ يقرأُ الدرسَ", "جملة فعلية", "phrase verbale"], ["الطالبُ أبوه طبيبٌ", "جملة اسمية", "phrase nominale"], ["الكتابُ على الطاولةِ", "شبه جملة", "préposition + nom"], ["القلمُ في الحقيبةِ", "شبه جملة", "préposition + nom"], ["المعلّمُ أمامَ السبّورةِ", "شبه جملة", "adverbe de lieu + nom"]];
+  remplacer("tle-ar-khabar", {
+    c: "Tle A", m: "arabe", titre: "Les types d'attribut (أنواع الخبر)", duree: 30,
+    accroche: "« الكتابُ على الطاولةِ » : Aminatou décrit sa salle de classe pour le club d'arabe. Où est le خبر, et de quel type est-il ?",
+    intro: "La description d'une salle de classe en arabe te sert de fil rouge : à chaque partie, un indice t'aide à trancher entre trois analyses.",
+    objectifs: ["identifier le مبتدأ et le خبر d'une phrase nominale", "distinguer خبر مفرد, خبر جملة et خبر شبه جملة", "repérer le pronom de rappel (الرابط) dans un خبر جملة", "analyser des phrases décrivant un lieu"],
+    enquete: {
+      titre: "La salle de classe d'Aminatou à Maroua",
+      svg: (function () {
+        var s = "<rect width='640' height='230' fill='#EFE6D6'/><rect x='30' y='20' width='300' height='190' rx='6' fill='#fff' stroke='#C9C1B2'/>";
+        ["الجوُّ جميلٌ.", "الكتابُ على الطاولةِ.", "المعلّمُ أمامَ السبّورةِ.", "الطالبُ أبوه طبيبٌ.", "الأمُّ تطبخُ."].forEach(function (l, i) { s += txtAr(310, 56 + i * 34, l, { s: 18, a: "start" }); });
+        s += "<rect x='370' y='40' width='240' height='130' rx='6' fill='#23402F' stroke='#8B5A2B' stroke-width='6'/>" + txtAr(490, 96, "المبتدأ + الخبر", { s: 22, c: "#F4EFE4" }) + txt(490, 140, "phrase nominale", { s: 13, c: "#DCE6F2", w: 500 });
+        return svg(640, 230, "Un cahier avec cinq phrases nominales en arabe et un tableau noir portant mubtada et khabar", "", s);
+      })(),
+      legende: "À Maroua : Aminatou, élève de Terminale A, prépare pour le club d'arabe la description de sa salle de classe.",
+      contexte: "<p>Aminatou a écrit cinq phrases nominales. Pour l'exposé, elle doit dire de quel type est chaque خبر. Son camarade affirme : « Dans الكتابُ على الطاولةِ, il n'y a pas de خبر : il n'y a pas d'adjectif ! » Une autre : « Dans الطالبُ أبوه طبيبٌ, le خبر est seulement طبيبٌ. »</p>",
+      documents: [{ t: "Rappel : la phrase nominale (الجملة الاسمية)", html: "<p>Elle commence par un nom, le مبتدأ (sujet), suivi du خبر (attribut), qui complète le sens. Tous deux sont <strong>مرفوع</strong> quand le خبر est un seul mot.</p>" }],
+      question: "Quel est le type du خبر dans chacune des cinq phrases d'Aminatou ?",
+      tache: "Classe les cinq phrases dans un tableau (مفرد / جملة / شبه جملة) et justifie chaque classement.",
+      hypotheses: ["Le خبر est toujours un adjectif ; sans adjectif, il n'y a pas de خبر.", "Dans الطالبُ أبوه طبيبٌ, le خبر est seulement طبيبٌ.", "Le خبر peut être un mot, une phrase (avec pronom de rappel) ou un شبه جملة (préposition ou adverbe + nom)."]
+    },
+    parties: [
+      { t: "La phrase nominale", html: partie(AK_OLD, 0),
+        planches: [{ type: "2D", titre: "مبتدأ + خبر", legende: "On lit de droite à gauche : le مبتدأ (bleu) puis le خبر (vert), tous deux au cas sujet (مرفوع), marqués par la ḍamma.", svg: (function () {
+          var s = "<rect width='640' height='190' fill='#F5F7FB'/><rect x='340' y='40' width='260' height='80' rx='14' fill='" + BLEU + "'/><rect x='40' y='40' width='260' height='80' rx='14' fill='" + VERT + "'/>";
+          s += txtAr(470, 92, "الطالبُ", { s: 32, c: "#fff" }) + txtAr(170, 92, "مجتهدٌ", { s: 32, c: "#fff" }) + txtAr(470, 150, "المبتدأ (مرفوع)", { s: 16, c: BLEU }) + txtAr(170, 150, "الخبر (مرفوع)", { s: 16, c: VERT });
+          s += "<path d='M330 80H310' stroke='" + NUIT + "' stroke-width='3' marker-end='url(#akF)'/>" + txt(320, 180, "« L'élève est travailleur. » — lecture de droite à gauche", { s: 11.5, c: GRIS });
+          return svg(640, 190, "Deux blocs : le sujet al-talibu à droite, l attribut mujtahidun à gauche", fleche("akF", NUIT), s);
+        })() }],
+        retenir: "Phrase nominale = مبتدأ + خبر, au cas مرفوع." },
+      { t: "Les trois types de خبر", html: partie(AK_OLD, 1),
+        planches: [{ type: "3d", titre: "Décrire la salle de classe", legende: "Tourne la salle : le livre rouge sur la table (الكتابُ على الطاولةِ), le maître devant le tableau (المعلّمُ أمامَ السبّورةِ), l'élève assis qui lit (الطالبُ يقرأُ). Chaque position se dit avec un خبر شبه جملة ; chaque action, avec un خبر جملة.",
+          modele: { h: 340, rx: -18, ry: 24, echelle: 0.9, alt: "Salle de classe avec un tableau noir, une table portant un livre rouge, un élève assis et un maître debout", objets: classe3D(),
+            etiquettes: [{ p: [-80, 58, 20], t: "الكتابُ على الطاولةِ" }, { p: [150, 150, 100], t: "المعلّمُ أمامَ السبّورةِ", cote: "d" }, { p: [110, 124, 30], t: "الطالبُ يقرأُ", cote: "d" }] } }],
+        fil: { html: "<p>Dans الكتابُ على الطاولةِ, le خبر est <strong>على الطاولةِ</strong> : une préposition et un nom, c'est un <strong>شبه جملة</strong>. Un خبر n'est donc pas forcément un adjectif.</p>", verdicts: [[0, "rejetee", "على الطاولةِ est un خبر شبه جملة."]] },
+        retenir: "مفرد : un mot ; جملة : phrase verbale ou nominale ; شبه جملة : préposition ou adverbe + nom." },
+      { t: "Le lien avec le sujet", html: partie(AK_OLD, 2),
+        fil: { html: "<p>Dans الطالبُ أبوه طبيبٌ, le خبر est toute la phrase nominale <strong>أبوه طبيبٌ</strong> (son père est médecin) ; le pronom ـه, le <strong>رابط</strong>, la relie au مبتدأ. « طبيبٌ » seul ne dit rien de l'élève.</p>", verdicts: [[1, "rejetee", "Le خبر est la phrase أبوه طبيبٌ, reliée au sujet par le pronom ـه."], [2, "validee", "Trois types : مفرد، جملة، شبه جملة."]] },
+        retenir: "خبر جملة : il contient un pronom de rappel (الرابط) qui renvoie au مبتدأ." }
+    ],
+    denouement: {
+      titre: "Le tableau d'Aminatou",
+      etapes: ["الجوُّ جميلٌ : خبر مفرد (indice 1).", "الكتابُ على الطاولةِ ، المعلّمُ أمامَ السبّورةِ : خبر شبه جملة (indice 2).", "الأمُّ تطبخُ : خبر جملة فعلية ; الطالبُ أبوه طبيبٌ : خبر جملة اسمية avec le رابط ـه (indice 3)."],
+      reponse: "<p>Dans الجوُّ جميلٌ, le خبر est un seul mot, جميلٌ : c'est un خبر مفرد, au cas مرفوع. Dans الكتابُ على الطاولةِ et المعلّمُ أمامَ السبّورةِ, le خبر est une préposition ou un adverbe de lieu suivi d'un nom : c'est un خبر شبه جملة ; un خبر n'est donc pas toujours un adjectif. Dans الأمُّ تطبخُ, le خبر est une phrase verbale (تطبخُ) ; dans الطالبُ أبوه طبيبٌ, c'est une phrase nominale entière, أبوه طبيبٌ, reliée au مبتدأ par le pronom de rappel ـه : ce sont deux خبر جملة.</p>",
+      transfert: "<p>Décris ta chambre en cinq phrases nominales en arabe, avec au moins un خبر de chaque type, et souligne le رابط s'il y en a un.</p>"
+    },
+    revision: (AK_OLD ? AK_OLD.revision : []).concat(["Un خبر n'est pas toujours un adjectif."]),
+    exo: AK_OLD ? AK_OLD.exo : "",
+    quiz: [
+      q("Dans الجوُّ جميلٌ, le خبر est…", "مفرد", "جملة", "شبه جملة", "Un seul mot."),
+      q("الكتابُ على الطاولةِ : quel type ?", "شبه جملة", "مفرد", "جملة فعلية", "Préposition + nom."),
+      q("Le cas du مبتدأ est…", "مرفوع", "منصوب", "مجرور", "Marqué par la ḍamma."),
+      q("الأمُّ تطبخُ : quel type de خبر ?", "جملة فعلية", "مفرد", "شبه جملة", "تطبخُ est un verbe."),
+      q("الطالبُ أبوه طبيبٌ : quel type de خبر ?", "جملة اسمية", "مفرد", "شبه جملة", "أبوه طبيبٌ est une phrase nominale."),
+      q("المعلّمُ أمامَ السبّورةِ : le خبر est…", "شبه جملة (ظرف + اسم)", "مفرد", "جملة فعلية", "أمامَ est un adverbe de lieu."),
+      q("Dans الطالبُ أبوه طبيبٌ, le رابط est…", "le pronom ـه", "طبيبٌ", "الطالبُ", "Il renvoie au مبتدأ."),
+      q("البيتُ كبيرٌ : le خبر est…", "مفرد", "جملة", "شبه جملة", "كبيرٌ."),
+      q("القلمُ في الحقيبةِ : le خبر est…", "شبه جملة (جار ومجرور)", "مفرد", "جملة اسمية", "في + الحقيبةِ."),
+      q("Une phrase nominale commence par…", "un nom (المبتدأ)", "un verbe", "une préposition", "الجملة الاسمية.")
+    ]
+  });
+
+  /* ═══════════════════════ Tle ARABE — اللازم والمتعدي ═══════════════════════ */
+  var AV_OLD = ancien("tle-ar-verbes");
+  var VERBES = [["جلسَ الولدُ", "لازم", "pas de complément"], ["نامَ الطفلُ", "لازم", "pas de complément"], ["ذهبَ الطالبُ إلى المدرسةِ", "لازم", "complément avec préposition, pas de مفعول به"], ["ضحكَ الرجلُ", "لازم", "pas de complément"], ["كتبَ الطالبُ الدرسَ", "متعدٍّ", "الدرسَ est مفعول به منصوب"], ["قرأَ الطالبُ القصةَ", "متعدٍّ", "القصةَ est مفعول به"], ["فتحَ الولدُ البابَ", "متعدٍّ", "البابَ est مفعول به"], ["أعطى الأبُ الولدَ كتاباً", "متعدٍّ", "deux compléments : الولدَ et كتاباً"]];
+  function chaise3D() {
+    var o = [], ec = [0, -46, 0];
+    o.push({ f: "boite", c: [0, -10, 0], d: [460, 8, 220], coul: "#9C6B3C", dessus: "#C0894F" });
+    o.push({ f: "boite", c: [40, 0, 0], d: [60, 40, 60], coul: "#5D3A1E", dessus: "#7A5230", div: false });
+    o.push({ f: "boite", c: [40, 40, 28], d: [60, 70, 6], coul: "#5D3A1E", div: false });
+    o.push({ f: "cylindre", c: [40, 86, 0], r: 9, h: 40, n: 14, coul: "#2E7D32", ec: ec });
+    o.push({ f: "sphere", c: [40, 136, 0], r: 12, coul: "#6B4423", ec: ec });
+    o.push({ f: "cylindre", c: [-80, 0, 0], r: 12, h: 90, n: 14, coul: "#1E499B" });
+    o.push({ f: "sphere", c: [-80, 106, 0], r: 15, coul: "#5A3A1E" });
+    o.push({ f: "cylindre", c: [-68, 70, 0], r: 4, h: 80, n: 8, axe: "x", coul: "#1E499B" });
+    return o;
+  }
+  remplacer("tle-ar-verbes", {
+    c: "Tle A", m: "arabe", titre: "Verbes intransitifs et transitifs (اللازم والمتعدي)", duree: 30,
+    accroche: "« ذهبَ الطالبُ المدرسةَ » : dans le journal d'Ibrahim, un verbe a pris un complément qu'il ne peut pas porter.",
+    intro: "Le journal de bord d'un élève, écrit en arabe, te sert de fil rouge : à chaque partie, un indice t'aide à trancher entre trois analyses.",
+    objectifs: ["reconnaître un verbe intransitif (لازم)", "reconnaître un verbe transitif (متعدٍّ) et son مفعول به منصوب", "repérer les verbes à deux compléments", "rendre un verbe transitif avec les formes II et IV"],
+    enquete: {
+      titre: "Le journal d'Ibrahim, à Garoua",
+      svg: (function () {
+        var s = "<rect width='640' height='230' fill='#F4EFE4'/><g transform='rotate(2 330 115)'><rect x='160' y='20' width='320' height='190' rx='6' fill='#fff' stroke='#C9C1B2'/><path d='M440 20V210' stroke='#F2C2C9' stroke-width='2'/>";
+        ["جلسَ الولدُ.", "كتبَ الطالبُ الدرسَ.", "ذهبَ الطالبُ المدرسةَ.", "أجلسَ الأبُ الولدَ.", "أعطى الأبُ الولدَ كتاباً."].forEach(function (l, i) { s += txtAr(426, 56 + i * 34, l, { s: 18, a: "start" }); });
+        s += "<path d='M240 118h170' stroke='" + ROUGE + "' stroke-width='2'/></g>";
+        return svg(640, 230, "Un journal intime ouvert avec cinq phrases verbales en arabe, dont une barrée en rouge", "", s);
+      })(),
+      legende: "À Garoua : Ibrahim, élève de Terminale A, tient un journal en arabe que corrige son professeur.",
+      contexte: "<p>Le professeur a barré « ذهبَ الطالبُ المدرسةَ » et demande à Ibrahim de classer tous ses verbes. Ibrahim pense : « Tous les verbes peuvent avoir un complément direct, il suffit de mettre le nom au cas direct. » Son ami ajoute : « Et un verbe ne peut jamais avoir deux compléments. »</p>",
+      documents: [{ t: "Rappel : le مفعول به", html: "<p>Le complément d'objet direct (مفعول به) d'un verbe transitif est au cas direct, <strong>منصوب</strong>, marqué par la fatḥa : كتبَ الطالبُ الدرس<strong>َ</strong>.</p>" }],
+      question: "Pourquoi « ذهبَ الطالبُ المدرسةَ » est-elle fautive, et comment classer les verbes d'Ibrahim ?",
+      tache: "Classe les cinq verbes (لازم / متعدٍّ), corrige la phrase fautive et explique la forme أجلسَ.",
+      hypotheses: ["Tout verbe peut recevoir un مفعول به : il suffit de mettre le nom au منصوب.", "Un verbe ne peut jamais avoir deux compléments d'objet.", "Un verbe لازم n'a pas de مفعول به (il se construit avec une préposition) ; un verbe متعدٍّ en a un, parfois deux ; les formes II et IV rendent transitif."]
+    },
+    parties: [
+      { t: "Le verbe intransitif (اللازم)", html: partie(AV_OLD, 0),
+        planches: [{ type: "2D", titre: "لازم ou متعدٍّ ?", legende: "En haut, le verbe لازم s'arrête au sujet ; en bas, le verbe متعدٍّ « passe » au مفعول به, au cas منصوب. On lit de droite à gauche.", svg: (function () {
+          var s = "<rect width='640' height='240' fill='#F5F7FB'/>";
+          s += "<rect x='440' y='30' width='160' height='60' rx='12' fill='#7B3F99'/>" + txtAr(520, 70, "نامَ", { s: 26, c: "#fff" }) + "<rect x='250' y='30' width='160' height='60' rx='12' fill='" + BLEU + "'/>" + txtAr(330, 70, "الطفلُ", { s: 26, c: "#fff" }) + txtAr(130, 70, "لازم", { s: 22, c: "#7B3F99" }) + "<path d='M248 60h-30' stroke='" + GRIS + "' stroke-width='3' stroke-dasharray='5 4'/><path d='M214 50l-12 20M202 50l12 20' stroke='" + ROUGE + "' stroke-width='3'/>";
+          s += "<rect x='440' y='140' width='160' height='60' rx='12' fill='#C2540A'/>" + txtAr(520, 180, "كتبَ", { s: 26, c: "#fff" }) + "<rect x='250' y='140' width='160' height='60' rx='12' fill='" + BLEU + "'/>" + txtAr(330, 180, "الطالبُ", { s: 26, c: "#fff" }) + "<rect x='40' y='140' width='170' height='60' rx='12' fill='" + VERT + "'/>" + txtAr(125, 180, "الدرسَ", { s: 26, c: "#fff" }) + "<path d='M248 170h-34' stroke='" + NUIT + "' stroke-width='3' marker-end='url(#avF)'/>" + txtAr(125, 222, "مفعول به (منصوب)", { s: 15, c: VERT }) + txtAr(520, 222, "متعدٍّ", { s: 18, c: "#C2540A" });
+          return svg(640, 240, "Deux phrases : nama al-tiflu sans complément, kataba al-talibu al-darsa avec complément", fleche("avF", NUIT), s);
+        })() }],
+        fil: { html: "<p>ذهبَ est un verbe <strong>لازم</strong> : il ne peut pas avoir de مفعول به. On indique le lieu avec une préposition : « ذهبَ الطالبُ <strong>إلى</strong> المدرسةِ ». Mettre المدرسةَ au منصوب ne le rend pas transitif.</p>", verdicts: [[0, "rejetee", "ذهبَ est لازم : il se construit avec إلى, pas avec un مفعول به."]] },
+        retenir: "اللازم : pas de مفعول به ; le lieu ou la personne se disent avec une préposition." },
+      { t: "Le verbe transitif (المتعدي)", html: partie(AV_OLD, 1),
+        fil: { html: "<p>« أعطى الأبُ الولدَ كتاباً » contient <strong>deux</strong> compléments au منصوب : الولدَ (à qui) et كتاباً (quoi). Certains verbes, comme أعطى (donner), en ont deux.</p>", verdicts: [[1, "rejetee", "أعطى a deux compléments : الولدَ et كتاباً."]] },
+        retenir: "المتعدي : مفعول به منصوب ; أعطى en a deux." },
+      { t: "Rendre un verbe transitif", html: partie(AV_OLD, 2),
+        planches: [{ type: "3d", titre: "جلسَ الولدُ → أجلسَ الأبُ الولدَ", legende: "Tourne la scène : le père (bleu) fait asseoir l'enfant (vert) sur la chaise. Le curseur abaisse l'enfant sur la chaise : جلسَ (il s'est assis, لازم) devient أجلسَ (il a fait asseoir, متعدٍّ, forme IV).",
+          modele: { h: 320, rx: -14, ry: 20, echelle: 0.95, alt: "Un père debout fait asseoir un enfant sur une chaise en bois", eclate: "Faire asseoir l'enfant", jouer: "أجلسَ", objets: chaise3D(),
+            etiquettes: [{ p: [-80, 122, 0], t: "الأبُ (le père)" }, { p: [40, 150, 0], t: "الولدَ (مفعول به)", cote: "d", ec: [0, -46, 0] }] } }],
+        fil: { html: "<p>La forme IV (أفعل) ajoute une idée de « faire faire » : جلسَ (s'asseoir) → <strong>أجلسَ</strong> (faire asseoir), qui prend un مفعول به : أجلسَ الأبُ <strong>الولدَ</strong>. La règle complète explique toutes les phrases d'Ibrahim.</p>", verdicts: [[2, "validee", "لازم sans مفعول به ; متعدٍّ avec un ou deux ; formes II et IV."]] },
+        retenir: "Formes II (فعّل) et IV (أفعل) : rendre transitif." }
+    ],
+    denouement: {
+      titre: "Le journal corrigé",
+      etapes: ["جلسَ, ذهبَ : لازم ; « ذهبَ الطالبُ إلى المدرسةِ » (indice 1).", "كتبَ : متعدٍّ ; أعطى : deux compléments (indice 2).", "أجلسَ : forme IV, transitive (indice 3)."],
+      reponse: "<p>« ذهبَ الطالبُ المدرسةَ » est fautive parce que ذهبَ est un verbe <strong>لازم</strong> : il n'a pas de مفعول به et se construit avec une préposition, d'où « ذهبَ الطالبُ <strong>إلى</strong> المدرسةِ ». Classement : جلسَ et ذهبَ sont لازم ; كتبَ (avec الدرسَ منصوب), أجلسَ et أعطى sont متعدٍّ. أعطى a même deux compléments, الولدَ et كتاباً : un verbe peut donc en avoir deux. Enfin, أجلسَ est la forme IV de جلسَ : elle ajoute l'idée de « faire asseoir » et rend le verbe transitif. Mettre un nom au منصوب ne suffit donc pas : c'est le verbe qui décide.</p>",
+      transfert: "<p>Écris cinq phrases de ton propre journal en arabe : deux avec un verbe لازم, deux avec un verbe متعدٍّ, une avec أعطى, et souligne chaque مفعول به.</p>"
+    },
+    revision: (AV_OLD ? AV_OLD.revision : []).concat(["ذهبَ إلى… : un verbe لازم se complète par une préposition."]),
+    exo: AV_OLD ? AV_OLD.exo : "",
+    quiz: [
+      q("نامَ الطفلُ : le verbe est…", "لازم", "متعدٍّ", "à deux compléments", "Pas de complément."),
+      q("Le مفعول به est au cas…", "منصوب", "مرفوع", "مجرور", "Marqué par la fatḥa."),
+      q("أجلسَ est la forme…", "IV", "II", "I", "أفعل."),
+      q("كتبَ الطالبُ الدرسَ : le verbe est…", "متعدٍّ", "لازم", "sans sujet", "الدرسَ est مفعول به."),
+      q("ذهبَ est…", "لازم", "متعدٍّ", "à deux compléments", "ذهبَ إلى…"),
+      q("فتحَ الولدُ البابَ : le verbe est…", "متعدٍّ", "لازم", "nominal", "البابَ est مفعول به."),
+      q("Combien de compléments dans أعطى الأبُ الولدَ كتاباً ?", "deux", "un", "aucun", "الولدَ et كتاباً."),
+      q("جلسَ → أجلسَ : le verbe devient…", "متعدٍّ", "لازم", "passif", "Forme IV."),
+      q("ضحكَ الرجلُ : le verbe est…", "لازم", "متعدٍّ", "à deux compléments", "Pas de complément."),
+      q("Dans قرأَ الطالبُ القصةَ, le مفعول به est…", "القصةَ", "الطالبُ", "قرأَ", "Au cas منصوب.")
+    ]
+  });
+
+  /* ═══════════════════════ SIMULATIONS ═══════════════════════ */
+  VRT_A("1re-zh-budan", 0, "Construis la phrase : 不但……而且……", function (el) {
+    var A = [["会说汉语", "huì shuō Hànyǔ", "parle chinois"], ["会说英语", "huì shuō Yīngyǔ", "parle anglais"], ["喜欢看书", "xǐhuan kàn shū", "aime lire"], ["喜欢踢足球", "xǐhuan tī zúqiú", "aime jouer au football"], ["帮助妈妈", "bāngzhù māma", "aide maman"], ["尊重老师", "zūnzhòng lǎoshī", "respecte le professeur"]], S = [["我哥哥", "wǒ gēge", "Mon grand frère"], ["我姐姐", "wǒ jiějie", "Ma grande sœur"], ["我", "wǒ", "Je"]], s = 0, a = 0, b = 1;
+    function sel(lib, L, v, cle) { return "<label class='labo-c'><span>" + lib + "</span><select class='labo-sel' data-" + cle + ">" + L.map(function (x, k) { return "<option value='" + k + "'" + (k === v ? " selected" : "") + ">" + x[0] + " (" + x[2] + ")</option>"; }).join("") + "</select></label>"; }
+    el.innerHTML = "<div style='display:flex;flex-wrap:wrap;gap:8px 18px'>" + sel("Sujet", S, s, "s") + sel("Qualité A", A, a, "a") + sel("Qualité B", A, b, "b") + "</div><svg viewBox='0 0 640 150' class='an-svg' data-v></svg><p class='labo-r' data-r></p>";
+    function maj() {
+      s = +el.querySelector("[data-s]").value; a = +el.querySelector("[data-a]").value; b = +el.querySelector("[data-b]").value;
+      var x = 10, h = "<rect width='640' height='150' fill='#FBF5EC'/>", P = [[S[s][0], S[s][1], "#5C6478"], ["不但", "bùdàn", "#B01C14"], [A[a][0], A[a][1], BLEU], ["而且", "érqiě", "#C9A227"], [A[b][0], A[b][1], VERT]];
+      P.forEach(function (p) { var w = Math.max(70, p[0].length * 22 + 20); h += bloc(x, 30, w, 66, p[2], p[0], p[1]); x += w + 6; });
+      el.querySelector("[data-v]").setAttribute("viewBox", "0 0 " + Math.max(640, x + 10) + " 150");
+      el.querySelector("[data-v]").innerHTML = h;
+      el.querySelector("[data-r]").innerHTML = a === b ? "⚠️ Choisis deux qualités différentes : 不但……而且…… ajoute une seconde idée." : "<b>" + S[s][0] + "不但" + A[a][0] + "，而且" + A[b][0] + "。</b> " + S[s][2] + " : non seulement « " + A[a][2] + " », mais aussi « " + A[b][2] + " ».";
+    }
+    el.querySelectorAll("select").forEach(function (x) { x.addEventListener("change", maj); }); maj();
+  });
+  VRT_A("1re-zh-ruguo", 1, "Quelle phrase est correcte ?", function (el) {
+    exercice(el, [["S'il pleut demain, nous n'irons pas : ___", ["如果明天下雨，我们就不去。", "我们就如果明天下雨不去。", "就我们如果明天下雨不去。"], "如果 + condition，sujet + 就 + conséquence."], ["Si tu as un problème, demande au professeur : ___", ["如果你有问题，就问老师。", "就如果你有问题问老师。", "你有问题如果，就问老师。"], "Sans sujet dans la conséquence, 就 ouvre la conséquence."], ["S'il fait beau, nous irons à Kribi : ___", ["如果天气好，我们就去克里比。", "我们就去克里比，如果天气好。", "如果我们就天气好去克里比。"], "La condition vient en premier."], ["Si tu es fatigué, repose-toi : ___", ["如果你累了，就休息吧。", "就你累了如果休息吧。", "你如果就累了休息吧。"], "如果……，就……"], ["Certains élèves aiment lire, d'autres le sport : ___", ["学生有的喜欢看书，有的喜欢运动。", "学生如果喜欢看书，就喜欢运动。", "学生不但喜欢看书，有的喜欢运动。"], "有的……有的……"]], "Phrase suivante", "Phrase");
+  });
+  VRT_A("tle-ar-khabar", 1, "Quel est le type du خبر ?", function (el) {
+    exercice(el, KHABAR.map(function (k) { return ["<span dir='rtl' style='font-size:22px'>" + k[0] + "</span> — type du خبر : ___", [k[1], "مفرد", "جملة فعلية", "جملة اسمية", "شبه جملة"].filter(function (x, i, a) { return a.indexOf(x) === i; }), k[2] + "."]; }), "Phrase suivante", "Phrase");
+  });
+  VRT_A("tle-ar-verbes", 0, "لازم أم متعدٍّ ? Classe chaque verbe", function (el) {
+    exercice(el, VERBES.map(function (v) { return ["<span dir='rtl' style='font-size:22px'>" + v[0] + "</span> : ___", [v[1], v[1] === "لازم" ? "متعدٍّ" : "لازم"], v[2] + "."]; }), "Phrase suivante", "Phrase");
+  });
+})();
+
+/* Leçons APPROFONDIES — lot 13, 2nde (18/11/2026) : ℝ et ses sous-ensembles, texte théâtral, la production (2nde C),
+   l'énonciation (2nde A). Même gabarit et même mécanisme que 11-approfondies-lot4.js (remplacement EN PLACE ; ordre, clé,
+   fiche APC, examen et scènes conservés ; partie « Entraînement au format de l'examen » et quiz d'origine repris).
+   Simulations VRT_A en fin de fichier. */
+(function () {
+  "use strict";
+  var NUIT = "#001136", BLEU = "#1E499B", GRIS = "#4D5163", VERT = "#17784D", ROUGE = "#C62828", TERRE = "#C46A2B";
+
+  function txt(x, y, t, o) {
+    o = o || {};
+    return "<text x='" + x + "' y='" + y + "' text-anchor='" + (o.a || "middle") + "' font-size='" + (o.s || 12) + "' font-weight='" + (o.w || 700) + "' fill='" + (o.c || NUIT) + "'" + (o.i ? " font-style='italic'" : "") + (o.halo ? " stroke='#fff' stroke-width='3' paint-order='stroke'" : "") + ">" + t + "</text>";
+  }
+  function lin(id, cs, vertical) {
+    var s = "<linearGradient id='" + id + "'" + (vertical ? " x1='0' y1='0' x2='0' y2='1'" : "") + ">";
+    cs.forEach(function (c, i) { s += "<stop offset='" + (i / (cs.length - 1)).toFixed(2) + "' stop-color='" + c + "'/>"; });
+    return s + "</linearGradient>";
+  }
+  function rad(id, cs) {
+    var s = "<radialGradient id='" + id + "' cx='35%' cy='30%' r='75%'>";
+    cs.forEach(function (c, i) { s += "<stop offset='" + (i / (cs.length - 1)).toFixed(2) + "' stop-color='" + c + "'/>"; });
+    return s + "</radialGradient>";
+  }
+  function fleche(id, c) { return "<marker id='" + id + "' markerWidth='10' markerHeight='10' refX='7' refY='5' orient='auto'><path d='M0 1L8 5L0 9Z' fill='" + c + "'/></marker>"; }
+  function svg(w, h, alt, defs, corps) {
+    return "<svg viewBox='0 0 " + w + " " + h + "' role='img' aria-label='" + alt + "' font-family='Inter,Arial,sans-serif'><rect width='" + w + "' height='" + h + "' fill='#fff'/><defs>" + defs + "</defs>" + corps +
+      "<text x='" + (w - 6) + "' y='" + (h - 5) + "' font-size='8' text-anchor='end' fill='#8A93A6'>Planche VÉRITAS</text></svg>";
+  }
+  function ancien(id) { return window.VRT_LECONS[id]; }
+  function remplacer(id, o) {
+    var a = ancien(id);
+    if (a) ["apc", "examen", "rang", "cle", "scenes"].forEach(function (k) { if (a[k] != null && o[k] == null) o[k] = a[k]; });
+    VRT_L(id, o);
+    if (a) o.ordre = a.ordre;
+  }
+  function q(qq, bonne, f1, f2, e) { return { q: qq, r: [bonne, f1, f2], b: 0, e: e }; }
+  function partie(old, i) { return old && old.parties[i] ? old.parties[i].html : ""; }
+  function bulle(x, y, w, t, c) { return "<rect x='" + x + "' y='" + y + "' width='" + w + "' height='30' rx='12' fill='#fff' stroke='" + (c || "#C9D2E3") + "'/>" + txt(x + w / 2, y + 20, t, { s: 11.5 }); }
+  function perso(x, y, peau, habit, bas) {
+    bas = bas || "#2E3445";
+    return "<g transform='translate(" + x + " " + y + ")'><ellipse cx='0' cy='84' rx='18' ry='4' fill='#001136' opacity='.18'/>" +
+      "<rect x='-9' y='44' width='8' height='36' rx='3' fill='" + bas + "'/><rect x='1' y='44' width='8' height='36' rx='3' fill='" + bas + "'/>" +
+      "<ellipse cx='-6' cy='81' rx='7' ry='3.5' fill='#1F2328'/><ellipse cx='6' cy='81' rx='7' ry='3.5' fill='#1F2328'/>" +
+      "<path d='M-13 46L-16 18C-16 13 -12 11 -6 10H6C12 11 16 13 16 18L13 46Z' fill='" + habit + "'/>" +
+      "<path d='M-15 16L-20 40' stroke='" + habit + "' stroke-width='7' stroke-linecap='round'/><path d='M15 16L20 40' stroke='" + habit + "' stroke-width='7' stroke-linecap='round'/>" +
+      "<circle cx='-20' cy='42' r='3.6' fill='" + peau + "'/><circle cx='20' cy='42' r='3.6' fill='" + peau + "'/>" +
+      "<rect x='-3.5' y='5' width='7' height='7' fill='" + peau + "'/><ellipse cx='0' cy='-2' rx='9' ry='10.5' fill='" + peau + "'/>" +
+      "<path d='M-9 -4C-10 -14 -4 -13.5 0 -13.5S10 -14 9 -4C7 -9 -7 -9 -9 -4Z' fill='#1B1410'/><ellipse cx='-9' cy='-1' rx='1.8' ry='3' fill='" + peau + "'/><ellipse cx='9' cy='-1' rx='1.8' ry='3' fill='" + peau + "'/></g>";
+  }
+  /* portrait en buste (arbre généalogique) */
+  function portrait(x, y, peau, habit, cheveux, age) {
+    var s = "<g transform='translate(" + x + " " + y + ")'><circle r='30' fill='#F4EFE4' stroke='#C9A576' stroke-width='3'/><clipPath id='pc" + x + "_" + y + "'><circle r='28'/></clipPath><g clip-path='url(#pc" + x + "_" + y + ")'>";
+    s += "<path d='M-26 32C-26 14 -14 10 0 10S26 14 26 32Z' fill='" + habit + "'/><rect x='-4' y='2' width='8' height='10' fill='" + peau + "'/><ellipse cy='-6' rx='11' ry='13' fill='" + peau + "'/>";
+    s += age === "vieux" ? "<path d='M-11 -10C-12 -20 -4 -21 0 -21S12 -20 11 -10C9 -14 -9 -14 -11 -10Z' fill='#D8D8D8'/>" : age === "femme" ? "<path d='M-13 -6C-15 -24 15 -24 13 -6C12 -14 -12 -14 -13 -6Z' fill='" + cheveux + "'/><path d='M-13 -14h26v-6c-6 -6 -20 -6 -26 0Z' fill='" + habit + "'/>" : "<path d='M-11 -10C-12 -20 -4 -21 0 -21S12 -20 11 -10C9 -14 -9 -14 -11 -10Z' fill='" + cheveux + "'/>";
+    s += "<circle cx='-4' cy='-6' r='1.4' fill='#1B1410'/><circle cx='4' cy='-6' r='1.4' fill='#1B1410'/><path d='M-3 2q3 2 6 0' stroke='#1B1410' fill='none'/></g></g>";
+    return s;
+  }
+  /* boucle d'exercice générique : [phrase avec ___, [bonne, autres…], explication] */
+  function exercice(el, C, suivant, lib) {
+    var i = 0, ok = 0;
+    el.innerHTML = "<p class='labo-r' data-q style='font-size:16px'></p><div style='display:flex;gap:8px;flex-wrap:wrap' data-c></div><p class='an-note' data-e></p><p class='labo-r' data-s></p>";
+    function $(s) { return el.querySelector(s); }
+    function poser() {
+      var c = C[i];
+      $("[data-q]").innerHTML = (i + 1) + ". " + c[0].replace("___", "<b style='border-bottom:2px dashed #1E499B;padding:0 14px'>?</b>");
+      $("[data-e]").textContent = ""; $("[data-s]").innerHTML = lib + " " + (i + 1) + " / " + C.length + " · score : <b>" + ok + "</b>";
+      $("[data-c]").innerHTML = c[1].slice().sort().map(function (x) { return "<button type='button' class='btn-l' data-v='" + x + "'>" + x + "</button>"; }).join("");
+      el.querySelectorAll("[data-v]").forEach(function (b) {
+        b.addEventListener("click", function () {
+          var bon = b.dataset.v === c[1][0]; if (bon) ok++;
+          $("[data-q]").innerHTML = (i + 1) + ". " + c[0].replace("___", "<b style='color:" + (bon ? VERT : ROUGE) + "'>" + c[1][0] + "</b>");
+          $("[data-e]").innerHTML = (bon ? "✔ " : "✘ ") + c[2];
+          el.querySelectorAll("[data-v]").forEach(function (x) { x.disabled = true; });
+          var nx = document.createElement("button"); nx.type = "button"; nx.className = "btn-l"; nx.textContent = i + 1 < C.length ? suivant : "↺";
+          nx.addEventListener("click", function () { i = (i + 1) % C.length; if (!i) ok = 0; poser(); });
+          $("[data-c]").appendChild(nx);
+          $("[data-s]").innerHTML = lib + " " + (i + 1) + " / " + C.length + " · score : <b>" + ok + "</b>";
+        });
+      });
+    }
+    poser();
+  }
+
+  function alea(g) { return function () { g = (g * 16807) % 2147483647; return (g - 1) / 2147483646; }; }
+  function bloc(x, y, w, h, c, l1, l2, l3) {
+    return "<rect x='" + x + "' y='" + y + "' width='" + w + "' height='" + h + "' rx='12' fill='" + c + "'/>" + txt(x + w / 2, y + h / 2 - (l2 ? 4 : -6), l1, { s: 18, c: "#fff" }) + (l2 ? txt(x + w / 2, y + h / 2 + 16, l2, { s: 11, c: "#fff", w: 500 }) : "") + (l3 ? txt(x + w / 2, y + h + 18, l3, { s: 11, c: GRIS, w: 600 }) : "");
+  }
+
+  /* ═══════════════════════ 2nde C MATHS — ℝ ET SES SOUS-ENSEMBLES ═══════════════════════ */
+  var MR_OLD = ancien("2nde-c-maths-reels");
+  function pgcd(a, b) { a = Math.abs(a); b = Math.abs(b); while (b) { var r = a % b; a = b; b = r; } return a; }
+  function champ3D() {
+    var o = [], k, R = alea(30);
+    o.push({ f: "boite", c: [0, -8, 0], d: [440, 8, 440], coul: "#6B4A2B", dessus: "#7A5530" });
+    for (k = 0; k < 9; k++) o.push({ f: "boite", c: [-160 + k * 40, 2, 0], d: [22, 10, 340], coul: "#5D3A1E", dessus: "#4E7D2A", div: false });
+    for (k = 0; k < 60; k++) o.push({ f: "sphere", c: [-160 + (k % 9) * 40 + (R() - 0.5) * 6, 14, -150 + Math.floor(k / 9) * 48 + (R() - 0.5) * 10], r: 7, coul: k % 3 ? "#3E8E3A" : "#5AA14A" });
+    [[-180, -180], [180, -180], [180, 180], [-180, 180]].forEach(function (p) { o.push({ f: "cylindre", c: [p[0], 0, p[1]], r: 4, h: 50, n: 8, coul: "#8B5A2B" }); });
+    for (k = 0; k <= 30; k++) { var t = k / 30; o.push({ f: "sphere", c: [-180 + 360 * t, 48, -180 + 360 * t], r: 2.4, coul: "#C62828" }); }
+    [[-180, -180, 180, -180], [180, -180, 180, 180], [180, 180, -180, 180], [-180, 180, -180, -180]].forEach(function (l) { for (k = 0; k <= 20; k++) { var t = k / 20; o.push({ f: "sphere", c: [l[0] + (l[2] - l[0]) * t, 46, l[1] + (l[3] - l[1]) * t], r: 1.4, coul: "#E9E2D2" }); } });
+    return o;
+  }
+  remplacer("2nde-c-maths-reels", {
+    c: "2nde C", m: "maths", titre: "ℝ et ses sous-ensembles", duree: 35,
+    accroche: "« 0,8333333 : la calculatrice l'affiche, donc c'est un décimal ! » Le trésorier de la coopérative de Santa se trompe-t-il ?",
+    intro: "Les partages et les mesures d'une coopérative agricole te servent de fil rouge : à chaque partie, un indice t'aide à trancher entre trois affirmations.",
+    objectifs: ["connaître ℕ, ℤ, 𝔻, ℚ, ℝ et leurs inclusions", "reconnaître un décimal grâce à la règle des dénominateurs", "reconnaître un irrationnel", "choisir le plus petit ensemble qui contient un nombre"],
+    enquete: {
+      titre: "Les comptes de la coopérative de Santa",
+      svg: svg(640, 220, "Un trésorier montre une calculatrice affichant 0,8333333 près de sacs de pommes de terre", lin("mrC", ["#DCEBF5", "#F4F1EA"], true), "<rect width='640' height='220' fill='url(#mrC)'/><rect y='176' width='640' height='44' fill='#7A5530'/>" + [0, 1, 2, 3, 4].map(function (k) { return "<path d='M" + (60 + k * 40) + " 176c-6 -40 -2 -54 18 -58c20 4 24 18 18 58Z' fill='#C9B28A' stroke='#8A6E4B'/>"; }).join("") + perso(320, 80, "#5A3A1E", "#2E7D32", "#2E3445") + "<rect x='336' y='110' width='34' height='50' rx='5' fill='#1F2328'/><rect x='340' y='114' width='26' height='12' fill='#B8D8A8'/>" + "<rect x='400' y='40' width='210' height='70' rx='10' fill='#1F2328'/><rect x='410' y='50' width='190' height='40' fill='#B8D8A8'/>" + txt(590, 80, "0,8333333", { s: 24, a: "end", c: "#1F2328" }) + txt(505, 104, "5 ÷ 6", { s: 11, c: "#B8D8A8", w: 500 })),
+      legende: "À Santa, dans le Nord-Ouest : la coopérative des producteurs de pommes de terre répartit sa récolte et mesure ses parcelles.",
+      contexte: "<p>Cette saison, la coopérative partage <strong>5 tonnes</strong> entre <strong>6 familles</strong> ; la saison dernière, c'était entre 8. Le trésorier tape 5 ÷ 6 et lit 0,8333333 : « C'est un décimal, c'est écrit ! » Un membre ajoute : « 6 = 2 × 3 contient un 2, donc ça doit tomber juste. » Le géomètre, lui, doit planter des piquets le long de la diagonale d'une parcelle carrée de <strong>1 hectomètre</strong> de côté.</p>",
+      documents: [{ t: "Le carnet du trésorier", html: "<table class='donnees'><tr><th>Saison</th><th>Partage</th><th>Calculatrice</th></tr><tr><td>2025</td><td>5 ÷ 8</td><td>0,625</td></tr><tr><td>2026</td><td>5 ÷ 6</td><td>0,8333333</td></tr><tr><td>Parcelle</td><td>diagonale d'un carré de 1 hm</td><td>1,4142136</td></tr></table>" }],
+      question: "Lesquels de ces nombres sont décimaux, et peut-on écrire exactement la diagonale ?",
+      tache: "Classe 5/8, 5/6 et la diagonale dans le plus petit ensemble possible, en justifiant chaque classement.",
+      hypotheses: ["Tout nombre affiché par la calculatrice est un décimal.", "5/6 est décimal parce que 6 contient le facteur 2.", "Une fraction irréductible est décimale si son dénominateur n'a que 2 et 5 comme facteurs premiers ; la diagonale √2 est irrationnelle."]
+    },
+    parties: [
+      { t: "Les cinq ensembles de nombres", html: partie(MR_OLD, 0),
+        planches: [{ type: "2D", titre: "ℕ ⊂ ℤ ⊂ 𝔻 ⊂ ℚ ⊂ ℝ", legende: "Chaque ensemble est contenu dans le suivant : 3 est dans tous ; −2 n'est pas dans ℕ ; 0,625 est décimal ; 5/6 est rationnel sans être décimal ; √2 et π sont seulement réels.", svg: (function () {
+          var E = [["ℝ", 600, 280, "#EEF1F6"], ["ℚ", 500, 230, "#DCE6F2"], ["𝔻", 400, 180, "#C9DAF0"], ["ℤ", 290, 130, "#AFC7EA"], ["ℕ", 170, 80, "#8FB2E3"]], s = "<rect width='640' height='300' fill='#fff'/>";
+          E.forEach(function (e, i) { s += "<rect x='" + (20 + i * 30) + "' y='" + (10 + i * 25) + "' width='" + e[1] + "' height='" + e[2] + "' rx='22' fill='" + e[3] + "' stroke='#7E9BC8'/>" + txt(38 + i * 30, 38 + i * 25, e[0], { s: 20, a: "start", c: BLEU }); });
+          [["3", 200, 150], ["0", 240, 170], ["−2", 300, 210], ["−7", 330, 175], ["0,625", 420, 230], ["2,35", 410, 200], ["5/6", 500, 250], ["1/3", 520, 225], ["√2", 590, 280], ["π", 600, 250]].forEach(function (n) { s += txt(n[1], n[2], n[0], { s: 16, c: NUIT }); });
+          return svg(640, 300, "Cinq rectangles emboîtés N, Z, D, Q, R avec des nombres placés dans le plus petit ensemble", "", s);
+        })() }],
+        labo: { type: "ensembles" },
+        fil: { html: "<p>5/8 = 0,625 = 625/1000 : c'est un <strong>décimal</strong>. Mais la calculatrice n'affiche que 8 ou 10 chiffres : « 0,8333333 » est un <strong>arrondi</strong> de 5/6, dont l'écriture décimale continue sans fin. Ce qui s'affiche n'est pas toujours le nombre exact.</p>", verdicts: [[0, "rejetee", "La calculatrice tronque ou arrondit : 5/6 = 0,8333… n'est pas décimal."]] },
+        retenir: "ℕ ⊂ ℤ ⊂ 𝔻 ⊂ ℚ ⊂ ℝ." },
+      { t: "Décimal ou pas ? La règle des dénominateurs", html: partie(MR_OLD, 1),
+        fil: { html: "<p>5/6 est irréductible et 6 = 2 × 3 : le facteur <strong>3</strong> interdit l'écriture décimale finie. Il ne suffit pas qu'il y ait un 2 : il faut qu'il n'y ait <strong>que</strong> des 2 et des 5. 5/6 ∈ ℚ mais 5/6 ∉ 𝔻.</p>", verdicts: [[1, "rejetee", "Le facteur 3 de 6 interdit le décimal : seuls 2 et 5 sont permis."]] },
+        retenir: "p/q irréductible ∈ 𝔻 ⟺ q = 2ᵃ × 5ᵇ." },
+      { t: "Les irrationnels", html: partie(MR_OLD, 2),
+        planches: [{ type: "3d", titre: "La parcelle carrée et sa diagonale", legende: "Tourne la parcelle : un carré de 1 hm de côté, avec ses rangs de pommes de terre et ses quatre piquets d'angle. La corde rouge suit la diagonale : sa longueur, √2 hm ≈ 141,42 m, ne s'écrit exactement avec aucun nombre décimal.",
+          modele: { h: 360, rx: -38, ry: 30, echelle: 0.8, alt: "Parcelle carrée de pommes de terre avec quatre piquets et une corde rouge en diagonale", objets: champ3D(),
+            etiquettes: [{ p: [0, 52, 0], t: "diagonale : √2 hm" }, { p: [180, 52, -180], t: "côté : 1 hm", cote: "d" }] } }],
+        fil: { html: "<p>D'après Pythagore, la diagonale d'un carré de côté 1 vaut √2. Or 2 n'est pas un carré parfait : √2 est <strong>irrationnel</strong>, son écriture décimale est infinie et non périodique. Le géomètre utilisera une valeur approchée, 141,42 m.</p>", verdicts: [[2, "validee", "Règle des dénominateurs pour 𝔻 ; √2 irrationnel."]] },
+        retenir: "Irrationnel : écriture décimale infinie non périodique (√2, π)." },
+      MR_OLD && MR_OLD.parties[3] ? MR_OLD.parties[3] : { t: "Entraînement", html: "" }
+    ],
+    denouement: {
+      titre: "Le classement du trésorier",
+      etapes: ["5/8 = 0,625 ∈ 𝔻 (indice 1).", "5/6 : 6 = 2 × 3, donc 5/6 ∈ ℚ mais ∉ 𝔻 (indice 2).", "Diagonale √2 hm : irrationnelle, ∈ ℝ seulement (indice 3)."],
+      reponse: "<p>5/8 est une fraction irréductible dont le dénominateur 8 = 2³ ne contient que le facteur 2 : c'est un décimal, 0,625, et chaque famille a reçu exactement 625 kg. Pour 5/6, le dénominateur 6 = 2 × 3 contient le facteur 3 : 5/6 = 0,8333… a une écriture décimale infinie (périodique) ; c'est un rationnel mais pas un décimal, et « 0,8333333 » n'est qu'un arrondi de la calculatrice. Enfin, la diagonale de la parcelle mesure √2 hm, car 1² + 1² = 2 : √2 est irrationnel, son écriture décimale est infinie et non périodique ; le géomètre prendra une valeur approchée, environ 141,42 m.</p>",
+      transfert: "<p>Classe dans le plus petit ensemble : 21/35 ; 7/12 ; −18/6 ; √50 ; 3/40. <em>(3/5 = 0,6 ∈ 𝔻 ; 7/12 ∈ ℚ ; −3 ∈ ℤ ; 5√2 ∈ ℝ ; 0,075 ∈ 𝔻.)</em></p>"
+    },
+    revision: (MR_OLD ? MR_OLD.revision : []).concat(["La calculatrice affiche des arrondis : 0,8333333 n'est pas la valeur exacte de 5/6."]),
+    exo: MR_OLD ? MR_OLD.exo : "",
+    quiz: MR_OLD ? MR_OLD.quiz : []
+  });
+
+  /* ═══════════════════════ 2nde C FRANÇAIS — LE TEXTE THÉÂTRAL ═══════════════════════ */
+  var FT_OLD = ancien("2nde-c-francais-theatre");
+  function scene3D() {
+    var o = [], k, rideau = [0, 0, 0];
+    o.push({ f: "boite", c: [0, -10, 0], d: [520, 8, 300], coul: "#3B2A1A", dessus: "#4E3A26" });
+    o.push({ f: "boite", c: [0, 10, 40], d: [440, 30, 180], coul: "#6B4423", dessus: "#9C6B3C", div: false });
+    o.push({ f: "boite", c: [0, 120, 130], d: [440, 190, 6], coul: "#2E6B34", div: false });
+    o.push({ f: "boite", c: [-230, 120, -50], d: [16, 220, 16], coul: "#C9A227", div: false });
+    o.push({ f: "boite", c: [230, 120, -50], d: [16, 220, 16], coul: "#C9A227", div: false });
+    o.push({ f: "boite", c: [0, 226, -50], d: [476, 20, 16], coul: "#C9A227", div: false });
+    for (k = 0; k < 6; k++) { o.push({ f: "boite", c: [-200 + k * 18, 120, -44], d: [16, 190, 6], coul: k % 2 ? "#9E1C1C" : "#B32424", div: false, ec: [-90 - k * 4, 0, 0] }); o.push({ f: "boite", c: [200 - k * 18, 120, -44], d: [16, 190, 6], coul: k % 2 ? "#9E1C1C" : "#B32424", div: false, ec: [90 + k * 4, 0, 0] }); }
+    o.push({ f: "boite", c: [-90, 44, 80], d: [60, 36, 40], coul: "#8B5A2B", dessus: "#A8703A", div: false });
+    [[-40, "#F7C948", "#5A3A1E"], [40, "#1E499B", "#6B4423"], [110, "#2E7D32", "#5A3A1E"]].forEach(function (a) { o.push({ f: "cylindre", c: [a[0], 26, 20], r: 10, h: 54, n: 14, coul: a[1] }); o.push({ f: "sphere", c: [a[0], 92, 20], r: 11, coul: a[2] }); });
+    [-160, 0, 160].forEach(function (x) { o.push({ f: "cone", c: [x, 206, -30], r: 14, h: 18, n: 12, coul: "#2C3138" }); o.push({ f: "sphere", c: [x, 202, -30], r: 6, coul: "#FFE066" }); });
+    o.forEach(function (x) { if (x.c) x.c[1] -= 70; });
+    return o;
+  }
+  remplacer("2nde-c-francais-theatre", {
+    c: "2nde C", m: "francais", titre: "Le texte théâtral : ses caractéristiques", duree: 35,
+    accroche: "Le club théâtre répète. « Pourquoi lis-tu les phrases en italique ? » « Et pourquoi parles-tu au public alors que ton père est à côté ? »",
+    intro: "La répétition d'une pièce par le club théâtre te sert de fil rouge : à chaque partie, un indice t'aide à trancher entre trois idées.",
+    objectifs: ["distinguer répliques et didascalies ; comprendre la double énonciation", "reconnaître tirade, stichomythie, monologue et aparté", "repérer actes, scènes, exposition, nœud et dénouement", "lire une page de théâtre comme un metteur en scène"],
+    enquete: {
+      titre: "La répétition du club théâtre de Mbalmayo",
+      svg: svg(640, 230, "Une scène de théâtre aux rideaux rouges ; une élève lit à voix haute une indication en italique", lin("ftS", ["#2B1E14", "#3B2A1A"], true), "<rect width='640' height='230' fill='url(#ftS)'/><path d='M0 0h120v200c-40 -20 -80 -10 -120 10Z' fill='#B32424'/><path d='M640 0h-120v200c40 -20 80 -10 120 10Z' fill='#B32424'/><rect x='0' y='180' width='640' height='50' fill='#6B4423'/>" + perso(240, 92, "#5A3A1E", "#F7C948", "#7B3F99") + perso(380, 92, "#6B4423", "#1E499B", "#2E3445") + bulle(150, 30, 200, "« … en colère. — Assez ! »", "#F2C94C") + bulle(330, 30, 200, "On ne lit pas l'italique !", "#9FC5E8")),
+      legende: "Au lycée classique de Mbalmayo : le club théâtre répète une comédie de mariage pour la journée culturelle.",
+      contexte: "<p>Pendant la répétition, Béatrice lit à voix haute : « LA FILLE, <em>en colère</em>. — Assez ! », y compris les mots en italique. Le metteur en scène l'arrête. Puis Paul, qui joue le prétendant, se tourne vers le public pour dire « <em>à part</em> » qu'il n'a pas un franc, alors que le père est juste à côté : « Mais le père va l'entendre ! » s'étonne une camarade. Un troisième affirme : « Une pièce, c'est juste une histoire écrite avec des tirets. »</p>",
+      documents: [{ t: "Une page du texte de la répétition", html: "<p><strong>LE PÈRE</strong>, <em>s'asseyant</em>. — Alors, jeune homme, combien apportes-tu pour la dot ?<br><strong>LE PRÉTENDANT</strong>, <em>à part</em>. — Pas un franc… <em>(Haut.)</em> Tout ce qu'il faudra, Papa !<br><strong>LA FILLE</strong>, <em>en colère</em>. — Assez !</p>" }],
+      question: "Comment lire et jouer correctement cette page de théâtre ?",
+      tache: "Annote la page pour les acteurs : répliques, didascalies, aparté, et explique au club la double énonciation.",
+      hypotheses: ["Les mots en italique se lisent à voix haute comme le reste.", "Un aparté est impossible : le père, à côté, l'entendrait forcément.", "Les didascalies guident le jeu sans être dites ; l'aparté est une convention : le public l'entend, pas les autres personnages."]
+    },
+    parties: [
+      { t: "Un texte fait pour la scène", html: partie(FT_OLD, 0),
+        planches: [{ type: "2D", titre: "Lire une page de théâtre", legende: "Le nom du personnage (en capitales), sa réplique, et les didascalies en italique : elles indiquent gestes, tons et apartés, mais ne se disent pas sur scène.", svg: (function () {
+          var s = "<rect width='640' height='250' fill='#F4EFE4'/><rect x='30' y='16' width='380' height='220' rx='6' fill='#FFFDF6' stroke='#D9CFBC'/>", L = [["LE PÈRE", "s'asseyant", "Alors, jeune homme, combien apportes-tu ?"], ["LE PRÉTENDANT", "à part", "Pas un franc…"], ["", "(Haut.)", "Tout ce qu'il faudra, Papa !"], ["LA FILLE", "en colère", "Assez !"]];
+          L.forEach(function (l, i) { var y = 50 + i * 46; s += (l[0] ? txt(46, y, l[0], { s: 12, a: "start", c: "#7A1F1F" }) : "") + txt(l[0] ? 46 + l[0].length * 8.6 : 46, y, l[1], { s: 12, a: "start", c: "#1E88E5", i: true }) + txt(46, y + 18, "— " + l[2], { s: 12.5, a: "start", w: 500 }); });
+          s += "<rect x='440' y='30' width='180' height='40' rx='10' fill='#7A1F1F'/>" + txt(530, 55, "nom du personnage", { s: 12, c: "#fff" }) + "<rect x='440' y='90' width='180' height='40' rx='10' fill='#1E88E5'/>" + txt(530, 115, "didascalie (italique)", { s: 12, c: "#fff" }) + "<rect x='440' y='150' width='180' height='40' rx='10' fill='" + NUIT + "'/>" + txt(530, 175, "réplique (dite)", { s: 12, c: "#fff" });
+          return svg(640, 250, "Page de théâtre annotée : noms des personnages, didascalies en bleu italique, répliques", "", s);
+        })() }],
+        fil: { html: "<p>« <em>en colère</em> » est une <strong>didascalie</strong> : elle dit à Béatrice <strong>comment</strong> jouer la réplique, pas ce qu'elle doit dire. Sur scène, on joue la colère ; on ne la lit pas.</p>", verdicts: [[0, "rejetee", "Les didascalies guident le jeu ; elles ne sont pas prononcées."]] },
+        retenir: "Répliques (dites) + didascalies (jouées) ; double énonciation : l'auteur parle au public à travers les personnages." },
+      { t: "Les formes de la parole", html: partie(FT_OLD, 1),
+        planches: [{ type: "3d", titre: "La scène du club théâtre", legende: "Tourne la scène : le décor vert, la table, trois comédiens, les projecteurs, le cadre doré. Le curseur ouvre les rideaux. Face au public, l'acteur peut dire un aparté que les autres personnages, par convention, n'entendent pas.",
+          modele: { h: 360, rx: -12, ry: 12, echelle: 0.82, alt: "Scène de théâtre avec rideaux rouges, décor, table, trois comédiens et projecteurs", eclate: "Ouvrir les rideaux", jouer: "Lever de rideau", objets: scene3D(),
+            etiquettes: [{ p: [0, 140, -30], t: "Projecteurs" }, { p: [40, 34, 20], t: "Le prétendant (aparté)", cote: "d" }, { p: [-110, 50, -44], t: "Rideau", ec: [-90, 0, 0] }] } }],
+        fil: { html: "<p>L'<strong>aparté</strong> est une <strong>convention</strong> acceptée par tous : le personnage parle « à part », le public l'entend, les autres personnages sont censés ne pas l'entendre. C'est même un ressort comique : le public sait que le prétendant n'a pas un franc, le père l'ignore.</p>", verdicts: [[1, "rejetee", "L'aparté est une convention théâtrale : le père ne l'entend pas."]] },
+        retenir: "Tirade, stichomythie, monologue, aparté." },
+      { t: "La structure d'une pièce", html: partie(FT_OLD, 2),
+        planches: [{ type: "2D", titre: "Exposition, nœud, dénouement", legende: "La tension monte pendant le nœud (obstacles, rivalités entre prétendants) puis retombe au dénouement : heureux dans la comédie, malheureux dans la tragédie.", svg: (function () {
+          var X = function (t) { return 60 + t * 540; }, d = "", t;
+          for (t = 0; t <= 1; t += 0.02) d += (t ? "L" : "M") + X(t).toFixed(1) + " " + (230 - 170 * Math.pow(Math.sin(Math.PI * Math.pow(t, 0.8)), 1.4)).toFixed(1);
+          var s = "<rect width='640' height='270' fill='#fff'/><rect x='60' y='30' width='130' height='210' fill='#EEF3FC'/><rect x='190' y='30' width='300' height='210' fill='#FCEDEA'/><rect x='490' y='30' width='110' height='210' fill='#EEF8F1'/><path d='" + d + "' fill='none' stroke='#7A1F1F' stroke-width='4'/>";
+          s += txt(125, 254, "exposition", { s: 13, c: BLEU }) + txt(340, 254, "nœud", { s: 13, c: "#A31238" }) + txt(545, 254, "dénouement", { s: 13, c: VERT }) + txt(70, 24, "tension", { s: 11.5, a: "start", c: GRIS });
+          ["Acte I", "Acte II", "Acte III"].forEach(function (a, i) { s += "<path d='M" + (60 + (i + 1) * 180) + " 30V240' stroke='#C9D2E3' stroke-dasharray='4 4'/>" + txt(150 + i * 180, 48, a, { s: 11, c: GRIS }); });
+          return svg(640, 270, "Courbe de tension d une pièce : exposition, nœud, dénouement, sur trois actes", "", s);
+        })() }],
+        fil: { html: "<p>Une pièce n'est pas « une histoire avec des tirets » : elle est construite pour la scène, en actes et en scènes, avec une exposition, un nœud et un dénouement, et chaque mot écrit sert le jeu.</p>", verdicts: [[2, "validee", "Didascalies jouées, aparté conventionnel, structure pour la scène."]] },
+        retenir: "Actes, scènes ; exposition, nœud, dénouement." },
+      FT_OLD && FT_OLD.parties[3] ? FT_OLD.parties[3] : { t: "Entraînement", html: "" }
+    ],
+    denouement: {
+      titre: "La page annotée pour le club",
+      etapes: ["Didascalies : jouer la colère, s'asseoir, parler « à part », sans les dire (indice 1).", "Aparté : convention ; le public entend, le père non (indice 2).", "Une page construite pour la scène, dans une structure en actes (indice 3)."],
+      reponse: "<p>Dans cette page, les noms en capitales indiquent qui parle, les répliques sont les paroles à dire, et les mots en italique sont des didascalies : « s'asseyant », « à part », « Haut », « en colère » indiquent des gestes et des tons à jouer, jamais à prononcer. « Pas un franc… » est un aparté : par convention, le prétendant parle au public, que les autres personnages sont censés ne pas entendre ; c'est ce qui crée le comique, puisque le spectateur en sait plus que le père. C'est la double énonciation : l'auteur s'adresse au public à travers les personnages. Enfin, cette scène appartient au nœud d'une comédie : les obstacles au mariage s'accumulent avant un dénouement heureux.</p>",
+      transfert: "<p>Écris une courte scène de six répliques (un vendeur et un client au marché) avec trois didascalies et un aparté, puis joue-la avec un camarade.</p>"
+    },
+    revision: (FT_OLD ? FT_OLD.revision : []).concat(["Les didascalies se jouent, elles ne se disent pas.", "L'aparté est une convention : le public l'entend, pas les autres personnages."]),
+    exo: FT_OLD ? FT_OLD.exo : "",
+    quiz: FT_OLD ? FT_OLD.quiz : []
+  });
+
+  /* ═══════════════════════ 2nde C ECM — LA PRODUCTION ═══════════════════════ */
+  var EP_OLD = ancien("2nde-c-ecm-production");
+  function filiere3D() {
+    var o = [], k;
+    o.push({ f: "boite", c: [0, -10, 0], d: [600, 8, 260], coul: "#7A9A4A", dessus: "#8FB35A" });
+    o.push({ f: "boite", c: [0, -5, 0], d: [600, 2, 40], coul: "#8A7A66", dessus: "#9C8C76", div: false });
+    /* cacaoyers (primaire) */
+    [[-240, -70], [-190, -100], [-250, -130]].forEach(function (p) { o.push({ f: "cylindre", c: [p[0], 0, p[1]], r: 5, h: 50, n: 8, coul: "#5D3A1E" }); o.push({ f: "sphere", c: [p[0], 66, p[1]], r: 26, coul: "#2E6B34" }); for (k = 0; k < 3; k++) o.push({ f: "sphere", c: [p[0] + 6 - k * 4, 26 + k * 8, p[1] + 6], r: [4, 7, 4], n: 8, m: 6, coul: k % 2 ? "#E07A1F" : "#C9A227" }); });
+    /* petite usine (secondaire) */
+    o.push({ f: "boite", c: [0, 30, -90], d: [120, 70, 80], coul: "#C9C1B2", dessus: "#8E96A6", div: false });
+    o.push({ f: "cylindre", c: [40, 64, -110], r: 8, h: 50, n: 12, coul: "#7A6A55" });
+    o.push({ f: "sphere", c: [44, 126, -110], r: 12, coul: "#E9ECEF", op: 0.5 });
+    /* boutique et camion (tertiaire) */
+    o.push({ f: "boite", c: [210, 25, -90], d: [100, 60, 70], coul: "#F2C94C", dessus: "#C62828", div: false });
+    o.push({ f: "boite", c: [210, 30, -126], d: [60, 30, 2], coul: "#9FC5E8", div: false });
+    o.push({ f: "boite", c: [-60, 14, 0], d: [70, 34, 34], coul: "#1E88E5", dessus: "#F7F7F7", div: false });
+    o.push({ f: "boite", c: [-12, 10, 0], d: [26, 26, 32], coul: "#C62828", dessus: "#E8492E", div: false });
+    [[-80, -18], [-80, 18], [-20, -18], [-20, 18]].forEach(function (p) { o.push({ f: "cylindre", c: [p[0], 0, p[1]], r: 7, h: 4, n: 12, axe: "z", coul: "#1F2328" }); });
+    return o;
+  }
+  remplacer("2nde-c-ecm-production", {
+    c: "2nde C", m: "ecm", titre: "La production : facteurs et secteurs", duree: 35,
+    accroche: "Vendre ses fèves brutes ou fabriquer du chocolat à Ebolowa ? Le projet de Nadège fait débattre la coopérative.",
+    intro: "Le projet d'une jeune entrepreneuse de la filière cacao te sert de fil rouge : à chaque partie, un indice t'aide à trancher entre trois idées.",
+    objectifs: ["définir la production de biens et de services", "identifier les facteurs de production (nature, travail, capital)", "classer une activité dans le secteur primaire, secondaire ou tertiaire", "expliquer l'intérêt de transformer sur place"],
+    enquete: {
+      titre: "Le projet de chocolaterie de Nadège",
+      svg: svg(640, 230, "Une cacaoyère, un petit atelier de transformation et une boutique qui vend des tablettes de chocolat", "", "<rect width='640' height='230' fill='#E9F1DC'/><rect y='186' width='640' height='44' fill='#8FB35A'/>" + [70, 120, 170].map(function (x) { return "<path d='M" + x + " 186v-60' stroke='#5D3A1E' stroke-width='8'/><circle cx='" + x + "' cy='110' r='30' fill='#2E6B34'/><ellipse cx='" + (x + 6) + "' cy='150' rx='6' ry='10' fill='#E07A1F'/>"; }).join("") + "<rect x='260' y='120' width='120' height='66' fill='#C9C1B2'/><path d='M252 120h136l-68 -30Z' fill='#8E96A6'/><rect x='350' y='70' width='12' height='50' fill='#7A6A55'/>" + "<rect x='450' y='120' width='140' height='66' fill='#F2C94C'/><path d='M444 120h152l-10 -20h-132Z' fill='#C62828'/><rect x='480' y='140' width='40' height='26' fill='#5A2E0A'/><rect x='526' y='140' width='40' height='26' fill='#5A2E0A'/>" + txt(115, 210, "primaire", { s: 12, c: "#1B5E20" }) + txt(320, 210, "secondaire", { s: 12, c: "#5C6478" }) + txt(520, 210, "tertiaire", { s: 12, c: "#C62828" }) + "<path d='M210 160h40M394 160h46' stroke='" + NUIT + "' stroke-width='2.5' marker-end='url(#epF)'/>").replace("</defs>", fleche("epF", NUIT) + "</defs>"),
+      legende: "À Ebolowa : Nadège, fille de cacaoculteur, a appris à fabriquer du chocolat et présente son projet à la coopérative.",
+      contexte: "<p>La coopérative vend chaque année ses fèves séchées à un exportateur. Nadège propose d'en transformer une partie en <strong>tablettes de chocolat</strong> vendues dans les supermarchés de Yaoundé. Un aîné objecte : « Nous sommes des planteurs, la production, c'est le champ ; le reste n'est pas de la production. » Un autre : « Pour produire, il suffit d'avoir de la terre et des bras. »</p>",
+      documents: [{ t: "Ce dont Nadège a besoin (exemple)", html: "<table class='donnees'><tr><td>Fèves de cacao, sucre, eau</td><td>nature</td></tr><tr><td>Trois ouvriers, un comptable</td><td>travail</td></tr><tr><td>Torréfacteur, broyeuse, moules, local, fonds de départ</td><td>capital</td></tr><tr><td>Un plan d'affaires, la recherche de clients</td><td>esprit d'entreprise</td></tr></table>" }],
+      question: "La transformation et la vente du chocolat sont-elles de la production, et de quoi Nadège a-t-elle besoin ?",
+      tache: "Présente la filière du cacao à chocolat en trois secteurs et justifie l'intérêt de transformer sur place.",
+      hypotheses: ["Seul le travail des champs est de la production.", "Pour produire, la terre et les bras suffisent.", "Produire, c'est créer des biens ou des services ; il faut nature, travail et capital ; la filière couvre les trois secteurs."]
+    },
+    parties: [
+      { t: "Qu'est-ce que produire ?", html: partie(EP_OLD, 0),
+        fil: { html: "<p>La tablette de chocolat est un <strong>bien</strong> ; son transport et sa vente au supermarché sont des <strong>services</strong>. Ce sont aussi des productions : l'aîné confond production et agriculture.</p>", verdicts: [[0, "rejetee", "Transformer et vendre, c'est aussi produire (biens et services)."]] },
+        retenir: "Produire = créer des biens ou des services pour satisfaire des besoins." },
+      { t: "Les facteurs de production", html: partie(EP_OLD, 1),
+        fil: { html: "<p>Le document le montre : sans torréfacteur, broyeuse, moules et local (le <strong>capital</strong>), les fèves (la <strong>nature</strong>) et les ouvriers (le <strong>travail</strong>) ne donnent pas de chocolat. Il faut aussi l'esprit d'entreprise de Nadège pour combiner le tout.</p>", verdicts: [[1, "rejetee", "Sans capital (machines, local, fonds), pas de transformation."]] },
+        retenir: "Nature, travail, capital (+ esprit d'entreprise)." },
+      { t: "Les trois secteurs d'activité", html: partie(EP_OLD, 2),
+        planches: [{ type: "3d", titre: "La filière cacao, du champ à la boutique", legende: "Tourne la scène de gauche à droite : les cacaoyers et leurs cabosses (primaire), l'atelier de transformation et sa cheminée (secondaire), le camion de livraison et la boutique (tertiaire).",
+          modele: { h: 340, rx: -24, ry: 18, echelle: 0.85, alt: "Paysage avec cacaoyers, un atelier de transformation, un camion et une boutique", objets: filiere3D(),
+            etiquettes: [{ p: [-220, 96, -100], t: "Primaire : cacaoculture" }, { p: [0, 70, -90], t: "Secondaire : chocolaterie", cote: "d" }, { p: [210, 60, -90], t: "Tertiaire : commerce", cote: "d" }, { p: [-40, 34, 0], t: "Tertiaire : transport" }] } }],
+        fil: { html: "<p>La filière traverse les trois secteurs : cacaoculture (primaire), fabrication du chocolat (secondaire), transport et vente (tertiaire). Transformer sur place fait passer une partie de la valeur ajoutée du secondaire et du tertiaire au Cameroun, et crée des emplois.</p>", verdicts: [[2, "validee", "Biens et services, trois facteurs, trois secteurs."]] },
+        retenir: "Primaire : nature ; secondaire : transformation ; tertiaire : services." },
+      EP_OLD && EP_OLD.parties[3] ? EP_OLD.parties[3] : { t: "Entraînement", html: "" }
+    ],
+    denouement: {
+      titre: "La filière du cacao à chocolat",
+      etapes: ["Le chocolat est un bien, sa vente un service : deux productions (indice 1).", "Nature, travail, capital, esprit d'entreprise (indice 2).", "Primaire, secondaire, tertiaire ; valeur ajoutée gardée sur place (indice 3)."],
+      reponse: "<p>Produire, c'est créer des biens ou des services pour satisfaire des besoins : la tablette de chocolat est un bien, son transport et sa vente sont des services ; ce sont donc bien des productions, et pas seulement le travail des champs. Pour produire, Nadège combine les facteurs de production : la nature (fèves, sucre, eau), le travail (ouvriers, comptable) et le capital (torréfacteur, broyeuse, moules, local, fonds), organisés par son esprit d'entreprise ; la terre et les bras ne suffisent pas. La filière couvre les trois secteurs : primaire (cacaoculture), secondaire (chocolaterie), tertiaire (transport, commerce). Transformer sur place garde au Cameroun une plus grande part de la valeur ajoutée et crée des emplois.</p>",
+      transfert: "<p>Choisis une autre filière camerounaise (bois, café, manioc, poisson) et présente-la en trois secteurs, avec un exemple de chaque facteur de production.</p>"
+    },
+    revision: (EP_OLD ? EP_OLD.revision : []).concat(["Une filière traverse les trois secteurs ; transformer sur place garde la valeur ajoutée."]),
+    exo: EP_OLD ? EP_OLD.exo : "",
+    quiz: EP_OLD ? EP_OLD.quiz : []
+  });
+
+  /* ═══════════════════════ 2nde A FRANÇAIS — L'ÉNONCIATION ═══════════════════════ */
+  var FE_OLD = ancien("2nde-a-francais-enonciation");
+  var MARQUES = [["Je", "pronom de 1ʳᵉ personne"], ["t'", "pronom de 2ᵉ personne"], ["ici", "déictique de lieu"], ["demain", "déictique de temps"], ["sans doute", "modalisateur"], ["!", "ponctuation expressive"]];
+  function cour3D() {
+    var o = [], k;
+    o.push({ f: "boite", c: [0, -10, 0], d: [560, 8, 320], coul: "#C9B28A", dessus: "#D9C49C" });
+    o.push({ f: "boite", c: [0, 40, 150], d: [560, 100, 20], coul: "#E9E2D2", dessus: "#C62828", div: false });
+    for (k = 0; k < 6; k++) o.push({ f: "boite", c: [-220 + k * 88, 50, 139], d: [36, 46, 2], coul: "#5C6478", div: false });
+    o.push({ f: "cylindre", c: [140, 0, 40], r: 4, h: 150, n: 10, coul: "#C9CED6" });
+    o.push({ f: "boite", c: [150, 126, 40], d: [14, 30, 2], coul: "#007A3D", div: false });
+    o.push({ f: "boite", c: [164, 126, 40], d: [14, 30, 2], coul: "#CE1126", div: false });
+    o.push({ f: "boite", c: [178, 126, 40], d: [14, 30, 2], coul: "#FCD116", div: false });
+    o.push({ f: "poly", pts: [[164, 132, 38.5], [166, 127, 38.5], [171, 127, 38.5], [167, 124, 38.5], [169, 119, 38.5], [164, 122, 38.5], [159, 119, 38.5], [161, 124, 38.5], [157, 127, 38.5], [162, 127, 38.5]], coul: "#FCD116" });
+    o.push({ f: "boite", c: [-120, -2, 60], d: [70, 20, 40], coul: "#8E96A6", dessus: "#B8BFCC", div: false });
+    o.push({ f: "boite", c: [-160, 30, 100], d: [70, 50, 4], coul: "#5D3A1E", div: false });
+    o.push({ f: "boite", c: [-160, 30, 97], d: [30, 22, 1], coul: "#FBF8F2", div: false });
+    return o;
+  }
+  remplacer("2nde-a-francais-enonciation", {
+    c: "2nde A", m: "francais", titre: "L'énonciation : les marques explicites", duree: 35,
+    accroche: "« Je t'attends ici demain, sans doute à 8 h. Ne sois pas en retard ! » Un billet sans nom ni date, trouvé dans un cahier : qui, où, quand ?",
+    intro: "Un billet mystérieux trouvé au lycée te sert de fil rouge : à chaque partie, un indice t'aide à trancher entre trois lectures.",
+    objectifs: ["identifier la situation d'énonciation (qui, à qui, où, quand)", "relever les marques explicites : pronoms, déictiques, temps, modalisateurs", "distinguer énoncé ancré et énoncé coupé", "transformer un énoncé ancré en énoncé coupé"],
+    enquete: {
+      titre: "Le billet trouvé dans le cahier",
+      svg: svg(640, 220, "Un petit billet manuscrit plié trouvé dans un cahier, et deux élèves intriguées", "", "<rect width='640' height='220' fill='#EEF3F9'/><g transform='rotate(-4 200 110)'><rect x='70' y='30' width='270' height='150' rx='4' fill='#FFFBEA' stroke='#E3D7A6'/><path d='M80 60h250M80 90h250M80 120h250M80 150h250' stroke='#D7E3F2'/>" + txt(90, 74, "Je t'attends ici demain,", { s: 15, a: "start", c: BLEU, i: true }) + txt(90, 104, "sans doute à 8 h.", { s: 15, a: "start", c: BLEU, i: true }) + txt(90, 134, "Ne sois pas en retard !", { s: 15, a: "start", c: BLEU, i: true }) + "</g>" + perso(440, 100, "#5A3A1E", "#DCE6F2", "#1E499B") + perso(530, 104, "#6B4423", "#DCE6F2", "#1E499B") + bulle(400, 30, 200, "Ici ? Demain ? Qui ?", "#9FC5E8")),
+      legende: "Au lycée de Kribi, en 2nde A : Grâce trouve un billet glissé dans un cahier emprunté à la bibliothèque.",
+      contexte: "<p>Le billet dit : « Je t'attends ici demain, sans doute à 8 h. Ne sois pas en retard ! » Ni nom, ni date, ni lieu. Grâce dit : « Ici, c'est la bibliothèque, et demain, c'est mercredi. » Sa voisine répond : « Impossible de le savoir : ces mots ne veulent rien dire tout seuls. » Le professeur propose d'en faire un exercice sur l'énonciation.</p>",
+      documents: [{ t: "La même information, racontée", html: "<p>« La veille de la kermesse, Atangana avait donné rendez-vous à son cousin dans la cour du lycée, à huit heures. »</p>" }],
+      question: "Peut-on savoir qui a écrit le billet, à qui, où et quand ? Pourquoi le second texte est-il clair ?",
+      tache: "Relève les marques de l'énonciation du billet, puis réécris-le en énoncé coupé.",
+      hypotheses: ["« Ici » désigne forcément la bibliothèque, et « demain » forcément mercredi.", "Ces mots n'ont aucun sens.", "Ce sont des déictiques : ils ne se comprennent qu'avec la situation d'énonciation ; le récit utilise des repères absolus."]
+    },
+    parties: [
+      { t: "La situation d'énonciation", html: partie(FE_OLD, 0),
+        planches: [{ type: "2D", titre: "Qui ? À qui ? Où ? Quand ?", legende: "Les quatre questions de la situation d'énonciation : l'énonciateur (je), le destinataire (tu), le lieu (ici) et le moment (demain). Sans elles, le billet reste muet.", svg: (function () {
+          var s = "<rect width='640' height='240' fill='#F5F7FB'/>" + perso(120, 70, "#5A3A1E", "#DCE6F2", "#1E499B") + perso(520, 70, "#6B4423", "#F7C948", "#2E3445") + "<path d='M150 110H480' stroke='" + NUIT + "' stroke-width='3' marker-end='url(#feF)'/><rect x='250' y='88' width='140' height='34' rx='10' fill='#fff' stroke='#C9D2E3'/>" + txt(320, 110, "énoncé", { s: 13 });
+          s += bloc(30, 186, 130, 40, BLEU, "Qui ? je") + bloc(176, 186, 130, 40, "#7B3F99", "À qui ? tu") + bloc(322, 186, 130, 40, VERT, "Où ? ici") + bloc(468, 186, 140, 40, "#C2540A", "Quand ? demain");
+          return svg(640, 240, "Un énonciateur adresse un énoncé à un destinataire ; quatre étiquettes : qui, à qui, où, quand", fleche("feF", NUIT), s);
+        })() }],
+        fil: { html: "<p>« Je », « t' », « ici », « demain » renvoient à une personne, un lieu et un moment que seuls connaissent l'auteur et le destinataire. Sans la situation, on ne peut pas les remplir. Ils ont un sens, mais un sens qui dépend de la situation.</p>", verdicts: [[1, "rejetee", "Ils ont un sens, qui dépend de la situation d'énonciation."]] },
+        retenir: "Qui parle, à qui, où, quand." },
+      { t: "Les marques explicites", html: partie(FE_OLD, 1),
+        planches: [{ type: "3d", titre: "« Ici », c'est où ?", legende: "Tourne la cour du lycée : le bâtiment des classes, le mât et le drapeau, le banc, le panneau d'affichage. « Ici » peut désigner n'importe lequel de ces endroits : seul l'auteur du billet le sait.",
+          modele: { h: 340, rx: -26, ry: 22, echelle: 0.85, alt: "Cour de lycée avec un bâtiment, un mât au drapeau camerounais, un banc et un panneau d affichage", objets: cour3D(),
+            etiquettes: [{ p: [164, 144, 40], t: "le mât ?", cote: "d" }, { p: [-120, 12, 60], t: "le banc ?" }, { p: [-160, 60, 100], t: "le panneau ?" }] } }],
+        fil: { html: "<p>Grâce suppose que « ici » est la bibliothèque parce qu'elle y a trouvé le billet ; mais le billet a pu être écrit ailleurs, et « demain » dépend du jour où il a été écrit, pas du jour où on le lit.</p>", verdicts: [[0, "rejetee", "« Ici » et « demain » renvoient au lieu et au moment de l'écriture, inconnus."]] },
+        retenir: "Pronoms je / tu, déictiques (ici, demain), temps de l'énonciation, modalisateurs (sans doute), ponctuation expressive." },
+      { t: "Énoncé ancré, énoncé coupé", html: partie(FE_OLD, 2),
+        fil: { html: "<p>Le second texte est un <strong>énoncé coupé</strong> : 3ᵉ personne (Atangana), plus-que-parfait, repères absolus (« la veille de la kermesse », « dans la cour du lycée »). On le comprend sans connaître la situation de celui qui raconte.</p>", verdicts: [[2, "validee", "Déictiques liés à la situation ; repères absolus dans le récit."]] },
+        retenir: "Ancré : je, tu, ici, demain ; coupé : il, passé simple, la veille, le lendemain." },
+      FE_OLD && FE_OLD.parties[3] ? FE_OLD.parties[3] : { t: "Entraînement", html: "" }
+    ],
+    denouement: {
+      titre: "Le billet décodé",
+      etapes: ["Je, tu, ici, demain : situation d'énonciation inconnue (indice 1).", "Marques : pronoms, déictiques, modalisateur, ponctuation (indice 2).", "Énoncé coupé : repères absolus (indice 3)."],
+      reponse: "<p>Le billet est un énoncé ancré dans sa situation d'énonciation : « je » (l'auteur) et « t' » (le destinataire) sont des pronoms de 1ʳᵉ et 2ᵉ personne ; « ici » et « demain » sont des déictiques de lieu et de temps ; « sans doute » est un modalisateur qui exprime une incertitude ; le point d'exclamation est une ponctuation expressive. Toutes ces marques ne prennent leur sens que si l'on sait qui a écrit, à qui, où et quand : faute de cela, Grâce ne peut pas affirmer que « ici » est la bibliothèque ni que « demain » est mercredi. Le second texte est un énoncé coupé, à la 3ᵉ personne et au passé, avec des repères absolus : il se comprend seul. Réécrit ainsi, le billet devient : « Il lui avait donné rendez-vous dans la cour du lycée le lendemain, probablement à huit heures, en lui demandant de ne pas être en retard. »</p>",
+      transfert: "<p>Écris un message ancré de trois lignes à un camarade (avec quatre marques de l'énonciation), puis réécris-le en énoncé coupé.</p>"
+    },
+    revision: (FE_OLD ? FE_OLD.revision : []).concat(["Un déictique se comprend seulement avec la situation d'énonciation."]),
+    exo: FE_OLD ? FE_OLD.exo : "",
+    quiz: FE_OLD ? FE_OLD.quiz : []
+  });
+
+  /* ═══════════════════════ SIMULATIONS ═══════════════════════ */
+  VRT_A("2nde-c-maths-reels", 1, "Le testeur de décimaux : entre une fraction", function (el) {
+    el.innerHTML = "<div style='display:flex;flex-wrap:wrap;gap:8px 18px;align-items:end'><label class='labo-c'><span>Numérateur p</span><input type='number' value='5' data-p style='width:90px;font:inherit;padding:6px'></label><label class='labo-c'><span>Dénominateur q</span><input type='number' value='6' min='1' data-q style='width:90px;font:inherit;padding:6px'></label></div><div style='display:flex;flex-wrap:wrap;gap:6px;margin-top:8px'>" + [[5, 8], [5, 6], [7, 20], [6, 15], [1, 3], [3, 40], [11, 12]].map(function (f) { return "<button type='button' class='btn-l' data-f='" + f[0] + "/" + f[1] + "'>" + f[0] + "/" + f[1] + "</button>"; }).join("") + "</div><p class='labo-r' data-r></p>";
+    var P = el.querySelector("[data-p]"), Q = el.querySelector("[data-q]");
+    function facteurs(n) { var f = [], d = 2; while (n > 1) { while (n % d === 0) { f.push(d); n /= d; } d++; } return f; }
+    function developpe(p, q) { var ent = Math.floor(Math.abs(p) / q), r = Math.abs(p) % q, vus = {}, ch = "", i = 0; while (r && !(r in vus) && i < 40) { vus[r] = i++; r *= 10; ch += Math.floor(r / q); r %= q; } if (!r) return (p < 0 ? "−" : "") + ent + (ch ? "," + ch : ""); var k = vus[r]; return (p < 0 ? "−" : "") + ent + "," + ch.slice(0, k) + "<span style='text-decoration:overline'>" + ch.slice(k) + "</span>…"; }
+    function maj() {
+      var p = parseInt(P.value, 10), q = parseInt(Q.value, 10);
+      if (!q || isNaN(p)) { el.querySelector("[data-r]").textContent = "Entre deux entiers, q non nul."; return; }
+      var g = pgcd(p, q), pp = p / g, qq = q / g, F = facteurs(qq), ok = F.every(function (x) { return x === 2 || x === 5; });
+      el.querySelector("[data-r]").innerHTML = p + "/" + q + (g > 1 ? " = <b>" + pp + "/" + qq + "</b> (irréductible)" : " est irréductible") + " · " + qq + " = " + (F.length ? F.join(" × ") : "1") + " · " + (ok ? "<b style='color:" + VERT + "'>seulement 2 et 5 : décimal</b>" : "<b style='color:" + ROUGE + "'>facteur " + F.filter(function (x) { return x !== 2 && x !== 5; })[0] + " : non décimal</b>") + " · écriture : <b>" + developpe(pp, qq) + "</b> · plus petit ensemble : <b>" + (qq === 1 ? (pp >= 0 ? "ℕ" : "ℤ") : ok ? "𝔻" : "ℚ") + "</b>";
+    }
+    P.addEventListener("input", maj); Q.addEventListener("input", maj);
+    el.querySelectorAll("[data-f]").forEach(function (b) { b.addEventListener("click", function () { var f = b.dataset.f.split("/"); P.value = f[0]; Q.value = f[1]; maj(); }); });
+    maj();
+  });
+  VRT_A("2nde-c-francais-theatre", 1, "Tirade, stichomythie, monologue ou aparté ?", function (el) {
+    exercice(el, [["Un valet, seul sur scène, se plaint longuement de son maître : ___", ["monologue", "aparté", "tirade"], "Seul sur scène : monologue."], ["Deux personnages échangent dix répliques d'un ou deux mots dans une dispute : ___", ["stichomythie", "tirade", "monologue"], "Répliques courtes et rapides."], ["Le prétendant glisse au public « Pas un franc… » devant le père : ___", ["aparté", "monologue", "stichomythie"], "Le public entend, pas le père."], ["Le chef du village parle sans interruption pendant une page devant tous : ___", ["tirade", "monologue", "aparté"], "Longue réplique devant d'autres personnages."], ["« LA FILLE, en colère » : les mots en italique sont… ___", ["une didascalie", "une réplique", "un aparté"], "Indication de jeu, non prononcée."]], "Cas suivant", "Cas");
+  });
+  VRT_A("2nde-c-ecm-production", 2, "Primaire, secondaire ou tertiaire ?", function (el) {
+    exercice(el, [["Un pêcheur de Kribi : ___", ["primaire", "secondaire", "tertiaire"], "Exploitation directe de la nature."], ["Une chocolaterie à Ebolowa : ___", ["secondaire", "primaire", "tertiaire"], "Transformation de matières premières."], ["Une infirmière à l'hôpital de Garoua : ___", ["tertiaire", "primaire", "secondaire"], "Service de santé."], ["Un mineur d'or à Bétaré-Oya : ___", ["primaire", "secondaire", "tertiaire"], "Mines : primaire."], ["Une brasserie à Douala : ___", ["secondaire", "tertiaire", "primaire"], "Industrie."], ["Un chauffeur de car Douala–Yaoundé : ___", ["tertiaire", "secondaire", "primaire"], "Transport : service."], ["Un maçon sur un chantier : ___", ["secondaire", "tertiaire", "primaire"], "BTP : secondaire."], ["Une vendeuse de pagnes au marché : ___", ["tertiaire", "secondaire", "primaire"], "Commerce : service."]], "Activité suivante", "Activité");
+  });
+  VRT_A("2nde-a-francais-enonciation", 1, "Relève les marques de l'énonciation du billet", function (el) {
+    exercice(el, MARQUES.map(function (m) { return ["Dans le billet, « " + m[0] + " » est… ___", [m[1]].concat(["pronom de 1ʳᵉ personne", "pronom de 2ᵉ personne", "déictique de lieu", "déictique de temps", "modalisateur", "ponctuation expressive"].filter(function (x) { return x !== m[1]; }).slice(0, 2)), "Réponse : " + m[1] + "."]; }), "Marque suivante", "Marque");
   });
 })();
 
