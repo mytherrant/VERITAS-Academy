@@ -345,5 +345,78 @@
     ]
   });
 
+
+  /* ─────────────── Lot 4 : 2nde A dénombrement, Tle sciences ─────────────── */
+  function venn(a, b, i, la, lb, tot) {
+    return "<rect x='20' y='20' width='600' height='200' rx='14' fill='#FBFAF7' stroke='#C9D0DC'/>" + txt(40, 44, "U : " + tot, { s: 13, a: "start", c: GRIS }) +
+      "<circle cx='250' cy='125' r='85' fill='" + ROUGE + "' fill-opacity='.14' stroke='" + ROUGE + "' stroke-width='2.5'/><circle cx='370' cy='125' r='85' fill='" + BLEU + "' fill-opacity='.14' stroke='" + BLEU + "' stroke-width='2.5'/>" +
+      txt(215, 130, a - i, { s: 22, c: ROUGE }) + txt(310, 130, i, { s: 22 }) + txt(405, 130, b - i, { s: 22, c: BLEU }) + txt(150, 50, la, { s: 13, c: ROUGE }) + txt(470, 50, lb, { s: 13, c: BLEU }) + txt(560, 200, tot - (a + b - i), { s: 20, c: VERT }) + txt(560, 176, "aucun", { s: 12, c: VERT });
+  }
+  enrichir("2nde-a-maths-r26", {
+    formules: [
+      F("Placer l'intersection d'abord", "card(L ∩ D)", "7 élèves font les deux clubs"),
+      F("Calculer les parties propres", "card(L seul) = card(L) − card(L ∩ D)", "lecture seule : 20 − 7 = 13 ; danse seule : 18 − 7 = 11"),
+      F("Calculer la réunion", "card(L ∪ D) = card(L) + card(D) − card(L ∩ D)", "20 + 18 − 7 = 31 élèves font au moins un club"),
+      F("Calculer le complémentaire", "card(aucun) = card(U) − card(L ∪ D)", "48 − 31 = 17 ≥ 15 : on ouvre le troisième club")
+    ],
+    planches: { 0: [pl2("Le diagramme de Venn de la classe", "On place d'abord les 7 élèves des deux clubs, puis 13 et 11 dans les parties propres ; 17 élèves restent hors des cercles.", 640, 240, "Diagramme de Venn de deux clubs dans une classe de 48 élèves", venn(20, 18, 7, "Lecture : 20", "Danse : 18", 48))] },
+    ajouts: {
+      0: def("Définition", "Le <strong>cardinal</strong> d'un ensemble fini A, noté card(A), est son nombre d'éléments. A ∩ B (intersection) : éléments communs ; A ∪ B (réunion) : éléments d'au moins un des deux.") +
+        ex("Exemple", "Sur 40 élèves, 25 aiment le football, 18 le handball et 10 les deux : card(F ∪ H) = 25 + 18 − 10 = 33 ; 7 n'aiment aucun des deux.") +
+        attention("Ne pas additionner simplement 20 + 18 = 38 : les 7 élèves des deux clubs seraient comptés deux fois."),
+      1: ex("Exemple : tableau à double entrée", "Lignes : garçons / filles ; colonnes : club / pas de club. Le total de chaque ligne et de chaque colonne se vérifie, et le total général vaut card(U).")
+    }
+  });
+
+  enrichir("2nde-a-maths-r27", {
+    formules: [
+      F("Identifier les choix successifs", "une tenue = pagne puis modèle puis coiffe", "3 choix, puis 2, puis 2"),
+      F("Appliquer le principe multiplicatif", "nombre de résultats = n₁ × n₂ × … × nₖ", "3 × 2 × 2 = 12 tenues"),
+      F("Comparer au besoin", "nombre de tenues ≥ nombre de filles ?", "12 = 12 : chaque fille a une tenue différente")
+    ],
+    ajouts: { 1: astuce("« <strong>Et → je multiplie, ou → j'additionne</strong> » : un pagne ET un modèle ET une coiffe : on multiplie. Un pagne en wax OU en kita : on additionne les possibilités.") }
+  });
+
+  enrichir("2nde-a-maths-r28", {
+    formules: [
+      F("Calculer les participants (réunion)", "card(S ∪ D) = card(S) + card(D) − card(S ∩ D)", "75 + 50 − 30 = 95 élèves"),
+      F("Calculer les non-participants", "card(U) − card(S ∪ D)", "120 − 95 = 25 élèves"),
+      F("Compter les plateaux (principe multiplicatif)", "boissons × plats × desserts", "4 × 3 × 2 = 24 plateaux"),
+      F("Conclure", "24 ≤ 25", "les 25 modèles de tickets suffisent")
+    ],
+    planches: { 0: [pl2("Les participants de la kermesse", "75 tiennent un stand, 50 jouent aux dames, 30 font les deux : 95 participent, 25 ne font rien.", 640, 240, "Diagramme de Venn de la kermesse sur 120 élèves", venn(75, 50, 30, "Stand : 75", "Dames : 50", 120))] },
+    ajouts: {
+      0: def("Choisir l'outil", "<strong>Diagramme de Venn</strong> : pour des ensembles qui se chevauchent (au moins un, aucun, les deux). <strong>Arbre</strong> ou <strong>principe multiplicatif</strong> : pour des choix successifs (un élément de chaque catégorie).") +
+        formule("card(A ∪ B) = card(A) + card(B) − card(A ∩ B) · nombre de choix = n₁ × n₂ × … × nₖ") +
+        ex("Exemple", "Un code de cadenas à 3 chiffres (0 à 9) : 10 × 10 × 10 = 1 000 codes possibles."),
+      1: ex("Exemple", "Avec 2 boissons, 3 plats et 2 desserts : 2 × 3 × 2 = 12 menus ; si l'on ajoute une boisson, 3 × 3 × 2 = 18.")
+    }
+  });
+
+  enrichir("tle-sc-microscopie", {
+    formules: [
+      F("Calculer le grossissement", "G = grossissement de l'objectif × grossissement de l'oculaire", "G = 40 × 10 = 400"),
+      F("Calculer la taille réelle", "taille réelle = taille sur le dessin ÷ G", "20 mm ÷ 400 = 0,05 mm"),
+      F("Convertir en micromètres", "1 mm = 1 000 µm", "0,05 mm × 1 000 = 50 µm"),
+      F("Comparer à un objet connu", "rapport = taille de l'objet ÷ taille de la cellule", "grain de riz ≈ 6 mm : 6 ÷ 0,05 = 120 fois plus grand")
+    ]
+  });
+
+  enrichir("tle-sc-organites", {
+    formules: [
+      F("Comparer les pouvoirs de séparation", "rapport = pouvoir du microscope optique ÷ celui du microscope électronique", "0,2 µm ÷ 0,2 nm = 1 000 : 1 000 fois plus précis"),
+      F("Relier structure et fonction", "beaucoup d'énergie nécessaire ⇒ beaucoup de mitochondries", "cœur ≈ 5 000 mitochondries par cellule, peau ≈ 100"),
+      F("Écrire le bilan de la respiration cellulaire", "glucose + dioxygène → dioxyde de carbone + eau + énergie (ATP)", "C₆H₁₂O₆ + 6 O₂ → 6 CO₂ + 6 H₂O + énergie")
+    ],
+    ajouts: {
+      1: def("Définition", "Un <strong>organite</strong> est un compartiment de la cellule, limité par une ou deux membranes, qui remplit une fonction précise : la <strong>mitochondrie</strong> produit l'énergie, le <strong>ribosome</strong> fabrique les protéines, l'<strong>appareil de Golgi</strong> les emballe et les exporte, le <strong>chloroplaste</strong> (cellule végétale) réalise la photosynthèse.") +
+        formule("Respiration : C₆H₁₂O₆ + 6 O₂ → 6 CO₂ + 6 H₂O + énergie") +
+        ex("Exemple", "Les cellules du foie, très actives, comptent environ 2 000 mitochondries ; un spermatozoïde en concentre une cinquantaine dans sa pièce intermédiaire pour faire battre son flagelle.") +
+        ex("Exemple", "Les cellules du pancréas qui sécrètent l'insuline ont un réticulum endoplasmique et un appareil de Golgi très développés.") +
+        astuce("« <strong>Usine cellulaire</strong> » : le noyau est le bureau des plans, les ribosomes les ouvriers, le Golgi le service d'emballage, la mitochondrie la centrale électrique, la membrane le portail.") +
+        attention("La mitochondrie ne « stocke » pas l'énergie comme une réserve de graisse : elle la libère au fur et à mesure à partir du glucose et du dioxygène.")
+    }
+  });
+
   /* ─────────────── 2nde C Physique (formules déjà complètes) ─────────────── */
 })();
