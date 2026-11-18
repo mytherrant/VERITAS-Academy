@@ -362,3 +362,33 @@ html body .carte .info-b h2::before,html body .carte .info-b h2::after{content:n
 html body .carte .info-b .apc-i{flex:none;display:grid;place-items:center;width:36px;height:36px;border-radius:12px;background:#DCE6F8;color:#1E499B}
 html body .carte .info-b p.info{margin:0!important;padding:0!important;background:none!important;border:0!important;font-size:16.5px!important;line-height:1.65!important;color:#22283A;text-align:justify;hyphens:auto;-webkit-hyphens:auto}
 html body .carte .objectifs li{text-align:left!important;hyphens:manual!important;-webkit-hyphens:manual!important}
+
+/* ── 18/11/2026 « laisse le milieu en blanc, fonce un peu les en-têtes » : formules compactes ── */
+html body .offre .fo-mini{background:#fff!important;overflow:hidden}
+html body .offre .fo-mini .fo-nom{margin:-14px -14px 0!important;padding:14px 14px 2px!important;background:var(--fo-t,#E6ECF7)}
+html body .offre .fo-mini .fo-cle{margin:0 -14px 10px!important;padding:0 14px 12px!important;background:var(--fo-t,#E6ECF7);border-bottom:1.5px solid var(--fo-b,#C5D5F2)}
+html body .offre .fo-mini .fo-base{border-top:0!important;padding-top:0!important}
+html body .offre .fo-mini.fo-starter{--fo-t:#DCEFE2;--fo-b:#A9D8B9;background:#fff!important}
+html body .offre .fo-mini.fo-pro{--fo-t:#DCE6F8;--fo-b:#B3C8EE;background:#fff!important}
+html body .offre .fo-mini.fo-elite{--fo-t:#E7DCF8;--fo-b:#CDB8F0;background:#fff!important}
+html body .fo-av li{text-align:left!important;hyphens:manual!important;-webkit-hyphens:manual!important}
+html body .offre .fo-mini .fo-av{border-top:0!important;padding-top:2px!important}
+
+/* ── 18/11/2026 « titres dans un petit cadre posé sur le grand encadré, comme les autres encadrés ;
+   tâche sans encadré, icône + texte en italique » ── */
+html body .carte .info-b,html body .carte .apc{position:relative;margin-top:34px!important;padding-top:30px!important}
+html body .carte .info-b h2,html body .apc h2{display:table!important;margin:-50px auto 12px!important;padding:5px 16px 5px 8px!important;gap:8px;background:#fff!important;border:1.5px solid var(--cad,#C9D8F2);border-radius:12px;box-shadow:0 2px 6px rgba(0,17,54,.07);transform:rotate(-1.5deg);font-size:17px!important;line-height:1.25!important}
+html body .carte .info-b h2>*,html body .apc h2>*{vertical-align:middle}
+html body .carte .info-b h2 .apc-i,html body .apc h2 .apc-i{display:inline-grid!important;width:28px!important;height:28px!important;border-radius:9px!important;margin-right:8px}
+html body .carte .info-b h2 .apc-i svg,html body .apc h2 .apc-i svg{width:16px;height:16px}
+html body .carte .info-b{--cad:#C9D8F2}
+html body .apc{--cad:#F2D9B8}
+html body .apc .apc-t{background:none!important;border:0!important;padding:0!important;border-radius:0!important;gap:10px}
+html body .apc .apc-t .apc-i{width:30px;height:30px;border-radius:50%;background:#FFC93C;color:#142554}
+html body .apc .apc-t p{font-style:italic;font-weight:500}
+html body .apc .apc-t p b{font-style:normal}
+@media (prefers-reduced-motion:reduce){html body .carte .info-b h2,html body .apc h2{transform:none}}
+/* même traitement pour « Ta tâche » des leçons-enquêtes : pas d'encadré, pastille crayon + italique */
+html body .carte .enq-tache{position:relative;background:none!important;border:0!important;border-radius:0!important;padding:2px 0 2px 42px!important;font-style:italic;font-weight:500}
+html body .carte .enq-tache::before{content:"";position:absolute;left:0;top:4px;width:30px;height:30px;border-radius:50%;background:#FFC93C url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23142554' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M17 3a2.8 2.8 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5z'/%3E%3C/svg%3E") center/15px no-repeat}
+html body .carte .enq-tache b{font-style:normal;color:#8A6A00!important}

@@ -224,3 +224,12 @@ ul.mx-check li::before{border-color:var(--vm-mag)}
 #mx .mx-puces a{display:inline-flex;align-items:center;gap:5px;background:#fff;border:1px solid #DCE5F5;border-radius:999px;padding:5px 11px;font:600 13px/1.2 var(--sans)!important;color:#0C2A6A!important;text-decoration:none!important;margin:0}
 #mx .mx-puces a svg{color:var(--mt)}
 #mx .mx-puces a:hover{border-color:var(--mt)}
+
+/* 18/11/2026 « refais les tableaux comme dans dénombrement » : quadrillage fin sur toutes les cellules,
+   ligne d'en-tête et première colonne sur fond bleu pâle en gras, pas de carte arrondie. */
+#mx .mx-tbl,.mx-tbl{border:0!important;border-radius:0!important;box-shadow:none!important}
+.mx-tbl table{border:1px solid #E3E8F1}
+#mx .mx-tbl th,.mx-tbl th{background:#F4F7FC!important;color:#001136;font-weight:700;border:1px solid #E3E8F1!important}
+.mx-tbl td{border:1px solid #E3E8F1!important;color:#3B4456}
+.mx-tbl tbody td:first-child{background:#F4F7FC;color:#001136;font-weight:700}
+.mx-tbl tfoot td{background:#F4F7FC}

@@ -12,7 +12,7 @@
 <link rel="stylesheet" href="jeu.css?v=20261112v">
 <link rel="stylesheet" href="planches.css?v=20261116b">
 <link rel="stylesheet" href="lecon-modele.css?v=20261116j">
-<link rel="stylesheet" href="modele.css?v=20261118r">
+<link rel="stylesheet" href="modele.css?v=20261118t">
 <style>
 /* ── Vue Enseignant, français : évaluer la leçon dans l'Atelier (10/11/2026) ── */
 .atelier-prof{display:none}
@@ -52,7 +52,7 @@
 <script src="/api/apprendre_config.php"></script>
 <script src="scenes.js?v=20261112a"></script>
 <script src="progressions.js?v=20261110g"></script>
-<script src="lecons.js?v=20261118l16"></script>
+<script src="lecons.js?v=20261118cm7"></script>
 <script src="ressources.js?v=20261117a"></script>
 <script src="atelier.js?v=20261110a"></script>
 <script src="charge.js?v=31ea7845"></script>
@@ -101,6 +101,11 @@
      (D.html||"")+(D.etapes?'<ol class="den-etapes">'+D.etapes.map(function(e){return '<li>'+e+'</li>'}).join("")+'</ol>':'')+
      (D.reponse?'<div class="reponse"><b>La réponse rédigée</b>'+D.reponse+'</div>':'')+
      (D.transfert?'<div class="transfert"><b>À ton tour : une situation nouvelle</b>'+D.transfert+'</div>':'')+'</section>':'';
+  /* 18/11/2026 « même dans les leçons » : carte mentale de la leçon (parties + « à retenir »), _src/00-carte-mentale.js.
+     Une seule fois, en fin de cours (« applique aussi les cartes aux leçons pour les enrichir ») : pas aussi dans la Révision (règle « pas de doublon »). */
+  var carteM="";
+  if(!mur&&window.VRT_CM){ try{ var cmH=VRT_CM.lecon(L); if(cmH){ if(!document.getElementById("cmCss")){ var st=document.createElement("style"); st.id="cmCss"; st.textContent=VRT_CM.css; document.head.appendChild(st); }
+    carteM='<div class="partie cm-lecon"><h2><span class="num">'+A.pic("cible",20)+'</span><span class="txt">La carte mentale de la leçon</span></h2>'+cmH+'</div>'; } }catch(e){ carteM=""; } }
   var parties=ouvertes.map(function(p,k){
     return '<div class="partie" id="p'+(k+1)+'"><h2><span class="num">'+(k+1)+'</span><span class="txt">'+esc(p.t)+'</span></h2>'+p.html+
       (p.planches?p.planches.map(function(pl,i){return planche(pl,k,i)}).join(""):'')+
@@ -135,7 +140,7 @@
      (L.intro?'<aside class="info-b"><h2><span class="apc-i">'+A.pic("lecture",20)+'</span>Pour commencer</h2><p class="info">'+L.intro+'</p></aside>':'')+
      (L.apc&&!L.enquete?'<aside class="apc"><h2><span class="apc-i">'+A.pic("boussole",20)+'</span>Situation de vie</h2><p class="apc-s">'+esc(L.apc.situation)+'</p><div class="apc-t"><span class="apc-i">'+A.pic("crayon",18)+'</span><p><b>Ta tâche</b>'+esc(L.apc.tache)+'</p></div></aside>':'')+
      enquete+(L.objectifs?'<div class="objectifs"><b>À la fin de la leçon, tu sauras :</b><ul>'+L.objectifs.map(function(o){return '<li>'+o+'</li>'}).join("")+'</ul></div>':'')+
-     parties+denouement+plus+(mur?VRT.verrou.mur(L,mur,A):scenesHtml+appel+A.offre(L.c,L.m,'lecon'))+'<div id="tuteurLecon"></div>'+nav+'</article></section>'+
+     parties+denouement+plus+carteM+(mur?VRT.verrou.mur(L,mur,A):scenesHtml+appel+A.offre(L.c,L.m,'lecon'))+'<div id="tuteurLecon"></div>'+nav+'</article></section>'+
    '<section class="grille" data-panneau="revision" hidden><aside class="sommaire"><p>L\'essentiel</p></aside><article class="carte">'+
      ''+(mur?'<p class="vide">La fiche de révision de cette leçon est réservée aux abonnés. <a href="#" data-retour-cours>Voir comment la débloquer</a>.</p>':'<div class="partie"><h2><span class="num">'+A.pic("coche",20)+'</span><span class="txt">Ce que tu dois retenir</span></h2><ul>'+L.revision.map(function(r){return '<li>'+r+'</li>'}).join("")+'</ul></div>')+
      (L.exo?'<div class="partie"><h2><span class="num">'+A.pic("crayon",18)+'</span><span class="txt">À toi de jouer</span></h2>'+L.exo+'</div>':'')+
