@@ -1,3 +1,17 @@
+## Apprendre : lot 12, chinois de 1re et arabe de Tle (18/11/2026)
+
+Demande de Jacques : « continue ».
+
+- **`apprendre/_src/20-approfondies-langues-3.js`** : 4 leçons gratuites au gabarit approfondi, remplacées en place :
+  - **1re chinois, 不但……而且 / 第一……第二** : discours de Marie pour le concours « Pont du chinois » (汉语桥) ; blocs de la structure avec pinyin, estrade 3D aux lanternes rouges, famille en portraits avec les mots chinois ; **constructeur de phrases** (sujet, qualité A, qualité B).
+  - **1re chinois, 如果……就** : message sur la sortie du club à Kribi ; blocs de la structure, car 3D sous la pluie ; **exercice** : choisir la phrase correcte (5 phrases).
+  - **Tle arabe, أنواع الخبر** : description de la salle de classe d'Aminatou à Maroua ; مبتدأ / خبر en blocs (lecture de droite à gauche), salle de classe 3D ; **exercice** : type du خبر (8 phrases).
+  - **Tle arabe, اللازم والمتعدي** : journal d'Ibrahim à Garoua (« ذهبَ الطالبُ المدرسةَ » corrigé en « إلى المدرسةِ ») ; schéma لازم / متعدٍّ, scène 3D جلسَ → أجلسَ ; **exercice** : لازم ou متعدٍّ (8 phrases).
+- Textes arabes des planches : `direction='rtl'`, police Amiri / Noto Naskh Arabic avec repli ; vérifiés à l'écran (lettres liées, sens de lecture correct).
+- **Piège rencontré** : la fonction `alea()` n'est pas dans l'en-tête commun des fichiers 17 à 20 ; une erreur au chargement d'un fichier `_src` arrête toutes ses leçons suivantes (le test « enquete / denouement » de Chromium le révèle). Dans `planche3d.js`, `boite.c` est le **centre** de la boîte.
+- `lecons.js?v=20261118l12` ; 4 pages `apprendre/cours/` régénérées et habillées. Chromium (1200 et 390 px) : aucun débordement, aucune erreur JS. Bancs : réglages 29/29, verrou 18/18, gabarits 54/54, planche mobile 23/23, charte 34/34, lisibilité 7/7 ; contrôles GEO au vert.
+- **Suite** : 2nde C (maths, français, ECM) et 2nde A (maths, énonciation, histoire, philosophie, géographie) ; les leçons de 6e-5e-4e restent à l'autre session.
+
 ## Apprendre : lot 11, économie sociale et familiale et italien de 1re ; déploiement débloqué (18/11/2026)
 
 Demandes de Jacques : « Continue », puis « continue ».
