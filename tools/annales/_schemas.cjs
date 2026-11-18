@@ -978,4 +978,29 @@ S["proba-2024-chimie-synthese"] = () => {
   g += L([330, 200], [360, 212], ' stroke-width="0.9"') + T([344, 228], "cuve à eau", fs);
   return svg(460, 272, g, "Montage de synthèse de l'acétylène : l'eau d'une ampoule de coulée tombe goutte à goutte sur le carbure de calcium contenu dans un ballon ; le gaz formé passe par un tube à dégagement et se recueille dans une éprouvette retournée sur une cuve à eau.");
 };
+// Probatoire 2024 physique C-E, exercice 3.1 : descente du parachutiste (document du sujet).
+S["proba-2024-physique-ce-parachute"] = () => {
+  const fs = ' font-size="11"', fb = ' font-size="11" font-weight="700"';
+  let g = L([30, 30], [330, 30], ' stroke-width="1.4"') + fleche([338, 30], [328, 30], 7);
+  g += '<path d="M40 30 l14 -4 l6 4 l-6 4 Z" fill="currentColor" stroke="none"/><path d="M262 30 l14 -4 l6 4 l-6 4 Z" fill="currentColor" stroke="none"/>';
+  g += '<path d="M100 30 Q190 34 230 110 Q262 168 300 205 Q318 222 340 226" stroke-width="2"/>';
+  g += L([100, 30], [100, 110], ' stroke-width="1"') + fleche([100, 114], [100, 104], 6) + fleche([100, 26], [100, 36], 6) + T([106, 74], "h", ' font-size="12" font-style="italic"');
+  g += L([100, 110], [222, 110], ' stroke-width="0.9" stroke-dasharray="4 3"') + T([222, 126], "Ouverture du parachute", fb + ' text-anchor="end"');
+  g += '<circle cx="230" cy="110" r="5" stroke-width="1.4"/>';
+  g += L([20, 228], [345, 228], ' stroke-width="1.8"') + T([24, 222], "Sol terrestre", fb);
+  g += L([70, 17], [97, 27], ' stroke-width="0.9"') + T([6, 13], "Le parachutiste sort de l'avion à l'instant t₀", fs);
+  g += T([120, 164], "Trajectoire du", fs) + T([120, 177], "parachutiste", fs) + L([196, 166], [254, 158], ' stroke-width="0.9"');
+  g += T([262, 70], "À l'instant t₁", fs) + L([270, 76], [238, 104], ' stroke-width="0.9"') + fleche([235, 107], [242, 100], 5);
+  return svg(360, 240, g, "Document : l'avion vole horizontalement ; le parachutiste le quitte à l'instant t₀, décrit une trajectoire courbe vers le bas ; à l'instant t₁, une hauteur h plus bas que le point de sortie, le parachute s'ouvre ; il atteint ensuite le sol terrestre.");
+};
+// Probatoire 2024 physique C-E, partie II : le circuit (bornes A et B, ampèremètre, moteur M, résistor R).
+S["proba-2024-physique-ce-circuit"] = () => {
+  const fs = ' font-size="13" font-weight="700"';
+  let g = P([[30, 90], [30, 40], [124, 40]]) + '<circle cx="144" cy="40" r="20" stroke-width="1.6"/>' + T([138, 45], "A", fs) + P([[164, 40], [240, 40], [240, 88]]);
+  g += '<circle cx="240" cy="110" r="22" stroke-width="1.6"/>' + T([231, 115], "M", fs) + P([[240, 132], [240, 180], [180, 180]]);
+  g += '<rect x="100" y="168" width="80" height="24" stroke-width="1.6"/>' + T([134, 210], "R", fs) + P([[100, 180], [30, 180], [30, 128]]);
+  g += '<circle cx="30" cy="92" r="3" fill="currentColor" stroke="none"/><circle cx="30" cy="126" r="3" fill="currentColor" stroke="none"/>' + T([38, 97], "A", fs) + T([38, 131], "B", fs);
+  g += L([144, 62], [144, 76], ' stroke-width="1"') + fleche([144, 80], [144, 72], 5) + T([150, 78], "I", ' font-size="12" font-style="italic"');
+  return svg(280, 220, g, "Circuit électrique : entre les bornes A et B de l'alimentation sont branchés en série un ampèremètre, le moteur M et un résistor R.");
+};
 module.exports = S;

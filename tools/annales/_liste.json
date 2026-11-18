@@ -392,6 +392,20 @@
   "u": "/ressources/annales/probatoire-physique-ce-2025.html"
  },
  {
+  "id": "probatoire-physique-ce-2024",
+  "examen": "probatoire",
+  "m": "physique",
+  "serie": "séries C et E",
+  "nomExamen": "Probatoire",
+  "fiche": "ressources/examen-physique-chimie-probatoire.html",
+  "matiere": "Physique (séries C et E)",
+  "mat": "physique",
+  "classes": "1re C",
+  "annee": 2024,
+  "national": false,
+  "u": "/ressources/annales/probatoire-physique-ce-2024.html"
+ },
+ {
   "id": "bac-physique-d-2025",
   "examen": "bac",
   "m": "physique",
