@@ -1,3 +1,13 @@
+## Apprendre : classes d'examen — leçons nouvelles RÉSERVÉES AUX ABONNÉS (18/11/2026)
+
+Décision de Jacques (question posée) : les nouvelles leçons des classes d'examen (3e, 1re, Tle) sont **réservées aux abonnés**, comme les 2 000 leçons existantes : début public, suite servie par `api/apprendre.php`.
+
+- **Chaîne payante** (`tools/build_apprendre_payant.cjs`) : sources HORS DÉPÔT (dépôt public) ; produit `apercus-<classe>.js` (début public), `charge.js`, et les `.json` de la suite à déposer par FTP dans `uploads/protected/apprendre/`. Ce build RÉÉCRIT tous les aperçus : ne jamais le lancer dans le dépôt sans toutes les sources.
+- **Méthode pour un nouveau lot** : 1) écrire la source au format de la chaîne (`VRT_L` sans la partie « Entraînement », `payant: true` ; `VRT_APC` avec situation, tache, resolution, etre, labo, partieLabo ≥ 1 ; `VRT_EXAM` avec sujet, situation, consignes, reponse) ; 2) la valider en lançant le build officiel sur une COPIE (`cp -r apprendre tools <copie>`) avec un fichier de modules d'essai (`VRT_MODULES`) ; 3) `node tools/ajouter_apercus.cjs <copie>/apprendre apprendre "<lot>"` ajoute le début public dans un bloc balisé en fin des aperçus du dépôt et met à jour les empreintes de `charge.js` ; 4) livrer à Jacques la source (pour son dossier hors dépôt) et les `.json` (FTP).
+- **Labo « choix »** (nouveau type dans `apprendre/labo.js`) : exercice à choix fait de données seules (`items = [[phrase avec ___, [bonne, leurres…], explication]]`), transportable dans le JSON payant ; remplace les simulations VRT_A (fonctions) pour les leçons à verrou.
+- **Lot 1 converti** : les 9 leçons de philosophie de Tle (science, existence et mort, Dieu et religion ; A, C, D) publiées gratuitement par la PR #375 sont retirées de `lecons.js` (`36-examens-philo-tle.js` supprimé) et passent à verrou ; livraison (source + 9 JSON) remise à Jacques dans `livraison-payant-lot1.zip`. Tant que les JSON ne sont pas déposés, un abonné voit « cette leçon n'est pas encore disponible sur le serveur ».
+- Vérifié : visiteur = titre, situation de départ, 1re partie (définitions), puis mur ; la situation résolue et les parties suivantes ne sont pas publiques ; labo « choix » fonctionnel. Contrôles GEO et bancs au vert.
+
 ## Apprendre : classes d'examen, lot 1 — philosophie de Terminale (18/11/2026)
 
 Demande de Jacques : « Continue avec les autres matières et leçons non rédigées ou non enrichies. Finalise d'abord les classes d'examen ».

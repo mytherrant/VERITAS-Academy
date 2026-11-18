@@ -296,6 +296,29 @@
       var bt = el("button", "btn-l", "Couper la pièce"); bt.type = "button"; f.c.appendChild(bt); bt.onclick = function () { c = !c; bt.textContent = c ? "Voir la pièce entière" : "Couper la pièce"; dess(); };
       function dess() { var def = '<defs><pattern id="hach" width="9" height="9" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><line x1="0" y1="0" x2="0" y2="9" stroke="' + NU + '" stroke-width="1.2"/></pattern></defs>'; s.innerHTML = def + (c ? '<rect x="110" y="30" width="200" height="120" fill="url(#hach)" stroke="' + NU + '" stroke-width="3"/><rect x="185" y="30" width="50" height="120" fill="#fff" stroke="' + NU + '" stroke-width="2"/>' : '<rect x="110" y="30" width="200" height="120" fill="' + CL + '" stroke="' + NU + '" stroke-width="3"/>' + trait(185, 30, 185, 150, GR, 1.5, true) + trait(235, 30, 235, 150, GR, 1.5, true)); f.r.innerHTML = c ? "Les parties pleines coupées sont <b>hachurées</b>. Le trou, vide, reste blanc." : "Vue extérieure : le trou intérieur n'apparaît qu'en <b>traits interrompus</b>."; } dess();
     },
+    /* choix (18/11/2026) : exercice à choix pour les leçons à verrou (données seules, sans code, transportables en JSON).
+       o.items = [[phrase avec ___, [bonne, leurre, leurre…], explication]], o.suivant, o.lib */
+    choix: function (b, o) {
+      var f = cadre(b), i = 0, ok = 0, C = o.items || [], lib = o.lib || "Question";
+      function poser() {
+        var c = C[i], cs = c[1].slice().sort();
+        f.z.innerHTML = "<p class='labo-r' style='font-size:16px'>" + (i + 1) + ". " + c[0].replace("___", "<b style='border-bottom:2px dashed #1E499B;padding:0 14px'>?</b>") + "</p>";
+        f.c.innerHTML = ""; f.r.innerHTML = lib + " " + (i + 1) + " / " + C.length + " · score : <b>" + ok + "</b>";
+        cs.forEach(function (x) {
+          var bt = el("button", "btn-l", x); bt.type = "button";
+          bt.onclick = function () {
+            var bon = x === c[1][0]; if (bon) ok++;
+            f.z.innerHTML = "<p class='labo-r' style='font-size:16px'>" + (i + 1) + ". " + c[0].replace("___", "<b style='color:" + (bon ? "#17784D" : "#C62828") + "'>" + c[1][0] + "</b>") + "</p><p class='an-note'>" + (bon ? "✔ " : "✘ ") + c[2] + "</p>";
+            f.c.querySelectorAll("button").forEach(function (y) { y.disabled = true; });
+            var nx = el("button", "btn-l", i + 1 < C.length ? (o.suivant || "Suivant") : "↺ Recommencer"); nx.type = "button";
+            nx.onclick = function () { i = (i + 1) % C.length; if (!i) ok = 0; poser(); };
+            f.c.appendChild(nx); f.r.innerHTML = lib + " " + (i + 1) + " / " + C.length + " · score : <b>" + ok + "</b>";
+          };
+          f.c.appendChild(bt);
+        });
+      }
+      if (C.length) poser(); else f.r.textContent = "Aucune question.";
+    },
     trier: function (b, o) {
       var f = cadre(b); o.items.forEach(function (x) { var c = el("button", "btn-l", x[0]); c.type = "button"; c.onclick = function () { f.r.innerHTML = "<b>" + x[0] + "</b> : " + x[1]; }; f.c.appendChild(c); });
       f.r.textContent = o.invite || "Choisis un élément.";
