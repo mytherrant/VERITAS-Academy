@@ -1,3 +1,15 @@
+## Apprendre : lot 15, 5e et 4e (18/11/2026)
+
+Demande de Jacques : « Continue d'enrichir les autres leçons ». Il ne restait que du premier cycle (6e : 10, 5e : 3, 4e : 2) ; l'autre session (premier cycle, dernier lot le 17/11) a été prévenue par message ; elle travaille sur les annales et les en-têtes. Vérifié avant d'écrire : aucune PR ni branche non fusionnée sur ces leçons.
+
+- **`apprendre/_src/23-approfondies-premier-cycle-2.js`** : 4 leçons au gabarit approfondi, remplacées en place :
+  - **5e français, la subordonnée relative** : lettre de Junior (Bandjoun) à son correspondant belge (« le chef que je t'ai parlé ») ; schéma antécédent / pronom / relative, village 3D (chefferie au toit pyramidal, piliers, marché, bois sacré) ; **exercice** qui / que / dont / où (8 phrases).
+  - **5e histoire, Pygmées et Sao** : dispute au Musée national (« des géants ! ») ; carte du Cameroun des deux peuples, village sao 3D sur sa butte dans la plaine inondée ; **simulation** du bronze à la cire perdue (5 étapes).
+  - **5e géographie, croissance de la population** : classe de 112 élèves à Garoua (36 − 9 = 27 ‰, pas 45) ; courbe mondiale 1750-2022, pyramide des âges 3D du Cameroun (ordres de grandeur) ; **simulation** natalité / mortalité / projection.
+  - **4e grec, l'alphabet** : carte postale ΑΘΗΝΑ (faux amis Η, Ρ, Χ) ; du phénicien au latin, stèle de marbre 3D gravée, atelier des racines ; **exercice** de transcription (8 mots) ; quiz porté à 10 questions.
+- `lecons.js?v=20261118l15` ; 4 pages `apprendre/cours/` régénérées et habillées. Chromium (1200 et 390 px) : aucun débordement, aucune erreur JS. Contrôles GEO et bancs au vert.
+- **Suite** : 4e-ln-tons et les 10 leçons de 6e (info, langues nationales, latin, EPS, arts, technologie).
+
 ## Apprendre : lot 14, 2nde A (18/11/2026)
 
 Demande de Jacques : « continue », puis « voir ce qui a été fait pour éviter les doublons ». Vérification faite avant d'écrire : aucune PR ouverte, aucune branche non fusionnée et aucune autre session ne touchait ces 4 leçons (seules 6e-5e-4e sont chez l'autre session).
