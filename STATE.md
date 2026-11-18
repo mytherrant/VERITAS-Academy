@@ -13,7 +13,9 @@ Demandes de Jacques : « Continue », puis « continue ».
 
 ## 18/11/2026 — Formules compactes : en-tête teinté plus foncé, milieu blanc (branche offres-entetes)
 - Starter vert, Pro bleu, Élite violet : seul l'en-tête (nom, prix, public) garde la teinte, un peu plus foncée ; la liste des avantages est sur fond blanc.
-- Avantages alignés à gauche (plus de mots étirés). modele.css?v=20261118s.
+- Avantages alignés à gauche (plus de mots étirés).
+- « Pour commencer » et « Situation de vie » : titre dans un petit cadre posé sur le bord de l'encadré, comme les notes.
+- « Ta tâche » (situation de vie et enquête) : plus d'encadré, pastille crayon + texte en italique. modele.css?v=20261118t.
 
 ## Leçons : étiquettes de planche sans « 2D » ni « 3D » (17/11/2026)
 
