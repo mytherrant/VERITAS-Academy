@@ -11,6 +11,13 @@ Demande de Jacques : « Continue ». L'autre session (retouches de leçons) a co
 - `lecons.js?v=20261118m17` (après fusion de master : PR #357, cartes mentales) ; 4 pages `apprendre/cours/` régénérées et habillées. Chromium (1200 et 390 px) : aucun débordement, aucune erreur JS. Contrôles GEO et bancs au vert.
 - **Suite** : 3 dernières leçons de 6e (coordination bras-jambes, matériel de dessin, site d'une pépinière).
 
+## 18/11/2026 — Apprendre : 6e Mathématiques, lot 2 (branche apprendre-lot-suite)
+- apprendre/_src/16c-approfondies-6e-maths.js : 3 leçons NOUVELLES au gabarit approfondi, sur des lignes de la progression sans leçon (coordonné avec la session « Enrichissement des leçons », qui prend les leçons gratuites existantes de 6e-4e).
+  - 6e-maths-cercle (« Périmètre ou circonférence du cercle », ligne 23) : le puits de Ngaoundéré, roue déroulée, disque redressé, puits 3D, simulation cercle/carré.
+  - 6e-maths-proportionnalite (« Tableau de proportionnalité », ligne 36) : le riz du marché Mfoundi, sacs et pièces 3D, quatrième proportionnelle, pourcentage et échelle, simulation avec promotion.
+  - 6e-maths-pave-droit (« Patron d'un cube et d'un pavé droit », ligne 53) : les savons de Bafang, boîte 3D de 30 savons, patron, aire 992 cm², volume 1 920 cm³, simulation des dimensions.
+- Rattachement vérifié (cle → VRT_PROG), 0 doublon ; Chromium 390/1280 px : 0 erreur, 0 débordement ; bancs verts.
+
 ## Apprendre : lot 16, 4e et 6e (18/11/2026)
 
 Demande de Jacques : « Continue ». Vérifié avant d'écrire : aucune PR ni branche ouverte ne touche ces leçons (la PR #357 de l'autre session ne modifie que `00-carte-mentale.js`).
