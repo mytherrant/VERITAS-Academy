@@ -28,6 +28,8 @@
 .ax-tbl td,.ax-tbl th{border-bottom:1px solid #E6E0D4;padding:9px 8px;text-align:left;font-size:15px}
 .ax-tbl a{color:#1E499B}
 .ax-col{display:inline-flex;flex-direction:column;vertical-align:middle;text-align:center;line-height:1.2;margin:0 2px}
+.ax-sys{display:inline-flex;flex-direction:column;vertical-align:middle;text-align:left;line-height:1.3;margin:2px 4px;padding-left:.75em;position:relative}
+.ax-sys::before{content:"{";position:absolute;left:0;top:50%;font-weight:300;line-height:1;transform:translateY(-50%) scaleY(calc(var(--n) * .92))}
 .ax-col{padding:0 5px;border-left:1.5px solid currentColor;border-right:1.5px solid currentColor;border-radius:9px}
 .ax-sujet pre,.ax-corrige pre{white-space:pre-wrap;overflow-wrap:anywhere;max-width:100%;background:#F7F5F0;border:1px solid #E6E0D4;border-radius:8px;padding:12px 14px;font-size:14px;line-height:1.55}
 .ax-sujet strong,.ax-corrige strong{color:#1E499B}

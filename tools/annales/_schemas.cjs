@@ -859,4 +859,75 @@ S["proba-2025-histoire-a-carte"] = () => {
     "Document 3 : carte du Cameroun après la guerre de 1914-1916 : une bande étroite à l'ouest, le long du Nigéria, de Buea à Dikoa, sous mandat anglais ; le reste du territoire, avec Yaoundé, sous mandat français ; une zone restituée à l'AEF à l'est et au sud ; la Guinée espagnole au sud-ouest.");
 };
 
+// Maths A-ABI 2025 (BAC), exercice 3 : courbe de f(x) = 1/x + ln x et son asymptote x = 0 (axe des ordonnées).
+S["bac-2025-maths-a-courbe"] = () => {
+  const R = repere(38, -0.6, 6.4, -0.6, 5.4), { X, Y } = R;
+  let g = R.g; const p = [];
+  for (let x = 0.17; x <= 6.3; x += 0.01) p.push([X(x), Y(1 / x + Math.log(x))]);
+  g += P(p, ' stroke-width="2.2"');
+  g += L([X(0.4), Y(1)], [X(1.6), Y(1)], ' stroke-width="1"') + L([X(1), Y(0)], [X(1), Y(1)], POINTILLE + ' stroke-width="1"');
+  for (const x of [0.25, 0.5, 2, 3]) g += point(X, Y, x, 1 / x + Math.log(x), "", 0, 0);
+  g += T([X(0) + 6, Y(5.1)], "x = 0", ' font-size="11" font-style="italic"');
+  g += T([X(4.4), Y(2.1)], "(C)", ' font-size="12" font-style="italic"');
+  return svg(R.W, R.H, g, "Courbe (C) de f(x) = 1/x + ln x : elle descend depuis +∞ le long de l'axe des ordonnées (asymptote verticale x = 0), atteint son minimum 1 en x = 1 avec une tangente horizontale, puis croît lentement vers +∞ ; points placés : (0,25 ; 2,6), (0,5 ; 1,3), (2 ; 1,2), (3 ; 1,4).");
+};
+// Géographie C-D-TI 2025 (BAC), document 2 : part de l'Afrique dans le commerce mondial de marchandises (en %), source OMC.
+S["bac-2025-geo-cdti-afrique"] = () => {
+  const x0 = 46, y0 = 276, u = 24, fs = ' font-size="12"';
+  let g = L([x0, y0], [x0, y0 - 8.4 * u]) + fleche([x0, y0 - 8.4 * u - 6], [x0, y0 - 8.4 * u], 6) + L([x0, y0], [x0 + 300, y0]);
+  for (let k = 0; k <= 8; k++) g += L([x0 - 4, y0 - k * u], [x0, y0 - k * u], ' stroke-width="1"') + T([x0 - 16, y0 - k * u + 4], String(k), ' font-size="11"');
+  g += T([x0 + 10, y0 - 8.4 * u + 4], "En %", fs);
+  [["1953", 6.5], ["1973", 4.8], ["1993", 2.5], ["2013", 3.3]].forEach(([a, v], i) => {
+    const x = x0 + 22 + i * 70;
+    g += '<rect x="' + x + '" y="' + f(y0 - v * u) + '" width="40" height="' + f(v * u) + '" fill="currentColor" fill-opacity="0.18"/>';
+    g += T([x + 20, y0 - v * u - 6], String(v).replace(".", ",") + " %", fs + ' text-anchor="middle"') + T([x + 20, y0 + 16], a, fs + ' text-anchor="middle"');
+  });
+  g += T([180, 16], "Part de l'Afrique dans le commerce", ' font-size="12" font-weight="700" text-anchor="middle"') + T([180, 32], "mondial de marchandises", ' font-size="12" font-weight="700" text-anchor="middle"');
+  return svg(360, 300, g, "Histogramme : part de l'Afrique dans le commerce mondial de marchandises, en pourcentage : 6,5 % en 1953, 4,8 % en 1973, 2,5 % en 1993, 3,3 % en 2013 (source : OMC).");
+};
+// Corrigé : diagramme en bâtons des densités (échelle 1 cm pour 10 hab./km²).
+S["bac-2025-geo-cdti-densites"] = () => {
+  const x0 = 56, y0 = 330, u = 2.1, fs = ' font-size="12"';
+  let g = L([x0, y0], [x0, y0 - 145 * u]) + fleche([x0, y0 - 145 * u - 6], [x0, y0 - 145 * u], 6) + L([x0, y0], [x0 + 330, y0]) + fleche([x0 + 336, y0], [x0 + 326, y0], 6);
+  for (let k = 0; k <= 120; k += 20) g += L([x0 - 4, y0 - k * u], [x0, y0 - k * u], ' stroke-width="1"') + T([x0 - 8, y0 - k * u + 4], String(k), ' font-size="11" text-anchor="end"');
+  g += T([x0 + 10, y0 - 145 * u + 4], "Densité (hab./km²)", fs);
+  [["Littoral", 124], ["Nord-Ouest", 99.9], ["Centre", 44.8], ["Nord", 26]].forEach(([r, v], i) => {
+    const x = x0 + 30 + i * 76;
+    g += '<rect x="' + x + '" y="' + f(y0 - v * u) + '" width="34" height="' + f(v * u) + '" fill="currentColor" fill-opacity="0.18"/>';
+    g += T([x + 17, y0 - v * u - 6], String(v).replace(".", ","), fs + ' text-anchor="middle"') + T([x + 17, y0 + 16], r, fs + ' text-anchor="middle"');
+  });
+  g += T([x0 + 330, y0 + 32], "Régions", fs + ' text-anchor="end"');
+  return svg(400, 370, g, "Diagramme en bâtons des densités de population : Littoral 124, Nord-Ouest 99,9, Centre 44,8 et Nord 26 habitants au km² ; à l'échelle 1 cm pour 10 hab./km², les bâtons mesurent 12,4 cm, 9,99 cm, 4,48 cm et 2,6 cm.");
+};
+// Maths C-E 2025 (BAC), partie B : l'espace aménagé par le Maire (figure du sujet : quadrillage, O, I, J, K ;
+// mêmes positions que sur le scan, où J est à 5 carreaux de O et I à 4 carreaux).
+S["bac-2025-maths-ce-espace"] = () => {
+  const c = 18, ox = 3 * c + 8, oy = 14 * c + 8, X = k => ox + k * c, Y = k => oy - k * c;
+  let g = '<g stroke-width="0.8" stroke-dasharray="1.5 2.5" opacity="0.6">';
+  for (let i = -3; i <= 7; i++) g += L([X(i), Y(-2)], [X(i), Y(14)]);
+  for (let j = -2; j <= 14; j++) g += L([X(-3), Y(j)], [X(7), Y(j)]);
+  g += "</g>" + L([X(-3), Y(0)], [X(7), Y(0)], ' stroke-width="1"') + L([X(0), Y(-2)], [X(0), Y(14)], ' stroke-width="1"');
+  const J = [X(0), Y(5)], K = [X(4), Y(10.7)];
+  g += L([X(0), Y(0)], [X(4), Y(0)], ' stroke-width="2.2"') + L([X(4), Y(0)], K, ' stroke-width="2.2"') + L([X(0), Y(0)], J, ' stroke-width="2.2"');
+  g += '<path d="M' + J[0] + ' ' + J[1] + ' Q ' + f(X(1.9)) + ' ' + f(Y(7.4)) + ' ' + K[0] + ' ' + K[1] + '" stroke-width="2.2"/>';
+  g += '<path d="M' + f(X(-3)) + ' ' + f(Y(1.6)) + ' Q ' + f(X(-1.4)) + ' ' + f(Y(3.4)) + ' ' + J[0] + ' ' + J[1] + '" stroke-width="1" stroke-dasharray="3 3"/>';
+  const fs = ' font-size="13" font-style="italic"';
+  g += T([X(0) - 14, Y(0) + 15], "O", fs) + T([X(4) - 3, Y(0) + 15], "I", fs) + T([X(0) - 13, J[1] + 4], "J", fs) + T([K[0] - 14, K[1] - 4], "K", fs) + T([X(0) - 12, Y(13.4)], "y", fs) + T([X(6.6), Y(0) + 15], "x", fs);
+  g += T([X(-3), Y(-2) + 22], "1 unité = 100 m", ' font-size="12"');
+  return svg(X(7) + 10, Y(-2) + 30, g, "Figure du sujet : sur un quadrillage, l'espace aménagé est limité par le segment [OI] sur l'axe des abscisses, le segment [IK] vertical, le segment [OJ] sur l'axe des ordonnées et l'arc JK de la courbe (Γ) ; 1 unité = 100 m.");
+};
+// Corrigé exercice 2 : la parabole (C) d'équation y = x² et son image (Γ) par la rotation de centre O et d'angle π/4.
+S["bac-2025-maths-ce-paraboles"] = () => {
+  const R = repere(64, -2.6, 2.2, -0.9, 3.3), { X, Y } = R, r2 = Math.SQRT1_2;
+  let g = R.g; const c = [], G = [];
+  for (let t = -1.75; t <= 1.75; t += 0.02) c.push([X(t), Y(t * t)]);
+  for (let t = -1.35; t <= 1.62; t += 0.02) G.push([X(r2 * (t - t * t)), Y(r2 * (t + t * t))]);
+  g += P(c, ' stroke-width="2.2"') + P(G, ' stroke-width="2.2" stroke-dasharray="7 4"');
+  g += L([X(-2.6), Y(-0.25)], [X(2.2), Y(-0.25)], ' stroke-width="1" stroke-dasharray="2 4"');
+  g += L([X(-0.55), Y(-0.9)], [X(2.2), Y(2.2 - Math.SQRT2 / 4)], ' stroke-width="1" stroke-dasharray="2 4"');
+  g += point(X, Y, 0, 0.25, "F", 6, -4) + point(X, Y, -Math.SQRT2 / 8, Math.SQRT2 / 8, "F'", -22, -4);
+  g += T([X(1.45), Y(2.5)], "(C)", ' font-size="13" font-style="italic"') + T([X(-2.3), Y(1.3)], "(Γ)", ' font-size="13" font-style="italic"');
+  g += T([X(1.25), Y(-0.25) + 14], "(D)", ' font-size="12" font-style="italic"') + T([X(1.55), Y(1.0)], "(D')", ' font-size="12" font-style="italic"');
+  return svg(R.W, R.H, g, "La parabole (C) : y = x², de sommet O, de foyer F(0 ; 1/4) et de directrice (D) : y = −1/4 ; en pointillés, son image (Γ) par la rotation de centre O et d'angle π/4, de même sommet O, d'axe la droite y = −x, de foyer F'(−√2/8 ; √2/8) et de directrice (D') : x − y − √2/4 = 0.");
+};
 module.exports = S;
