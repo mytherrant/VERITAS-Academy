@@ -1,3 +1,16 @@
+## Apprendre : lot 17, 6e (18/11/2026)
+
+Demande de Jacques : « Continue ». L'autre session (retouches de leçons) a confirmé par message qu'elle laisse les leçons de 6e-5e-4e à cette session ; sa PR #357 ajoutera une carte mentale automatique en fin de leçon (pas besoin de planche récapitulative).
+
+- **`apprendre/_src/25-approfondies-premier-cycle-4.js`** : 4 leçons de 6e au gabarit approfondi, remplacées en place (schémas d'origine `illus` conservés, quiz portés à 10 questions) :
+  - **Latin, origine et importance** : liste de fournitures de Léa à Kribi (« le latin est mort », « le français vient de l'anglais ») ; aqueduc romain 3D, arbre des langues romanes (noctem) ; **exercice** des racines latines (8 mots).
+  - **Latin, jours et mois** : calendrier d'une classe d'Ebolowa (« lundi = l'un-di », « septembre par erreur ») ; les sept astres 3D (Saturne et ses anneaux, Jupiter à bandes), Quintilis → Iulius, Sextilis → Augustus, Janus ; **simulation** : faire commencer l'année en mars ou en janvier.
+  - **Arts, les branches** : trois jurys du festival de Foumban (conte, balafon) ; bronze, ndop indigo, jarre ; balafon 3D (lames et calebasses) ; **exercice** « quel jury ? » (8 œuvres).
+  - **EPS, la piste** : finale du 200 m à Ngaoundéré (décalage du couloir 8, coureur qui coupe le virage) ; stade 3D (huit couloirs en `poly`, corde, arrivée) ; **simulation** du décalage (200 / 400 m, couloirs 1 à 8, rayons de course réglementaires : 36,80 m puis 36,5 + 1,22 (i − 1) + 0,2).
+- Partie 1 de `6e-eps-piste` : l'animation de `91-animations-2.js` est conservée ; la simulation du décalage est en partie 2.
+- `lecons.js?v=20261118l17` ; 4 pages `apprendre/cours/` régénérées et habillées. Chromium (1200 et 390 px) : aucun débordement, aucune erreur JS. Contrôles GEO et bancs au vert.
+- **Suite** : 3 dernières leçons de 6e (coordination bras-jambes, matériel de dessin, site d'une pépinière).
+
 ## Apprendre : lot 16, 4e et 6e (18/11/2026)
 
 Demande de Jacques : « Continue ». Vérifié avant d'écrire : aucune PR ni branche ouverte ne touche ces leçons (la PR #357 de l'autre session ne modifie que `00-carte-mentale.js`).
