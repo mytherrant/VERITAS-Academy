@@ -175,12 +175,45 @@
 
   /* ═══════════════════════ 1re ESF — LES SIGNES D'ALARME CHEZ LE NOURRISSON ═══════════════════════ */
   var EA_OLD = ancien("1re-esf-alarme");
+  /* nourrisson couché sur le dos, vu de dessus, sur sa couverture ; etat : normal, pleure, mou, conv, fievre, jaune, vomit, pli, resp, biberon */
   function bebe(x, y, s, etat) {
-    var t = "<g transform='translate(" + x + " " + y + ") scale(" + (s || 1) + ")'><ellipse cx='0' cy='40' rx='44' ry='8' fill='#001136' opacity='.12'/><path d='M-40 34C-40 4 -20 -6 6 -6S44 8 44 30C44 40 30 42 -30 42Z' fill='#F4EFE4' stroke='#D9CFBC'/>";
-    t += "<circle cx='-26' cy='4' r='20' fill='#6B4423'/><path d='M-44 -2C-40 -20 -14 -24 -8 -10' fill='#2B1D14'/>";
-    if (etat === "mou") t += "<path d='M-34 4h6M-22 4h6' stroke='#1B1410' stroke-width='2'/><path d='M-30 14q4 -2 8 0' stroke='#1B1410' fill='none' stroke-width='1.5'/>";
-    else if (etat === "pleure") t += "<path d='M-34 2l6 3M-22 5l6 -3' stroke='#1B1410' stroke-width='2'/><ellipse cx='-26' cy='15' rx='5' ry='4' fill='#7A1F1F'/>";
-    else t += "<circle cx='-31' cy='2' r='2.2' fill='#1B1410'/><circle cx='-21' cy='2' r='2.2' fill='#1B1410'/><path d='M-30 12q4 4 8 0' stroke='#1B1410' fill='none' stroke-width='1.5'/>";
+    etat = etat || "normal";
+    var jaune = etat === "jaune", peau = jaune ? "url(#bbJaune)" : "url(#bbPeau)", trait = "#3B2414", body = "#F7E7A6", ombreBody = "#E3CF86";
+    var d = "<defs><radialGradient id='bbPeau' cx='40%' cy='35%' r='70%'><stop offset='0' stop-color='#A8724A'/><stop offset='.6' stop-color='#8A5A36'/><stop offset='1' stop-color='#6B4423'/></radialGradient>" +
+      "<radialGradient id='bbJaune' cx='40%' cy='35%' r='70%'><stop offset='0' stop-color='#C9A04A'/><stop offset='.6' stop-color='#A8803A'/><stop offset='1' stop-color='#86642A'/></radialGradient>" +
+      "<linearGradient id='bbCouv' x1='0' y1='0' x2='1' y2='1'><stop offset='0' stop-color='#DDEBF7'/><stop offset='1' stop-color='#BFD6EC'/></linearGradient></defs>";
+    var t = "<g transform='translate(" + x + " " + y + ") scale(" + (s || 1) + ")'>" + d + "<rect x='-54' y='-58' width='108' height='124' rx='16' fill='url(#bbCouv)'/>";
+    for (var k = -40; k <= 40; k += 20) t += "<path d='M" + k + " -56V64' stroke='#fff' stroke-width='2' opacity='.5'/>";
+    var mou = etat === "mou", conv = etat === "conv";
+    function membre(pts, c, w) { return "<path d='M" + pts.map(function (q) { return q.join(" "); }).join("L") + "' stroke='" + c + "' stroke-width='" + w + "' stroke-linecap='round' stroke-linejoin='round' fill='none'/>"; }
+    /* jambes */
+    var J = mou ? [[[-10, 30], [-14, 50], [-15, 60]], [[10, 30], [14, 50], [15, 60]]] : conv ? [[[-10, 30], [-16, 52], [-20, 62]], [[10, 30], [16, 52], [20, 62]]] : [[[-10, 30], [-28, 44], [-20, 56]], [[10, 30], [28, 44], [20, 56]]];
+    J.forEach(function (j) { t += membre(j, ombreBody, 13) + membre(j, body, 11) + "<ellipse cx='" + j[2][0] + "' cy='" + (j[2][1] + 3) + "' rx='5.5' ry='4' fill='" + peau + "'/>"; });
+    /* bras */
+    var B = mou ? [[[-18, -2], [-26, 16], [-28, 30]], [[18, -2], [26, 16], [28, 30]]] : conv ? [[[-18, -2], [-36, -10], [-46, -20]], [[18, -2], [36, -10], [46, -20]]] : [[[-18, -2], [-32, 6], [-30, -14]], [[18, -2], [32, 6], [30, -14]]];
+    B.forEach(function (j) { t += membre(j, ombreBody, 10) + membre(j, body, 8) + "<circle cx='" + j[2][0] + "' cy='" + j[2][1] + "' r='4.6' fill='" + peau + "'/>"; });
+    if (conv) t += "<path d='M-52 -24l4 -4l3 5M48 -28l4 -4l3 5M-26 66l3 4l4 -3M22 68l3 4l4 -3' stroke='" + ROUGE + "' stroke-width='1.8' fill='none'/>";
+    /* corps en grenouillère */
+    t += "<ellipse cx='0' cy='12' rx='22' ry='25' fill='" + ombreBody + "'/><ellipse cx='-1' cy='10' rx='20' ry='23' fill='" + body + "'/><circle cx='0' cy='0' r='1.6' fill='#C9B26A'/><circle cx='0' cy='9' r='1.6' fill='#C9B26A'/><circle cx='0' cy='18' r='1.6' fill='#C9B26A'/>";
+    if (etat === "resp") t += "<path d='M-14 16q6 4 12 0M2 16q6 4 12 0' stroke='" + ROUGE + "' stroke-width='2' fill='none'/><path d='M-26 4q-6 6 0 12M26 4q6 6 0 12M-31 2q-8 8 0 16M31 2q8 8 0 16' stroke='" + ROUGE + "' stroke-width='1.6' fill='none' opacity='.8'/>";
+    if (etat === "pli") t += "<path d='M-8 14q8 -10 16 0' stroke='#8A5A36' stroke-width='5' fill='none' stroke-linecap='round'/><path d='M-6 8l-6 -6M6 8l6 -6' stroke='" + GRIS + "' stroke-width='1.6'/>";
+    /* tête */
+    t += "<rect x='-6' y='-14' width='12' height='8' fill='" + peau + "'/><circle cx='-19' cy='-30' r='4.5' fill='" + peau + "'/><circle cx='19' cy='-30' r='4.5' fill='" + peau + "'/><circle cx='0' cy='-30' r='19' fill='" + peau + "'/>";
+    [[-10, -46], [-4, -48], [2, -48], [8, -46], [-14, -42], [13, -42], [-1, -44]].forEach(function (c) { t += "<circle cx='" + c[0] + "' cy='" + c[1] + "' r='3.4' fill='#1B1410'/>"; });
+    var oeil = jaune ? "#F2D96B" : "#FFFFFF";
+    if (etat === "pleure" || etat === "resp" || etat === "biberon") t += "<path d='M-12 -32q5 4 10 0M2 -32q5 4 10 0' stroke='" + trait + "' stroke-width='2' fill='none' stroke-linecap='round'/>";
+    else if (mou) t += "<path d='M-12 -30q5 2 10 0M2 -30q5 2 10 0' stroke='" + trait + "' stroke-width='2' fill='none' stroke-linecap='round'/><path d='M-12 -31h10M2 -31h10' stroke='" + trait + "' stroke-width='1' opacity='.6'/>";
+    else if (conv) t += "<ellipse cx='-7' cy='-31' rx='4.4' ry='3.6' fill='" + oeil + "' stroke='" + trait + "'/><ellipse cx='7' cy='-31' rx='4.4' ry='3.6' fill='" + oeil + "' stroke='" + trait + "'/><circle cx='-7' cy='-34' r='1.6' fill='" + trait + "'/><circle cx='7' cy='-34' r='1.6' fill='" + trait + "'/>";
+    else t += "<ellipse cx='-7' cy='-31' rx='4' ry='3.6' fill='" + oeil + "'/><ellipse cx='7' cy='-31' rx='4' ry='3.6' fill='" + oeil + "'/><circle cx='-6.5' cy='-30.5' r='2.4' fill='" + trait + "'/><circle cx='7.5' cy='-30.5' r='2.4' fill='" + trait + "'/><circle cx='-5.8' cy='-31.4' r='.8' fill='#fff'/><circle cx='8.2' cy='-31.4' r='.8' fill='#fff'/>";
+    if (etat === "pli") t += "<path d='M-12 -26q5 3 10 0M2 -26q5 3 10 0' stroke='#4A2E18' stroke-width='2' fill='none' opacity='.7'/>";
+    t += "<path d='M-1.5 -24q1.5 2 3 0' stroke='" + trait + "' stroke-width='1.3' fill='none'/>";
+    if (etat === "pleure" || etat === "resp") t += "<ellipse cx='0' cy='-17' rx='5' ry='4' fill='#7A1F1F'/><path d='M-12 -28q-2 6 0 9M12 -28q2 6 0 9' stroke='#5BA3D9' stroke-width='2' fill='none'/>";
+    else if (etat === "biberon") t += "<path d='M-4 -18h8' stroke='" + trait + "' stroke-width='2' stroke-linecap='round'/>";
+    else if (mou || conv) t += "<ellipse cx='0' cy='-18' rx='3' ry='2' fill='#5A2A1A'/>";
+    else t += "<path d='M-5 -19q5 4 10 0' stroke='" + trait + "' stroke-width='1.6' fill='none' stroke-linecap='round'/>";
+    if (etat === "fievre") t += "<ellipse cx='-12' cy='-23' rx='5' ry='3' fill='#E8492E' opacity='.55'/><ellipse cx='12' cy='-23' rx='5' ry='3' fill='#E8492E' opacity='.55'/><path d='M16 -44q2 4 0 6q-2 -2 0 -6M-18 -40q2 4 0 6q-2 -2 0 -6' fill='#9FD4F2'/>";
+    else if (!jaune) t += "<ellipse cx='-12' cy='-23' rx='4' ry='2.4' fill='#C9746A' opacity='.35'/><ellipse cx='12' cy='-23' rx='4' ry='2.4' fill='#C9746A' opacity='.35'/>";
+    if (etat === "vomit") t += "<path d='M4 -16q10 6 22 2q8 4 14 -2q-6 10 -20 10q-12 0 -16 -10Z' fill='#F4F1E6' stroke='#D9D2BC'/>";
     return t + "</g>";
   }
   var SIGNES = [["Ne peut plus téter ni boire", "biberon"], ["Vomit tout ce qu'il prend", "vomit"], ["Convulsions", "conv"], ["Anormalement mou, somnolent", "mou"], ["Respire très vite, creusement sous les côtes", "resp"], ["Forte fièvre ou corps froid", "fievre"], ["Diarrhée, yeux enfoncés, pli cutané", "pli"], ["Peau ou yeux jaunes (jaunisse)", "jaune"]];
@@ -204,7 +237,7 @@
     objectifs: ["reconnaître un nourrisson en bonne santé", "identifier les signes de danger qui imposent de consulter", "compter la fréquence respiratoire et la comparer au seuil", "savoir quoi faire et quoi éviter en attendant les soins"],
     enquete: {
       titre: "La garde de Nina à Bertoua",
-      svg: svg(640, 220, "Une adolescente veille sur un nourrisson couché qui pleure, une voisine tend une calebasse", "", "<rect width='640' height='220' fill='#EEF2F8'/><rect y='180' width='640' height='40' fill='#C9B28A'/>" + bebe(300, 140, 1.4, "pleure") + perso(150, 86, "#5A3A1E", "#F7C948", "#1E499B") + perso(480, 86, "#6B4423", "#7B3F99", "#7B3F99") + "<path d='M500 128q20 -6 30 6q-6 14 -24 10Z' fill='#B9824A'/>" + bulle(410, 30, 210, "Une décoction, et on attend…", "#7B3F99") + bulle(60, 30, 180, "Elle ne tète plus…", BLEU)),
+      svg: svg(640, 220, "Une adolescente veille sur un nourrisson couché qui pleure, une voisine tend une calebasse", "", "<rect width='640' height='220' fill='#EEF2F8'/><rect y='180' width='640' height='40' fill='#C9B28A'/>" + bebe(300, 116, 0.95, "pleure") + perso(150, 86, "#5A3A1E", "#F7C948", "#1E499B") + perso(480, 86, "#6B4423", "#7B3F99", "#7B3F99") + "<path d='M500 128q20 -6 30 6q-6 14 -24 10Z' fill='#B9824A'/>" + bulle(410, 30, 210, "Une décoction, et on attend…", "#7B3F99") + bulle(60, 30, 180, "Elle ne tète plus…", BLEU)),
       legende: "À Bertoua : la maman de Nina est au marché ; Clarisse, élève de 1re A, garde sa petite sœur de 4 mois.",
       contexte: "<p>En fin d'après-midi, Nina refuse le biberon de lait maternel tiré, est très chaude et respire vite : Clarisse compte <strong>62 respirations en une minute</strong> et voit sa peau se creuser sous les côtes à chaque inspiration. La voisine propose une <strong>décoction de feuilles</strong> et dit qu'il faut « attendre que la maman rentre demain matin ». Le centre de santé est à quinze minutes en moto-taxi.</p>",
       documents: [{ t: "Seuils de respiration rapide (OMS, prise en charge de l'enfant malade)", html: "<table class='donnees'><tr><th>Âge</th><th>Respiration rapide si…</th></tr><tr><td>moins de 2 mois</td><td>60 par minute ou plus</td></tr><tr><td>2 à 12 mois</td><td>50 par minute ou plus</td></tr><tr><td>1 à 5 ans</td><td>40 par minute ou plus</td></tr></table>" }],
@@ -233,14 +266,10 @@
           var s = "<rect width='640' height='300' fill='#FFF6F4'/>";
           SIGNES.forEach(function (g, i) {
             var x = 14 + (i % 4) * 156, y = 14 + Math.floor(i / 4) * 142;
-            s += "<rect x='" + x + "' y='" + y + "' width='146' height='130' rx='12' fill='#fff' stroke='#F2C2C9'/>" + bebe(x + 82, y + 50, 0.85, g[1] === "mou" ? "mou" : g[1] === "conv" || g[1] === "vomit" || g[1] === "resp" ? "pleure" : "");
-            if (g[1] === "biberon") s += "<g transform='translate(" + (x + 30) + " " + (y + 26) + ") rotate(-30)'><rect x='-6' y='-14' width='12' height='26' rx='4' fill='#E8F4FA' stroke='#8EA9C1'/><path d='M-4 -14l4 -8l4 8' fill='#E3C79C'/></g><path d='M" + (x + 18) + " " + (y + 14) + "l26 26M" + (x + 44) + " " + (y + 14) + "l-26 26' stroke='" + ROUGE + "' stroke-width='3'/>";
-            if (g[1] === "fievre") s += "<g transform='translate(" + (x + 124) + " " + (y + 30) + ")'><rect x='-4' y='-22' width='8' height='36' rx='4' fill='#fff' stroke='#8E96A6'/><rect x='-2' y='-12' width='4' height='24' fill='" + ROUGE + "'/><circle cy='16' r='6' fill='" + ROUGE + "'/></g>";
-            if (g[1] === "resp") s += "<path d='M" + (x + 96) + " " + (y + 40) + "q8 6 0 12q8 6 0 12' stroke='" + ROUGE + "' stroke-width='2.5' fill='none'/>" + txt(x + 124, y + 26, "≥ 50/min", { s: 10, c: ROUGE });
-            if (g[1] === "conv") s += "<path d='M" + (x + 30) + " " + (y + 30) + "l6 -8l6 8l6 -8l6 8' stroke='" + ROUGE + "' stroke-width='2.5' fill='none'/>";
-            if (g[1] === "vomit") s += "<path d='M" + (x + 50) + " " + (y + 58) + "q-10 10 -20 8' stroke='#C9B28A' stroke-width='6' fill='none' stroke-linecap='round'/>";
-            if (g[1] === "pli") s += "<path d='M" + (x + 110) + " " + (y + 70) + "q8 -16 16 0' stroke='#6B4423' stroke-width='5' fill='none'/>";
-            if (g[1] === "jaune") s += "<circle cx='" + (x + 56) + "' cy='" + (y + 54) + "' r='16' fill='#F2C94C' opacity='.5'/>";
+            s += "<rect x='" + x + "' y='" + y + "' width='146' height='130' rx='12' fill='#fff' stroke='#F2C2C9'/>" + bebe(x + 73, y + 48, 0.62, g[1]);
+            if (g[1] === "biberon") s += "<g transform='translate(" + (x + 124) + " " + (y + 30) + ") rotate(25)'><rect x='-6' y='-14' width='12' height='26' rx='4' fill='#E8F4FA' stroke='#8EA9C1'/><path d='M-4 -14l4 -8l4 8' fill='#E3C79C'/></g><path d='M" + (x + 112) + " " + (y + 14) + "l24 26M" + (x + 136) + " " + (y + 14) + "l-24 26' stroke='" + ROUGE + "' stroke-width='3'/>";
+            if (g[1] === "fievre") s += "<g transform='translate(" + (x + 126) + " " + (y + 34) + ")'><rect x='-4' y='-22' width='8' height='36' rx='4' fill='#fff' stroke='#8E96A6'/><rect x='-2' y='-12' width='4' height='24' fill='" + ROUGE + "'/><circle cy='16' r='6' fill='" + ROUGE + "'/></g>" + txt(x + 126, y + 66, "39 °C", { s: 10, c: ROUGE });
+            if (g[1] === "resp") s += txt(x + 124, y + 22, "≥ 50/min", { s: 10, c: ROUGE });
             var mots = g[0].split(" "), l1 = "", l2 = "";
             mots.forEach(function (m) { if ((l1 + " " + m).length <= 22 && !l2) l1 = (l1 ? l1 + " " : "") + m; else l2 = (l2 ? l2 + " " : "") + m; });
             s += txt(x + 73, y + 104, l1, { s: 10.5, c: ROUGE }) + (l2 ? txt(x + 73, y + 118, l2, { s: 10.5, c: ROUGE }) : "");
@@ -440,7 +469,7 @@
     function seuil(m) { return m < 2 ? 60 : m < 12 ? 50 : 40; }
     function dess(ts) {
       var age = +I[0].value, r = +I[1].value, s = seuil(age), rapide = r >= s, ph = ((ts || 0) / 1000) * r / 60 * 2 * Math.PI, k = 1 + 0.06 * Math.sin(ph);
-      el.querySelector("[data-s]").innerHTML = "<rect width='640' height='170' fill='" + (rapide ? "#FFF1EE" : "#EEF8F1") + "'/><g transform='translate(170 96) scale(1.6 " + (1.6 * k).toFixed(3) + ")'>" + bebe(0, 0, 1, rapide ? "pleure" : "") + "</g>" + (rapide ? "<path d='M196 108q10 6 0 12q10 6 0 12' stroke='" + ROUGE + "' stroke-width='2.5' fill='none'/>" : "") + txt(460, 70, r + " / min", { s: 28, c: rapide ? ROUGE : VERT }) + txt(460, 100, "seuil pour cet âge : " + s + " / min", { s: 13, c: GRIS }) + txt(460, 130, rapide ? "RESPIRATION RAPIDE : consulter" : "respiration normale", { s: 13, c: rapide ? ROUGE : VERT });
+      el.querySelector("[data-s]").innerHTML = "<rect width='640' height='170' fill='" + (rapide ? "#FFF1EE" : "#EEF8F1") + "'/><g transform='translate(190 88) scale(1.2 " + (1.2 * k).toFixed(3) + ")'>" + bebe(0, 0, 1, rapide ? "resp" : "normal") + "</g>" + txt(460, 70, r + " / min", { s: 28, c: rapide ? ROUGE : VERT }) + txt(460, 100, "seuil pour cet âge : " + s + " / min", { s: 13, c: GRIS }) + txt(460, 130, rapide ? "RESPIRATION RAPIDE : consulter" : "respiration normale", { s: 13, c: rapide ? ROUGE : VERT });
       raf = requestAnimationFrame(function (t) { dess(t); });
     }
     var dessin = dess; dess = function (ts) { if (ts && ts - t0 < 66) { raf = requestAnimationFrame(dess); return; } t0 = ts || 0; dessin(ts); };
