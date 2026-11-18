@@ -17,6 +17,23 @@
   "u": "/ressources/sequentielles/3e-seq1-etudetexte.html"
  },
  {
+  "id": "3e-seq2-etudetexte",
+  "classe": "3e",
+  "m": "etudetexte",
+  "mat": "francais",
+  "matiere": "Français : étude de texte",
+  "seq": 2,
+  "rangs": [
+   21,
+   22,
+   23,
+   24,
+   27,
+   28
+  ],
+  "u": "/ressources/sequentielles/3e-seq2-etudetexte.html"
+ },
+ {
   "id": "3e-seq1-orthographe",
   "classe": "3e",
   "m": "orthographe",
@@ -28,6 +45,19 @@
    9
   ],
   "u": "/ressources/sequentielles/3e-seq1-orthographe.html"
+ },
+ {
+  "id": "3e-seq2-orthographe",
+  "classe": "3e",
+  "m": "orthographe",
+  "mat": "francais",
+  "matiere": "Français : correction orthographique",
+  "seq": 2,
+  "rangs": [
+   23,
+   27
+  ],
+  "u": "/ressources/sequentielles/3e-seq2-orthographe.html"
  },
  {
   "id": "3e-seq1-expression",
@@ -42,6 +72,20 @@
    10
   ],
   "u": "/ressources/sequentielles/3e-seq1-expression.html"
+ },
+ {
+  "id": "3e-seq2-expression",
+  "classe": "3e",
+  "m": "expression",
+  "mat": "francais",
+  "matiere": "Français : expression écrite",
+  "seq": 2,
+  "rangs": [
+   20,
+   25,
+   29
+  ],
+  "u": "/ressources/sequentielles/3e-seq2-expression.html"
  },
  {
   "id": "3e-seq1-mathematiques",
@@ -448,6 +492,165 @@
    26
   ],
   "u": "/ressources/sequentielles/3e-seq1-anglais.html"
+ },
+ {
+  "id": "3e-seq2-anglais",
+  "classe": "3e",
+  "m": "anglais",
+  "mat": "anglais",
+  "matiere": "Anglais",
+  "seq": 2,
+  "rangs": [
+   27,
+   28,
+   29,
+   30,
+   31,
+   32,
+   33,
+   34,
+   35,
+   36,
+   37,
+   38,
+   39,
+   40,
+   41,
+   42,
+   43,
+   44,
+   45,
+   46,
+   47,
+   48,
+   49,
+   50,
+   51,
+   52
+  ],
+  "u": "/ressources/sequentielles/3e-seq2-anglais.html"
+ },
+ {
+  "id": "3e-seq3-anglais",
+  "classe": "3e",
+  "m": "anglais",
+  "mat": "anglais",
+  "matiere": "Anglais",
+  "seq": 3,
+  "rangs": [
+   53,
+   54,
+   55,
+   56,
+   57,
+   58,
+   59,
+   60,
+   61,
+   62,
+   63,
+   64,
+   65,
+   66,
+   67,
+   68,
+   69,
+   70,
+   71,
+   72,
+   73,
+   74,
+   75,
+   76,
+   77,
+   78
+  ],
+  "u": "/ressources/sequentielles/3e-seq3-anglais.html"
+ },
+ {
+  "id": "3e-seq4-anglais",
+  "classe": "3e",
+  "m": "anglais",
+  "mat": "anglais",
+  "matiere": "Anglais",
+  "seq": 4,
+  "rangs": [
+   79,
+   80,
+   81,
+   82,
+   83,
+   84,
+   85,
+   86,
+   87,
+   88,
+   89,
+   90,
+   91,
+   92,
+   93,
+   94,
+   95,
+   96,
+   97,
+   98,
+   99,
+   100,
+   101,
+   102,
+   103,
+   104
+  ],
+  "u": "/ressources/sequentielles/3e-seq4-anglais.html"
+ },
+ {
+  "id": "3e-seq5-anglais",
+  "classe": "3e",
+  "m": "anglais",
+  "mat": "anglais",
+  "matiere": "Anglais",
+  "seq": 5,
+  "rangs": [
+   105,
+   106,
+   107,
+   108,
+   109,
+   110,
+   111,
+   112,
+   113,
+   114,
+   115,
+   116,
+   117
+  ],
+  "u": "/ressources/sequentielles/3e-seq5-anglais.html"
+ },
+ {
+  "id": "3e-seq6-anglais",
+  "classe": "3e",
+  "m": "anglais",
+  "mat": "anglais",
+  "matiere": "Anglais",
+  "seq": 6,
+  "rangs": [
+   118,
+   119,
+   120,
+   121,
+   122,
+   123,
+   124,
+   125,
+   126,
+   127,
+   128,
+   129,
+   130
+  ],
+  "u": "/ressources/sequentielles/3e-seq6-anglais.html"
  },
  {
   "id": "3e-seq1-histoire",

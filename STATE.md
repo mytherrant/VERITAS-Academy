@@ -1,6 +1,39 @@
 ## Leçons : étiquettes de planche sans « 2D » ni « 3D » (17/11/2026)
 
 Demande de Jacques : « pour toutes les fiches, enlève 2d, 3d ». `apprendre/lecon.html`, fonction `planche()` : l'étiquette devient « Planche n » (au lieu de « Planche n · 2D / 3D » ; les planches de type « Planche » affichaient même « Planche n · Planche »). Le type reste dans les données (`type: "3d"` pilote toujours le moteur 3D). Bancs gabarits, planche mobile, réglages, charte au vert ; 0 erreur JS.
+## Apprendre : premier cycle, lot 1 — divisibilité (6e), PGCD (5e), facteurs premiers (4e) (17/11/2026)
+
+Demande de Jacques : « continue l'enrichissement de mes leçons et visuels 2D, 3D », précisée par « juste les leçons dans la progression nationale des classes ». Pour ne pas croiser la session « Enrichissement des leçons » (3e, 1re, Tle), cette série prend la **6e, la 5e et la 4e** (message envoyé à l'autre session).
+
+- **`apprendre/_src/16-approfondies-premier-cycle.js`** : 3 leçons gratuites au gabarit approfondi, remplacées en place (même identifiant, même rang ; APC, examen et scènes repris ; parties d'origine conservées et enrichies) :
+  - **6e, critères de divisibilité** : les 1 260 beignets de la kermesse du CES de Bafia, sachets de 2, 3, 5, 9 ou 10 ; planches 2D (reste nul ou non, dernier chiffre / somme des chiffres, nombre de sachets par taille), **boulier 3D** de 1 260 (1 + 2 + 6 + 0 = 9 perles) ; **simulation** : emballer a beignets par sachets de b, reste et critère affichés.
+  - **5e, PGCD** : le carrelage 360 cm × 240 cm de la salle de 5e à Bertoua ; dalles de 240 (ne tombent pas juste), de 60 (justes mais pas les plus grandes), de 120 (PGCD) ; diviseurs communs en pastilles, **sol 3D** en 6 dalles de 120 cm ; **simulation** : choisir la taille de dalle (coupes en rose, nombre de dalles, coût de pose).
+  - **4e, décomposition en facteurs premiers** : 360 élèves du lycée de Kribi pour le défilé du 20 mai ; crible jusqu'à 50, arbre de 360 = 2³ × 3² × 5, 4 × 3 × 2 = 24 diviseurs donc 24 dispositions, **défilé 3D** en 18 rangées de 20 ; **simulation** : l'arbre de n'importe quel nombre de 2 à 600, nombre de diviseurs, disposition la plus proche du carré.
+- Quiz de 10 questions pour chacune (au lieu de 3 pour la 6e et la 5e). Simulations VRT_A sur la partie 0 (6e, 5e) et 1 (4e) : les animations existantes de `91-animations-2.js` restent sur la partie 1.
+- `lecons.js?v=20261117pc1` ; 3 pages `apprendre/cours/` régénérées et habillées. Chromium (390 et 1280 px) : aucun débordement, aucune erreur JS. Bancs : réglages 29/29, verrou 18/18, gabarits, planche mobile, charte 34/34, lisibilité au vert.
+- **Suite (premier cycle)** : 6e informatique (composants, IA), 6e technologie, 5e français (subordonnée relative), 5e histoire (Pygmées, Sao), 5e géographie (population), 4e langues nationales et grec.
+## Apprendre : lot 10, Ville cruelle et culture nationale (18/11/2026)
+
+Demande de Jacques : « Continue ». La 6e, la 5e et la 4e restent à l'autre session (`16-approfondies-premier-cycle.js`).
+
+- **`apprendre/_src/18-approfondies-examens-4.js`** : 3 leçons gratuites de classes d'examen au gabarit approfondi, remplacées en place :
+  - **3e français, Ville cruelle** : exposé de la 3ᵉ B à Mbalmayo (« histoire d'amour » ou « roman anticolonial » ?) ; plan de Tanga coupée en deux, hangar du Contrôle en 3D (sacs, bascule, feu), du fruit du cacaoyer au sac ; **exercice** : remettre l'intrigue dans l'ordre (7 épisodes) ; quiz d'origine complété à 10.
+  - **Tle, naissance** : la famille Ndzana de Mbalmayo (village ou maternité, état civil) ; case familiale et maternité en 3D, parcours moderne et étapes traditionnelles ; **exercice** : valoriser ou questionner (6 pratiques).
+  - **Tle, funérailles** : le conseil de famille des Kamga à Bafang (budget de 3 000 000 F, scolarité de 600 000 F) ; tambour à fente et place des funérailles en 3D, répartition du budget ; **simulateur** de budget révisé.
+- `lecons.js?v=20261118a` ; 3 pages `apprendre/cours/` régénérées et habillées. Chromium (1200 et 390 px) : aucun débordement, aucune erreur JS. Bancs : réglages 29/29, verrou 18/18, gabarits 54/54, planche mobile 23/23, charte 34/34, lisibilité 7/7.
+- **Suite** : Tle arabe (types d'attribut, verbes), 1re italien, chinois, ESF ; 3e langues nationales et arts restants ; 2nde (C et A).
+
+## Apprendre : lot 9, langues de 3e (17/11/2026)
+
+Demande de Jacques : « continue ». Coordination : une autre session (« Enrichissement leçons et visuels 2D/3D ») prend la 6e, la 5e et la 4e dans `apprendre/_src/16-approfondies-premier-cycle.js` ; cette session reste sur la 3e, la 1re et la Tle.
+
+- **`apprendre/_src/17-approfondies-langues-2.js`** : 4 leçons gratuites de 3e au gabarit approfondi, remplacées en place :
+  - **anglais, a / an / the** : dépliant touristique de Kribi plein de fautes ; six images (a university, an hour…), plage de Kribi en 3D (the sun, the Atlantic, the Lobé Falls, a pirogue) ; **exercice** : compléter le dépliant (8 phrases).
+  - **allemand, verbes faibles** : message vocal de Paul à Jonas (Berlin) ; radical et terminaisons en blocs 3D détachables, scène de marché ; **machine à conjuguer** (7 verbes × 6 personnes, e intercalé après -t / -d).
+  - **espagnol, mi familia** : photo de famille envoyée à Ana (Séville) ; arbre généalogique en portraits, arbre 3D à trois générations ; **simulation** : « ¿Quién es? ».
+  - **grec, Ésope et Homère** : soirée contes à Ebolowa (la tortue Kulu et Ulysse) ; amphore grecque 3D, voyage d'Ulysse et fable du lièvre côte à côte ; **exercice** : épopée ou fable (6 extraits).
+- `lecons.js?v=20261117g` ; 4 pages `apprendre/cours/` régénérées et habillées. Chromium (1200 et 390 px) : aucun débordement, aucune erreur JS. Bancs : réglages 29/29, verrou 18/18, gabarits 54/54, planche mobile 23/23, charte 34/34, lisibilité 7/7.
+- **Suite** : 3e français (Ville cruelle), Tle culture nationale (naissance, funérailles), arabe ; 1re italien, chinois, ESF.
 
 ## Apprendre : lot 8, langues de 3e et préparation du bac (17/11/2026)
 

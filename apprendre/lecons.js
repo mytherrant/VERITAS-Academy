@@ -6205,6 +6205,1277 @@ VRT_PLUS("3e-en-articles", [
   });
 })();
 
+/* Leçons APPROFONDIES — premier cycle, lot 1 (17/11/2026) : critères de divisibilité (6e), PGCD (5e),
+   décomposition en facteurs premiers (4e). Même gabarit que 11-approfondies-lot4.js : situation de vie suivie partie
+   après partie, hypothèses tranchées, planches 2D et 3D, simulation, situation résolue, quiz de 10 questions.
+   Remplacement EN PLACE des versions courtes (05-sciences-2.js, 06-premieres-lecons.js) : même identifiant, même rang,
+   fiche APC et « examen » repris. Les simulations sont déclarées à la fin du fichier (VRT_A). */
+(function () {
+  "use strict";
+  var NUIT = "#001136", BLEU = "#1E499B", GRIS = "#4D5163", VERT = "#17784D", ORANGE = "#C2540A";
+
+  /* ── outils de dessin 2D ── */
+  function txt(x, y, t, o) {
+    o = o || {};
+    return "<text x='" + x + "' y='" + y + "' text-anchor='" + (o.a || "middle") + "' font-size='" + (o.s || 12) + "' font-weight='" + (o.w || 700) + "' fill='" + (o.c || NUIT) + "'" + (o.i ? " font-style='italic'" : "") + ">" + t + "</text>";
+  }
+  function lin(id, cs, vertical) {
+    var s = "<linearGradient id='" + id + "'" + (vertical ? " x1='0' y1='0' x2='0' y2='1'" : "") + ">";
+    cs.forEach(function (c, i) { s += "<stop offset='" + (i / (cs.length - 1)).toFixed(2) + "' stop-color='" + c + "'/>"; });
+    return s + "</linearGradient>";
+  }
+  function rad(id, cs) {
+    var s = "<radialGradient id='" + id + "' cx='35%' cy='30%' r='75%'>";
+    cs.forEach(function (c, i) { s += "<stop offset='" + (i / (cs.length - 1)).toFixed(2) + "' stop-color='" + c + "'/>"; });
+    return s + "</radialGradient>";
+  }
+  function omb(id) { return "<radialGradient id='" + id + "'><stop offset='0' stop-color='#001136' stop-opacity='.28'/><stop offset='1' stop-color='#001136' stop-opacity='0'/></radialGradient>"; }
+  function fleche(id, c) { return "<marker id='" + id + "' markerWidth='10' markerHeight='10' refX='7' refY='5' orient='auto'><path d='M0 1L8 5L0 9Z' fill='" + c + "'/></marker>"; }
+  function svg(w, h, alt, defs, corps) {
+    return "<svg viewBox='0 0 " + w + " " + h + "' role='img' aria-label='" + alt + "' font-family='Inter,Arial,sans-serif'><rect width='" + w + "' height='" + h + "' fill='#fff'/><defs>" + defs + "</defs>" + corps +
+      "<text x='" + (w - 6) + "' y='" + (h - 5) + "' font-size='8' text-anchor='end' fill='#8A93A6'>Planche VÉRITAS</text></svg>";
+  }
+  function alea(g) { return function () { g = (g * 16807) % 2147483647; return (g - 1) / 2147483646; }; }
+  function ancien(id) { return window.VRT_LECONS[id]; }
+  function remplacer(id, o) {
+    var a = ancien(id);
+    if (a) ["apc", "examen", "rang", "cle", "scenes"].forEach(function (k) { if (a[k] != null && o[k] == null) o[k] = a[k]; });
+    VRT_L(id, o);
+    if (a) o.ordre = a.ordre;
+  }
+  function q(qq, bonne, f1, f2, e) { return { q: qq, r: [bonne, f1, f2], b: 0, e: e }; }
+  function partie(old, i) { return old && old.parties[i] ? old.parties[i].html : ""; }
+  /* silhouette debout (y = centre de la tête), environ 92 px de haut */
+  function perso(x, y, peau, habit, bas, s) {
+    bas = bas || "#2E3445";
+    return "<g transform='translate(" + x + " " + y + ") scale(" + (s || 1) + ")'><ellipse cx='0' cy='84' rx='18' ry='4' fill='#001136' opacity='.18'/>" +
+      "<rect x='-9' y='44' width='8' height='36' rx='3' fill='" + bas + "'/><rect x='1' y='44' width='8' height='36' rx='3' fill='" + bas + "'/>" +
+      "<ellipse cx='-6' cy='81' rx='7' ry='3.5' fill='#1F2328'/><ellipse cx='6' cy='81' rx='7' ry='3.5' fill='#1F2328'/>" +
+      "<path d='M-13 46L-16 18C-16 13 -12 11 -6 10H6C12 11 16 13 16 18L13 46Z' fill='" + habit + "'/>" +
+      "<path d='M-15 16L-20 40' stroke='" + habit + "' stroke-width='7' stroke-linecap='round'/><path d='M15 16L20 40' stroke='" + habit + "' stroke-width='7' stroke-linecap='round'/>" +
+      "<circle cx='-20' cy='42' r='3.6' fill='" + peau + "'/><circle cx='20' cy='42' r='3.6' fill='" + peau + "'/>" +
+      "<rect x='-3.5' y='5' width='7' height='7' fill='" + peau + "'/><ellipse cx='0' cy='-2' rx='9' ry='10.5' fill='" + peau + "'/>" +
+      "<path d='M-9 -4C-10 -14 -4 -13.5 0 -13.5S10 -14 9 -4C7 -9 -7 -9 -9 -4Z' fill='#1B1410'/></g>";
+  }
+  var PEAU = ["#6B4226", "#8A5A36", "#5A3620", "#7A4B2C"];
+
+  /* ═══════════════════════ 6e MATHS — LES CRITÈRES DE DIVISIBILITÉ ═══════════════════════ */
+  var V_OLD = ancien("6e-maths-divisibilite");
+  /* un beignet doré (2D) */
+  function beignet(id, x, y, r) {
+    return "<g transform='translate(" + x + " " + y + ")'><ellipse cx='0' cy='" + (r * .7) + "' rx='" + r + "' ry='" + (r * .28) + "' fill='url(#" + id + "o)'/><circle r='" + r + "' fill='url(#" + id + "b)'/><circle cx='" + (-r * .3) + "' cy='" + (-r * .35) + "' r='" + (r * .28) + "' fill='#fff' opacity='.35'/></g>";
+  }
+  function defsBeignet(id) { return rad(id + "b", ["#F6C66A", "#D98A2B", "#9A5418"]) + omb(id + "o"); }
+  /* un sachet transparent fermé, avec n beignets visibles */
+  function sachet(id, x, y, n, lab) {
+    var s = "<g transform='translate(" + x + " " + y + ")'><path d='M4 10Q0 60 6 86H70Q76 60 72 10Z' fill='#EAF4FB' fill-opacity='.85' stroke='#8FB3CF'/><path d='M14 6h48l-4 8H18z' fill='#C62828'/>", i;
+    for (i = 0; i < Math.min(n, 10); i++) s += beignet(id, 18 + (i % 3) * 20, 30 + Math.floor(i / 3) * 16, 8);
+    return s + (lab ? txt(38, 102, lab, { s: 11.5, c: GRIS }) : "") + "</g>";
+  }
+  /* boulier 3D : une tige par chiffre de 1 260, autant de perles que la valeur du chiffre */
+  function boulier3D() {
+    var o = [], chiffres = [1, 2, 6, 0], coul = ["#C62828", "#1E499B", "#17784D", "#8A93A6"], i, k;
+    o.push({ f: "boite", c: [0, -8, 0], d: [460, 14, 150], coul: "#7A4A22", dessus: "#A8703A" });
+    o.push({ f: "boite", c: [-215, 90, 0], d: [16, 190, 24], coul: "#8A5A2D", dessus: "#B07A43" });
+    o.push({ f: "boite", c: [215, 90, 0], d: [16, 190, 24], coul: "#8A5A2D", dessus: "#B07A43" });
+    o.push({ f: "boite", c: [0, 188, 0], d: [446, 12, 24], coul: "#8A5A2D", dessus: "#B07A43" });
+    for (i = 0; i < 4; i++) {
+      var x = -150 + i * 100;
+      o.push({ f: "cylindre", c: [x, 0, 0], r: 3, h: 182, n: 10, coul: "#C9CDD4", dessus: "#E3E6EA" });
+      for (k = 0; k < chiffres[i]; k++) o.push({ f: "sphere", c: [x, 14 + k * 26, 0], r: 12.5, coul: coul[i], ec: [0, k * 6, 0] });
+    }
+    return o;
+  }
+
+  remplacer("6e-maths-divisibilite", {
+    c: "6e", m: "maths", titre: "Les critères de divisibilité", duree: 30,
+    accroche: "1 260 beignets à mettre en sachets sans en laisser un seul : par 2, 3, 5, 9 ou 10 ? Sans poser une seule division.",
+    intro: "La kermesse du CES de Bafia te sert de fil rouge : à chaque partie, un indice t'aide à trancher entre trois réponses.",
+    objectifs: ["dire ce que signifie « divisible par »", "appliquer les critères par 2, 5, 10, 100 et 1 000", "appliquer les critères par 3 et par 9", "justifier une réponse avec le critère utilisé"],
+    enquete: {
+      titre: "Les beignets de la kermesse",
+      svg: (function () {
+        var id = "dvk", s = "<rect width='640' height='220' fill='#FFF6E8'/><rect y='170' width='640' height='50' fill='#E8D3AE'/>", R = alea(11), i;
+        s += "<path d='M0 0H640V26H0z' fill='#1E499B'/>" + txt(320, 18, "KERMESSE DU CES DE BAFIA", { s: 12.5, c: "#fff" });
+        s += "<rect x='40' y='110' width='300' height='16' rx='3' fill='#8A5A2D'/><rect x='52' y='126' width='10' height='46' fill='#6B4423'/><rect x='318' y='126' width='10' height='46' fill='#6B4423'/>";
+        s += "<ellipse cx='190' cy='106' rx='130' ry='16' fill='#C9A576'/>";
+        for (i = 0; i < 70; i++) s += beignet(id, 80 + (i % 14) * 16 + R() * 5, 100 - Math.floor(i / 14) * 9 + R() * 3, 8);
+        s += perso(390, 92, PEAU[0], "#E86A2E", "#3A2A20") + perso(450, 98, PEAU[1], "#2F6DB5", "#24324A", .9);
+        s += sachet(id, 510, 96, 9, "9 par sachet ?");
+        s += "<rect x='372' y='34' width='240' height='34' rx='12' fill='#fff' stroke='#E3DCCB'/>" + txt(492, 56, "1 260 beignets à emballer", { s: 13, c: "#8A6200" });
+        return svg(640, 220, "Une table de kermesse couverte de beignets, deux élèves et un sachet de neuf beignets", defsBeignet(id), s);
+      })(),
+      legende: "Samedi de kermesse au CES de Bafia : le stand des beignets de Madame Mballa.",
+      contexte: "<p>Madame Mballa a frit <strong>1 260 beignets</strong> pour la kermesse. Elle veut les vendre en <strong>sachets identiques</strong>, sans qu'il reste un seul beignet. Elle a des sachets pour <strong>2, 3, 5, 9 ou 10</strong> beignets.</p><p>Ndongo propose de poser cinq divisions. Aïcha affirme : « 1 260 se termine par 0, donc il se divise par n'importe quel nombre. »</p>",
+      documents: [{ t: "Les sachets du stand", html: "<table class='donnees'><tr><td>Sachet de 2</td><td>100 F</td></tr><tr><td>Sachet de 3, de 5 ou de 9</td><td>150 F, 250 F, 450 F</td></tr><tr><td>Sachet de 10</td><td>500 F</td></tr></table>" }],
+      question: "Avec quelles tailles de sachet peut-on emballer les 1 260 beignets sans reste ?",
+      tache: "Décide, pour chaque taille, en appliquant un critère et en écrivant « car… ».",
+      hypotheses: [
+        "Il faut poser les cinq divisions, il n'y a pas d'autre moyen.",
+        "« 1 260 se termine par 0 » : il se divise par n'importe quel nombre.",
+        "Les critères suffisent : le dernier chiffre pour 2, 5 et 10, la somme des chiffres pour 3 et 9."
+      ]
+    },
+    parties: [
+      { t: "Le vocabulaire", html: partie(V_OLD, 0) +
+        "<div class='astuce'><b>Pourquoi des critères ?</b>Un critère est un raccourci : il répond à la question « le reste est-il nul ? » en regardant seulement les chiffres du nombre, sans poser la division.</div>",
+        planches: [{ type: "2D", titre: "Divisible ou pas : il reste quelque chose ?", legende: "12 beignets en sachets de 3 : rien ne reste, 12 est divisible par 3. En sachets de 5 : il en reste 2, 12 n'est pas divisible par 5.", svg: (function () {
+          var id = "dv6a", s = "", i;
+          s += txt(160, 24, "12 beignets, sachets de 3", { s: 13, c: VERT });
+          for (i = 0; i < 4; i++) s += sachet(id, 10 + i * 78, 34, 3);
+          s += txt(160, 158, "reste : 0  →  divisible", { s: 13, c: VERT });
+          s += txt(480, 24, "12 beignets, sachets de 5", { s: 13, c: ORANGE });
+          for (i = 0; i < 2; i++) s += sachet(id, 340 + i * 78, 34, 5);
+          s += beignet(id, 530, 80, 9) + beignet(id, 556, 84, 9) + "<path d='M520 104Q543 118 566 104' stroke='" + ORANGE + "' stroke-width='2' fill='none'/>";
+          s += txt(480, 158, "reste : 2  →  pas divisible", { s: 13, c: ORANGE });
+          return svg(640, 175, "Douze beignets en sachets de trois sans reste, puis en sachets de cinq avec un reste de deux", defsBeignet(id), s);
+        })() }],
+        fil: { html: "<p>Poser cinq divisions de 1 260, c'est long et on peut se tromper. Ce qui compte, c'est seulement de savoir si le <strong>reste est nul</strong> : les critères le disent en quelques secondes.</p>", verdicts: [[0, "rejetee", "Poser chaque division marche, mais les critères répondent sans calcul long."]] },
+        retenir: "Divisible = reste nul. Un critère évite de poser la division." },
+
+      { t: "Les critères : le dernier chiffre, la somme des chiffres", html: partie(V_OLD, 1),
+        planches: [{ type: "2D", titre: "Deux familles de critères", legende: "À gauche, on regarde le chiffre des unités ; à droite, on additionne tous les chiffres.", svg: (function () {
+          var s = "<rect x='10' y='10' width='300' height='210' rx='14' fill='#EEF4FC' stroke='#C9D8EE'/><rect x='330' y='10' width='300' height='210' rx='14' fill='#FFF6E3' stroke='#F2DFA6'/>";
+          s += txt(160, 38, "Le dernier chiffre", { s: 15, c: BLEU }) + txt(480, 38, "La somme des chiffres", { s: 15, c: "#8A6200" });
+          s += "<rect x='60' y='60' width='200' height='56' rx='10' fill='#fff' stroke='#C9D8EE'/>" + txt(120, 98, "1 26", { s: 30, a: "middle" }) + "<rect x='170' y='66' width='38' height='44' rx='8' fill='" + BLEU + "'/>" + txt(189, 98, "0", { s: 30, c: "#fff" });
+          s += txt(160, 146, "par 2 : 0, 2, 4, 6, 8", { s: 12.5 }) + txt(160, 168, "par 5 : 0 ou 5", { s: 12.5 }) + txt(160, 190, "par 10 : 0", { s: 12.5 });
+          [["1", 380], ["2", 430], ["6", 480], ["0", 530]].forEach(function (c) { s += "<rect x='" + (c[1] - 18) + "' y='62' width='36' height='44' rx='8' fill='#fff' stroke='#E3C77A'/>" + txt(c[1], 94, c[0], { s: 26 }); });
+          s += txt(480, 132, "1 + 2 + 6 + 0 = 9", { s: 17, c: "#8A6200" }) + txt(480, 162, "9 est dans la table de 3 et de 9", { s: 12.5 }) + txt(480, 186, "donc 1 260 est divisible par 3 et par 9", { s: 12.5, c: VERT });
+          return svg(640, 232, "Le chiffre des unités de 1 260 et la somme de ses chiffres, égale à 9", "", s);
+        })() }, { type: "3d", titre: "Le boulier de 1 260", legende: "Une tige par chiffre : 1 perle, 2 perles, 6 perles, aucune. En tout 9 perles, la somme des chiffres. Le curseur soulève les perles pour mieux les compter.",
+          modele: { h: 340, rx: -24, ry: 24, echelle: 0.6, dy: 30, alt: "Boulier à quatre tiges portant 1, 2, 6 et 0 perles, soit neuf perles", eclate: "Soulever les perles", jouer: "Compter les perles", objets: boulier3D(),
+            etiquettes: [{ p: [-150, 30, 0], t: "milliers : 1" }, { p: [-50, 50, 0], t: "centaines : 2" }, { p: [50, 150, 0], t: "dizaines : 6", cote: "d" }, { p: [150, 20, 0], t: "unités : 0", cote: "d" }] } }],
+        fil: { html: "<p>1 260 se termine par <strong>0</strong> : il est divisible par <strong>2</strong>, par <strong>5</strong> et par <strong>10</strong>. La somme de ses chiffres vaut <strong>1 + 2 + 6 + 0 = 9</strong> : il est divisible par <strong>3</strong> et par <strong>9</strong>. Mais finir par 0 ne suffit pas pour 3 : 10 se termine par 0 et n'est pas divisible par 3.</p>", verdicts: [[1, "rejetee", "Finir par 0 donne 2, 5 et 10, pas « n'importe quel nombre » : 10 n'est pas divisible par 3, et 1 260 ne l'est pas par 8."]] },
+        retenir: "2, 5, 10 : le dernier chiffre. 3 et 9 : la somme des chiffres." },
+
+      { t: "Justifier sa réponse", html: partie(V_OLD, 2) +
+        "<div class='ex'><b>Rédaction pour la kermesse</b>« 1 260 est divisible par 9 <strong>car</strong> 1 + 2 + 6 + 0 = 9 et 9 est divisible par 9. On peut faire 1 260 ÷ 9 = <strong>140 sachets</strong> de 9. »</div>",
+        planches: [{ type: "2D", titre: "Combien de sachets pour chaque taille ?", legende: "1 260 ÷ 2 = 630 ; ÷ 3 = 420 ; ÷ 5 = 252 ; ÷ 9 = 140 ; ÷ 10 = 126. Toutes les tailles conviennent, sans reste.", svg: (function () {
+          var id = "dv6c", s = "", T = [[2, 630], [3, 420], [5, 252], [9, 140], [10, 126]], i;
+          T.forEach(function (t, k) {
+            var x = 14 + k * 125;
+            s += "<rect x='" + x + "' y='14' width='112' height='184' rx='12' fill='#F7FAF7' stroke='#BFDCC9'/>";
+            s += sachet(id, x + 18, 24, Math.min(t[0], 9));
+            s += txt(x + 56, 140, "sachets de " + t[0], { s: 12, c: GRIS }) + txt(x + 56, 168, t[1] + " sachets", { s: 15, c: VERT }) + txt(x + 56, 188, "reste 0 ✓", { s: 11.5, c: VERT });
+          });
+          return svg(640, 210, "Cinq tailles de sachet et le nombre de sachets obtenus pour 1 260 beignets", defsBeignet(id), s);
+        })() }],
+        fil: { html: "<p>Les critères tranchent pour les cinq tailles : <strong>toutes conviennent</strong>. Madame Mballa peut choisir selon ses clients : 140 sachets de 9 à 450 F rapportent 63 000 F, comme 126 sachets de 10 à 500 F.</p>", verdicts: [[2, "validee", "Dernier chiffre 0 : 2, 5, 10. Somme des chiffres 9 : 3 et 9. Les cinq tailles conviennent."]] },
+        retenir: "On écrit toujours « … est divisible par … car … »." },
+      { t: "Entraînement", html: "<div class='integ'><h3>Partie A : évaluation des ressources</h3><p><strong>Question de cours.</strong> Quel critère permet de savoir si un nombre est divisible par 9 ?</p><details><summary>Voir la réponse</summary><p>La somme de ses chiffres doit être divisible par 9.</p></details><p><strong>Exercice.</strong> 2 745 est-il divisible par 2 ? par 3 ? par 5 ? par 9 ? Justifie.</p><details><summary>Voir la réponse</summary><p>Pas par 2 (il se termine par 5, chiffre impair). Par 5 oui (il se termine par 5). 2 + 7 + 4 + 5 = 18 : divisible par 3 et par 9.</p></details>" +
+        "<h3>Partie B : évaluation des compétences</h3><p><strong>Situation.</strong> La coopérative scolaire de Mbalmayo a reçu 2 340 cahiers à distribuer en paquets identiques de 2, 4, 5, 9 ou 10.</p><p><strong>Tâche.</strong> Quels paquets permettent de tout distribuer sans reste ? Justifie avec les critères.</p><details><summary>Voir une réponse attendue</summary><p>2 340 se termine par 0 : paquets de 2, 5 et 10 possibles. 2 + 3 + 4 + 0 = 9 : paquets de 9 possibles. Par 4 : 2 340 ÷ 4 = 585, le reste est nul, mais le critère par 4 n'est pas au programme : on le vérifie en posant la division.</p></details></div>",
+        retenir: "Savoir-être : organiser un partage équitable." }
+    ],
+    denouement: {
+      titre: "Cinq tailles possibles, sans une seule division posée",
+      etapes: [
+        "Divisible veut dire « reste nul » : les critères le disent sans poser la division (indice 1).",
+        "1 260 se termine par 0 : divisible par 2, par 5 et par 10 (indice 2).",
+        "1 + 2 + 6 + 0 = 9 : divisible par 3 et par 9 (indice 2).",
+        "Pour chaque taille, on rédige « … car … » et on calcule le nombre de sachets (indice 3)."
+      ],
+      reponse: "<p>Madame Mballa peut utiliser <strong>toutes les tailles de sachet</strong>. 1 260 est divisible par 2, par 5 et par 10 <strong>car</strong> il se termine par 0 ; il est divisible par 3 et par 9 <strong>car</strong> la somme de ses chiffres, 1 + 2 + 6 + 0 = 9, est divisible par 3 et par 9. Aïcha avait tort : se terminer par 0 ne garantit pas la divisibilité par n'importe quel nombre (10 n'est pas divisible par 3). Elle obtient 630 sachets de 2, 420 de 3, 252 de 5, 140 de 9 ou 126 de 10.</p>",
+      transfert: "<p>L'an prochain, elle prévoit 1 455 beignets. Quelles tailles conviennent ? <em>(Se termine par 5 : par 5 oui, par 2 et 10 non. 1 + 4 + 5 + 5 = 15 : par 3 oui, par 9 non.)</em></p>"
+    },
+    revision: V_OLD ? V_OLD.revision : [],
+    exo: V_OLD ? V_OLD.exo : "",
+    quiz: [
+      q("« 72 est divisible par 9 » signifie :", "le reste de 72 ÷ 9 est 0", "72 se termine par 9", "72 est plus grand que 9", "Divisible = reste nul : 72 = 9 × 8."),
+      q("Quel nombre est divisible par 2 ?", "3 548", "1 235", "777", "Il se termine par 8, chiffre pair."),
+      q("Quel nombre est divisible par 5 ?", "4 605", "4 562", "4 563", "Il se termine par 5."),
+      q("Un nombre est divisible par 10 s'il se termine par :", "0", "0 ou 5", "un chiffre pair", "Exemples : 30, 4 500."),
+      q("La somme des chiffres de 4 572 vaut :", "18", "16", "4 572", "4 + 5 + 7 + 2 = 18."),
+      q("4 572 est-il divisible par 9 ?", "Oui, car 4 + 5 + 7 + 2 = 18", "Non, car il se termine par 2", "Oui, car il est pair", "18 est dans la table de 9."),
+      q("12 est divisible par 3. Est-il divisible par 9 ?", "Non : 1 + 2 = 3", "Oui", "On ne peut pas savoir", "Divisible par 9 entraîne divisible par 3, pas l'inverse."),
+      q("1 260 se termine par 0. Il est donc sûrement divisible par :", "2, 5 et 10", "tous les nombres", "3 et 9", "Le dernier chiffre ne dit rien pour 3 et 9."),
+      q("Combien de sachets de 9 avec 1 260 beignets ?", "140", "126", "1 251", "1 260 ÷ 9 = 140."),
+      q("Quelle rédaction est correcte ?", "« 315 est divisible par 5 car il se termine par 5 »", "« 315 est divisible par 5 »", "« 315 car 5 »", "On donne la conclusion ET le critère.")
+    ]
+  });
+
+  /* ═══════════════════════ 5e MATHS — LE PGCD DE DEUX ENTIERS ═══════════════════════ */
+  var P_OLD = ancien("5e-maths-pgcd");
+  /* sol de la classe (360 × 240 cm) pavé de dalles carrées de côté c, vu de dessus ; échelle k px / cm */
+  function sol2D(x, y, c, k, lab) {
+    var W = 360 * k, H = 240 * k, s = "<g transform='translate(" + x + " " + y + ")'><rect width='" + W + "' height='" + H + "' fill='#F3EEE6' stroke='" + NUIT + "' stroke-width='2'/>", i, j, nx = 360 / c, ny = 240 / c;
+    for (i = 0; i < Math.ceil(nx); i++) for (j = 0; j < Math.ceil(ny); j++) {
+      var w = Math.min(c, 360 - i * c) * k, h = Math.min(c, 240 - j * c) * k, coupe = w < c * k - 0.1 || h < c * k - 0.1;
+      s += "<rect x='" + (i * c * k).toFixed(1) + "' y='" + (j * c * k).toFixed(1) + "' width='" + w.toFixed(1) + "' height='" + h.toFixed(1) + "' fill='" + (coupe ? "#F6C9B8" : ((i + j) % 2 ? "#D7C4A3" : "#E8D9BC")) + "' stroke='#9E8763' stroke-width='1'/>";
+    }
+    return s + (lab ? txt(W / 2, H + 18, lab, { s: 12.5 }) : "") + "</g>";
+  }
+  function carrelage3D() {
+    var o = [], c = 120, i, j;
+    o.push({ f: "boite", c: [0, -10, 0], d: [400, 10, 280], coul: "#8F8A80", dessus: "#B9B3A8", div: false });
+    for (i = 0; i < 3; i++) for (j = 0; j < 2; j++) {
+      o.push({ f: "boite", c: [-120 + i * c, 0, -60 + j * c], d: [c - 4, 6, c - 4], coul: "#B79A6E", dessus: (i + j) % 2 ? "#D7C4A3" : "#EADCBF", div: false, ec: [0, 30 + (i + j) * 18, 0] });
+    }
+    return o;
+  }
+
+  remplacer("5e-maths-pgcd", {
+    c: "5e", m: "maths", titre: "Le PGCD de deux entiers naturels", duree: 30,
+    accroche: "Une salle de 360 cm sur 240 cm, des dalles carrées les plus grandes possibles, sans en couper une seule.",
+    intro: "Le carrelage de la salle de 5e du lycée de Bertoua te sert de fil rouge : à chaque partie, un indice t'aide à trancher entre trois réponses.",
+    objectifs: ["lister les diviseurs d'un entier", "trouver les diviseurs communs à deux entiers", "déterminer le PGCD et l'utiliser dans un problème", "reconnaître deux nombres premiers entre eux et simplifier une fraction"],
+    enquete: {
+      titre: "Le carrelage de la salle de 5e",
+      svg: (function () {
+        var s = "<rect width='640' height='220' fill='#F5F0E8'/>";
+        s += "<path d='M40 190L180 70H600L620 190Z' fill='#E8D9BC' stroke='#9E8763'/><path d='M180 70V18H600V70' fill='#EEF1F5' stroke='#C9CFD8'/><rect x='300' y='26' width='180' height='34' fill='#1F3B2B'/>";
+        s += perso(110, 106, PEAU[2], "#2F6DB5", "#24324A") + perso(160, 112, PEAU[3], "#E86A2E", "#3A2A20", .9);
+        s += "<g transform='translate(470 120)'><rect width='70' height='70' fill='#EADCBF' stroke='#9E8763'/><rect x='80' y='20' width='50' height='50' fill='#D7C4A3' stroke='#9E8763'/></g>";
+        s += "<rect x='380' y='84' width='240' height='30' rx='10' fill='#fff' stroke='#E3DCCB'/>" + txt(500, 104, "sol : 360 cm × 240 cm", { s: 13, c: "#8A6200" });
+        return svg(640, 220, "Une salle de classe au sol nu, deux élèves et des dalles carrées de deux tailles", "", s);
+      })(),
+      legende: "Au lycée bilingue de Bertoua, l'APEE rénove la salle de 5e pendant les vacances de Pâques.",
+      contexte: "<p>Le sol de la salle mesure <strong>360 cm</strong> sur <strong>240 cm</strong>. Le maçon veut des <strong>dalles carrées toutes identiques</strong>, posées sans en couper aucune, et les <strong>plus grandes possible</strong> : moins de dalles, moins de joints, moins de travail.</p><p>Elvis a vu au magasin des dalles de <strong>60 cm</strong>. Sa sœur Manuela propose des dalles de <strong>240 cm</strong> : « une seule rangée et c'est fini ».</p>",
+      documents: [{ t: "Le devis du maçon", html: "<table class='donnees'><tr><td>Dalle carrée (toutes tailles)</td><td>sur commande</td></tr><tr><td>Pose</td><td>1 500 F par dalle</td></tr></table>" }],
+      question: "Quelle est la plus grande dalle carrée qui recouvre exactement le sol, et combien en faut-il ?",
+      tache: "Liste les diviseurs de 360 et de 240, repère les diviseurs communs, puis choisis le plus grand.",
+      hypotheses: [
+        "Des dalles de 240 cm (Manuela) : la plus grande dalle possible, c'est la largeur de la salle.",
+        "Des dalles de 60 cm (Elvis) : elles tombent juste dans les deux sens.",
+        "Il existe une dalle plus grande que 60 cm qui tombe juste dans les deux sens : le PGCD de 360 et 240."
+      ]
+    },
+    parties: [
+      { t: "Diviseurs et diviseurs communs", html: partie(P_OLD, 0) +
+        "<div class='astuce'><b>Pourquoi des diviseurs ?</b>Une dalle de côté c tombe juste sur une longueur L si c <strong>divise</strong> L : on aligne L ÷ c dalles sans en couper. Pour le sol, c doit diviser <strong>360 et 240</strong> : c'est un diviseur <strong>commun</strong>.</div>",
+        planches: [{ type: "2D", titre: "Des dalles qui tombent juste… ou pas", legende: "Dalles de 240 cm : elles débordent sur la longueur de 360 cm (la partie rose est à couper). Dalles de 60 cm : 6 sur la longueur, 4 sur la largeur, aucune coupe.", svg: (function () {
+          var s = sol2D(20, 30, 240, 0.72, "dalles de 240 cm : 360 ÷ 240 ne tombe pas juste") + sol2D(340, 30, 60, 0.72, "dalles de 60 cm : 6 × 4 = 24 dalles");
+          s += txt(150, 20, "360 cm", { s: 12, c: GRIS }) + txt(470, 20, "360 cm", { s: 12, c: GRIS });
+          return svg(640, 230, "Le sol pavé de dalles de 240 cm avec une coupe, puis de dalles de 60 cm sans coupe", "", s);
+        })() }],
+        fil: { html: "<p>Une dalle de 240 cm tient dans la largeur (240 ÷ 240 = 1) mais pas dans la longueur : 360 ÷ 240 = 1 reste 120. Il faudrait couper. <strong>240 ne divise pas 360</strong> : ce n'est pas un diviseur commun.</p>", verdicts: [[0, "rejetee", "240 ne divise pas 360 : il faudrait couper les dalles sur la longueur."]] },
+        retenir: "Une dalle tombe juste si son côté divise les deux dimensions." },
+
+      { t: "Le PGCD", html: partie(P_OLD, 1) +
+        "<div class='ex'><b>Pour la salle</b>Diviseurs de 240 : 1, 2, 3, 4, 5, 6, 8, 10, 12, 15, 16, 20, 24, 30, 40, 48, 60, 80, <strong>120</strong>, 240.<br>Diviseurs de 360 : 1, 2, 3, 4, 5, 6, 8, 9, 10, 12, 15, 18, 20, 24, 30, 36, 40, 45, 60, 72, 90, <strong>120</strong>, 180, 360.<br>Le plus grand diviseur commun : <strong>PGCD(360 ; 240) = 120</strong>.</div>",
+        planches: [{ type: "2D", titre: "Les diviseurs communs, du plus petit au plus grand", legende: "Chaque pastille est un diviseur commun de 360 et 240, donc une taille de dalle possible. La plus grande est 120.", svg: (function () {
+          var D = [1, 2, 3, 4, 5, 6, 8, 10, 12, 15, 20, 24, 30, 40, 60, 120], s = "", i;
+          s += "<path d='M30 120H620' stroke='#C9D2E3' stroke-width='2'/>";
+          D.forEach(function (d, k) {
+            var x = 40 + k * 37, r = 9 + Math.sqrt(d) * 1.4, big = d === 120, mid = d === 60;
+            s += "<circle cx='" + x + "' cy='120' r='" + r.toFixed(1) + "' fill='" + (big ? VERT : mid ? "#F2B53A" : "#DCE6F5") + "' stroke='" + (big ? VERT : BLEU) + "'/>" + txt(x, 124 + (r > 16 ? 0 : 0), d, { s: d > 99 ? 10.5 : 11, c: big ? "#fff" : NUIT });
+          });
+          s += txt(594, 70, "PGCD = 120", { s: 15, c: VERT }) + "<path d='M594 78V96' stroke='" + VERT + "' stroke-width='2'/>";
+          s += txt(470, 186, "60 : possible, mais pas le plus grand", { s: 11.5, c: "#8A6200" });
+          return svg(640, 210, "Les seize diviseurs communs de 360 et 240 alignés, le plus grand étant 120", "", s);
+        })() }],
+        fil: { html: "<p>60 est bien un diviseur commun (360 = 60 × 6 et 240 = 60 × 4) : les dalles d'Elvis tombent juste. Mais ce n'est <strong>pas le plus grand</strong> : 120 divise aussi 360 et 240. Le maçon veut les plus grandes dalles : il lui faut le <strong>PGCD</strong>.</p>", verdicts: [[1, "rejetee", "60 cm convient, mais 120 cm convient aussi et c'est plus grand."]] },
+        retenir: "PGCD = le plus grand des diviseurs communs." },
+
+      { t: "Premiers entre eux et fractions", html: partie(P_OLD, 2),
+        planches: [{ type: "3d", titre: "Six dalles de 120 cm", legende: "360 ÷ 120 = 3 dalles sur la longueur, 240 ÷ 120 = 2 sur la largeur : 3 × 2 = 6 dalles. Le curseur soulève les dalles pour les compter.",
+          modele: { h: 340, rx: -32, ry: 28, echelle: 0.82, alt: "Le sol de la classe recouvert de six grandes dalles carrées de 120 centimètres", eclate: "Soulever les dalles", jouer: "Poser les dalles", objets: carrelage3D(),
+            etiquettes: [{ p: [-120, 10, -60], t: "120 cm × 120 cm" }, { p: [120, 10, 60], t: "3 × 2 = 6 dalles", cote: "d" }] } },
+          { type: "2D", titre: "Le même sol, deux carrelages", legende: "Avec 60 cm : 24 dalles et 36 000 F de pose. Avec 120 cm : 6 dalles et 9 000 F de pose.", svg: (function () {
+            var s = sol2D(20, 20, 60, 0.72, "60 cm : 24 dalles, 36 000 F") + sol2D(340, 20, 120, 0.72, "120 cm : 6 dalles, 9 000 F");
+            return svg(640, 220, "Le sol en vingt-quatre dalles de 60 cm et en six dalles de 120 cm", "", s);
+          })() }],
+        fil: { html: "<p>Avec des dalles de <strong>120 cm</strong>, on en pose 3 sur la longueur et 2 sur la largeur : <strong>6 dalles</strong>, et la pose coûte 6 × 1 500 = <strong>9 000 F</strong> au lieu de 24 × 1 500 = 36 000 F avec des dalles de 60 cm. Et 360/240 = 3/2 : 3 et 2 sont premiers entre eux.</p>", verdicts: [[2, "validee", "PGCD(360 ; 240) = 120 : 6 dalles de 120 cm, sans coupe."]] },
+        retenir: "PGCD = 1 : premiers entre eux, fraction irréductible." },
+      { t: "Entraînement", html: "<div class='integ'><h3>Partie A : évaluation des ressources</h3><p><strong>Question de cours.</strong> Que signifie PGCD ?</p><details><summary>Voir la réponse</summary><p>Plus Grand Commun Diviseur.</p></details><p><strong>Exercice.</strong> Calcule PGCD(48 ; 60), puis simplifie 48/60.</p><details><summary>Voir la réponse</summary><p>Diviseurs communs : 1, 2, 3, 4, 6, 12. PGCD = 12, et 48/60 = 4/5.</p></details>" +
+        "<h3>Partie B : évaluation des compétences</h3><p><strong>Situation.</strong> Un tailleur de Maroua a un pagne de 150 cm sur 90 cm. Il veut le découper en carrés identiques, les plus grands possible, sans chute.</p><p><strong>Tâche.</strong> Quelle taille de carré ? Combien de carrés ?</p><details><summary>Voir une réponse attendue</summary><p>PGCD(150 ; 90) = 30 : des carrés de 30 cm, 5 sur la longueur et 3 sur la largeur, soit 15 carrés.</p></details></div>",
+        retenir: "Savoir-être : économiser la matière et le travail." }
+    ],
+    denouement: {
+      titre: "Six dalles de 120 cm",
+      etapes: [
+        "Le côté de la dalle doit diviser 360 et 240 : c'est un diviseur commun ; 240 ne divise pas 360 (indice 1).",
+        "Les diviseurs communs vont de 1 à 120 ; 60 en fait partie mais n'est pas le plus grand (indice 2).",
+        "PGCD(360 ; 240) = 120 : 3 dalles × 2 dalles = 6 dalles (indice 3).",
+        "Pose : 6 × 1 500 F = 9 000 F (indice 3)."
+      ],
+      reponse: "<p>Le côté d'une dalle qui tombe juste doit diviser à la fois 360 et 240. Les diviseurs communs de 360 et 240 sont 1, 2, 3, 4, 5, 6, 8, 10, 12, 15, 20, 24, 30, 40, 60 et 120 ; le plus grand est <strong>PGCD(360 ; 240) = 120</strong>. Le maçon pose donc des dalles de <strong>120 cm</strong> : 360 ÷ 120 = 3 sur la longueur et 240 ÷ 120 = 2 sur la largeur, soit <strong>6 dalles</strong>, pour 9 000 F de pose. Les dalles de 240 cm ne tombent pas juste, et celles de 60 cm conviennent mais ne sont pas les plus grandes.</p>",
+      transfert: "<p>La salle voisine mesure 420 cm sur 300 cm. Quelle dalle choisir, et combien en faut-il ? <em>(PGCD(420 ; 300) = 60 : 7 × 5 = 35 dalles de 60 cm.)</em></p>"
+    },
+    revision: P_OLD ? P_OLD.revision : [],
+    exo: P_OLD ? P_OLD.exo : "",
+    quiz: [
+      q("Un diviseur commun de 12 et 18 est :", "6", "36", "5", "12 = 6 × 2 et 18 = 6 × 3."),
+      q("PGCD(18 ; 24) = ?", "6", "3", "72", "Diviseurs communs : 1, 2, 3, 6."),
+      q("PGCD(360 ; 240) = ?", "120", "60", "240", "120 divise 360 et 240, et aucun plus grand ne les divise tous les deux."),
+      q("Une dalle de 240 cm tombe-t-elle juste sur 360 cm ?", "Non : 360 = 240 × 1 + 120", "Oui", "Seulement dans un sens", "240 ne divise pas 360."),
+      q("Combien de dalles de 120 cm pour un sol de 360 cm × 240 cm ?", "6", "3", "12", "3 sur la longueur × 2 sur la largeur."),
+      q("8 et 15 sont…", "premiers entre eux", "multiples l'un de l'autre", "tous deux premiers", "PGCD(8 ; 15) = 1, même si 8 et 15 ne sont pas premiers."),
+      q("Simplifier 24/36 au maximum :", "2/3", "12/18", "4/6", "On divise par le PGCD 12."),
+      q("Le PGCD de deux nombres est toujours :", "un diviseur de chacun des deux", "un multiple des deux", "plus grand que les deux", "C'est un diviseur commun."),
+      q("PGCD(7 ; 21) = ?", "7", "1", "21", "7 divise 21."),
+      q("48 roses et 60 tulipes en bouquets identiques, le plus possible : combien de bouquets ?", "12", "6", "24", "PGCD(48 ; 60) = 12 : 4 roses et 5 tulipes par bouquet.")
+    ]
+  });
+
+  /* ═══════════════════════ 4e MATHS — DÉCOMPOSITION EN PRODUIT DE FACTEURS PREMIERS ═══════════════════════ */
+  var F_OLD = ancien("4e-maths-facteurs-premiers");
+  /* une formation rectangulaire de n rangées de m élèves (2D, vue de dessus) */
+  function formation2D(x, y, n, m, pas, coul) {
+    var s = "<g transform='translate(" + x + " " + y + ")'>", i, j;
+    for (i = 0; i < n; i++) for (j = 0; j < m; j++) s += "<circle cx='" + (j * pas).toFixed(1) + "' cy='" + (i * pas).toFixed(1) + "' r='" + (pas * 0.36).toFixed(1) + "' fill='" + coul + "'/>";
+    return s + "</g>";
+  }
+  /* défilé 3D : 18 rangées de 20 élèves (casquettes et chemises) */
+  function defile3D() {
+    var o = [], i, j, n = 18, m = 20, e = 18;
+    o.push({ f: "boite", c: [0, -6, 0], d: [m * e + 60, 6, n * e + 60], coul: "#7E8A6A", dessus: "#9AA884" });
+    for (i = 0; i < n; i++) for (j = 0; j < m; j++) {
+      var x = (j - (m - 1) / 2) * e, z = (i - (n - 1) / 2) * e, ec = [0, 0, (i - (n - 1) / 2) * 3];
+      o.push({ f: "cylindre", c: [x, 0, z], r: 5, h: 16, n: 8, coul: i % 2 ? "#2F6DB5" : "#F2F4F7", dessus: "#E3E6EA", ec: ec });
+      o.push({ f: "sphere", c: [x, 21, z], r: 4.6, coul: "#6B4226", ec: ec });
+    }
+    o.push({ f: "boite", c: [0, 26, -(n * e) / 2 - 50], d: [160, 52, 20], coul: "#C62828", dessus: "#E04848" });
+    return o;
+  }
+
+  remplacer("4e-maths-facteurs-premiers", {
+    c: "4e", m: "maths", titre: "Décomposer un nombre en produit de facteurs premiers", duree: 35,
+    accroche: "360 élèves pour le défilé du 20 mai, en rectangle parfait : combien de façons de les ranger ?",
+    intro: "Le défilé du lycée de Kribi te sert de fil rouge : à chaque partie, un indice t'aide à trancher entre trois réponses.",
+    objectifs: ["reconnaître un nombre premier", "décomposer un entier en produit de facteurs premiers", "utiliser la décomposition pour trouver les diviseurs d'un nombre", "simplifier une fraction grâce à la décomposition"],
+    enquete: {
+      titre: "Le défilé du 20 mai",
+      svg: (function () {
+        var s = "<rect width='640' height='220' fill='#EAF4FB'/><rect y='150' width='640' height='70' fill='#9AA884'/>";
+        s += "<rect x='420' y='60' width='190' height='90' fill='#E3E6EA' stroke='#B9C0CA'/><path d='M410 60L515 30L620 60Z' fill='#C62828'/>" + txt(515, 110, "TRIBUNE", { s: 13, c: GRIS });
+        [["#17784D", 0], ["#C62828", 1], ["#F2C230", 2]].forEach(function (c) { s += "<rect x='" + (470 + c[1] * 30) + "' y='40' width='30' height='20' fill='" + c[0] + "'/>"; });
+        s += "<path d='M485 50l2.5 5 5.5.5-4 3.6 1.2 5.4-5.2-2.8-5.2 2.8 1.2-5.4-4-3.6 5.5-.5z' fill='#F2C230' transform='translate(15 -6) scale(.8)'/>";
+        s += formation2D(40, 160, 4, 18, 18, "#2F6DB5");
+        s += perso(370, 74, PEAU[1], "#17784D", "#24324A");
+        s += "<rect x='40' y='30' width='300' height='34' rx='12' fill='#fff' stroke='#C9D8EE'/>" + txt(190, 52, "360 élèves, rangées égales", { s: 13, c: BLEU });
+        return svg(640, 220, "Des élèves en rangées devant une tribune aux couleurs du Cameroun, et le surveillant général", "", s);
+      })(),
+      legende: "Lycée de Kribi, le 19 mai : la répétition générale du défilé de la fête nationale.",
+      contexte: "<p>Le surveillant général doit faire défiler <strong>360 élèves</strong> en <strong>rectangle complet</strong> : toutes les rangées ont le même nombre d'élèves, et il n'y a personne en trop. Il veut connaître <strong>toutes les dispositions possibles</strong> (nombre de rangées × élèves par rangée) pour choisir la plus belle.</p><p>Bertrand pense qu'il y en a « une dizaine ». Ruth veut essayer chaque nombre de rangées, de 1 à 360.</p>",
+      documents: [{ t: "Les contraintes", html: "<table class='donnees'><tr><td>Élèves</td><td>360</td></tr><tr><td>Rangées</td><td>toutes égales, sans élève en trop</td></tr></table>" }],
+      question: "Combien de dispositions rectangulaires (rangées × élèves par rangée) sont possibles avec 360 élèves ?",
+      tache: "Décompose 360 en produit de facteurs premiers, puis construis tous ses diviseurs.",
+      hypotheses: [
+        "« Une dizaine » (Bertrand), en essayant quelques nombres au hasard.",
+        "Il faut essayer chacun des nombres de 1 à 360 (Ruth), il n'y a pas plus rapide.",
+        "La décomposition 360 = 2³ × 3² × 5 donne tous les diviseurs, donc toutes les dispositions."
+      ]
+    },
+    parties: [
+      { t: "Les nombres premiers", html: partie(F_OLD, 0),
+        planches: [{ type: "2D", titre: "Le crible : les nombres premiers jusqu'à 50", legende: "On barre les multiples de 2, de 3, de 5 et de 7 (sauf eux-mêmes) : il reste les 15 nombres premiers inférieurs à 50.", svg: (function () {
+          var s = "", n, P = function (k) { if (k < 2) return false; for (var d = 2; d * d <= k; d++) if (k % d === 0) return false; return true; };
+          for (n = 1; n <= 50; n++) {
+            var i = (n - 1) % 10, j = Math.floor((n - 1) / 10), x = 20 + i * 60, y = 16 + j * 42, p = P(n);
+            s += "<rect x='" + x + "' y='" + y + "' width='54' height='36' rx='8' fill='" + (p ? "#E8F5EC" : "#F4F5F8") + "' stroke='" + (p ? VERT : "#D5DAE3") + "'/>" + txt(x + 27, y + 24, n, { s: 15, c: p ? VERT : "#A2AABA" });
+            if (!p && n > 1) s += "<path d='M" + (x + 8) + " " + (y + 30) + "L" + (x + 46) + " " + (y + 6) + "' stroke='#C9CFD8' stroke-width='1.6'/>";
+          }
+          return svg(640, 232, "Les nombres de 1 à 50, les nombres premiers en vert, les autres barrés", "", s);
+        })() }],
+        fil: { html: "<p>Les briques de base sont les <strong>nombres premiers</strong> : 2, 3, 5, 7, 11… Essayer des nombres « au hasard » risque d'en oublier : il faut une méthode qui n'en oublie aucun.</p>", verdicts: [[0, "rejetee", "Au hasard, on en oublie : il faut une méthode complète."]] },
+        retenir: "Premier = deux diviseurs exactement : 1 et lui-même." },
+
+      { t: "La méthode des divisions successives", html: partie(F_OLD, 1),
+        planches: [{ type: "2D", titre: "L'arbre de 360", legende: "On casse 360 en deux facteurs, puis chaque facteur, jusqu'à n'avoir que des nombres premiers (en vert) : 360 = 2 × 2 × 2 × 3 × 3 × 5 = 2³ × 3² × 5.", svg: (function () {
+          var N = [[320, 30, "360", 0], [200, 90, "36", 0], [440, 90, "10", 0], [140, 150, "6", 0], [260, 150, "6", 0], [400, 150, "2", 1], [480, 150, "5", 1], [90, 210, "2", 1], [170, 210, "3", 1], [230, 210, "2", 1], [310, 210, "3", 1]];
+          var E = [[0, 1], [0, 2], [1, 3], [1, 4], [2, 5], [2, 6], [3, 7], [3, 8], [4, 9], [4, 10]], s = "";
+          E.forEach(function (e) { s += "<path d='M" + N[e[0]][0] + " " + (N[e[0]][1] + 14) + "L" + N[e[1]][0] + " " + (N[e[1]][1] - 16) + "' stroke='#9AA4B6' stroke-width='2'/>"; });
+          N.forEach(function (n) { s += "<circle cx='" + n[0] + "' cy='" + n[1] + "' r='19' fill='" + (n[3] ? VERT : "#fff") + "' stroke='" + (n[3] ? VERT : BLEU) + "' stroke-width='2'/>" + txt(n[0], n[1] + 5, n[2], { s: 14, c: n[3] ? "#fff" : NUIT }); });
+          s += "<rect x='420' y='196' width='200' height='34' rx='10' fill='#FFF8E6' stroke='#F2DFA6'/>" + txt(520, 218, "360 = 2³ × 3² × 5", { s: 15, c: "#8A6200" });
+          return svg(640, 245, "Arbre de décomposition de 360 en facteurs premiers 2, 2, 2, 3, 3 et 5", "", s);
+        })() }],
+        fil: { html: "<p>Décomposé, 360 s'écrit <strong>2³ × 3² × 5</strong>. Tout diviseur de 360 est fait <strong>des mêmes briques</strong> : 0 à 3 fois le 2, 0 à 2 fois le 3, 0 ou 1 fois le 5. Inutile d'essayer les 360 nombres : on <strong>construit</strong> les diviseurs.</p>", verdicts: [[1, "rejetee", "Essayer 360 nombres est inutile : la décomposition fabrique directement tous les diviseurs."]] },
+        retenir: "On divise par 2, puis 3, puis 5, 7… tant que c'est possible." },
+
+      { t: "Construire les diviseurs, simplifier une fraction", html:
+        "<div class='prop'><b>Tous les diviseurs de 360</b>On choisit combien de 2 (0, 1, 2 ou 3 : <strong>4 choix</strong>), combien de 3 (0, 1 ou 2 : <strong>3 choix</strong>), combien de 5 (0 ou 1 : <strong>2 choix</strong>). Cela fait 4 × 3 × 2 = <strong>24 diviseurs</strong>.</div>" +
+        "<div class='ex'><b>La liste</b>1, 2, 3, 4, 5, 6, 8, 9, 10, 12, 15, 18, 20, 24, 30, 36, 40, 45, 60, 72, 90, 120, 180, 360.</div>" + partie(F_OLD, 2),
+        planches: [{ type: "3d", titre: "Le défilé en 18 rangées de 20", legende: "Une des 24 dispositions : 18 rangées de 20 élèves (18 × 20 = 360). Le curseur écarte les rangées pour les compter.",
+          modele: { h: 360, rx: -30, ry: 22, echelle: 0.62, alt: "Trois cent soixante élèves en dix-huit rangées de vingt devant une tribune", eclate: "Écarter les rangées", jouer: "Compter les rangées", objets: defile3D(),
+            etiquettes: [{ p: [-171, 20, -153], t: "20 élèves par rangée" }, { p: [171, 20, 153], t: "18 rangées", cote: "d" }] } },
+          { type: "2D", titre: "Les 24 diviseurs de 360, rangés par paires", legende: "Chaque paire donne une disposition et sa « tournée » : 1 × 360, 2 × 180, 3 × 120… jusqu'à 18 × 20. Douze paires, donc 24 dispositions si l'on distingue rangées et colonnes.", svg: (function () {
+            var P = [[1, 360], [2, 180], [3, 120], [4, 90], [5, 72], [6, 60], [8, 45], [9, 40], [10, 36], [12, 30], [15, 24], [18, 20]], s = "";
+            P.forEach(function (p, k) {
+              var x = 18 + (k % 6) * 104, y = 18 + Math.floor(k / 6) * 104;
+              s += "<rect x='" + x + "' y='" + y + "' width='96' height='92' rx='12' fill='#F5F8FD' stroke='#C9D8EE'/>" + txt(x + 48, y + 26, p[0] + " × " + p[1], { s: 15, c: BLEU });
+              var r = Math.min(p[0], 6), c = Math.min(p[1], 12);
+              s += formation2D(x + 48 - (c - 1) * 3.4, y + 44, r, c, 6.8, k === 11 ? VERT : "#7FA6D9");
+            });
+            return svg(640, 230, "Les douze paires de diviseurs de 360, chacune avec une petite formation", "", s);
+          })() }],
+        fil: { html: "<p>360 a <strong>24 diviseurs</strong>, donc <strong>24 dispositions</strong> : 1 rangée de 360, 2 de 180… 18 rangées de 20, 20 rangées de 18… jusqu'à 360 rangées de 1. Le surveillant choisit 18 rangées de 20, presque un carré.</p>", verdicts: [[2, "validee", "360 = 2³ × 3² × 5 : 4 × 3 × 2 = 24 diviseurs, donc 24 dispositions."]] },
+        retenir: "Les diviseurs d'un nombre sont faits de ses facteurs premiers." },
+      F_OLD && F_OLD.parties[3] ? F_OLD.parties[3] : { t: "Entraînement", html: "" }
+    ],
+    denouement: {
+      titre: "24 dispositions, dont 18 rangées de 20",
+      etapes: [
+        "Les briques des nombres sont les nombres premiers ; au hasard, on en oublie (indice 1).",
+        "Divisions successives : 360 = 2³ × 3² × 5 (indice 2).",
+        "Un diviseur choisit 0 à 3 fois le 2, 0 à 2 fois le 3, 0 ou 1 fois le 5 : 4 × 3 × 2 = 24 (indice 3).",
+        "La disposition la plus proche du carré : 18 rangées de 20 (indice 3)."
+      ],
+      reponse: "<p>On décompose 360 en produit de facteurs premiers : 360 = 2 × 2 × 2 × 3 × 3 × 5 = <strong>2³ × 3² × 5</strong>. Un diviseur de 360 s'obtient en choisissant combien de fois il contient 2 (0 à 3), 3 (0 à 2) et 5 (0 ou 1) : 4 × 3 × 2 = <strong>24 diviseurs</strong>. Chaque diviseur d est un nombre de rangées possible, avec 360 ÷ d élèves par rangée : il y a donc <strong>24 dispositions</strong>. La plus proche d'un carré est <strong>18 rangées de 20 élèves</strong>. Bertrand sous-estimait, et Ruth n'avait pas besoin d'essayer les 360 nombres.</p>",
+      transfert: "<p>L'an prochain, le lycée aura 420 élèves. Décompose 420 et compte les dispositions. <em>(420 = 2² × 3 × 5 × 7 : 3 × 2 × 2 × 2 = 24 dispositions, dont 20 rangées de 21.)</em></p>"
+    },
+    revision: F_OLD ? F_OLD.revision : [],
+    exo: F_OLD ? F_OLD.exo : "",
+    quiz: [
+      q("Un nombre premier a :", "exactement deux diviseurs", "un seul diviseur", "trois diviseurs", "1 et lui-même."),
+      q("Lequel est premier ?", "23", "21", "27", "21 = 3 × 7 ; 27 = 3³."),
+      q("1 est-il premier ?", "Non : il n'a qu'un seul diviseur", "Oui", "Seulement en 4e", "Il faut exactement deux diviseurs."),
+      q("La décomposition de 360 est :", "2³ × 3² × 5", "2 × 180", "6² × 10", "On ne garde que des facteurs premiers."),
+      q("La décomposition de 84 est :", "2² × 3 × 7", "4 × 21", "2 × 42", "84 = 2 × 2 × 3 × 7."),
+      q("Combien de diviseurs a 360 = 2³ × 3² × 5 ?", "24", "6", "10", "4 × 3 × 2 = 24."),
+      q("Combien de dispositions rectangulaires pour 360 élèves ?", "24", "12", "360", "Autant que de diviseurs."),
+      q("Le seul nombre premier pair est :", "2", "4", "0", "Tous les autres pairs sont divisibles par 2."),
+      q("84/126 simplifiée au maximum vaut :", "2/3", "42/63", "14/21", "On supprime les facteurs communs 2 × 3 × 7 = 42."),
+      q("Pour décomposer, on divise d'abord par :", "le plus petit nombre premier possible", "le plus grand diviseur", "10", "2, puis 3, puis 5, 7…")
+    ]
+  });
+
+  /* ═══════════════════════ SIMULATIONS ═══════════════════════ */
+  function $(el, s) { return el.querySelector(s); }
+  function curseur(lib, min, max, pas, val, unite) {
+    return "<label class='labo-c'><span>" + lib + " : <b data-v>" + val + "</b>" + (unite || "") + "</span><input type='range' min='" + min + "' max='" + max + "' step='" + pas + "' value='" + val + "'></label>";
+  }
+
+  /* Divisibilité : emballer les beignets en sachets de b */
+  VRT_A("6e-maths-divisibilite", 0, "Emballe les beignets : reste-t-il quelque chose ?", function (el) {
+    el.innerHTML = "<div style='display:flex;flex-wrap:wrap;gap:8px 18px'>" + curseur("Beignets", 10, 1500, 1, 1260) + curseur("Beignets par sachet", 2, 12, 1, 9) + "</div><svg viewBox='0 0 640 120' class='an-svg' data-s></svg><p class='labo-r' data-r></p>";
+    var I = el.querySelectorAll("input"), V = el.querySelectorAll("[data-v]"), sv = $(el, "[data-s]");
+    function crit(a, b) {
+      var u = a % 10, som = String(a).split("").reduce(function (x, c) { return x + (+c); }, 0);
+      if (b === 2) return "dernier chiffre " + u + (u % 2 ? " (impair)" : " (pair)");
+      if (b === 5) return "dernier chiffre " + u;
+      if (b === 10) return "dernier chiffre " + u;
+      if (b === 3 || b === 9) return "somme des chiffres " + som;
+      return "pas de critère au programme : on pose la division";
+    }
+    function maj() {
+      var a = +I[0].value, b = +I[1].value, qq = Math.floor(a / b), r = a % b, s = "<defs>" + rad("dsb", ["#F6C66A", "#D98A2B", "#9A5418"]) + "</defs>", k, n = Math.min(qq, 28);
+      V[0].textContent = a; V[1].textContent = b;
+      for (k = 0; k < n; k++) s += "<rect x='" + (8 + (k % 15) * 42) + "' y='" + (8 + Math.floor(k / 15) * 44) + "' width='36' height='38' rx='7' fill='#EAF4FB' stroke='#8FB3CF'/><circle cx='" + (26 + (k % 15) * 42) + "' cy='" + (27 + Math.floor(k / 15) * 44) + "' r='9' fill='url(#dsb)'/>";
+      for (k = 0; k < r; k++) s += "<circle cx='" + (16 + k * 22) + "' cy='108' r='8' fill='url(#dsb)'/>";
+      sv.innerHTML = s + (qq > n ? "<text x='632' y='108' font-size='12' font-weight='700' text-anchor='end' fill='" + GRIS + "'>… " + qq + " sachets en tout</text>" : "");
+      $(el, "[data-r]").innerHTML = (r ? "<b>" + a + " n'est pas divisible par " + b + "</b> : il reste " + r + " beignet" + (r > 1 ? "s" : "") + "." : "<b>" + a + " est divisible par " + b + "</b> : " + qq + " sachets, reste 0.") + " Critère : " + crit(a, b) + ".";
+    }
+    I[0].addEventListener("input", maj); I[1].addEventListener("input", maj); maj();
+  });
+
+  /* PGCD : choisir la taille des dalles */
+  VRT_A("5e-maths-pgcd", 0, "Choisis la taille des dalles", function (el) {
+    var T = [10, 20, 30, 40, 45, 60, 72, 80, 90, 120, 180, 240];
+    el.innerHTML = "<div style='display:flex;flex-wrap:wrap;gap:6px' data-b>" + T.map(function (t) { return "<button type='button' class='btn-l' data-t='" + t + "'>" + t + " cm</button>"; }).join("") + "</div><svg viewBox='0 0 640 290' class='an-svg' data-s></svg><p class='labo-r' data-r>Touche une taille de dalle.</p>";
+    var sv = $(el, "[data-s]");
+    function maj(c) {
+      sv.innerHTML = sol2D(140, 10, c, 1).replace("<g transform='translate(140 10)'>", "<g transform='translate(140 10) scale(1)'>");
+      el.querySelectorAll("[data-t]").forEach(function (b) { b.classList.toggle("on", +b.getAttribute("data-t") === c); b.setAttribute("aria-pressed", +b.getAttribute("data-t") === c ? "true" : "false"); });
+      var ok = 360 % c === 0 && 240 % c === 0, n = ok ? (360 / c) * (240 / c) : 0;
+      $(el, "[data-r]").innerHTML = ok ? "<b>" + c + " cm tombe juste</b> : " + (360 / c) + " × " + (240 / c) + " = " + n + " dalles, " + (n * 1500).toLocaleString("fr-FR") + " F de pose." + (c === 120 ? " <b>C'est le PGCD : la plus grande dalle possible.</b>" : " Une dalle plus grande tomberait-elle juste ?")
+        : "<b>" + c + " cm ne tombe pas juste</b> : " + (360 % c ? "360 = " + c + " × " + Math.floor(360 / c) + " + " + (360 % c) : "") + (360 % c && 240 % c ? " et " : "") + (240 % c ? "240 = " + c + " × " + Math.floor(240 / c) + " + " + (240 % c) : "") + ". Les dalles roses seraient à couper.";
+    }
+    el.querySelectorAll("[data-t]").forEach(function (b) { b.addEventListener("click", function () { maj(+b.getAttribute("data-t")); }); });
+    maj(60);
+  });
+
+  /* Facteurs premiers : l'arbre d'un nombre au choix et ses dispositions */
+  VRT_A("4e-maths-facteurs-premiers", 1, "Décompose un nombre : l'arbre se construit tout seul", function (el) {
+    el.innerHTML = curseur("Nombre d'élèves", 2, 600, 1, 360) + "<svg viewBox='0 0 640 120' class='an-svg' data-s></svg><p class='labo-r' data-r></p>";
+    var I = $(el, "input"), V = $(el, "[data-v]"), sv = $(el, "[data-s]"), SUP = { 2: "²", 3: "³", 4: "⁴", 5: "⁵", 6: "⁶", 7: "⁷", 8: "⁸", 9: "⁹" };
+    function maj() {
+      var n = +I.value, x = n, d = 2, f = [], steps = [], s = "";
+      V.textContent = n;
+      while (x > 1) { if (x % d === 0) { steps.push([x, d]); f.push(d); x /= d; } else d++; }
+      steps.forEach(function (st, k) {
+        var xx = 14 + k * 70; if (xx > 600) return;
+        s += "<rect x='" + xx + "' y='18' width='60' height='34' rx='8' fill='#fff' stroke='" + BLEU + "'/><text x='" + (xx + 30) + "' y='41' font-size='14' font-weight='700' text-anchor='middle' fill='" + NUIT + "'>" + st[0] + "</text>";
+        s += "<circle cx='" + (xx + 30) + "' cy='84' r='16' fill='" + VERT + "'/><text x='" + (xx + 30) + "' y='89' font-size='13' font-weight='700' text-anchor='middle' fill='#fff'>" + st[1] + "</text><path d='M" + (xx + 30) + " 52V68' stroke='#9AA4B6' stroke-width='2'/>";
+      });
+      sv.innerHTML = s;
+      var c = {}; f.forEach(function (p) { c[p] = (c[p] || 0) + 1; });
+      var ecr = Object.keys(c).map(function (p) { return p + (c[p] > 1 ? (SUP[c[p]] || "^" + c[p]) : ""); }).join(" × ");
+      var nd = Object.keys(c).reduce(function (a, p) { return a * (c[p] + 1); }, 1);
+      var pres = 1; for (var k = 1; k * k <= n; k++) if (n % k === 0) pres = k;
+      $(el, "[data-r]").innerHTML = "<b>" + n + " = " + (f.length === 1 ? n + " (nombre premier)" : ecr) + "</b> · " + nd + " diviseurs, donc " + nd + " dispositions · la plus proche du carré : <b>" + pres + " rangées de " + (n / pres) + "</b>" + (f.length === 1 ? " · un nombre premier ne se range qu'en une seule ligne !" : "");
+    }
+    I.addEventListener("input", maj); maj();
+  });
+})();
+
+/* Leçons APPROFONDIES — lot 9, classe d'examen de 3e (17/11/2026) : articles (anglais), verbes faibles (allemand),
+   la famille (espagnol), Ésope et Homère (grec). Même gabarit et même mécanisme que 11-approfondies-lot4.js
+   (remplacement EN PLACE ; ordre, clé, fiche APC, examen et scènes conservés). Les classes de 6e, 5e et 4e sont
+   traitées par une autre session (16-approfondies-premier-cycle.js). Simulations VRT_A en fin de fichier. */
+(function () {
+  "use strict";
+  var NUIT = "#001136", BLEU = "#1E499B", GRIS = "#4D5163", VERT = "#17784D", ROUGE = "#C62828", TERRE = "#C46A2B";
+
+  function txt(x, y, t, o) {
+    o = o || {};
+    return "<text x='" + x + "' y='" + y + "' text-anchor='" + (o.a || "middle") + "' font-size='" + (o.s || 12) + "' font-weight='" + (o.w || 700) + "' fill='" + (o.c || NUIT) + "'" + (o.i ? " font-style='italic'" : "") + (o.halo ? " stroke='#fff' stroke-width='3' paint-order='stroke'" : "") + ">" + t + "</text>";
+  }
+  function lin(id, cs, vertical) {
+    var s = "<linearGradient id='" + id + "'" + (vertical ? " x1='0' y1='0' x2='0' y2='1'" : "") + ">";
+    cs.forEach(function (c, i) { s += "<stop offset='" + (i / (cs.length - 1)).toFixed(2) + "' stop-color='" + c + "'/>"; });
+    return s + "</linearGradient>";
+  }
+  function rad(id, cs) {
+    var s = "<radialGradient id='" + id + "' cx='35%' cy='30%' r='75%'>";
+    cs.forEach(function (c, i) { s += "<stop offset='" + (i / (cs.length - 1)).toFixed(2) + "' stop-color='" + c + "'/>"; });
+    return s + "</radialGradient>";
+  }
+  function fleche(id, c) { return "<marker id='" + id + "' markerWidth='10' markerHeight='10' refX='7' refY='5' orient='auto'><path d='M0 1L8 5L0 9Z' fill='" + c + "'/></marker>"; }
+  function svg(w, h, alt, defs, corps) {
+    return "<svg viewBox='0 0 " + w + " " + h + "' role='img' aria-label='" + alt + "' font-family='Inter,Arial,sans-serif'><rect width='" + w + "' height='" + h + "' fill='#fff'/><defs>" + defs + "</defs>" + corps +
+      "<text x='" + (w - 6) + "' y='" + (h - 5) + "' font-size='8' text-anchor='end' fill='#8A93A6'>Planche VÉRITAS</text></svg>";
+  }
+  function ancien(id) { return window.VRT_LECONS[id]; }
+  function remplacer(id, o) {
+    var a = ancien(id);
+    if (a) ["apc", "examen", "rang", "cle", "scenes"].forEach(function (k) { if (a[k] != null && o[k] == null) o[k] = a[k]; });
+    VRT_L(id, o);
+    if (a) o.ordre = a.ordre;
+  }
+  function q(qq, bonne, f1, f2, e) { return { q: qq, r: [bonne, f1, f2], b: 0, e: e }; }
+  function partie(old, i) { return old && old.parties[i] ? old.parties[i].html : ""; }
+  function bulle(x, y, w, t, c) { return "<rect x='" + x + "' y='" + y + "' width='" + w + "' height='30' rx='12' fill='#fff' stroke='" + (c || "#C9D2E3") + "'/>" + txt(x + w / 2, y + 20, t, { s: 11.5 }); }
+  function perso(x, y, peau, habit, bas) {
+    bas = bas || "#2E3445";
+    return "<g transform='translate(" + x + " " + y + ")'><ellipse cx='0' cy='84' rx='18' ry='4' fill='#001136' opacity='.18'/>" +
+      "<rect x='-9' y='44' width='8' height='36' rx='3' fill='" + bas + "'/><rect x='1' y='44' width='8' height='36' rx='3' fill='" + bas + "'/>" +
+      "<ellipse cx='-6' cy='81' rx='7' ry='3.5' fill='#1F2328'/><ellipse cx='6' cy='81' rx='7' ry='3.5' fill='#1F2328'/>" +
+      "<path d='M-13 46L-16 18C-16 13 -12 11 -6 10H6C12 11 16 13 16 18L13 46Z' fill='" + habit + "'/>" +
+      "<path d='M-15 16L-20 40' stroke='" + habit + "' stroke-width='7' stroke-linecap='round'/><path d='M15 16L20 40' stroke='" + habit + "' stroke-width='7' stroke-linecap='round'/>" +
+      "<circle cx='-20' cy='42' r='3.6' fill='" + peau + "'/><circle cx='20' cy='42' r='3.6' fill='" + peau + "'/>" +
+      "<rect x='-3.5' y='5' width='7' height='7' fill='" + peau + "'/><ellipse cx='0' cy='-2' rx='9' ry='10.5' fill='" + peau + "'/>" +
+      "<path d='M-9 -4C-10 -14 -4 -13.5 0 -13.5S10 -14 9 -4C7 -9 -7 -9 -9 -4Z' fill='#1B1410'/><ellipse cx='-9' cy='-1' rx='1.8' ry='3' fill='" + peau + "'/><ellipse cx='9' cy='-1' rx='1.8' ry='3' fill='" + peau + "'/></g>";
+  }
+  /* portrait en buste (arbre généalogique) */
+  function portrait(x, y, peau, habit, cheveux, age) {
+    var s = "<g transform='translate(" + x + " " + y + ")'><circle r='30' fill='#F4EFE4' stroke='#C9A576' stroke-width='3'/><clipPath id='pc" + x + "_" + y + "'><circle r='28'/></clipPath><g clip-path='url(#pc" + x + "_" + y + ")'>";
+    s += "<path d='M-26 32C-26 14 -14 10 0 10S26 14 26 32Z' fill='" + habit + "'/><rect x='-4' y='2' width='8' height='10' fill='" + peau + "'/><ellipse cy='-6' rx='11' ry='13' fill='" + peau + "'/>";
+    s += age === "vieux" ? "<path d='M-11 -10C-12 -20 -4 -21 0 -21S12 -20 11 -10C9 -14 -9 -14 -11 -10Z' fill='#D8D8D8'/>" : age === "femme" ? "<path d='M-13 -6C-15 -24 15 -24 13 -6C12 -14 -12 -14 -13 -6Z' fill='" + cheveux + "'/><path d='M-13 -14h26v-6c-6 -6 -20 -6 -26 0Z' fill='" + habit + "'/>" : "<path d='M-11 -10C-12 -20 -4 -21 0 -21S12 -20 11 -10C9 -14 -9 -14 -11 -10Z' fill='" + cheveux + "'/>";
+    s += "<circle cx='-4' cy='-6' r='1.4' fill='#1B1410'/><circle cx='4' cy='-6' r='1.4' fill='#1B1410'/><path d='M-3 2q3 2 6 0' stroke='#1B1410' fill='none'/></g></g>";
+    return s;
+  }
+  /* boucle d'exercice générique : [phrase avec ___, [bonne, autres…], explication] */
+  function exercice(el, C, suivant, lib) {
+    var i = 0, ok = 0;
+    el.innerHTML = "<p class='labo-r' data-q style='font-size:16px'></p><div style='display:flex;gap:8px;flex-wrap:wrap' data-c></div><p class='an-note' data-e></p><p class='labo-r' data-s></p>";
+    function $(s) { return el.querySelector(s); }
+    function poser() {
+      var c = C[i];
+      $("[data-q]").innerHTML = (i + 1) + ". " + c[0].replace("___", "<b style='border-bottom:2px dashed #1E499B;padding:0 14px'>?</b>");
+      $("[data-e]").textContent = ""; $("[data-s]").innerHTML = lib + " " + (i + 1) + " / " + C.length + " · score : <b>" + ok + "</b>";
+      $("[data-c]").innerHTML = c[1].slice().sort().map(function (x) { return "<button type='button' class='btn-l' data-v='" + x + "'>" + x + "</button>"; }).join("");
+      el.querySelectorAll("[data-v]").forEach(function (b) {
+        b.addEventListener("click", function () {
+          var bon = b.dataset.v === c[1][0]; if (bon) ok++;
+          $("[data-q]").innerHTML = (i + 1) + ". " + c[0].replace("___", "<b style='color:" + (bon ? VERT : ROUGE) + "'>" + c[1][0] + "</b>");
+          $("[data-e]").innerHTML = (bon ? "✔ " : "✘ ") + c[2];
+          el.querySelectorAll("[data-v]").forEach(function (x) { x.disabled = true; });
+          var nx = document.createElement("button"); nx.type = "button"; nx.className = "btn-l"; nx.textContent = i + 1 < C.length ? suivant : "↺";
+          nx.addEventListener("click", function () { i = (i + 1) % C.length; if (!i) ok = 0; poser(); });
+          $("[data-c]").appendChild(nx);
+          $("[data-s]").innerHTML = lib + " " + (i + 1) + " / " + C.length + " · score : <b>" + ok + "</b>";
+        });
+      });
+    }
+    poser();
+  }
+
+  /* ═══════════════════════ 3e ANGLAIS — A, AN, THE ═══════════════════════ */
+  var AR_OLD = ancien("3e-en-articles");
+  function kribi3D() {
+    var o = [], k;
+    o.push({ f: "boite", c: [0, -14, 40], d: [600, 8, 260], coul: "#2F6DB5", dessus: "#3E87D1" });
+    o.push({ f: "boite", c: [0, -8, -90], d: [600, 10, 120], coul: "#D9C08A", dessus: "#EAD7A6" });
+    o.push({ f: "sphere", c: [200, 170, 160], r: 34, coul: "#FFD54A" });
+    /* pirogue : coque en bois effilée */
+    o.push({ f: "poly", pts: [[-160, -4, 40], [-60, -4, 52], [40, -4, 40], [-60, -4, 28]], coul: "#5D3A1E" });
+    o.push({ f: "poly", pts: [[-160, -4, 40], [-60, 14, 54], [40, -4, 40], [-60, -4, 52]], coul: "#7A4A22" });
+    o.push({ f: "poly", pts: [[-160, -4, 40], [-60, 14, 26], [40, -4, 40], [-60, -4, 28]], coul: "#8B5A2B" });
+    o.push({ f: "cylindre", c: [-70, 6, 40], r: 1.5, h: 70, n: 6, coul: "#5D3A1E" });
+    o.push({ f: "poly", pts: [[-68, 20, 40], [-68, 74, 40], [-20, 24, 40]], coul: "#F4EFE4" });
+    /* cocotiers */
+    [[-220, -110], [-120, -130], [150, -120], [240, -100]].forEach(function (p, i) {
+      for (k = 0; k < 8; k++) o.push({ f: "cylindre", c: [p[0] + k * (i % 2 ? 2 : -2), -4 + k * 14, p[1]], r: 5 - k * 0.3, h: 14, n: 8, coul: "#8B6B4A" });
+      [[30, 0], [-30, 0], [0, 30], [0, -30], [22, 22], [-22, -22]].forEach(function (d) { o.push({ f: "poly", pts: [[p[0] + (i % 2 ? 16 : -16), 110, p[1]], [p[0] + (i % 2 ? 16 : -16) + d[0] * 2, 86, p[1] + d[1] * 2], [p[0] + (i % 2 ? 16 : -16) + d[0] * 1.6 + 6, 96, p[1] + d[1] * 1.6 + 6]], coul: "#2E7D32" }); });
+    });
+    /* les chutes de la Lobé : rochers et eau blanche */
+    for (k = 0; k < 5; k++) o.push({ f: "sphere", c: [-260 + k * 18, 2 + (k % 2) * 10, -40], r: 16, coul: "#6E6A66" });
+    o.push({ f: "poly", pts: [[-280, 30, -30], [-180, 30, -30], [-180, -4, -10], [-280, -4, -10]], coul: "#EAF6FB", op: 0.85 });
+    return o;
+  }
+  remplacer("3e-en-articles", {
+    c: "3e", m: "anglais", titre: "Definite and indefinite articles: a, an, the", duree: 30,
+    accroche: "« A sun is hot in the Cameroon » : Brenda's tourist leaflet about Kribi needs your help before the visitors arrive.",
+    intro: "A tourist leaflet about Kribi is your guiding thread: in each part, a clue helps you choose between three rules.",
+    objectifs: ["choose a or an according to the first sound", "use the for known or unique things, rivers, oceans and superlatives", "use no article with general plurals, countries, cities and languages", "avoid the French « le / la / les » reflex"],
+    enquete: {
+      titre: "Brenda's leaflet for the visitors of Kribi",
+      svg: svg(640, 230, "Dépliant touristique en anglais sur Kribi avec des fautes d articles, à côté d une plage avec une pirogue et des cocotiers", lin("krs", ["#9FD4F2", "#E9F5FB"], true), "<rect width='640' height='230' fill='url(#krs)'/><rect y='150' width='640' height='80' fill='#2F6DB5'/><path d='M0 150C200 140 420 160 640 146V158H0Z' fill='#EAD7A6'/><circle cx='560' cy='50' r='26' fill='#FFD54A'/><path d='M420 168l60 6l40 -6l-50 -4Z' fill='#5D3A1E'/><path d='M466 166v-38l26 34Z' fill='#F4EFE4'/>" + "<g transform='rotate(-3 160 115)'><rect x='30' y='20' width='270' height='190' rx='6' fill='#fff' stroke='#D9CFBC'/>" + txt(46, 46, "VISIT KRIBI!", { s: 15, a: "start", c: TERRE }) + ["A sun is hot in the Cameroon.", "Swim in Atlantic Ocean.", "Visit an university and a Lobé Falls.", "Tourists love the mangoes."].map(function (l, i) { return txt(46, 80 + i * 28, "• " + l, { s: 12, a: "start", w: 500, i: true }); }).join("") + "</g>"),
+      legende: "At Kribi: Brenda's family runs a small guesthouse near the Lobé Falls; English-speaking visitors are coming from Nigeria.",
+      contexte: "<p>Brenda writes a leaflet for the visitors: « <em>A sun</em> is hot in <em>the Cameroon</em>. Swim in <em>Atlantic Ocean</em>. Visit <em>an university</em> and <em>a Lobé Falls</em>. Tourists love <em>the mangoes</em>. » Her brother says: « Put “the” everywhere, like “le, la, les” in French. » Her friend says: « Use “an” before every word that starts with a vowel letter. »</p>",
+      documents: [{ t: "Three questions to ask", html: "<ol><li>Is the noun singular and countable, mentioned for the first time? → <strong>a / an</strong> (choose by the first <strong>sound</strong>).</li><li>Do we know which one, or is it unique? → <strong>the</strong>.</li><li>Is it a plural or an uncountable noun in general, a country, a city, a language? → <strong>no article (Ø)</strong>.</li></ol>" }],
+      question: "Which article does each noun of the leaflet need?",
+      tache: "Correct the five mistakes of the leaflet and justify each correction with one of the three questions.",
+      hypotheses: ["Put « the » everywhere, like « le / la / les » in French.", "Use « an » before every word that starts with a vowel letter.", "Choose a / an by the first sound, « the » for known or unique things, and no article for general plurals and countries."]
+    },
+    parties: [
+      { t: "A or an?", html: partie(AR_OLD, 0),
+        planches: [{ type: "2D", titre: "It's the sound that counts", legende: "A university (« you- » sound), an hour (silent h), an egg, a European (« you- »), an orange, a mango: a before a consonant sound, an before a vowel sound.", svg: (function () {
+          var I = [["a", "university", "« you- »"], ["an", "hour", "h silent"], ["an", "egg", "vowel sound"], ["a", "mango", "consonant"], ["an", "orange", "vowel sound"], ["a", "European", "« you- »"]], s = "";
+          I.forEach(function (it, i) {
+            var x = 20 + (i % 3) * 205, y = 20 + Math.floor(i / 3) * 140, c = it[0] === "an" ? "#C2540A" : BLEU;
+            s += "<rect x='" + x + "' y='" + y + "' width='190' height='124' rx='14' fill='#F7F9FC' stroke='#E3E8F1'/><g transform='translate(" + (x + 50) + " " + (y + 62) + ")'>";
+            if (it[1] === "university") s += "<rect x='-34' y='-20' width='68' height='44' fill='#E9E2D2' stroke='#8A6E4B'/><path d='M-40 -20L0 -42L40 -20Z' fill='#B33A2C'/><rect x='-24' y='-8' width='8' height='32' fill='#C9C1B2'/><rect x='-4' y='-8' width='8' height='32' fill='#C9C1B2'/><rect x='16' y='-8' width='8' height='32' fill='#C9C1B2'/>";
+            else if (it[1] === "hour") s += "<circle r='34' fill='#FBF8F2' stroke='#5C6478' stroke-width='5'/><path d='M0 0V-22M0 0L16 8' stroke='#1F2328' stroke-width='4' stroke-linecap='round'/>";
+            else if (it[1] === "egg") s += "<ellipse rx='24' ry='31' fill='url(#arEgg)'/>";
+            else if (it[1] === "mango") s += "<ellipse rx='32' ry='24' fill='url(#arMg)' transform='rotate(-20)'/><path d='M24 -14q8 -10 16 -8' stroke='#5B3A12' stroke-width='3' fill='none'/>";
+            else if (it[1] === "orange") s += "<circle r='30' fill='url(#arOr)'/><path d='M0 -30q6 -10 14 -8' stroke='#2E7D32' stroke-width='4' fill='none'/>";
+            else s += "<circle r='30' fill='#003399'/>" + Array.apply(null, Array(12)).map(function (_, k) { var a = k / 12 * 2 * Math.PI; return "<text x='" + (19 * Math.cos(a)).toFixed(1) + "' y='" + (19 * Math.sin(a) + 4).toFixed(1) + "' font-size='10' text-anchor='middle' fill='#FFCC00'>★</text>"; }).join("");
+            s += "</g>" + txt(x + 140, y + 56, it[0], { s: 26, c: c }) + txt(x + 140, y + 80, it[1], { s: 14 }) + txt(x + 140, y + 100, it[2], { s: 10.5, w: 500, c: GRIS });
+          });
+          return svg(640, 300, "Six images avec leur article : a university, an hour, an egg, a mango, an orange, a European", rad("arEgg", ["#FFFFFF", "#F4EBDD", "#D9C7A8"]) + rad("arMg", ["#FFE07A", "#F7B32B", "#E07A1F", "#7A9A2E"]) + rad("arOr", ["#FFD08A", "#F59A23", "#D96E00"]), s);
+        })() }],
+        fil: { html: "<p>« University » commence par une voyelle écrite mais par le <strong>son</strong> « you- », une consonne : on écrit <strong>a university</strong>. La règle de la lettre est fausse ; c'est le son qui compte.</p>", verdicts: [[1, "rejetee", "A university (« you- ») ; an hour (h muet) : c'est le son qui décide."]] },
+        retenir: "a + consonant sound ; an + vowel sound." },
+      { t: "The", html: partie(AR_OLD, 1),
+        planches: [{ type: "3d", titre: "The beach at Kribi", legende: "Turn the beach: the sun and the Atlantic Ocean are unique, so « the »; the Lobé Falls (a famous place) take « the »; a pirogue, seen for the first time, takes « a »… then it becomes « the pirogue ».",
+          modele: { h: 340, rx: -20, ry: 18, echelle: 0.85, alt: "Plage de Kribi en trois dimensions avec la mer, une pirogue à voile, des cocotiers, le soleil et les chutes de la Lobé", objets: kribi3D(),
+            etiquettes: [{ p: [200, 204, 160], t: "the sun", cote: "d" }, { p: [100, -6, 100], t: "the Atlantic Ocean", cote: "d" }, { p: [-60, 40, 40], t: "a pirogue → the pirogue" }, { p: [-240, 40, -30], t: "the Lobé Falls" }] } }],
+        fil: { html: "<p>Le soleil est unique : <strong>the sun</strong> ; un océan prend toujours <strong>the</strong> : <strong>the Atlantic Ocean</strong> ; les chutes de la Lobé aussi : <strong>the Lobé Falls</strong> (« a Lobé Falls » est faux).</p>" },
+        retenir: "the: known or unique things, rivers, oceans, superlatives." },
+      { t: "No article", html: partie(AR_OLD, 2),
+        fil: { html: "<p>« Cameroon » est un pays : pas d'article (on dit cependant <em>the United States</em>). « Tourists love mangoes » parle des mangues en général : pas d'article. Mettre « the » partout, comme « le, la, les », produit trois fautes.</p>", verdicts: [[0, "rejetee", "« the Cameroon » et « the mangoes » (en général) sont faux."], [2, "validee", "Son pour a / an ; the pour le connu ou l'unique ; Ø pour le général et les pays."]] },
+        retenir: "General plurals, uncountables, countries, cities, languages → no article." }
+    ],
+    denouement: {
+      titre: "The corrected leaflet",
+      etapes: ["a university, but an hour: the first sound decides (clue 1).", "the sun, the Atlantic Ocean, the Lobé Falls (clue 2).", "Cameroon, mangoes in general: no article (clue 3)."],
+      reponse: "<p>Corrected leaflet: « <strong>The</strong> sun is hot in <strong>Cameroon</strong>. Swim in <strong>the</strong> Atlantic Ocean. Visit <strong>a</strong> university and <strong>the</strong> Lobé Falls. Tourists love <strong>mangoes</strong>. » We choose <em>a</em> or <em>an</em> by the first <strong>sound</strong>, not the first letter: <em>a university</em> (« you- ») but <em>an hour</em>. We use <em>the</em> for what is unique or known (the sun), for oceans and famous places (the Atlantic, the Lobé Falls). We use no article for countries (Cameroon) and for plurals in general (mangoes). Putting « the » everywhere, like « le, la, les » in French, would be wrong.</p>",
+      transfert: "<p>Write a five-line leaflet for your own town, using at least two « a / an », two « the » and two nouns without article.</p>"
+    },
+    revision: (AR_OLD ? AR_OLD.revision : []).concat(["a university, a European (« you- ») ; an hour, an honest man (h muet).", "the + ocean, river, unique thing ; Ø + country, general plural."]),
+    exo: AR_OLD ? AR_OLD.exo : "",
+    quiz: [
+      q("___ hour ago.", "An", "A", "The", "Silent h: vowel sound."),
+      q("___ Wouri is a river in Douala.", "The", "A", "Ø", "Rivers take « the »."),
+      q("I like ___ mangoes.", "Ø", "the", "a", "Mangoes in general: no article."),
+      q("She studies at ___ university.", "a", "an", "Ø", "« you- »: consonant sound."),
+      q("___ sun is very hot today.", "The", "A", "Ø", "Unique thing."),
+      q("Swim in ___ Atlantic Ocean.", "the", "a", "Ø", "Oceans take « the »."),
+      q("Kribi is in ___ Cameroon.", "Ø", "the", "a", "Most countries: no article."),
+      q("He is ___ honest man.", "an", "a", "the", "Silent h."),
+      q("I saw a pirogue. ___ pirogue was blue.", "The", "A", "Ø", "Mentioned before: « the »."),
+      q("___ English is easy for her.", "Ø", "The", "An", "Languages: no article.")
+    ]
+  });
+
+  /* ═══════════════════════ 3e ALLEMAND — LES VERBES FAIBLES ═══════════════════════ */
+  var DV_OLD = ancien("3e-de-verbes");
+  var PRON = [["ich", "e"], ["du", "st"], ["er / sie / es", "t"], ["wir", "en"], ["ihr", "t"], ["sie / Sie", "en"]];
+  function conj(rad, p) { var e = PRON[p][1], tD = /[td]$/.test(rad) && (e === "st" || e === "t"); return [rad, (tD ? "e" : "") + e]; }
+  function blocs3D() {
+    var o = [], C = ["#C62828", "#F2994A", "#F2C94C", "#2E7D32", "#1E88E5", "#7B3F99"], k;
+    o.push({ f: "boite", c: [0, -10, 0], d: [460, 8, 160], coul: "#C9A576", dessus: "#E3C79C" });
+    for (k = 0; k < 6; k++) {
+      var y = k * 34;
+      o.push({ f: "boite", c: [-60, y, 0], d: [150, 28, 50], coul: "#1E499B", dessus: "#2F5FBF", div: false });
+      o.push({ f: "boite", c: [50, y, 0], d: [60, 28, 50], coul: C[k], dessus: C[k], div: false, ec: [70, 0, 0] });
+    }
+    o.forEach(function (x) { x.c[1] -= 90; });
+    return o;
+  }
+  remplacer("3e-de-verbes", {
+    c: "3e", m: "allemand", titre: "Les verbes faibles (réguliers) au présent", duree: 30,
+    accroche: "« Ich spielt Fußball, du lerne Deutsch » : le message vocal de Paul à Jonas fait sourire Berlin.",
+    intro: "Le message d'un élève à son correspondant de Berlin te sert de fil rouge : à chaque partie, un indice t'aide à trancher entre trois règles.",
+    objectifs: ["trouver le radical d'un verbe faible", "ajouter les terminaisons -e, -st, -t, -en, -t, -en", "appliquer les cas particuliers (radical en -t / -d, verbes en -eln / -ern)", "présenter sa journée avec des verbes faibles"],
+    enquete: {
+      titre: "Le message de Paul à Jonas",
+      svg: svg(640, 220, "Un élève enregistre un message vocal en allemand avec des fautes de conjugaison", "", "<rect width='640' height='220' fill='#F3F0F8'/>" + perso(90, 70, "#5A3A1E", "#DCE6F2", "#1E499B") + "<rect x='110' y='108' width='12' height='22' rx='3' fill='#1F2328'/>" + "<rect x='170' y='30' width='440' height='150' rx='16' fill='#fff' stroke='#C9D2E3'/><path d='M190 58h40' stroke='#7B3F99' stroke-width='6' stroke-linecap='round'/>" + [8, 16, 26, 14, 22, 10, 18, 28, 12, 20].map(function (h, i) { return "<rect x='" + (240 + i * 8) + "' y='" + (58 - h / 2) + "' width='4' height='" + h + "' rx='2' fill='#7B3F99'/>"; }).join("") + txt(190, 100, "« Hallo Jonas! Ich spielt Fußball.", { s: 13, a: "start", w: 500, i: true }) + txt(190, 124, "Du lerne Deutsch. Mein Vater arbeit viel.", { s: 13, a: "start", w: 500, i: true }) + txt(190, 148, "Wir kauft Bananen auf dem Markt. »", { s: 13, a: "start", w: 500, i: true })),
+      legende: "À Dschang : Paul, élève de 3e, envoie un message vocal à Jonas, son correspondant de Berlin.",
+      contexte: "<p>Paul raconte sa journée : « Ich <em>spielt</em> Fußball. Du <em>lerne</em> Deutsch. Mein Vater <em>arbeit</em> viel. Wir <em>kauft</em> Bananen auf dem Markt. » Jonas répond : « Je comprends, mais tes verbes sont tous mélangés ! » Paul pense : « En allemand, comme en anglais, la terminaison ne change presque pas. » Sa sœur : « Il suffit d'ajouter -e, -es, -e, comme en français. »</p>",
+      documents: [{ t: "Les terminaisons du présent", html: "<table class='donnees'><tr><th>ich</th><th>du</th><th>er / sie / es</th><th>wir</th><th>ihr</th><th>sie / Sie</th></tr><tr><td>-e</td><td>-st</td><td>-t</td><td>-en</td><td>-t</td><td>-en</td></tr></table>" }],
+      question: "Comment conjuguer correctement les verbes de Paul ?",
+      tache: "Corrige les quatre verbes en indiquant pour chacun le radical et la terminaison.",
+      hypotheses: ["La terminaison change à peine, comme en anglais.", "On ajoute -e, -es, -e comme en français.", "Radical + -e, -st, -t, -en, -t, -en ; on ajoute un e quand le radical finit par -t ou -d."]
+    },
+    parties: [
+      { t: "Le modèle", html: partie(DV_OLD, 0),
+        planches: [{ type: "3d", titre: "Le radical et ses terminaisons", legende: "Le bloc bleu est le radical (spiel-), le même pour toutes les personnes ; chaque bloc coloré est une terminaison : -e (ich), -st (du), -t (er), -en (wir), -t (ihr), -en (sie). Le curseur détache les terminaisons.",
+          modele: { h: 360, rx: -14, ry: 24, echelle: 0.85, alt: "Six rangées de blocs : un radical bleu et une terminaison colorée par personne", eclate: "Détacher les terminaisons", jouer: "Détacher", objets: blocs3D(),
+            etiquettes: PRON.map(function (p, k) { return { p: [80, k * 34 - 76, 0], t: p[0] + " spiel" + p[1], cote: "d", ec: [70, 0, 0] }; }).concat([{ p: [-130, 10, 0], t: "radical : spiel-" }]) } }],
+        fil: { html: "<p>Six personnes, cinq terminaisons différentes : rien à voir avec l'anglais, où seul « he plays » change. « Ich spiel<strong>e</strong> », « du lern<strong>st</strong> » : il faut chaque fois enlever -en de l'infinitif et ajouter la bonne terminaison.</p>", verdicts: [[0, "rejetee", "Les terminaisons changent à presque toutes les personnes."], [1, "rejetee", "Ce sont -e, -st, -t, -en, -t, -en, pas les terminaisons françaises."]] },
+        retenir: "Radical (infinitif sans -en) + -e, -st, -t, -en, -t, -en." },
+      { t: "Les cas particuliers", html: partie(DV_OLD, 1),
+        fil: { html: "<p>« arbeiten » a un radical en -t (arbeit-) : on ajoute un e pour pouvoir prononcer : « mein Vater arbeit<strong>e</strong>t ». Sans ce e, « er arbeitt » serait imprononçable.</p>" },
+        retenir: "Radical en -t ou -d : du arbeitest, er arbeitet, ihr findet." },
+      { t: "En situation", html: partie(DV_OLD, 2),
+        planches: [{ type: "2D", titre: "Am Samstag auf dem Markt", legende: "Une scène de marché décrite avec des verbes faibles : Mama kauft Tomaten, die Verkäuferin sagt den Preis, die Kinder spielen, ich höre Musik.", svg: (function () {
+          var s = "<rect width='640' height='260' fill='#F6EEDC'/><rect y='200' width='640' height='60' fill='#D9C49C'/><path d='M200 100h260l-20 -36h-220Z' fill='#C62828'/><rect x='220' y='150' width='220' height='12' fill='#8B5A2B'/><path d='M230 162v38M430 162v38' stroke='#6B4423' stroke-width='6'/>";
+          for (var k = 0; k < 12; k++) s += "<circle cx='" + (236 + (k % 6) * 16) + "' cy='" + (142 - Math.floor(k / 6) * 10) + "' r='7' fill='#D7261E'/>";
+          s += perso(170, 120, "#5A3A1E", "#C2540A", "#7B3F99") + perso(330, 84, "#6B4423", "#F7C948", "#2E3445") + perso(520, 120, "#6B4423", "#2E7D32", "#1E499B") + perso(580, 126, "#5A3A1E", "#F2994A", "#1E499B") + perso(60, 120, "#5A3A1E", "#DCE6F2", "#1E499B") + "<path d='M50 108a10 10 0 0 1 20 0' stroke='#1F2328' stroke-width='3' fill='none'/>";
+          s += bulle(110, 60, 130, "Mama kauft…", TERRE) + bulle(270, 22, 170, "Die Verkäuferin sagt…", "#B07A00") + bulle(470, 60, 150, "Die Kinder spielen.", VERT) + bulle(10, 22, 120, "Ich höre Musik.", BLEU);
+          return svg(640, 260, "Scène de marché : une mère achète des tomates, la vendeuse annonce le prix, deux enfants jouent, un élève écoute de la musique", "", s);
+        })() }],
+        fil: { html: "<p>« Wir kauf<strong>en</strong> Bananen » : avec wir, la terminaison est -en, comme l'infinitif. La règle complète (radical + terminaison, e intercalé après -t / -d) corrige les quatre verbes de Paul.</p>", verdicts: [[2, "validee", "Radical + terminaison ; e intercalé après -t / -d."]] },
+        retenir: "lernen, kaufen, wohnen, machen, sagen, fragen, hören, kochen : verbes faibles." }
+    ],
+    denouement: {
+      titre: "Le message corrigé",
+      etapes: ["Radical : spiel-, lern-, arbeit-, kauf- (indice 1).", "Terminaisons : ich -e, du -st, er -t, wir -en (indice 1).", "arbeit- finit par -t : er arbeitet (indice 2)."],
+      reponse: "<p>Message corrigé : « Hallo Jonas! Ich spiel<strong>e</strong> Fußball. Du lern<strong>st</strong> Deutsch. Mein Vater arbeit<strong>et</strong> viel. Wir kauf<strong>en</strong> Bananen auf dem Markt. » Un verbe faible se conjugue en prenant le radical (l'infinitif sans -en) et en ajoutant -e, -st, -t, -en, -t, -en. Contrairement à l'anglais, la terminaison change presque à chaque personne ; et ce ne sont pas les terminaisons françaises. Quand le radical se termine par -t ou -d, on intercale un e : er arbeitet, du arbeitest.</p>",
+      transfert: "<p>Raconte ton samedi à Jonas en six phrases avec six verbes faibles différents (wohnen, machen, kochen, hören, fragen, sagen) et six personnes différentes.</p>"
+    },
+    revision: (DV_OLD ? DV_OLD.revision : []).concat(["Radical en -t / -d : e intercalé (er arbeitet, ihr findet)."]),
+    exo: DV_OLD ? DV_OLD.exo : "",
+    quiz: [
+      q("du ___ (lernen)", "lernst", "lernt", "lerne", "du : -st."),
+      q("er ___ (arbeiten)", "arbeitet", "arbeit", "arbeitt", "Radical en -t : e intercalé."),
+      q("Quelle est la terminaison de « ich » ?", "-e", "-st", "-en", "ich spiele."),
+      q("wir ___ (kaufen)", "kaufen", "kauft", "kaufst", "wir : -en."),
+      q("ihr ___ (spielen)", "spielt", "spielen", "spielst", "ihr : -t."),
+      q("Le radical de « wohnen » est…", "wohn-", "wohne-", "wohnen-", "On enlève -en."),
+      q("du ___ (finden)", "findest", "findst", "finden", "Radical en -d."),
+      q("sie (pluriel) ___ (machen)", "machen", "macht", "machst", "sie / Sie : -en."),
+      q("wir ___ (wandern)", "wandern", "wanderen", "wandert", "Verbes en -ern : -n seulement."),
+      q("« kochen » signifie…", "cuisiner", "acheter", "habiter", "kochen = cuisiner.")
+    ]
+  });
+
+  /* ═══════════════════════ 3e ESPAGNOL — MI FAMILIA ═══════════════════════ */
+  var EF_OLD = ancien("3e-es-familia");
+  var FAM = [["el abuelo", "Papa Mbarga", 210, 50, "#6B4423", "#7A6A55", "", "vieux"], ["la abuela", "Mama Ngono", 430, 50, "#5A3A1E", "#7B3F99", "#1B1410", "vieux"], ["el padre", "Paul", 160, 170, "#6B4423", "#1E499B", "#1B1410", "homme"], ["la madre", "Marie", 320, 170, "#5A3A1E", "#C2540A", "#1B1410", "femme"], ["la tía", "Rose", 480, 170, "#6B4423", "#2E7D32", "#1B1410", "femme"], ["yo", "María", 120, 290, "#5A3A1E", "#F7C948", "#1B1410", "femme"], ["el hermano", "Junior", 230, 290, "#6B4423", "#DCE6F2", "#1B1410", "homme"], ["la hermana", "Lucie", 340, 290, "#5A3A1E", "#F2994A", "#1B1410", "femme"], ["el primo", "Eric", 500, 290, "#6B4423", "#1E88E5", "#1B1410", "homme"]];
+  function arbre(sel) {
+    var s = "<rect width='640' height='360' fill='#FBF7EE'/>", L = [[210, 50, 430, 50], [320, 50, 320, 110], [160, 110, 480, 110], [160, 110, 160, 140], [480, 110, 480, 140], [320, 110, 320, 140], [160, 170, 320, 170], [240, 170, 240, 230], [120, 230, 340, 230], [120, 230, 120, 260], [230, 230, 230, 260], [340, 230, 340, 260], [480, 200, 480, 230], [480, 230, 500, 230], [500, 230, 500, 260]];
+    L.forEach(function (l) { s += "<path d='M" + l[0] + " " + l[1] + "L" + l[2] + " " + l[3] + "' stroke='#8A6E4B' stroke-width='3'/>"; });
+    FAM.forEach(function (f, i) { s += (i === sel ? "<circle cx='" + f[2] + "' cy='" + f[3] + "' r='37' fill='none' stroke='" + ROUGE + "' stroke-width='4'/>" : "") + portrait(f[2], f[3], f[4], f[5], f[6], f[7]) + txt(f[2], f[3] + 46, f[0], { s: 12, c: BLEU, halo: true }) + txt(f[2], f[3] + 60, f[1], { s: 10.5, w: 500, c: GRIS, halo: true }); });
+    return s;
+  }
+  remplacer("3e-es-familia", {
+    c: "3e", m: "espagnol", titre: "Mi familia : présenter sa famille", duree: 30,
+    accroche: "« Mi hermanos viven en Bafoussam » : Ana, la correspondante de Séville, a reçu la photo de famille de María… et une phrase à corriger.",
+    intro: "Une photo de famille envoyée à une correspondante espagnole te sert de fil rouge : à chaque partie, un indice t'aide à trancher entre trois règles.",
+    objectifs: ["nommer les membres de la famille en espagnol", "accorder les possessifs (mi / mis, su / sus, nuestro…)", "employer la préposition a devant un COD de personne", "présenter sa famille en six phrases"],
+    enquete: {
+      titre: "La photo de famille de María",
+      svg: svg(640, 230, "Une photo de famille avec trois générations et une légende en espagnol contenant des fautes", "", "<rect width='640' height='230' fill='#EFE6D6'/><rect x='30' y='20' width='300' height='190' rx='6' fill='#fff' stroke='#C9A576' stroke-width='4'/>" + portrait(100, 80, "#6B4423", "#7A6A55", "", "vieux") + portrait(180, 80, "#5A3A1E", "#7B3F99", "", "vieux") + portrait(260, 80, "#6B4423", "#1E499B", "#1B1410", "homme") + portrait(100, 160, "#5A3A1E", "#F7C948", "#1B1410", "femme") + portrait(180, 160, "#6B4423", "#DCE6F2", "#1B1410", "homme") + portrait(260, 160, "#5A3A1E", "#F2994A", "#1B1410", "femme") + "<rect x='360' y='40' width='250' height='150' rx='10' fill='#fff' stroke='#C9D2E3'/>" + ["Querida Ana:", "Mi hermanos viven en Bafoussam.", "Su padre es profesor. (mon père)", "Quiero mucho mi abuela.", "La hermana de mi padre es mi prima."].map(function (l, i) { return txt(374, 66 + i * 26, l, { s: 11.5, a: "start", w: i ? 500 : 700, i: true }); }).join("")),
+      legende: "À Yaoundé : María, élève de 3e, prépare la légende d'une photo de famille pour Ana, sa correspondante de Séville.",
+      contexte: "<p>María écrit : « <em>Mi hermanos</em> viven en Bafoussam. <em>Su padre</em> es profesor (pour dire « mon père »). Quiero mucho <em>mi abuela</em>. La hermana de mi padre es <em>mi prima</em>. » Ana répond : « J'adore la photo ! Mais qui est qui ? » Le frère de María dit : « Les possessifs ne s'accordent jamais. » Sa cousine : « En espagnol, on parle de sa famille comme en français, sans rien ajouter. »</p>",
+      documents: [{ t: "L'arbre généalogique de María", html: "<p>Grands-parents : Papa Mbarga et Mama Ngono. Parents : Paul (le père) et Marie (la mère). Tante : Rose, sœur de Paul. Enfants : María, Junior, Lucie ; cousin : Eric, fils de Rose.</p>" }],
+      question: "Comment corriger la légende pour qu'Ana comprenne qui est qui ?",
+      tache: "Corrige les quatre phrases et présente la famille de María en six phrases en espagnol.",
+      hypotheses: ["Les possessifs ne s'accordent jamais.", "On parle de sa famille comme en français, sans rien ajouter devant les personnes.", "Le possessif s'accorde en nombre (mi / mis) ; on met « a » devant un COD de personne ; le vocabulaire de parenté se lit sur l'arbre."]
+    },
+    parties: [
+      { t: "El vocabulario", html: partie(EF_OLD, 0),
+        planches: [{ type: "2D", titre: "El árbol genealógico de María", legende: "Trois générations : los abuelos, los padres y la tía, puis María, sus hermanos y su primo. La sœur du père est la tía ; le fils de la tía est el primo.", svg: svg(640, 360, "Arbre généalogique en portraits : grands-parents, parents, tante, enfants et cousin, avec les noms de parenté en espagnol", "", arbre(null)) }],
+        fil: { html: "<p>Rose est la sœur du père de María : c'est <strong>su tía</strong>, pas « su prima ». Eric, le fils de Rose, est <strong>su primo</strong>.</p>" },
+        retenir: "padre, madre, abuelo, abuela, hermano, hermana, tío, tía, primo, prima." },
+      { t: "Los posesivos", html: partie(EF_OLD, 1),
+        fil: { html: "<p>« hermanos » est au pluriel : <strong>mis</strong> hermanos. Et pour dire « mon père », c'est <strong>mi</strong> padre : « su padre » voudrait dire « son père » ou « votre père ». Les possessifs s'accordent en nombre (et nuestro / vuestro aussi en genre).</p>", verdicts: [[0, "rejetee", "mi → mis au pluriel ; nuestro → nuestra, nuestros, nuestras."]] },
+        retenir: "mi / mis, tu / tus, su / sus ; nuestro / nuestra / nuestros / nuestras." },
+      { t: "Presentar a su familia", html: partie(EF_OLD, 2),
+        planches: [{ type: "3d", titre: "L'arbre de la famille", legende: "Tourne l'arbre : un tronc et trois étages de branches. En haut, los abuelos ; au milieu, los padres y la tía ; en bas, los hijos y el primo. Chaque fruit est une personne de la famille.",
+          modele: { h: 380, rx: -10, ry: 20, echelle: 0.85, alt: "Arbre en trois dimensions avec des fruits colorés sur trois étages représentant trois générations", objets: (function () {
+            var o = [], k;
+            o.push({ f: "boite", c: [0, -10, 0], d: [360, 8, 200], coul: "#7A9A4A", dessus: "#8FB35A" });
+            o.push({ f: "cylindre", c: [0, -2, 0], r: 16, r2: 11, h: 190, n: 14, coul: "#6B4423" });
+            [[180, 2, 70, "#7A6A55"], [120, 3, 110, "#1E499B"], [60, 4, 150, "#F7C948"]].forEach(function (e, j) {
+              for (k = 0; k < e[1]; k++) { var a = k / e[1] * 2 * Math.PI + j, x = e[2] * 0.6 * Math.cos(a), z = e[2] * 0.4 * Math.sin(a); o.push({ f: "sphere", c: [x * 0.5, e[0] + 6, z * 0.5], r: 34 - j * 4, coul: "#2E7D32", op: 0.75 }); o.push({ f: "sphere", c: [x, e[0], z], r: 13, coul: e[3] }); }
+            });
+            return o;
+          })(), etiquettes: [{ p: [42, 180, 0], t: "los abuelos", cote: "d" }, { p: [-66, 120, 0], t: "los padres y la tía" }, { p: [90, 60, 0], t: "los hijos y el primo", cote: "d" }] } }],
+        fil: { html: "<p>En espagnol, un COD qui désigne une personne est précédé de <strong>a</strong> : « Quiero mucho <strong>a</strong> mi abuela ». On ne parle donc pas de sa famille exactement comme en français.</p>", verdicts: [[1, "rejetee", "Il faut « a » devant un COD de personne : quiero a mi abuela."], [2, "validee", "Accord du possessif, « a » personnel, vocabulaire de l'arbre."]] },
+        retenir: "Somos cinco en casa. Tengo dos hermanos. Quiero mucho a mi abuela." }
+    ],
+    denouement: {
+      titre: "La légende corrigée",
+      etapes: ["Rose = la tía ; Eric = el primo (indice 1).", "mis hermanos ; mi padre (indice 2).", "Quiero mucho a mi abuela (indice 3)."],
+      reponse: "<p>Légende corrigée : « <strong>Mis</strong> hermanos viven en Bafoussam. <strong>Mi</strong> padre es profesor. Quiero mucho <strong>a</strong> mi abuela. La hermana de mi padre es mi <strong>tía</strong>. » Le possessif s'accorde en nombre avec ce qui est possédé (mi hermano, mis hermanos) et « su » signifie « son, sa, leur » ou « votre », jamais « mon ». Devant un complément d'objet direct qui désigne une personne, l'espagnol ajoute <strong>a</strong>. Enfin, l'arbre montre que la sœur du père est la tía, et son fils el primo.</p>",
+      transfert: "<p>Présente ta propre famille à Ana en six phrases : combien vous êtes, les prénoms, deux métiers, où vit un grand-parent, et une phrase avec « quiero a… ».</p>"
+    },
+    revision: (EF_OLD ? EF_OLD.revision : []).concat(["« a » devant un COD de personne : quiero a mi madre."]),
+    exo: EF_OLD ? EF_OLD.exo : "",
+    quiz: [
+      q("« Mes cousins » se dit…", "mis primos", "mi primos", "sus primos", "Pluriel : mis."),
+      q("La hermana de mi padre es mi…", "tía", "prima", "abuela", "La sœur du père."),
+      q("Tengo dos ___ (frères).", "hermanos", "hermanas", "primos", "hermano = frère."),
+      q("« Mon père est professeur » :", "Mi padre es profesor.", "Su padre es profesor.", "Mis padre es profesor.", "mi = mon."),
+      q("« J'aime beaucoup ma grand-mère » :", "Quiero mucho a mi abuela.", "Quiero mucho mi abuela.", "Quiero mucho la abuela mía a.", "« a » devant une personne."),
+      q("« Notre maison » :", "nuestra casa", "nuestro casa", "nuestras casa", "casa est féminin."),
+      q("El hijo de mi tía es mi…", "primo", "sobrino", "hermano", "Le cousin."),
+      q("« los padres » signifie…", "les parents", "les pères seulement", "les grands-parents", "padre + madre."),
+      q("« Somos cinco en casa » signifie…", "Nous sommes cinq à la maison.", "J'ai cinq maisons.", "Ma maison a cinq pièces.", "Présenter sa famille."),
+      q("« sus hermanas » peut signifier…", "ses sœurs", "mes sœurs", "nos sœurs", "su / sus : son, sa, leur, votre.")
+    ]
+  });
+
+  /* ═══════════════════════ 3e GREC — ÉSOPE, HOMÈRE ═══════════════════════ */
+  var GR_OLD = ancien("3e-gr-esope-homere");
+  function amphore3D() {
+    var o = [], P = [[0, 0, 22, 28, "#1F1A17"], [0, 10, 28, 54, "#C46A2B"], [0, 30, 54, 70, "#C46A2B"], [0, 70, 70, 72, "#1F1A17"], [0, 90, 72, 64, "#1F1A17"], [0, 130, 64, 44, "#C46A2B"], [0, 160, 44, 26, "#C46A2B"], [0, 182, 26, 22, "#1F1A17"], [0, 220, 22, 30, "#C46A2B"], [0, 230, 30, 30, "#1F1A17"]], k;
+    o.push({ f: "boite", c: [0, -10, 0], d: [320, 8, 220], coul: "#E9E4D8", dessus: "#F4F1EA" });
+    for (k = 0; k < P.length - 1; k++) { var a = P[k], b = P[k + 1]; o.push({ f: "cylindre", c: [0, a[1], 0], r: a[3], r2: b[3], h: b[1] - a[1], n: 32, coul: a[4] }); }
+    [-1, 1].forEach(function (sg) { for (k = 0; k < 10; k++) { var t = k / 9 * Math.PI; o.push({ f: "sphere", c: [sg * (30 + 22 * Math.sin(t)), 168 + 50 * Math.cos(t) * 0.6 + 10, 0], r: 5, coul: "#1F1A17" }); } });
+    o.forEach(function (x) { x.c[1] -= 110; });
+    return o;
+  }
+  remplacer("3e-gr-esope-homere", {
+    c: "3e", m: "grec", titre: "Ésope, Homère et leurs genres littéraires", duree: 30,
+    accroche: "« Ulysse, c'est une fable ! » La soirée contes du club de lecture tourne au débat entre la tortue et Achille.",
+    intro: "Une soirée contes au club de lecture te sert de fil rouge : à chaque partie, un indice t'aide à trancher entre trois idées.",
+    objectifs: ["présenter Homère et les deux épopées qui lui sont attribuées", "présenter Ésope et la fable", "distinguer l'épopée de la fable", "repérer l'héritage d'Homère et d'Ésope, jusque dans les contes africains"],
+    enquete: {
+      titre: "La soirée contes du club de lecture",
+      svg: (function () {
+        var s = "<rect width='640' height='220' fill='#2B2233'/><circle cx='320' cy='200' r='60' fill='#F2994A' opacity='.25'/><path d='M300 200l20 -40l20 40Z' fill='#F2994A'/><path d='M310 200l10 -24l10 24Z' fill='#FFD54A'/>";
+        s += perso(180, 110, "#6B4423", "#7A6A55", "#5A5F6B") + perso(460, 110, "#5A3A1E", "#DCE6F2", "#1E499B") + "<g transform='translate(90 190)'><ellipse rx='26' ry='14' fill='#6E6A3A'/><path d='M-22 0h44' stroke='#4D4A28' stroke-width='2'/><circle cx='28' cy='-4' r='7' fill='#7A7650'/></g>" + "<g transform='translate(560 160)'><path d='M-14 30l14 -60l14 60Z' fill='#B08D57'/><circle cy='-36' r='10' fill='#C9A66B'/></g>";
+        s += bulle(110, 30, 160, "Ulysse, c'est une fable !", "#B07A00") + bulle(380, 30, 190, "Non, la tortue, c'est Ésope !", "#1E88E5");
+        return svg(640, 220, "Deux élèves débattent autour d un feu, une tortue d un côté et un casque de héros grec de l autre", "", s);
+      })(),
+      legende: "À Ebolowa : le club de lecture du lycée organise une soirée contes autour du feu.",
+      contexte: "<p>Grand-père Mvondo raconte comment <strong>la tortue Kulu</strong> a battu l'antilope à la course par la ruse ; la morale : « l'intelligence vaut mieux que la force ». Puis le professeur de grec lit le récit du <strong>cyclope</strong> trompé par Ulysse. Samuel s'exclame : « Ulysse, c'est une fable, comme la tortue ! » Grace répond : « Les animaux qui parlent, ce n'est que chez nous ; les Grecs ne racontaient que des guerres. »</p>",
+      documents: [
+        { t: "Ésope, « Le Lièvre et la Tortue » (morale)", html: "<p>« Souvent, le travail l'emporte sur les dons naturels négligés. »</p>" },
+        { t: "Homère, Odyssée, chant IX (résumé)", html: "<p>Prisonniers du cyclope Polyphème, Ulysse et ses compagnons l'enivrent, lui crèvent son œil unique et s'échappent accrochés sous le ventre des moutons. Le poème compte plus de 12 000 vers.</p>" }
+      ],
+      question: "L'histoire d'Ulysse et celle de la tortue appartiennent-elles au même genre, et que nous ont laissé Homère et Ésope ?",
+      tache: "Compare l'Odyssée et la fable de la tortue (longueur, personnages, but) et explique l'héritage de chacun, en dix lignes.",
+      hypotheses: ["L'Odyssée est une fable, comme l'histoire de la tortue.", "Les fables d'animaux n'existent qu'en Afrique ; les Grecs ne racontaient que des guerres.", "L'Odyssée est une épopée (long poème, héros, dieux) ; la fable d'Ésope est un récit court avec des animaux et une morale ; les deux genres se retrouvent ailleurs, jusque dans nos contes."]
+    },
+    parties: [
+      { t: "Homère et l'épopée", html: partie(GR_OLD, 0),
+        planches: [{ type: "3d", titre: "Une amphore grecque", legende: "Tourne l'amphore : terre cuite orangée et bandes noires, comme sur les vases à figures noires qui représentaient les héros d'Homère (Achille, Ulysse). Les Grecs y conservaient l'huile et le vin.",
+          modele: { h: 380, rx: -10, ry: 20, echelle: 0.9, alt: "Amphore grecque en terre cuite orange à bandes noires", objets: amphore3D(),
+            etiquettes: [{ p: [0, 122, 0], t: "Col et lèvre" }, { p: [72, -30, 0], t: "Panse : frise des héros", cote: "d" }, { p: [52, 60, 0], t: "Anses", cote: "d" }] } }],
+        fil: { html: "<p>L'Odyssée compte plus de 12 000 vers (document 2), raconte les exploits d'un héros humain sur dix ans, avec l'intervention des dieux : c'est une <strong>épopée</strong>, pas une fable.</p>", verdicts: [[0, "rejetee", "Long poème héroïque avec des dieux : une épopée."]] },
+        retenir: "Homère (VIIIᵉ s. av. J.-C.) : l'Iliade et l'Odyssée, épopées." },
+      { t: "Ésope et la fable", html: partie(GR_OLD, 1),
+        planches: [{ type: "2D", titre: "Épopée et fable, côte à côte", legende: "Le voyage d'Ulysse de Troie à Ithaque, avec ses étapes (le cyclope, Circé, les sirènes), en dix ans ; à droite, la course du lièvre et de la tortue, en quelques lignes, avec sa morale.", svg: (function () {
+          var s = "<rect width='640' height='320' fill='#F4EFE4'/><rect x='14' y='14' width='380' height='292' rx='14' fill='#BFDDF2'/>", P = [[340, 70, "Troie"], [270, 150, "le cyclope"], [180, 90, "Circé"], [120, 200, "les sirènes"], [60, 120, "Ithaque"]];
+          s += "<path d='M" + P.map(function (p) { return p[0] + " " + p[1]; }).join("L") + "' fill='none' stroke='#7A4A22' stroke-width='3' stroke-dasharray='8 6' marker-end='url(#grf)'/>";
+          P.forEach(function (p, i) { s += "<ellipse cx='" + p[0] + "' cy='" + (p[1] + 6) + "' rx='" + (i ? 22 : 30) + "' ry='10' fill='#D9C08A' stroke='#A3824A'/><circle cx='" + p[0] + "' cy='" + p[1] + "' r='5' fill='" + (i === 0 || i === 4 ? ROUGE : NUIT) + "'/>" + txt(p[0], p[1] - 12, p[2], { s: 11.5, halo: true }); });
+          s += "<path d='M300 250l30 4l20 -4l-26 -4Z' fill='#5D3A1E'/><path d='M322 248v-28l16 26Z' fill='#F4EFE4'/>" + txt(204, 290, "Épopée : plus de 12 000 vers, dix ans d'aventures", { s: 12, c: "#7A4A22" });
+          s += "<rect x='408' y='14' width='218' height='292' rx='14' fill='#EEF6E8'/><path d='M420 230h194' stroke='#7A9A4A' stroke-width='3'/><path d='M590 210v20' stroke='" + ROUGE + "' stroke-width='3'/><path d='M590 210l18 6l-18 6Z' fill='" + ROUGE + "'/>";
+          s += "<g transform='translate(560 216)'><ellipse rx='18' ry='10' fill='#6E6A3A'/><circle cx='20' cy='-3' r='5' fill='#7A7650'/></g><g transform='translate(460 150)'><ellipse rx='18' ry='10' fill='#B9A68A'/><circle cx='-18' cy='-8' r='7' fill='#B9A68A'/><path d='M-22 -14l-4 -16M-16 -14l0 -16' stroke='#B9A68A' stroke-width='4' stroke-linecap='round'/><path d='M-6 10l-4 10M6 10l4 10' stroke='#B9A68A' stroke-width='3'/></g>" + txt(470, 120, "zzz", { s: 12, c: GRIS, i: true });
+          s += txt(517, 50, "Fable : quelques lignes", { s: 12, c: VERT }) + txt(517, 270, "Morale : le travail", { s: 11.5, w: 600, c: VERT }) + txt(517, 286, "l'emporte sur le don négligé", { s: 11.5, w: 600, c: VERT });
+          return svg(640, 320, "À gauche le voyage d Ulysse de Troie à Ithaque par le cyclope, Circé et les sirènes ; à droite le lièvre endormi et la tortue qui franchit la ligne d arrivée", fleche("grf", "#7A4A22"), s);
+        })() }],
+        fil: { html: "<p>Ésope, Grec du VIᵉ siècle av. J.-C., racontait déjà des <strong>fables d'animaux</strong> : le lièvre et la tortue, le corbeau et le renard. Les Grecs ne racontaient donc pas que des guerres, et la fable n'est pas propre à l'Afrique.</p>", verdicts: [[1, "rejetee", "Ésope, Grec, a écrit des fables d'animaux dès le VIᵉ siècle av. J.-C."]] },
+        retenir: "Ésope (VIᵉ s. av. J.-C.) : fables, récits courts à morale, souvent avec des animaux." },
+      { t: "Leur héritage", html: partie(GR_OLD, 2),
+        fil: { html: "<p>La tortue Kulu de grand-père Mvondo et la tortue d'Ésope partagent le même genre et presque la même morale : la fable est universelle. Homère, lui, nous a laissé les mots « odyssée » et « talon d'Achille ».</p>", verdicts: [[2, "validee", "Épopée ≠ fable ; deux genres universels, présents aussi dans nos contes."]] },
+        retenir: "« Une odyssée », « le talon d'Achille » ; La Fontaine reprend Ésope ; la tortue des contes africains." }
+    ],
+    denouement: {
+      titre: "La tortue et Ulysse : deux genres, un même héritage",
+      etapes: ["Odyssée : plus de 12 000 vers, héros, dieux → épopée (indice 1).", "Ésope : récits courts, animaux, morale → fable (indice 2).", "La fable est universelle ; Homère et Ésope ont laissé des mots et des œuvres (indice 3)."],
+      reponse: "<p>L'histoire d'Ulysse et celle de la tortue n'appartiennent pas au même genre. L'Odyssée, attribuée au poète Homère (VIIIᵉ siècle av. J.-C.), est une épopée : un long poème de plus de 12 000 vers qui raconte pendant dix ans les exploits d'un héros, avec l'intervention des dieux, comme la ruse contre le cyclope. La fable, illustrée par Ésope (VIᵉ siècle av. J.-C.), est un récit court, souvent avec des animaux, qui se termine par une morale, comme « Le Lièvre et la Tortue ». Grace se trompe : les Grecs avaient déjà des fables d'animaux, et la tortue Kulu de nos contes en montre l'universalité. Homère nous a laissé des expressions (« une odyssée », « le talon d'Achille ») ; Ésope a inspiré La Fontaine et rejoint les conteurs africains.</p>",
+      transfert: "<p>Écris une fable de dix lignes avec deux animaux du Cameroun (la tortue, le léopard, l'antilope, le singe…) et termine-la par une morale ; puis indique en deux lignes ce qui la distingue d'une épopée.</p>"
+    },
+    revision: (GR_OLD ? GR_OLD.revision : []).concat(["Épopée : long poème, héros, dieux ; fable : récit court, animaux, morale.", "La tortue des contes africains : la fable est universelle."]),
+    exo: GR_OLD ? GR_OLD.exo : "",
+    quiz: [
+      q("Qui est le héros de l'Odyssée ?", "Ulysse", "Achille", "Ésope", "Son retour vers Ithaque."),
+      q("Une fable se termine par…", "une morale", "une bataille", "une prière", "La leçon du récit."),
+      q("« Le talon d'Achille » désigne…", "un point faible", "une course rapide", "une ruse", "Achille n'était vulnérable qu'au talon."),
+      q("Homère est l'auteur supposé…", "de l'Iliade et de l'Odyssée", "des fables", "du Lièvre et la Tortue", "Deux épopées."),
+      q("L'épopée est…", "un long poème qui raconte les exploits de héros", "un récit court à morale", "une pièce de théâtre comique", "Avec l'intervention des dieux."),
+      q("Ésope vivait au…", "VIᵉ siècle av. J.-C.", "XVIIᵉ siècle", "VIIIᵉ siècle apr. J.-C.", "Selon la tradition, esclave affranchi."),
+      q("Qui a réécrit en vers des fables d'Ésope ?", "La Fontaine", "Homère", "Victor Hugo", "Au XVIIᵉ siècle."),
+      q("« Une odyssée » désigne aujourd'hui…", "un long voyage plein d'aventures", "une colère", "une fable", "D'après le voyage d'Ulysse."),
+      q("Les aèdes étaient…", "des poètes qui récitaient les épopées", "des animaux des fables", "des dieux grecs", "Récitation orale."),
+      q("La tortue rusée des contes africains montre que…", "la fable est un genre universel", "les Grecs ignoraient les fables", "l'épopée vient d'Afrique", "Même genre, partout.")
+    ]
+  });
+
+  /* ═══════════════════════ SIMULATIONS ═══════════════════════ */
+  VRT_A("3e-en-articles", 2, "Complete the leaflet: a, an, the or Ø", function (el) {
+    exercice(el, [["___ sun is hot in Kribi.", ["The", "A", "Ø"], "Unique thing → the."], ["Kribi is in ___ Cameroon.", ["Ø", "the", "a"], "Most countries take no article."], ["Visit ___ university of Douala.", ["the", "an", "Ø"], "A known, specific one → the (« you- » sound anyway)."], ["Eat ___ orange on the beach.", ["an", "a", "the"], "Vowel sound → an."], ["Tourists love ___ mangoes.", ["Ø", "the", "a"], "Mangoes in general → no article."], ["Swim in ___ Atlantic Ocean.", ["the", "Ø", "an"], "Oceans → the."], ["Take ___ pirogue to the island.", ["a", "an", "Ø"], "First mention, consonant sound → a."], ["It is ___ hour from Douala.", ["an", "a", "the"], "Silent h → an."]], "Next", "Sentence");
+  });
+  VRT_A("3e-de-verbes", 0, "La machine à conjuguer : choisis un verbe et une personne", function (el) {
+    var V = [["spielen", "jouer"], ["lernen", "apprendre"], ["kaufen", "acheter"], ["wohnen", "habiter"], ["arbeiten", "travailler"], ["finden", "trouver"], ["kochen", "cuisiner"]], v = 0, p = 0;
+    el.innerHTML = "<div style='display:flex;flex-wrap:wrap;gap:6px' data-v>" + V.map(function (x, k) { return "<button type='button' class='btn-l' data-k='" + k + "'>" + x[0] + "</button>"; }).join("") + "</div><div style='display:flex;flex-wrap:wrap;gap:6px;margin-top:8px' data-p>" + PRON.map(function (x, k) { return "<button type='button' class='btn-l' data-q='" + k + "'>" + x[0] + "</button>"; }).join("") + "</div><svg viewBox='0 0 640 140' class='an-svg' data-s></svg><p class='labo-r' data-r></p>";
+    function maj() {
+      var rad = V[v][0].replace(/en$/, ""), c = conj(rad, p), wR = 22 + rad.length * 15, wE = 30 + c[1].length * 15;
+      var s = "<rect width='640' height='140' fill='#F5F7FB'/>" + txt(70, 82, PRON[p][0].split(" ")[0], { s: 22, a: "end", c: GRIS });
+      s += "<rect x='90' y='50' width='" + wR + "' height='48' rx='10' fill='#1E499B'/>" + txt(90 + wR / 2, 82, rad, { s: 22, c: "#fff" });
+      s += "<rect x='" + (96 + wR) + "' y='50' width='" + wE + "' height='48' rx='10' fill='#C2540A'/>" + txt(96 + wR + wE / 2, 82, "-" + c[1], { s: 22, c: "#fff" });
+      s += txt(110 + wR + wE, 82, "→  " + PRON[p][0].split(" ")[0] + " " + c[0] + c[1], { s: 22, a: "start" }) + txt(90, 32, "radical", { s: 11, a: "start", c: BLEU }) + txt(96 + wR, 32, "terminaison", { s: 11, a: "start", c: "#C2540A" });
+      el.querySelector("[data-s]").innerHTML = s;
+      el.querySelector("[data-r]").innerHTML = V[v][0] + " (" + V[v][1] + ") : radical <b>" + rad + "-</b> + <b>-" + c[1] + "</b>" + (c[1].length > PRON[p][1].length ? " · radical en -t / -d : on intercale un <b>e</b> pour prononcer." : "");
+      el.querySelectorAll("[data-k]").forEach(function (b) { b.setAttribute("aria-pressed", +b.dataset.k === v); });
+      el.querySelectorAll("[data-q]").forEach(function (b) { b.setAttribute("aria-pressed", +b.dataset.q === p); });
+    }
+    el.querySelectorAll("[data-k]").forEach(function (b) { b.addEventListener("click", function () { v = +b.dataset.k; maj(); }); });
+    el.querySelectorAll("[data-q]").forEach(function (b) { b.addEventListener("click", function () { p = +b.dataset.q; maj(); }); });
+    maj();
+  });
+  VRT_A("3e-es-familia", 1, "¿Quién es? Toca a una persona del árbol", function (el) {
+    var REL = ["Es mi abuelo, el padre de mi padre.", "Es mi abuela, la madre de mi padre.", "Es mi padre. Es profesor.", "Es mi madre. Es comerciante.", "Es mi tía, la hermana de mi padre.", "Soy yo, María.", "Es mi hermano Junior.", "Es mi hermana Lucie.", "Es mi primo, el hijo de mi tía."];
+    el.innerHTML = "<div style='display:flex;flex-wrap:wrap;gap:6px' data-b>" + FAM.map(function (f, k) { return "<button type='button' class='btn-l' data-k='" + k + "'>" + f[1] + "</button>"; }).join("") + "</div><svg viewBox='0 0 640 360' class='an-svg' style='max-height:380px' data-s></svg><p class='labo-r' data-r></p>";
+    function maj(k) {
+      el.querySelector("[data-s]").innerHTML = arbre(k);
+      el.querySelector("[data-r]").innerHTML = "<b>" + REL[k] + "</b> (" + FAM[k][0] + ")";
+      el.querySelectorAll("[data-k]").forEach(function (b) { b.setAttribute("aria-pressed", +b.dataset.k === k); });
+    }
+    el.querySelectorAll("[data-k]").forEach(function (b) { b.addEventListener("click", function () { maj(+b.dataset.k); }); });
+    maj(4);
+  });
+  VRT_A("3e-gr-esope-homere", 1, "Épopée ou fable ? Classe chaque extrait", function (el) {
+    exercice(el, [["Achille, furieux, refuse de combattre devant Troie pendant que les dieux se disputent sur l'Olympe : ___", ["épopée", "fable"], "Héros, guerre, dieux : l'Iliade."], ["Le corbeau lâche son fromage, flatté par le renard. Morale : tout flatteur vit aux dépens de celui qui l'écoute. ___", ["fable", "épopée"], "Animaux, récit court, morale."], ["Ulysse s'attache au mât pour écouter le chant des sirènes sans périr : ___", ["épopée", "fable"], "L'Odyssée, chant XII."], ["La tortue Kulu gagne la course contre l'antilope par la ruse ; l'intelligence vaut mieux que la force. ___", ["fable", "épopée"], "Conte africain à morale : même genre que les fables d'Ésope."], ["Le lièvre s'endort, la tortue avance sans s'arrêter et gagne. ___", ["fable", "épopée"], "Ésope : Le Lièvre et la Tortue."], ["Pénélope défait la nuit la toile tissée le jour, en attendant le retour d'Ulysse : ___", ["épopée", "fable"], "L'Odyssée."]], "Extrait suivant", "Extrait");
+  });
+})();
+
+/* Leçons APPROFONDIES — lot 10, classes d'examen (18/11/2026) : Ville cruelle (français 3e), naissance et funérailles
+   (culture nationale, Tle). Même gabarit et même mécanisme que 11-approfondies-lot4.js (remplacement EN PLACE ; ordre,
+   clé, fiche APC, examen et scènes conservés). Les classes de 6e, 5e et 4e sont traitées par une autre session
+   (16-approfondies-premier-cycle.js). Simulations VRT_A en fin de fichier. */
+(function () {
+  "use strict";
+  var NUIT = "#001136", BLEU = "#1E499B", GRIS = "#4D5163", VERT = "#17784D", ROUGE = "#C62828", TERRE = "#C46A2B";
+
+  function txt(x, y, t, o) {
+    o = o || {};
+    return "<text x='" + x + "' y='" + y + "' text-anchor='" + (o.a || "middle") + "' font-size='" + (o.s || 12) + "' font-weight='" + (o.w || 700) + "' fill='" + (o.c || NUIT) + "'" + (o.i ? " font-style='italic'" : "") + (o.halo ? " stroke='#fff' stroke-width='3' paint-order='stroke'" : "") + ">" + t + "</text>";
+  }
+  function lin(id, cs, vertical) {
+    var s = "<linearGradient id='" + id + "'" + (vertical ? " x1='0' y1='0' x2='0' y2='1'" : "") + ">";
+    cs.forEach(function (c, i) { s += "<stop offset='" + (i / (cs.length - 1)).toFixed(2) + "' stop-color='" + c + "'/>"; });
+    return s + "</linearGradient>";
+  }
+  function rad(id, cs) {
+    var s = "<radialGradient id='" + id + "' cx='35%' cy='30%' r='75%'>";
+    cs.forEach(function (c, i) { s += "<stop offset='" + (i / (cs.length - 1)).toFixed(2) + "' stop-color='" + c + "'/>"; });
+    return s + "</radialGradient>";
+  }
+  function fleche(id, c) { return "<marker id='" + id + "' markerWidth='10' markerHeight='10' refX='7' refY='5' orient='auto'><path d='M0 1L8 5L0 9Z' fill='" + c + "'/></marker>"; }
+  function svg(w, h, alt, defs, corps) {
+    return "<svg viewBox='0 0 " + w + " " + h + "' role='img' aria-label='" + alt + "' font-family='Inter,Arial,sans-serif'><rect width='" + w + "' height='" + h + "' fill='#fff'/><defs>" + defs + "</defs>" + corps +
+      "<text x='" + (w - 6) + "' y='" + (h - 5) + "' font-size='8' text-anchor='end' fill='#8A93A6'>Planche VÉRITAS</text></svg>";
+  }
+  function ancien(id) { return window.VRT_LECONS[id]; }
+  function remplacer(id, o) {
+    var a = ancien(id);
+    if (a) ["apc", "examen", "rang", "cle", "scenes"].forEach(function (k) { if (a[k] != null && o[k] == null) o[k] = a[k]; });
+    VRT_L(id, o);
+    if (a) o.ordre = a.ordre;
+  }
+  function q(qq, bonne, f1, f2, e) { return { q: qq, r: [bonne, f1, f2], b: 0, e: e }; }
+  function partie(old, i) { return old && old.parties[i] ? old.parties[i].html : ""; }
+  function bulle(x, y, w, t, c) { return "<rect x='" + x + "' y='" + y + "' width='" + w + "' height='30' rx='12' fill='#fff' stroke='" + (c || "#C9D2E3") + "'/>" + txt(x + w / 2, y + 20, t, { s: 11.5 }); }
+  function perso(x, y, peau, habit, bas) {
+    bas = bas || "#2E3445";
+    return "<g transform='translate(" + x + " " + y + ")'><ellipse cx='0' cy='84' rx='18' ry='4' fill='#001136' opacity='.18'/>" +
+      "<rect x='-9' y='44' width='8' height='36' rx='3' fill='" + bas + "'/><rect x='1' y='44' width='8' height='36' rx='3' fill='" + bas + "'/>" +
+      "<ellipse cx='-6' cy='81' rx='7' ry='3.5' fill='#1F2328'/><ellipse cx='6' cy='81' rx='7' ry='3.5' fill='#1F2328'/>" +
+      "<path d='M-13 46L-16 18C-16 13 -12 11 -6 10H6C12 11 16 13 16 18L13 46Z' fill='" + habit + "'/>" +
+      "<path d='M-15 16L-20 40' stroke='" + habit + "' stroke-width='7' stroke-linecap='round'/><path d='M15 16L20 40' stroke='" + habit + "' stroke-width='7' stroke-linecap='round'/>" +
+      "<circle cx='-20' cy='42' r='3.6' fill='" + peau + "'/><circle cx='20' cy='42' r='3.6' fill='" + peau + "'/>" +
+      "<rect x='-3.5' y='5' width='7' height='7' fill='" + peau + "'/><ellipse cx='0' cy='-2' rx='9' ry='10.5' fill='" + peau + "'/>" +
+      "<path d='M-9 -4C-10 -14 -4 -13.5 0 -13.5S10 -14 9 -4C7 -9 -7 -9 -9 -4Z' fill='#1B1410'/><ellipse cx='-9' cy='-1' rx='1.8' ry='3' fill='" + peau + "'/><ellipse cx='9' cy='-1' rx='1.8' ry='3' fill='" + peau + "'/></g>";
+  }
+  /* portrait en buste (arbre généalogique) */
+  function portrait(x, y, peau, habit, cheveux, age) {
+    var s = "<g transform='translate(" + x + " " + y + ")'><circle r='30' fill='#F4EFE4' stroke='#C9A576' stroke-width='3'/><clipPath id='pc" + x + "_" + y + "'><circle r='28'/></clipPath><g clip-path='url(#pc" + x + "_" + y + ")'>";
+    s += "<path d='M-26 32C-26 14 -14 10 0 10S26 14 26 32Z' fill='" + habit + "'/><rect x='-4' y='2' width='8' height='10' fill='" + peau + "'/><ellipse cy='-6' rx='11' ry='13' fill='" + peau + "'/>";
+    s += age === "vieux" ? "<path d='M-11 -10C-12 -20 -4 -21 0 -21S12 -20 11 -10C9 -14 -9 -14 -11 -10Z' fill='#D8D8D8'/>" : age === "femme" ? "<path d='M-13 -6C-15 -24 15 -24 13 -6C12 -14 -12 -14 -13 -6Z' fill='" + cheveux + "'/><path d='M-13 -14h26v-6c-6 -6 -20 -6 -26 0Z' fill='" + habit + "'/>" : "<path d='M-11 -10C-12 -20 -4 -21 0 -21S12 -20 11 -10C9 -14 -9 -14 -11 -10Z' fill='" + cheveux + "'/>";
+    s += "<circle cx='-4' cy='-6' r='1.4' fill='#1B1410'/><circle cx='4' cy='-6' r='1.4' fill='#1B1410'/><path d='M-3 2q3 2 6 0' stroke='#1B1410' fill='none'/></g></g>";
+    return s;
+  }
+  /* boucle d'exercice générique : [phrase avec ___, [bonne, autres…], explication] */
+  function exercice(el, C, suivant, lib) {
+    var i = 0, ok = 0;
+    el.innerHTML = "<p class='labo-r' data-q style='font-size:16px'></p><div style='display:flex;gap:8px;flex-wrap:wrap' data-c></div><p class='an-note' data-e></p><p class='labo-r' data-s></p>";
+    function $(s) { return el.querySelector(s); }
+    function poser() {
+      var c = C[i];
+      $("[data-q]").innerHTML = (i + 1) + ". " + c[0].replace("___", "<b style='border-bottom:2px dashed #1E499B;padding:0 14px'>?</b>");
+      $("[data-e]").textContent = ""; $("[data-s]").innerHTML = lib + " " + (i + 1) + " / " + C.length + " · score : <b>" + ok + "</b>";
+      $("[data-c]").innerHTML = c[1].slice().sort().map(function (x) { return "<button type='button' class='btn-l' data-v='" + x + "'>" + x + "</button>"; }).join("");
+      el.querySelectorAll("[data-v]").forEach(function (b) {
+        b.addEventListener("click", function () {
+          var bon = b.dataset.v === c[1][0]; if (bon) ok++;
+          $("[data-q]").innerHTML = (i + 1) + ". " + c[0].replace("___", "<b style='color:" + (bon ? VERT : ROUGE) + "'>" + c[1][0] + "</b>");
+          $("[data-e]").innerHTML = (bon ? "✔ " : "✘ ") + c[2];
+          el.querySelectorAll("[data-v]").forEach(function (x) { x.disabled = true; });
+          var nx = document.createElement("button"); nx.type = "button"; nx.className = "btn-l"; nx.textContent = i + 1 < C.length ? suivant : "↺";
+          nx.addEventListener("click", function () { i = (i + 1) % C.length; if (!i) ok = 0; poser(); });
+          $("[data-c]").appendChild(nx);
+          $("[data-s]").innerHTML = lib + " " + (i + 1) + " / " + C.length + " · score : <b>" + ok + "</b>";
+        });
+      });
+    }
+    poser();
+  }
+
+  /* ═══════════════════════ 3e FRANÇAIS — VILLE CRUELLE ═══════════════════════ */
+  var VC_OLD = ancien("3e-fr-ville-cruelle");
+  function cabosse(x, y, r, a, mur) {
+    return "<g transform='translate(" + x + " " + y + ") rotate(" + (a || 0) + ")'><ellipse rx='" + r + "' ry='" + (r * 0.55) + "' fill='url(#" + (mur ? "vcCm" : "vcCv") + ")'/>" + [-0.5, 0, 0.5].map(function (k) { return "<path d='M" + (-r * 0.9) + " " + (k * r * 0.5) + "Q0 " + (k * r * 0.75) + " " + (r * 0.9) + " " + (k * r * 0.5) + "' stroke='#5A2E0A' stroke-width='1.2' fill='none' opacity='.5'/>"; }).join("") + "<path d='M" + (r * 0.95) + " 0l" + (r * 0.3) + " -3' stroke='#4E6B2A' stroke-width='3'/></g>";
+  }
+  function controle3D() {
+    var o = [], k, feu = [0, 0, 0];
+    o.push({ f: "boite", c: [0, -10, 0], d: [560, 8, 300], coul: "#B9905E", dessus: "#C9A06E" });
+    o.push({ f: "boite", c: [-80, 120, -60], d: [300, 6, 180], coul: "#8E96A6", dessus: "#B8BFCC", div: false });
+    [[-220, -140], [60, -140], [-220, 20], [60, 20]].forEach(function (p) { o.push({ f: "cylindre", c: [p[0], -2, p[1]], r: 5, h: 122, n: 8, coul: "#6B4423" }); });
+    for (k = 0; k < 9; k++) o.push({ f: "sphere", c: [-190 + (k % 3) * 34, 12 + Math.floor(k / 3) * 22, -100 + (k % 2) * 8], r: [17, 12, 13], n: 14, m: 8, coul: "#C9B28A" });
+    o.push({ f: "boite", c: [10, 0, -40], d: [70, 8, 50], coul: "#5C6478", dessus: "#8E96A6", div: false });
+    o.push({ f: "boite", c: [40, 8, -40], d: [6, 70, 6], coul: "#5C6478", div: false });
+    o.push({ f: "boite", c: [40, 78, -40], d: [70, 6, 6], coul: "#5C6478", div: false });
+    o.push({ f: "sphere", c: [10, 22, -40], r: [18, 13, 14], n: 14, m: 8, coul: "#C9B28A" });
+    for (k = 0; k < 7; k++) o.push({ f: "cylindre", c: [180 + Math.cos(k) * 22, 0, 60 + Math.sin(k) * 22], r: 5, h: 50, n: 6, axe: "x", coul: "#4E2A10" });
+    for (k = 0; k < 6; k++) o.push({ f: "cone", c: [180 + (k % 3 - 1) * 14, 4, 60 + (k > 2 ? 10 : -10)], r: 14 - k, h: 36 + k * 6, n: 10, coul: k % 2 ? "#F2994A" : "#E8492E", ec: feu });
+    for (k = 0; k < 5; k++) o.push({ f: "sphere", c: [180 + k * 6, 70 + k * 22, 60 - k * 4], r: 12 + k * 4, coul: "#9AA3B2", op: 0.45 - k * 0.07 });
+    o.push({ f: "sphere", c: [150, 14, 90], r: [16, 11, 12], n: 14, m: 8, coul: "#3B2A1A" });
+    return o;
+  }
+  var ETAPES_VC = ["Banda arrive à Tanga avec son cacao, le jour du marché.", "Au Contrôle, son cacao est déclaré mauvais et jeté au feu.", "Banda se bat avec les gardes et passe au commissariat.", "La nuit, il rencontre Odilia, qui cherche son frère Koumé.", "Koumé meurt après la révolte des ouvriers.", "Banda trouve la valise des commerçants grecs et reçoit dix mille francs.", "Il conduit Odilia à Bamila, chez sa mère."];
+  remplacer("3e-fr-ville-cruelle", {
+    c: "3e", m: "francais", titre: "Lecture suivie : Ville cruelle d'Eza Boto", duree: 35,
+    accroche: "« C'est l'histoire d'amour de Banda et Odilia ! » — « Non, c'est un roman contre la colonisation ! » L'exposé de la 3ᵉ B tourne au débat.",
+    intro: "La préparation d'un exposé sur le roman te sert de fil rouge : à chaque partie, un indice t'aide à trancher entre trois lectures du titre.",
+    objectifs: ["situer l'auteur et l'œuvre", "décrire les lieux et les personnages", "résumer l'intrigue en quatre temps", "dégager les grands thèmes et justifier le titre"],
+    enquete: {
+      titre: "L'exposé de la 3ᵉ B sur Ville cruelle",
+      svg: (function () {
+        var s = "<rect width='640' height='220' fill='#F4EFE4'/><rect x='40' y='30' width='130' height='170' rx='4' fill='#7A1F1F'/><rect x='48' y='38' width='114' height='154' fill='#8E2A2A'/>" + txt(105, 90, "VILLE", { s: 18, c: "#F4E7C5" }) + txt(105, 114, "CRUELLE", { s: 18, c: "#F4E7C5" }) + txt(105, 160, "Eza Boto", { s: 12, c: "#F4E7C5", i: true }) + txt(105, 182, "1954", { s: 11, c: "#F4E7C5", w: 500 });
+        s += perso(280, 110, "#5A3A1E", "#F7C948", "#1E499B") + perso(500, 110, "#6B4423", "#DCE6F2", "#2E3445") + bulle(200, 40, 190, "Une histoire d'amour !", "#C2540A") + bulle(410, 40, 210, "Un roman anticolonial !", BLEU);
+        return svg(640, 220, "La couverture du roman Ville cruelle et deux élèves qui débattent de son sens", "", s);
+      })(),
+      legende: "Au CES de Mbalmayo, la ville natale de Mongo Beti : la 3ᵉ B prépare un exposé sur l'œuvre au programme.",
+      contexte: "<p>Pour l'exposé, il faut expliquer le titre. Clarisse soutient : « C'est surtout l'histoire d'amour entre Banda et Odilia ; la ville est cruelle parce qu'elle les sépare. » Ibrahim répond : « Non, c'est uniquement un roman contre les Blancs. » Le professeur demande de s'appuyer sur des épisodes précis et sur le sous-titre implicite de l'œuvre : la vie d'un paysan face à la ville coloniale.</p>",
+      documents: [{ t: "Le début du chapitre sur le Contrôle (résumé)", html: "<p>Au Contrôle, les fonctionnaires examinent les sacs de cacao. Celui de Banda, fruit d'une année entière de travail, est déclaré « mauvais » et jeté au feu, sans discussion possible.</p>" }],
+      question: "Pourquoi le titre Ville cruelle convient-il au roman ?",
+      tache: "Rédige l'introduction et le plan de l'exposé, puis une conclusion qui justifie le titre par trois épisodes précis.",
+      hypotheses: ["C'est avant tout une histoire d'amour : la ville est cruelle parce qu'elle sépare Banda et Odilia.", "C'est seulement un roman contre les Blancs.", "La ville coloniale est cruelle par son injustice économique et sa violence, envers Banda et les siens, et le roman montre aussi les limites du village."]
+    },
+    parties: [
+      { t: "L'auteur et l'œuvre", html: partie(VC_OLD, 0),
+        retenir: "Eza Boto = Mongo Beti ; Ville cruelle, 1954, Présence Africaine." },
+      { t: "Les lieux et les personnages", html: partie(VC_OLD, 1),
+        planches: [{ type: "2D", titre: "Tanga, une ville coupée en deux", legende: "Tanga-Sud : maisons en dur des commerçants grecs et de l'administration, avec le Contrôle du cacao. Tanga-Nord : cases des Africains (Moko). La piste mène au village de Bamila, au milieu de la forêt.", svg: (function () {
+          var s = "<rect width='640' height='340' fill='#DCE9D2'/><path d='M0 170C160 160 300 190 640 160' stroke='#5BA3D9' stroke-width='14' fill='none'/>" + txt(560, 150, "rivière", { s: 11, c: "#2F6DB5", i: true });
+          s += "<rect x='20' y='20' width='380' height='130' rx='12' fill='#EFE6D6' opacity='.8'/>" + txt(210, 42, "TANGA-SUD", { s: 14, c: "#7A1F1F" });
+          [[60, 70], [130, 60], [200, 80], [280, 66], [340, 90]].forEach(function (p) { s += "<rect x='" + p[0] + "' y='" + p[1] + "' width='46' height='34' fill='#E9E2D2' stroke='#8A6E4B'/><path d='M" + (p[0] - 4) + " " + p[1] + "h54l-27 -16Z' fill='#B33A2C'/><rect x='" + (p[0] + 18) + "' y='" + (p[1] + 16) + "' width='10' height='18' fill='#6B4423'/>"; });
+          s += "<rect x='230' y='106' width='110' height='30' fill='#C9C1B2' stroke='#7A6A55'/>" + txt(285, 126, "le Contrôle", { s: 11.5, c: "#7A1F1F" });
+          s += "<rect x='20' y='196' width='380' height='126' rx='12' fill='#E9DDC0' opacity='.8'/>" + txt(210, 314, "TANGA-NORD (Moko)", { s: 14, c: "#6D4A00" });
+          for (var k = 0; k < 10; k++) { var x = 50 + (k % 5) * 70, y = 220 + Math.floor(k / 5) * 46; s += "<ellipse cx='" + x + "' cy='" + (y + 28) + "' rx='20' ry='5' fill='#001136' opacity='.12'/><rect x='" + (x - 16) + "' y='" + (y + 6) + "' width='32' height='22' fill='#B98A55'/><path d='M" + (x - 22) + " " + (y + 8) + "L" + x + " " + (y - 10) + "L" + (x + 22) + " " + (y + 8) + "Z' fill='#C9A86B'/>"; }
+          s += "<path d='M400 250C460 260 500 230 560 250' stroke='#A3824A' stroke-width='6' stroke-dasharray='10 6' fill='none'/>";
+          for (k = 0; k < 14; k++) s += "<circle cx='" + (470 + (k % 5) * 30) + "' cy='" + (200 + Math.floor(k / 5) * 40 + (k % 2) * 10) + "' r='16' fill='#2E6B34'/>";
+          s += "<rect x='560' y='240' width='26' height='18' fill='#B98A55'/><path d='M554 242L573 228L592 242Z' fill='#C9A86B'/>" + txt(574, 290, "Bamila", { s: 13, c: "#1B5E20", halo: true });
+          return svg(640, 340, "Plan de Tanga : au nord les maisons en dur et le Contrôle, au sud les cases de Moko, et la piste vers le village de Bamila dans la forêt", rad("vcCv", ["#E9D27A", "#C9A227", "#8A6A1A"]), s);
+        })() }],
+        fil: { html: "<p>La ville est construite sur une séparation : d'un côté les commerçants et l'administration, de l'autre les Africains. Cette géographie dit déjà l'injustice : ce n'est pas un simple décor pour une histoire d'amour.</p>" },
+        retenir: "Tanga-Sud (commerce, administration) / Tanga-Nord (Africains) ; Bamila, le village." },
+      { t: "L'intrigue en quatre temps", html: partie(VC_OLD, 2),
+        planches: [{ type: "3d", titre: "Le Contrôle du cacao", legende: "Tourne la scène : sous le hangar, les sacs de cacao attendent ; le sac de Banda est sur la bascule ; à droite, le feu où l'on jette le cacao déclaré « mauvais ». Une année de travail part en fumée.",
+          modele: { h: 340, rx: -24, ry: 24, echelle: 0.85, alt: "Hangar du contrôle avec des sacs de cacao, une bascule et un feu où brûlent des sacs", objets: controle3D(),
+            etiquettes: [{ p: [-160, 50, -100], t: "Sacs de cacao" }, { p: [40, 82, -40], t: "La bascule du Contrôle", cote: "d" }, { p: [180, 50, 60], t: "Le feu", cote: "d" }] } }],
+        fil: { html: "<p>Le cacao de Banda, une année de travail, est brûlé sans recours ; Banda est frappé par les gardes ; Koumé meurt après s'être révolté contre un patron qui ne payait pas. La rencontre avec Odilia ne vient qu'ensuite : l'amour n'est pas le cœur du roman.</p>", verdicts: [[0, "rejetee", "L'histoire d'amour est secondaire : le roman s'ouvre sur l'injustice du Contrôle."]] },
+        retenir: "Humiliation, rencontre, mort de Koumé, dénouement." },
+      { t: "Les grands thèmes", html: partie(VC_OLD, 3) +
+        "<div class='attention'><b>Nuance</b>Le roman ne se réduit pas à une opposition entre Blancs et Noirs : les gardes régionaux et certains intermédiaires sont africains, et le village de Bamila, dominé par les vieillards, étouffe aussi Banda.</div>",
+        planches: [{ type: "2D", titre: "Le fruit du travail de Banda", legende: "Une cabosse mûre de cacao, ses fèves, puis les fèves séchées dans le sac : il faut une année de soins pour que le cacao arrive au marché de Tanga.", svg: svg(640, 220, "Cabosses de cacao mûres et vertes, fèves et sac de jute", rad("vcCm", ["#F2B05E", "#D9822B", "#8E4A18"]) + rad("vcCv", ["#E9D27A", "#C9A227", "#8A6A1A"]), "<rect width='640' height='220' fill='#F4EFE4'/><path d='M60 30v170' stroke='#6B4423' stroke-width='12'/>" + cabosse(110, 80, 40, 20, true) + cabosse(100, 150, 34, -15, false) + "<path d='M200 110h60' stroke='#8A6E4B' stroke-width='3' marker-end='url(#vcf)'/>" + [0, 1, 2, 3, 4, 5, 6, 7].map(function (k) { return "<ellipse cx='" + (300 + (k % 4) * 26) + "' cy='" + (96 + Math.floor(k / 4) * 26) + "' rx='11' ry='7' fill='#5A2E0A' transform='rotate(" + (k * 25) + " " + (300 + (k % 4) * 26) + " " + (96 + Math.floor(k / 4) * 26) + ")'/>"; }).join("") + "<path d='M420 110h60' stroke='#8A6E4B' stroke-width='3' marker-end='url(#vcf)'/><path d='M500 60c-10 30 -10 110 0 130h90c10 -20 10 -100 0 -130Z' fill='#C9B28A' stroke='#8A6E4B' stroke-width='2'/><path d='M505 80h80M505 120h80M505 160h80' stroke='#A3824A'/>" + txt(500, 210, "un sac, une année de travail", { s: 11.5, c: "#6D4A00", a: "end" })).replace("</defs>", fleche("vcf", "#8A6E4B") + "</defs>") }],
+        fil: { html: "<p>La « cruauté » de la ville tient à son système : contrôle arbitraire, violence des gardes, exploitation par les commerçants, et elle frappe aussi par des Africains. Réduire le roman à « contre les Blancs » oublie cette mécanique et la critique du village.</p>", verdicts: [[1, "rejetee", "Le roman vise un système (colonial et social), y compris ses relais africains et le poids des vieillards."], [2, "validee", "Injustice économique, violence, mais aussi limites du village."]] },
+        retenir: "Injustice coloniale, ville et village, révolte individuelle, la mère." }
+    ],
+    denouement: {
+      titre: "Pourquoi « Ville cruelle »",
+      etapes: ["Tanga, ville divisée entre colons et Africains (indice 2).", "Le cacao brûlé, les coups des gardes, la mort de Koumé (indice 3).", "Un système, avec ses relais africains, et un village qui étouffe aussi (indice 4)."],
+      reponse: "<p>Le titre Ville cruelle convient parce que Tanga, la ville coloniale, broie ceux qui y viennent. Elle est cruelle par son injustice économique : le cacao de Banda, fruit d'une année de travail, est déclaré mauvais et jeté au feu au Contrôle. Elle est cruelle par sa violence : les gardes régionaux le frappent et le conduisent au commissariat, et Koumé meurt après s'être révolté contre un patron qui refusait de payer ses ouvriers. L'histoire d'Odilia et de Banda n'est donc pas le centre du roman, mais une rencontre née de cette violence. Le roman ne se limite pas non plus à « contre les Blancs » : il dénonce un système et ses relais, y compris africains, et montre aussi le village de Bamila, protecteur mais étouffant. Banda finit par quitter les deux, avec l'argent de la valise rendue aux Grecs.</p>",
+      transfert: "<p>Choisis un autre épisode du roman et montre, en cinq lignes, qu'il illustre lui aussi la cruauté de la ville.</p>"
+    },
+    revision: (VC_OLD ? VC_OLD.revision : []).concat(["Titre : injustice économique (cacao brûlé), violence (gardes, mort de Koumé), système colonial et ses relais.", "Ville et village : Tanga détruit, Bamila étouffe."]),
+    exo: VC_OLD ? VC_OLD.exo : "",
+    quiz: (VC_OLD ? VC_OLD.quiz : []).concat([
+      q("En quelle année paraît Ville cruelle ?", "1954", "1960", "1884", "Chez Présence Africaine."),
+      q("Que devient le cacao de Banda au Contrôle ?", "il est jeté au feu", "il est acheté très cher", "il est envoyé en Europe", "Déclaré « mauvais »."),
+      q("Qui est Koumé ?", "le frère d'Odilia", "le père de Banda", "un commerçant grec", "Il est en fuite après la révolte des ouvriers."),
+      q("Comment s'appelle le village de Banda ?", "Bamila", "Tanga", "Moko", "Moko est un quartier de Tanga."),
+      q("Que trouve Banda dans une rigole ?", "la valise de commerçants grecs", "un sac de cacao", "une lettre de sa mère", "Il la rend et reçoit dix mille francs."),
+      q("Mongo Beti est né près de…", "Mbalmayo", "Garoua", "Bafoussam", "Au sud du Cameroun.")
+    ]).slice(0, 10)
+  });
+
+  /* ═══════════════════════ Tle — NAISSANCE : TRADITION ET VIE MODERNE ═══════════════════════ */
+  var CN_OLD = ancien("tle-cult-naissance");
+  function naissance3D() {
+    var o = [], k;
+    o.push({ f: "boite", c: [0, -10, 0], d: [600, 8, 280], coul: "#A9B46A", dessus: "#BCC77A" });
+    o.push({ f: "cylindre", c: [-160, -2, 0], r: 60, h: 60, n: 28, coul: "#B98A55", dessus: "#C99A65" });
+    o.push({ f: "cone", c: [-160, 58, 0], r: 78, h: 64, n: 28, coul: "#C9A86B" });
+    o.push({ f: "boite", c: [-160, 0, -60], d: [26, 40, 4], coul: "#5D3A1E", div: false });
+    o.push({ f: "boite", c: [140, -2, 0], d: [200, 90, 110], coul: "#F1ECE2", dessus: "#E3DED2", div: false });
+    o.push({ f: "boite", c: [140, 88, 0], d: [210, 8, 120], coul: "#B33A2C", dessus: "#C44A3C", div: false });
+    o.push({ f: "boite", c: [140, 50, -56], d: [30, 8, 2], coul: "#C62828", div: false });
+    o.push({ f: "boite", c: [140, 40, -56], d: [8, 28, 2], coul: "#C62828", div: false });
+    for (k = 0; k < 3; k++) o.push({ f: "boite", c: [70 + k * 70, 20, -56], d: [34, 26, 2], coul: "#9FC5E8", div: false });
+    o.push({ f: "boite", c: [140, -2, -60], d: [40, 46, 4], coul: "#1E499B", div: false });
+    o.push({ f: "boite", c: [0, -4, -80], d: [140, 4, 30], coul: "#C9B28A", div: false });
+    return o;
+  }
+  remplacer("tle-cult-naissance", {
+    c: "Tle A", m: "cultures", titre: "Naissance : pratiques traditionnelles et vie moderne", duree: 30,
+    accroche: "Grand-mère veut que l'enfant naisse au village ; papa veut la maternité. Et l'acte de naissance, qui y pense ?",
+    intro: "La naissance attendue dans une famille de Mbalmayo te sert de fil rouge : à chaque partie, un indice t'aide à trancher entre trois positions.",
+    objectifs: ["décrire des pratiques traditionnelles liées à la naissance", "expliquer l'apport des soins modernes et de l'acte de naissance", "distinguer ce qu'il faut valoriser et ce qu'il faut questionner", "dialoguer avec les aînés sans mépriser la tradition"],
+    enquete: {
+      titre: "La naissance attendue chez les Ndzana",
+      svg: svg(640, 220, "Une grand-mère, un père et une future mère discutent ; à gauche une case du village, à droite une maternité", "", "<rect width='640' height='220' fill='#EEF4E6'/><rect y='186' width='640' height='34' fill='#BCC77A'/><ellipse cx='80' cy='186' rx='56' ry='6' fill='#001136' opacity='.12'/><rect x='40' y='136' width='80' height='50' fill='#B98A55'/><path d='M28 140L80 92L132 140Z' fill='#C9A86B'/><rect x='500' y='110' width='120' height='76' fill='#F1ECE2' stroke='#C9C1B2'/><rect x='494' y='104' width='132' height='8' fill='#B33A2C'/><path d='M554 126h12M560 120v12' stroke='#C62828' stroke-width='4'/>" + txt(560, 176, "maternité", { s: 11, c: GRIS }) + perso(220, 100, "#6B4423", "#7B3F99", "#7B3F99") + perso(320, 100, "#5A3A1E", "#F2994A", "#F2994A") + perso(420, 100, "#6B4423", "#1E499B", "#2E3445") + bulle(150, 40, 150, "Au village, comme moi !", "#7B3F99") + bulle(370, 40, 160, "À la maternité !", BLEU)),
+      legende: "À Mbalmayo : la famille Ndzana attend un enfant ; la grand-mère, le père et la future mère ne sont pas d'accord.",
+      contexte: "<p>Mama Ndzana, la grand-mère, veut que sa belle-fille accouche au village, aidée par une matrone, et que l'on attende la <strong>cérémonie de nomination</strong> pour « déclarer » l'enfant. Le père veut la <strong>maternité</strong> de l'hôpital de district, mais pense que l'acte de naissance « peut attendre ». La future mère voudrait garder les deux : la sécurité de la maternité et l'accueil traditionnel de l'enfant par la famille.</p>",
+      documents: [{ t: "Ce que dit la sage-femme du centre de santé", html: "<p>« Les consultations prénatales permettent de repérer à temps les grossesses à risque. Accoucher dans une formation sanitaire réduit fortement les décès des mères et des nouveau-nés. Et déclarez la naissance à l'état civil dans les délais fixés par la loi : sans acte de naissance, l'enfant ne pourra pas s'inscrire aux examens officiels. »</p>" }],
+      question: "Comment concilier les pratiques traditionnelles de la naissance et les exigences de la vie moderne ?",
+      tache: "Propose à la famille Ndzana un « plan de naissance » qui respecte la tradition et protège la mère et l'enfant, en dix lignes.",
+      hypotheses: ["La tradition suffit : l'accouchement au village et la nomination remplacent l'hôpital et l'état civil.", "La vie moderne doit tout remplacer : les pratiques traditionnelles sont dépassées.", "Garder ce qui protège et rassemble (accueil, nom, solidarité), adopter ce qui sauve des vies et donne des droits (maternité, acte de naissance)."]
+    },
+    parties: [
+      { t: "Les pratiques traditionnelles", html: partie(CN_OLD, 0),
+        planches: [{ type: "3d", titre: "La case du village et la maternité", legende: "Tourne la scène : à gauche, la case familiale où l'on accueille l'enfant et sa mère ; à droite, la maternité, avec sa croix rouge. Le chemin entre les deux, c'est le dialogue entre tradition et vie moderne.",
+          modele: { h: 320, rx: -22, ry: 18, echelle: 0.9, alt: "Case ronde au toit de paille et bâtiment de maternité au toit rouge avec une croix", objets: naissance3D(),
+            etiquettes: [{ p: [-160, 124, 0], t: "La case familiale" }, { p: [140, 96, 0], t: "La maternité", cote: "d" }] } }],
+        fil: { html: "<p>La protection de la mère, la présentation de l'enfant, le choix du nom et la solidarité autour de la jeune mère ont une vraie valeur : ils inscrivent l'enfant dans une famille et une histoire. Mais ils ne protègent pas contre une hémorragie ou une infection.</p>" },
+        retenir: "Protection de la mère, accueil de l'enfant, nom, solidarité." },
+      { t: "La rencontre avec la vie moderne", html: partie(CN_OLD, 1),
+        planches: [{ type: "2D", titre: "Le parcours de l'enfant, de la grossesse à l'école", legende: "Consultations prénatales, accouchement à la maternité, déclaration à l'état civil puis acte de naissance, et, à côté, la présentation à la famille et la fête de nomination : les deux chemins se rejoignent.", svg: (function () {
+          var E = [["Consultations prénatales", "#2E7D32"], ["Accouchement à la maternité", "#1E88E5"], ["Déclaration à l'état civil", "#7B3F99"], ["Acte de naissance", "#7B3F99"], ["École, examens officiels", "#C2540A"]], T = [["Conseils des aînées", 0], ["Présentation à la famille", 2], ["Fête de nomination", 3]], s = "";
+          E.forEach(function (e, i) { var x = 14 + i * 126; s += "<rect x='" + x + "' y='70' width='116' height='56' rx='12' fill='" + e[1] + "'/>" + e[0].split(" ").reduce(function (acc, w) { var l = acc[acc.length - 1]; if ((l + " " + w).length > 14 && l) acc.push(w); else acc[acc.length - 1] = (l ? l + " " : "") + w; return acc; }, [""]).map(function (l, k, a) { return txt(x + 58, 100 - (a.length - 1) * 7 + k * 14, l, { s: 11, c: "#fff" }); }).join("") + (i < 4 ? "<path d='M" + (x + 117) + " 98h8' stroke='" + NUIT + "' stroke-width='2' marker-end='url(#cnf)'/>" : ""); });
+          T.forEach(function (t) { var x = 14 + t[1] * 126 + 58; s += "<path d='M" + x + " 128V168' stroke='#A3824A' stroke-width='2' stroke-dasharray='4 4'/><rect x='" + (x - 62) + "' y='168' width='124' height='40' rx='12' fill='#F4E7C5' stroke='#C9A86B'/>" + txt(x, 192, t[0], { s: 10.5, c: "#6D4A00" }); });
+          s += txt(320, 40, "vie moderne", { s: 13, c: BLEU }) + txt(320, 236, "tradition", { s: 13, c: "#6D4A00" });
+          return svg(640, 250, "Frise : consultations prénatales, accouchement, déclaration, acte de naissance, école, avec en dessous les étapes traditionnelles", fleche("cnf", NUIT), s);
+        })() }],
+        fil: { html: "<p>La sage-femme le rappelle (document) : les consultations et la maternité sauvent des vies ; la déclaration à l'état civil, dans les délais légaux, donne à l'enfant une existence juridique. Attendre la nomination pour déclarer l'enfant risque de le priver de ses droits.</p>", verdicts: [[0, "rejetee", "La tradition ne protège pas des complications de l'accouchement et ne remplace pas l'état civil."]] },
+        retenir: "Maternité et acte de naissance : santé et droits de l'enfant." },
+      { t: "Garder un regard critique", html: partie(CN_OLD, 2),
+        fil: { html: "<p>Supprimer toutes les pratiques traditionnelles priverait l'enfant de l'accueil, du nom et de la solidarité familiale, sans gain pour sa santé. La position de la future mère est la plus juste : maternité et état civil d'abord, puis présentation et nomination en famille.</p>", verdicts: [[1, "rejetee", "Les pratiques qui protègent et rassemblent n'ont pas à disparaître."], [2, "validee", "Valoriser ce qui rassemble, adopter ce qui protège et donne des droits."]] },
+        retenir: "Respect et esprit critique : dialoguer avec les aînés." }
+    ],
+    denouement: {
+      titre: "Le plan de naissance de la famille Ndzana",
+      etapes: ["Consultations prénatales et accouchement à la maternité (indice 2).", "Déclaration de la naissance à l'état civil dans les délais (indice 2).", "Présentation à la famille, nomination et solidarité autour de la mère (indices 1 et 3)."],
+      reponse: "<p>La famille Ndzana peut concilier tradition et vie moderne. La future mère suit les consultations prénatales et accouche à la maternité de l'hôpital de district, qui réduit fortement les risques de décès de la mère et de l'enfant. Dès la naissance, le père la déclare à l'état civil dans les délais fixés par la loi, pour que l'enfant ait un acte de naissance, indispensable à sa scolarité et à ses droits. Au retour de la maternité, la grand-mère organise la présentation de l'enfant à la famille et la cérémonie de nomination, et les femmes de la famille entourent la jeune mère pendant plusieurs semaines. On garde ainsi ce qui protège et rassemble, et l'on renonce seulement à ce qui mettrait la santé ou les droits de l'enfant en danger.</p>",
+      transfert: "<p>Interroge une aînée de ta famille sur une pratique liée à la naissance. Dis en cinq lignes si elle doit être conservée, adaptée ou abandonnée, et pourquoi.</p>"
+    },
+    revision: (CN_OLD ? CN_OLD.revision : []).concat(["Maternité : moins de décès des mères et des nouveau-nés.", "Acte de naissance : existence juridique, inscription aux examens."]),
+    exo: CN_OLD ? CN_OLD.exo : "",
+    quiz: [
+      q("À quoi sert l'acte de naissance ?", "À donner une existence juridique à l'enfant", "À choisir son prénom", "À remplacer la nomination", "Sans lui, pas d'examens officiels."),
+      q("Une pratique traditionnelle fréquente :", "la nomination de l'enfant", "la vaccination", "l'échographie", "Fête de nomination."),
+      q("Quelle attitude adopter ?", "Respect et esprit critique", "Mépris de la tradition", "Refus de la vie moderne", "Dialoguer avec les aînés."),
+      q("Les consultations prénatales permettent de…", "repérer à temps les grossesses à risque", "choisir le nom de l'enfant", "éviter l'état civil", "Suivi médical."),
+      q("Accoucher à la maternité…", "réduit les décès des mères et des enfants", "est interdit par la tradition", "ne change rien", "Soins en cas de complication."),
+      q("Quand déclarer la naissance ?", "dans les délais fixés par la loi", "après la nomination seulement", "à l'entrée au collège", "À l'état civil."),
+      q("Une pratique à valoriser :", "la solidarité autour de la jeune mère", "le refus des soins", "un interdit alimentaire nuisible", "Ce qui protège et rassemble."),
+      q("Une pratique à questionner :", "un interdit qui met la santé en danger", "le choix du nom", "la présentation à la famille", "Ce qui nuit à la santé."),
+      q("Le nom de l'enfant est souvent choisi pour…", "honorer un parent ou rappeler une circonstance", "plaire à l'administration", "remplacer l'acte de naissance", "Transmission familiale."),
+      q("Pour faire évoluer une pratique, il faut…", "dialoguer avec les aînés", "l'interdire brutalement", "l'ignorer", "Sans mépriser.")
+    ]
+  });
+
+  /* ═══════════════════════ Tle — FUNÉRAILLES : TRADITION ET VIE MODERNE ═══════════════════════ */
+  var CM_OLD = ancien("tle-cult-mort");
+  var BUDGET = [["Morgue et transport", 450000, "#5C6478"], ["Cercueil", 400000, "#6B4423"], ["Réception (repas, boissons)", 1200000, "#C2540A"], ["Chaises, bâches, sonorisation", 350000, "#1E88E5"], ["Tenues (pagne commun)", 400000, "#7B3F99"], ["Cérémonies (veillée, rites, culte)", 200000, "#2E7D32"]];
+  function tamtam3D() {
+    var o = [], k;
+    o.push({ f: "boite", c: [0, -10, 0], d: [520, 8, 240], coul: "#B9905E", dessus: "#C9A06E" });
+    o.push({ f: "cylindre", c: [-200, 30, -40], r: 40, h: 300, n: 30, axe: "x", coul: "#6B3E1E", dessus: "#8B5A2B" });
+    o.push({ f: "boite", c: [-50, 70, -40], d: [220, 2, 10], coul: "#1F1209", div: false });
+    [[-180, -40], [80, -40]].forEach(function (p) { o.push({ f: "boite", c: [p[0], -6, p[1] - 30], d: [10, 30, 10], coul: "#5D3A1E", div: false }); o.push({ f: "boite", c: [p[0], -6, p[1] + 30], d: [10, 30, 10], coul: "#5D3A1E", div: false }); });
+    [-1, 1].forEach(function (sg) { o.push({ f: "cylindre", c: [-60 + sg * 70, 76, 30], r: 3, h: 80, n: 6, axe: "z", coul: "#8B5A2B" }); });
+    for (k = 0; k < 8; k++) { o.push({ f: "boite", c: [-200 + k * 52, 0, 100], d: [36, 26, 34], coul: "#E9EEF3", dessus: "#F7F9FB", div: false }); o.push({ f: "boite", c: [-200 + k * 52, 26, 116], d: [36, 34, 4], coul: "#E9EEF3", div: false }); }
+    o.push({ f: "boite", c: [0, 110, 100], d: [460, 4, 90], coul: "#1E88E5", dessus: "#2F9BEF", op: 0.85, div: false });
+    return o;
+  }
+  remplacer("tle-cult-mort", {
+    c: "Tle A", m: "cultures", titre: "Funérailles : tradition et vie moderne", duree: 30,
+    accroche: "3 millions de francs pour les funérailles de Papa Kamga, pendant que les enfants risquent de quitter l'école. Faut-il réduire ?",
+    intro: "Les funérailles d'un grand-père à Bafang te servent de fil rouge : à chaque partie, un indice t'aide à trancher entre trois positions.",
+    objectifs: ["décrire les étapes des funérailles et leur sens", "expliquer ce que la vie moderne a changé", "argumenter sur le coût des funérailles", "proposer des solutions qui respectent le défunt et les vivants"],
+    enquete: {
+      titre: "Le conseil de famille des Kamga",
+      svg: svg(640, 220, "Une réunion de famille sous une bâche bleue, avec un tableau de dépenses et un tambour à fente", "", "<rect width='640' height='220' fill='#F2EEE6'/><path d='M20 40h600l-20 30h-560Z' fill='#1E88E5'/><rect x='40' y='70' width='4' height='130' fill='#8E96A6'/><rect x='596' y='70' width='4' height='130' fill='#8E96A6'/>" + perso(120, 110, "#5A3A1E", "#7A6A55", "#5A5F6B") + perso(220, 110, "#6B4423", "#7B3F99", "#7B3F99") + perso(320, 110, "#5A3A1E", "#DCE6F2", "#1E499B") + "<rect x='400' y='86' width='200' height='110' rx='8' fill='#fff' stroke='#C9D2E3'/>" + txt(414, 108, "Budget prévu", { s: 12, a: "start", c: ROUGE }) + BUDGET.slice(0, 5).map(function (b, i) { return txt(414, 124 + i * 13, b[0].split(" (")[0].slice(0, 24), { s: 9.5, a: "start", w: 500 }) + txt(590, 124 + i * 13, b[1].toLocaleString("fr-FR"), { s: 9.5, a: "end", w: 600 }); }).join("") + "<path d='M414 182h176' stroke='#C9D2E3'/>" + txt(590, 194, "total : 3 000 000 F", { s: 11, a: "end", c: ROUGE })),
+      legende: "À Bafang : la famille Kamga se réunit après le décès du grand-père pour préparer ses funérailles.",
+      contexte: "<p>Papa Kamga est décédé à Douala ; son corps est à la morgue. Le conseil de famille prévoit <strong>3 000 000 F</strong> de dépenses. L'oncle aîné déclare : « Un grand homme mérite de grandes funérailles, sinon c'est la honte. » Sa petite-fille Carine, élève de Terminale, rappelle que les frais de scolarité de quatre enfants de la famille, environ <strong>600 000 F</strong>, ne sont pas payés. Un cousin propose de « tout supprimer et de l'enterrer simplement à Douala ».</p>",
+      documents: [{ t: "Décision du comité de développement d'un village de l'Ouest (exemple)", html: "<p>« Les funérailles se tiennent sur une seule journée ; la réception est limitée aux repas ; l'achat d'un pagne commun n'est plus obligatoire. Les économies sont versées à une caisse de solidarité pour la scolarité des orphelins. »</p>" }],
+      question: "Faut-il limiter les dépenses des funérailles, et comment le faire sans manquer de respect au défunt ?",
+      tache: "Rédige l'intervention de Carine au conseil de famille : un budget révisé et trois arguments qui respectent le défunt et les vivants.",
+      hypotheses: ["Il faut dépenser sans compter : l'honneur de la famille est en jeu.", "Il faut tout supprimer : les traditions funéraires coûtent trop cher et ne servent à rien.", "Il faut garder le sens des rites (honorer, réunir, transmettre) et limiter les dépenses de prestige, pour protéger les vivants."]
+    },
+    parties: [
+      { t: "Les étapes", html: partie(CM_OLD, 0),
+        planches: [{ type: "3d", titre: "Le tam-tam d'appel et la place des funérailles", legende: "Tourne la scène : le tambour à fente, taillé dans un tronc évidé, annonçait autrefois le décès d'un village à l'autre ; sous la bâche bleue, les rangées de chaises louées pour la veillée et la réception.",
+          modele: { h: 320, rx: -22, ry: 22, echelle: 0.85, alt: "Grand tambour à fente en bois sur des supports, rangées de chaises blanches sous une bâche bleue", objets: tamtam3D(),
+            etiquettes: [{ p: [-60, 74, -40], t: "Tambour à fente (tam-tam)" }, { p: [120, 30, 100], t: "Chaises louées", cote: "d" }, { p: [200, 114, 100], t: "Bâche", cote: "d" }] } }],
+        fil: { html: "<p>Annonce, veillée, inhumation, deuil, funérailles : chaque étape a un sens. Elles honorent le défunt, réunissent la famille dispersée et transmettent la mémoire du lignage. Supprimer tout cela, comme le propose le cousin, ferait perdre ce sens.</p>", verdicts: [[1, "rejetee", "Les rites ont un sens (honorer, réunir, transmettre) ; il n'est pas nécessaire de tout supprimer."]] },
+        retenir: "Annonce, veillée, inhumation, deuil, funérailles." },
+      { t: "Ce qui change", html: partie(CM_OLD, 1),
+        planches: [{ type: "2D", titre: "Où va l'argent des funérailles ?", legende: "Le budget prévu par la famille Kamga (3 000 000 F) : la réception en représente plus du tiers ; les rites et cérémonies proprement dits, moins d'un dixième.", svg: (function () {
+          var tot = BUDGET.reduce(function (a, b) { return a + b[1]; }, 0), x = 30, s = "";
+          BUDGET.forEach(function (b) { var w = b[1] / tot * 580; s += "<rect x='" + x + "' y='60' width='" + (w - 2) + "' height='60' rx='6' fill='" + b[2] + "'/>" + (w > 60 ? txt(x + w / 2, 96, Math.round(b[1] / tot * 100) + " %", { s: 13, c: "#fff" }) : ""); x += w; });
+          BUDGET.forEach(function (b, i) { var xx = 30 + (i % 2) * 300, yy = 146 + Math.floor(i / 2) * 22; s += "<rect x='" + xx + "' y='" + (yy - 11) + "' width='14' height='14' rx='3' fill='" + b[2] + "'/>" + txt(xx + 20, yy, b[0] + " : " + b[1].toLocaleString("fr-FR") + " F", { s: 10.5, a: "start", w: 600 }); });
+          s += txt(320, 40, "Budget prévu : 3 000 000 F", { s: 14, c: ROUGE });
+          return svg(640, 230, "Barre découpée en six postes de dépenses ; la réception représente 40 pour cent", "", s);
+        })() }],
+        fil: { html: "<p>La morgue, la location du matériel, la réception et les pagnes ont fait exploser les coûts. Or ce sont surtout des dépenses de <strong>prestige</strong>, pas les rites eux-mêmes. Dépenser sans compter, pendant que quatre enfants risquent de quitter l'école, n'honore pas vraiment le défunt.</p>", verdicts: [[0, "rejetee", "L'honneur ne justifie pas de sacrifier la scolarité des vivants."]] },
+        retenir: "Morgue, rites mêlés, coût en hausse." },
+      { t: "Le débat", html: partie(CM_OLD, 2),
+        fil: { html: "<p>Le document montre une solution déjà adoptée par certaines communautés : une seule journée, une réception limitée, un pagne facultatif, et une caisse de solidarité pour les orphelins. Le simulateur montre qu'en limitant la réception et les tenues, la famille Kamga paie la scolarité sans renoncer aux rites.</p>", verdicts: [[2, "validee", "Garder le sens des rites, limiter le prestige, protéger les vivants."]] },
+        retenir: "Dette d'honneur et ciment social, mais pas au détriment des vivants." }
+    ],
+    denouement: {
+      titre: "L'intervention de Carine",
+      etapes: ["Les rites ont un sens : honorer, réunir, transmettre (indice 1).", "La réception et les tenues pèsent plus que les rites eux-mêmes (indice 2).", "Budget révisé et caisse de solidarité scolaire (indice 3)."],
+      reponse: "<p>« Nous voulons tous honorer Papa Kamga. Les funérailles ont un sens : elles réunissent la famille dispersée, disent notre respect et transmettent sa mémoire ; il ne faut donc pas tout supprimer. Mais regardons le budget : la réception (1 200 000 F) et les tenues (400 000 F) pèsent bien plus que les cérémonies elles-mêmes (200 000 F). En organisant les funérailles sur une journée, avec une réception limitée aux repas et un pagne facultatif, nous pouvons économiser environ 900 000 F, payer les 600 000 F de scolarité des quatre enfants et ouvrir une caisse de solidarité. Grand-père, qui a tant travaillé pour nos études, serait plus honoré par des enfants à l'école que par des boissons. »</p>",
+      transfert: "<p>Prépare un exposé de deux minutes : « Les funérailles dans ma communauté hier et aujourd'hui », avec une proposition concrète pour en réduire le coût.</p>"
+    },
+    revision: (CM_OLD ? CM_OLD.revision : []).concat(["Prestige (réception, tenues) ≠ rites ; caisse de solidarité pour les vivants."]),
+    exo: CM_OLD ? CM_OLD.exo : "",
+    quiz: [
+      q("Moyen traditionnel d'annoncer un décès :", "le tam-tam", "la télévision", "le courrier", "Aujourd'hui aussi la radio et les réseaux sociaux."),
+      q("Pourquoi la morgue a-t-elle changé les funérailles ?", "Elle permet d'attendre la famille dispersée", "Elle supprime les rites", "Elle rend les funérailles gratuites", "Les familles vivent loin."),
+      q("Une critique fréquente des funérailles actuelles :", "leur coût élevé", "leur courte durée", "l'absence de musique", "Elles appauvrissent les familles."),
+      q("Le tambour à fente est taillé dans…", "un tronc d'arbre évidé", "une calebasse", "une peau tendue seulement", "Le tam-tam d'appel."),
+      q("Dans le budget des Kamga, le poste le plus lourd est…", "la réception", "les cérémonies religieuses", "la morgue", "1 200 000 F sur 3 000 000 F."),
+      q("Pour les défenseurs des funérailles, elles sont…", "une dette d'honneur et un ciment social", "une dépense inutile", "une obligation légale", "Elles réunissent la communauté."),
+      q("Une solution adoptée par certaines communautés :", "limiter les funérailles à une journée", "interdire les funérailles", "les rendre obligatoires chaque année", "Réduire le coût."),
+      q("La veillée comprend souvent…", "chants, prières et témoignages", "un examen officiel", "une vente aux enchères", "Avant l'inhumation."),
+      q("Une caisse de solidarité peut servir à…", "payer la scolarité des orphelins", "acheter plus de boissons", "louer plus de chaises", "Protéger les vivants."),
+      q("Une position nuancée consiste à…", "garder le sens des rites et limiter le prestige", "dépenser sans compter", "tout supprimer", "Respecter le défunt et les vivants.")
+    ]
+  });
+
+  /* ═══════════════════════ SIMULATIONS ═══════════════════════ */
+  VRT_A("3e-fr-ville-cruelle", 2, "Remets l'intrigue dans l'ordre", function (el) {
+    var ordre = ETAPES_VC.map(function (e, i) { return i; }), melange = [3, 0, 5, 1, 6, 2, 4], choisi = [];
+    el.innerHTML = "<p class='an-note'>Clique sur les épisodes dans l'ordre du roman.</p><div data-c style='display:grid;gap:6px'></div><ol data-o class='labo-l'></ol><p class='labo-r' data-r></p>";
+    function maj() {
+      el.querySelector("[data-c]").innerHTML = melange.map(function (k) { return "<button type='button' class='btn-l' style='text-align:left' data-k='" + k + "'" + (choisi.indexOf(k) >= 0 ? " disabled" : "") + ">" + ETAPES_VC[k] + "</button>"; }).join("");
+      el.querySelector("[data-o]").innerHTML = choisi.map(function (k, i) { return "<li style='color:" + (k === i ? VERT : ROUGE) + "'>" + ETAPES_VC[k] + (k === i ? " ✔" : " ✘") + "</li>"; }).join("");
+      var bons = choisi.filter(function (k, i) { return k === i; }).length;
+      el.querySelector("[data-r]").innerHTML = choisi.length === 7 ? (bons === 7 ? "<b>Parfait : l'intrigue est dans l'ordre.</b>" : "<b>" + bons + " / 7</b> bien placés. <button type='button' class='btn-l' data-z>Recommencer</button>") : "Épisodes placés : " + choisi.length + " / 7";
+      el.querySelectorAll("[data-k]").forEach(function (b) { b.addEventListener("click", function () { choisi.push(+b.dataset.k); maj(); }); });
+      var z = el.querySelector("[data-z]"); if (z) z.addEventListener("click", function () { choisi = []; maj(); });
+    }
+    maj();
+  });
+  VRT_A("tle-cult-naissance", 2, "Valoriser, adapter ou questionner ? Classe chaque pratique", function (el) {
+    exercice(el, [["La solidarité des femmes autour de la jeune mère pendant plusieurs semaines : ___", ["valoriser", "questionner"], "Elle protège la mère et rassemble la famille."], ["Refuser les consultations prénatales parce que « nos mères n'en avaient pas » : ___", ["questionner", "valoriser"], "Cela met en danger la mère et l'enfant."], ["Choisir le nom de l'enfant pour honorer un grand-parent : ___", ["valoriser", "questionner"], "Transmission et mémoire familiale."], ["Attendre la nomination, des mois plus tard, pour déclarer l'enfant à l'état civil : ___", ["questionner", "valoriser"], "Il faut déclarer dans les délais légaux ; la nomination peut suivre."], ["Présenter l'enfant à la famille au retour de la maternité : ___", ["valoriser", "questionner"], "Une pratique adaptée à la vie moderne."], ["Un interdit qui prive la femme enceinte d'aliments nourrissants : ___", ["questionner", "valoriser"], "Il nuit à la santé de la mère et de l'enfant."]], "Pratique suivante", "Pratique");
+  });
+  VRT_A("tle-cult-mort", 2, "Simulateur : réviser le budget des funérailles", function (el) {
+    el.innerHTML = "<div style='display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:2px 18px'>" + BUDGET.map(function (b) { return "<label class='labo-c'><span>" + b[0] + " : <b data-v>" + b[1].toLocaleString("fr-FR") + "</b> F</span><input type='range' min='0' max='" + b[1] + "' step='25000' value='" + b[1] + "'></label>"; }).join("") + "</div><svg viewBox='0 0 640 120' class='an-svg' data-s></svg><p class='labo-r' data-r></p>";
+    var I = el.querySelectorAll("input"), V = el.querySelectorAll("[data-v]");
+    function maj() {
+      var N = [].map.call(I, function (x) { return +x.value; }), tot = N.reduce(function (a, b) { return a + b; }, 0), eco = 3000000 - tot, ok = eco >= 600000;
+      N.forEach(function (n, i) { V[i].textContent = n.toLocaleString("fr-FR"); });
+      var X = function (v) { return 30 + v / 3000000 * 580; };
+      el.querySelector("[data-s]").innerHTML = "<rect x='30' y='40' width='580' height='26' rx='13' fill='#EEF1F6'/><rect x='30' y='40' width='" + (X(tot) - 30) + "' height='26' rx='13' fill='#C2540A'/><path d='M" + X(2400000) + " 30V76' stroke='" + NUIT + "' stroke-width='2' stroke-dasharray='4 3'/>" + txt(X(2400000), 24, "2 400 000 F : scolarité payée", { s: 11 }) + txt(30, 98, "Dépenses : " + tot.toLocaleString("fr-FR") + " F", { s: 12, a: "start" }) + txt(610, 98, "Économie : " + eco.toLocaleString("fr-FR") + " F", { s: 12, a: "end", c: ok ? VERT : ROUGE });
+      el.querySelector("[data-r]").innerHTML = ok ? "<b>La scolarité des quatre enfants (600 000 F) est payée</b>" + (eco > 600000 ? ", et " + (eco - 600000).toLocaleString("fr-FR") + " F vont à la caisse de solidarité." : ".") + (N[5] < 100000 ? " ⚠️ Attention : les cérémonies elles-mêmes sont presque supprimées." : "") : "Il manque " + (600000 - eco).toLocaleString("fr-FR") + " F pour payer la scolarité. Où réduire sans toucher au sens des rites ?";
+    }
+    I.forEach(function (x) { x.addEventListener("input", maj); }); maj();
+  });
+})();
+
 /* Schémas animés et manipulables — sciences. Chaque fonction reçoit le conteneur et y dessine.
    Règles : transform/opacity uniquement pour les boucles ; tout reste lisible sans animation. */
 (function () {
