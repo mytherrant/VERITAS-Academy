@@ -1014,4 +1014,46 @@ S["proba-2024-physique-dti-manege"] = () => {
   g += T([24, 226], "Départ", fs) + T([150, 230], "Propulsion", fs);
   return svg(392, 240, g, "Le manège : la locomotive part de A, est propulsée sur la portion rectiligne horizontale AB, monte jusqu'au sommet C situé à la hauteur h au-dessus de la voie, puis redescend vers D.");
 };
+// Probatoire 2024 SVT D, document 1 : mode d'action du VIH dans une cellule cible (libellés du sujet).
+S["proba-2024-svt-d-vih"] = () => {
+  const fs = ' font-size="11"', fb = ' font-size="11" font-weight="700"', num = (p, n) => T(p, n, ' font-size="14" font-weight="700"');
+  const virion = (cx, cy, r) => { let v = '<circle cx="' + cx + '" cy="' + cy + '" r="' + r + '" stroke-width="1.4"/>' + '<rect x="' + (cx - r * 0.45) + '" y="' + (cy - r * 0.45) + '" width="' + r * 0.9 + '" height="' + r * 0.9 + '" stroke-width="1.1"/>';
+    for (let a = 0; a < 360; a += 45) { const t = a * Math.PI / 180; v += L([cx + Math.cos(t) * r, cy + Math.sin(t) * r], [cx + Math.cos(t) * (r + 5), cy + Math.sin(t) * (r + 5)], ' stroke-width="1.2"'); }
+    return v + P([[cx - r * 0.3, cy - r * 0.2], [cx - r * 0.1, cy + r * 0.2], [cx + r * 0.1, cy - r * 0.2], [cx + r * 0.3, cy + r * 0.2]], ' stroke-width="1"'); };
+  const helice = (x1, x2, y) => { let h = ""; for (let x = x1; x < x2; x += 14) h += '<path d="M' + x + ' ' + (y - 4) + ' Q' + (x + 7) + ' ' + (y + 8) + ' ' + (x + 14) + ' ' + (y - 4) + '" stroke-width="1.2"/><path d="M' + x + ' ' + (y + 4) + ' Q' + (x + 7) + ' ' + (y - 8) + ' ' + (x + 14) + ' ' + (y + 4) + '" stroke-width="1.2"/>'; return h; };
+  let g = '<path d="M80 250 Q80 92 280 86 Q480 92 482 250 Q482 418 280 424 Q80 418 80 250Z" stroke-width="2"/>';
+  g += virion(118, 104, 20) + L([136, 94], [300, 26], ' stroke-width="0.9"') + T([304, 30], "ARN viral", fb) + num([150, 136], "1");
+  g += '<path d="M98 160 l-10 -10 M98 160 l-2 -14 M98 160 l6 8" stroke-width="1.8"/>' + T([14, 176], "CD-4", fb) + L([48, 172], [84, 160], ' stroke-width="0.9"') + fleche([89, 158], [81, 161], 5);
+  g += '<path d="M236 92 Q250 64 270 64 Q290 64 302 92" stroke-width="1.4"/>' + L([262, 94], [258, 118], ' stroke-width="1"') + L([274, 94], [278, 118], ' stroke-width="1"') + num([308, 74], "2");
+  g += T([186, 142], "ARN viral", fb) + L([248, 138], [312, 138], ' stroke-width="1.4"') + T([182, 160], "ADN viral", fb) + L([248, 152], [312, 152], ' stroke-width="1.4"') + L([248, 158], [312, 158], ' stroke-width="1.4" stroke-dasharray="2 2"') + num([318, 152], "3");
+  g += T([360, 136], "cytoplasme de la", fb) + T([360, 150], "cellule hôte", fb);
+  g += '<ellipse cx="282" cy="268" rx="152" ry="84" stroke-width="1.4" stroke-dasharray="10 4"/><ellipse cx="282" cy="268" rx="144" ry="77" stroke-width="1" stroke-dasharray="10 4"/>';
+  g += T([340, 268], "Noyau", ' font-size="13" font-weight="700"');
+  g += num([238, 218], "4") + T([292, 214], "intégrase", fb) + L([290, 210], [270, 226], ' stroke-width="0.9"') + helice(160, 300, 232) + L([300, 232], [340, 232], ' stroke-width="2.2"') + L([300, 172], [300, 196], ' stroke-width="1"') + fleche([300, 202], [300, 194], 5);
+  g += T([150, 254], "ADN de la", fb) + T([150, 266], "cellule hôte", fb);
+  g += helice(160, 300, 288) + T([304, 292], "ADN viral", fb);
+  g += num([166, 314], "5") + T([182, 306], "transcription de l'ADN", fb) + T([182, 318], "viral en ARN", fb) + L([330, 296], [330, 318], ' stroke-width="1"') + fleche([330, 324], [330, 316], 5) + L([300, 330], [380, 330], ' stroke-width="1.3"') + T([352, 324], "ARN", fb);
+  g += L([424, 230], [492, 206], ' stroke-width="0.9"') + T([496, 210], "pore nucléaire", fb) + L([432, 262], [492, 240], ' stroke-width="0.9"') + T([496, 244], "enveloppe nucléaire", fb);
+  g += '<ellipse cx="252" cy="372" rx="12" ry="7" stroke-width="1.3"/>' + L([214, 378], [300, 378], ' stroke-width="1.3"') + T([150, 376], "ribosome", fb) + L([196, 372], [238, 372], ' stroke-width="0.9"') + L([270, 368], [296, 354], ' stroke-width="1.2"') + num([300, 360], "6") + T([316, 358], "protéine virale", fb) + T([316, 370], "en formation", fb);
+  g += L([262, 386], [266, 406], ' stroke-width="1"') + fleche([267, 412], [266, 404], 5) + num([292, 400], "7") + T([306, 390], "assemblage des", fb) + T([306, 402], "constituants viraux", fb);
+  g += virion(222, 420, 14) + virion(290, 425, 14) + virion(456, 396, 15) + virion(504, 426, 15) + virion(452, 448, 15) + num([370, 458], "8");
+  g += T([12, 404], "Lymphocyte", fb) + L([78, 400], [96, 380], ' stroke-width="0.9"') + fleche([100, 376], [94, 383], 5);
+  return svg(626, 470, g, "Document 1 : cycle du VIH dans un lymphocyte. 1 : le virus (ARN viral) se fixe sur le récepteur CD-4 ; 2 : il pénètre dans la cellule ; 3 : l'ARN viral est copié en ADN viral dans le cytoplasme ; 4 : l'ADN viral s'intègre, grâce à l'intégrase, à l'ADN de la cellule hôte dans le noyau ; 5 : transcription de l'ADN viral en ARN ; 6 : un ribosome fabrique les protéines virales ; 7 : assemblage des constituants viraux ; 8 : de nouveaux virus bourgeonnent et quittent la cellule.");
+};
+// Corrigé SVT D 2024 : vitesse de la réaction enzymatique en fonction de la concentration en lactose.
+S["proba-2024-svt-d-enzyme"] = () => {
+  const x0 = 46, y0 = 252, ux = 26, uy = 6, X = c => x0 + c * ux, Y = v => y0 - v * uy, fs = ' font-size="11"';
+  let g = '<g stroke-width="0.5" opacity="0.35">';
+  for (let c = 1; c <= 12; c++) g += L([X(c), Y(0)], [X(c), Y(36)]);
+  for (let v = 4; v <= 36; v += 4) g += L([X(0), Y(v)], [X(12.5), Y(v)]);
+  g += "</g>" + L([X(0), Y(0)], [X(12.8), Y(0)], ' stroke-width="1.2"') + fleche([X(13.1), Y(0)], [X(12.8), Y(0)], 6) + L([X(0), Y(0)], [X(0), Y(37)], ' stroke-width="1.2"') + fleche([X(0), Y(38.3)], [X(0), Y(37)], 6);
+  for (let c = 1; c <= 12; c++) g += T([X(c) - 3, Y(0) + 14], String(c), fs);
+  for (let v = 4; v <= 36; v += 4) g += T([X(0) - 20, Y(v) + 4], String(v), fs);
+  const pts = [[0, 0], [1, 5], [2, 12.5], [4, 22], [6, 30], [7, 32], [9, 32], [11, 32], [12, 32]];
+  g += P(pts.map(([c, v]) => [X(c), Y(v)]), ' stroke-width="2"');
+  for (const [c, v] of pts) g += '<circle cx="' + f(X(c)) + '" cy="' + f(Y(v)) + '" r="3" fill="currentColor" stroke="none"/>';
+  g += L([X(0), Y(32)], [X(7), Y(32)], ' stroke-width="0.9" stroke-dasharray="4 3"') + T([X(8), Y(32) - 8], "Vmax = 32", ' font-size="12" font-weight="700"');
+  g += T([X(0) + 6, Y(38)], "Vitesse (unités relatives)", fs) + T([X(8.6), Y(0) + 30], "[lactose] (u.a.)", fs);
+  return svg(X(13.4) + 6, Y(0) + 38, g, "Courbe de la vitesse de la réaction en fonction de la concentration en substrat : la vitesse croît presque proportionnellement jusqu'à la concentration 6 (30 unités), puis atteint un plateau à 32 unités à partir de la concentration 7.");
+};
 module.exports = S;
