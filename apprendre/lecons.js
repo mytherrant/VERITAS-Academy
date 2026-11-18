@@ -13449,6 +13449,106 @@ VRT_PLUS("3e-en-articles", [
     }
   });
 
+
+  /* ─────────────── Lot 5 : 6e Informatique et Technologie ─────────────── */
+  function boites(items, y, h, w0) {
+    var n = items.length, w = w0 || (600 - (n - 1) * 30) / n;
+    return items.map(function (it, k) {
+      var x = 20 + k * (w + 30), s = "<rect x='" + x.toFixed(1) + "' y='" + y + "' width='" + w.toFixed(1) + "' height='" + h + "' rx='12' fill='" + it[2] + "' stroke='" + it[3] + "' stroke-width='2'/>" + txt((x + w / 2).toFixed(1), y + 28, it[0], { s: 14, c: it[3] });
+      (it[1] || []).forEach(function (l, j) { s += txt((x + w / 2).toFixed(1), y + 54 + j * 18, l, { s: 11.5, w: 500, c: NUIT }); });
+      if (k < n - 1) s += "<path d='M" + (x + w + 4).toFixed(1) + " " + (y + h / 2) + "H" + (x + w + 24).toFixed(1) + "' stroke='" + NUIT + "' stroke-width='2.5'/><path d='M" + (x + w + 26).toFixed(1) + " " + (y + h / 2) + "l-8 -5v10z' fill='" + NUIT + "'/>";
+      return s;
+    }).join("");
+  }
+  enrichir("6e-info-ia", {
+    formules: [
+      F("Reconnaître une IA", "IA = programme + données d'exemples + calcul de la réponse la plus probable", "le correcteur, la traduction, l'assistant vocal sont des IA ; elles ne pensent pas"),
+      F("Comprendre pourquoi elle se trompe", "réponse = ce qui ressemble le plus aux exemples appris", "exemples insuffisants ou mélangés ⇒ réponse fausse mais bien rédigée"),
+      F("Vérifier une réponse (méthode des 3 sources)", "réponse de l'IA + manuel ou enseignant + site officiel", "si les trois concordent, on peut l'utiliser ; sinon, on garde le manuel")
+    ],
+    planches: {
+      1: [pl2("Comment une IA apprend", "On lui montre des milliers d'exemples étiquetés ; elle en tire un modèle ; devant un cas nouveau, elle donne la réponse la plus probable, qui peut être fausse.", 640, 190, "Trois étapes : exemples étiquetés, entraînement, prédiction",
+        boites([["Exemples", ["10 000 photos", "« mangue » / « papaye »"], "#EEF4FC", BLEU], ["Entraînement", ["le programme cherche", "les ressemblances"], "#FFF6E3", "#C2540A"], ["Prédiction", ["photo nouvelle →", "« mangue » à 92 %"], "#ECF7F0", VERT]], 30, 130))]
+    },
+    ajouts: {
+      0: def("Définition", "Une <strong>intelligence artificielle</strong> (IA) est un programme informatique qui imite certaines capacités humaines (reconnaître, traduire, répondre) en calculant à partir de très nombreux <strong>exemples</strong>. Elle n'a ni conscience, ni émotions, ni expérience du monde.") +
+        ex("Exemple", "L'appareil photo du téléphone qui reconnaît un visage, le traducteur qui passe du français à l'anglais, le GPS qui propose le chemin le plus rapide."),
+      1: def("Apprentissage automatique", "La machine <strong>apprend</strong> en comparant des milliers d'exemples déjà classés par des humains, puis applique ce qu'elle a trouvé à des cas nouveaux.") +
+        ex("Exemple d'erreur", "Une IA entraînée surtout avec des photos de mangues mûres jaunes peut prendre une mangue verte pour une papaye : ses exemples étaient incomplets.") +
+        astuce("« <strong>L'IA propose, je vérifie</strong> » : avant de recopier une réponse, compare-la avec ton manuel ou demande à ton enseignant.") +
+        attention("Ne donne jamais ton nom complet, ton adresse ou tes mots de passe à une application d'IA.")
+    }
+  });
+
+  enrichir("6e-info-composants", {
+    formules: [
+      F("Situer l'ordinateur", "ordinateur = unité centrale (processeur + mémoire vive + disque)", "l'écran n'est qu'un périphérique : il affiche"),
+      F("Classer un périphérique selon le trajet de l'information", "vers l'unité centrale → entrée ; vers l'utilisateur → sortie ; les deux → entrée-sortie", "souris, clavier : entrée ; écran, imprimante : sortie ; clé USB : entrée-sortie"),
+      F("Éviter de perdre son travail", "mémoire vive = effacée sans courant ; disque = conservé", "enregistrer souvent (Ctrl + S), éteindre par le menu, brancher un onduleur")
+    ],
+    planches: {
+      1: [pl2("Entrée, traitement, sortie", "L'information entre par le clavier ou la souris, est traitée par l'unité centrale, puis sort par l'écran ou l'imprimante.", 640, 190, "Schéma entrée, unité centrale, sortie avec exemples de périphériques",
+        boites([["Entrée", ["clavier, souris,", "micro, scanner"], "#EEF4FC", BLEU], ["Unité centrale", ["processeur : calcule", "RAM et disque : gardent"], "#FFF6E3", "#C2540A"], ["Sortie", ["écran, imprimante,", "haut-parleurs"], "#ECF7F0", VERT]], 30, 130))],
+      2: [pl2("Mémoire vive ou disque ?", "La mémoire vive (RAM) garde le travail en cours mais s'efface quand le courant coupe ; le disque conserve les fichiers enregistrés.", 640, 200, "Comparaison mémoire vive et disque dur",
+        "<rect x='20' y='20' width='290' height='160' rx='14' fill='#FCE8EC' stroke='" + ROUGE + "' stroke-width='2'/><rect x='330' y='20' width='290' height='160' rx='14' fill='#ECF7F0' stroke='" + VERT + "' stroke-width='2'/>" +
+        txt(165, 52, "Mémoire vive (RAM)", { s: 15, c: ROUGE }) + txt(165, 88, "travail en cours", { s: 13, w: 500 }) + txt(165, 114, "rapide", { s: 13, w: 500 }) + txt(165, 146, "s'efface sans courant ✗", { s: 13, c: ROUGE }) +
+        txt(475, 52, "Disque (HDD, SSD)", { s: 15, c: VERT }) + txt(475, 88, "fichiers enregistrés", { s: 13, w: 500 }) + txt(475, 114, "plus lent, très grand", { s: 13, w: 500 }) + txt(475, 146, "conserve tout ✓", { s: 13, c: VERT }))]
+    },
+    ajouts: {
+      0: def("Définition", "L'<strong>unité centrale</strong> contient le <strong>processeur</strong> (qui calcule), la <strong>mémoire vive</strong> ou RAM (qui garde le travail en cours) et le <strong>disque</strong> (qui conserve les fichiers). Un <strong>périphérique</strong> est un appareil branché à l'unité centrale."),
+      1: ex("Exemple", "Le clavier envoie les lettres tapées à l'unité centrale : c'est un périphérique d'<strong>entrée</strong>. L'imprimante reçoit le document à imprimer : <strong>sortie</strong>.") +
+        ex("Exemple", "Un écran tactile reçoit tes doigts (entrée) et affiche l'image (sortie) : c'est un périphérique d'<strong>entrée-sortie</strong>, comme la clé USB.") +
+        astuce("« <strong>Suis la flèche</strong> » : demande-toi dans quel sens voyage l'information. Vers l'ordinateur → entrée ; vers toi → sortie."),
+      2: formule("ordinateur = processeur + mémoire vive + disque + périphériques d'entrée et de sortie") + attention("Ne jamais éteindre en coupant le courant : le travail non enregistré, gardé dans la mémoire vive, est perdu. Enregistre (Ctrl + S) toutes les 5 minutes.")
+    }
+  });
+
+  enrichir("6e-tm-materiel-dessin", {
+    formules: [
+      F("Choisir le crayon", "H (dur) : traits fins de construction · HB ou B (tendre) : traits définitifs", "construire au H en appuyant peu, repasser au HB"),
+      F("Choisir l'outil de chaque tracé", "segment → règle · angle droit → équerre · cercle → compas · angle → rapporteur", "murs à la règle, angles à l'équerre, toit au compas, porte à 60° au rapporteur"),
+      F("Régler le compas", "écartement du compas = rayon = diamètre ÷ 2", "toit de 8 cm de diamètre : compas ouvert à 4 cm")
+    ],
+    planches: {
+      1: [pl2("Les crayons, du plus dur au plus tendre", "Plus le chiffre suivi de H est grand, plus la mine est dure et le trait clair ; plus le chiffre suivi de B est grand, plus la mine est tendre et le trait foncé.", 640, 180, "Échelle des mines de crayon de 4H à 4B",
+        ["4H", "2H", "H", "HB", "B", "2B", "4B"].map(function (m, k) { var g = 200 - k * 28, x = 30 + k * 86; return "<rect x='" + x + "' y='40' width='70' height='18' rx='4' fill='#E8C547'/><path d='M" + (x + 70) + " 40l14 9-14 9z' fill='#E3C9A0'/><path d='M" + (x + 80) + " 46l4 3-4 3z' fill='rgb(" + g + "," + g + "," + g + ")'/>" + txt(x + 35, 85, m, { s: 15 }) + "<path d='M" + x + " 110H" + (x + 70) + "' stroke='rgb(" + g + "," + g + "," + g + ")' stroke-width='" + (1 + k * .5) + "'/>"; }).join("") +
+        txt(80, 150, "dur, trait clair : construction", { s: 12, c: BLEU, a: "start" }) + txt(600, 150, "tendre, trait foncé : définitif", { s: 12, c: ROUGE, a: "end" }))],
+      2: [pl2("Choisir le bon outil", "Chaque tracé a son outil : la règle pour les segments, l'équerre pour l'angle droit, le compas pour le cercle, le rapporteur pour un angle mesuré.", 640, 200, "Quatre outils de dessin et leur usage",
+        boites([["Règle", ["segments", "et mesures"], "#EEF4FC", BLEU], ["Équerre", ["angles droits,", "perpendiculaires"], "#FFF6E3", "#C2540A"], ["Compas", ["cercles,", "reports de longueur"], "#ECF7F0", VERT], ["Rapporteur", ["angles en", "degrés"], "#F4F1FB", "#7B2CBF"]], 30, 130))]
+    },
+    ajouts: {
+      0: def("Définition", "Le <strong>matériel de dessin</strong> comprend les outils de tracé (règle, équerre, compas, rapporteur), les crayons (mines H, HB, B) et le matériel de correction (gomme, taille-crayon).") +
+        ex("Exemple", "Pour tracer un cercle de 3 cm de rayon, on ouvre le compas à 3 cm sur la règle graduée, on plante la pointe au centre et on tourne en tenant la tête du compas.") +
+        astuce("« <strong>H comme Hard (dur), B comme Black (noir)</strong> » : H pour construire léger, B pour repasser foncé."),
+      2: formule("rayon = diamètre ÷ 2 · écartement du compas = rayon") + ex("Exemple", "Une mine bien taillée trace un trait de moins de 0,5 mm ; une mine émoussée donne des traits épais qui faussent les mesures.") +
+        attention("La pointe sèche du compas se range protégée (bouchon ou étui) : elle peut blesser.")
+    }
+  });
+
+  enrichir("6e-tm-site-pepiniere", {
+    formules: [
+      F("Lister les critères d'un bon site", "eau · sol meuble et drainé · terrain plat · lumière filtrée · accès · protection", "6 critères notés sur 2 points, sauf l'accès sur 2 et la protection sur 2 : total sur 12"),
+      F("Noter chaque terrain (grille)", "note du terrain = somme des points obtenus", "terrain A : 5/12 ; terrain B : 11/12"),
+      F("Choisir et justifier", "on choisit la meilleure note et on cite les critères décisifs", "terrain B : pas inondable, lumière filtrée, loin du fromager")
+    ],
+    planches: {
+      1: [pl2("La grille de choix du site", "On note chaque terrain critère par critère ; la somme désigne le meilleur site.", 640, 240, "Grille de notation de deux terrains pour une pépinière",
+        (function () { var crit = [["Eau toute l'année", 2, 2], ["Sol meuble, drainé", 0, 2], ["Terrain plat", 1, 2], ["Lumière filtrée", 0, 2], ["Accès facile", 2, 2], ["Protection", 0, 1]], s = "<rect x='20' y='14' width='600' height='212' rx='12' fill='#fff' stroke='#C9D0DC'/>" + txt(40, 40, "Critère", { s: 13, a: "start" }) + txt(470, 40, "Terrain A", { s: 13, c: ROUGE }) + txt(570, 40, "Terrain B", { s: 13, c: VERT });
+          crit.forEach(function (c, k) { var y = 66 + k * 24; s += "<path d='M30 " + (y - 16) + "H610' stroke='#EEF1F6'/>" + txt(40, y, c[0], { s: 12.5, a: "start", w: 500 }) + txt(470, y, c[1] + " / 2", { s: 12.5, c: ROUGE }) + txt(570, y, c[2] + " / 2", { s: 12.5, c: VERT }); });
+          return s + "<path d='M30 200H610' stroke='" + NUIT + "'/>" + txt(40, 218, "Total", { s: 14, a: "start" }) + txt(470, 218, "5 / 12", { s: 15, c: ROUGE }) + txt(570, 218, "11 / 12", { s: 15, c: VERT }); })())],
+      2: [pl2("Le bon et le mauvais site", "À gauche, un bas-fond inondable sous un grand arbre ; à droite, un terrain plat, drainé, à mi-ombre, près d'un point d'eau et clôturé.", 640, 200, "Comparaison de deux terrains pour une pépinière",
+        "<rect x='20' y='20' width='290' height='160' rx='14' fill='#FCE8EC'/><path d='M20 150Q165 120 310 150V180H20Z' fill='#7FB3D5'/><circle cx='200' cy='70' r='44' fill='#2E7D32'/><rect x='194' y='100' width='12' height='50' fill='#6B4423'/>" + txt(110, 50, "Terrain A ✗", { s: 14, c: ROUGE }) + txt(110, 170, "inondable, trop d'ombre", { s: 11.5, w: 500 }) +
+        "<rect x='330' y='20' width='290' height='160' rx='14' fill='#ECF7F0'/><rect x='350' y='130' width='250' height='30' fill='#B8916A'/>" + [0, 1, 2, 3, 4, 5].map(function (k) { return "<path d='M" + (370 + k * 40) + " 130v-16' stroke='#2E7D32' stroke-width='3'/><circle cx='" + (370 + k * 40) + "' cy='110' r='7' fill='#43A047'/>"; }).join("") + "<path d='M350 80H600' stroke='#C9A227' stroke-width='3' stroke-dasharray='8 4'/>" + txt(475, 50, "Terrain B ✓", { s: 14, c: VERT }) + txt(475, 170, "plat, drainé, ombrière, clôturé", { s: 11.5, w: 500 }))]
+    },
+    ajouts: {
+      0: def("Définition", "Une <strong>pépinière</strong> est un lieu aménagé où l'on fait germer et grandir de jeunes plants (cacaoyers, caféiers, arbres fruitiers) avant de les repiquer au champ.") +
+        ex("Exemple", "Une pépinière de 500 jeunes cacaoyers en sachets, sous une ombrière de palmes, arrosée matin et soir pendant 5 à 6 mois."),
+      1: ex("Exemple", "Un terrain en pente forte est déconseillé : l'eau d'arrosage ruisselle et emporte la terre des sachets.") +
+        astuce("« <strong>EAU-SOL-PLAT-OMBRE-ACCÈS-CLÔTURE</strong> » : récite les six critères dans l'ordre et note chaque terrain sur chacun.") +
+        attention("Évite le pied d'un grand arbre : ses racines prennent l'eau, ses branches peuvent tomber et il peut transmettre des maladies aux jeunes plants.")
+    }
+  });
+
   /* ─────────────── 2nde C Physique (formules déjà complètes) ─────────────── */
 })();
 
