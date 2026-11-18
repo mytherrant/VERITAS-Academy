@@ -8,6 +8,11 @@ Demande de Jacques : « Audite et corrige partout », puis « Continue ». Grill
 - **Pièges** : (1) une planche doit être un OBJET `{type, titre, legende, svg}` ; une chaîne SVG brute poussée dans `planches` est comptée par l'audit mais n'est pas affichée (corrigé, contrôle ajouté : 0 planche invalide) ; (2) éviter les doublons : relire les titres des planches existantes avant d'ajouter (3 doublons retirés : prépositions, arbre de famille, corps humain).
 - Audit : **80 leçons, 80 complètes**. `lecons.js?v=20261118L35` ; 47 pages `apprendre/cours/` régénérées. Chromium (1200 et 390 px) : aucun débordement, aucune erreur JS. Contrôles GEO et bancs au vert.
 
+## 18/11/2026 — Application : carte mentale des œuvres au nouveau dessin (branche carte-app)
+- app.js `_showLittCarte` : charge `chunks/carte-mentale.js` (copie EXACTE de apprendre/_src/00-carte-mentale.js, écrite et contrôlée par tools/oeuvres_statiques.js --controle) et affiche la même carte que les pages d'œuvres et les leçons (`_cmPage`). Ancien dessin canvas conservé en secours si le module ne charge pas.
+- « Télécharger (PNG) » : `_cmTelecharger` exporte la carte visible en PNG (≥ 1 800 px de large) avec `applyWatermark` ; animations neutralisées pour l'export.
+- Versions : app.js?v=1.20.84, sw.js CACHE_VERSION veritas-v1.20.84.
+
 ## Apprendre : réalisme, lot 21 — zoom HD de la cellule au gène (18/11/2026)
 
 Demande de Jacques : « Continue » (suite du lot 20).

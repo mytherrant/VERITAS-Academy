@@ -21741,6 +21741,14 @@ function _showLittCarte(oeuvreKey){
   // v1.16 — essais : l'analyse littéraire est libre, le reste de l'œuvre non.
   if(typeof _pwGate==='function' && !_pwGate('oeuvres','Carte mentale — '+(oe.titre||'œuvre'),oeuvreKey)) return;
   var c=oe.carte;
+  /* 18/11/2026 « de vraies cartes mentales » : même dessin que les pages d'œuvres et les leçons
+     (chunks/carte-mentale.js, généré depuis apprendre/_src/00-carte-mentale.js). Ancien dessin en secours. */
+  if(!window._cmEssaye){
+    window._cmEssaye=true;
+    _lazyChunk('carte-mentale').then(function(){ _showLittCarte(oeuvreKey); }).catch(function(){ window._cmIndispo=true; _showLittCarte(oeuvreKey); });
+    return;
+  }
+  if(window.VRT_CM && !window._cmIndispo){ _cmPage(oeuvreKey,oe,c); return; }
   var _MMCOLORS=['#0EA5E9','#C07D4F','#7C68B8','#3A8F73','#C46F6F','#F59E0B'];
   function _mmIco(lb){
     lb=(lb||'').toLowerCase();
@@ -22204,6 +22212,42 @@ if(typeof _esc !== 'function'){
 }
 
 // Télécharger la carte mentale en PNG — canvas HD 2x
+/* Carte mentale VÉRITAS (chunks/carte-mentale.js) : page, téléchargement PNG filigrané, impression. */
+function _cmPage(oeuvreKey,oe,c){
+  if(!document.getElementById('cmCss')){ var st=document.createElement('style'); st.id='cmCss'; st.textContent=window.VRT_CM.css; document.head.appendChild(st); }
+  var carte={ centre:(c.centre||((oe.titre||'')+'\n'+(oe.auteur||''))), branches:(c.branches||[]) };
+  _vc('<div class="vsec"><button class="back-btn" onclick="_showLittMenu(\''+oeuvreKey+'\',\''+oeuvreKey+'\')">← Retour</button>'
+    +'<div class="vsec-title"><span class="vsec-ico"><svg class="vico vico-21" aria-hidden="true"><use href="#lc-map"/></svg></span>Carte Mentale — '+_esc(oe.titre)+'</div>'
+    +'<div class="vsec-sub" style="font-style:italic">'+_esc(oe.auteur)+' — '+_esc(oe.classe)+'</div>'
+    +'<div id="cmApp" style="margin:12px 0">'+window.VRT_CM(carte)+'</div>'
+    +'<div class="vcard mt14"><div class="bold s mb8">📌 Comment utiliser cette carte ?</div>'
+    +'<div style="font-size:13px;color:var(--ink3);line-height:1.8">Pars du centre (le titre et l\'auteur), puis suis chaque branche : elle regroupe un aspect essentiel de l\'œuvre. Récite ensuite la carte de mémoire, branche par branche.</div>'
+    +'<div style="margin-top:12px;display:flex;gap:8px;flex-wrap:wrap">'
+    +'<button class="btn sm bi" onclick="_cmTelecharger(\''+oeuvreKey+'\')"><svg class="vico bico" aria-hidden="true"><use href="#lc-download"/></svg>Télécharger (PNG)</button>'
+    +'<button class="btn sm bo" onclick="window.print()"><svg class="vico bico" aria-hidden="true"><use href="#lc-printer"/></svg>Imprimer</button>'
+    +'</div></div></div>');
+}
+function _cmTelecharger(oeuvreKey){
+  var oe=LITT_OEUVRES[oeuvreKey], box=document.getElementById('cmApp');
+  var sv=box && [].slice.call(box.querySelectorAll('svg')).filter(function(x){ return getComputedStyle(x).display!=='none'; })[0];
+  if(!sv){ _mmDownload(oeuvreKey); return; }
+  var vb=sv.viewBox.baseVal, k=Math.max(2,1800/vb.width), W=Math.round(vb.width*k), H=Math.round(vb.height*k);
+  var clone=sv.cloneNode(true); clone.setAttribute('xmlns','http://www.w3.org/2000/svg'); clone.setAttribute('width',W); clone.setAttribute('height',H);
+  /* animations coupées : l'image doit montrer la carte entière */
+  var st=document.createElementNS('http://www.w3.org/2000/svg','style'); st.textContent='*{animation:none!important}.cm-p,.cm-h,.cm-c,text{opacity:1!important}.cm-t,.cm-l{stroke-dashoffset:0!important}'; clone.insertBefore(st,clone.firstChild);
+  var img=new Image();
+  img.onload=function(){
+    try{
+      var cv=document.createElement('canvas'); cv.width=W; cv.height=H; var ctx=cv.getContext('2d');
+      ctx.fillStyle='#fff'; ctx.fillRect(0,0,W,H); ctx.drawImage(img,0,0,W,H);
+      applyWatermark(cv,ctx);
+      var a=document.createElement('a'); a.download='CarteMentale_'+(oe.titre||'oeuvre').replace(/[^\wÀ-ɏ]+/g,'_')+'.png'; a.href=cv.toDataURL('image/png'); a.click();
+      toast('✓ Carte téléchargée');
+    }catch(e){ _mmDownload(oeuvreKey); }
+  };
+  img.onerror=function(){ _mmDownload(oeuvreKey); };
+  img.src='data:image/svg+xml;charset=utf-8,'+encodeURIComponent(new XMLSerializer().serializeToString(clone));
+}
 function _mmDownload(oeuvreKey){
   var oe=LITT_OEUVRES[oeuvreKey];
   if(!oe||!oe.carte){toast('Carte non disponible','warn');return;}
