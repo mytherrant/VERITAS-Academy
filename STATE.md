@@ -10,6 +10,13 @@ Demande de Jacques : « Continue ». L'autre session crée de NOUVELLES leçons 
 - `lecons.js?v=20261118m18` ; 3 pages `apprendre/cours/` régénérées et habillées. Chromium (1200 et 390 px) : aucun débordement, aucune erreur JS. Contrôles GEO et bancs au vert.
 - **Bilan** : les 91 leçons de `lecons.js` ont toutes une situation de départ résolue (`enquete` + `denouement`).
 
+## 18/11/2026 — Apprendre : 6e Mathématiques, lot 3 (branche apprendre-6e-maths-3)
+- apprendre/_src/16d-approfondies-6e-maths-2.js : 3 leçons NOUVELLES au gabarit approfondi (mêmes outils que 16c) :
+  - 6e-maths-fractions (ligne 26, « Numérateur, dénominateur, fractions égales ») : jus de foléré du CES de Mora, 3/4 = 6/8, bidon 3D en quarts, simulation de comparaison.
+  - 6e-maths-angles (ligne 30, « Notions d'angle ou de secteur angulaire ») : horloge de l'école de Kribi, six familles d'angles, rapporteur, horloge 3D (cadran carré découpé en tuiles : un grand disque se trie mal dans planche3d.js), simulation heure → angle.
+  - 6e-maths-symetrie-axiale (ligne 74, « Points symétriques par rapport à une droite ») : motif ndop de Bamenda, miroir 3D, motif complété, axes de symétrie, simulation du point et de son symétrique.
+- Rattachement vérifié, 0 doublon sur les 7 leçons de 6e maths ; 0 erreur, 0 débordement à 390 et 1280 px ; bancs verts.
+
 ## Apprendre : lot 17, 6e (18/11/2026)
 
 Demande de Jacques : « Continue ». L'autre session (retouches de leçons) a confirmé par message qu'elle laisse les leçons de 6e-5e-4e à cette session ; sa PR #357 ajoutera une carte mentale automatique en fin de leçon (pas besoin de planche récapitulative).
