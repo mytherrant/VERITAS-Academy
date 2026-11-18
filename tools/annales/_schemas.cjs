@@ -899,4 +899,35 @@ S["bac-2025-geo-cdti-densites"] = () => {
   g += T([x0 + 330, y0 + 32], "Régions", fs + ' text-anchor="end"');
   return svg(400, 370, g, "Diagramme en bâtons des densités de population : Littoral 124, Nord-Ouest 99,9, Centre 44,8 et Nord 26 habitants au km² ; à l'échelle 1 cm pour 10 hab./km², les bâtons mesurent 12,4 cm, 9,99 cm, 4,48 cm et 2,6 cm.");
 };
+// Maths C-E 2025 (BAC), partie B : l'espace aménagé par le Maire (figure du sujet : quadrillage, O, I, J, K ;
+// mêmes positions que sur le scan, où J est à 5 carreaux de O et I à 4 carreaux).
+S["bac-2025-maths-ce-espace"] = () => {
+  const c = 18, ox = 3 * c + 8, oy = 14 * c + 8, X = k => ox + k * c, Y = k => oy - k * c;
+  let g = '<g stroke-width="0.8" stroke-dasharray="1.5 2.5" opacity="0.6">';
+  for (let i = -3; i <= 7; i++) g += L([X(i), Y(-2)], [X(i), Y(14)]);
+  for (let j = -2; j <= 14; j++) g += L([X(-3), Y(j)], [X(7), Y(j)]);
+  g += "</g>" + L([X(-3), Y(0)], [X(7), Y(0)], ' stroke-width="1"') + L([X(0), Y(-2)], [X(0), Y(14)], ' stroke-width="1"');
+  const J = [X(0), Y(5)], K = [X(4), Y(10.7)];
+  g += L([X(0), Y(0)], [X(4), Y(0)], ' stroke-width="2.2"') + L([X(4), Y(0)], K, ' stroke-width="2.2"') + L([X(0), Y(0)], J, ' stroke-width="2.2"');
+  g += '<path d="M' + J[0] + ' ' + J[1] + ' Q ' + f(X(1.9)) + ' ' + f(Y(7.4)) + ' ' + K[0] + ' ' + K[1] + '" stroke-width="2.2"/>';
+  g += '<path d="M' + f(X(-3)) + ' ' + f(Y(1.6)) + ' Q ' + f(X(-1.4)) + ' ' + f(Y(3.4)) + ' ' + J[0] + ' ' + J[1] + '" stroke-width="1" stroke-dasharray="3 3"/>';
+  const fs = ' font-size="13" font-style="italic"';
+  g += T([X(0) - 14, Y(0) + 15], "O", fs) + T([X(4) - 3, Y(0) + 15], "I", fs) + T([X(0) - 13, J[1] + 4], "J", fs) + T([K[0] - 14, K[1] - 4], "K", fs) + T([X(0) - 12, Y(13.4)], "y", fs) + T([X(6.6), Y(0) + 15], "x", fs);
+  g += T([X(-3), Y(-2) + 22], "1 unité = 100 m", ' font-size="12"');
+  return svg(X(7) + 10, Y(-2) + 30, g, "Figure du sujet : sur un quadrillage, l'espace aménagé est limité par le segment [OI] sur l'axe des abscisses, le segment [IK] vertical, le segment [OJ] sur l'axe des ordonnées et l'arc JK de la courbe (Γ) ; 1 unité = 100 m.");
+};
+// Corrigé exercice 2 : la parabole (C) d'équation y = x² et son image (Γ) par la rotation de centre O et d'angle π/4.
+S["bac-2025-maths-ce-paraboles"] = () => {
+  const R = repere(64, -2.6, 2.2, -0.9, 3.3), { X, Y } = R, r2 = Math.SQRT1_2;
+  let g = R.g; const c = [], G = [];
+  for (let t = -1.75; t <= 1.75; t += 0.02) c.push([X(t), Y(t * t)]);
+  for (let t = -1.35; t <= 1.62; t += 0.02) G.push([X(r2 * (t - t * t)), Y(r2 * (t + t * t))]);
+  g += P(c, ' stroke-width="2.2"') + P(G, ' stroke-width="2.2" stroke-dasharray="7 4"');
+  g += L([X(-2.6), Y(-0.25)], [X(2.2), Y(-0.25)], ' stroke-width="1" stroke-dasharray="2 4"');
+  g += L([X(-0.55), Y(-0.9)], [X(2.2), Y(2.2 - Math.SQRT2 / 4)], ' stroke-width="1" stroke-dasharray="2 4"');
+  g += point(X, Y, 0, 0.25, "F", 6, -4) + point(X, Y, -Math.SQRT2 / 8, Math.SQRT2 / 8, "F'", -22, -4);
+  g += T([X(1.45), Y(2.5)], "(C)", ' font-size="13" font-style="italic"') + T([X(-2.3), Y(1.3)], "(Γ)", ' font-size="13" font-style="italic"');
+  g += T([X(1.25), Y(-0.25) + 14], "(D)", ' font-size="12" font-style="italic"') + T([X(1.55), Y(1.0)], "(D')", ' font-size="12" font-style="italic"');
+  return svg(R.W, R.H, g, "La parabole (C) : y = x², de sommet O, de foyer F(0 ; 1/4) et de directrice (D) : y = −1/4 ; en pointillés, son image (Γ) par la rotation de centre O et d'angle π/4, de même sommet O, d'axe la droite y = −x, de foyer F'(−√2/8 ; √2/8) et de directrice (D') : x − y − √2/4 = 0.");
+};
 module.exports = S;

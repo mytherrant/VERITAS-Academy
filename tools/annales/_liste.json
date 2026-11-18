@@ -98,6 +98,20 @@
   "u": "/ressources/annales/bac-litterature-cdeti-2025.html"
  },
  {
+  "id": "bac-langue-francaise-aabi-2025",
+  "examen": "bac",
+  "m": "langue-francaise",
+  "serie": "séries A et ABI",
+  "nomExamen": "Baccalauréat",
+  "fiche": "ressources/bac-francais.html",
+  "matiere": "Langue française (séries A et ABI)",
+  "mat": "francais",
+  "classes": "Tle A",
+  "annee": 2025,
+  "national": true,
+  "u": "/ressources/annales/bac-langue-francaise-aabi-2025.html"
+ },
+ {
   "id": "probatoire-langue-francaise-aabi-2025",
   "examen": "probatoire",
   "m": "langue-francaise",
@@ -222,6 +236,20 @@
   "annee": 2024,
   "national": false,
   "u": "/ressources/annales/probatoire-mathematiques-aabi-2024.html"
+ },
+ {
+  "id": "bac-mathematiques-ce-2025",
+  "examen": "bac",
+  "m": "mathematiques",
+  "serie": "séries C et E",
+  "nomExamen": "Baccalauréat",
+  "fiche": "ressources/examen-mathematiques-bac.html",
+  "matiere": "Mathématiques (séries C et E)",
+  "mat": "maths",
+  "classes": "Tle C",
+  "annee": 2025,
+  "national": false,
+  "u": "/ressources/annales/bac-mathematiques-ce-2025.html"
  },
  {
   "id": "probatoire-mathematiques-ce-2025",
@@ -852,6 +880,20 @@
   "annee": 2024,
   "national": false,
   "u": "/ressources/annales/bepc-allemand-2024.html"
+ },
+ {
+  "id": "bac-allemand-aabi-2025",
+  "examen": "bac",
+  "m": "allemand",
+  "serie": "séries A et ABI",
+  "nomExamen": "Baccalauréat",
+  "fiche": "ressources/examen-langues-vivantes-bac.html",
+  "matiere": "Allemand (séries A et ABI)",
+  "mat": "allemand",
+  "classes": "Tle A",
+  "annee": 2025,
+  "national": true,
+  "u": "/ressources/annales/bac-allemand-aabi-2025.html"
  },
  {
   "id": "probatoire-allemand-aabi-2025",
