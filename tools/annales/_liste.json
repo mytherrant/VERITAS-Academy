@@ -798,6 +798,20 @@
   "u": "/ressources/annales/bepc-ecm-2024.html"
  },
  {
+  "id": "probatoire-ecm-2024",
+  "examen": "probatoire",
+  "m": "ecm",
+  "serie": "",
+  "nomExamen": "Probatoire",
+  "fiche": "ressources/examen-ecm-probatoire.html",
+  "matiere": "Éducation à la citoyenneté et à la morale",
+  "mat": "ecm",
+  "classes": "1re A,1re C,1re D",
+  "annee": 2024,
+  "national": true,
+  "u": "/ressources/annales/probatoire-ecm-2024.html"
+ },
+ {
   "id": "probatoire-philosophie-aabi-2025",
   "examen": "probatoire",
   "m": "philosophie",
