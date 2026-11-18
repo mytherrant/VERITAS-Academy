@@ -854,6 +854,20 @@
   "u": "/ressources/annales/probatoire-philosophie-cdeti-2025.html"
  },
  {
+  "id": "probatoire-philosophie-cdeti-2024",
+  "examen": "probatoire",
+  "m": "philosophie",
+  "serie": "séries C, D, E et TI",
+  "nomExamen": "Probatoire",
+  "fiche": "ressources/examen-philosophie-probatoire.html",
+  "matiere": "Philosophie (séries C, D, E et TI)",
+  "mat": "philo",
+  "classes": "1re C,1re D",
+  "annee": 2024,
+  "national": false,
+  "u": "/ressources/annales/probatoire-philosophie-cdeti-2024.html"
+ },
+ {
   "id": "bepc-anglais-2025",
   "examen": "bepc",
   "m": "anglais",
