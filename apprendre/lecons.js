@@ -13052,6 +13052,10 @@ VRT_PLUS("3e-en-articles", [
   function attention(h) { return "<div class='attention'><b>Attention</b>" + h + "</div>"; }
   function def(t, h) { return "<div class='def'><b>" + t + "</b>" + h + "</div>"; }
   function formule(h) { return "<p class='formule'>" + h + "</p>"; }
+  var NUIT = "#001136", BLEU = "#1E499B", GRIS = "#4D5163", VERT = "#17784D", ORANGE = "#C2540A", ROUGE = "#C62828";
+  function txt(x, y, t, o) { o = o || {}; return "<text x='" + x + "' y='" + y + "' text-anchor='" + (o.a || "middle") + "' font-size='" + (o.s || 12) + "' font-weight='" + (o.w || 700) + "' fill='" + (o.c || NUIT) + "'>" + t + "</text>"; }
+  function svg(w, h, alt, corps) { return "<svg viewBox='0 0 " + w + " " + h + "' role='img' aria-label='" + alt + "' font-family='Inter,Arial,sans-serif'><rect width='" + w + "' height='" + h + "' fill='#fff'/>" + corps + "<text x='" + (w - 6) + "' y='" + (h - 5) + "' font-size='8' text-anchor='end' fill='#8A93A6'>Planche VÉRITAS</text></svg>"; }
+  function pl2(titre, legende, w, h, alt, corps) { return { type: "2D", titre: titre, legende: legende, svg: svg(w, h, alt, corps) }; }
 
   /* ─────────────── 6e Mathématiques ─────────────── */
   enrichir("6e-maths-divisibilite", {
@@ -13172,6 +13176,129 @@ VRT_PLUS("3e-en-articles", [
       F("Compter les diviseurs", "nombre de diviseurs = (a + 1) × (b + 1) × (c + 1)", "(3 + 1) × (2 + 1) × (1 + 1) = 4 × 3 × 2 = 24 dispositions"),
       F("Trouver la disposition la plus proche du carré", "le diviseur d le plus proche de √n, avec n ÷ d élèves par rangée", "√360 ≈ 19 : 18 rangées de 20 élèves")
     ]
+  });
+
+
+  /* ─────────────── Lot 2 : 5e-3e sciences ─────────────── */
+  enrichir("5e-maths-division-euclidienne", {
+    formules: [
+      F("Poser l'égalité de la division euclidienne", "a = b × q + r, avec 0 ≤ r < b", "250 = 24 × q + r"),
+      F("Trouver le quotient", "q = le plus grand entier tel que b × q ≤ a", "24 × 10 = 240 ≤ 250 et 24 × 11 = 264 > 250 : q = 10"),
+      F("Calculer le reste", "r = a − b × q", "r = 250 − 240 = 10, et 10 < 24 ✓"),
+      F("Calculer la recette", "q × prix d'une cagette + r × prix d'une mangue", "10 × 3 000 + 10 × 150 = 30 000 + 1 500 = 31 500 F")
+    ],
+    ajouts: { 1: astuce("« <strong>Le reste est toujours plus petit que le diviseur</strong> » : si ton reste dépasse le diviseur, ton quotient est trop petit d'au moins 1. Vérifie toujours : b × q + r doit redonner a.") }
+  });
+
+  enrichir("4e-pct-aimants", {
+    formules: [
+      F("Identifier le pôle Nord de l'aimant", "aimant suspendu librement : le pôle Nord se tourne vers le nord géographique", "l'extrémité qui pointe vers le nord est le pôle N"),
+      F("Confirmer avec la boussole", "pôles de même nom ⇒ répulsion ; pôles de noms contraires ⇒ attraction", "le bout coloré (N) de l'aiguille est repoussé : l'extrémité testée est bien N"),
+      F("Choisir où pêcher", "le champ magnétique est le plus intense près des pôles", "on plonge une extrémité de l'aimant, pas son milieu"),
+      F("Prévoir ce qui est attiré", "attirés : fer, acier, nickel, cobalt · non attirés : cuivre, laiton, aluminium, or", "anneau en acier attiré, clé en laiton non : la clé remonte par son anneau")
+    ],
+    ajouts: {
+      1: ex("Exemple", "On approche le pôle N d'un aimant du pôle S d'un autre aimant posé sur des crayons : il roule vers lui (attraction). On le retourne : il s'éloigne (répulsion).") +
+        ex("Exemple", "Une aiguille à coudre frottée 20 fois dans le même sens sur un aimant devient à son tour un petit aimant : posée sur un bouchon dans l'eau, elle s'oriente nord-sud.") +
+        astuce("« <strong>Les contraires s'attirent, les pareils se repoussent</strong> » : N-S s'attirent, N-N et S-S se repoussent."),
+      3: ex("Exemple au quotidien", "La porte du réfrigérateur, les haut-parleurs du téléphone et les cartes bancaires utilisent des aimants ; c'est pourquoi on n'approche pas un aimant d'une carte à piste magnétique.")
+    }
+  });
+
+  enrichir("4e-svt-photosynthese", {
+    formules: [
+      F("Faire le bilan de masse", "gain du plant = masse finale − masse initiale ; perte de la terre = masse initiale − masse finale", "le plant gagne 450 g ; la terre ne perd que 4 g (sels minéraux)"),
+      F("Séparer l'eau de la matière sèche", "masse fraîche = eau + matière sèche", "450 g = environ 360 g d'eau + 90 g de matière sèche"),
+      F("Trouver l'origine du carbone", "matière sèche ≈ 45 % de carbone, venu du CO₂ de l'air", "≈ 0,45 × 90 ≈ 40 g de carbone pris dans l'air"),
+      F("Écrire le bilan de la photosynthèse", "eau + dioxyde de carbone → (lumière, chlorophylle) → matière organique + dioxygène", "6 CO₂ + 6 H₂O → C₆H₁₂O₆ + 6 O₂")
+    ],
+    ajouts: {
+      4: ex("Exemple", "Une plante aquatique (élodée) éclairée dans l'eau dégage des bulles de dioxygène ; à l'obscurité, plus de bulles.") +
+        ex("Exemple", "Une feuille de manioc cachée deux jours par un papier aluminium puis testée à l'eau iodée ne bleuit pas là où elle était cachée : sans lumière, pas d'amidon.")
+    }
+  });
+
+  enrichir("3e-pct-ph", {
+    formules: [
+      F("Calculer la quantité de matière", "n = m ÷ M", "n = 40 g ÷ 40 g/mol = 1 mol de NaOH"),
+      F("Calculer la concentration molaire", "C = n ÷ V", "C = 1 mol ÷ 0,5 L = 2 mol/L"),
+      F("Classer la solution par son pH", "pH < 7 acide · pH = 7 neutre · pH > 7 basique", "pH > 13 : très basique, corrosive"),
+      F("Calculer la dilution", "C₁ × V₁ = C₂ × V₂", "2 × 50 mL = C₂ × 500 mL → C₂ = 0,2 mol/L (dix fois moins concentrée)")
+    ],
+    ajouts: {
+      0: ex("Exemple", "15 g de sel (NaCl, M = 58,5 g/mol) dans 250 mL : n = 15 ÷ 58,5 ≈ 0,26 mol ; C = 0,26 ÷ 0,25 ≈ 1,0 mol/L."),
+      2: ex("Exemple : facteur de dilution", "Pour diviser la concentration par 10, on prélève 10 mL de solution et on complète à 100 mL avec de l'eau : V₂ = 10 × V₁.") +
+        astuce("« <strong>Toujours l'acide (ou la soude) dans l'eau, jamais l'eau dedans</strong> » : on verse le produit concentré lentement dans beaucoup d'eau, pour éviter les projections brûlantes.")
+    }
+  });
+
+  enrichir("3e-svt-adn", {
+    formules: [
+      F("Compter les chromosomes reçus", "cellule-œuf = 23 chromosomes du père + 23 de la mère", "23 + 23 = 46 chromosomes, soit 23 paires"),
+      F("Écrire les gamètes possibles", "mère XX → ovules tous X ; père XY → spermatozoïdes X ou Y", "ovule X ; spermatozoïde X (50 %) ou Y (50 %)"),
+      F("Faire le tableau de croisement", "gamète du père × gamète de la mère", "X × X = XX (fille) ; Y × X = XY (garçon)"),
+      F("Calculer la probabilité", "probabilité = cas favorables ÷ cas possibles", "fille : 1 ÷ 2 = 50 % à chaque naissance, quel que soit le rang")
+    ],
+    ajouts: {
+      2: ex("Exemple", "Une famille a déjà trois filles. La probabilité que le 4ᵉ enfant soit un garçon reste 1 sur 2 : chaque fécondation est indépendante.") +
+        ex("Exemple : caryotype", "Un caryotype montre 22 paires semblables (autosomes) et une 23ᵉ paire XX : c'est une fille ; XY : un garçon. 47 chromosomes avec trois chromosomes 21 : trisomie 21.")
+    }
+  });
+
+  enrichir("3e-maths-racines", {
+    formules: [
+      F("Calculer l'aire nécessaire", "aire = nombre de poules ÷ densité", "200 ÷ 4 = 50 m²"),
+      F("Calculer le côté du carré", "c = √A", "c = √50 = √(25 × 2) = 5√2 ≈ 7,07 m"),
+      F("Encadrer pour vérifier", "a² < A < b² ⇒ a < √A < b", "49 < 50 < 64 donc 7 < √50 < 8"),
+      F("Calculer le grillage", "P = 4 × c", "4 × 7,07 ≈ 28,3 m : acheter 29 m"),
+      F("Calculer la diagonale", "d = c × √2", "5√2 × √2 = 5 × 2 = 10 m de fil")
+    ],
+    planches: {
+      1: [pl2("Le carré de 50 m² et sa diagonale", "Un carré d'aire 50 m² a un côté de √50 ≈ 7,07 m ; sa diagonale mesure exactement 10 m.", 640, 260, "Carré de côté racine de 50 avec sa diagonale de 10 mètres, encadré entre les carrés de 7 et 8 mètres",
+        "<rect x='70' y='30' width='196' height='196' fill='#EEF4FC' stroke='" + BLEU + "' stroke-width='3'/><rect x='70' y='30' width='224' height='224' fill='none' stroke='#9AA4B6' stroke-dasharray='6 4'/><rect x='70' y='30' width='186' height='186' fill='none' stroke='#C9D0DC' stroke-dasharray='3 4'/>" +
+        "<path d='M70 226L266 30' stroke='" + ROUGE + "' stroke-width='3'/>" + txt(168, 140, "50 m²", { s: 18, c: BLEU }) + txt(150, 106, "d = 10 m", { s: 13, c: ROUGE }) + txt(168, 248, "c = √50 ≈ 7,07 m", { s: 13 }) +
+        "<rect x='330' y='40' width='280' height='180' rx='14' fill='#FFF6E3' stroke='#F2DFA6'/>" + txt(470, 76, "7² = 49 < 50 < 64 = 8²", { s: 15, c: '#8A6200' }) + txt(470, 108, "donc 7 < √50 < 8", { s: 15 }) + txt(470, 146, "√50 = √25 × √2 = 5√2", { s: 15, c: BLEU }) + txt(470, 184, "d = 5√2 × √2 = 10 m", { s: 15, c: ROUGE }))]
+    },
+    ajouts: { 2: attention("√(a + b) ≠ √a + √b : √(9 + 16) = √25 = 5, alors que √9 + √16 = 3 + 4 = 7.") + astuce("« <strong>On sort les carrés parfaits</strong> » : √50 = √(25 × 2) = 5√2 ; √72 = √(36 × 2) = 6√2. Connais par cœur les carrés de 1 à 15.") }
+  });
+
+  enrichir("3e-pct-atome", {
+    formules: [
+      F("Compter les atomes sur une longueur", "nombre d'atomes = longueur ÷ diamètre d'un atome", "1 mm ÷ 0,000 000 25 mm ≈ 4 millions d'atomes de cuivre"),
+      F("Écrire la neutralité de l'atome", "nombre d'électrons = nombre de protons = Z", "cuivre : 29 protons et 29 électrons"),
+      F("Identifier l'élément par Z", "Z = numéro atomique, propre à chaque élément", "Z = 29 : cuivre (Cu) ; Z = 79 : or (Au)"),
+      F("Comparer les tailles", "taille de l'atome ≈ 100 000 × taille du noyau", "noyau d'1 mm ⇒ atome de 100 m, un stade")
+    ],
+    planches: {
+      2: [pl2("Deux atomes, deux éléments", "Le cuivre (Z = 29) et l'or (Z = 79) ont la même architecture, mais pas le même nombre de protons : ce sont deux éléments différents.", 640, 240, "Schéma comparé d'un atome de cuivre et d'un atome d'or avec leur numéro atomique",
+        (function () { var s = "", k; [[160, "Cu", 29, "#C77B30"], [480, "Au", 79, "#D4A017"]].forEach(function (a) { s += "<circle cx='" + a[0] + "' cy='110' r='86' fill='#F7F9FC' stroke='#C9D0DC' stroke-dasharray='4 4'/><circle cx='" + a[0] + "' cy='110' r='14' fill='" + a[3] + "'/>"; for (k = 0; k < 10; k++) { var t = k * Math.PI / 5; s += "<circle cx='" + (a[0] + 70 * Math.cos(t)).toFixed(1) + "' cy='" + (110 + 70 * Math.sin(t)).toFixed(1) + "' r='4' fill='" + BLEU + "'/>"; } s += txt(a[0], 115, a[1], { s: 13, c: "#fff" }) + txt(a[0], 220, a[1] + " : Z = " + a[2] + " protons, " + a[2] + " électrons", { s: 13 }); }); return s + txt(320, 112, "≠", { s: 30, c: ROUGE }); })())]
+    },
+    ajouts: {
+      2: def("Définition", "Le <strong>numéro atomique Z</strong> est le nombre de protons du noyau. L'atome est <strong>électriquement neutre</strong> : il a autant d'électrons (charge −e) que de protons (charge +e).") +
+        ex("Exemple", "L'atome d'oxygène (Z = 8) a 8 protons et 8 électrons ; l'atome de fer (Z = 26) a 26 protons et 26 électrons.") +
+        astuce("« <strong>Z, c'est la carte d'identité</strong> » : change le nombre de protons, et tu changes d'élément ; change le nombre d'électrons, et tu obtiens un ion du même élément.")
+    }
+  });
+
+  enrichir("3e-svt-ressemblances", {
+    formules: [
+      F("Tester l'appartenance à une espèce", "même espèce ⇔ interfécondité et descendance fertile", "humain × chimpanzé : pas de descendance → espèces différentes"),
+      F("Classer les caractères", "caractère de l'espèce : tous l'ont · caractère individuel : varie d'une personne à l'autre", "bipédie, pouce opposable, langage : espèce ; lobe d'oreille, fossettes : individuel"),
+      F("Séparer hérédité et milieu", "caractère observé = information génétique + influence du milieu", "jumelles : même information génétique ; sport et soleil changent leur peau et leurs muscles"),
+      F("Retrouver l'origine des caractères héréditaires", "cellule-œuf = information du père + information de la mère", "les caractères viennent des deux familles")
+    ],
+    planches: {
+      1: [pl2("Caractères de l'espèce et caractères individuels", "Tous les humains partagent les caractères de l'espèce ; les caractères individuels varient et partagent la classe en groupes.", 640, 230, "Deux colonnes : caractères de l'espèce humaine et caractères individuels",
+        "<rect x='20' y='20' width='290' height='190' rx='14' fill='#EEF4FC' stroke='#C9D8EE'/><rect x='330' y='20' width='290' height='190' rx='14' fill='#ECF7F0' stroke='#BFDCC9'/>" + txt(165, 50, "Caractères de l'espèce", { s: 15, c: BLEU }) + txt(475, 50, "Caractères individuels", { s: 15, c: VERT }) +
+        ["marcher debout (bipédie)", "pouce opposable", "langage articulé", "46 chromosomes"].map(function (t, k) { return txt(40, 86 + k * 30, "• " + t, { s: 13, a: "start", w: 500 }); }).join("") +
+        ["lobe d'oreille libre ou attaché", "fossettes ou non", "groupe sanguin A, B, AB, O", "enrouler la langue ou non"].map(function (t, k) { return txt(350, 86 + k * 30, "• " + t, { s: 13, a: "start", w: 500 }); }).join(""))]
+    },
+    ajouts: {
+      2: ex("Exemple", "Le groupe sanguin est héréditaire : il ne change pas avec l'alimentation. La couleur de la peau peut foncer au soleil (influence du milieu), mais la couleur de base est héréditaire.") +
+        ex("Exemple", "Deux vrais jumeaux, l'un footballeur, l'autre non, ont le même groupe sanguin mais pas la même musculature.") +
+        astuce("« <strong>Héritage + vie = ce que tu es</strong> » : pour chaque caractère, demande-toi s'il peut changer pendant la vie (milieu) ou s'il est fixé dès la cellule-œuf (hérédité).") +
+        attention("Un caractère « de famille » n'est pas toujours héréditaire : une famille peut partager un accent ou des habitudes alimentaires sans gène commun.")
+    }
   });
 
   /* ─────────────── 2nde C Physique (formules déjà complètes) ─────────────── */
