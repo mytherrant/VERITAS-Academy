@@ -1,3 +1,16 @@
+## Apprendre : lot 11, économie sociale et familiale et italien de 1re ; déploiement débloqué (18/11/2026)
+
+Demandes de Jacques : « Continue », puis « continue ».
+
+- **Déploiement du lot 10 débloqué** : le déploiement de la PR #351 échouait à l'étape GEO (`methodes_examens.cjs --controle` : `ressources/sitemap-ressources.xml : à régénérer`). La PR #345 (séquentielles de 3e, autre session) avait ajouté ses pages en fin de fichier. Fichier régénéré (même ensemble d'URL, ordre seulement) par la PR #352 ; redéploiement réussi. **Avant chaque PR, rejouer en local les contrôles de l'étape GEO** (oeuvres, annales, séquentielles, méthodes, scènes, découverte, llms, vitrine).
+- **`apprendre/_src/19-approfondies-1re.js`** : 4 leçons gratuites de 1re au gabarit approfondi, remplacées en place :
+  - **ESF, notions** : le budget de la famille Abena à Ebolowa (130 000 F dépensés pour 120 000 F) ; maison 3D en coupe aux quatre domaines (toit amovible), budget avant / après ; **simulateur** de budget du mois.
+  - **ESF, signes d'alarme du nourrisson** : Clarisse garde Nina, 4 mois, à Bertoua (62 respirations par minute) ; courbe de poids du carnet de santé, huit vignettes de signes de danger, table 3D de ce qu'on emporte ; **simulateur** de fréquence respiratoire avec les seuils de l'OMS (bébé qui respire, animation coupée si « réduire les animations »).
+  - **Italien, avverbi in -mente** : compte rendu d'un match de Coton Sport pour Giulia (Turin) ; pièces lent + a + mente en 3D, adjectif ou adverbe ; **fabbrica degli avverbi** (12 adjectifs).
+  - **Italien, accordo e disaccordo** : débat du club d'italien de Deïdo ; salle de débat 3D, réaction en trois temps ; **exercice** accordo / disaccordo / sfumatura.
+- `lecons.js?v=20261118l11` ; 4 pages `apprendre/cours/` régénérées et habillées. Chromium (1200 et 390 px) : aucun débordement, aucune erreur JS. Bancs : réglages 29/29, verrou 18/18, gabarits 54/54, planche mobile 23/23, charte 34/34, lisibilité 7/7 ; contrôles GEO au vert.
+- **Suite** : 1re chinois (budan, ruguo), Tle arabe (khabar, verbes) ; 2nde (maths, français, ECM, histoire, philosophie, géographie).
+
 ## Leçons : étiquettes de planche sans « 2D » ni « 3D » (17/11/2026)
 
 Demande de Jacques : « pour toutes les fiches, enlève 2d, 3d ». `apprendre/lecon.html`, fonction `planche()` : l'étiquette devient « Planche n » (au lieu de « Planche n · 2D / 3D » ; les planches de type « Planche » affichaient même « Planche n · Planche »). Le type reste dans les données (`type: "3d"` pilote toujours le moteur 3D). Bancs gabarits, planche mobile, réglages, charte au vert ; 0 erreur JS.
