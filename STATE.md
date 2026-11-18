@@ -21,7 +21,7 @@ Demande de Jacques : « Audite et corrige partout », puis « Continue ». Grill
 ## 18/11/2026 — Application : carte mentale des œuvres au nouveau dessin (branche carte-app)
 - app.js `_showLittCarte` : charge `chunks/carte-mentale.js` (copie EXACTE de apprendre/_src/00-carte-mentale.js, écrite et contrôlée par tools/oeuvres_statiques.js --controle) et affiche la même carte que les pages d'œuvres et les leçons (`_cmPage`). Ancien dessin canvas conservé en secours si le module ne charge pas.
 - « Télécharger (PNG) » : `_cmTelecharger` exporte la carte visible en PNG (≥ 1 800 px de large) avec `applyWatermark` ; animations neutralisées pour l'export.
-- Versions : app.js?v=1.20.84, sw.js CACHE_VERSION veritas-v1.20.84.
+- Versions : app.js?v=1.20.84, sw.js CACHE_VERSION veritas-v1.20.84. ⚠ Un changement de version des assets exige `python3 tools/habiller_pages.py` (22 pages hors Apprendre reprennent ce numéro) : oublié dans #374, le déploiement a échoué au contrôle « habillage » ; corrigé par la PR suivante.
 
 ## Apprendre : réalisme, lot 21 — zoom HD de la cellule au gène (18/11/2026)
 
