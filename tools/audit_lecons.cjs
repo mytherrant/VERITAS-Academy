@@ -15,12 +15,14 @@ function compte(h, re) { return (h.match(re) || []).length; }
 const lignes = [];
 for (const [id, l] of Object.entries(L)) {
   const parties = l.parties || [], html = parties.map(p => p.html || "").join(" ") + " " + JSON.stringify(l.denouement || {}) + " " + (l.intro || "");
-  const pl = parties.flatMap(p => p.planches || []);
+  /* seules les planches affichables comptent : un objet avec un titre et un dessin (svg, modele 3D ou ref) */
+  const pl = parties.flatMap(p => p.planches || []).filter(x => x && typeof x === "object" && x.titre && (x.svg || x.modele || x.ref));
   const D = l.denouement || {};
   const r = {
     id, classe: l.c, matiere: l.m, titre: l.titre,
     situation: !!l.enquete || !!l.apc,
     resolue: !!(D.reponse && (D.etapes || []).length >= 2),
+    etapesFormules: (D.formules || []).length,
     formules: compte(html, /class=['"]formule['"]/g) + compte(html, /class=['"]def['"]/g),
     exemples: compte(html, /class=['"]ex['"]/g),
     astuces: compte(html, /class=['"](astuce|attention|savais|methode|retiens)['"]/g),
@@ -31,6 +33,7 @@ for (const [id, l] of Object.entries(L)) {
   r.manque = [];
   if (!r.situation) r.manque.push("situation de départ");
   if (!r.resolue) r.manque.push("situation résolue (étapes + réponse)");
+  if (r.etapesFormules < 2) r.manque.push("résolution par formules étape par étape");
   if (r.formules < 2) r.manque.push("formules/définitions");
   if (r.exemples < 2) r.manque.push("exemples");
   if (r.astuces < 2) r.manque.push("astuces");
@@ -42,5 +45,5 @@ for (const [id, l] of Object.entries(L)) {
 const aff = tout ? lignes : lignes.filter(r => r.manque.length);
 if (json) { console.log(JSON.stringify(aff, null, 1)); process.exit(0); }
 aff.sort((a, b) => b.manque.length - a.manque.length || a.id.localeCompare(b.id));
-for (const r of aff) console.log(r.id.padEnd(40), "F" + r.formules, "E" + r.exemples, "A" + r.astuces, "2D" + r.p2d, "3D" + r.p3d, "S" + r.anim, r.resolue ? "résolue" : "NON RÉSOLUE", "|", r.manque.join(", "));
+for (const r of aff) console.log(r.id.padEnd(40), "F" + r.formules, "E" + r.exemples, "A" + r.astuces, "2D" + r.p2d, "3D" + r.p3d, "S" + r.anim, "R" + r.etapesFormules, r.resolue ? "résolue" : "NON RÉSOLUE", "|", r.manque.join(", "));
 console.log("\n" + lignes.length + " leçons ; " + lignes.filter(r => !r.manque.length).length + " complètes ; " + lignes.filter(r => r.manque.length).length + " à enrichir.");

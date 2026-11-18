@@ -1,3 +1,25 @@
+## Apprendre : réalisme, lot 21 — zoom HD de la cellule au gène (18/11/2026)
+
+Demande de Jacques : « Continue » (suite du lot 20).
+
+- **`apprendre/_src/92-animations-realisme.js`** : l'animation « Zoome de la cellule jusqu'au gène » (3e ADN, partie 4) est refaite en haute définition et remplace celle de `90-animations-sciences.js` : 1) cellule animale HD avec le noyau encadré ; 2) noyau en division et 46 chromosomes en X à bandes ; 3) un chromosome agrandi (chromatides, centromère, filament d'ADN qui se déroule) ; 4) double hélice d'ADN avec paires de bases colorées (A-T, G-C) et un gène encadré.
+- `28-realisme-premiers-lots.js` exporte aussi `chromosome`, `LONG`, `CENT` dans `window.VRT_CELLULES` pour cette animation.
+- `lecons.js?v=20261118r21`. Chromium : aucune erreur JS. Contrôles GEO et bancs au vert.
+
+## Apprendre : réalisme des premiers lots, lot 20 (18/11/2026)
+
+Demandes de Jacques : « Oui améliore et rend les plus réalistes pertinentes », « Surtout les jours de semaine en orientation », « Même la structure HD de la cellule, cellule animale et végétale », « Continue ».
+
+- **`apprendre/_src/28-realisme-premiers-lots.js`** : remplace SEULEMENT des dessins (`dessinEnquete`, `dessinPlanche` par titre, `remplacerPlanche`) ou en ajoute ; aucun texte retiré.
+  - Situations de départ redessinées avec des personnages complets : ADN (salon d'Ebolowa, grand-mère, bébé), ressemblances (centre de Limbé, chimpanzé réaliste, jumelles), atome (fil de cuivre dénudé, chaîne en or), racines (carré à la ficelle, vraies poules), pH (cuvette de soude, huile de palme, pains de savon).
+  - ADN : **caryotypes** en vrais chromosomes en X (deux chromatides, centromère, bandes, longueurs relatives réelles, rangés en 4 lignes, XX / XY) ; **transfert de noyau** avec de vraies grenouilles (verte, albinos aux yeux rouges, têtard).
+  - pH : verrerie réaliste (balance, bécher, fiole jaugée, pissette, pipette jaugée et poire).
+  - **Orientation** : les planches 3D sans légende de jours / mois sont remplacées par un **planning de semaine** (Lundi à Dimanche, 0 h à 24 h, 15 h 30 de révisions) et un **calendrier de Septembre à Juin**, punaisés sur un tableau en liège.
+  - **Cellules en haute définition** (ultrastructure) : cellule animale (membrane, noyau à pores, nucléole, chromatine, mitochondries à crêtes, réticulum rugueux et lisse, Golgi, vésicules, lysosomes, centrosome, ribosomes) et cellule végétale (paroi, plasmodesmes, vacuole et tonoplaste, chloroplastes à grana et amidon…) ajoutées à `tle-sc-microscopie` (partie 4) et `tle-sc-organites` (partie 2).
+- **`apprendre/_src/92-animations-realisme.js`** (chargé après 90 et 91) : l'**explorateur de cellules** (animale / végétale, clic sur un organite → surbrillance + rôle) remplace l'animation simple « Clique sur un organite ».
+- **Piège** : certains titres de planches contiennent une espace insécable (« 500 mL ») ; la comparaison des titres normalise désormais U+00A0 et U+202F.
+- `lecons.js?v=20261118r20` ; 9 pages `apprendre/cours/` régénérées. Chromium (1200 et 390 px) : aucun débordement, aucune erreur JS. Contrôles GEO et bancs au vert.
+
 ## Apprendre : révision des leçons approfondies, lot 19 (18/11/2026)
 
 Demande de Jacques : « Oui » (mettre les premières leçons au niveau des derniers lots). Audit automatique des 91 leçons (planche 3D, planche 2D ou schéma, simulation ou labo, quiz de 10, indices) : 8 leçons en dessous du niveau.
@@ -15,6 +37,7 @@ Jacques : « Résoudre la situation-problème de départ en donnant des formules
 - **Gabarit** (lecon.html) : `denouement.formules = [{ nom, f, calcul }]` → bloc « Les formules utilisées, étape par étape » (formule générale puis application chiffrée) dans la situation résolue. modele.css?v=20261118u.
 - **2nde-c-physique-mesure** complète : définition, exemples (vernier 23,7 mm, balance non tarée, chronomètre en retard, parallaxe, pendule), formules (moyenne, incertitude absolue et relative, écriture du résultat), astuces (test du vide, « M-É-R »), planches 2D « Lire 23,7 mm sur le vernier » et « L'intervalle de mesure du sac », résolution en 6 étapes chiffrées.
 - « Change en vraies cartes mentales esthétiques » (schémas offerts et schémas des leçons payantes, p.illus.svg, générés HORS dépôt) : `VRT_CM.depuisSvg(svg)` (00-carte-mentale.js) relit le schéma dans le navigateur (titre, cadres, titres, listes, notes, flèches) et le redessine en carte mentale ; appelé dans lecon.html (p.illus) et verrou.js (« Schéma offert »). Ne convertit que les schémas en cadres et listes : courbes, tracés, cartes, frises, dessins, tableaux et grilles restent tels quels. 57 schémas sur 296 convertis (flux 16, radiale 11, roue 8, arbre 8, bulles 6…). verrou.js?v=20261118cm, modele.css?v=20261118v.
+- « Audite et corrige partout » : audit renforcé (exige aussi ≥ 2 formules de résolution dans denouement.formules). apprendre/_src/89-enrichissements-sciences.js (ajouts seulement, après les sources et avant les animations) complète TOUTES les leçons de sciences (maths, physique, chimie, PCT, SVT, sciences, informatique, technologie, 33 leçons) : résolution étape par étape avec formules et calculs chiffrés, définitions, formules, exemples, astuces, et planches 2D ajoutées (carré √50, atomes Cu/Au, caractères de l'espèce, ensembles emboîtés, décimaux, diagrammes de Venn, IA, entrée-sortie, RAM/disque, crayons, outils, grille et sites de pépinière). Audit : 0 leçon de sciences incomplète ; 33/80 complètes, les 47 restantes (lettres, langues, histoire-géo, ECM, philo, arts, EPS, cultures, orientation, ESF) sont prises par la session « Enrichissement des leçons » (fichiers 29-…).
 - Partage proposé à la session « Enrichissement des leçons » : moi = sciences (maths, physique, chimie, PCT, SVT, informatique, technologie) ; elle = lettres, langues, histoire-géo, ECM, philo, arts, EPS, cultures nationales, orientation, ESF.
 
 ## Apprendre : lot 18, 6e — toutes les leçons gratuites au gabarit approfondi (18/11/2026)

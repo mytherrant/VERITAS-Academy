@@ -12686,6 +12686,872 @@ VRT_PLUS("3e-en-articles", [
   });
 })();
 
+/* Leçons APPROFONDIES — réalisme, lot 20 (18/11/2026) : illustrations des premiers lots redessinées (personnages complets,
+   chromosomes en X, grenouilles, verrerie de laboratoire, poules, chimpanzé), plannings d'orientation lisibles (jours et mois
+   écrits) et cellules animale et végétale en haute définition (ultrastructure ; explorateur dans 92-animations-realisme.js).
+   Remplace SEULEMENT des dessins (enquete.svg, planche.svg ou planche entière par son titre) ou en AJOUTE ; aucun texte retiré. */
+(function () {
+  "use strict";
+  var NUIT = "#001136", BLEU = "#1E499B", GRIS = "#4D5163", VERT = "#17784D", ROUGE = "#C62828", TERRE = "#C46A2B";
+
+  function txt(x, y, t, o) {
+    o = o || {};
+    return "<text x='" + x + "' y='" + y + "' text-anchor='" + (o.a || "middle") + "' font-size='" + (o.s || 12) + "' font-weight='" + (o.w || 700) + "' fill='" + (o.c || NUIT) + "'" + (o.i ? " font-style='italic'" : "") + (o.halo ? " stroke='#fff' stroke-width='3' paint-order='stroke'" : "") + ">" + t + "</text>";
+  }
+  function lin(id, cs, vertical) {
+    var s = "<linearGradient id='" + id + "'" + (vertical ? " x1='0' y1='0' x2='0' y2='1'" : "") + ">";
+    cs.forEach(function (c, i) { s += "<stop offset='" + (i / (cs.length - 1)).toFixed(2) + "' stop-color='" + c + "'/>"; });
+    return s + "</linearGradient>";
+  }
+  function rad(id, cs) {
+    var s = "<radialGradient id='" + id + "' cx='35%' cy='30%' r='75%'>";
+    cs.forEach(function (c, i) { s += "<stop offset='" + (i / (cs.length - 1)).toFixed(2) + "' stop-color='" + c + "'/>"; });
+    return s + "</radialGradient>";
+  }
+  function fleche(id, c) { return "<marker id='" + id + "' markerWidth='10' markerHeight='10' refX='7' refY='5' orient='auto'><path d='M0 1L8 5L0 9Z' fill='" + c + "'/></marker>"; }
+  function svg(w, h, alt, defs, corps) {
+    return "<svg viewBox='0 0 " + w + " " + h + "' role='img' aria-label='" + alt + "' font-family='Inter,Arial,sans-serif'><rect width='" + w + "' height='" + h + "' fill='#fff'/><defs>" + defs + "</defs>" + corps +
+      "<text x='" + (w - 6) + "' y='" + (h - 5) + "' font-size='8' text-anchor='end' fill='#8A93A6'>Planche VÉRITAS</text></svg>";
+  }
+  function ancien(id) { return window.VRT_LECONS[id]; }
+  function remplacer(id, o) {
+    var a = ancien(id);
+    if (a) ["apc", "examen", "rang", "cle", "scenes"].forEach(function (k) { if (a[k] != null && o[k] == null) o[k] = a[k]; });
+    VRT_L(id, o);
+    if (a) o.ordre = a.ordre;
+  }
+  function q(qq, bonne, f1, f2, e) { return { q: qq, r: [bonne, f1, f2], b: 0, e: e }; }
+  function partie(old, i) { return old && old.parties[i] ? old.parties[i].html : ""; }
+  function bulle(x, y, w, t, c) { return "<rect x='" + x + "' y='" + y + "' width='" + w + "' height='30' rx='12' fill='#fff' stroke='" + (c || "#C9D2E3") + "'/>" + txt(x + w / 2, y + 20, t, { s: 11.5 }); }
+  function perso(x, y, peau, habit, bas) {
+    bas = bas || "#2E3445";
+    return "<g transform='translate(" + x + " " + y + ")'><ellipse cx='0' cy='84' rx='18' ry='4' fill='#001136' opacity='.18'/>" +
+      "<rect x='-9' y='44' width='8' height='36' rx='3' fill='" + bas + "'/><rect x='1' y='44' width='8' height='36' rx='3' fill='" + bas + "'/>" +
+      "<ellipse cx='-6' cy='81' rx='7' ry='3.5' fill='#1F2328'/><ellipse cx='6' cy='81' rx='7' ry='3.5' fill='#1F2328'/>" +
+      "<path d='M-13 46L-16 18C-16 13 -12 11 -6 10H6C12 11 16 13 16 18L13 46Z' fill='" + habit + "'/>" +
+      "<path d='M-15 16L-20 40' stroke='" + habit + "' stroke-width='7' stroke-linecap='round'/><path d='M15 16L20 40' stroke='" + habit + "' stroke-width='7' stroke-linecap='round'/>" +
+      "<circle cx='-20' cy='42' r='3.6' fill='" + peau + "'/><circle cx='20' cy='42' r='3.6' fill='" + peau + "'/>" +
+      "<rect x='-3.5' y='5' width='7' height='7' fill='" + peau + "'/><ellipse cx='0' cy='-2' rx='9' ry='10.5' fill='" + peau + "'/>" +
+      "<path d='M-9 -4C-10 -14 -4 -13.5 0 -13.5S10 -14 9 -4C7 -9 -7 -9 -9 -4Z' fill='#1B1410'/><ellipse cx='-9' cy='-1' rx='1.8' ry='3' fill='" + peau + "'/><ellipse cx='9' cy='-1' rx='1.8' ry='3' fill='" + peau + "'/></g>";
+  }
+  /* portrait en buste (arbre généalogique) */
+  function portrait(x, y, peau, habit, cheveux, age) {
+    var s = "<g transform='translate(" + x + " " + y + ")'><circle r='30' fill='#F4EFE4' stroke='#C9A576' stroke-width='3'/><clipPath id='pc" + x + "_" + y + "'><circle r='28'/></clipPath><g clip-path='url(#pc" + x + "_" + y + ")'>";
+    s += "<path d='M-26 32C-26 14 -14 10 0 10S26 14 26 32Z' fill='" + habit + "'/><rect x='-4' y='2' width='8' height='10' fill='" + peau + "'/><ellipse cy='-6' rx='11' ry='13' fill='" + peau + "'/>";
+    s += age === "vieux" ? "<path d='M-11 -10C-12 -20 -4 -21 0 -21S12 -20 11 -10C9 -14 -9 -14 -11 -10Z' fill='#D8D8D8'/>" : age === "femme" ? "<path d='M-13 -6C-15 -24 15 -24 13 -6C12 -14 -12 -14 -13 -6Z' fill='" + cheveux + "'/><path d='M-13 -14h26v-6c-6 -6 -20 -6 -26 0Z' fill='" + habit + "'/>" : "<path d='M-11 -10C-12 -20 -4 -21 0 -21S12 -20 11 -10C9 -14 -9 -14 -11 -10Z' fill='" + cheveux + "'/>";
+    s += "<circle cx='-4' cy='-6' r='1.4' fill='#1B1410'/><circle cx='4' cy='-6' r='1.4' fill='#1B1410'/><path d='M-3 2q3 2 6 0' stroke='#1B1410' fill='none'/></g></g>";
+    return s;
+  }
+  /* boucle d'exercice générique : [phrase avec ___, [bonne, autres…], explication] */
+  function exercice(el, C, suivant, lib) {
+    var i = 0, ok = 0;
+    el.innerHTML = "<p class='labo-r' data-q style='font-size:16px'></p><div style='display:flex;gap:8px;flex-wrap:wrap' data-c></div><p class='an-note' data-e></p><p class='labo-r' data-s></p>";
+    function $(s) { return el.querySelector(s); }
+    function poser() {
+      var c = C[i];
+      $("[data-q]").innerHTML = (i + 1) + ". " + c[0].replace("___", "<b style='border-bottom:2px dashed #1E499B;padding:0 14px'>?</b>");
+      $("[data-e]").textContent = ""; $("[data-s]").innerHTML = lib + " " + (i + 1) + " / " + C.length + " · score : <b>" + ok + "</b>";
+      $("[data-c]").innerHTML = c[1].slice().sort().map(function (x) { return "<button type='button' class='btn-l' data-v='" + x + "'>" + x + "</button>"; }).join("");
+      el.querySelectorAll("[data-v]").forEach(function (b) {
+        b.addEventListener("click", function () {
+          var bon = b.dataset.v === c[1][0]; if (bon) ok++;
+          $("[data-q]").innerHTML = (i + 1) + ". " + c[0].replace("___", "<b style='color:" + (bon ? VERT : ROUGE) + "'>" + c[1][0] + "</b>");
+          $("[data-e]").innerHTML = (bon ? "✔ " : "✘ ") + c[2];
+          el.querySelectorAll("[data-v]").forEach(function (x) { x.disabled = true; });
+          var nx = document.createElement("button"); nx.type = "button"; nx.className = "btn-l"; nx.textContent = i + 1 < C.length ? suivant : "↺";
+          nx.addEventListener("click", function () { i = (i + 1) % C.length; if (!i) ok = 0; poser(); });
+          $("[data-c]").appendChild(nx);
+          $("[data-s]").innerHTML = lib + " " + (i + 1) + " / " + C.length + " · score : <b>" + ok + "</b>";
+        });
+      });
+    }
+    poser();
+  }
+
+  function alea(g) { return function () { g = (g * 16807) % 2147483647; return (g - 1) / 2147483646; }; }
+  /* remplace seulement le dessin : la situation de départ ou une planche 2D repérée par son titre */
+  function dessinEnquete(id, s) { var L = ancien(id); if (L && L.enquete) L.enquete.svg = s; }
+  function dessinPlanche(id, titre, s) { var L = ancien(id); if (!L) return; L.parties.forEach(function (p) { (p.planches || []).forEach(function (x) { if (String(x.titre).replace(/[\u00a0\u202f]/g, " ") === titre.replace(/[\u00a0\u202f]/g, " ") && !/3d/i.test(x.type)) { x.svg = s; delete x.ref; } }); }); }
+  /* décor : mur, sol, fenêtre */
+  function piece(w, h, mur, sol) { return "<rect width='" + w + "' height='" + h + "' fill='" + mur + "'/><rect y='" + (h - 46) + "' width='" + w + "' height='46' fill='" + sol + "'/><path d='M0 " + (h - 46) + "H" + w + "' stroke='#00000022' stroke-width='3'/>"; }
+  function poule(x, y, s, plume) {
+    return "<g transform='translate(" + x + " " + y + ") scale(" + s + ")'><path d='M-14 -6q-10 -10 -6 -22q6 6 8 14z' fill='#3B2A1A'/><ellipse cx='0' cy='0' rx='16' ry='12' fill='" + plume + "'/><path d='M-6 -2q6 8 14 2' stroke='#00000033' stroke-width='2' fill='none'/><circle cx='12' cy='-12' r='6.5' fill='" + plume + "'/><path d='M9 -18q2 -6 4 -1q2 -5 4 0q2 -4 3 1z' fill='#D7261E'/><path d='M18 -12l6 2l-6 2z' fill='#E8A33D'/><path d='M16 -8q2 5 -1 6' fill='#D7261E'/><circle cx='14' cy='-13' r='1.2' fill='#111'/><path d='M-3 11v9M4 11v9M-3 20l-4 2M-3 20l3 2M4 20l-3 2M4 20l4 2' stroke='#E8A33D' stroke-width='1.8'/></g>";
+  }
+  function bebeBras(x, y) { return "<g transform='translate(" + x + " " + y + ")'><ellipse rx='15' ry='9' fill='#F4E7C8' stroke='#D9C49C'/><circle cx='11' cy='-4' r='6' fill='#6B4423'/><path d='M-12 -2q10 -6 18 2' stroke='#E8A33D' stroke-width='3' fill='none'/></g>"; }
+
+  /* ═══════════ 3e SVT — CHROMOSOMES ET ADN ═══════════ */
+  var LONG = [249, 242, 198, 190, 181, 171, 159, 145, 138, 134, 135, 133, 114, 107, 102, 90, 83, 80, 59, 64, 47, 51], CENT = [0.48, 0.39, 0.46, 0.27, 0.27, 0.35, 0.36, 0.31, 0.32, 0.30, 0.40, 0.27, 0.15, 0.15, 0.17, 0.41, 0.33, 0.24, 0.45, 0.45, 0.25, 0.25];
+  function chromosome(x, yb, len, cpos, graine, couleur) {
+    var h = len * 0.36, top = yb - h, yc = top + h * cpos, R = alea(graine), s = "", w = 6.5, i;
+    [x - w - 0.6, x + 0.6].forEach(function (cx) {
+      s += "<path d='M" + cx + " " + (top + 3) + "q0 -3 " + (w / 2) + " -3q" + (w / 2) + " 0 " + (w / 2) + " 3V" + (yc - 2) + "q0 2 -" + (w * 0.18) + " 2q" + (w * 0.18) + " 0 " + (w * 0.18) + " 2V" + (yb - 3) + "q0 3 -" + (w / 2) + " 3q-" + (w / 2) + " 0 -" + (w / 2) + " -3V" + (yc + 2) + "q0 -2 " + (w * 0.18) + " -2q-" + (w * 0.18) + " 0 -" + (w * 0.18) + " -2Z' fill='" + couleur + "' stroke='#5E4A78' stroke-width='0.6'/>";
+      for (i = 0; i < Math.round(h / 9); i++) { var yy = top + 4 + R() * (h - 8), hh = 1.5 + R() * 3.5; if (Math.abs(yy - yc) > 3) s += "<rect x='" + cx + "' y='" + yy.toFixed(1) + "' width='" + w + "' height='" + hh.toFixed(1) + "' fill='#3B2A52' opacity='" + (0.55 + R() * 0.4).toFixed(2) + "'/>"; }
+    });
+    return s;
+  }
+  function caryotype(sexe) {
+    var s = "<rect width='640' height='330' fill='#F7F5F2'/>", rangs = [[1, 2, 3, 4, 5], [6, 7, 8, 9, 10, 11, 12], [13, 14, 15, 16, 17, 18], [19, 20, 21, 22, "S"]], bases = [104, 186, 252, 312];
+    rangs.forEach(function (r, ri) {
+      var pas = 600 / r.length;
+      r.forEach(function (n, k) {
+        var cx = 20 + pas * (k + 0.5), yb = bases[ri];
+        if (n === "S") {
+          s += chromosome(cx - 9, yb, 156, 0.39, 777, "#C7B5DA") + chromosome(cx + 9, yb, sexe === "XX" ? 156 : 57, sexe === "XX" ? 0.39 : 0.22, sexe === "XX" ? 778 : 779, sexe === "XX" ? "#C7B5DA" : "#E9B8B8");
+          s += txt(cx, yb + 14, sexe, { s: 11, c: ROUGE });
+        } else {
+          s += chromosome(cx - 9, yb, LONG[n - 1], CENT[n - 1], n * 31, "#C7B5DA") + chromosome(cx + 9, yb, LONG[n - 1], CENT[n - 1], n * 31 + 1, "#C7B5DA");
+          s += txt(cx, yb + 14, String(n), { s: 10, c: GRIS, w: 600 });
+        }
+      });
+    });
+    return svg(640, 330, "Caryotype " + (sexe === "XX" ? "d’une fille : 22 paires et XX" : "d’un garçon : 22 paires et XY") + " ; chromosomes en X avec leurs bandes sombres, rangés du plus grand au plus petit", "", s);
+  }
+  dessinPlanche("3e-svt-adn", "Caryotype d'une fille (simplifié)", caryotype("XX"));
+  dessinPlanche("3e-svt-adn", "Caryotype d'un garçon (simplifié)", caryotype("XY"));
+  function grenouille(x, y, s, peau, tache, oeil) {
+    var g = "<g transform='translate(" + x + " " + y + ") scale(" + s + ")'>";
+    g += "<path d='M-14 8q-26 4 -30 18q8 4 20 -2q-6 10 -18 12q10 4 22 -4M14 8q26 4 30 18q-8 4 -20 -2q6 10 18 12q-10 4 -22 -4' fill='" + peau + "' stroke='#00000033'/>";
+    g += "<path d='M-10 -6q-14 6 -18 16l6 1M10 -6q14 6 18 16l-6 1' stroke='" + peau + "' stroke-width='5' fill='none' stroke-linecap='round'/>";
+    g += "<ellipse cx='0' cy='4' rx='18' ry='22' fill='" + peau + "' stroke='#00000033'/><ellipse cx='0' cy='-14' rx='14' ry='10' fill='" + peau + "'/>";
+    if (tache) g += "<ellipse cx='-6' cy='6' rx='4' ry='3' fill='" + tache + "'/><ellipse cx='7' cy='12' rx='3.5' ry='2.5' fill='" + tache + "'/><ellipse cx='2' cy='-2' rx='3' ry='2' fill='" + tache + "'/>";
+    g += "<circle cx='-8' cy='-20' r='5' fill='" + peau + "' stroke='#00000033'/><circle cx='8' cy='-20' r='5' fill='" + peau + "' stroke='#00000033'/><circle cx='-8' cy='-21' r='2.6' fill='" + oeil + "'/><circle cx='8' cy='-21' r='2.6' fill='" + oeil + "'/></g>";
+    return g;
+  }
+  dessinPlanche("3e-svt-adn", "Le transfert de noyau", (function () {
+    var s = "<rect width='640' height='250' fill='#F2F7F1'/>";
+    s += grenouille(60, 70, 1.1, "#4E8B2E", "#2E5A1A", "#111") + txt(60, 128, "grenouille verte", { s: 11 });
+    s += "<circle cx='60' cy='190' r='26' fill='#E6F0D8' stroke='#7FA06A' stroke-width='2'/><circle cx='60' cy='190' r='10' fill='#6A4C93'/>" + txt(60, 236, "une cellule de son intestin", { s: 10, c: GRIS, w: 600 });
+    s += "<path d='M86 186Q190 120 296 118' stroke='#6A4C93' stroke-width='2.5' stroke-dasharray='6 4' fill='none' marker-end='url(#gnF)'/>" + txt(190, 132, "on prélève le noyau", { s: 11, c: "#6A4C93" });
+    s += grenouille(320, 50, 0.9, "#F1E3D8", null, "#C0392B") + txt(320, 100, "grenouille albinos", { s: 11 });
+    s += "<circle cx='320' cy='160' r='34' fill='#F7EFD8' stroke='#C9B28A' stroke-width='2'/><circle cx='320' cy='160' r='34' fill='url(#gnO)'/><path d='M346 130l40 -30' stroke='#9AA3AF' stroke-width='4'/><path d='M340 136l6 -6' stroke='#6A4C93' stroke-width='3'/>" + txt(320, 216, "son ovule, noyau détruit,", { s: 10, c: GRIS, w: 600 }) + txt(320, 230, "reçoit le noyau de la verte", { s: 10, c: GRIS, w: 600 });
+    s += "<path d='M362 160H440' stroke='" + NUIT + "' stroke-width='2.5' marker-end='url(#gnF2)'/>" + txt(400, 150, "développement", { s: 11 });
+    s += "<g transform='translate(470 160)'><ellipse rx='12' ry='9' fill='#4E8B2E'/><path d='M10 0q16 -8 26 4q-12 -2 -26 2z' fill='#4E8B2E'/></g>" + txt(478, 188, "têtard", { s: 10, c: GRIS });
+    s += grenouille(575, 120, 1.15, "#4E8B2E", "#2E5A1A", "#111") + txt(575, 182, "grenouille VERTE", { s: 12, c: VERT });
+    return svg(640, 250, "Expérience : le noyau d’une cellule de grenouille verte est placé dans l’ovule d’une grenouille albinos ; il en naît une grenouille verte", fleche("gnF", "#6A4C93") + fleche("gnF2", NUIT) + "<radialGradient id='gnO' cx='35%' cy='30%' r='70%'><stop offset='0' stop-color='#fff' stop-opacity='.7'/><stop offset='1' stop-color='#fff' stop-opacity='0'/></radialGradient>", s);
+  })());
+  dessinEnquete("3e-svt-adn", svg(640, 220, "Salon familial à Ebolowa : la grand-mère au foulard parle à Tonton Essomba ; Tata Ngo Bassong tient le bébé ; trois fillettes", "",
+    piece(640, 220, "#F2E3C6", "#B88A5A") + "<rect x='30' y='26' width='110' height='76' fill='#BFE0F7' stroke='#8B5A2B' stroke-width='6'/><path d='M85 26V102M30 64H140' stroke='#8B5A2B' stroke-width='4'/><rect x='470' y='20' width='70' height='50' fill='#C9A06E' stroke='#6B4423' stroke-width='3'/><path d='M478 60l14 -18l10 10l12 -16l16 24z' fill='#2E7D32'/>" +
+    "<rect x='420' y='120' width='200' height='54' rx='12' fill='#7A2E2E'/><rect x='420' y='104' width='200' height='26' rx='10' fill='#8E3A3A'/>" +
+    perso(170, 82, "#5A3A1E", "#1E499B", "#2E3445") + perso(250, 86, "#6B4423", "#2E7D32", "#2E7D32") + bebeBras(254, 126) + "<g transform='translate(220 140) scale(.62)'>" + perso(0, 0, "#6B4423", "#E8A33D", "#C62828") + "</g><g transform='translate(300 142) scale(.6)'>" + perso(0, 0, "#5A3A1E", "#D7261E", "#7B3F99") + "</g><g transform='translate(330 150) scale(.5)'>" + perso(0, 0, "#6B4423", "#F7C948", "#1E499B") + "</g>" +
+    perso(520, 72, "#4A2E1A", "#7B3F99", "#7B3F99") + "<path d='M509 66q11 -14 22 0q-11 -4 -22 0z' fill='#E8A33D'/>" + bulle(400, 10, 230, "« Ta femme ne te donne que des filles ! »", "#F7C948") +
+    txt(170, 214, "Tonton Essomba", { s: 10, c: "#fff" }) + txt(254, 214, "Tata et Manuela", { s: 10, c: "#fff" }) + txt(520, 214, "la grand-mère", { s: 10, c: "#fff" })));
+
+  /* ═══════════ 3e SVT — RESSEMBLANCES ═══════════ */
+  function chimpanze(x, y, s) {
+    var g = "<g transform='translate(" + x + " " + y + ") scale(" + s + ")'>";
+    g += "<ellipse cx='0' cy='34' rx='30' ry='34' fill='#2B211B'/><path d='M-26 20q-22 30 -14 58l10 0q-4 -26 10 -46z' fill='#2B211B'/><path d='M26 20q22 30 14 58l-10 0q4 -26 -10 -46z' fill='#2B211B'/>";
+    g += "<ellipse cx='-16' cy='66' rx='16' ry='8' fill='#2B211B'/><ellipse cx='16' cy='66' rx='16' ry='8' fill='#2B211B'/><ellipse cx='-34' cy='78' rx='7' ry='4' fill='#8A6B55'/><ellipse cx='34' cy='78' rx='7' ry='4' fill='#8A6B55'/>";
+    g += "<circle cx='0' cy='-6' r='20' fill='#2B211B'/><circle cx='-20' cy='-6' r='7' fill='#8A6B55'/><circle cx='20' cy='-6' r='7' fill='#8A6B55'/><path d='M-13 -10q13 -10 26 0q4 14 -4 24q-9 6 -18 0q-8 -10 -4 -24z' fill='#B08A6E'/><path d='M-10 -8q5 -3 8 0M2 -8q5 -3 8 0' stroke='#2B211B' stroke-width='2' fill='none'/><circle cx='-6' cy='-4' r='1.8' fill='#111'/><circle cx='6' cy='-4' r='1.8' fill='#111'/><path d='M-6 8q6 4 12 0' stroke='#5A3A2A' stroke-width='1.6' fill='none'/><ellipse cx='0' cy='3' rx='5' ry='2.4' fill='#8A6B55'/></g>";
+    return g;
+  }
+  dessinEnquete("3e-svt-ressemblances", svg(640, 220, "Centre de faune de Limbé : un chimpanzé assis derrière un grillage ; les jumelles Awa et Aïssa en tenue de handball et deux camarades", lin("rsC", ["#CFE3F2", "#EAF4E6"], true),
+    "<rect width='640' height='220' fill='url(#rsC)'/><ellipse cx='470' cy='70' rx='120' ry='56' fill='#2E6B2A'/><ellipse cx='580' cy='80' rx='80' ry='46' fill='#3E7D32'/><rect x='466' y='96' width='14' height='80' fill='#5D3A1E'/><rect y='160' width='640' height='60' fill='#6E9B45'/>" +
+    chimpanze(510, 104, 0.82) + (function () { var s = "", k; for (k = 0; k <= 16; k++) s += "<path d='M" + (380 + k * 16) + " 60V178' stroke='#9AA3AF' stroke-width='1.5'/>"; for (k = 0; k < 8; k++) s += "<path d='M380 " + (60 + k * 16) + "H636' stroke='#9AA3AF' stroke-width='1' opacity='.7'/>"; return s + "<path d='M376 56V180M636 56V180' stroke='#6E737C' stroke-width='5'/>"; })() +
+    perso(70, 98, "#5A3A1E", "#1E499B", "#F4F1EA") + perso(110, 98, "#5A3A1E", "#1E499B", "#F4F1EA") + perso(220, 96, "#6B4423", "#F4F1EA", "#2E3445") + perso(270, 98, "#4A2E1A", "#F4F1EA", "#2E3445") + bulle(170, 12, 200, "« Il est presque humain ! »", "#F7C948") +
+    txt(90, 212, "Awa et Aïssa (handball)", { s: 10, c: "#fff" }) + txt(245, 212, "Christelle, Ndi", { s: 10, c: "#fff" }) + txt(510, 212, "chimpanzé", { s: 10, c: "#fff" })));
+
+  /* ═══════════ 3e PCT — L'ATOME ═══════════ */
+  dessinEnquete("3e-pct-atome", svg(640, 220, "À Ngaoundéré, Ibrahim dénude un fil électrique où brillent des brins de cuivre orange ; à côté, une chaîne en or ; sa petite sœur tient une pince", "",
+    piece(640, 220, "#EFE6D6", "#C9A06E") + "<rect x='120' y='118' width='400' height='14' rx='3' fill='#8B5A2B'/><rect x='136' y='132' width='12' height='70' fill='#6B4423'/><rect x='492' y='132' width='12' height='70' fill='#6B4423'/>" +
+    "<path d='M190 110H330' stroke='#1F2328' stroke-width='9' stroke-linecap='round'/><path d='M330 110H350' stroke='#E8E8E8' stroke-width='7'/>" + [0, 1, 2, 3, 4].map(function (k) { return "<path d='M350 110q" + (14 + k * 2) + " " + (k - 2) * 3 + " " + (28 + k * 4) + " " + (k - 2) * 5 + "' stroke='#C8742E' stroke-width='1.6' fill='none'/>"; }).join("") + txt(270, 98, "fil électrique : brins de cuivre", { s: 11, c: "#8B4513" }) +
+    (function () { var s = "", k; for (k = 0; k < 18; k++) { var a = Math.PI * k / 17, x = 440 - 34 * Math.cos(a), y = 112 - 10 * Math.sin(a); s += "<ellipse cx='" + x.toFixed(1) + "' cy='" + y.toFixed(1) + "' rx='3.2' ry='2.2' fill='none' stroke='#D4A017' stroke-width='1.8'/>"; } return s; })() + "<circle cx='440' cy='116' r='5' fill='#D4A017'/>" + txt(440, 92, "chaîne en or", { s: 11, c: "#8A6A10" }) +
+    perso(70, 70, "#5A3A1E", "#1E499B", "#2E3445") + perso(580, 86, "#6B4423", "#C62828", "#7B3F99") + "<path d='M560 130l-22 -6M560 130l-22 2' stroke='#C62828' stroke-width='4'/>" + bulle(20, 10, 210, "« Or, cuivre : même matière ! »", "#9FC5E8") + bulle(410, 10, 220, "« Et si je coupe sans fin ? »", "#F7C948")));
+
+  /* ═══════════ 3e MATHS — RACINES CARRÉES ═══════════ */
+  dessinEnquete("3e-maths-racines", svg(640, 220, "Derrière une maison de Bafang : Papa Fotso tient un mètre ruban près d’un carré tracé à la ficelle entre quatre piquets ; des poules picorent", lin("rcC", ["#CFE3F2", "#F4F1EA"], true),
+    "<rect width='640' height='220' fill='url(#rcC)'/><rect y='120' width='640' height='100' fill='#9C7A4E'/><path d='M0 120Q200 112 640 124' stroke='#7A5A3A' stroke-width='3' fill='none'/>" +
+    "<rect x='470' y='40' width='130' height='82' fill='#E9DFCF' stroke='#B8AE9C'/><path d='M456 44L535 6L614 44Z' fill='#9AA3AF' stroke='#6E737C'/><rect x='520' y='74' width='26' height='48' fill='#6B4423'/><rect x='484' y='64' width='24' height='20' fill='#8FB2E3' stroke='#6B4423' stroke-width='2'/>" +
+    "<path d='M190 150L330 150L370 196L150 196Z' fill='#B88A5A' opacity='.35'/><path d='M190 150L330 150L370 196L150 196Z' fill='none' stroke='#F4F1EA' stroke-width='2' stroke-dasharray='6 4'/>" + [[190, 150], [330, 150], [370, 196], [150, 196]].map(function (p) { return "<path d='M" + p[0] + " " + p[1] + "v-16' stroke='#6B4423' stroke-width='4'/>"; }).join("") + txt(260, 182, "50 m² ?", { s: 15, c: "#fff" }) +
+    perso(90, 92, "#5A3A1E", "#2E7D32", "#2E3445") + "<path d='M110 132L190 140' stroke='#F7C948' stroke-width='3'/>" + poule(420, 176, 0.9, "#B5532A") + poule(460, 196, 0.8, "#F4F1EA") + poule(400, 204, 0.75, "#3B2A1A") + bulle(20, 14, 230, "« 200 poules, 4 par m² : 50 m². »", "#F7C948") + txt(90, 214, "Papa Fotso", { s: 10, c: "#fff" })));
+
+  /* ═══════════ 3e PCT — CONCENTRATION ET pH ═══════════ */
+  dessinEnquete("3e-pct-ph", svg(640, 220, "Cour à Obala : Tata Mbarga, gants et tablier, remue une cuvette de solution de soude ; bidon d’huile de palme, sac de soude, pains de savon qui sèchent ; Junior approche la main", lin("phC", ["#CFE3F2", "#F4F1EA"], true),
+    "<rect width='640' height='220' fill='url(#phC)'/><rect y='150' width='640' height='70' fill='#B88A5A'/><path d='M430 40L520 10L610 40V150H430Z' fill='#C9A06E' stroke='#8B5A2B' stroke-width='2'/><path d='M420 44L520 6L620 44' stroke='#8B4513' stroke-width='8' fill='none'/><rect x='500' y='96' width='34' height='54' fill='#5D3A1E'/>" +
+    "<ellipse cx='210' cy='160' rx='62' ry='14' fill='#2F6DB5'/><path d='M148 160q4 34 62 34q58 0 62 -34' fill='#2F6DB5'/><ellipse cx='210' cy='160' rx='56' ry='10' fill='#E6EEF4'/><path d='M240 120L210 158' stroke='#8B5A2B' stroke-width='5'/>" +
+    "<rect x='300' y='150' width='34' height='44' rx='4' fill='#F4F1EA' stroke='#9AA3AF'/><rect x='300' y='160' width='34' height='14' fill='#C62828'/>" + txt(317, 171, "SOUDE", { s: 7, c: "#fff" }) + "<rect x='345' y='140' width='30' height='54' rx='6' fill='#D2691E'/><rect x='352' y='132' width='16' height='10' fill='#B5532A'/>" + txt(360, 172, "huile", { s: 8, c: "#fff" }) +
+    "<rect x='390' y='182' width='150' height='8' fill='#8B5A2B'/>" + [0, 1, 2, 3, 4].map(function (k) { return "<rect x='" + (396 + k * 28) + "' y='166' width='22' height='16' rx='3' fill='#E8D27A' stroke='#C9B26A'/>"; }).join("") +
+    perso(110, 82, "#5A3A1E", "#2E7D32", "#2E7D32") + "<rect x='97' y='108' width='26' height='34' fill='#F4F1EA' opacity='.85'/><circle cx='90' cy='124' r='5' fill='#F7C948'/><circle cx='130' cy='124' r='5' fill='#F7C948'/>" + "<g transform='translate(280 112) scale(.62)'>" + perso(0, 0, "#6B4423", "#1E499B", "#2E3445") + "</g>" +
+    bulle(170, 14, 240, "« Ne touche pas, ça brûle même froid ! »", "#F7C948") + txt(110, 212, "Tata Mbarga (gants)", { s: 10, c: "#fff" }) + txt(280, 212, "Junior", { s: 10, c: "#fff" }) + txt(465, 212, "pains de savon", { s: 10, c: "#fff" })));
+  var VERRE = "<linearGradient id='vrG' x1='0' x2='1'><stop offset='0' stop-color='#DDEFF8'/><stop offset='.3' stop-color='#F8FCFF'/><stop offset='1' stop-color='#C9E1EE'/></linearGradient>";
+  dessinPlanche("3e-pct-ph", "Préparer 500 mL de solution, en quatre gestes", svg(640, 250, "Quatre gestes : peser 40 g de soude sur une balance, dissoudre dans un bécher, verser dans une fiole jaugée et compléter au trait avec la pissette, boucher et retourner", VERRE + fleche("phF", BLEU),
+    "<rect width='640' height='250' fill='#F7F5F2'/><rect y='196' width='640' height='54' fill='#DCD3C4'/>" +
+    "<g transform='translate(80 0)'><rect x='-52' y='150' width='104' height='46' rx='6' fill='#3A3F47'/><rect x='-34' y='160' width='68' height='20' rx='3' fill='#B8D8A8'/>" + txt(0, 175, "40,00 g", { s: 13, c: "#1F2328" }) + "<rect x='-36' y='140' width='72' height='8' rx='2' fill='#C9CED6'/><ellipse cx='0' cy='138' rx='26' ry='5' fill='#E9E2D2'/>" + [[-8, 134], [0, 132], [8, 134], [-3, 130], [5, 130]].map(function (p) { return "<ellipse cx='" + p[0] + "' cy='" + p[1] + "' rx='3.5' ry='2' fill='#fff' stroke='#C9CED6'/>"; }).join("") + "</g>" + txt(80, 222, "1. Peser 40 g de NaOH", { s: 11 }) +
+    "<g transform='translate(240 0)'><path d='M-34 90V188q0 8 8 8H26q8 0 8 -8V90' fill='url(#vrG)' stroke='#8AA6B8' stroke-width='2'/><path d='M-33 130V188q0 7 7 7H26q7 0 7 -7V130Z' fill='#D6ECF8' opacity='.9'/><path d='M-38 90H-30M30 90H38' stroke='#8AA6B8' stroke-width='2'/><path d='M8 70L-6 186' stroke='#9AA3AF' stroke-width='4' stroke-linecap='round'/>" + [130, 150, 170].map(function (y) { return "<path d='M-34 " + y + "h8' stroke='#8AA6B8'/>"; }).join("") + "</g>" + txt(240, 222, "2. Dissoudre dans l'eau", { s: 11 }) +
+    "<g transform='translate(400 0)'><path d='M-6 40V120q-36 10 -36 46q0 30 42 30q42 0 42 -30q0 -36 -36 -46V40Z' fill='url(#vrG)' stroke='#8AA6B8' stroke-width='2'/><path d='M-40 160q0 36 40 36q40 0 40 -36q-2 -16 -14 -26H-26q-12 10 -14 26Z' fill='#D6ECF8'/><path d='M-6 70h12' stroke='" + ROUGE + "' stroke-width='2.5'/><path d='M-6 76V118' stroke='#D6ECF8' stroke-width='10'/><path d='M-20 28h40l-14 14h-12Z' fill='url(#vrG)' stroke='#8AA6B8'/><path d='M40 30q20 -14 26 6v40h-12v-40q-4 -10 -14 -6Z' fill='#F4F1EA' stroke='#9AA3AF'/></g>" + txt(400, 222, "3. Compléter au trait (pissette)", { s: 11 }) +
+    "<g transform='translate(560 120) rotate(150)'><path d='M-6 -80V0q-36 10 -36 46q0 30 42 30q42 0 42 -30q0 -36 -36 -46V-80Z' fill='url(#vrG)' stroke='#8AA6B8' stroke-width='2'/><path d='M-40 40q0 36 40 36q40 0 40 -36q-2 -16 -14 -26H-26q-12 10 -14 26Z' fill='#D6ECF8'/><rect x='-8' y='-92' width='16' height='14' rx='3' fill='#1F2328'/></g><path d='M520 70q40 -30 80 0' stroke='" + BLEU + "' stroke-width='2.5' fill='none' marker-end='url(#phF)'/>" + txt(560, 222, "4. Boucher, retourner", { s: 11 })));
+  dessinPlanche("3e-pct-ph", "Diluer dix fois la solution de Tata", svg(640, 250, "Dilution : on prélève 50 mL de solution à 2 mol par litre avec une pipette jaugée munie d’une poire, puis on complète à 500 mL d’eau dans une fiole jaugée : 0,2 mol par litre", VERRE + fleche("dlF", NUIT),
+    "<rect width='640' height='250' fill='#F7F5F2'/><rect y='204' width='640' height='46' fill='#DCD3C4'/>" +
+    "<g transform='translate(110 0)'><path d='M-50 90V196q0 8 8 8H42q8 0 8 -8V90' fill='url(#vrG)' stroke='#8AA6B8' stroke-width='2'/><path d='M-49 110V196q0 7 7 7H42q7 0 7 -7V110Z' fill='#9EC2DE'/>" + (function () { var R = alea(5), s = "", k; for (k = 0; k < 26; k++) s += "<circle cx='" + (-40 + R() * 80).toFixed(1) + "' cy='" + (118 + R() * 80).toFixed(1) + "' r='2.6' fill='#2F3E73'/>"; return s; })() + "</g>" + txt(110, 226, "2 mol/L (pH > 13)", { s: 12 }) +
+    "<g transform='translate(250 0)'><path d='M-3 40V100h-8v30h8v60l3 6l3 -6v-60h8v-30h-8V40Z' fill='url(#vrG)' stroke='#8AA6B8' stroke-width='1.5'/><path d='M-3 70h6' stroke='" + ROUGE + "' stroke-width='2'/><ellipse cx='0' cy='30' rx='12' ry='16' fill='#C62828'/><path d='M-2 104h4v84h-4z' fill='#9EC2DE'/></g>" + txt(250, 226, "pipette : 50 mL", { s: 12 }) + txt(250, 240, "= 0,1 mol de soude", { s: 10, c: GRIS, w: 600 }) +
+    "<path d='M300 140H380' stroke='" + NUIT + "' stroke-width='3' marker-end='url(#dlF)'/>" + txt(340, 130, "+ eau jusqu'au trait", { s: 11 }) +
+    "<g transform='translate(480 0)'><path d='M-8 40V112q-48 12 -48 52q0 40 56 40q56 0 56 -40q0 -40 -48 -52V40Z' fill='url(#vrG)' stroke='#8AA6B8' stroke-width='2'/><path d='M-54 160q0 44 54 44q54 0 54 -44q-2 -20 -18 -32H-36q-16 12 -18 32Z' fill='#D6ECF8'/><path d='M-8 70h16' stroke='" + ROUGE + "' stroke-width='2.5'/><path d='M-8 76V110' stroke='#D6ECF8' stroke-width='14'/>" + (function () { var R = alea(9), s = "", k; for (k = 0; k < 6; k++) s += "<circle cx='" + (-36 + R() * 72).toFixed(1) + "' cy='" + (140 + R() * 50).toFixed(1) + "' r='2.6' fill='#2F3E73'/>"; return s; })() + "</g>" + txt(480, 226, "500 mL : 0,2 mol/L", { s: 12 }) + txt(480, 240, "10 fois moins concentrée", { s: 10, c: GRIS, w: 600 })));
+  /* ═══════════ Tle ORIENTATION — LA SEMAINE ET L'ANNÉE, EN CLAIR ═══════════ */
+  function remplacerPlanche(id, titre, nouvelle) { var L = ancien(id); if (!L) return; L.parties.forEach(function (p) { (p.planches || []).forEach(function (x, i) { if (String(x.titre).replace(/[\u00a0\u202f]/g, " ") === titre.replace(/[\u00a0\u202f]/g, " ")) p.planches[i] = nouvelle; }); }); }
+  function liege(w, h) { var s = "<rect width='" + w + "' height='" + h + "' fill='#8B5A2B'/><rect x='8' y='8' width='" + (w - 16) + "' height='" + (h - 16) + "' fill='#C89B63'/>", R = alea(3), k; for (k = 0; k < 160; k++) s += "<circle cx='" + (10 + R() * (w - 20)).toFixed(0) + "' cy='" + (10 + R() * (h - 20)).toFixed(0) + "' r='" + (0.8 + R() * 1.4).toFixed(1) + "' fill='#A97B45' opacity='.6'/>"; return s; }
+  function punaise(x, y, c) { return "<circle cx='" + x + "' cy='" + y + "' r='6' fill='" + c + "'/><circle cx='" + (x - 2) + "' cy='" + (y - 2) + "' r='2' fill='#fff' opacity='.6'/>"; }
+  var ACT = { som: ["sommeil", "#3A4E8C"], cours: ["cours", "#1E88E5"], rev: ["révisions", "#2E7D32"], sport: ["sport", "#F2994A"], repas: ["repas, toilette", "#D9B77A"], repos: ["détente, famille", "#E0E3E8"], ecran: ["téléphone", "#C62828"] };
+  var JOURS = ["Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi", "Dimanche"];
+  var SEMAINE = [
+    [["som", 6], ["repas", 1], ["cours", 7], ["repas", 1], ["repos", 1], ["rev", 2], ["repos", 1], ["repas", 1], ["ecran", 1], ["repos", 1], ["som", 2]],
+    [["som", 6], ["repas", 1], ["cours", 7], ["repas", 1], ["repos", 1], ["rev", 2], ["sport", 1], ["repas", 1], ["ecran", 1], ["repos", 1], ["som", 2]],
+    [["som", 6], ["repas", 1], ["cours", 5], ["repas", 1], ["repos", 3], ["rev", 2], ["repas", 1], ["ecran", 1], ["repos", 2], ["som", 2]],
+    [["som", 6], ["repas", 1], ["cours", 7], ["repas", 1], ["repos", 1], ["rev", 2], ["sport", 1], ["repas", 1], ["ecran", 1], ["repos", 1], ["som", 2]],
+    [["som", 6], ["repas", 1], ["cours", 7], ["repas", 1], ["repos", 1.5], ["rev", 1.5], ["repos", 1], ["repas", 1], ["ecran", 1.5], ["repos", 0.5], ["som", 2.5]],
+    [["som", 7.5], ["repas", 1.5], ["rev", 4], ["repas", 1], ["repos", 2], ["sport", 2], ["repos", 1], ["repas", 1], ["ecran", 1.5], ["repos", 1], ["som", 1.5]],
+    [["som", 8], ["repas", 1.5], ["repos", 4], ["repas", 1.5], ["repos", 1], ["rev", 2], ["repos", 2], ["repas", 1], ["ecran", 1], ["repos", 0.5], ["som", 1.5]]];
+  remplacerPlanche("tle-orient-temps", "La semaine type d'Aïcha", { type: "2D", titre: "La semaine type d'Aïcha", legende: "Le planning qu'Aïcha a punaisé au-dessus de son bureau : une colonne par jour, de minuit (en haut) à minuit (en bas). Sommeil en bleu nuit (8 h chaque nuit), cours en bleu, révisions en vert (2 h chaque soir de semaine, 4 h le samedi, 2 h le dimanche : 15 h 30), téléphone limité à 1 h à 1 h 30 (rouge).", svg: (function () {
+    var W = 640, H = 486, x0 = 74, cw = 76, y0 = 86, ph = 13, s = liege(W, H) + "<rect x='28' y='22' width='" + (W - 56) + "' height='" + (H - 44) + "' fill='#FBF8F2' stroke='#D9C49C'/>" + punaise(40, 34, "#C62828") + punaise(W - 40, 34, "#1E499B") + punaise(40, H - 34, "#2E7D32") + punaise(W - 40, H - 34, "#F7C948");
+    s += txt(W / 2, 46, "Ma semaine de révisions — Aïcha, Tle A", { s: 13, c: BLEU, i: true });
+    [0, 6, 12, 18, 24].forEach(function (hh) { var y = y0 + hh * ph; s += "<path d='M" + x0 + " " + y + "H" + (x0 + 7 * cw) + "' stroke='#C9D2E3' stroke-dasharray='3 3'/>" + txt(x0 - 6, y + 4, hh + " h", { s: 9, a: "end", c: GRIS, w: 600 }); });
+    SEMAINE.forEach(function (j, i) {
+      var x = x0 + i * cw, y = y0, rv = 0;
+      s += "<rect x='" + (x + 3) + "' y='" + (y0 - 18) + "' width='" + (cw - 6) + "' height='16' rx='4' fill='" + (i > 4 ? "#7B3F99" : NUIT) + "'/>" + txt(x + cw / 2, y0 - 6, JOURS[i], { s: 10, c: "#fff" });
+      j.forEach(function (b) { var h = b[1] * ph; s += "<rect x='" + (x + 3) + "' y='" + y.toFixed(1) + "' width='" + (cw - 6) + "' height='" + (h - 1).toFixed(1) + "' rx='3' fill='" + ACT[b[0]][1] + "'/>"; if (b[0] === "rev") { rv += b[1]; s += txt(x + cw / 2, y + h / 2 + 4, String(b[1]).replace(".", ",") + " h", { s: 10, c: "#fff" }); } y += h; });
+    });
+    var lx = 30; Object.keys(ACT).forEach(function (k, i) { var xx = 36 + i * 82; s += "<rect x='" + xx + "' y='" + (H - 58) + "' width='12' height='12' rx='3' fill='" + ACT[k][1] + "' stroke='#9AA3AF'/>" + txt(xx + 16, H - 48, ACT[k][0], { s: 9.5, a: "start", w: 600 }); });
+    return svg(W, H, "Planning d’une semaine punaisé sur un tableau en liège : sept colonnes Lundi à Dimanche, heures de 0 à 24 h, blocs de couleur pour sommeil, cours, révisions, sport, repas, détente et téléphone", "", s);
+  })() });
+  var MOISK = [["Septembre", ["cours"]], ["Octobre", ["cours", "sujet"]], ["Novembre", ["cours", "sujet"]], ["Décembre", ["cours", "sujet", "conge"]], ["Janvier", ["cours", "sujet"]], ["Février", ["cours", "sujet"]], ["Mars", ["cours", "sujet", "conge"]], ["Avril", ["cours", "blanc"]], ["Mai", ["blanc", "revision"]], ["Juin", ["bac"]]];
+  var ETQ = { cours: ["cours + fiches", "#1E88E5"], sujet: ["1 sujet / matière", "#C62828"], conge: ["congés : révisions", "#F2C94C"], blanc: ["examen blanc", "#7B3F99"], revision: ["sujets chronométrés", "#2F6DB5"], bac: ["LE BAC", "#2E7D32"] };
+  remplacerPlanche("tle-orient-bac", "L'année de Kevin, mois par mois", { type: "2D", titre: "L'année de Kevin, mois par mois", legende: "Le calendrier mural de Kevin, de septembre à juin : une case par mois. Bleu : cours et fiches ; rouge : un sujet d'examen par matière ; jaune : congés de Noël et de Pâques consacrés aux révisions ; violet : examens blancs en conditions réelles ; puis le bac, en juin.", svg: (function () {
+    var W = 640, H = 330, s = liege(W, H) + "<rect x='26' y='20' width='" + (W - 52) + "' height='" + (H - 40) + "' fill='#FBF8F2' stroke='#D9C49C'/>" + punaise(40, 32, "#1E499B") + punaise(W - 40, 32, "#C62828");
+    s += txt(W / 2, 44, "Objectif BAC — Kevin, Tle A, Bertoua", { s: 13, c: BLEU, i: true });
+    MOISK.forEach(function (m, i) {
+      var c = i % 5, r = Math.floor(i / 5), x = 40 + c * 114, y = 58 + r * 120, w = 106, h = 110;
+      s += "<rect x='" + x + "' y='" + y + "' width='" + w + "' height='" + h + "' rx='6' fill='#fff' stroke='#C9D2E3'/><rect x='" + x + "' y='" + y + "' width='" + w + "' height='22' rx='6' fill='" + (m[0] === "Juin" ? VERT : NUIT) + "'/>" + txt(x + w / 2, y + 15, m[0], { s: 11, c: "#fff" });
+      m[1].forEach(function (b, k) { s += "<rect x='" + (x + 6) + "' y='" + (y + 28 + k * 26) + "' width='" + (w - 12) + "' height='22' rx='5' fill='" + ETQ[b][1] + "'/>" + txt(x + w / 2, y + 43 + k * 26, ETQ[b][0], { s: 9.5, c: b === "conge" ? NUIT : "#fff" }); });
+      if (m[0] === "Juin") s += "<path d='M" + (x + 30) + " " + (y + 80) + "l10 12l26 -26' stroke='" + VERT + "' stroke-width='5' fill='none'/>";
+    });
+    return svg(W, H, "Calendrier mural de septembre à juin sur un tableau en liège : chaque mois porte ses étiquettes de couleur, cours, sujets d’examen, congés de révision, examens blancs, et le bac en juin", "", s);
+  })() });
+
+  /* ═══════════ CELLULE ANIMALE ET CELLULE VÉGÉTALE EN HAUTE DÉFINITION (ultrastructure) ═══════════ */
+  var DEFC = "<radialGradient id='cyA' cx='45%' cy='40%' r='65%'><stop offset='0' stop-color='#FFF4F2'/><stop offset='.7' stop-color='#FBE1E4'/><stop offset='1' stop-color='#F2C6CF'/></radialGradient>" +
+    "<radialGradient id='cyV' cx='50%' cy='45%' r='70%'><stop offset='0' stop-color='#F8FBEA'/><stop offset='1' stop-color='#E6F0C8'/></radialGradient>" +
+    "<radialGradient id='noy' cx='40%' cy='35%' r='70%'><stop offset='0' stop-color='#E6DAF4'/><stop offset='.75' stop-color='#C3ABE2'/><stop offset='1' stop-color='#9C7BC9'/></radialGradient>" +
+    "<radialGradient id='nuc' cx='35%' cy='35%' r='70%'><stop offset='0' stop-color='#7E5BB0'/><stop offset='1' stop-color='#3F2669'/></radialGradient>" +
+    "<radialGradient id='mit' cx='40%' cy='35%' r='75%'><stop offset='0' stop-color='#FBC98E'/><stop offset='1' stop-color='#D9773A'/></radialGradient>" +
+    "<radialGradient id='chl' cx='40%' cy='35%' r='75%'><stop offset='0' stop-color='#9CD27A'/><stop offset='1' stop-color='#3C8A2E'/></radialGradient>" +
+    "<radialGradient id='vac' cx='45%' cy='40%' r='70%'><stop offset='0' stop-color='#F4FAFE'/><stop offset='1' stop-color='#CFE6F4'/></radialGradient>" +
+    "<radialGradient id='lys' cx='35%' cy='35%' r='70%'><stop offset='0' stop-color='#D7F0C8'/><stop offset='1' stop-color='#7DB86A'/></radialGradient>";
+  function mito(x, y, r, s) {
+    var g = "<g transform='translate(" + x + " " + y + ") rotate(" + r + ") scale(" + (s || 1) + ")'><ellipse rx='26' ry='12' fill='url(#mit)' stroke='#A2511F' stroke-width='1.6'/><ellipse rx='22.5' ry='8.8' fill='none' stroke='#B5602A' stroke-width='1'/>", k;
+    for (k = -3; k <= 3; k++) g += "<path d='M" + (k * 6.4) + " " + (k % 2 ? -8.6 : 8.6) + "q" + (k % 2 ? 2 : -2) + " " + (k % 2 ? 9 : -9) + " 0 " + (k % 2 ? 12 : -12) + "' stroke='#A2511F' stroke-width='1.3' fill='none'/>";
+    return g + "</g>";
+  }
+  function chloro(x, y, r, s) {
+    var g = "<g transform='translate(" + x + " " + y + ") rotate(" + r + ") scale(" + (s || 1) + ")'><ellipse rx='30' ry='14' fill='url(#chl)' stroke='#2B6420' stroke-width='1.6'/><ellipse rx='26.5' ry='10.8' fill='none' stroke='#3C7A2C' stroke-width='.8'/>", k, j;
+    for (k = -2; k <= 2; k++) { for (j = 0; j < 4; j++) g += "<rect x='" + (k * 10 - 3.5) + "' y='" + (-6 + j * 3.2) + "' width='7' height='2.4' rx='1' fill='#1F5A1A'/>"; if (k < 2) g += "<path d='M" + (k * 10 + 3.5) + " " + (k % 2 ? -1 : 2) + "h3' stroke='#1F5A1A' stroke-width='.9'/>"; }
+    return g + "<ellipse cx='14' cy='-6' rx='4' ry='2.6' fill='#F4F1EA' stroke='#C9C0AE' stroke-width='.6'/></g>";
+  }
+  function golgi(x, y, r, s, coul) {
+    var g = "<g transform='translate(" + x + " " + y + ") rotate(" + r + ") scale(" + (s || 1) + ")'>", k;
+    for (k = 0; k < 5; k++) { var L = 34 - Math.abs(k - 2) * 4; g += "<path d='M" + (-L) + " " + (k * 6) + "q" + L + " -12 " + (2 * L) + " 0' stroke='" + (coul || "#E0A52A") + "' stroke-width='4.2' fill='none' stroke-linecap='round'/>"; }
+    [[-36, 8], [38, 14], [-32, 26], [34, 30], [42, -2]].forEach(function (v) { g += "<circle cx='" + v[0] + "' cy='" + v[1] + "' r='3.2' fill='#F7D774' stroke='#C9902A' stroke-width='.8'/>"; });
+    return g + "</g>";
+  }
+  function rer(x, y, r, s) {
+    var g = "<g transform='translate(" + x + " " + y + ") rotate(" + r + ") scale(" + (s || 1) + ")'>", k, R = alea(61);
+    for (k = 0; k < 4; k++) { var d = "M-40 " + (k * 9) + "q10 -8 20 0t20 0t20 0t20 0"; g += "<path d='" + d + "' stroke='#5E9CC8' stroke-width='4.5' fill='none' stroke-linecap='round'/><path d='" + d + "' stroke='#CFE6F4' stroke-width='1.6' fill='none'/>"; var j; for (j = 0; j < 12; j++) g += "<circle cx='" + (-40 + j * 7 + R() * 2).toFixed(1) + "' cy='" + (k * 9 - 3.2 + (j % 2) * 6.4 + Math.sin(j) * 1.5).toFixed(1) + "' r='1.25' fill='#1F3F6B'/>"; }
+    return g + "</g>";
+  }
+  function rel(x, y, r) { return "<g transform='translate(" + x + " " + y + ") rotate(" + r + ")'><path d='M-30 0q8 -12 18 -2t18 2t20 -6M-24 10q10 6 20 -2t22 4' stroke='#8CC6DE' stroke-width='4' fill='none' stroke-linecap='round'/></g>"; }
+  function etiq(x1, y1, x2, y2, t, cote) { return "<path d='M" + x1 + " " + y1 + "L" + x2 + " " + y2 + "' stroke='#3D4A5C' stroke-width='1'/><circle cx='" + x1 + "' cy='" + y1 + "' r='2.2' fill='#3D4A5C'/>" + txt(x2 + (cote === "g" ? -4 : 4), y2 + 4, t, { s: 11, a: cote === "g" ? "end" : "start", w: 650, c: "#1F2A3D" }); }
+  function noyauHD(x, y, rx, ry) {
+    var g = "<g data-o='noyau'><ellipse cx='" + x + "' cy='" + y + "' rx='" + (rx + 4) + "' ry='" + (ry + 4) + "' fill='#B49ADB' stroke='#6D4FA0' stroke-width='1.6'/><ellipse cx='" + x + "' cy='" + y + "' rx='" + rx + "' ry='" + ry + "' fill='url(#noy)' stroke='#6D4FA0' stroke-width='1'/>", k, R = alea(17);
+    for (k = 0; k < 12; k++) { var a = k / 12 * 6.283; g += "<circle cx='" + (x + (rx + 2) * Math.cos(a)).toFixed(1) + "' cy='" + (y + (ry + 2) * Math.sin(a)).toFixed(1) + "' r='1.8' fill='#F8F4FC'/>"; }
+    for (k = 0; k < 18; k++) g += "<path d='M" + (x - rx * 0.7 + R() * rx * 1.4).toFixed(1) + " " + (y - ry * 0.6 + R() * ry * 1.2).toFixed(1) + "q" + (R() * 8 - 4).toFixed(1) + " " + (R() * 8 - 4).toFixed(1) + " " + (R() * 10 - 5).toFixed(1) + " " + (R() * 6 - 3).toFixed(1) + "' stroke='#7A5BA8' stroke-width='1.4' fill='none' opacity='.75'/>";
+    return g + "</g><g data-o='nucleole'><circle cx='" + (x + rx * 0.2) + "' cy='" + (y - ry * 0.1) + "' r='" + (rx * 0.3) + "' fill='url(#nuc)'/></g>";
+  }
+  function celluleAnimale(interactif) {
+    var s = "<rect width='640' height='440' fill='#FBFAF8'/>", R = alea(29), k;
+    var forme = "M322 52C410 50 486 92 500 168C514 244 486 330 410 370C334 410 236 402 182 352C128 302 118 214 150 148C182 82 246 54 322 52Z";
+    s += "<g data-o='membrane'><path d='" + forme + "' fill='#E9A7B6' transform='translate(0 0)'/><path d='" + forme + "' fill='url(#cyA)' stroke='#B03A5B' stroke-width='3.2'/><path d='" + forme + "' fill='none' stroke='#F6D3DB' stroke-width='1' transform='translate(1.5 1.5) scale(.995)'/></g>";
+    for (k = 0; k < 26; k++) s += "<path d='M" + (180 + R() * 300).toFixed(0) + " " + (90 + R() * 260).toFixed(0) + "l" + (R() * 50 - 25).toFixed(0) + " " + (R() * 50 - 25).toFixed(0) + "' stroke='#E7B9C4' stroke-width='.8' opacity='.7'/>";
+    s += "<g data-o='rer'>" + rer(250, 140, -20, 1) + rer(388, 268, 30, 0.9) + "</g>";
+    s += noyauHD(310, 214, 62, 52);
+    s += "<g data-o='rel'>" + rel(224, 300, 10) + rel(420, 140, -30) + "</g>";
+    s += "<g data-o='mito'>" + mito(206, 210, 70, 1) + mito(430, 210, -20, 1) + mito(300, 330, 10, 0.95) + mito(372, 96, 15, 0.85) + "</g>";
+    s += "<g data-o='golgi'>" + golgi(402, 330, -20, 0.9) + "</g>";
+    s += "<g data-o='lysosome'><circle cx='238' cy='96' r='11' fill='url(#lys)' stroke='#4E8A3E'/><circle cx='466' cy='272' r='9' fill='url(#lys)' stroke='#4E8A3E'/>" + [[234, 93], [241, 99], [237, 101], [464, 270], [469, 275]].map(function (p) { return "<circle cx='" + p[0] + "' cy='" + p[1] + "' r='1.4' fill='#2F5A26'/>"; }).join("") + "</g>";
+    s += "<g data-o='centrosome'><g transform='translate(262 362) rotate(-10)'><rect x='-10' y='-4' width='20' height='8' rx='2' fill='#9A8FC0' stroke='#5E5390'/><path d='M-6 -4v8M-2 -4v8M2 -4v8M6 -4v8' stroke='#5E5390' stroke-width='.8'/></g><g transform='translate(276 350) rotate(80)'><rect x='-10' y='-4' width='20' height='8' rx='2' fill='#9A8FC0' stroke='#5E5390'/><path d='M-6 -4v8M-2 -4v8M2 -4v8M6 -4v8' stroke='#5E5390' stroke-width='.8'/></g></g>";
+    s += "<g data-o='vesicule'>" + [[452, 312], [462, 330], [440, 352], [178, 260]].map(function (p) { return "<circle cx='" + p[0] + "' cy='" + p[1] + "' r='5' fill='#FFF7D6' stroke='#C9A04A'/>"; }).join("") + "</g>";
+    s += "<g data-o='ribosomes'>"; for (k = 0; k < 40; k++) { var px = 175 + R() * 310, py = 80 + R() * 280; if (Math.hypot((px - 310) / 70, (py - 214) / 60) > 1) s += "<circle cx='" + px.toFixed(1) + "' cy='" + py.toFixed(1) + "' r='1.3' fill='#1F3F6B'/>"; } s += "</g>";
+    if (!interactif) {
+      s += etiq(322, 53, 120, 40, "membrane plasmique", "g") + etiq(200, 168, 120, 92, "cytoplasme", "g") + etiq(206, 210, 120, 150, "mitochondrie", "g") + etiq(232, 128, 120, 120, "réticulum rugueux", "g") + etiq(238, 96, 120, 64, "lysosome", "g") + etiq(214, 300, 120, 300, "réticulum lisse", "g") + etiq(266, 360, 120, 360, "centrosome", "g");
+      s += etiq(310, 214, 540, 214, "noyau (ADN)", "d") + etiq(322, 209, 540, 186, "nucléole", "d") + etiq(372, 170, 540, 150, "enveloppe à pores", "d") + etiq(402, 330, 540, 330, "appareil de Golgi", "d") + etiq(462, 330, 540, 360, "vésicules", "d") + etiq(430, 120, 540, 110, "ribosomes libres", "d");
+      s += "<path d='M520 394h60' stroke='#1F2A3D' stroke-width='3'/>" + txt(550, 410, "≈ 5 µm", { s: 11 }) + txt(130, 432, "Cellule animale vue au microscope électronique (schéma d'ultrastructure)", { s: 11, a: "start", c: GRIS, w: 600 });
+    }
+    return s;
+  }
+  function celluleVegetale(interactif) {
+    var s = "<rect width='640' height='440' fill='#FBFAF8'/>", R = alea(43), k;
+    s += "<g data-o='paroi'><rect x='150' y='40' width='340' height='350' rx='18' fill='#A9C978' stroke='#5F8A33' stroke-width='2'/><rect x='136' y='26' width='368' height='378' rx='24' fill='none' stroke='#C7DCA0' stroke-width='10' opacity='.6'/>";
+    [[150, 140], [150, 290], [490, 110], [490, 260], [260, 40], [380, 390]].forEach(function (p) { var v = p[0] === 150 || p[0] === 490; s += "<rect x='" + (v ? p[0] - 6 : p[0] - 3) + "' y='" + (v ? p[1] - 3 : p[1] - 6) + "' width='" + (v ? 12 : 6) + "' height='" + (v ? 6 : 12) + "' fill='#F1F7DA'/><path d='" + (v ? "M" + (p[0] - 8) + " " + p[1] + "h16" : "M" + p[0] + " " + (p[1] - 8) + "v16") + "' stroke='#5F8A33' stroke-width='1.2' data-o='plasmodesme'/>"; });
+    s += "</g><g data-o='membrane'><rect x='162' y='52' width='316' height='326' rx='12' fill='url(#cyV)' stroke='#3C6E2E' stroke-width='1.6'/></g>";
+    s += "<g data-o='vacuole'><path d='M232 108C300 92 400 96 432 132C462 168 458 260 430 300C402 340 300 346 252 320C206 294 196 220 204 170C210 134 214 112 232 108Z' fill='url(#vac)' stroke='#4F8FB8' stroke-width='2'/>";
+    for (k = 0; k < 10; k++) s += "<circle cx='" + (240 + R() * 180).toFixed(0) + "' cy='" + (130 + R() * 170).toFixed(0) + "' r='" + (1 + R() * 2).toFixed(1) + "' fill='#9EC5DE' opacity='.7'/>";
+    s += "</g>";
+    s += "<g data-o='chloroplaste'>" + chloro(196, 86, 20, 0.95) + chloro(456, 92, -30, 0.9) + chloro(186, 250, 80, 0.95) + chloro(462, 214, 95, 0.95) + chloro(300, 360, 5, 0.95) + chloro(410, 356, -10, 0.85) + "</g>";
+    s += noyauHD(220, 336, 30, 24).replace(/data-o='noyau'/, "data-o='noyau'");
+    s += "<g data-o='mito'>" + mito(452, 300, 70, 0.7) + mito(186, 176, 90, 0.7) + mito(338, 72, 0, 0.7) + "</g>";
+    s += "<g data-o='golgi'>" + golgi(458, 150, 80, 0.55, "#E0A52A") + "</g><g data-o='rer'>" + rer(270, 70, 0, 0.6) + "</g>";
+    s += "<g data-o='ribosomes'>"; for (k = 0; k < 30; k++) { var px = 168 + R() * 300, py = 58 + R() * 314; var inV = px > 210 && px < 450 && py > 100 && py < 330; if (!inV) s += "<circle cx='" + px.toFixed(1) + "' cy='" + py.toFixed(1) + "' r='1.2' fill='#1F3F6B'/>"; } s += "</g>";
+    if (!interactif) {
+      s += etiq(150, 200, 110, 200, "paroi (cellulose)", "g") + etiq(163, 120, 110, 120, "membrane plasmique", "g") + etiq(196, 86, 110, 70, "chloroplaste", "g") + etiq(204, 82, 110, 44, "grana (thylakoïdes)", "g") + etiq(186, 176, 110, 160, "mitochondrie", "g") + etiq(150, 290, 110, 290, "plasmodesme", "g") + etiq(220, 336, 110, 340, "noyau", "g") + etiq(226, 334, 110, 372, "nucléole", "g");
+      s += etiq(330, 210, 530, 210, "vacuole", "d") + etiq(432, 132, 530, 128, "tonoplaste", "d") + etiq(458, 150, 530, 160, "appareil de Golgi", "d") + etiq(270, 70, 530, 60, "réticulum", "d") + etiq(470, 360, 530, 330, "cytoplasme", "d") + etiq(314, 354, 530, 380, "grain d'amidon", "d");
+      s += "<path d='M520 400h60' stroke='#1F2A3D' stroke-width='3'/>" + txt(550, 416, "≈ 10 µm", { s: 11 }) + txt(130, 434, "Cellule végétale (feuille) au microscope électronique (schéma d'ultrastructure)", { s: 11, a: "start", c: GRIS, w: 600 });
+    }
+    return s;
+  }
+  var PL_ANI = { type: "2D", titre: "La cellule animale en haute définition", legende: "Une cellule animale telle que la révèle le microscope électronique : membrane plasmique, cytoplasme, noyau à double enveloppe percée de pores, nucléole, mitochondries à crêtes, réticulum rugueux couvert de ribosomes, réticulum lisse, appareil de Golgi et ses vésicules, lysosomes, centrosome. Couleurs conventionnelles : en réalité, les organites sont incolores.", svg: svg(760, 444, "Schéma détaillé d’une cellule animale avec ses organites légendés : membrane, noyau, nucléole, mitochondries, réticulum, Golgi, lysosomes, centrosome, ribosomes", DEFC, "<g transform='translate(60 0)'>" + celluleAnimale(false) + "</g>") };
+  var PL_VEG = { type: "2D", titre: "La cellule végétale en haute définition", legende: "Une cellule de feuille au microscope électronique : la paroi de cellulose, percée de plasmodesmes, entoure la membrane plasmique ; une grande vacuole occupe le centre et repousse le noyau et les chloroplastes (avec leurs grana et leurs grains d'amidon) contre la paroi ; mitochondries, réticulum et appareil de Golgi sont aussi présents. Couleurs conventionnelles.", svg: svg(760, 444, "Schéma détaillé d’une cellule végétale : paroi, plasmodesmes, membrane, grande vacuole, chloroplastes à grana, noyau, mitochondries, Golgi", DEFC, "<g transform='translate(60 0)'>" + celluleVegetale(false) + "</g>") };
+  (function () { var L = ancien("tle-sc-microscopie"); if (L && L.parties[3]) L.parties[3].planches = [PL_ANI, PL_VEG].concat(L.parties[3].planches || []); })();
+  (function () { var L = ancien("tle-sc-organites"); if (L && L.parties[1]) L.parties[1].planches = (L.parties[1].planches || []).concat([PL_ANI, PL_VEG]); })();
+  var ORG = {
+    membrane: ["Membrane plasmique", "Fine enveloppe qui limite la cellule et contrôle les échanges avec le milieu (eau, ions, nutriments)."],
+    noyau: ["Noyau", "Contient l'ADN (la chromatine) : il commande la cellule. Son enveloppe double est percée de pores."],
+    nucleole: ["Nucléole", "Zone dense du noyau où sont fabriqués les ribosomes."],
+    mito: ["Mitochondrie", "Centrale énergétique : la respiration cellulaire y produit l'énergie (ATP). Double membrane, la membrane interne forme des crêtes."],
+    rer: ["Réticulum endoplasmique rugueux", "Sacs aplatis couverts de ribosomes : fabrication des protéines destinées à être exportées."],
+    rel: ["Réticulum lisse", "Tubes sans ribosomes : fabrication des lipides, détoxification."],
+    golgi: ["Appareil de Golgi", "Saccules empilés qui modifient, trient et emballent les protéines dans des vésicules."],
+    lysosome: ["Lysosome (cellule animale)", "Petite vésicule pleine d'enzymes : digestion à l'intérieur de la cellule."],
+    centrosome: ["Centrosome (cellule animale)", "Deux centrioles perpendiculaires : ils organisent le fuseau lors de la division cellulaire."],
+    vesicule: ["Vésicules", "Petits sacs qui transportent des substances d'un organite à l'autre ou vers l'extérieur."],
+    ribosomes: ["Ribosomes", "Minuscules grains (libres ou fixés au réticulum) qui assemblent les protéines."],
+    paroi: ["Paroi (cellule végétale)", "Enveloppe rigide de cellulose, à l'extérieur de la membrane : elle soutient et protège la cellule."],
+    plasmodesme: ["Plasmodesmes", "Fins canaux à travers la paroi qui relient le cytoplasme des cellules voisines."],
+    vacuole: ["Vacuole (cellule végétale)", "Grande poche d'eau et de substances dissoutes : réserve, et turgescence qui maintient la plante droite."],
+    chloroplaste: ["Chloroplaste (cellule végétale)", "Siège de la photosynthèse : ses thylakoïdes, empilés en grana, captent la lumière ; il stocke l'amidon."]
+  };
+  window.VRT_CELLULES = { DEFC: DEFC, animale: celluleAnimale, vegetale: celluleVegetale, ORG: ORG, chromosome: chromosome, LONG: LONG, CENT: CENT };
+
+})();
+
+/* ENRICHISSEMENT des leçons de sciences (18/11/2026), consignes de Jacques :
+   « Résoudre la situation-problème de départ en donnant des formules avec les étapes de la leçon ; illustrer par des
+     exemples ; formules, détails précis, astuces pour mieux retenir ; planches 2D et 3D. »
+   Ce fichier passe APRÈS les sources des leçons (ordre alphabétique) et AVANT les animations (90-…) :
+   - formules : denouement.formules = [{ nom, f, calcul }] (affichées par lecon.html, « étape par étape ») ;
+   - ajouts   : HTML ajouté à la fin d'une partie (définitions, formules, exemples, astuces) ;
+   - planches : planches ajoutées à une partie (l'ordre des parties ne change pas : les VRT_A restent valides).
+   Contrôle : node tools/audit_lecons.cjs */
+(function () {
+  "use strict";
+  function enrichir(id, o) {
+    var L = window.VRT_LECONS[id];
+    if (!L) return;
+    if (o.formules && L.denouement) L.denouement.formules = o.formules;
+    Object.keys(o.ajouts || {}).forEach(function (k) { var p = L.parties[+k]; if (p) p.html = (p.html || "") + o.ajouts[k]; });
+    Object.keys(o.planches || {}).forEach(function (k) { var p = L.parties[+k]; if (p) p.planches = (p.planches || []).concat(o.planches[k]); });
+  }
+  function F(nom, f, calcul) { return { nom: nom, f: f, calcul: calcul }; }
+  function ex(t, h) { return "<div class='ex'><b>" + t + "</b>" + h + "</div>"; }
+  function astuce(h) { return "<div class='astuce'><b>Astuce pour retenir</b>" + h + "</div>"; }
+  function attention(h) { return "<div class='attention'><b>Attention</b>" + h + "</div>"; }
+  function def(t, h) { return "<div class='def'><b>" + t + "</b>" + h + "</div>"; }
+  function formule(h) { return "<p class='formule'>" + h + "</p>"; }
+  var NUIT = "#001136", BLEU = "#1E499B", GRIS = "#4D5163", VERT = "#17784D", ORANGE = "#C2540A", ROUGE = "#C62828";
+  function txt(x, y, t, o) { o = o || {}; return "<text x='" + x + "' y='" + y + "' text-anchor='" + (o.a || "middle") + "' font-size='" + (o.s || 12) + "' font-weight='" + (o.w || 700) + "' fill='" + (o.c || NUIT) + "'>" + t + "</text>"; }
+  function svg(w, h, alt, corps) { return "<svg viewBox='0 0 " + w + " " + h + "' role='img' aria-label='" + alt + "' font-family='Inter,Arial,sans-serif'><rect width='" + w + "' height='" + h + "' fill='#fff'/>" + corps + "<text x='" + (w - 6) + "' y='" + (h - 5) + "' font-size='8' text-anchor='end' fill='#8A93A6'>Planche VÉRITAS</text></svg>"; }
+  function pl2(titre, legende, w, h, alt, corps) { return { type: "2D", titre: titre, legende: legende, svg: svg(w, h, alt, corps) }; }
+
+  /* ─────────────── 6e Mathématiques ─────────────── */
+  enrichir("6e-maths-divisibilite", {
+    formules: [
+      F("Tester la divisibilité par 2, 5 et 10 (dernier chiffre)", "n divisible par 2 ⇔ chiffre des unités pair ; par 5 ⇔ unités 0 ou 5 ; par 10 ⇔ unités 0", "1 260 se termine par 0 : divisible par 2, par 5 et par 10"),
+      F("Tester la divisibilité par 3 et 9 (somme des chiffres)", "n divisible par 3 (ou 9) ⇔ la somme de ses chiffres est divisible par 3 (ou 9)", "1 + 2 + 6 + 0 = 9 : divisible par 3 et par 9"),
+      F("Calculer le nombre de sachets", "nombre de sachets = nombre de beignets ÷ beignets par sachet", "1 260 ÷ 2 = 630 ; ÷ 3 = 420 ; ÷ 5 = 252 ; ÷ 9 = 140 ; ÷ 10 = 126"),
+      F("Comparer les recettes", "recette = nombre de sachets × prix d'un sachet", "140 × 450 F = 63 000 F et 126 × 500 F = 63 000 F")
+    ],
+    ajouts: {
+      0: def("Définition", "a est <strong>divisible</strong> par b (b ≠ 0) lorsque le reste de la division de a par b est <strong>nul</strong> : a = b × q. On dit aussi que b est un <strong>diviseur</strong> de a et que a est un <strong>multiple</strong> de b."),
+      1: formule("Par 2 : unités 0, 2, 4, 6, 8 · par 5 : unités 0 ou 5 · par 10 : unités 0 · par 100 : se termine par 00 · par 1 000 : par 000") +
+        formule("Par 3 : somme des chiffres divisible par 3 · par 9 : somme des chiffres divisible par 9") +
+        ex("Exemple", "4 725 : unités 5 → divisible par 5, pas par 2 ni 10 ; 4 + 7 + 2 + 5 = 18 → divisible par 3 et par 9.") +
+        astuce("« <strong>Les petits regardent la queue, les grands font la somme</strong> » : 2, 5, 10 regardent le dernier chiffre ; 3 et 9 additionnent tous les chiffres. Si la somme est encore grande, recommence : 9 999 → 36 → 9.")
+    }
+  });
+
+  enrichir("6e-maths-fractions", {
+    formules: [
+      F("Calculer une fraction d'une quantité", "a/b de Q = Q ÷ b × a", "3/4 de 12 L = 12 ÷ 4 × 3 = 9 L ; 6/8 de 12 L = 12 ÷ 8 × 6 = 9 L"),
+      F("Fabriquer une fraction égale", "a/b = (a × k)/(b × k)", "3/4 = (3 × 2)/(4 × 2) = 6/8"),
+      F("Vérifier l'égalité par les produits en croix", "a/b = c/d ⇔ a × d = b × c", "3 × 8 = 24 et 4 × 6 = 24 : 3/4 = 6/8"),
+      F("Conclure", "même valeur ⇒ même quantité versée", "Aïcha et Paul versent chacun 9 L : 18 L dans la marmite")
+    ],
+    ajouts: {
+      1: astuce("Pour savoir si deux fractions sont égales, fais le <strong>produit en croix</strong> : 3/4 et 6/8 → 3 × 8 = 24 et 4 × 6 = 24, c'est égal. Pour 2/3 et 3/4 : 8 ≠ 9, elles sont différentes.") +
+        ex("Exemple", "Comparer 5/6 et 7/9 : dénominateur commun 18 → 15/18 et 14/18, donc 5/6 > 7/9.")
+    }
+  });
+
+  enrichir("6e-maths-angles", {
+    formules: [
+      F("Angle entre deux chiffres voisins du cadran", "360° ÷ 12 = 30°", "le tour complet (360°) est partagé en 12 heures"),
+      F("Angle des aiguilles à h heures pile", "angle = h × 30° (si plus de 180°, on prend 360° − angle)", "1 h → 30° ; 3 h → 90° ; 4 h → 120° ; 6 h → 180°"),
+      F("Classer l'angle", "aigu < 90° = droit < obtus < 180° = plat", "30° aigu ; 90° droit ; 120° obtus ; 180° plat")
+    ],
+    ajouts: {
+      0: def("Définition", "Deux angles sont <strong>adjacents</strong> s'ils ont le même sommet, un côté commun et sont de part et d'autre de ce côté. Deux angles sont <strong>complémentaires</strong> si leur somme vaut 90°, <strong>supplémentaires</strong> si elle vaut 180°."),
+      1: formule("aigu : 0° &lt; a &lt; 90° · droit : a = 90° · obtus : 90° &lt; a &lt; 180° · plat : a = 180°") +
+        ex("Exemple", "À 10 h, 10 × 30° = 300° : le petit angle vaut 360° − 300° = 60°, angle aigu.") +
+        ex("Exemple", "Deux angles de 35° et 55° sont complémentaires : 35° + 55° = 90°.")
+    }
+  });
+
+  enrichir("6e-maths-symetrie-axiale", {
+    formules: [
+      F("Mesurer la distance de chaque point à l'axe", "d(A ; axe) = longueur de la perpendiculaire [AH]", "le rond est à 50 cm de l'axe, le carré à 90 cm"),
+      F("Placer le symétrique de l'autre côté", "A' sur (AH), de l'autre côté de l'axe, avec HA' = HA", "rond à 50 cm à droite, à 40 cm du haut ; carré à 90 cm à droite"),
+      F("Vérifier par la conservation des longueurs", "A'B' = AB", "le carré symétrique garde 30 cm de côté")
+    ],
+    ajouts: {
+      0: ex("Exemple sur quadrillage", "Axe vertical ; A est 4 carreaux à gauche de l'axe et 2 carreaux au-dessus du bas : A' est 4 carreaux à droite, toujours 2 carreaux au-dessus du bas.") +
+        astuce("« <strong>Plier, piquer, déplier</strong> » : plie la feuille le long de l'axe, pique le point avec la pointe du compas, déplie : le trou de l'autre côté est le symétrique."),
+      2: ex("Exemple dans la vie", "Les lettres A, M, T, U, V, W, Y ont un axe de symétrie vertical ; B, C, D, E, K un axe horizontal ; H, I, O, X en ont deux.") +
+        attention("Le parallélogramme quelconque n'a <strong>aucun</strong> axe de symétrie, même s'il « paraît » régulier.")
+    }
+  });
+
+  enrichir("6e-maths-proportionnalite", {
+    formules: [
+      F("Calculer le coefficient (prix d'un kilo)", "coefficient = prix ÷ quantité", "1 500 F ÷ 3 kg = 500 F/kg ; 2 500 ÷ 5 = 500 : même coefficient, proportionnel"),
+      F("Tester les mangues", "prix ÷ quantité pour chaque colonne", "500 ÷ 3 ≈ 167 F ; 900 ÷ 6 = 150 F : coefficients différents, pas proportionnel"),
+      F("Calculer la quatrième proportionnelle", "prix = quantité × coefficient", "7 kg × 500 F = 3 500 F"),
+      F("Vérifier par les produits en croix", "3 × 3 500 = 7 × 1 500", "10 500 = 10 500 ✓")
+    ],
+    ajouts: {
+      0: formule("y = k × x &nbsp;·&nbsp; k = y ÷ x (le même pour toutes les colonnes)"),
+      1: formule("Produit en croix : si a/b = c/x alors x = b × c ÷ a") +
+        astuce("« <strong>Un kilo d'abord</strong> » : quand tu hésites, cherche toujours le prix d'UNE unité (passage à l'unité), puis multiplie. Et vérifie : plus de kilos doit donner plus cher, jamais moins.") +
+        attention("Proportionnel ne veut pas dire « augmente ensemble » : l'âge et la taille augmentent ensemble, mais ne sont pas proportionnels.")
+    }
+  });
+
+  enrichir("6e-maths-cercle", {
+    formules: [
+      F("Calculer le rayon", "r = d ÷ 2", "r = 1,40 ÷ 2 = 0,70 m"),
+      F("Calculer le périmètre (bordure en fer)", "P = π × d", "P = 3,14 × 1,40 = 4,396 ≈ 4,40 m"),
+      F("Calculer l'aire (couvercle en tôle)", "A = π × r × r", "A = 3,14 × 0,70 × 0,70 = 1,5386 ≈ 1,54 m²"),
+      F("Calculer le coût total", "coût = P × prix du mètre + A × prix du m²", "4,40 × 1 500 + 1,54 × 6 000 = 6 600 + 9 240 = 15 840 F")
+    ],
+    ajouts: {
+      2: astuce("« <strong>Le tour prend le diamètre, l'aire prend le rayon deux fois</strong> » : P = π × d ; A = π × r × r. Et l'unité te trahit : une longueur en m, une aire en m².")
+    }
+  });
+
+  enrichir("6e-maths-pave-droit", {
+    formules: [
+      F("Calculer l'aire des trois faces différentes", "L × l ; L × h ; l × h", "20 × 12 = 240 cm² ; 20 × 8 = 160 cm² ; 12 × 8 = 96 cm²"),
+      F("Calculer l'aire totale (carton)", "A = 2 × (L × l + L × h + l × h)", "2 × (240 + 160 + 96) = 2 × 496 = 992 cm²"),
+      F("Calculer le volume de la boîte", "V = L × l × h", "20 × 12 × 8 = 1 920 cm³"),
+      F("Calculer le nombre de savons", "volume de la boîte ÷ volume d'un savon (a × a × a)", "1 920 ÷ (4 × 4 × 4) = 1 920 ÷ 64 = 30 savons, soit 5 × 3 × 2")
+    ],
+    ajouts: {
+      2: astuce("« <strong>Aire = papier, volume = remplissage</strong> » : pour emballer, on additionne des surfaces (cm²) ; pour remplir, on multiplie trois longueurs (cm³).")
+    }
+  });
+
+  /* ─────────────── 5e / 4e Mathématiques ─────────────── */
+  enrichir("5e-maths-pgcd", {
+    formules: [
+      F("Écrire la condition « tomber juste »", "le côté c de la dalle divise 360 et 240", "c est un diviseur commun de 360 et 240"),
+      F("Calculer le PGCD par l'algorithme d'Euclide", "PGCD(a ; b) = PGCD(b ; r), avec a = b × q + r", "360 = 240 × 1 + 120 ; 240 = 120 × 2 + 0 → PGCD = 120"),
+      F("Calculer le nombre de dalles", "(longueur ÷ c) × (largeur ÷ c)", "(360 ÷ 120) × (240 ÷ 120) = 3 × 2 = 6 dalles"),
+      F("Calculer le coût de la pose", "nombre de dalles × prix de pose", "6 × 1 500 F = 9 000 F")
+    ],
+    ajouts: {
+      1: ex("Exemple : algorithme d'Euclide", "PGCD(84 ; 36) : 84 = 36 × 2 + 12 ; 36 = 12 × 3 + 0. Le dernier reste non nul est <strong>12</strong>.") +
+        ex("Exemple : partage équitable", "Avec 84 cahiers et 36 stylos, on fait au plus PGCD(84 ; 36) = 12 lots identiques de 7 cahiers et 3 stylos."),
+      2: ex("Exemple : fraction irréductible", "84/36 = (84 ÷ 12)/(36 ÷ 12) = 7/3 : en divisant par le PGCD, on obtient directement la fraction irréductible.")
+    }
+  });
+
+  enrichir("4e-maths-facteurs-premiers", {
+    formules: [
+      F("Décomposer par divisions successives", "diviser par 2, puis 3, puis 5… tant que c'est possible", "360 ÷ 2 = 180 ; ÷ 2 = 90 ; ÷ 2 = 45 ; ÷ 3 = 15 ; ÷ 3 = 5 ; ÷ 5 = 1"),
+      F("Écrire la décomposition", "n = p₁^a × p₂^b × p₃^c", "360 = 2³ × 3² × 5"),
+      F("Compter les diviseurs", "nombre de diviseurs = (a + 1) × (b + 1) × (c + 1)", "(3 + 1) × (2 + 1) × (1 + 1) = 4 × 3 × 2 = 24 dispositions"),
+      F("Trouver la disposition la plus proche du carré", "le diviseur d le plus proche de √n, avec n ÷ d élèves par rangée", "√360 ≈ 19 : 18 rangées de 20 élèves")
+    ]
+  });
+
+
+  /* ─────────────── Lot 2 : 5e-3e sciences ─────────────── */
+  enrichir("5e-maths-division-euclidienne", {
+    formules: [
+      F("Poser l'égalité de la division euclidienne", "a = b × q + r, avec 0 ≤ r < b", "250 = 24 × q + r"),
+      F("Trouver le quotient", "q = le plus grand entier tel que b × q ≤ a", "24 × 10 = 240 ≤ 250 et 24 × 11 = 264 > 250 : q = 10"),
+      F("Calculer le reste", "r = a − b × q", "r = 250 − 240 = 10, et 10 < 24 ✓"),
+      F("Calculer la recette", "q × prix d'une cagette + r × prix d'une mangue", "10 × 3 000 + 10 × 150 = 30 000 + 1 500 = 31 500 F")
+    ],
+    ajouts: { 1: astuce("« <strong>Le reste est toujours plus petit que le diviseur</strong> » : si ton reste dépasse le diviseur, ton quotient est trop petit d'au moins 1. Vérifie toujours : b × q + r doit redonner a.") }
+  });
+
+  enrichir("4e-pct-aimants", {
+    formules: [
+      F("Identifier le pôle Nord de l'aimant", "aimant suspendu librement : le pôle Nord se tourne vers le nord géographique", "l'extrémité qui pointe vers le nord est le pôle N"),
+      F("Confirmer avec la boussole", "pôles de même nom ⇒ répulsion ; pôles de noms contraires ⇒ attraction", "le bout coloré (N) de l'aiguille est repoussé : l'extrémité testée est bien N"),
+      F("Choisir où pêcher", "le champ magnétique est le plus intense près des pôles", "on plonge une extrémité de l'aimant, pas son milieu"),
+      F("Prévoir ce qui est attiré", "attirés : fer, acier, nickel, cobalt · non attirés : cuivre, laiton, aluminium, or", "anneau en acier attiré, clé en laiton non : la clé remonte par son anneau")
+    ],
+    ajouts: {
+      1: ex("Exemple", "On approche le pôle N d'un aimant du pôle S d'un autre aimant posé sur des crayons : il roule vers lui (attraction). On le retourne : il s'éloigne (répulsion).") +
+        ex("Exemple", "Une aiguille à coudre frottée 20 fois dans le même sens sur un aimant devient à son tour un petit aimant : posée sur un bouchon dans l'eau, elle s'oriente nord-sud.") +
+        astuce("« <strong>Les contraires s'attirent, les pareils se repoussent</strong> » : N-S s'attirent, N-N et S-S se repoussent."),
+      3: ex("Exemple au quotidien", "La porte du réfrigérateur, les haut-parleurs du téléphone et les cartes bancaires utilisent des aimants ; c'est pourquoi on n'approche pas un aimant d'une carte à piste magnétique.")
+    }
+  });
+
+  enrichir("4e-svt-photosynthese", {
+    formules: [
+      F("Faire le bilan de masse", "gain du plant = masse finale − masse initiale ; perte de la terre = masse initiale − masse finale", "le plant gagne 450 g ; la terre ne perd que 4 g (sels minéraux)"),
+      F("Séparer l'eau de la matière sèche", "masse fraîche = eau + matière sèche", "450 g = environ 360 g d'eau + 90 g de matière sèche"),
+      F("Trouver l'origine du carbone", "matière sèche ≈ 45 % de carbone, venu du CO₂ de l'air", "≈ 0,45 × 90 ≈ 40 g de carbone pris dans l'air"),
+      F("Écrire le bilan de la photosynthèse", "eau + dioxyde de carbone → (lumière, chlorophylle) → matière organique + dioxygène", "6 CO₂ + 6 H₂O → C₆H₁₂O₆ + 6 O₂")
+    ],
+    ajouts: {
+      4: ex("Exemple", "Une plante aquatique (élodée) éclairée dans l'eau dégage des bulles de dioxygène ; à l'obscurité, plus de bulles.") +
+        ex("Exemple", "Une feuille de manioc cachée deux jours par un papier aluminium puis testée à l'eau iodée ne bleuit pas là où elle était cachée : sans lumière, pas d'amidon.")
+    }
+  });
+
+  enrichir("3e-pct-ph", {
+    formules: [
+      F("Calculer la quantité de matière", "n = m ÷ M", "n = 40 g ÷ 40 g/mol = 1 mol de NaOH"),
+      F("Calculer la concentration molaire", "C = n ÷ V", "C = 1 mol ÷ 0,5 L = 2 mol/L"),
+      F("Classer la solution par son pH", "pH < 7 acide · pH = 7 neutre · pH > 7 basique", "pH > 13 : très basique, corrosive"),
+      F("Calculer la dilution", "C₁ × V₁ = C₂ × V₂", "2 × 50 mL = C₂ × 500 mL → C₂ = 0,2 mol/L (dix fois moins concentrée)")
+    ],
+    ajouts: {
+      0: ex("Exemple", "15 g de sel (NaCl, M = 58,5 g/mol) dans 250 mL : n = 15 ÷ 58,5 ≈ 0,26 mol ; C = 0,26 ÷ 0,25 ≈ 1,0 mol/L."),
+      2: ex("Exemple : facteur de dilution", "Pour diviser la concentration par 10, on prélève 10 mL de solution et on complète à 100 mL avec de l'eau : V₂ = 10 × V₁.") +
+        astuce("« <strong>Toujours l'acide (ou la soude) dans l'eau, jamais l'eau dedans</strong> » : on verse le produit concentré lentement dans beaucoup d'eau, pour éviter les projections brûlantes.")
+    }
+  });
+
+  enrichir("3e-svt-adn", {
+    formules: [
+      F("Compter les chromosomes reçus", "cellule-œuf = 23 chromosomes du père + 23 de la mère", "23 + 23 = 46 chromosomes, soit 23 paires"),
+      F("Écrire les gamètes possibles", "mère XX → ovules tous X ; père XY → spermatozoïdes X ou Y", "ovule X ; spermatozoïde X (50 %) ou Y (50 %)"),
+      F("Faire le tableau de croisement", "gamète du père × gamète de la mère", "X × X = XX (fille) ; Y × X = XY (garçon)"),
+      F("Calculer la probabilité", "probabilité = cas favorables ÷ cas possibles", "fille : 1 ÷ 2 = 50 % à chaque naissance, quel que soit le rang")
+    ],
+    ajouts: {
+      2: ex("Exemple", "Une famille a déjà trois filles. La probabilité que le 4ᵉ enfant soit un garçon reste 1 sur 2 : chaque fécondation est indépendante.") +
+        ex("Exemple : caryotype", "Un caryotype montre 22 paires semblables (autosomes) et une 23ᵉ paire XX : c'est une fille ; XY : un garçon. 47 chromosomes avec trois chromosomes 21 : trisomie 21.")
+    }
+  });
+
+  enrichir("3e-maths-racines", {
+    formules: [
+      F("Calculer l'aire nécessaire", "aire = nombre de poules ÷ densité", "200 ÷ 4 = 50 m²"),
+      F("Calculer le côté du carré", "c = √A", "c = √50 = √(25 × 2) = 5√2 ≈ 7,07 m"),
+      F("Encadrer pour vérifier", "a² < A < b² ⇒ a < √A < b", "49 < 50 < 64 donc 7 < √50 < 8"),
+      F("Calculer le grillage", "P = 4 × c", "4 × 7,07 ≈ 28,3 m : acheter 29 m"),
+      F("Calculer la diagonale", "d = c × √2", "5√2 × √2 = 5 × 2 = 10 m de fil")
+    ],
+    planches: {
+      1: [pl2("Le carré de 50 m² et sa diagonale", "Un carré d'aire 50 m² a un côté de √50 ≈ 7,07 m ; sa diagonale mesure exactement 10 m.", 640, 260, "Carré de côté racine de 50 avec sa diagonale de 10 mètres, encadré entre les carrés de 7 et 8 mètres",
+        "<rect x='70' y='30' width='196' height='196' fill='#EEF4FC' stroke='" + BLEU + "' stroke-width='3'/><rect x='70' y='30' width='224' height='224' fill='none' stroke='#9AA4B6' stroke-dasharray='6 4'/><rect x='70' y='30' width='186' height='186' fill='none' stroke='#C9D0DC' stroke-dasharray='3 4'/>" +
+        "<path d='M70 226L266 30' stroke='" + ROUGE + "' stroke-width='3'/>" + txt(168, 140, "50 m²", { s: 18, c: BLEU }) + txt(150, 106, "d = 10 m", { s: 13, c: ROUGE }) + txt(168, 248, "c = √50 ≈ 7,07 m", { s: 13 }) +
+        "<rect x='330' y='40' width='280' height='180' rx='14' fill='#FFF6E3' stroke='#F2DFA6'/>" + txt(470, 76, "7² = 49 < 50 < 64 = 8²", { s: 15, c: '#8A6200' }) + txt(470, 108, "donc 7 < √50 < 8", { s: 15 }) + txt(470, 146, "√50 = √25 × √2 = 5√2", { s: 15, c: BLEU }) + txt(470, 184, "d = 5√2 × √2 = 10 m", { s: 15, c: ROUGE }))]
+    },
+    ajouts: { 2: attention("√(a + b) ≠ √a + √b : √(9 + 16) = √25 = 5, alors que √9 + √16 = 3 + 4 = 7.") + astuce("« <strong>On sort les carrés parfaits</strong> » : √50 = √(25 × 2) = 5√2 ; √72 = √(36 × 2) = 6√2. Connais par cœur les carrés de 1 à 15.") }
+  });
+
+  enrichir("3e-pct-atome", {
+    formules: [
+      F("Compter les atomes sur une longueur", "nombre d'atomes = longueur ÷ diamètre d'un atome", "1 mm ÷ 0,000 000 25 mm ≈ 4 millions d'atomes de cuivre"),
+      F("Écrire la neutralité de l'atome", "nombre d'électrons = nombre de protons = Z", "cuivre : 29 protons et 29 électrons"),
+      F("Identifier l'élément par Z", "Z = numéro atomique, propre à chaque élément", "Z = 29 : cuivre (Cu) ; Z = 79 : or (Au)"),
+      F("Comparer les tailles", "taille de l'atome ≈ 100 000 × taille du noyau", "noyau d'1 mm ⇒ atome de 100 m, un stade")
+    ],
+    planches: {
+      2: [pl2("Deux atomes, deux éléments", "Le cuivre (Z = 29) et l'or (Z = 79) ont la même architecture, mais pas le même nombre de protons : ce sont deux éléments différents.", 640, 240, "Schéma comparé d'un atome de cuivre et d'un atome d'or avec leur numéro atomique",
+        (function () { var s = "", k; [[160, "Cu", 29, "#C77B30"], [480, "Au", 79, "#D4A017"]].forEach(function (a) { s += "<circle cx='" + a[0] + "' cy='110' r='86' fill='#F7F9FC' stroke='#C9D0DC' stroke-dasharray='4 4'/><circle cx='" + a[0] + "' cy='110' r='14' fill='" + a[3] + "'/>"; for (k = 0; k < 10; k++) { var t = k * Math.PI / 5; s += "<circle cx='" + (a[0] + 70 * Math.cos(t)).toFixed(1) + "' cy='" + (110 + 70 * Math.sin(t)).toFixed(1) + "' r='4' fill='" + BLEU + "'/>"; } s += txt(a[0], 115, a[1], { s: 13, c: "#fff" }) + txt(a[0], 220, a[1] + " : Z = " + a[2] + " protons, " + a[2] + " électrons", { s: 13 }); }); return s + txt(320, 112, "≠", { s: 30, c: ROUGE }); })())]
+    },
+    ajouts: {
+      2: def("Définition", "Le <strong>numéro atomique Z</strong> est le nombre de protons du noyau. L'atome est <strong>électriquement neutre</strong> : il a autant d'électrons (charge −e) que de protons (charge +e).") +
+        ex("Exemple", "L'atome d'oxygène (Z = 8) a 8 protons et 8 électrons ; l'atome de fer (Z = 26) a 26 protons et 26 électrons.") +
+        astuce("« <strong>Z, c'est la carte d'identité</strong> » : change le nombre de protons, et tu changes d'élément ; change le nombre d'électrons, et tu obtiens un ion du même élément.")
+    }
+  });
+
+  enrichir("3e-svt-ressemblances", {
+    formules: [
+      F("Tester l'appartenance à une espèce", "même espèce ⇔ interfécondité et descendance fertile", "humain × chimpanzé : pas de descendance → espèces différentes"),
+      F("Classer les caractères", "caractère de l'espèce : tous l'ont · caractère individuel : varie d'une personne à l'autre", "bipédie, pouce opposable, langage : espèce ; lobe d'oreille, fossettes : individuel"),
+      F("Séparer hérédité et milieu", "caractère observé = information génétique + influence du milieu", "jumelles : même information génétique ; sport et soleil changent leur peau et leurs muscles"),
+      F("Retrouver l'origine des caractères héréditaires", "cellule-œuf = information du père + information de la mère", "les caractères viennent des deux familles")
+    ],
+    planches: {
+      1: [pl2("Caractères de l'espèce et caractères individuels", "Tous les humains partagent les caractères de l'espèce ; les caractères individuels varient et partagent la classe en groupes.", 640, 230, "Deux colonnes : caractères de l'espèce humaine et caractères individuels",
+        "<rect x='20' y='20' width='290' height='190' rx='14' fill='#EEF4FC' stroke='#C9D8EE'/><rect x='330' y='20' width='290' height='190' rx='14' fill='#ECF7F0' stroke='#BFDCC9'/>" + txt(165, 50, "Caractères de l'espèce", { s: 15, c: BLEU }) + txt(475, 50, "Caractères individuels", { s: 15, c: VERT }) +
+        ["marcher debout (bipédie)", "pouce opposable", "langage articulé", "46 chromosomes"].map(function (t, k) { return txt(40, 86 + k * 30, "• " + t, { s: 13, a: "start", w: 500 }); }).join("") +
+        ["lobe d'oreille libre ou attaché", "fossettes ou non", "groupe sanguin A, B, AB, O", "enrouler la langue ou non"].map(function (t, k) { return txt(350, 86 + k * 30, "• " + t, { s: 13, a: "start", w: 500 }); }).join(""))]
+    },
+    ajouts: {
+      2: ex("Exemple", "Le groupe sanguin est héréditaire : il ne change pas avec l'alimentation. La couleur de la peau peut foncer au soleil (influence du milieu), mais la couleur de base est héréditaire.") +
+        ex("Exemple", "Deux vrais jumeaux, l'un footballeur, l'autre non, ont le même groupe sanguin mais pas la même musculature.") +
+        astuce("« <strong>Héritage + vie = ce que tu es</strong> » : pour chaque caractère, demande-toi s'il peut changer pendant la vie (milieu) ou s'il est fixé dès la cellule-œuf (hérédité).") +
+        attention("Un caractère « de famille » n'est pas toujours héréditaire : une famille peut partager un accent ou des habitudes alimentaires sans gène commun.")
+    }
+  });
+
+
+  /* ─────────────── Lot 3 : 2nde, 3e, Tle ─────────────── */
+  enrichir("3e-maths-thales", {
+    formules: [
+      F("Vérifier la configuration", "P ∈ [EA], B ∈ [ES] et (PB) // (AS)", "manche et mât verticaux, donc parallèles"),
+      F("Écrire l'égalité de Thalès", "EP / EA = EB / ES = PB / AS", "0,8 / 6,4 = 1,2 / AS"),
+      F("Calculer la longueur inaccessible (produit en croix)", "AS = EA × PB ÷ EP", "AS = 6,4 × 1,2 ÷ 0,8 = 9,6 m"),
+      F("Calculer la corde", "corde = 2 × hauteur + marge pour les nœuds", "2 × 9,6 + 1 = 20,2 m : acheter 21 m")
+    ]
+  });
+
+  enrichir("tle-maths-binaire", {
+    formules: [
+      F("Donner la valeur de chaque ampoule", "le rang k (en partant de 0, à droite) vaut 2ᵏ", "128, 64, 32, 16, 8, 4, 2, 1"),
+      F("Convertir 45 en base 2 (divisions successives par 2)", "on lit les restes de bas en haut", "45 = 2 × 22 + 1 ; 22 = 2 × 11 + 0 ; 11 = 2 × 5 + 1 ; 5 = 2 × 2 + 1 ; 2 = 2 × 1 + 0 ; 1 = 2 × 0 + 1 → 101101₂"),
+      F("Vérifier la conversion", "N = Σ bₖ × 2ᵏ", "32 + 8 + 4 + 1 = 45 ✓"),
+      F("Calculer la capacité de n ampoules", "2ⁿ combinaisons, de 0 à 2ⁿ − 1", "8 ampoules : 0 à 255 ; 300 > 255 → 9 ampoules (jusqu'à 511)")
+    ],
+    ajouts: {
+      0: def("Définition", "En <strong>base 2</strong>, un nombre s'écrit avec les seuls chiffres 0 et 1 (les <strong>bits</strong>) : N = bₙ × 2ⁿ + … + b₁ × 2 + b₀. Un <strong>octet</strong> est un groupe de 8 bits.") +
+        formule("N = bₙ × 2ⁿ + bₙ₋₁ × 2ⁿ⁻¹ + … + b₁ × 2¹ + b₀ × 2⁰, avec bₖ ∈ {0 ; 1}")
+    }
+  });
+
+  enrichir("tle-svt-osmose", {
+    formules: [
+      F("Prévoir le sens du mouvement de l'eau", "l'eau va du milieu le moins concentré (hypotonique) vers le plus concentré (hypertonique)", "eau distillée (≈ 0 g/L) → globule rouge (≈ 9 g/L) : l'eau entre"),
+      F("Comparer au plasma", "isotonique : même concentration de part et d'autre, pas de flux net", "sérum physiologique à 9 g/L de NaCl, comme le plasma"),
+      F("Calculer la concentration molaire du sérum", "C = Cm ÷ M", "C = 9 g/L ÷ 58,5 g/mol ≈ 0,15 mol/L de NaCl"),
+      F("Lire l'expérience des frites", "concentration interne ≈ concentration où la masse ne varie pas", "les frites ne changent pas de masse vers 0,28 mol/L : c'est la concentration de leurs cellules")
+    ],
+    ajouts: {
+      0: def("Définition", "L'<strong>osmose</strong> est le passage de l'eau à travers une membrane semi-perméable, du milieu le moins concentré en solutés vers le milieu le plus concentré. Un milieu est <strong>hypotonique</strong> s'il est moins concentré que la cellule, <strong>hypertonique</strong> s'il l'est plus, <strong>isotonique</strong> s'il a la même concentration."),
+      1: ex("Exemple", "Des globules rouges dans de l'eau salée à 20 g/L (hypertonique) perdent de l'eau et se ratatinent (crénelure) ; dans l'eau distillée, ils gonflent et éclatent (hémolyse)."),
+      2: ex("Exemple au quotidien", "On sale les aubergines avant de les frire : le sel (hypertonique) fait sortir leur eau, elles ramollissent et boivent moins d'huile. Des feuilles de laitue fanées redeviennent croquantes dans l'eau fraîche (turgescence).")
+    }
+  });
+
+  enrichir("2nde-c-maths-reels", {
+    formules: [
+      F("Rendre la fraction irréductible", "diviser numérateur et dénominateur par leur PGCD", "5/8 et 5/6 sont déjà irréductibles"),
+      F("Tester si c'est un décimal", "a/b irréductible est décimal ⇔ b ne contient que les facteurs 2 et 5", "8 = 2³ → 5/8 = 0,625 ∈ 𝔻 ; 6 = 2 × 3 → 5/6 ∉ 𝔻"),
+      F("Calculer la diagonale (Pythagore)", "d² = c² + c²", "d² = 1² + 1² = 2, donc d = √2 hm"),
+      F("Classer √2", "√2 n'est le quotient d'aucun couple d'entiers : irrationnel", "√2 ∈ ℝ \\ ℚ ; √2 ≈ 1,414 hm ≈ 141 m")
+    ],
+    planches: {
+      1: [pl2("Les ensembles emboîtés", "Chaque ensemble contient le précédent : ℕ ⊂ ℤ ⊂ 𝔻 ⊂ ℚ ⊂ ℝ. On y range les nombres de la situation.", 640, 260, "Cinq ensembles emboîtés N, Z, D, Q, R avec des exemples de nombres",
+        [["ℝ", 620, 240, "#F4F1FB", "#7B2CBF"], ["ℚ", 500, 200, "#EEF4FC", BLEU], ["𝔻", 380, 160, "#ECF7F0", VERT], ["ℤ", 260, 120, "#FFF6E3", "#C2540A"], ["ℕ", 140, 80, "#FCE8EC", ROUGE]].map(function (e, k) { return "<rect x='" + (10 + k * 24) + "' y='" + (10 + k * 22) + "' width='" + e[1] + "' height='" + e[2] + "' rx='16' fill='" + e[3] + "' stroke='" + e[4] + "' stroke-width='2'/>" + txt(26 + k * 24, 34 + k * 22, e[0], { s: 16, c: e[4], a: "start" }); }).join("") +
+        txt(176, 150, "3", { s: 16 }) + txt(294, 150, "−2", { s: 16, c: "#C2540A" }) + txt(390, 142, "5/8", { s: 15, c: VERT }) + txt(390, 162, "= 0,625", { s: 12, c: VERT }) + txt(486, 142, "5/6", { s: 15, c: BLEU }) + txt(486, 162, "= 0,833…", { s: 12, c: BLEU }) + txt(582, 152, "√2", { s: 17, c: "#7B2CBF" }))]
+    }
+  });
+
+  enrichir("2nde-a-maths-reels", {
+    formules: [
+      F("Classer le solde", "entier négatif ⇒ ℤ (donc aussi 𝔻, ℚ, ℝ)", "−3 000 ∈ ℤ"),
+      F("Calculer la part de chacune", "part = total ÷ nombre de personnes", "100 000 ÷ 6 = 50 000/3"),
+      F("Tester si c'est un décimal", "dénominateur irréductible fait seulement de 2 et de 5 ⇔ décimal", "3 n'est ni 2 ni 5 : 50 000/3 = 16 666,666… ∉ 𝔻"),
+      F("Payer justement (division euclidienne)", "100 000 = 6 × 16 666 + 4", "16 666 F chacune, 4 F restent dans la caisse"),
+      F("Calculer la diagonale", "d = √(c² + c²) = c√2", "d = √2 m ≈ 1,41 m, irrationnel")
+    ],
+    planches: {
+      1: [pl2("Décimal ou pas ? La règle des dénominateurs", "On rend la fraction irréductible, puis on décompose le dénominateur : seulement des 2 et des 5 → décimal.", 640, 220, "Trois fractions testées par la décomposition de leur dénominateur",
+        [["7/20", "20 = 2² × 5", "0,35 ∈ 𝔻", VERT], ["3/8", "8 = 2³", "0,375 ∈ 𝔻", VERT], ["50 000/3", "3 = 3", "16 666,6… ∉ 𝔻", ROUGE]].map(function (r, k) { var x = 20 + k * 210; return "<rect x='" + x + "' y='30' width='190' height='160' rx='14' fill='#fff' stroke='" + r[3] + "' stroke-width='2'/>" + txt(x + 95, 72, r[0], { s: 22 }) + txt(x + 95, 116, r[1], { s: 14, c: GRIS }) + txt(x + 95, 160, r[2], { s: 15, c: r[3] }); }).join(""))]
+    }
+  });
+
+  enrichir("2nde-c-chimie-rutherford", {
+    formules: [
+      F("Compter les couches traversées", "nombre de couches = épaisseur de la feuille ÷ diamètre d'un atome", "≈ 0,3 µm ÷ 0,3 nm ≈ 1 000 couches d'atomes d'or"),
+      F("Interpréter les rebonds", "proportion de rebonds ≈ 1 sur 10 000", "presque tout l'atome est vide ; la masse et la charge + sont concentrées dans le noyau"),
+      F("Comparer les tailles", "rayon de l'atome ÷ rayon du noyau ≈ 10⁻¹⁰ m ÷ 10⁻¹⁵ m", "≈ 100 000 : un noyau d'1 cm dans un atome d'1 km"),
+      F("Lire la notation du noyau", "ᴬ_Z X : Z protons, N = A − Z neutrons", "¹⁹⁷₇₉Au : 79 protons, 197 − 79 = 118 neutrons")
+    ]
+  });
+
+
+  /* ─────────────── Lot 4 : 2nde A dénombrement, Tle sciences ─────────────── */
+  function venn(a, b, i, la, lb, tot) {
+    return "<rect x='20' y='20' width='600' height='200' rx='14' fill='#FBFAF7' stroke='#C9D0DC'/>" + txt(40, 44, "U : " + tot, { s: 13, a: "start", c: GRIS }) +
+      "<circle cx='250' cy='125' r='85' fill='" + ROUGE + "' fill-opacity='.14' stroke='" + ROUGE + "' stroke-width='2.5'/><circle cx='370' cy='125' r='85' fill='" + BLEU + "' fill-opacity='.14' stroke='" + BLEU + "' stroke-width='2.5'/>" +
+      txt(215, 130, a - i, { s: 22, c: ROUGE }) + txt(310, 130, i, { s: 22 }) + txt(405, 130, b - i, { s: 22, c: BLEU }) + txt(150, 50, la, { s: 13, c: ROUGE }) + txt(470, 50, lb, { s: 13, c: BLEU }) + txt(560, 200, tot - (a + b - i), { s: 20, c: VERT }) + txt(560, 176, "aucun", { s: 12, c: VERT });
+  }
+  enrichir("2nde-a-maths-r26", {
+    formules: [
+      F("Placer l'intersection d'abord", "card(L ∩ D)", "7 élèves font les deux clubs"),
+      F("Calculer les parties propres", "card(L seul) = card(L) − card(L ∩ D)", "lecture seule : 20 − 7 = 13 ; danse seule : 18 − 7 = 11"),
+      F("Calculer la réunion", "card(L ∪ D) = card(L) + card(D) − card(L ∩ D)", "20 + 18 − 7 = 31 élèves font au moins un club"),
+      F("Calculer le complémentaire", "card(aucun) = card(U) − card(L ∪ D)", "48 − 31 = 17 ≥ 15 : on ouvre le troisième club")
+    ],
+    planches: { 0: [pl2("Le diagramme de Venn de la classe", "On place d'abord les 7 élèves des deux clubs, puis 13 et 11 dans les parties propres ; 17 élèves restent hors des cercles.", 640, 240, "Diagramme de Venn de deux clubs dans une classe de 48 élèves", venn(20, 18, 7, "Lecture : 20", "Danse : 18", 48))] },
+    ajouts: {
+      0: def("Définition", "Le <strong>cardinal</strong> d'un ensemble fini A, noté card(A), est son nombre d'éléments. A ∩ B (intersection) : éléments communs ; A ∪ B (réunion) : éléments d'au moins un des deux.") +
+        ex("Exemple", "Sur 40 élèves, 25 aiment le football, 18 le handball et 10 les deux : card(F ∪ H) = 25 + 18 − 10 = 33 ; 7 n'aiment aucun des deux.") +
+        attention("Ne pas additionner simplement 20 + 18 = 38 : les 7 élèves des deux clubs seraient comptés deux fois."),
+      1: ex("Exemple : tableau à double entrée", "Lignes : garçons / filles ; colonnes : club / pas de club. Le total de chaque ligne et de chaque colonne se vérifie, et le total général vaut card(U).")
+    }
+  });
+
+  enrichir("2nde-a-maths-r27", {
+    formules: [
+      F("Identifier les choix successifs", "une tenue = pagne puis modèle puis coiffe", "3 choix, puis 2, puis 2"),
+      F("Appliquer le principe multiplicatif", "nombre de résultats = n₁ × n₂ × … × nₖ", "3 × 2 × 2 = 12 tenues"),
+      F("Comparer au besoin", "nombre de tenues ≥ nombre de filles ?", "12 = 12 : chaque fille a une tenue différente")
+    ],
+    ajouts: { 1: astuce("« <strong>Et → je multiplie, ou → j'additionne</strong> » : un pagne ET un modèle ET une coiffe : on multiplie. Un pagne en wax OU en kita : on additionne les possibilités.") }
+  });
+
+  enrichir("2nde-a-maths-r28", {
+    formules: [
+      F("Calculer les participants (réunion)", "card(S ∪ D) = card(S) + card(D) − card(S ∩ D)", "75 + 50 − 30 = 95 élèves"),
+      F("Calculer les non-participants", "card(U) − card(S ∪ D)", "120 − 95 = 25 élèves"),
+      F("Compter les plateaux (principe multiplicatif)", "boissons × plats × desserts", "4 × 3 × 2 = 24 plateaux"),
+      F("Conclure", "24 ≤ 25", "les 25 modèles de tickets suffisent")
+    ],
+    planches: { 0: [pl2("Les participants de la kermesse", "75 tiennent un stand, 50 jouent aux dames, 30 font les deux : 95 participent, 25 ne font rien.", 640, 240, "Diagramme de Venn de la kermesse sur 120 élèves", venn(75, 50, 30, "Stand : 75", "Dames : 50", 120))] },
+    ajouts: {
+      0: def("Choisir l'outil", "<strong>Diagramme de Venn</strong> : pour des ensembles qui se chevauchent (au moins un, aucun, les deux). <strong>Arbre</strong> ou <strong>principe multiplicatif</strong> : pour des choix successifs (un élément de chaque catégorie).") +
+        formule("card(A ∪ B) = card(A) + card(B) − card(A ∩ B) · nombre de choix = n₁ × n₂ × … × nₖ") +
+        ex("Exemple", "Un code de cadenas à 3 chiffres (0 à 9) : 10 × 10 × 10 = 1 000 codes possibles."),
+      1: ex("Exemple", "Avec 2 boissons, 3 plats et 2 desserts : 2 × 3 × 2 = 12 menus ; si l'on ajoute une boisson, 3 × 3 × 2 = 18.")
+    }
+  });
+
+  enrichir("tle-sc-microscopie", {
+    formules: [
+      F("Calculer le grossissement", "G = grossissement de l'objectif × grossissement de l'oculaire", "G = 40 × 10 = 400"),
+      F("Calculer la taille réelle", "taille réelle = taille sur le dessin ÷ G", "20 mm ÷ 400 = 0,05 mm"),
+      F("Convertir en micromètres", "1 mm = 1 000 µm", "0,05 mm × 1 000 = 50 µm"),
+      F("Comparer à un objet connu", "rapport = taille de l'objet ÷ taille de la cellule", "grain de riz ≈ 6 mm : 6 ÷ 0,05 = 120 fois plus grand")
+    ]
+  });
+
+  enrichir("tle-sc-organites", {
+    formules: [
+      F("Comparer les pouvoirs de séparation", "rapport = pouvoir du microscope optique ÷ celui du microscope électronique", "0,2 µm ÷ 0,2 nm = 1 000 : 1 000 fois plus précis"),
+      F("Relier structure et fonction", "beaucoup d'énergie nécessaire ⇒ beaucoup de mitochondries", "cœur ≈ 5 000 mitochondries par cellule, peau ≈ 100"),
+      F("Écrire le bilan de la respiration cellulaire", "glucose + dioxygène → dioxyde de carbone + eau + énergie (ATP)", "C₆H₁₂O₆ + 6 O₂ → 6 CO₂ + 6 H₂O + énergie")
+    ],
+    ajouts: {
+      1: def("Définition", "Un <strong>organite</strong> est un compartiment de la cellule, limité par une ou deux membranes, qui remplit une fonction précise : la <strong>mitochondrie</strong> produit l'énergie, le <strong>ribosome</strong> fabrique les protéines, l'<strong>appareil de Golgi</strong> les emballe et les exporte, le <strong>chloroplaste</strong> (cellule végétale) réalise la photosynthèse.") +
+        formule("Respiration : C₆H₁₂O₆ + 6 O₂ → 6 CO₂ + 6 H₂O + énergie") +
+        ex("Exemple", "Les cellules du foie, très actives, comptent environ 2 000 mitochondries ; un spermatozoïde en concentre une cinquantaine dans sa pièce intermédiaire pour faire battre son flagelle.") +
+        ex("Exemple", "Les cellules du pancréas qui sécrètent l'insuline ont un réticulum endoplasmique et un appareil de Golgi très développés.") +
+        astuce("« <strong>Usine cellulaire</strong> » : le noyau est le bureau des plans, les ribosomes les ouvriers, le Golgi le service d'emballage, la mitochondrie la centrale électrique, la membrane le portail.") +
+        attention("La mitochondrie ne « stocke » pas l'énergie comme une réserve de graisse : elle la libère au fur et à mesure à partir du glucose et du dioxygène.")
+    }
+  });
+
+
+  /* ─────────────── Lot 5 : 6e Informatique et Technologie ─────────────── */
+  function boites(items, y, h, w0) {
+    var n = items.length, w = w0 || (600 - (n - 1) * 30) / n;
+    return items.map(function (it, k) {
+      var x = 20 + k * (w + 30), s = "<rect x='" + x.toFixed(1) + "' y='" + y + "' width='" + w.toFixed(1) + "' height='" + h + "' rx='12' fill='" + it[2] + "' stroke='" + it[3] + "' stroke-width='2'/>" + txt((x + w / 2).toFixed(1), y + 28, it[0], { s: 14, c: it[3] });
+      (it[1] || []).forEach(function (l, j) { s += txt((x + w / 2).toFixed(1), y + 54 + j * 18, l, { s: 11.5, w: 500, c: NUIT }); });
+      if (k < n - 1) s += "<path d='M" + (x + w + 4).toFixed(1) + " " + (y + h / 2) + "H" + (x + w + 24).toFixed(1) + "' stroke='" + NUIT + "' stroke-width='2.5'/><path d='M" + (x + w + 26).toFixed(1) + " " + (y + h / 2) + "l-8 -5v10z' fill='" + NUIT + "'/>";
+      return s;
+    }).join("");
+  }
+  enrichir("6e-info-ia", {
+    formules: [
+      F("Reconnaître une IA", "IA = programme + données d'exemples + calcul de la réponse la plus probable", "le correcteur, la traduction, l'assistant vocal sont des IA ; elles ne pensent pas"),
+      F("Comprendre pourquoi elle se trompe", "réponse = ce qui ressemble le plus aux exemples appris", "exemples insuffisants ou mélangés ⇒ réponse fausse mais bien rédigée"),
+      F("Vérifier une réponse (méthode des 3 sources)", "réponse de l'IA + manuel ou enseignant + site officiel", "si les trois concordent, on peut l'utiliser ; sinon, on garde le manuel")
+    ],
+    planches: {
+      1: [pl2("Comment une IA apprend", "On lui montre des milliers d'exemples étiquetés ; elle en tire un modèle ; devant un cas nouveau, elle donne la réponse la plus probable, qui peut être fausse.", 640, 190, "Trois étapes : exemples étiquetés, entraînement, prédiction",
+        boites([["Exemples", ["10 000 photos", "« mangue » / « papaye »"], "#EEF4FC", BLEU], ["Entraînement", ["le programme cherche", "les ressemblances"], "#FFF6E3", "#C2540A"], ["Prédiction", ["photo nouvelle →", "« mangue » à 92 %"], "#ECF7F0", VERT]], 30, 130))]
+    },
+    ajouts: {
+      0: def("Définition", "Une <strong>intelligence artificielle</strong> (IA) est un programme informatique qui imite certaines capacités humaines (reconnaître, traduire, répondre) en calculant à partir de très nombreux <strong>exemples</strong>. Elle n'a ni conscience, ni émotions, ni expérience du monde.") +
+        ex("Exemple", "L'appareil photo du téléphone qui reconnaît un visage, le traducteur qui passe du français à l'anglais, le GPS qui propose le chemin le plus rapide."),
+      1: def("Apprentissage automatique", "La machine <strong>apprend</strong> en comparant des milliers d'exemples déjà classés par des humains, puis applique ce qu'elle a trouvé à des cas nouveaux.") +
+        ex("Exemple d'erreur", "Une IA entraînée surtout avec des photos de mangues mûres jaunes peut prendre une mangue verte pour une papaye : ses exemples étaient incomplets.") +
+        astuce("« <strong>L'IA propose, je vérifie</strong> » : avant de recopier une réponse, compare-la avec ton manuel ou demande à ton enseignant.") +
+        attention("Ne donne jamais ton nom complet, ton adresse ou tes mots de passe à une application d'IA.")
+    }
+  });
+
+  enrichir("6e-info-composants", {
+    formules: [
+      F("Situer l'ordinateur", "ordinateur = unité centrale (processeur + mémoire vive + disque)", "l'écran n'est qu'un périphérique : il affiche"),
+      F("Classer un périphérique selon le trajet de l'information", "vers l'unité centrale → entrée ; vers l'utilisateur → sortie ; les deux → entrée-sortie", "souris, clavier : entrée ; écran, imprimante : sortie ; clé USB : entrée-sortie"),
+      F("Éviter de perdre son travail", "mémoire vive = effacée sans courant ; disque = conservé", "enregistrer souvent (Ctrl + S), éteindre par le menu, brancher un onduleur")
+    ],
+    planches: {
+      1: [pl2("Entrée, traitement, sortie", "L'information entre par le clavier ou la souris, est traitée par l'unité centrale, puis sort par l'écran ou l'imprimante.", 640, 190, "Schéma entrée, unité centrale, sortie avec exemples de périphériques",
+        boites([["Entrée", ["clavier, souris,", "micro, scanner"], "#EEF4FC", BLEU], ["Unité centrale", ["processeur : calcule", "RAM et disque : gardent"], "#FFF6E3", "#C2540A"], ["Sortie", ["écran, imprimante,", "haut-parleurs"], "#ECF7F0", VERT]], 30, 130))],
+      2: [pl2("Mémoire vive ou disque ?", "La mémoire vive (RAM) garde le travail en cours mais s'efface quand le courant coupe ; le disque conserve les fichiers enregistrés.", 640, 200, "Comparaison mémoire vive et disque dur",
+        "<rect x='20' y='20' width='290' height='160' rx='14' fill='#FCE8EC' stroke='" + ROUGE + "' stroke-width='2'/><rect x='330' y='20' width='290' height='160' rx='14' fill='#ECF7F0' stroke='" + VERT + "' stroke-width='2'/>" +
+        txt(165, 52, "Mémoire vive (RAM)", { s: 15, c: ROUGE }) + txt(165, 88, "travail en cours", { s: 13, w: 500 }) + txt(165, 114, "rapide", { s: 13, w: 500 }) + txt(165, 146, "s'efface sans courant ✗", { s: 13, c: ROUGE }) +
+        txt(475, 52, "Disque (HDD, SSD)", { s: 15, c: VERT }) + txt(475, 88, "fichiers enregistrés", { s: 13, w: 500 }) + txt(475, 114, "plus lent, très grand", { s: 13, w: 500 }) + txt(475, 146, "conserve tout ✓", { s: 13, c: VERT }))]
+    },
+    ajouts: {
+      0: def("Définition", "L'<strong>unité centrale</strong> contient le <strong>processeur</strong> (qui calcule), la <strong>mémoire vive</strong> ou RAM (qui garde le travail en cours) et le <strong>disque</strong> (qui conserve les fichiers). Un <strong>périphérique</strong> est un appareil branché à l'unité centrale."),
+      1: ex("Exemple", "Le clavier envoie les lettres tapées à l'unité centrale : c'est un périphérique d'<strong>entrée</strong>. L'imprimante reçoit le document à imprimer : <strong>sortie</strong>.") +
+        ex("Exemple", "Un écran tactile reçoit tes doigts (entrée) et affiche l'image (sortie) : c'est un périphérique d'<strong>entrée-sortie</strong>, comme la clé USB.") +
+        astuce("« <strong>Suis la flèche</strong> » : demande-toi dans quel sens voyage l'information. Vers l'ordinateur → entrée ; vers toi → sortie."),
+      2: formule("ordinateur = processeur + mémoire vive + disque + périphériques d'entrée et de sortie") + attention("Ne jamais éteindre en coupant le courant : le travail non enregistré, gardé dans la mémoire vive, est perdu. Enregistre (Ctrl + S) toutes les 5 minutes.")
+    }
+  });
+
+  enrichir("6e-tm-materiel-dessin", {
+    formules: [
+      F("Choisir le crayon", "H (dur) : traits fins de construction · HB ou B (tendre) : traits définitifs", "construire au H en appuyant peu, repasser au HB"),
+      F("Choisir l'outil de chaque tracé", "segment → règle · angle droit → équerre · cercle → compas · angle → rapporteur", "murs à la règle, angles à l'équerre, toit au compas, porte à 60° au rapporteur"),
+      F("Régler le compas", "écartement du compas = rayon = diamètre ÷ 2", "toit de 8 cm de diamètre : compas ouvert à 4 cm")
+    ],
+    planches: {
+      1: [pl2("Les crayons, du plus dur au plus tendre", "Plus le chiffre suivi de H est grand, plus la mine est dure et le trait clair ; plus le chiffre suivi de B est grand, plus la mine est tendre et le trait foncé.", 640, 180, "Échelle des mines de crayon de 4H à 4B",
+        ["4H", "2H", "H", "HB", "B", "2B", "4B"].map(function (m, k) { var g = 200 - k * 28, x = 30 + k * 86; return "<rect x='" + x + "' y='40' width='70' height='18' rx='4' fill='#E8C547'/><path d='M" + (x + 70) + " 40l14 9-14 9z' fill='#E3C9A0'/><path d='M" + (x + 80) + " 46l4 3-4 3z' fill='rgb(" + g + "," + g + "," + g + ")'/>" + txt(x + 35, 85, m, { s: 15 }) + "<path d='M" + x + " 110H" + (x + 70) + "' stroke='rgb(" + g + "," + g + "," + g + ")' stroke-width='" + (1 + k * .5) + "'/>"; }).join("") +
+        txt(80, 150, "dur, trait clair : construction", { s: 12, c: BLEU, a: "start" }) + txt(600, 150, "tendre, trait foncé : définitif", { s: 12, c: ROUGE, a: "end" }))],
+      2: [pl2("Choisir le bon outil", "Chaque tracé a son outil : la règle pour les segments, l'équerre pour l'angle droit, le compas pour le cercle, le rapporteur pour un angle mesuré.", 640, 200, "Quatre outils de dessin et leur usage",
+        boites([["Règle", ["segments", "et mesures"], "#EEF4FC", BLEU], ["Équerre", ["angles droits,", "perpendiculaires"], "#FFF6E3", "#C2540A"], ["Compas", ["cercles,", "reports de longueur"], "#ECF7F0", VERT], ["Rapporteur", ["angles en", "degrés"], "#F4F1FB", "#7B2CBF"]], 30, 130))]
+    },
+    ajouts: {
+      0: def("Définition", "Le <strong>matériel de dessin</strong> comprend les outils de tracé (règle, équerre, compas, rapporteur), les crayons (mines H, HB, B) et le matériel de correction (gomme, taille-crayon).") +
+        ex("Exemple", "Pour tracer un cercle de 3 cm de rayon, on ouvre le compas à 3 cm sur la règle graduée, on plante la pointe au centre et on tourne en tenant la tête du compas.") +
+        astuce("« <strong>H comme Hard (dur), B comme Black (noir)</strong> » : H pour construire léger, B pour repasser foncé."),
+      2: formule("rayon = diamètre ÷ 2 · écartement du compas = rayon") + ex("Exemple", "Une mine bien taillée trace un trait de moins de 0,5 mm ; une mine émoussée donne des traits épais qui faussent les mesures.") +
+        attention("La pointe sèche du compas se range protégée (bouchon ou étui) : elle peut blesser.")
+    }
+  });
+
+  enrichir("6e-tm-site-pepiniere", {
+    formules: [
+      F("Lister les critères d'un bon site", "eau · sol meuble et drainé · terrain plat · lumière filtrée · accès · protection", "6 critères notés sur 2 points, sauf l'accès sur 2 et la protection sur 2 : total sur 12"),
+      F("Noter chaque terrain (grille)", "note du terrain = somme des points obtenus", "terrain A : 5/12 ; terrain B : 11/12"),
+      F("Choisir et justifier", "on choisit la meilleure note et on cite les critères décisifs", "terrain B : pas inondable, lumière filtrée, loin du fromager")
+    ],
+    planches: {
+      1: [pl2("La grille de choix du site", "On note chaque terrain critère par critère ; la somme désigne le meilleur site.", 640, 240, "Grille de notation de deux terrains pour une pépinière",
+        (function () { var crit = [["Eau toute l'année", 2, 2], ["Sol meuble, drainé", 0, 2], ["Terrain plat", 1, 2], ["Lumière filtrée", 0, 2], ["Accès facile", 2, 2], ["Protection", 0, 1]], s = "<rect x='20' y='14' width='600' height='212' rx='12' fill='#fff' stroke='#C9D0DC'/>" + txt(40, 40, "Critère", { s: 13, a: "start" }) + txt(470, 40, "Terrain A", { s: 13, c: ROUGE }) + txt(570, 40, "Terrain B", { s: 13, c: VERT });
+          crit.forEach(function (c, k) { var y = 66 + k * 24; s += "<path d='M30 " + (y - 16) + "H610' stroke='#EEF1F6'/>" + txt(40, y, c[0], { s: 12.5, a: "start", w: 500 }) + txt(470, y, c[1] + " / 2", { s: 12.5, c: ROUGE }) + txt(570, y, c[2] + " / 2", { s: 12.5, c: VERT }); });
+          return s + "<path d='M30 200H610' stroke='" + NUIT + "'/>" + txt(40, 218, "Total", { s: 14, a: "start" }) + txt(470, 218, "5 / 12", { s: 15, c: ROUGE }) + txt(570, 218, "11 / 12", { s: 15, c: VERT }); })())],
+      2: [pl2("Le bon et le mauvais site", "À gauche, un bas-fond inondable sous un grand arbre ; à droite, un terrain plat, drainé, à mi-ombre, près d'un point d'eau et clôturé.", 640, 200, "Comparaison de deux terrains pour une pépinière",
+        "<rect x='20' y='20' width='290' height='160' rx='14' fill='#FCE8EC'/><path d='M20 150Q165 120 310 150V180H20Z' fill='#7FB3D5'/><circle cx='200' cy='70' r='44' fill='#2E7D32'/><rect x='194' y='100' width='12' height='50' fill='#6B4423'/>" + txt(110, 50, "Terrain A ✗", { s: 14, c: ROUGE }) + txt(110, 170, "inondable, trop d'ombre", { s: 11.5, w: 500 }) +
+        "<rect x='330' y='20' width='290' height='160' rx='14' fill='#ECF7F0'/><rect x='350' y='130' width='250' height='30' fill='#B8916A'/>" + [0, 1, 2, 3, 4, 5].map(function (k) { return "<path d='M" + (370 + k * 40) + " 130v-16' stroke='#2E7D32' stroke-width='3'/><circle cx='" + (370 + k * 40) + "' cy='110' r='7' fill='#43A047'/>"; }).join("") + "<path d='M350 80H600' stroke='#C9A227' stroke-width='3' stroke-dasharray='8 4'/>" + txt(475, 50, "Terrain B ✓", { s: 14, c: VERT }) + txt(475, 170, "plat, drainé, ombrière, clôturé", { s: 11.5, w: 500 }))]
+    },
+    ajouts: {
+      0: def("Définition", "Une <strong>pépinière</strong> est un lieu aménagé où l'on fait germer et grandir de jeunes plants (cacaoyers, caféiers, arbres fruitiers) avant de les repiquer au champ.") +
+        ex("Exemple", "Une pépinière de 500 jeunes cacaoyers en sachets, sous une ombrière de palmes, arrosée matin et soir pendant 5 à 6 mois."),
+      1: ex("Exemple", "Un terrain en pente forte est déconseillé : l'eau d'arrosage ruisselle et emporte la terre des sachets.") +
+        astuce("« <strong>EAU-SOL-PLAT-OMBRE-ACCÈS-CLÔTURE</strong> » : récite les six critères dans l'ordre et note chaque terrain sur chacun.") +
+        attention("Évite le pied d'un grand arbre : ses racines prennent l'eau, ses branches peuvent tomber et il peut transmettre des maladies aux jeunes plants.")
+    }
+  });
+
+  /* ─────────────── 2nde C Physique (formules déjà complètes) ─────────────── */
+})();
+
 /* Schémas animés et manipulables — sciences. Chaque fonction reçoit le conteneur et y dessine.
    Règles : transform/opacity uniquement pour les boucles ; tout reste lisible sans animation. */
 (function () {
@@ -13001,5 +13867,78 @@ VRT_PLUS("3e-en-articles", [
     var R = { noyau: ["Noyau", "Contient l'ADN et dirige la cellule ; enveloppe percée de pores."], mito: ["Mitochondrie", "Respiration cellulaire : produit l'énergie."], golgi: ["Appareil de Golgi", "Modifie, emballe et expédie les protéines."], ret: ["Réticulum endoplasmique", "Synthèse et transport des molécules ; porte des ribosomes."], lyso: ["Lysosome", "Digestion à l'intérieur de la cellule."], memb: ["Membrane plasmique", "Limite la cellule et contrôle les échanges."] };
     el.innerHTML = "<svg viewBox='0 0 460 260' class='an-svg an-pc'><g data-k='memb' tabindex='0' role='button' aria-label='Membrane'><ellipse cx='230' cy='130' rx='215' ry='118' fill='#FBEFF4' stroke='#B03A6E' stroke-width='4'/></g><g data-k='noyau' tabindex='0' role='button' aria-label='Noyau'><circle cx='220' cy='125' r='52' fill='#ECE8F8' stroke='#5B4FA8' stroke-width='3' stroke-dasharray='10 3'/><circle cx='230' cy='118' r='16' fill='#5B4FA8'/></g><g data-k='mito' tabindex='0' role='button' aria-label='Mitochondrie'><ellipse cx='95' cy='90' rx='38' ry='17' fill='#FDEBDD' stroke='#C24E00' stroke-width='2.5'/><path d='M66 90 q8 -12 14 0 t14 0 t14 0 t14 0' fill='none' stroke='#C24E00' stroke-width='2'/><ellipse cx='350' cy='190' rx='34' ry='15' fill='#FDEBDD' stroke='#C24E00' stroke-width='2.5'/></g><g data-k='golgi' tabindex='0' role='button' aria-label='Appareil de Golgi'><g fill='none' stroke='#0E7C86' stroke-width='5' stroke-linecap='round'><path d='M320 70 q30 12 60 0'/><path d='M318 84 q32 12 64 0'/><path d='M322 98 q28 12 56 0'/></g></g><g data-k='ret' tabindex='0' role='button' aria-label='Réticulum'><path d='M150 200 q20 -18 40 0 t40 0 t40 0' fill='none' stroke='#1E499B' stroke-width='5'/><g fill='#1E499B'><circle cx='160' cy='195' r='3'/><circle cx='200' cy='205' r='3'/><circle cx='240' cy='195' r='3'/></g></g><g data-k='lyso' tabindex='0' role='button' aria-label='Lysosome'><circle cx='110' cy='180' r='13' fill='#E0F5E5' stroke='#007E11' stroke-width='2.5'/><circle cx='380' cy='130' r='11' fill='#E0F5E5' stroke='#007E11' stroke-width='2.5'/></g></svg><div class='an-fiche' data-f><b>Clique sur un organite</b><span>Noyau, mitochondrie, appareil de Golgi, réticulum, lysosome, membrane.</span></div>";
     el.querySelectorAll("[data-k]").forEach(function (g) { function f(e) { if (e) e.stopPropagation(); el.querySelectorAll("[data-k]").forEach(function (x) { x.classList.toggle("an-sel", x === g); }); var r = R[g.dataset.k]; q(el, "[data-f]").innerHTML = "<b>" + r[0] + "</b><span>" + r[1] + "</span>"; } g.addEventListener("click", f); g.addEventListener("keydown", function (e) { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); f(e); } }); });
+  });
+})();
+
+/* Animations — réalisme, lot 20 (18/11/2026) : l'explorateur de cellules en haute définition remplace l'animation simple
+   « Clique sur un organite » de 90-animations-sciences.js (ce fichier est chargé APRÈS 90 et 91). Dessins : 28-realisme-premiers-lots.js. */
+(function () {
+  "use strict";
+  var C = window.VRT_CELLULES, VERT = "#17784D";
+  if (!C) return;
+  VRT_A("tle-sc-organites", 1, "Explore les deux cellules : clique sur un organite", function (el) {
+    var type = "ani", choix = null;
+    el.innerHTML = "<div style='display:flex;gap:6px;flex-wrap:wrap'><button type='button' class='btn-l' data-t='ani'>Cellule animale</button><button type='button' class='btn-l' data-t='veg'>Cellule végétale</button></div><div data-g style='margin:8px 0'></div><div data-b style='display:flex;gap:5px;flex-wrap:wrap'></div><p class='labo-r' data-r>Choisis un organite.</p>";
+    var LISTE = { ani: ["membrane", "noyau", "nucleole", "mito", "rer", "rel", "golgi", "vesicule", "lysosome", "centrosome", "ribosomes"], veg: ["paroi", "plasmodesme", "membrane", "vacuole", "chloroplaste", "noyau", "nucleole", "mito", "rer", "golgi", "ribosomes"] };
+    function maj() {
+      el.querySelector("[data-g]").innerHTML = "<svg viewBox='130 20 380 400' style='max-width:520px;width:100%' role='img' aria-label='Cellule interactive'><defs>" + C.DEFC + "</defs>" + (type === "ani" ? C.animale(true) : C.vegetale(true)) + "</svg>";
+      el.querySelector("[data-b]").innerHTML = LISTE[type].map(function (o) { return "<button type='button' class='btn-l' data-o='" + o + "' style='" + (o === choix ? "background:#1E499B;color:#fff" : "") + "'>" + C.ORG[o][0].replace(/ \(.*\)/, "") + "</button>"; }).join("");
+      if (choix) el.querySelectorAll("[data-g] [data-o]").forEach(function (g) { g.style.opacity = g.getAttribute("data-o") === choix || (choix === "noyau" && g.getAttribute("data-o") === "nucleole") ? "1" : "0.18"; });
+      el.querySelectorAll("[data-b] [data-o]").forEach(function (b) { b.addEventListener("click", function () { choix = b.dataset.o; el.querySelector("[data-r]").innerHTML = "<b>" + C.ORG[choix][0] + "</b> : " + C.ORG[choix][1]; maj(); }); });
+    }
+    el.querySelectorAll("[data-t]").forEach(function (b) { b.addEventListener("click", function () { type = b.dataset.t; choix = null; el.querySelector("[data-r]").textContent = "Choisis un organite."; maj(); }); });
+    maj();
+  });
+})();
+
+/* Zoom HD de la cellule jusqu'au gène (remplace la version simple de 90-animations-sciences.js) */
+(function () {
+  "use strict";
+  var C = window.VRT_CELLULES;
+  if (!C || !C.chromosome) return;
+  function T(x, y, t, o) { o = o || {}; return "<text x='" + x + "' y='" + y + "' text-anchor='" + (o.a || "middle") + "' font-size='" + (o.s || 13) + "' font-weight='" + (o.w || 700) + "' fill='" + (o.c || "#001136") + "' stroke='#fff' stroke-width='3' paint-order='stroke'>" + t + "</text>"; }
+  var BASES = { A: "#E8A33D", T: "#2F6DB5", G: "#2E9E5B", C: "#C0392B" }, PAIRE = { A: "T", T: "A", G: "C", C: "G" };
+  var SEQ = "ATGCGTACCGATTACGGCTAAGCTTGCAAT";
+  var ET = [
+    ["Cellule", "Une cellule du corps humain au microscope électronique : le noyau (en violet) contient l'information héréditaire.", function () {
+      return "<svg viewBox='130 30 400 380' role='img' aria-label='Cellule animale avec le noyau encadré'><defs>" + C.DEFC + "</defs>" + C.animale(true) + "<ellipse cx='310' cy='214' rx='78' ry='68' fill='none' stroke='#F7C948' stroke-width='4' stroke-dasharray='10 6'/>" + T(310, 304, "noyau", { s: 16 }) + "</svg>";
+    }],
+    ["Noyau", "Au moment de la division, l'ADN du noyau se condense : on voit alors 46 chromosomes (23 paires), l'enveloppe du noyau disparaît.", function () {
+      var s = "<svg viewBox='0 0 640 380' role='img' aria-label='Noyau en division avec 46 chromosomes'><defs>" + C.DEFC + "</defs><rect width='640' height='380' fill='#FBFAF8'/><ellipse cx='320' cy='190' rx='250' ry='170' fill='url(#noy)' opacity='.55'/><ellipse cx='320' cy='190' rx='250' ry='170' fill='none' stroke='#6D4FA0' stroke-width='2' stroke-dasharray='8 8'/>", k, n = 0;
+      for (k = 0; k < 46; k++) {
+        var i = k % 23, num = Math.min(i, 21), a = k * 2.399, r = 26 + 132 * Math.sqrt((k + 0.5) / 46), x = 320 + r * Math.cos(a) * 1.35, y = 190 + r * Math.sin(a) * 0.85, len = i === 22 ? 156 : C.LONG[num];
+        s += "<g transform='translate(" + x.toFixed(0) + " " + y.toFixed(0) + ") rotate(" + ((k * 47) % 180 - 90) + ") scale(.95)'>" + C.chromosome(0, len * 0.18, len, i === 22 ? 0.39 : C.CENT[num], 500 + k, "#C7B5DA") + "</g>";
+      }
+      return s + T(320, 370, "46 chromosomes condensés", { s: 15 }) + "</svg>";
+    }],
+    ["Chromosome", "Un chromosome condensé : deux chromatides identiques, reliées par le centromère. Chacune est un long filament d'ADN très enroulé.", function () {
+      var s = "<svg viewBox='0 0 640 380' role='img' aria-label='Un chromosome agrandi avec ses deux chromatides, son centromère et un filament d’ADN qui se déroule'><rect width='640' height='380' fill='#FBFAF8'/><g transform='translate(320 362) scale(3.6)'>" + C.chromosome(0, 0, 249 * 0.92, 0.46, 77, "#C7B5DA") + "</g>";
+      var d = "M362 74", k; for (k = 0; k < 40; k++) d += "q" + (6 + k * 0.3) + " " + (k % 2 ? 8 : -8) + " " + (10 + k * 0.4) + " " + (k % 2 ? -2 : 2);
+      s += "<path d='" + d + "' stroke='#5E4A78' stroke-width='2' fill='none'/>" + T(560, 60, "filament d'ADN", { s: 13, c: "#5E4A78" });
+      s += "<path d='M268 120H200' stroke='#3D4A5C'/>" + T(196, 124, "chromatide", { a: "end" }) + "<path d='M334 202H420' stroke='#3D4A5C'/>" + T(424, 206, "centromère", { a: "start" }) + "<path d='M272 300H200' stroke='#3D4A5C'/>" + T(196, 304, "bandes (régions de l'ADN)", { a: "end", s: 12 });
+      return s + "</svg>";
+    }],
+    ["ADN et gène", "Déroulé, l'ADN est une double hélice : deux brins reliés par des paires de bases (A avec T, G avec C). Un gène est un segment de cette molécule.", function () {
+      var s = "<svg viewBox='0 0 640 300' role='img' aria-label='Double hélice d’ADN avec ses paires de bases colorées et un gène encadré'><rect width='640' height='300' fill='#FBFAF8'/>", k, N = SEQ.length, X = function (i) { return 30 + i * 19.5; };
+      s += "<rect x='" + (X(9) - 10) + "' y='40' width='" + (X(20) - X(9) + 20) + "' height='200' rx='12' fill='#F7C948' opacity='.22'/>" + T((X(9) + X(20)) / 2, 30, "un gène", { s: 15, c: "#8A6A10" });
+      for (k = 0; k < N; k++) {
+        var x = X(k), ph = k * 0.55, y1 = 140 + 70 * Math.sin(ph), y2 = 140 - 70 * Math.sin(ph), b = SEQ[k], p = PAIRE[b], ym = (y1 + y2) / 2, avant = Math.cos(ph) > 0;
+        s += "<line x1='" + x + "' y1='" + y1.toFixed(1) + "' x2='" + x + "' y2='" + ym.toFixed(1) + "' stroke='" + BASES[b] + "' stroke-width='5' opacity='" + (avant ? 1 : 0.55) + "'/><line x1='" + x + "' y1='" + ym.toFixed(1) + "' x2='" + x + "' y2='" + y2.toFixed(1) + "' stroke='" + BASES[p] + "' stroke-width='5' opacity='" + (avant ? 1 : 0.55) + "'/>";
+      }
+      ["1", "2"].forEach(function (br, j) { var d = "", t; for (t = 0; t <= (N - 1) * 4; t++) { var i = t / 4, ph = i * 0.55, y = 140 + (j ? -1 : 1) * 70 * Math.sin(ph); d += (t ? "L" : "M") + X(i).toFixed(1) + " " + y.toFixed(1); } s += "<path d='" + d + "' stroke='" + (j ? "#1E3F7A" : "#4A2E7A") + "' stroke-width='7' fill='none' stroke-linecap='round'/>"; });
+      for (k = 0; k < N; k += 3) s += T(X(k), 270, SEQ[k], { s: 12, c: BASES[SEQ[k]] });
+      s += Object.keys(BASES).map(function (b, i) { return "<rect x='" + (430 + i * 50) + "' y='278' width='12' height='12' rx='3' fill='" + BASES[b] + "'/>" + T(452 + i * 50, 289, b, { s: 12, a: "start" }); }).join("");
+      return s + T(140, 292, "A-T et G-C : bases complémentaires", { s: 11, w: 600 }) + "</svg>";
+    }]
+  ];
+  VRT_A("3e-svt-adn", 3, "Zoome de la cellule jusqu'au gène", function (el) {
+    el.innerHTML = "<div style='display:flex;gap:6px;flex-wrap:wrap'>" + ET.map(function (e, i) { return "<button type='button' class='btn-l' data-i='" + i + "'>" + (i + 1) + ". " + e[0] + "</button>"; }).join("") + "</div><div data-g style='margin:8px 0;max-width:620px'></div><p class='labo-r' data-t></p>";
+    function aff(i) {
+      el.querySelector("[data-g]").innerHTML = ET[i][2]().replace("<svg ", "<svg style='width:100%' ");
+      el.querySelector("[data-t]").textContent = ET[i][1];
+      el.querySelectorAll("[data-i]").forEach(function (b, k) { b.style.background = k === i ? "#1E499B" : ""; b.style.color = k === i ? "#fff" : ""; });
+    }
+    el.querySelectorAll("[data-i]").forEach(function (b) { b.addEventListener("click", function () { aff(+b.dataset.i); }); });
+    aff(0);
   });
 })();
