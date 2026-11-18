@@ -153,9 +153,11 @@
   \NewEnviron{corrige}{}
 \fi
 
-% Points d'une question, poussés en fin de ligne
+% Points d'une question, poussés en fin de ligne.
+% \parfillskip=0pt reste DANS un groupe : sans lui, le réglage fuyait sur tous les
+% paragraphes suivants de la liste, que la justification étirait alors sur toute la ligne.
 \newcommand\pts[1]{\unskip\nobreak\hfill\penalty50\hskip1em\null\nobreak\hfill
-  {\color{vrtbleu}\small\bfseries #1}\parfillskip=0pt\par}
+  {\color{vrtbleu}\small\bfseries #1}\begingroup\parfillskip=0pt\par\endgroup}
 % Titre interne (« Exercice 2 (2,5 points) », « Situation », « Tâches »)
 \newcommand\soustitre[1]{\par\needspace{4\baselineskip}\medskip
   {\color{vrtencre}\bfseries #1}\par\nopagebreak\smallskip}
