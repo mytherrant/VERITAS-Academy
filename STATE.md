@@ -1,3 +1,16 @@
+## Apprendre : lot 16, 4e et 6e (18/11/2026)
+
+Demande de Jacques : « Continue ». Vérifié avant d'écrire : aucune PR ni branche ouverte ne touche ces leçons (la PR #357 de l'autre session ne modifie que `00-carte-mentale.js`).
+
+- **`apprendre/_src/24-approfondies-premier-cycle-3.js`** : 4 leçons au gabarit approfondi, remplacées en place (schémas d'origine `illus` conservés, quiz portés à 10 questions) :
+  - **4e langues nationales, les tons** : affiche du club de langues (« on efface les accents ? ») ; hauteur ou volume (ondes), tambour d'appel 3D (nkul, lèvre fine / épaisse) ; **simulation sonore** (Web Audio) : écouter les 5 tons puis les reconnaître à l'oreille.
+  - **6e langues nationales, la carte linguistique** : nouvel élève de Maroua (« deux langues seulement » / « une seule avec des accents ») ; salutations dans 6 langues, maquette 3D du Cameroun en carreaux colorés par famille, carte des aires culturelles d'origine ; **exercice** des familles (8 langues).
+  - **6e informatique, l'IA** : exposé sur le mont Cameroun (« 6 095 m » au lieu de 4 095) ; ce que l'IA fait / n'a pas, téléphone 3D qui reconnaît un fruit ; **simulation** d'un classifieur mangue / avocat avec exemples mal choisis (partie 3).
+  - **6e informatique, les composants** : coupure de courant en salle informatique (« l'écran, c'est l'ordinateur », « la souris est une sortie ») ; unité centrale 3D en vue éclatée ; **exercice** entrée / sortie / stockage (partie 3).
+- **Piège rencontré** : `90-animations-sciences.js` (chargé après) attache déjà des animations à la partie 1 de `6e-info-ia` et `6e-info-composants` ; un `VRT_A` sur la même partie est écrasé. Vérifier `grep VRT_A("id"` avant de choisir la partie.
+- `lecons.js?v=20261118l16` ; 4 pages `apprendre/cours/` régénérées et habillées. Chromium (1200 et 390 px) : aucun débordement, aucune erreur JS. Contrôles GEO et bancs au vert.
+- **Suite** : 7 leçons de 6e (latin origine et jours, EPS piste et bras-jambes, branches des arts, matériel de dessin, site d'une pépinière).
+
 ## Apprendre : lot 15, 5e et 4e (18/11/2026)
 
 Demande de Jacques : « Continue d'enrichir les autres leçons ». Il ne restait que du premier cycle (6e : 10, 5e : 3, 4e : 2) ; l'autre session (premier cycle, dernier lot le 17/11) a été prévenue par message ; elle travaille sur les annales et les en-têtes. Vérifié avant d'écrire : aucune PR ni branche non fusionnée sur ces leçons.
