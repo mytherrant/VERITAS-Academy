@@ -1,3 +1,27 @@
+## Apprendre : lot 15, 5e et 4e (18/11/2026)
+
+Demande de Jacques : « Continue d'enrichir les autres leçons ». Il ne restait que du premier cycle (6e : 10, 5e : 3, 4e : 2) ; l'autre session (premier cycle, dernier lot le 17/11) a été prévenue par message ; elle travaille sur les annales et les en-têtes. Vérifié avant d'écrire : aucune PR ni branche non fusionnée sur ces leçons.
+
+- **`apprendre/_src/23-approfondies-premier-cycle-2.js`** : 4 leçons au gabarit approfondi, remplacées en place :
+  - **5e français, la subordonnée relative** : lettre de Junior (Bandjoun) à son correspondant belge (« le chef que je t'ai parlé ») ; schéma antécédent / pronom / relative, village 3D (chefferie au toit pyramidal, piliers, marché, bois sacré) ; **exercice** qui / que / dont / où (8 phrases).
+  - **5e histoire, Pygmées et Sao** : dispute au Musée national (« des géants ! ») ; carte du Cameroun des deux peuples, village sao 3D sur sa butte dans la plaine inondée ; **simulation** du bronze à la cire perdue (5 étapes).
+  - **5e géographie, croissance de la population** : classe de 112 élèves à Garoua (36 − 9 = 27 ‰, pas 45) ; courbe mondiale 1750-2022, pyramide des âges 3D du Cameroun (ordres de grandeur) ; **simulation** natalité / mortalité / projection.
+  - **4e grec, l'alphabet** : carte postale ΑΘΗΝΑ (faux amis Η, Ρ, Χ) ; du phénicien au latin, stèle de marbre 3D gravée, atelier des racines ; **exercice** de transcription (8 mots) ; quiz porté à 10 questions.
+- `lecons.js?v=20261118l15` ; 4 pages `apprendre/cours/` régénérées et habillées. Chromium (1200 et 390 px) : aucun débordement, aucune erreur JS. Contrôles GEO et bancs au vert.
+- **Suite** : 4e-ln-tons et les 10 leçons de 6e (info, langues nationales, latin, EPS, arts, technologie).
+
+## Apprendre : lot 14, 2nde A (18/11/2026)
+
+Demande de Jacques : « continue », puis « voir ce qui a été fait pour éviter les doublons ». Vérification faite avant d'écrire : aucune PR ouverte, aucune branche non fusionnée et aucune autre session ne touchait ces 4 leçons (seules 6e-5e-4e sont chez l'autre session).
+
+- **`apprendre/_src/22-approfondies-2nde-a.js`** : les 4 dernières leçons gratuites de 2nde A au gabarit approfondi, remplacées en place (partie « Entraînement au format de l'examen » et quiz de 10 d'origine repris) :
+  - **Maths, ℝ et ses sous-ensembles** : tontine des couturières de Bafoussam (100 000/6 « tout rond », dette de −3 000 F, biais d'un pagne carré) ; droite graduée, labo ensembles, table de coupe 3D (pagne wax, diagonale √2) ; **simulation** de partage (décimal ou non, part en francs, reste en caisse).
+  - **Histoire, les disciplines affinitaires** : tessons du chantier de Mbalmayo (« des débris » / « sept générations ») ; l'historien et ses 8 alliés, coupe stratigraphique 3D (couches, perles de traite, tessons, charbon, mire) ; **simulation** carbone 14 (88 % → environ 1 060 ans).
+  - **Philosophie, définitions** : rumeur WhatsApp reçue à Ngaoundéré ; philein + sophia, escalier de Socrate appliqué au message, arbre à palabres 3D ; **exercice** opinion / question philosophique / fait (7 phrases).
+  - **Géographie, lire une carte** : plan d'évacuation d'un quartier riverain du Wouri (3,5 cm au 1/10 000 = 350 m, pas 3,5 km) ; carte complète TOLES avec légende, maquette 3D du quartier (fleuve, mangrove, colline-refuge, rose des vents) ; **simulation** règle et échelles.
+- `lecons.js?v=20261118l14` ; 4 pages `apprendre/cours/` régénérées et habillées. Chromium (1200 et 390 px) : aucun débordement, aucune erreur JS. Contrôles GEO et bancs au vert.
+- **État** : toutes les leçons gratuites de 3e, 2nde, 1re et Tle sont au gabarit approfondi. Restent 6e (10), 5e (3), 4e (2), confiées à l'autre session.
+
 ## Apprendre : lot 13, 2nde (18/11/2026)
 
 Demande de Jacques : « continue ». Lot 12 (PR #358) fusionné et déployé.
@@ -44,6 +68,7 @@ Demandes de Jacques : « Continue », puis « continue ».
 - Marges mesurées avec Poppins chargée : ≥ 54 px de chaque côté ; branches rapprochées du noyau (« recentre plus vers l'intérieur »).
 - 18/11 (suite) « varie les styles de cartes » : 11 formes (radiale, organigramme, bulles, accolade « { », alvéoles, flux, causes-conséquences, roue, arête de poisson, arbre dessiné, frise chronologique) × 3 styles (main levée, coloré, sobre), tirés du titre (stables) ; 4 palettes harmonieuses remplacent les couleurs ternes ; traits et flèches épaissis. Leçons : frise pour l'histoire, flux pour les étapes, causes-conséquences seulement si deux parties distinctes. Titres longs passés à la ligne ; contrôle des marges sur 33 cartes × 2 tailles : 0 débordement.
 - « Trop classique, mets de la fantaisie » : style sobre retiré du tirage ; deux styles ajoutés, post-it (notes inclinées, ruban adhésif, coin corné, fond kraft) et ardoise (tableau vert encadré de bois, craie de couleur, nuage pointillé). Tirage actuel des leçons : ardoise 18, coloré 21, post-it 20, main levée 15.
+- « Arrière-fond en blanc pour plus de lisibilité » : fond blanc pur pour tous les styles (plus de kraft, de pointillés ni de dégradé) ; l'ardoise (craie claire, illisible sur blanc) sort du tirage. Tirage : main levée, coloré, post-it.
 - Carte de la leçon : une seule fois, en fin de cours (pas dans la Révision : règle « pas de doublon »).
 - Reste à faire : la carte de l'application (_showLittCarte, app.js) garde son ancien dessin.
 

@@ -72,12 +72,10 @@
       "<linearGradient id='" + P + "p' x1='0' y1='0' x2='1' y2='1'><stop offset='0' stop-color='#FFF6E8'/><stop offset='.5' stop-color='#FDF2FA'/><stop offset='1' stop-color='#EAF3FF'/></linearGradient>" +
       B.map(function (b, i) { return "<marker id='" + P + "f" + i + "' markerWidth='18' markerHeight='18' refX='11' refY='9' orient='auto' markerUnits='userSpaceOnUse'><path d='M2 2.5L14 9L2 15.5' fill='none' stroke='" + trait(b.color) + "' stroke-width='3.4' stroke-linecap='round' stroke-linejoin='round'/></marker>"; }).join("") + "</defs>";
   }
+  /* fond blanc pour tous les styles (18/11/2026, « arrière-fond en blanc pour plus de lisibilité ») ; l'ardoise garde son tableau si on la demande */
   function fond(Wd, H) {
-    if (ARD()) return "<rect width='" + Wd + "' height='" + Math.round(H) + "' rx='18' fill='#6B4423'/><rect x='9' y='9' width='" + (Wd - 18) + "' height='" + Math.round(H - 18) + "' rx='10' fill='#24453B'/><rect x='9' y='9' width='" + (Wd - 18) + "' height='" + Math.round(H - 18) + "' rx='10' fill='url(#" + P + "q)'/>";
-    if (PIT()) return "<rect width='" + Wd + "' height='" + Math.round(H) + "' rx='18' fill='#EFD9B0'/><rect width='" + Wd + "' height='" + Math.round(H) + "' rx='18' fill='url(#" + P + "q)'/>";
-    if (STYLE === "sobre") return "<rect x='.5' y='.5' width='" + (Wd - 1) + "' height='" + Math.round(H - 1) + "' rx='14' fill='#fff' stroke='#E3E8F1'/>";
-    if (STYLE === "colore") return "<rect width='" + Wd + "' height='" + Math.round(H) + "' rx='18' fill='url(#" + P + "p)'/>";
-    return "<rect width='" + Wd + "' height='" + Math.round(H) + "' rx='18' fill='#FCFDFF'/><rect width='" + Wd + "' height='" + Math.round(H) + "' rx='18' fill='url(#" + P + "q)'/>";
+    if (ARD()) return "<rect width='" + Wd + "' height='" + Math.round(H) + "' rx='18' fill='#6B4423'/><rect x='9' y='9' width='" + (Wd - 18) + "' height='" + Math.round(H - 18) + "' rx='10' fill='#24453B'/>";
+    return "<rect x='.5' y='.5' width='" + (Wd - 1) + "' height='" + Math.round(H - 1) + "' rx='16' fill='#fff' stroke='#EEF1F6'/>";
   }
   /* centre selon le style : nuage (main levée), cartouche dégradé (coloré), cartouche sobre */
   function centre(cx, cy, lignes, w) {
@@ -491,7 +489,7 @@
     return svgDe("cm-large", Wd, H, alt, B, s + dessus + pc2.s);
   }
 
-  var FORMES = ["radiale", "organigramme", "bulles", "accolade", "alveoles", "roue", "poisson", "arbre"], STYLES = ["main", "colore", "postit", "ardoise"];
+  var FORMES = ["radiale", "organigramme", "bulles", "accolade", "alveoles", "roue", "poisson", "arbre"], STYLES = ["main", "colore", "postit"];
   function hache(t) { var h = 7; for (var i = 0; i < t.length; i++) h = (h * 31 + t.charCodeAt(i)) % 100003; return h; }
 
   /* carte = { centre: "Titre\nSous-titre" | [lignes], branches: [{ label, color?, items: [] }] } */
