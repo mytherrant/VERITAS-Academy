@@ -11,6 +11,10 @@ Demandes de Jacques : « Continue », puis « continue ».
 - `lecons.js?v=20261118l11` ; 4 pages `apprendre/cours/` régénérées et habillées. Chromium (1200 et 390 px) : aucun débordement, aucune erreur JS. Bancs : réglages 29/29, verrou 18/18, gabarits 54/54, planche mobile 23/23, charte 34/34, lisibilité 7/7 ; contrôles GEO au vert.
 - **Suite** : 1re chinois (budan, ruguo), Tle arabe (khabar, verbes) ; 2nde (maths, français, ECM, histoire, philosophie, géographie).
 
+## 18/11/2026 — Formules compactes : en-tête teinté plus foncé, milieu blanc (branche offres-entetes)
+- Starter vert, Pro bleu, Élite violet : seul l'en-tête (nom, prix, public) garde la teinte, un peu plus foncée ; la liste des avantages est sur fond blanc.
+- Avantages alignés à gauche (plus de mots étirés). modele.css?v=20261118s.
+
 ## Leçons : étiquettes de planche sans « 2D » ni « 3D » (17/11/2026)
 
 Demande de Jacques : « pour toutes les fiches, enlève 2d, 3d ». `apprendre/lecon.html`, fonction `planche()` : l'étiquette devient « Planche n » (au lieu de « Planche n · 2D / 3D » ; les planches de type « Planche » affichaient même « Planche n · Planche »). Le type reste dans les données (`type: "3d"` pilote toujours le moteur 3D). Bancs gabarits, planche mobile, réglages, charte au vert ; 0 erreur JS.
