@@ -930,4 +930,52 @@ S["bac-2025-maths-ce-paraboles"] = () => {
   g += T([X(1.25), Y(-0.25) + 14], "(D)", ' font-size="12" font-style="italic"') + T([X(1.55), Y(1.0)], "(D')", ' font-size="12" font-style="italic"');
   return svg(R.W, R.H, g, "La parabole (C) : y = x², de sommet O, de foyer F(0 ; 1/4) et de directrice (D) : y = −1/4 ; en pointillés, son image (Γ) par la rotation de centre O et d'angle π/4, de même sommet O, d'axe la droite y = −x, de foyer F'(−√2/8 ; √2/8) et de directrice (D') : x − y − √2/4 = 0.");
 };
+// Probatoire 2024 chimie C-D-E, partie B : la lampe à acétylène (figure du sujet).
+S["proba-2024-chimie-lampe"] = () => {
+  const fs = ' font-size="13"', fb = ' font-size="13" font-weight="700"';
+  let g = P([[150, 50], [250, 50], [278, 205], [122, 205], [150, 50]], ' stroke-width="1.6"');
+  g += '<polygon points="140,105 260,105 266,135 134,135" fill="currentColor" fill-opacity="0.3" stroke-width="1.2"/>';
+  g += L([200, 135], [200, 142], ' stroke-width="1.2"') + '<circle cx="200" cy="147" r="4" fill="none" stroke-width="1.2"/>';
+  g += '<polygon points="140,198 136,182 152,170 168,180 164,198" fill="currentColor" fill-opacity="0.55" stroke-width="1"/>';
+  g += '<polygon points="174,198 168,182 182,166 204,166 214,182 206,198" fill="currentColor" fill-opacity="0.55" stroke-width="1"/>';
+  g += L([132, 170], [64, 82], ' stroke-width="1.4"') + L([138, 176], [70, 88], ' stroke-width="1.4"');
+  g += '<path d="M60 80 Q48 70 54 56 Q62 66 66 58 Q72 72 60 80Z" fill="currentColor" fill-opacity="0.25" stroke-width="1.2"/>';
+  g += L([96, 28], [72, 50], ' stroke-width="1"') + fleche([68, 54], [76, 46], 6) + T([92, 22], "flamme", fb);
+  g += L([124, 66], [90, 92], ' stroke-width="1"') + fleche([84, 96], [94, 89], 6) + T([116, 60], "bec", fb);
+  g += L([320, 120], [268, 120], ' stroke-width="1"') + fleche([262, 120], [272, 120], 6) + T([324, 112], "Réserve", fb) + T([324, 130], "d'eau", fb);
+  g += L([320, 180], [216, 182], ' stroke-width="1"') + fleche([210, 182], [220, 182], 6) + T([324, 172], "Carbure de", fb) + T([324, 190], "calcium", fb);
+  g += T([200, 232], "Lampe à acétylène", fb + ' text-anchor="middle"');
+  return svg(410, 242, g, "Lampe à acétylène : un récipient contenant en haut une réserve d'eau, qui goutte sur des morceaux de carbure de calcium placés au fond ; le gaz produit monte par un tube jusqu'au bec, où brûle la flamme.");
+};
+// Corrigé : dispositif de dosage des ions Fe2+ par le permanganate de potassium.
+S["proba-2024-chimie-dosage"] = () => {
+  const fs = ' font-size="12"';
+  let g = L([40, 20], [40, 290], ' stroke-width="2"') + '<rect x="14" y="288" width="160" height="8" stroke-width="1.4"/>' + L([40, 70], [96, 70], ' stroke-width="1.6"');
+  g += '<rect x="96" y="20" width="14" height="170" stroke-width="1.4"/>' + '<rect x="97" y="40" width="12" height="149" fill="currentColor" fill-opacity="0.35" stroke="none"/>';
+  for (let y = 40; y <= 180; y += 10) g += L([110, y], [y % 50 === 0 ? 102 : 105, y], ' stroke-width="0.7"');
+  g += P([[96, 190], [101, 205], [101, 214]], ' stroke-width="1.4"') + P([[110, 190], [105, 205], [105, 214]], ' stroke-width="1.4"') + '<rect x="96" y="196" width="18" height="6" stroke-width="1"/>';
+  g += P([[70, 222], [70, 282], [136, 282], [136, 222]], ' stroke-width="1.6"') + '<rect x="71" y="244" width="64" height="37" fill="currentColor" fill-opacity="0.12" stroke="none"/>' + '<rect x="94" y="276" width="18" height="4" fill="currentColor" stroke="none"/>';
+  g += '<rect x="58" y="284" width="90" height="4" stroke-width="1"/>';
+  g += L([122, 30], [168, 30], ' stroke-width="0.9"') + T([172, 26], "burette graduée : solution de permanganate", fs) + T([172, 42], "de potassium, C₀ = 0,1 mol/L", fs);
+  g += L([132, 199], [168, 178], ' stroke-width="0.9"') + T([172, 182], "robinet", fs);
+  g += L([136, 258], [168, 246], ' stroke-width="0.9"') + T([172, 242], "bécher : Vr = 20 mL de solution de", fs) + T([172, 258], "sulfate de fer II acidifiée (H₂SO₄)", fs);
+  g += L([112, 279], [168, 272], ' stroke-width="0.9"') + T([172, 276], "barreau aimanté", fs) + L([148, 286], [168, 300], ' stroke-width="0.9"') + T([172, 306], "agitateur magnétique", fs);
+  return svg(470, 318, g, "Dispositif de dosage : une burette graduée, fixée à un support, contient la solution de permanganate de potassium ; en dessous, un bécher contient 20 mL de la solution de sulfate de fer II acidifiée, agitée par un barreau aimanté posé sur un agitateur magnétique.");
+};
+// Corrigé partie B : synthèse de l'acétylène au laboratoire (eau sur carbure de calcium, gaz recueilli sur l'eau).
+S["proba-2024-chimie-synthese"] = () => {
+  const fs = ' font-size="12"';
+  let g = '<path d="M70 72 L58 40 L102 40 L90 72 Z" stroke-width="1.4"/>' + '<rect x="59" y="46" width="42" height="12" fill="currentColor" fill-opacity="0.15" stroke="none"/>' + L([80, 72], [80, 108], ' stroke-width="1.4"') + '<rect x="74" y="84" width="12" height="6" stroke-width="1"/>';
+  g += '<path d="M66 112 L66 130 Q30 150 34 185 Q40 215 80 215 Q120 215 126 185 Q130 150 94 130 L94 112 Z" stroke-width="1.6"/>';
+  g += '<polygon points="56,206 62,192 76,196 72,208" fill="currentColor" fill-opacity="0.55" stroke="none"/><polygon points="82,208 86,194 102,196 100,209" fill="currentColor" fill-opacity="0.55" stroke="none"/>';
+  g += P([[90, 112], [90, 100], [218, 100], [218, 222], [250, 222], [250, 192]], ' stroke-width="1.6"');
+  g += '<rect x="200" y="160" width="140" height="70" stroke-width="1.6"/>' + '<rect x="201" y="176" width="138" height="53" fill="currentColor" fill-opacity="0.12" stroke="none"/>';
+  g += '<path d="M236 214 L236 128 Q236 120 244 120 L256 120 Q264 120 264 128 L264 214" stroke-width="1.4"/>' + '<rect x="237" y="150" width="26" height="64" fill="currentColor" fill-opacity="0.12" stroke="none"/>';
+  g += L([110, 46], [150, 30], ' stroke-width="0.9"') + T([154, 28], "ampoule de coulée (eau)", fs);
+  g += L([108, 200], [150, 250], ' stroke-width="0.9"') + T([110, 262], "ballon : carbure de calcium CaC₂", fs);
+  g += L([170, 100], [178, 74], ' stroke-width="0.9"') + T([158, 68], "tube à dégagement", fs);
+  g += L([264, 134], [300, 110], ' stroke-width="0.9"') + T([304, 104], "éprouvette retournée :", fs) + T([304, 120], "acétylène C₂H₂", fs);
+  g += L([330, 200], [360, 212], ' stroke-width="0.9"') + T([344, 228], "cuve à eau", fs);
+  return svg(460, 272, g, "Montage de synthèse de l'acétylène : l'eau d'une ampoule de coulée tombe goutte à goutte sur le carbure de calcium contenu dans un ballon ; le gaz formé passe par un tube à dégagement et se recueille dans une éprouvette retournée sur une cuve à eau.");
+};
 module.exports = S;
