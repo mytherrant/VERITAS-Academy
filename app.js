@@ -28830,13 +28830,14 @@ function pgVisitorAccounts(){
       ?"<div style='display:flex;gap:3px;flex-wrap:wrap'>"+(a.plans||[]).map(function(p){return "<span style='background:#EDE9FE;color:#6C56A6;font-size:9px;font-weight:800;padding:2px 7px;border-radius:7px'>"+_esc(String(p))+"</span>";}).join("")+"</div>"
       :"<span style='background:#F0F4FF;color:#9CA3AF;font-size:9px;font-weight:700;padding:2px 7px;border-radius:7px'>GRATUIT</span>";
     return "<tr>"
-      +"<td style='padding:8px 6px;border-bottom:1px solid #F0F4FF'><div style='font-size:12px;font-weight:700;color:#142554'>"+_esc(a.pre||"")+" "+_esc(a.nom||"")+"</div><div style='font-size:10px;color:#9CA3AF;font-family:monospace'>"+_esc(a.user||"")+" · "+_esc(a.cls||"")+(a.pwd?"":" · <span style='color:#AE5353;font-weight:800'>sans mot de passe</span>")+"</div></td>"
+      +"<td style='padding:8px 6px;border-bottom:1px solid #F0F4FF'><div style='font-size:12px;font-weight:700;color:#142554'>"+_esc(a.pre||"")+" "+_esc(a.nom||"")+"</div><div style='font-size:10px;color:#9CA3AF;font-family:monospace'>"+_esc(a.user||"")+" · "+_esc(a.cls||"")+(a.pwd?"":" · <span style='color:#AE5353;font-weight:800'>sans mot de passe</span>")+"</div>"+(_mgrEstProf(a)?"<div style='margin-top:3px'><span style='background:"+(a.equipe===true?"#FFF4D6;color:#8A5A00":"#F0F4FF;color:#6B7A99")+";font-size:9px;font-weight:800;padding:2px 7px;border-radius:7px'>"+(a.equipe===true?"ÉQUIPE VÉRITAS":"ENSEIGNANT · formule Prof requise")+"</span></div>":"")+"</td>"
       +"<td style='padding:8px 6px;border-bottom:1px solid #F0F4FF;font-size:11px;color:#6B7A99'>"+_esc(a.tel||"")+"</td>"
       +"<td style='padding:8px 6px;border-bottom:1px solid #F0F4FF'>"+pb+"</td>"
-      +"<td style='padding:8px 6px;border-bottom:1px solid #F0F4FF'><span style='background:"+(a.statut==="actif"?"#D1FAE5":"#FEE2E2")+";color:"+(a.statut==="actif"?"#059669":"#AE5353")+";font-size:9px;font-weight:800;padding:2px 8px;border-radius:8px;white-space:nowrap'>"+a.statut.toUpperCase()+"</span></td>"
+      +"<td style='padding:8px 6px;border-bottom:1px solid #F0F4FF'><span style='background:"+(a.statut==="actif"?"#D1FAE5":"#FEE2E2")+";color:"+(a.statut==="actif"?"#059669":"#AE5353")+";font-size:9px;font-weight:800;padding:2px 8px;border-radius:8px;white-space:nowrap'>"+String(a.statut||"—").toUpperCase()+"</span></td>"
       +"<td style='padding:8px 6px;border-bottom:1px solid #F0F4FF;white-space:nowrap'>"
       +"<button class='btn bi xs' onclick='_mgrPlans(\""+a.id+"\")' title='Gérer les abonnements (dont l’Atelier de Français)'>⭐</button> "
       +"<button class='btn bo xs' onclick='_mgrPwd(\""+a.id+"\")' title='Définir le mot de passe'>🔑</button> "
+      +(_mgrEstProf(a)?"<button class='btn bo xs' onclick='_mgrEquipe(\""+a.id+"\")' title='Enseignant du centre : accès complet sans formule'>🏫</button> ":"")
       +"<button class='btn bo xs' onclick='_mgrToggle(\""+a.id+"\")' title='Activer/Suspendre'>⇄</button> "
       +"<button class='btn br2 xs' onclick='_mgrDelAcc(\""+a.id+"\")' title='Supprimer'>🗑</button>"
       +"</td></tr>";
@@ -28935,6 +28936,33 @@ async function _mgrPwdSave(id){
   if(!h||h.indexOf('S256$')!==0){toast('Hachage impossible sur ce navigateur : rien n’a été changé.','err');return;}
   acc.pwd=h;
   save();cm();re();toast('🔑 Mot de passe enregistré pour '+(acc.user||'')+' ✅');
+}
+
+/* ÉQUIPE VÉRITAS (19/11/2026). Le rôle « enseignant » se déclare à l'inscription :
+   il n'ouvre plus rien sur le serveur (vrt_compte_equipe, api/_auth_lib.php).
+   Seuls les enseignants du centre marqués ici `equipe: true` gardent l'accès
+   complet sans formule : toutes les classes d'Apprendre, labos, documents sans
+   plafond, cours en direct, forum de toutes les classes, manuels collaboratifs.
+   Les autres passent par une formule Prof. Le champ ne voyage que par la synchro
+   admin (db.php) : aucun compte ne peut se l'attribuer. */
+function _mgrEstProf(a){ return !!a && (a.role==='enseignant' || !!a.isTeacher); }
+function _mgrEquipe(id){
+  var acc=(DB.visitorAccounts||[]).find(function(a){return a.id===id;});
+  if(!acc||!_mgrEstProf(acc)){toast("Compte enseignant introuvable","warn");return;}
+  var on=acc.equipe===true;
+  M("🏫 "+_esc(acc.pre||"")+" "+_esc(acc.nom||""),"Identifiant : "+_esc(acc.user||""),
+    "<div class='ib ibt mb14'><span>💡</span><span>"+(on
+      ?"Ce compte fait partie de l’équipe VÉRITAS : il a l’accès complet sans formule. Le retirer de l’équipe le ramène aux droits de sa formule (aucune formule Prof = accès gratuit)."
+      :"Réservé aux enseignants du centre. Un enseignant de l’équipe a l’accès complet sans formule : toutes les classes d’Apprendre, les labos, les documents sans plafond, les cours en direct, le forum de toutes les classes et les manuels collaboratifs. Un enseignant extérieur doit prendre une formule Prof.")
+    +"</span></div>",
+    "<button class='btn bo' onclick='cm()'>Annuler</button>"
+    +"<button class='btn "+(on?"br2":"bi")+"' onclick='_mgrEquipeSave(\""+id+"\","+(on?"false":"true")+")'>"+(on?"Retirer de l’équipe":"Ajouter à l’équipe")+"</button>");
+}
+function _mgrEquipeSave(id,val){
+  var acc=(DB.visitorAccounts||[]).find(function(a){return a.id===id;});
+  if(!acc){toast("Compte introuvable","warn");return;}
+  if(val===true) acc.equipe=true; else delete acc.equipe;
+  save();cm();re();toast(val===true?"🏫 Ajouté à l’équipe VÉRITAS ✅":"Retiré de l’équipe");
 }
 
 function _mgrToggle(id){
