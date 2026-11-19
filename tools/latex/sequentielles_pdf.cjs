@@ -135,6 +135,15 @@ function bloc(n) {
       return '\\begin{center}\\small\\renewcommand\\arraystretch{1.25}\n\\begin{tabularx}{\\linewidth}{' + spec + '}\\hline\n' + corps + '\n\\end{tabularx}\\end{center}\n\n';
     }
     case 'br': return '\n\n';
+    case 'pre': {
+      // Algorithme : une ligne du PDF par ligne de la source, retrait conservé (sinon tout tient sur une ligne).
+      const lignes = texteDe(n).replace(/\r/g, '').replace(/^\n+|\s+$/g, '').split('\n');
+      return '{\\setlength{\\parindent}{0pt}\\setlength{\\parskip}{0pt}\\leftskip=1.5em\\small\n'
+        + lignes.map(l => {
+          const r = l.match(/^ */)[0].length;
+          return (r ? '\\hspace*{' + (r * 0.5) + 'em}' : '') + (latex(l.trim()) || '~') + '\\par';
+        }).join('\n') + '\n}\\medskip\n\n';
+    }
     case 'div': case 'section': case 'article': case 'blockquote': case 'span': case '#':
       return n.enfants.map(bloc).join('');
     default: {
