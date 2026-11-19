@@ -714,6 +714,20 @@
   "u": "/ressources/annales/probatoire-svt-d-2024.html"
  },
  {
+  "id": "probatoire-sciences-aabi-2026",
+  "examen": "probatoire",
+  "m": "sciences",
+  "serie": "séries A et ABI",
+  "nomExamen": "Probatoire",
+  "fiche": "ressources/examen-svt-probatoire.html",
+  "matiere": "Sciences (séries A et ABI)",
+  "mat": "svt",
+  "classes": "1re A",
+  "annee": 2026,
+  "national": true,
+  "u": "/ressources/annales/probatoire-sciences-aabi-2026.html"
+ },
+ {
   "id": "probatoire-sciences-aabi-2025",
   "examen": "probatoire",
   "m": "sciences",

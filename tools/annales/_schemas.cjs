@@ -1137,4 +1137,60 @@ S["bepc-2023-pct-poulies"] = () => {
   g += T([E[0] - 70, 186], "E : roue motrice, 120 mm", ' font-size="11"') + T([S0[0] - 120, 186], "S : roue réceptrice, 20 mm", ' font-size="11"') + T([E[0] - 5, E[1] - 8], "E", fs) + T([S0[0] - 5, S0[1] - 18], "S", fs);
   return svg(380, 196, g, "Transmission par courroie : la grande roue motrice E (diamètre 120 mm), liée au moteur, entraîne la petite roue réceptrice S (diamètre 20 mm), qui tourne six fois plus vite.");
 };
+// Probatoire 2026 sciences A-ABI : mécanisme des réactions allergiques (1er contact : étapes 1 à 5 ; 2e contact : étapes 1 et 2).
+S["proba-2026-sciences-allergie"] = () => {
+  const fs = ' font-size="12"', lignes = (x, y, t, x2 = "") => t.map((l, i) => T([x, y + i * 15], l, fs + x2)).join("");
+  const num = (x, y, n) => '<circle cx="' + x + '" cy="' + y + '" r="9" stroke-width="1.2"/>' + T([x - 3.6, y + 4.5], n, ' font-size="12" font-weight="700"');
+  const fl = (a, b) => L(a, b, ' stroke-width="2"') + fleche(b, a, 9);
+  const noyau = (x, y, rx, ry) => '<ellipse cx="' + x + '" cy="' + y + '" rx="' + rx + '" ry="' + ry + '" fill="currentColor" stroke="none" opacity=".75"/>';
+  const lympho = (x, y, nom, nx, ny) => '<ellipse cx="' + x + '" cy="' + y + '" rx="20" ry="14"/>' + noyau(x, y, 9, 6) + T([nx, ny], nom, ' font-size="11" font-weight="700"');
+  const ige = (x, y, a) => { const r = a * Math.PI / 180, u = [Math.cos(r), Math.sin(r)], n = [-u[1], u[0]], b = [x + 7 * u[0], y + 7 * u[1]];
+    return L([x, y], b, ' stroke-width="1.3"') + L(b, [b[0] + 5 * u[0] + 4 * n[0], b[1] + 5 * u[1] + 4 * n[1]], ' stroke-width="1.3"') + L(b, [b[0] + 5 * u[0] - 4 * n[0], b[1] + 5 * u[1] - 4 * n[1]], ' stroke-width="1.3"'); };
+  const granules = (x, y, r, k) => { let g = ""; for (let i = 0; i < k; i++) { const a = i * 2.4, d = r * (0.35 + 0.5 * ((i * 37) % 10) / 10); g += '<circle cx="' + f(x + d * Math.cos(a)) + '" cy="' + f(y + d * Math.sin(a)) + '" r="2.6" fill="currentColor" stroke="none"/>'; } return g; };
+  const masto = (x, y, igE) => { let g = '<circle cx="' + x + '" cy="' + y + '" r="32"/>' + noyau(x, y, 10, 8) + granules(x, y, 28, 16);
+    if (igE) for (let a = -150; a <= 150; a += 50) { const r = a * Math.PI / 180; g += ige(x + 32 * Math.cos(r), y + 32 * Math.sin(r), a); } return g; };
+  const allergene = (x, y) => '<ellipse cx="' + x + '" cy="' + y + '" rx="4" ry="5.5" stroke-width="1.2"/>';
+  const macro = (x, y) => '<path d="M' + (x - 26) + " " + y + "c0-14 8-26 20-24c6-10 22-8 26 2c12 2 14 18 6 26c4 12-8 22-20 18c-8 8-24 6-26-6c-10-2-12-12-6-16z" + '"/>' + noyau(x + 2, y + 4, 8, 7) +
+    '<circle cx="' + (x - 12) + '" cy="' + (y - 6) + '" r="3.5" stroke-width="1.1"/><circle cx="' + (x + 16) + '" cy="' + (y - 8) + '" r="3.5" stroke-width="1.1"/>';
+  let g = "";
+  // cadres
+  g += '<rect x="6" y="6" width="848" height="408" stroke-width="1"/>' + '<rect x="16" y="16" width="190" height="24" stroke-width="1"/>' + T([24, 33], "1<tspan baseline-shift=\"super\" font-size=\"8\">er</tspan> contact avec l'antigène", ' font-size="13" font-weight="700"');
+  g += '<rect x="646" y="16" width="200" height="24" stroke-width="1"/>' + T([654, 33], "2<tspan baseline-shift=\"super\" font-size=\"8\">ème</tspan> contact avec l'antigène", ' font-size="13" font-weight="700"');
+  // 1 : entrée de l'allergène (silhouette)
+  g += '<circle cx="70" cy="226" r="16"/><path d="M38 286c0-26 14-40 32-40s32 14 32 40z"/>' + allergene(64, 206) + allergene(78, 202);
+  g += num(30, 318, "1") + lignes(46, 314, ["Entrée de l'allergène", "dans l'organisme"]);
+  g += fl([70, 196], [96, 132]);
+  // 2 : captation par les macrophages
+  g += macro(130, 90) + num(104, 150, "2") + lignes(120, 146, ["Captation de", "l'allergène par les", "macrophages"]);
+  g += fl([176, 70], [232, 80]);
+  // 3 : présentation aux lymphocytes
+  g += macro(262, 90) + lympho(318, 66, "LB", 344, 52) + lympho(306, 118, "LTh", 296, 148);
+  g += num(250, 168, "3") + lignes(266, 164, ["Présentation de", "l'allergène aux", "lymphocytes"]);
+  g += fl([346, 100], [400, 128]);
+  // 4 : production des IgE par le LB
+  g += lympho(432, 140, "LB", 424, 118);
+  for (const [dx, dy, a] of [[34, -6, -20], [42, 10, 10], [30, 22, 50], [50, -18, -60], [56, 24, 30]]) g += ige(432 + dx, 140 + dy, a);
+  g += num(396, 200, "4") + lignes(412, 196, ["Production des anticorps", "(IgE) dirigés contre", "l'allergène"]);
+  g += fl([432, 246], [362, 262]);
+  // 5 : fixation des IgE sur les mastocytes
+  g += masto(318, 268, true) + num(386, 296, "5") + lignes(402, 292, ["Fixation des IgE à la", "surface des mastocytes"]);
+  g += fl([300, 312], [290, 344]);
+  g += lignes(206, 362, ["Sensibilisation des mastocytes", "à une activation au prochain", "contact avec l'allergène"], ' font-weight="700"');
+  // séparation des deux contacts
+  g += L([560, 60], [560, 400], ' stroke-width="1" stroke-dasharray="4 4"');
+  // 2e contact : 1 captation des allergènes par les IgE fixés
+  g += masto(640, 150, true);
+  for (const [x, y] of [[592, 104], [624, 92], [668, 98], [694, 128], [700, 176], [586, 198], [672, 206], [604, 140]]) g += allergene(x, y);
+  g += T([566, 80], "Allergène", ' font-size="12" font-weight="700"') + P([[588, 86], [588, 96]], ' stroke-width="1"');
+  g += num(578, 246, "1") + lignes(594, 242, ["Captation des", "allergènes par les", "IgE fixés sur les", "mastocytes"], ' font-weight="700"');
+  g += fl([706, 150], [740, 150]);
+  // 2 : libération des médiateurs (dégranulation)
+  g += '<path d="M790 118c-22 0-34 16-32 34c2 14 10 22 22 24l-4 10 10-6 4 12 6-12 10 6-2-12c14-6 22-18 20-32c-2-14-14-24-34-24z"/>' + noyau(792, 140, 10, 8) + granules(788, 150, 14, 6);
+  for (const [x, y] of [[776, 196], [786, 204], [798, 198], [782, 214], [794, 216], [806, 208]]) g += '<circle cx="' + x + '" cy="' + y + '" r="2.6" fill="currentColor" stroke="none"/>';
+  for (const [x, y] of [[752, 104], [830, 108], [840, 150], [760, 176]]) g += allergene(x, y);
+  g += num(712, 246, "2") + lignes(728, 242, ["Libération des", "médiateurs de", "l'inflammation par", "les mastocytes"], ' font-weight="700"');
+  g += fl([790, 310], [790, 352]);
+  g += T([690, 384], "Réactions allergiques", ' font-size="15" font-weight="700"');
+  return svg(860, 420, g, "Mécanisme des réactions allergiques. Premier contact avec l'antigène : 1 entrée de l'allergène dans l'organisme ; 2 captation de l'allergène par les macrophages ; 3 présentation de l'allergène aux lymphocytes (LTh, LB) ; 4 production des anticorps (IgE) dirigés contre l'allergène ; 5 fixation des IgE à la surface des mastocytes, d'où la sensibilisation des mastocytes à une activation au prochain contact avec l'allergène. Deuxième contact : 1 captation des allergènes par les IgE fixés sur les mastocytes ; 2 libération des médiateurs de l'inflammation par les mastocytes, d'où les réactions allergiques.");
+};
 module.exports = S;
