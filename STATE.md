@@ -1,3 +1,156 @@
+## Apprendre : classes d'examen — leçons nouvelles RÉSERVÉES AUX ABONNÉS (18/11/2026)
+
+Décision de Jacques (question posée) : les nouvelles leçons des classes d'examen (3e, 1re, Tle) sont **réservées aux abonnés**, comme les 2 000 leçons existantes : début public, suite servie par `api/apprendre.php`.
+
+- **Chaîne payante** (`tools/build_apprendre_payant.cjs`) : sources HORS DÉPÔT (dépôt public) ; produit `apercus-<classe>.js` (début public), `charge.js`, et les `.json` de la suite à déposer par FTP dans `uploads/protected/apprendre/`. Ce build RÉÉCRIT tous les aperçus : ne jamais le lancer dans le dépôt sans toutes les sources.
+- **Méthode pour un nouveau lot** : 1) écrire la source au format de la chaîne (`VRT_L` sans la partie « Entraînement », `payant: true` ; `VRT_APC` avec situation, tache, resolution, etre, labo, partieLabo ≥ 1 ; `VRT_EXAM` avec sujet, situation, consignes, reponse) ; 2) la valider en lançant le build officiel sur une COPIE (`cp -r apprendre tools <copie>`) avec un fichier de modules d'essai (`VRT_MODULES`) ; 3) `node tools/ajouter_apercus.cjs <copie>/apprendre apprendre "<lot>"` ajoute le début public dans un bloc balisé en fin des aperçus du dépôt et met à jour les empreintes de `charge.js` ; 4) livrer à Jacques la source (pour son dossier hors dépôt) et les `.json` (FTP).
+- **Labo « choix »** (nouveau type dans `apprendre/labo.js`) : exercice à choix fait de données seules (`items = [[phrase avec ___, [bonne, leurres…], explication]]`), transportable dans le JSON payant ; remplace les simulations VRT_A (fonctions) pour les leçons à verrou.
+- **Lot 1 converti** : les 9 leçons de philosophie de Tle (science, existence et mort, Dieu et religion ; A, C, D) publiées gratuitement par la PR #375 sont retirées de `lecons.js` (`36-examens-philo-tle.js` supprimé) et passent à verrou ; livraison (source + 9 JSON) remise à Jacques dans `livraison-payant-lot1.zip`. Tant que les JSON ne sont pas déposés, un abonné voit « cette leçon n'est pas encore disponible sur le serveur ».
+- Vérifié : visiteur = titre, situation de départ, 1re partie (définitions), puis mur ; la situation résolue et les parties suivantes ne sont pas publiques ; labo « choix » fonctionnel. Contrôles GEO et bancs au vert.
+
+## Apprendre : classes d'examen, lot 1 — philosophie de Terminale (18/11/2026)
+
+Demande de Jacques : « Continue avec les autres matières et leçons non rédigées ou non enrichies. Finalise d'abord les classes d'examen ».
+
+- **État des lieux** (toutes leçons, gratuites `lecons.js` + payantes `apprendre/apercus-*.js`, 2 000 aperçus) : dans les classes d'examen, les vrais trous de la part « lettres » sont la philosophie de Tle A (37 lignes, 6 leçons), le français (115 à 142 lignes, une dizaine de leçons), l'anglais (moins de 10 leçons), et rien en orientation, cultures, langues anciennes et rares, arts, EPS, littérature en 3e, 1re, Tle. Pour compter les aperçus en Node : définir `global.VRT_L` avant `require("./apprendre/apercus-*.js")`.
+- **`apprendre/_src/36-examens-philo-tle.js`** : 9 leçons NOUVELLES au gabarit complet (enquête, 3 parties + « Entraînement au format du bac » avec dissertation et exercice sur texte, 2 planches 2D, 1 planche 3D, simulation, situation résolue avec formules, quiz de 10). Notions communes déclinées par `poser(base, [[classe, rang, id]…])` : la science (Tle A 23, Tle C/D 22), l'existence et la mort (A 32, C/D 26), Dieu et la religion (A 34, C/D 28). Rattachement par `rang` (numéro de ligne de la progression : exact).
+- Partage confirmé avec la session des sciences : elle crée les leçons de maths, PCT, SVT, informatique et TM des classes d'examen.
+- `lecons.js?v=20261118X36`. Chromium : aucune erreur, aucun débordement ; la page matière Tle A les place dans leurs chapitres. Audit : 89 leçons, 89 complètes.
+- **Suite** : Tle A (Towa, Njoh-Mouelle, nature et culture, art et travail, vérité, espace et temps, histoire), Tle C/D (État, panafricanisme, logique), puis français, anglais et autres matières des classes d'examen.
+
+## Apprendre : audit et enrichissement des leçons, lettres et sciences humaines (18/11/2026)
+
+Demande de Jacques : « Audite et corrige partout », puis « Continue ». Grille de l'audit `tools/audit_lecons.cjs` (session des sciences, PR #370) : situation de départ, situation résolue avec étapes, au moins 2 formules ou définitions, 2 exemples, 2 astuces, 2 planches 2D, 1 planche 3D, 1 simulation, et la nouvelle rubrique `denouement.formules` (« Les formules utilisées, étape par étape »).
+
+- **Partage** avec la session des sciences (accepté par message) : à elle les maths, la physique, la chimie, les SVT, l'informatique et la technologie ; à cette session le français, les langues, l'histoire-géo, l'ECM, la philosophie, les arts, l'EPS, les cultures, l'orientation et l'ESF.
+- **`apprendre/_src/29` à `34-enrichies-*.js`** : 47 leçons enrichies par AJOUT (`enrichir(id, {blocs, planches, formules})`) : règles et structures encadrées (`def`, `formule`), exemples (`ex`), astuces (`astuce`, `attention`, `methode`), une planche 2D de plus (tableaux, schémas de décision, ordonnance, frise, bureau, budget…), et 3 étapes de formules appliquées à la situation de départ.
+- **`35-orientation-3d.js`** : bureau de révision d'Aïcha et escalier des moyennes de Kevin en 3D (ces leçons avaient perdu leur 3D au lot 20).
+- **Pièges** : (1) une planche doit être un OBJET `{type, titre, legende, svg}` ; une chaîne SVG brute poussée dans `planches` est comptée par l'audit mais n'est pas affichée (corrigé, contrôle ajouté : 0 planche invalide) ; (2) éviter les doublons : relire les titres des planches existantes avant d'ajouter (3 doublons retirés : prépositions, arbre de famille, corps humain).
+- Audit : **80 leçons, 80 complètes**. `lecons.js?v=20261118L35` ; 47 pages `apprendre/cours/` régénérées. Chromium (1200 et 390 px) : aucun débordement, aucune erreur JS. Contrôles GEO et bancs au vert.
+
+## 18/11/2026 — Application : carte mentale des œuvres au nouveau dessin (branche carte-app)
+- app.js `_showLittCarte` : charge `chunks/carte-mentale.js` (copie EXACTE de apprendre/_src/00-carte-mentale.js, écrite et contrôlée par tools/oeuvres_statiques.js --controle) et affiche la même carte que les pages d'œuvres et les leçons (`_cmPage`). Ancien dessin canvas conservé en secours si le module ne charge pas.
+- « Télécharger (PNG) » : `_cmTelecharger` exporte la carte visible en PNG (≥ 1 800 px de large) avec `applyWatermark` ; animations neutralisées pour l'export.
+- Versions : app.js?v=1.20.84, sw.js CACHE_VERSION veritas-v1.20.84. ⚠ Un changement de version des assets exige `python3 tools/habiller_pages.py` (22 pages hors Apprendre reprennent ce numéro) : oublié dans #374, le déploiement a échoué au contrôle « habillage » ; corrigé par la PR suivante.
+
+## Apprendre : réalisme, lot 21 — zoom HD de la cellule au gène (18/11/2026)
+
+Demande de Jacques : « Continue » (suite du lot 20).
+
+- **`apprendre/_src/92-animations-realisme.js`** : l'animation « Zoome de la cellule jusqu'au gène » (3e ADN, partie 4) est refaite en haute définition et remplace celle de `90-animations-sciences.js` : 1) cellule animale HD avec le noyau encadré ; 2) noyau en division et 46 chromosomes en X à bandes ; 3) un chromosome agrandi (chromatides, centromère, filament d'ADN qui se déroule) ; 4) double hélice d'ADN avec paires de bases colorées (A-T, G-C) et un gène encadré.
+- `28-realisme-premiers-lots.js` exporte aussi `chromosome`, `LONG`, `CENT` dans `window.VRT_CELLULES` pour cette animation.
+- `lecons.js?v=20261118r21`. Chromium : aucune erreur JS. Contrôles GEO et bancs au vert.
+
+## Apprendre : réalisme des premiers lots, lot 20 (18/11/2026)
+
+Demandes de Jacques : « Oui améliore et rend les plus réalistes pertinentes », « Surtout les jours de semaine en orientation », « Même la structure HD de la cellule, cellule animale et végétale », « Continue ».
+
+- **`apprendre/_src/28-realisme-premiers-lots.js`** : remplace SEULEMENT des dessins (`dessinEnquete`, `dessinPlanche` par titre, `remplacerPlanche`) ou en ajoute ; aucun texte retiré.
+  - Situations de départ redessinées avec des personnages complets : ADN (salon d'Ebolowa, grand-mère, bébé), ressemblances (centre de Limbé, chimpanzé réaliste, jumelles), atome (fil de cuivre dénudé, chaîne en or), racines (carré à la ficelle, vraies poules), pH (cuvette de soude, huile de palme, pains de savon).
+  - ADN : **caryotypes** en vrais chromosomes en X (deux chromatides, centromère, bandes, longueurs relatives réelles, rangés en 4 lignes, XX / XY) ; **transfert de noyau** avec de vraies grenouilles (verte, albinos aux yeux rouges, têtard).
+  - pH : verrerie réaliste (balance, bécher, fiole jaugée, pissette, pipette jaugée et poire).
+  - **Orientation** : les planches 3D sans légende de jours / mois sont remplacées par un **planning de semaine** (Lundi à Dimanche, 0 h à 24 h, 15 h 30 de révisions) et un **calendrier de Septembre à Juin**, punaisés sur un tableau en liège.
+  - **Cellules en haute définition** (ultrastructure) : cellule animale (membrane, noyau à pores, nucléole, chromatine, mitochondries à crêtes, réticulum rugueux et lisse, Golgi, vésicules, lysosomes, centrosome, ribosomes) et cellule végétale (paroi, plasmodesmes, vacuole et tonoplaste, chloroplastes à grana et amidon…) ajoutées à `tle-sc-microscopie` (partie 4) et `tle-sc-organites` (partie 2).
+- **`apprendre/_src/92-animations-realisme.js`** (chargé après 90 et 91) : l'**explorateur de cellules** (animale / végétale, clic sur un organite → surbrillance + rôle) remplace l'animation simple « Clique sur un organite ».
+- **Piège** : certains titres de planches contiennent une espace insécable (« 500 mL ») ; la comparaison des titres normalise désormais U+00A0 et U+202F.
+- `lecons.js?v=20261118r20` ; 9 pages `apprendre/cours/` régénérées. Chromium (1200 et 390 px) : aucun débordement, aucune erreur JS. Contrôles GEO et bancs au vert.
+
+## Apprendre : révision des leçons approfondies, lot 19 (18/11/2026)
+
+Demande de Jacques : « Oui » (mettre les premières leçons au niveau des derniers lots). Audit automatique des 91 leçons (planche 3D, planche 2D ou schéma, simulation ou labo, quiz de 10, indices) : 8 leçons en dessous du niveau.
+
+- **`apprendre/_src/27-revision-approfondies.js`** : fonction `completer(id, [[partie, planches]], questions)` qui AJOUTE des planches et des questions (sans doublon, quiz plafonné à 10) ; rien n'est retiré.
+  - **2nde A dénombrement** : r26 (Venn) : classe rangée en 3D sur quatre tapis (7 / 13 / 11 / 17) + **simulation** Venn réglable avec contrôle de cohérence ; r27 (arbres) : 12 mannequins 3D (ndop, kaba, wax ; robe / ensemble ; coiffe) + **simulation** arbre de choix réglable ; r28 (kermesse) : **tableau de bord** Venn + plateaux / tickets ; quiz des trois portés de 8 à 10.
+  - **3e Kamerun** : **exercice** de frise (1884 traité ; 1891 Kuva Likenye à Buea ; 1899-1901 révolte bulu ; 1910-1914 plateau Joss ; août 1914 Duala Manga Bell, Ngoso Din, Samba ; 1916 Mora).
+  - **3e mangrove** : **modèle simplifié** coupe de la mangrove → crevettes, inondation, bois (indices / 100, présentés comme tels), option foyers améliorés et reboisement.
+  - **Tle bac** : journée équilibrée de 24 h (2D) ; **6e piste** : relais et zone de transmission de 30 m (2D) ; **2nde C production** : nature, travail, capital (2D).
+- `lecons.js?v=20261118r19` (master était passé à `m6f` avec la PR #366 de l'autre session) ; 8 pages `apprendre/cours/` régénérées. Chromium (1200 et 390 px) : aucun débordement, aucune erreur JS. Contrôles GEO et bancs au vert. L'audit ne signale plus aucune leçon en dessous du niveau.
+
+## 18/11/2026 — Consignes d'enrichissement de TOUTES les leçons (branche lecons-enrichies)
+Jacques : « Résoudre la situation-problème de départ en donnant des formules avec les étapes de la leçon ; illustrer par des exemples ; formules, détails précis, astuces ; planches animées en 2D et 3D. » (exemple cité : « Mesurer une grandeur et estimer l'erreur », 2nde C physique).
+- **Grille** (tools/audit_lecons.cjs) : situation de départ ; situation résolue (étapes + réponse) ; ≥ 2 formules/définitions (class formule|def) ; ≥ 2 exemples (class ex) ; ≥ 2 astuces (astuce|attention|savais|methode) ; ≥ 2 planches 2D ; ≥ 1 planche 3D ; ≥ 1 simulation. État initial : 80 leçons, 7 complètes, 73 à enrichir.
+- **Gabarit** (lecon.html) : `denouement.formules = [{ nom, f, calcul }]` → bloc « Les formules utilisées, étape par étape » (formule générale puis application chiffrée) dans la situation résolue. modele.css?v=20261118u.
+- **2nde-c-physique-mesure** complète : définition, exemples (vernier 23,7 mm, balance non tarée, chronomètre en retard, parallaxe, pendule), formules (moyenne, incertitude absolue et relative, écriture du résultat), astuces (test du vide, « M-É-R »), planches 2D « Lire 23,7 mm sur le vernier » et « L'intervalle de mesure du sac », résolution en 6 étapes chiffrées.
+- « Change en vraies cartes mentales esthétiques » (schémas offerts et schémas des leçons payantes, p.illus.svg, générés HORS dépôt) : `VRT_CM.depuisSvg(svg)` (00-carte-mentale.js) relit le schéma dans le navigateur (titre, cadres, titres, listes, notes, flèches) et le redessine en carte mentale ; appelé dans lecon.html (p.illus) et verrou.js (« Schéma offert »). Ne convertit que les schémas en cadres et listes : courbes, tracés, cartes, frises, dessins, tableaux et grilles restent tels quels. 57 schémas sur 296 convertis (flux 16, radiale 11, roue 8, arbre 8, bulles 6…). verrou.js?v=20261118cm, modele.css?v=20261118v.
+- « Audite et corrige partout » : audit renforcé (exige aussi ≥ 2 formules de résolution dans denouement.formules). apprendre/_src/89-enrichissements-sciences.js (ajouts seulement, après les sources et avant les animations) complète TOUTES les leçons de sciences (maths, physique, chimie, PCT, SVT, sciences, informatique, technologie, 33 leçons) : résolution étape par étape avec formules et calculs chiffrés, définitions, formules, exemples, astuces, et planches 2D ajoutées (carré √50, atomes Cu/Au, caractères de l'espèce, ensembles emboîtés, décimaux, diagrammes de Venn, IA, entrée-sortie, RAM/disque, crayons, outils, grille et sites de pépinière). Audit : 0 leçon de sciences incomplète ; 33/80 complètes, les 47 restantes (lettres, langues, histoire-géo, ECM, philo, arts, EPS, cultures, orientation, ESF) sont prises par la session « Enrichissement des leçons » (fichiers 29-…).
+- Partage proposé à la session « Enrichissement des leçons » : moi = sciences (maths, physique, chimie, PCT, SVT, informatique, technologie) ; elle = lettres, langues, histoire-géo, ECM, philo, arts, EPS, cultures nationales, orientation, ESF.
+
+## Apprendre : lot 18, 6e — toutes les leçons gratuites au gabarit approfondi (18/11/2026)
+
+Demande de Jacques : « Continue ». L'autre session crée de NOUVELLES leçons de maths de 6e (`16c-approfondies-6e-maths.js` : cercle, proportionnalité, pavé droit) ; aucun recouvrement (coordination confirmée par message).
+
+- **`apprendre/_src/26-approfondies-premier-cycle-5.js`** : les 3 dernières leçons gratuites sans situation de départ, remplacées en place (schémas d'origine `illus` conservés, quiz portés à 10 questions) :
+  - **EPS, coordination bras-jambes** : séance de vitesse à Bafia (bras collés, bras du même côté, crampes) ; foulée décomposée, coureur articulé 3D (membres en chaînes de sphères) ; **simulation animée** (requestAnimationFrame, arrêt si l'élément quitte la page) : bras collés / même côté / opposés et torsion du buste vue de dessus.
+  - **Technologie, matériel de dessin** : plan raté du kiosque à Bafoussam (4B pour construire, couvercle, angles « à l'œil ») ; planche à dessin 3D (règle, équerre évidée, rapporteur, compas, crayons H / HB / 4B, gomme) ; **simulation** dureté du crayon et gommage ; **exercice** « quel instrument ? » (6 traits).
+  - **Technologie, site d'une pépinière** : club agricole de Mbalmayo (fromager du bas-fond contre terrain près du forage) ; pépinière 3D (sachets, ombrière de palmes, clôture, forage, fût, piste) ; **simulation** grille notée 0-2 sur 6 critères (A = 5/12, B = 11/12).
+- **Pièges rencontrés (moteur 3D)** : une grande face unique (`div:false`, ou un `poly` étendu) posée sous de petits objets plats les recouvre selon l'angle (tri par profondeur des centres) ; mieux vaut un plateau subdivisé (par défaut) et des objets un peu épais (barres, petits blocs) plutôt que des lamelles ou des polygones plats. Les modèles dont l'origine est au sol doivent être recentrés (coureur décalé de −105 en y).
+- `lecons.js?v=20261118m18` ; 3 pages `apprendre/cours/` régénérées et habillées. Chromium (1200 et 390 px) : aucun débordement, aucune erreur JS. Contrôles GEO et bancs au vert.
+- **Bilan** : les 91 leçons de `lecons.js` ont toutes une situation de départ résolue (`enquete` + `denouement`).
+
+## 18/11/2026 — Apprendre : 6e Mathématiques, lot 3 (branche apprendre-6e-maths-3)
+- apprendre/_src/16d-approfondies-6e-maths-2.js : 3 leçons NOUVELLES au gabarit approfondi (mêmes outils que 16c) :
+  - 6e-maths-fractions (ligne 26, « Numérateur, dénominateur, fractions égales ») : jus de foléré du CES de Mora, 3/4 = 6/8, bidon 3D en quarts, simulation de comparaison.
+  - 6e-maths-angles (ligne 30, « Notions d'angle ou de secteur angulaire ») : horloge de l'école de Kribi, six familles d'angles, rapporteur, horloge 3D (cadran carré découpé en tuiles : un grand disque se trie mal dans planche3d.js), simulation heure → angle.
+  - 6e-maths-symetrie-axiale (ligne 74, « Points symétriques par rapport à une droite ») : motif ndop de Bamenda, miroir 3D, motif complété, axes de symétrie, simulation du point et de son symétrique.
+- Rattachement vérifié, 0 doublon sur les 7 leçons de 6e maths ; 0 erreur, 0 débordement à 390 et 1280 px ; bancs verts.
+
+## Apprendre : lot 17, 6e (18/11/2026)
+
+Demande de Jacques : « Continue ». L'autre session (retouches de leçons) a confirmé par message qu'elle laisse les leçons de 6e-5e-4e à cette session ; sa PR #357 ajoutera une carte mentale automatique en fin de leçon (pas besoin de planche récapitulative).
+
+- **`apprendre/_src/25-approfondies-premier-cycle-4.js`** : 4 leçons de 6e au gabarit approfondi, remplacées en place (schémas d'origine `illus` conservés, quiz portés à 10 questions) :
+  - **Latin, origine et importance** : liste de fournitures de Léa à Kribi (« le latin est mort », « le français vient de l'anglais ») ; aqueduc romain 3D, arbre des langues romanes (noctem) ; **exercice** des racines latines (8 mots).
+  - **Latin, jours et mois** : calendrier d'une classe d'Ebolowa (« lundi = l'un-di », « septembre par erreur ») ; les sept astres 3D (Saturne et ses anneaux, Jupiter à bandes), Quintilis → Iulius, Sextilis → Augustus, Janus ; **simulation** : faire commencer l'année en mars ou en janvier.
+  - **Arts, les branches** : trois jurys du festival de Foumban (conte, balafon) ; bronze, ndop indigo, jarre ; balafon 3D (lames et calebasses) ; **exercice** « quel jury ? » (8 œuvres).
+  - **EPS, la piste** : finale du 200 m à Ngaoundéré (décalage du couloir 8, coureur qui coupe le virage) ; stade 3D (huit couloirs en `poly`, corde, arrivée) ; **simulation** du décalage (200 / 400 m, couloirs 1 à 8, rayons de course réglementaires : 36,80 m puis 36,5 + 1,22 (i − 1) + 0,2).
+- Partie 1 de `6e-eps-piste` : l'animation de `91-animations-2.js` est conservée ; la simulation du décalage est en partie 2.
+- `lecons.js?v=20261118m17` (après fusion de master : PR #357, cartes mentales) ; 4 pages `apprendre/cours/` régénérées et habillées. Chromium (1200 et 390 px) : aucun débordement, aucune erreur JS. Contrôles GEO et bancs au vert.
+- **Suite** : 3 dernières leçons de 6e (coordination bras-jambes, matériel de dessin, site d'une pépinière).
+
+## 18/11/2026 — Apprendre : 6e Mathématiques, lot 2 (branche apprendre-lot-suite)
+- apprendre/_src/16c-approfondies-6e-maths.js : 3 leçons NOUVELLES au gabarit approfondi, sur des lignes de la progression sans leçon (coordonné avec la session « Enrichissement des leçons », qui prend les leçons gratuites existantes de 6e-4e).
+  - 6e-maths-cercle (« Périmètre ou circonférence du cercle », ligne 23) : le puits de Ngaoundéré, roue déroulée, disque redressé, puits 3D, simulation cercle/carré.
+  - 6e-maths-proportionnalite (« Tableau de proportionnalité », ligne 36) : le riz du marché Mfoundi, sacs et pièces 3D, quatrième proportionnelle, pourcentage et échelle, simulation avec promotion.
+  - 6e-maths-pave-droit (« Patron d'un cube et d'un pavé droit », ligne 53) : les savons de Bafang, boîte 3D de 30 savons, patron, aire 992 cm², volume 1 920 cm³, simulation des dimensions.
+- Rattachement vérifié (cle → VRT_PROG), 0 doublon ; Chromium 390/1280 px : 0 erreur, 0 débordement ; bancs verts.
+
+## Apprendre : lot 16, 4e et 6e (18/11/2026)
+
+Demande de Jacques : « Continue ». Vérifié avant d'écrire : aucune PR ni branche ouverte ne touche ces leçons (la PR #357 de l'autre session ne modifie que `00-carte-mentale.js`).
+
+- **`apprendre/_src/24-approfondies-premier-cycle-3.js`** : 4 leçons au gabarit approfondi, remplacées en place (schémas d'origine `illus` conservés, quiz portés à 10 questions) :
+  - **4e langues nationales, les tons** : affiche du club de langues (« on efface les accents ? ») ; hauteur ou volume (ondes), tambour d'appel 3D (nkul, lèvre fine / épaisse) ; **simulation sonore** (Web Audio) : écouter les 5 tons puis les reconnaître à l'oreille.
+  - **6e langues nationales, la carte linguistique** : nouvel élève de Maroua (« deux langues seulement » / « une seule avec des accents ») ; salutations dans 6 langues, maquette 3D du Cameroun en carreaux colorés par famille, carte des aires culturelles d'origine ; **exercice** des familles (8 langues).
+  - **6e informatique, l'IA** : exposé sur le mont Cameroun (« 6 095 m » au lieu de 4 095) ; ce que l'IA fait / n'a pas, téléphone 3D qui reconnaît un fruit ; **simulation** d'un classifieur mangue / avocat avec exemples mal choisis (partie 3).
+  - **6e informatique, les composants** : coupure de courant en salle informatique (« l'écran, c'est l'ordinateur », « la souris est une sortie ») ; unité centrale 3D en vue éclatée ; **exercice** entrée / sortie / stockage (partie 3).
+- **Piège rencontré** : `90-animations-sciences.js` (chargé après) attache déjà des animations à la partie 1 de `6e-info-ia` et `6e-info-composants` ; un `VRT_A` sur la même partie est écrasé. Vérifier `grep VRT_A("id"` avant de choisir la partie.
+- `lecons.js?v=20261118l16` ; 4 pages `apprendre/cours/` régénérées et habillées. Chromium (1200 et 390 px) : aucun débordement, aucune erreur JS. Contrôles GEO et bancs au vert.
+- **Suite** : 7 leçons de 6e (latin origine et jours, EPS piste et bras-jambes, branches des arts, matériel de dessin, site d'une pépinière).
+
+## Apprendre : lot 15, 5e et 4e (18/11/2026)
+
+Demande de Jacques : « Continue d'enrichir les autres leçons ». Il ne restait que du premier cycle (6e : 10, 5e : 3, 4e : 2) ; l'autre session (premier cycle, dernier lot le 17/11) a été prévenue par message ; elle travaille sur les annales et les en-têtes. Vérifié avant d'écrire : aucune PR ni branche non fusionnée sur ces leçons.
+
+- **`apprendre/_src/23-approfondies-premier-cycle-2.js`** : 4 leçons au gabarit approfondi, remplacées en place :
+  - **5e français, la subordonnée relative** : lettre de Junior (Bandjoun) à son correspondant belge (« le chef que je t'ai parlé ») ; schéma antécédent / pronom / relative, village 3D (chefferie au toit pyramidal, piliers, marché, bois sacré) ; **exercice** qui / que / dont / où (8 phrases).
+  - **5e histoire, Pygmées et Sao** : dispute au Musée national (« des géants ! ») ; carte du Cameroun des deux peuples, village sao 3D sur sa butte dans la plaine inondée ; **simulation** du bronze à la cire perdue (5 étapes).
+  - **5e géographie, croissance de la population** : classe de 112 élèves à Garoua (36 − 9 = 27 ‰, pas 45) ; courbe mondiale 1750-2022, pyramide des âges 3D du Cameroun (ordres de grandeur) ; **simulation** natalité / mortalité / projection.
+  - **4e grec, l'alphabet** : carte postale ΑΘΗΝΑ (faux amis Η, Ρ, Χ) ; du phénicien au latin, stèle de marbre 3D gravée, atelier des racines ; **exercice** de transcription (8 mots) ; quiz porté à 10 questions.
+- `lecons.js?v=20261118l15` ; 4 pages `apprendre/cours/` régénérées et habillées. Chromium (1200 et 390 px) : aucun débordement, aucune erreur JS. Contrôles GEO et bancs au vert.
+- **Suite** : 4e-ln-tons et les 10 leçons de 6e (info, langues nationales, latin, EPS, arts, technologie).
+
+## Apprendre : lot 14, 2nde A (18/11/2026)
+
+Demande de Jacques : « continue », puis « voir ce qui a été fait pour éviter les doublons ». Vérification faite avant d'écrire : aucune PR ouverte, aucune branche non fusionnée et aucune autre session ne touchait ces 4 leçons (seules 6e-5e-4e sont chez l'autre session).
+
+- **`apprendre/_src/22-approfondies-2nde-a.js`** : les 4 dernières leçons gratuites de 2nde A au gabarit approfondi, remplacées en place (partie « Entraînement au format de l'examen » et quiz de 10 d'origine repris) :
+  - **Maths, ℝ et ses sous-ensembles** : tontine des couturières de Bafoussam (100 000/6 « tout rond », dette de −3 000 F, biais d'un pagne carré) ; droite graduée, labo ensembles, table de coupe 3D (pagne wax, diagonale √2) ; **simulation** de partage (décimal ou non, part en francs, reste en caisse).
+  - **Histoire, les disciplines affinitaires** : tessons du chantier de Mbalmayo (« des débris » / « sept générations ») ; l'historien et ses 8 alliés, coupe stratigraphique 3D (couches, perles de traite, tessons, charbon, mire) ; **simulation** carbone 14 (88 % → environ 1 060 ans).
+  - **Philosophie, définitions** : rumeur WhatsApp reçue à Ngaoundéré ; philein + sophia, escalier de Socrate appliqué au message, arbre à palabres 3D ; **exercice** opinion / question philosophique / fait (7 phrases).
+  - **Géographie, lire une carte** : plan d'évacuation d'un quartier riverain du Wouri (3,5 cm au 1/10 000 = 350 m, pas 3,5 km) ; carte complète TOLES avec légende, maquette 3D du quartier (fleuve, mangrove, colline-refuge, rose des vents) ; **simulation** règle et échelles.
+- `lecons.js?v=20261118l14` ; 4 pages `apprendre/cours/` régénérées et habillées. Chromium (1200 et 390 px) : aucun débordement, aucune erreur JS. Contrôles GEO et bancs au vert.
+- **État** : toutes les leçons gratuites de 3e, 2nde, 1re et Tle sont au gabarit approfondi. Restent 6e (10), 5e (3), 4e (2), confiées à l'autre session.
+
 ## Apprendre : lot 13, 2nde (18/11/2026)
 
 Demande de Jacques : « continue ». Lot 12 (PR #358) fusionné et déployé.
@@ -36,6 +189,24 @@ Demandes de Jacques : « Continue », puis « continue ».
   - **Italien, accordo e disaccordo** : débat du club d'italien de Deïdo ; salle de débat 3D, réaction en trois temps ; **exercice** accordo / disaccordo / sfumatura.
 - `lecons.js?v=20261118l11` ; 4 pages `apprendre/cours/` régénérées et habillées. Chromium (1200 et 390 px) : aucun débordement, aucune erreur JS. Bancs : réglages 29/29, verrou 18/18, gabarits 54/54, planche mobile 23/23, charte 34/34, lisibilité 7/7 ; contrôles GEO au vert.
 - **Suite** : 1re chinois (budan, ruguo), Tle arabe (khabar, verbes) ; 2nde (maths, français, ECM, histoire, philosophie, géographie).
+
+## 18/11/2026 — Vraies cartes mentales : œuvres et leçons (branche offres-entetes)
+- apprendre/_src/00-carte-mentale.js (VRT_CM) : nuage central, flèches courbes, étiquettes entourées à main levée et numérotées, mots en éventail en italique, fond de cahier pointé ; en étoile sur grand écran, en arbre sur téléphone (bascule CSS à 640 px) ; animation de tracé (désactivée si mouvement réduit).
+- Pages d'œuvres (tools/oeuvres_statiques.js) : la grille de 4 boîtes remplacée par VRT_CM (même source litt-oeuvres.js), CSS du module injecté dans OE_CSS.
+- Leçons (apprendre/lecon.html) : « La carte mentale de la leçon » en fin de cours et en tête de la révision, tirée des parties (hors entraînement/parties verrouillées) et de « à retenir » (coupé aux « ; » et aux phrases), à défaut des mots-clés en gras. Pas de carte derrière un mur.
+- Marges mesurées avec Poppins chargée : ≥ 54 px de chaque côté ; branches rapprochées du noyau (« recentre plus vers l'intérieur »).
+- 18/11 (suite) « varie les styles de cartes » : 11 formes (radiale, organigramme, bulles, accolade « { », alvéoles, flux, causes-conséquences, roue, arête de poisson, arbre dessiné, frise chronologique) × 3 styles (main levée, coloré, sobre), tirés du titre (stables) ; 4 palettes harmonieuses remplacent les couleurs ternes ; traits et flèches épaissis. Leçons : frise pour l'histoire, flux pour les étapes, causes-conséquences seulement si deux parties distinctes. Titres longs passés à la ligne ; contrôle des marges sur 33 cartes × 2 tailles : 0 débordement.
+- « Trop classique, mets de la fantaisie » : style sobre retiré du tirage ; deux styles ajoutés, post-it (notes inclinées, ruban adhésif, coin corné, fond kraft) et ardoise (tableau vert encadré de bois, craie de couleur, nuage pointillé). Tirage actuel des leçons : ardoise 18, coloré 21, post-it 20, main levée 15.
+- « Arrière-fond en blanc pour plus de lisibilité » : fond blanc pur pour tous les styles (plus de kraft, de pointillés ni de dégradé) ; l'ardoise (craie claire, illisible sur blanc) sort du tirage. Tirage : main levée, coloré, post-it.
+- Carte de la leçon : une seule fois, en fin de cours (pas dans la Révision : règle « pas de doublon »).
+- Reste à faire : la carte de l'application (_showLittCarte, app.js) garde son ancien dessin.
+
+## 18/11/2026 — Formules compactes : en-tête teinté plus foncé, milieu blanc (branche offres-entetes)
+- Starter vert, Pro bleu, Élite violet : seul l'en-tête (nom, prix, public) garde la teinte, un peu plus foncée ; la liste des avantages est sur fond blanc.
+- Avantages alignés à gauche (plus de mots étirés).
+- « Pour commencer » et « Situation de vie » : titre dans un petit cadre posé sur le bord de l'encadré, comme les notes.
+- « Ta tâche » (situation de vie et enquête) : plus d'encadré, pastille crayon + texte en italique. modele.css?v=20261118t.
+- Tableaux des fiches de méthode, annales et séquentielles (tools/methodes/_methode.css, 166 pages régénérées) : quadrillage fin comme dans la leçon de dénombrement, en-tête et première colonne bleu pâle en gras.
 
 ## Leçons : étiquettes de planche sans « 2D » ni « 3D » (17/11/2026)
 

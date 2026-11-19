@@ -930,4 +930,167 @@ S["bac-2025-maths-ce-paraboles"] = () => {
   g += T([X(1.25), Y(-0.25) + 14], "(D)", ' font-size="12" font-style="italic"') + T([X(1.55), Y(1.0)], "(D')", ' font-size="12" font-style="italic"');
   return svg(R.W, R.H, g, "La parabole (C) : y = x², de sommet O, de foyer F(0 ; 1/4) et de directrice (D) : y = −1/4 ; en pointillés, son image (Γ) par la rotation de centre O et d'angle π/4, de même sommet O, d'axe la droite y = −x, de foyer F'(−√2/8 ; √2/8) et de directrice (D') : x − y − √2/4 = 0.");
 };
+// Probatoire 2024 chimie C-D-E, partie B : la lampe à acétylène (figure du sujet).
+S["proba-2024-chimie-lampe"] = () => {
+  const fs = ' font-size="13"', fb = ' font-size="13" font-weight="700"';
+  let g = P([[150, 50], [250, 50], [278, 205], [122, 205], [150, 50]], ' stroke-width="1.6"');
+  g += '<polygon points="140,105 260,105 266,135 134,135" fill="currentColor" fill-opacity="0.3" stroke-width="1.2"/>';
+  g += L([200, 135], [200, 142], ' stroke-width="1.2"') + '<circle cx="200" cy="147" r="4" fill="none" stroke-width="1.2"/>';
+  g += '<polygon points="140,198 136,182 152,170 168,180 164,198" fill="currentColor" fill-opacity="0.55" stroke-width="1"/>';
+  g += '<polygon points="174,198 168,182 182,166 204,166 214,182 206,198" fill="currentColor" fill-opacity="0.55" stroke-width="1"/>';
+  g += L([132, 170], [64, 82], ' stroke-width="1.4"') + L([138, 176], [70, 88], ' stroke-width="1.4"');
+  g += '<path d="M60 80 Q48 70 54 56 Q62 66 66 58 Q72 72 60 80Z" fill="currentColor" fill-opacity="0.25" stroke-width="1.2"/>';
+  g += L([96, 28], [72, 50], ' stroke-width="1"') + fleche([68, 54], [76, 46], 6) + T([92, 22], "flamme", fb);
+  g += L([124, 66], [90, 92], ' stroke-width="1"') + fleche([84, 96], [94, 89], 6) + T([116, 60], "bec", fb);
+  g += L([320, 120], [268, 120], ' stroke-width="1"') + fleche([262, 120], [272, 120], 6) + T([324, 112], "Réserve", fb) + T([324, 130], "d'eau", fb);
+  g += L([320, 180], [216, 182], ' stroke-width="1"') + fleche([210, 182], [220, 182], 6) + T([324, 172], "Carbure de", fb) + T([324, 190], "calcium", fb);
+  g += T([200, 232], "Lampe à acétylène", fb + ' text-anchor="middle"');
+  return svg(410, 242, g, "Lampe à acétylène : un récipient contenant en haut une réserve d'eau, qui goutte sur des morceaux de carbure de calcium placés au fond ; le gaz produit monte par un tube jusqu'au bec, où brûle la flamme.");
+};
+// Corrigé : dispositif de dosage des ions Fe2+ par le permanganate de potassium.
+S["proba-2024-chimie-dosage"] = () => {
+  const fs = ' font-size="12"';
+  let g = L([40, 20], [40, 290], ' stroke-width="2"') + '<rect x="14" y="288" width="160" height="8" stroke-width="1.4"/>' + L([40, 70], [96, 70], ' stroke-width="1.6"');
+  g += '<rect x="96" y="20" width="14" height="170" stroke-width="1.4"/>' + '<rect x="97" y="40" width="12" height="149" fill="currentColor" fill-opacity="0.35" stroke="none"/>';
+  for (let y = 40; y <= 180; y += 10) g += L([110, y], [y % 50 === 0 ? 102 : 105, y], ' stroke-width="0.7"');
+  g += P([[96, 190], [101, 205], [101, 214]], ' stroke-width="1.4"') + P([[110, 190], [105, 205], [105, 214]], ' stroke-width="1.4"') + '<rect x="96" y="196" width="18" height="6" stroke-width="1"/>';
+  g += P([[70, 222], [70, 282], [136, 282], [136, 222]], ' stroke-width="1.6"') + '<rect x="71" y="244" width="64" height="37" fill="currentColor" fill-opacity="0.12" stroke="none"/>' + '<rect x="94" y="276" width="18" height="4" fill="currentColor" stroke="none"/>';
+  g += '<rect x="58" y="284" width="90" height="4" stroke-width="1"/>';
+  g += L([122, 30], [168, 30], ' stroke-width="0.9"') + T([172, 26], "burette graduée : solution de permanganate", fs) + T([172, 42], "de potassium, C₀ = 0,1 mol/L", fs);
+  g += L([132, 199], [168, 178], ' stroke-width="0.9"') + T([172, 182], "robinet", fs);
+  g += L([136, 258], [168, 246], ' stroke-width="0.9"') + T([172, 242], "bécher : Vr = 20 mL de solution de", fs) + T([172, 258], "sulfate de fer II acidifiée (H₂SO₄)", fs);
+  g += L([112, 279], [168, 272], ' stroke-width="0.9"') + T([172, 276], "barreau aimanté", fs) + L([148, 286], [168, 300], ' stroke-width="0.9"') + T([172, 306], "agitateur magnétique", fs);
+  return svg(470, 318, g, "Dispositif de dosage : une burette graduée, fixée à un support, contient la solution de permanganate de potassium ; en dessous, un bécher contient 20 mL de la solution de sulfate de fer II acidifiée, agitée par un barreau aimanté posé sur un agitateur magnétique.");
+};
+// Corrigé partie B : synthèse de l'acétylène au laboratoire (eau sur carbure de calcium, gaz recueilli sur l'eau).
+S["proba-2024-chimie-synthese"] = () => {
+  const fs = ' font-size="12"';
+  let g = '<path d="M70 72 L58 40 L102 40 L90 72 Z" stroke-width="1.4"/>' + '<rect x="59" y="46" width="42" height="12" fill="currentColor" fill-opacity="0.15" stroke="none"/>' + L([80, 72], [80, 108], ' stroke-width="1.4"') + '<rect x="74" y="84" width="12" height="6" stroke-width="1"/>';
+  g += '<path d="M66 112 L66 130 Q30 150 34 185 Q40 215 80 215 Q120 215 126 185 Q130 150 94 130 L94 112 Z" stroke-width="1.6"/>';
+  g += '<polygon points="56,206 62,192 76,196 72,208" fill="currentColor" fill-opacity="0.55" stroke="none"/><polygon points="82,208 86,194 102,196 100,209" fill="currentColor" fill-opacity="0.55" stroke="none"/>';
+  g += P([[90, 112], [90, 100], [218, 100], [218, 222], [250, 222], [250, 192]], ' stroke-width="1.6"');
+  g += '<rect x="200" y="160" width="140" height="70" stroke-width="1.6"/>' + '<rect x="201" y="176" width="138" height="53" fill="currentColor" fill-opacity="0.12" stroke="none"/>';
+  g += '<path d="M236 214 L236 128 Q236 120 244 120 L256 120 Q264 120 264 128 L264 214" stroke-width="1.4"/>' + '<rect x="237" y="150" width="26" height="64" fill="currentColor" fill-opacity="0.12" stroke="none"/>';
+  g += L([110, 46], [150, 30], ' stroke-width="0.9"') + T([154, 28], "ampoule de coulée (eau)", fs);
+  g += L([108, 200], [150, 250], ' stroke-width="0.9"') + T([110, 262], "ballon : carbure de calcium CaC₂", fs);
+  g += L([170, 100], [178, 74], ' stroke-width="0.9"') + T([158, 68], "tube à dégagement", fs);
+  g += L([264, 134], [300, 110], ' stroke-width="0.9"') + T([304, 104], "éprouvette retournée :", fs) + T([304, 120], "acétylène C₂H₂", fs);
+  g += L([330, 200], [360, 212], ' stroke-width="0.9"') + T([344, 228], "cuve à eau", fs);
+  return svg(460, 272, g, "Montage de synthèse de l'acétylène : l'eau d'une ampoule de coulée tombe goutte à goutte sur le carbure de calcium contenu dans un ballon ; le gaz formé passe par un tube à dégagement et se recueille dans une éprouvette retournée sur une cuve à eau.");
+};
+// Probatoire 2024 physique C-E, exercice 3.1 : descente du parachutiste (document du sujet).
+S["proba-2024-physique-ce-parachute"] = () => {
+  const fs = ' font-size="11"', fb = ' font-size="11" font-weight="700"';
+  let g = L([30, 30], [330, 30], ' stroke-width="1.4"') + fleche([338, 30], [328, 30], 7);
+  g += '<path d="M40 30 l14 -4 l6 4 l-6 4 Z" fill="currentColor" stroke="none"/><path d="M262 30 l14 -4 l6 4 l-6 4 Z" fill="currentColor" stroke="none"/>';
+  g += '<path d="M100 30 Q190 34 230 110 Q262 168 300 205 Q318 222 340 226" stroke-width="2"/>';
+  g += L([100, 30], [100, 110], ' stroke-width="1"') + fleche([100, 114], [100, 104], 6) + fleche([100, 26], [100, 36], 6) + T([106, 74], "h", ' font-size="12" font-style="italic"');
+  g += L([100, 110], [222, 110], ' stroke-width="0.9" stroke-dasharray="4 3"') + T([222, 126], "Ouverture du parachute", fb + ' text-anchor="end"');
+  g += '<circle cx="230" cy="110" r="5" stroke-width="1.4"/>';
+  g += L([20, 228], [345, 228], ' stroke-width="1.8"') + T([24, 222], "Sol terrestre", fb);
+  g += L([70, 17], [97, 27], ' stroke-width="0.9"') + T([6, 13], "Le parachutiste sort de l'avion à l'instant t₀", fs);
+  g += T([120, 164], "Trajectoire du", fs) + T([120, 177], "parachutiste", fs) + L([196, 166], [254, 158], ' stroke-width="0.9"');
+  g += T([262, 70], "À l'instant t₁", fs) + L([270, 76], [238, 104], ' stroke-width="0.9"') + fleche([235, 107], [242, 100], 5);
+  return svg(360, 240, g, "Document : l'avion vole horizontalement ; le parachutiste le quitte à l'instant t₀, décrit une trajectoire courbe vers le bas ; à l'instant t₁, une hauteur h plus bas que le point de sortie, le parachute s'ouvre ; il atteint ensuite le sol terrestre.");
+};
+// Probatoire 2024 physique C-E, partie II : le circuit (bornes A et B, ampèremètre, moteur M, résistor R).
+S["proba-2024-physique-ce-circuit"] = () => {
+  const fs = ' font-size="13" font-weight="700"';
+  let g = P([[30, 90], [30, 40], [124, 40]]) + '<circle cx="144" cy="40" r="20" stroke-width="1.6"/>' + T([138, 45], "A", fs) + P([[164, 40], [240, 40], [240, 88]]);
+  g += '<circle cx="240" cy="110" r="22" stroke-width="1.6"/>' + T([231, 115], "M", fs) + P([[240, 132], [240, 180], [180, 180]]);
+  g += '<rect x="100" y="168" width="80" height="24" stroke-width="1.6"/>' + T([134, 210], "R", fs) + P([[100, 180], [30, 180], [30, 128]]);
+  g += '<circle cx="30" cy="92" r="3" fill="currentColor" stroke="none"/><circle cx="30" cy="126" r="3" fill="currentColor" stroke="none"/>' + T([38, 97], "A", fs) + T([38, 131], "B", fs);
+  g += L([144, 62], [144, 76], ' stroke-width="1"') + fleche([144, 80], [144, 72], 5) + T([150, 78], "I", ' font-size="12" font-style="italic"');
+  return svg(280, 220, g, "Circuit électrique : entre les bornes A et B de l'alimentation sont branchés en série un ampèremètre, le moteur M et un résistor R.");
+};
+// Probatoire 2024 physique D-TI, partie II : le manège (figure du sujet).
+S["proba-2024-physique-dti-manege"] = () => {
+  const fs = ' font-size="12" font-weight="700"';
+  let g = L([10, 210], [180, 210], ' stroke-width="1.8"');
+  g += '<path d="M180 210 Q196 210 198 180 L204 60 Q210 20 222 20 Q234 20 240 60 L248 180 Q250 210 268 210 L380 210" stroke-width="1.8"/>';
+  g += L([216, 18], [380, 18], ' stroke-width="1.2"') + L([360, 22], [360, 206], ' stroke-width="1.1"') + fleche([360, 18], [360, 28], 7) + fleche([360, 210], [360, 200], 7) + T([368, 108], "h", ' font-size="14" font-weight="700"');
+  g += L([186, 170], [192, 72], ' stroke-width="1.1"') + fleche([192, 64], [191.5, 74], 6) + L([254, 74], [260, 172], ' stroke-width="1.1"') + fleche([260, 180], [259.5, 170], 6);
+  g += T([40, 204], "A", fs) + T([168, 204], "B", fs) + T([216, 12], "C", fs) + T([272, 204], "D", fs);
+  g += T([24, 226], "Départ", fs) + T([150, 230], "Propulsion", fs);
+  return svg(392, 240, g, "Le manège : la locomotive part de A, est propulsée sur la portion rectiligne horizontale AB, monte jusqu'au sommet C situé à la hauteur h au-dessus de la voie, puis redescend vers D.");
+};
+// Probatoire 2024 SVT D, document 1 : mode d'action du VIH dans une cellule cible (libellés du sujet).
+S["proba-2024-svt-d-vih"] = () => {
+  const fs = ' font-size="11"', fb = ' font-size="11" font-weight="700"', num = (p, n) => T(p, n, ' font-size="14" font-weight="700"');
+  const virion = (cx, cy, r) => { let v = '<circle cx="' + cx + '" cy="' + cy + '" r="' + r + '" stroke-width="1.4"/>' + '<rect x="' + (cx - r * 0.45) + '" y="' + (cy - r * 0.45) + '" width="' + r * 0.9 + '" height="' + r * 0.9 + '" stroke-width="1.1"/>';
+    for (let a = 0; a < 360; a += 45) { const t = a * Math.PI / 180; v += L([cx + Math.cos(t) * r, cy + Math.sin(t) * r], [cx + Math.cos(t) * (r + 5), cy + Math.sin(t) * (r + 5)], ' stroke-width="1.2"'); }
+    return v + P([[cx - r * 0.3, cy - r * 0.2], [cx - r * 0.1, cy + r * 0.2], [cx + r * 0.1, cy - r * 0.2], [cx + r * 0.3, cy + r * 0.2]], ' stroke-width="1"'); };
+  const helice = (x1, x2, y) => { let h = ""; for (let x = x1; x < x2; x += 14) h += '<path d="M' + x + ' ' + (y - 4) + ' Q' + (x + 7) + ' ' + (y + 8) + ' ' + (x + 14) + ' ' + (y - 4) + '" stroke-width="1.2"/><path d="M' + x + ' ' + (y + 4) + ' Q' + (x + 7) + ' ' + (y - 8) + ' ' + (x + 14) + ' ' + (y + 4) + '" stroke-width="1.2"/>'; return h; };
+  let g = '<path d="M80 250 Q80 92 280 86 Q480 92 482 250 Q482 418 280 424 Q80 418 80 250Z" stroke-width="2"/>';
+  g += virion(118, 104, 20) + L([136, 94], [300, 26], ' stroke-width="0.9"') + T([304, 30], "ARN viral", fb) + num([150, 136], "1");
+  g += '<path d="M98 160 l-10 -10 M98 160 l-2 -14 M98 160 l6 8" stroke-width="1.8"/>' + T([14, 176], "CD-4", fb) + L([48, 172], [84, 160], ' stroke-width="0.9"') + fleche([89, 158], [81, 161], 5);
+  g += '<path d="M236 92 Q250 64 270 64 Q290 64 302 92" stroke-width="1.4"/>' + L([262, 94], [258, 118], ' stroke-width="1"') + L([274, 94], [278, 118], ' stroke-width="1"') + num([308, 74], "2");
+  g += T([186, 142], "ARN viral", fb) + L([248, 138], [312, 138], ' stroke-width="1.4"') + T([182, 160], "ADN viral", fb) + L([248, 152], [312, 152], ' stroke-width="1.4"') + L([248, 158], [312, 158], ' stroke-width="1.4" stroke-dasharray="2 2"') + num([318, 152], "3");
+  g += T([360, 136], "cytoplasme de la", fb) + T([360, 150], "cellule hôte", fb);
+  g += '<ellipse cx="282" cy="268" rx="152" ry="84" stroke-width="1.4" stroke-dasharray="10 4"/><ellipse cx="282" cy="268" rx="144" ry="77" stroke-width="1" stroke-dasharray="10 4"/>';
+  g += T([340, 268], "Noyau", ' font-size="13" font-weight="700"');
+  g += num([238, 218], "4") + T([292, 214], "intégrase", fb) + L([290, 210], [270, 226], ' stroke-width="0.9"') + helice(160, 300, 232) + L([300, 232], [340, 232], ' stroke-width="2.2"') + L([300, 172], [300, 196], ' stroke-width="1"') + fleche([300, 202], [300, 194], 5);
+  g += T([150, 254], "ADN de la", fb) + T([150, 266], "cellule hôte", fb);
+  g += helice(160, 300, 288) + T([304, 292], "ADN viral", fb);
+  g += num([166, 314], "5") + T([182, 306], "transcription de l'ADN", fb) + T([182, 318], "viral en ARN", fb) + L([330, 296], [330, 318], ' stroke-width="1"') + fleche([330, 324], [330, 316], 5) + L([300, 330], [380, 330], ' stroke-width="1.3"') + T([352, 324], "ARN", fb);
+  g += L([424, 230], [492, 206], ' stroke-width="0.9"') + T([496, 210], "pore nucléaire", fb) + L([432, 262], [492, 240], ' stroke-width="0.9"') + T([496, 244], "enveloppe nucléaire", fb);
+  g += '<ellipse cx="252" cy="372" rx="12" ry="7" stroke-width="1.3"/>' + L([214, 378], [300, 378], ' stroke-width="1.3"') + T([150, 376], "ribosome", fb) + L([196, 372], [238, 372], ' stroke-width="0.9"') + L([270, 368], [296, 354], ' stroke-width="1.2"') + num([300, 360], "6") + T([316, 358], "protéine virale", fb) + T([316, 370], "en formation", fb);
+  g += L([262, 386], [266, 406], ' stroke-width="1"') + fleche([267, 412], [266, 404], 5) + num([292, 400], "7") + T([306, 390], "assemblage des", fb) + T([306, 402], "constituants viraux", fb);
+  g += virion(222, 420, 14) + virion(290, 425, 14) + virion(456, 396, 15) + virion(504, 426, 15) + virion(452, 448, 15) + num([370, 458], "8");
+  g += T([12, 404], "Lymphocyte", fb) + L([78, 400], [96, 380], ' stroke-width="0.9"') + fleche([100, 376], [94, 383], 5);
+  return svg(626, 470, g, "Document 1 : cycle du VIH dans un lymphocyte. 1 : le virus (ARN viral) se fixe sur le récepteur CD-4 ; 2 : il pénètre dans la cellule ; 3 : l'ARN viral est copié en ADN viral dans le cytoplasme ; 4 : l'ADN viral s'intègre, grâce à l'intégrase, à l'ADN de la cellule hôte dans le noyau ; 5 : transcription de l'ADN viral en ARN ; 6 : un ribosome fabrique les protéines virales ; 7 : assemblage des constituants viraux ; 8 : de nouveaux virus bourgeonnent et quittent la cellule.");
+};
+// Corrigé SVT D 2024 : vitesse de la réaction enzymatique en fonction de la concentration en lactose.
+S["proba-2024-svt-d-enzyme"] = () => {
+  const x0 = 46, y0 = 252, ux = 26, uy = 6, X = c => x0 + c * ux, Y = v => y0 - v * uy, fs = ' font-size="11"';
+  let g = '<g stroke-width="0.5" opacity="0.35">';
+  for (let c = 1; c <= 12; c++) g += L([X(c), Y(0)], [X(c), Y(36)]);
+  for (let v = 4; v <= 36; v += 4) g += L([X(0), Y(v)], [X(12.5), Y(v)]);
+  g += "</g>" + L([X(0), Y(0)], [X(12.8), Y(0)], ' stroke-width="1.2"') + fleche([X(13.1), Y(0)], [X(12.8), Y(0)], 6) + L([X(0), Y(0)], [X(0), Y(37)], ' stroke-width="1.2"') + fleche([X(0), Y(38.3)], [X(0), Y(37)], 6);
+  for (let c = 1; c <= 12; c++) g += T([X(c) - 3, Y(0) + 14], String(c), fs);
+  for (let v = 4; v <= 36; v += 4) g += T([X(0) - 20, Y(v) + 4], String(v), fs);
+  const pts = [[0, 0], [1, 5], [2, 12.5], [4, 22], [6, 30], [7, 32], [9, 32], [11, 32], [12, 32]];
+  g += P(pts.map(([c, v]) => [X(c), Y(v)]), ' stroke-width="2"');
+  for (const [c, v] of pts) g += '<circle cx="' + f(X(c)) + '" cy="' + f(Y(v)) + '" r="3" fill="currentColor" stroke="none"/>';
+  g += L([X(0), Y(32)], [X(7), Y(32)], ' stroke-width="0.9" stroke-dasharray="4 3"') + T([X(8), Y(32) - 8], "Vmax = 32", ' font-size="12" font-weight="700"');
+  g += T([X(0) + 6, Y(38)], "Vitesse (unités relatives)", fs) + T([X(8.6), Y(0) + 30], "[lactose] (u.a.)", fs);
+  return svg(X(13.4) + 6, Y(0) + 38, g, "Courbe de la vitesse de la réaction en fonction de la concentration en substrat : la vitesse croît presque proportionnellement jusqu'à la concentration 6 (30 unités), puis atteint un plateau à 32 unités à partir de la concentration 7.");
+};
+// Probatoire 2024 SVT C-TI : vitesse des ondes P et S en fonction de la profondeur (document du sujet, mêmes valeurs lues sur le scan).
+function sismique() {
+  const x0 = 60, y0 = 250, ux = 0.075, uy = 16, X = d => x0 + d * ux, Y = v => y0 - v * uy, fs = ' font-size="11"';
+  let g = L([X(0), Y(0)], [X(6450), Y(0)], ' stroke-width="1.2"') + L([X(0), Y(0)], [X(0), Y(15)], ' stroke-width="1.2"') + fleche([X(0), Y(15.6)], [X(0), Y(15)], 6) + L([X(6371), Y(0)], [X(6371), Y(15)], ' stroke-width="1.2"') + fleche([X(6371), Y(15.6)], [X(6371), Y(15)], 6);
+  for (let v = 2; v <= 14; v += 2) g += L([X(0) - 4, Y(v)], [X(0), Y(v)], ' stroke-width="1"') + T([X(0) - 20, Y(v) + 4], String(v), fs) + L([X(6371), Y(v)], [X(6371) + 4, Y(v)], ' stroke-width="1"') + T([X(6371) + 8, Y(v) + 4], String(v), fs);
+  for (let d = 1000; d <= 6000; d += 1000) g += L([X(d), Y(0)], [X(d), Y(0) + 4], ' stroke-width="1"') + T([X(d) - 14, Y(0) + 16], (d / 1000) + " 000", fs);
+  g += T([X(6371) + 4, Y(0) + 16], "(km)", fs) + '<text transform="translate(18 ' + Y(5) + ') rotate(-90)" fill="currentColor" stroke="none" font-size="11">Vitesse sismique (km/s)</text>';
+  const P1 = [[0, 6], [15, 6.4], [30, 8.1], [70, 8.3], [100, 7.8], [150, 8.1], [220, 8.6], [400, 9.1], [450, 9.6], [600, 10.2], [670, 10.8], [1200, 11.4], [2000, 12.6], [2890, 13.7]];
+  const P2 = [[2890, 8.0], [3500, 9.0], [4200, 9.8], [5150, 10.3], [5150, 10.9], [5600, 11.1], [6000, 11.1], [6371, 11.3]];
+  const S1 = [[0, 3.4], [15, 3.7], [30, 4.6], [70, 4.7], [100, 4.3], [200, 4.5], [400, 5.0], [600, 5.6], [670, 6.0], [1200, 6.4], [2000, 6.9], [2890, 7.3]];
+  const S2 = [[5150, 0], [5150, 3.6], [6371, 3.6]];
+  const p = a => P(a.map(([d, v]) => [X(d), Y(v)]), ' stroke-width="1.8"');
+  g += p(P1) + L([X(2890), Y(13.7)], [X(2890), Y(8.0)], ' stroke-width="1.8"') + p(P2) + p(S1) + L([X(2890), Y(7.3)], [X(2890), Y(0)], ' stroke-width="1.8"') + p(S2);
+  g += T([X(1500), Y(12.4)], "P", ' font-size="12" font-weight="700"') + T([X(4100), Y(10.2)], "P", ' font-size="12" font-weight="700"') + T([X(1500), Y(7.0)], "S", ' font-size="12" font-weight="700"') + T([X(5700), Y(3.9)], "S", ' font-size="12" font-weight="700"');
+  return { g, X, Y, W: X(6371) + 40, H: Y(0) + 26 };
+}
+S["proba-2024-svt-c-sismique"] = () => {
+  const R = sismique();
+  return svg(R.W, R.H, R.g, "Vitesse des ondes sismiques P et S en fonction de la profondeur : les ondes P passent d'environ 6 à 13,7 km/s jusqu'à 2 900 km, chutent brusquement à 8 km/s, remontent à 10,3 km/s vers 5 150 km puis à 11 km/s ; les ondes S passent de 3,4 à 7,3 km/s jusqu'à 2 900 km, disparaissent entre 2 900 et 5 150 km, puis réapparaissent à 3,6 km/s jusqu'au centre (6 371 km). Une zone de ralentissement apparaît vers 100 km.");
+};
+// Corrigé : le graphe avec les discontinuités, et en dessous la coupe du globe (de la surface au centre).
+S["proba-2024-svt-c-coupe"] = () => {
+  const R = sismique(), { X, Y } = R, fs = ' font-size="11"', fb = ' font-size="11" font-weight="700"';
+  let g = R.g;
+  for (const [d, n] of [[30, "Moho"], [2890, "Gutenberg"], [5150, "Lehmann"]]) g += L([X(d), Y(15)], [X(d), Y(0) + 110], ' stroke-width="1" stroke-dasharray="4 3"') + T([X(d) + 3, Y(14.6)], n, fb);
+  const y1 = Y(0) + 46, y2 = y1 + 60;
+  g += '<rect x="' + X(0) + '" y="' + y1 + '" width="' + (X(6371) - X(0)) + '" height="60" stroke-width="1.4"/>';
+  g += '<rect x="' + X(0) + '" y="' + y1 + '" width="' + (X(30) - X(0) + 1) + '" height="60" fill="currentColor" stroke="none"/>';
+  g += '<rect x="' + X(100) + '" y="' + y1 + '" width="' + (X(250) - X(100)) + '" height="60" fill="currentColor" fill-opacity="0.12" stroke="none"/>';
+  g += '<rect x="' + X(2890) + '" y="' + y1 + '" width="' + (X(5150) - X(2890)) + '" height="60" fill="currentColor" fill-opacity="0.18" stroke="none"/>';
+  g += '<rect x="' + X(5150) + '" y="' + y1 + '" width="' + (X(6371) - X(5150)) + '" height="60" fill="currentColor" fill-opacity="0.35" stroke="none"/>';
+  for (const d of [670, 2890, 5150]) g += L([X(d), y1], [X(d), y2], ' stroke-width="1.4"');
+  g += L([X(15), y2], [X(15), y2 + 8], ' stroke-width="0.9"') + T([X(0), y2 + 20], "croûte", fs) + L([X(175), y2], [X(900), y2 + 8], ' stroke-width="0.9"') + T([X(900), y2 + 20], "LVZ (asthénosphère)", fs);
+  g += L([X(400), y1], [X(400), y1 - 6], ' stroke-width="0.9"') + T([X(150), y1 - 9], "manteau sup.", fs) + T([X(1050), y1 + 34], "manteau inférieur", fb) + T([X(3500), y1 + 26], "noyau externe", fb) + T([X(3500), y1 + 42], "(liquide)", fs) + T([X(5200), y1 + 26], "noyau", fb) + T([X(5200), y1 + 40], "interne", fb) + T([X(5200), y1 + 54], "(solide)", fs);
+  g += T([X(0), y2 + 36], "surface", fs) + T([X(6371) - 30, y2 + 36], "centre", fs);
+  return svg(R.W, y2 + 44, g, "Le graphe des vitesses sismiques et, en dessous, une coupe du globe de la surface au centre : croûte jusqu'au Moho (vers 30 km), manteau supérieur avec la zone de faible vitesse (LVZ, asthénosphère) vers 100 à 250 km, manteau inférieur jusqu'à la discontinuité de Gutenberg (2 900 km), noyau externe liquide jusqu'à la discontinuité de Lehmann (5 150 km), noyau interne solide jusqu'au centre (6 371 km).");
+};
 module.exports = S;

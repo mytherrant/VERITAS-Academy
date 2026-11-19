@@ -1,3 +1,656 @@
+/* VÉRITAS — cartes mentales dessinées (18/11/2026, « de vraies cartes mentales », « embellis plus »).
+   Un nuage au centre, des flèches courbes vers chaque branche, des étiquettes entourées à main levée et numérotées,
+   les mots reliés en éventail, en italique, sur fond de cahier pointé.
+   Deux dessins dans le même bloc : en étoile (écran large) et en arbre (téléphone), basculés en CSS (.cm-large / .cm-etroit).
+   Utilisé par les leçons (VRT_CM_LECON : carte de la leçon tirée des parties et de « à retenir ») et par
+   tools/oeuvres_statiques.js (pages d'œuvres), qui charge ce fichier sous Node. Aucune dépendance. */
+(function (W) {
+  "use strict";
+  var PALETTES = [["#D7263D", "#F46036", "#1B998B", "#2E86AB", "#7B2CBF", "#C2185B"], ["#E76F51", "#2A9D8F", "#D4891A", "#3A86FF", "#9C27B0", "#264653"], ["#EF476F", "#118AB2", "#06A77D", "#F78C1F", "#6A4C93", "#D62828"], ["#FF5A5F", "#00A6A6", "#F29E4C", "#5465FF", "#B5179E", "#2B9348"]];
+  var NUM = 0, P = "cm", STYLE = "main", COUL = ["#E0475B", "#0E9AA7", "#7B4FC4", "#E07B1F", "#2E9A5B", "#1E6FD0", "#C2387A"];
+  function esc(s) { return String(s == null ? "" : s).replace(/[&<>"']/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]; }); }
+  function f1(v) { return Math.round(v * 10) / 10; }
+  function couper(s, n) {
+    var mots = String(s).replace(/\s+([»:;!?])/g, "\u00a0$1").replace(/«\s+/g, "«\u00a0").split(/[ \t\n\r]+/), l = [], c = "";
+    mots.forEach(function (m) { if (c && (c + " " + m).length > n) { l.push(c); c = m; } else c = c ? c + " " + m : m; });
+    if (c) l.push(c);
+    return l;
+  }
+  /* styles fantaisie (18/11/2026, « trop classique, mets de la fantaisie ») : post-it et ardoise */
+  var ARD = function () { return STYLE === "ardoise"; }, PIT = function () { return STYLE === "postit"; }, MAINL = function () { return STYLE === "main" || STYLE === "ardoise" || STYLE === "postit"; };
+  function encre(c) { return STYLE === "ardoise" ? "#F3EFE4" : STYLE === "postit" ? "#2B2B2B" : c; }
+  function alpha(hex, a) { var n = parseInt(hex.slice(1), 16); return "rgba(" + (n >> 16 & 255) + "," + (n >> 8 & 255) + "," + (n & 255) + "," + a + ")"; }
+  function teinte(col, k) { return STYLE === "ardoise" ? "rgba(255,255,255,.07)" : STYLE === "postit" ? clair(col, Math.min(k, .7)) : clair(col, k); }
+  function clair(hex, k) {
+    var n = parseInt(hex.slice(1), 16), r = n >> 16 & 255, g = n >> 8 & 255, b = n & 255;
+    return "rgb(" + [r, g, b].map(function (v) { return Math.round(v + (255 - v) * k); }).join(",") + ")";
+  }
+  function texte(x, y, lignes, o) {
+    var s = "<text x='" + f1(x) + "' y='" + f1(y) + "' text-anchor='" + (o.a || "start") + "' font-size='" + o.t + "'" + (MAINL() ? " font-style='italic'" : "") + (o.g ? " font-weight='" + o.g + "'" : "") + " fill='" + (o.c || (STYLE === "sobre" ? encre("#3B4456") : encre("#2E3445"))) + "'>";
+    lignes.forEach(function (l, i) { s += "<tspan x='" + f1(x) + "' dy='" + (i ? f1(o.t * 1.24) : 0) + "'>" + esc(l) + "</tspan>"; });
+    return s + "</text>";
+  }
+  /* boucle tracée à main levée autour d'une étiquette (ellipse qui déborde un peu de son point de départ) */
+  function boucle(cx, cy, rx, ry, col, graine) {
+    var d = "", t, k = 0;
+    for (t = -0.5; t <= 2 * Math.PI + 0.3; t += 0.16, k++) {
+      var j = 1 + 0.045 * Math.sin(3 * t + graine) + 0.02 * Math.cos(5 * t + graine * 2), sp = t > 2 * Math.PI - 0.2 ? 1 + 6 / Math.max(rx, ry) : 1;
+      d += (k ? "L" : "M") + f1(cx + rx * j * sp * Math.cos(t)) + " " + f1(cy + ry * j * sp * Math.sin(t));
+    }
+    return "<path d='" + d + "' fill='" + teinte(col, .9) + "' stroke='" + col + "' stroke-width='2.6' stroke-linecap='round' stroke-linejoin='round'/>";
+  }
+  function etiquette(cx, cy, t, col, n, max) {
+    var L = t.length > (max || 99) ? couper(t, Math.ceil(t.length / 2) + 2) : [t], ry = L.length > 1 ? 31 : 21;
+    var w = Math.round(Math.max.apply(null, L.map(function (l) { return l.length; })) * 9.2 + 40), s = "<g class='cm-h'>", tc = col;
+    if (PIT()) { var rot = (n % 2 ? -2.2 : 1.8); s = "<g class='cm-h' transform='rotate(" + rot + " " + f1(cx) + " " + f1(cy) + ")'><rect x='" + f1(cx - w / 2 + 3) + "' y='" + f1(cy - ry + 6) + "' width='" + w + "' height='" + (ry * 2 - 2) + "' fill='#000' opacity='.12'/><rect x='" + f1(cx - w / 2) + "' y='" + f1(cy - ry + 2) + "' width='" + w + "' height='" + (ry * 2 - 2) + "' fill='" + clair(col, .62) + "'/><rect x='" + f1(cx - 22) + "' y='" + f1(cy - ry - 5) + "' width='44' height='13' fill='rgba(255,255,255,.65)' transform='rotate(-4 " + f1(cx) + " " + f1(cy - ry) + ")'/>"; tc = "#2B2B2B"; }
+    else if (STYLE === "main" || ARD()) s += boucle(cx, cy, w / 2, ry, col, n * 1.7);
+    else if (STYLE === "colore") { s += "<rect x='" + f1(cx - w / 2) + "' y='" + f1(cy - ry + 2) + "' width='" + w + "' height='" + (ry * 2 - 4) + "' rx='" + (ry - 2) + "' fill='" + col + "'/>"; tc = "#fff"; }
+    else { s += "<rect x='" + f1(cx - w / 2) + "' y='" + f1(cy - ry + 3) + "' width='" + w + "' height='" + (ry * 2 - 6) + "' rx='8' fill='#fff' stroke='#AEB6C6' stroke-width='1.3'/><rect x='" + f1(cx - w / 2) + "' y='" + f1(cy - ry + 3) + "' width='5' height='" + (ry * 2 - 6) + "' rx='2' fill='" + col + "'/>"; tc = encre("#1D2330"); }
+    L.forEach(function (l, k) { s += "<text x='" + f1(cx) + "' y='" + f1(cy + 5.5 + (k - (L.length - 1) / 2) * 19) + "' text-anchor='middle' font-size='16' font-weight='" + (STYLE === "sobre" ? 700 : 800) + "' fill='" + tc + "'>" + esc(l) + "</text>"; });
+    s += "<circle cx='" + f1(cx - w / 2 + 6) + "' cy='" + f1(cy - ry + 2) + "' r='11.5' fill='" + (STYLE === "colore" ? "#fff" : col) + "' stroke='" + (STYLE === "colore" ? col : "#fff") + "' stroke-width='2'/>" +
+      "<text x='" + f1(cx - w / 2 + 6) + "' y='" + f1(cy - ry + 6.5) + "' text-anchor='middle' font-size='13' font-weight='800' fill='" + (STYLE === "colore" ? col : "#fff") + "'>" + n + "</text></g>";
+    return { s: s, w: w, h: ry * 2 };
+  }
+  /* nuage central : contour en festons autour d'une ellipse */
+  function nuage(cx, cy, lignes, w) {
+    var h = 26 + lignes.length * 21, a = w / 2 + 16, b = h / 2 + 16, n = 11, pts = [], i, d;
+    for (i = 0; i <= n; i++) { var u = -Math.PI / 2 + 2 * Math.PI * i / n; pts.push([cx + a * Math.cos(u), cy + b * Math.sin(u)]); }
+    d = "M" + f1(pts[0][0]) + " " + f1(pts[0][1]);
+    for (i = 1; i <= n; i++) { var c = Math.hypot(pts[i][0] - pts[i - 1][0], pts[i][1] - pts[i - 1][1]) * 0.62; d += "A" + f1(c) + " " + f1(c) + " 0 0 1 " + f1(pts[i][0]) + " " + f1(pts[i][1]); }
+    var s = "<g class='cm-c'><path d='" + d + "Z' fill='#001136' opacity='.12' transform='translate(3 5)'/>" +
+      "<path d='" + d + "Z' fill='" + (ARD() ? "rgba(255,255,255,.1)" : "url(#" + P + "g)") + "' stroke='" + (ARD() ? "#FFE08A" : "#fff") + "' stroke-width='" + (ARD() ? 3 : 2.5) + "'" + (ARD() ? " stroke-dasharray='14 4'" : "") + "/>";
+    lignes.forEach(function (l, k) {
+      var sub = k >= (lignes.nt || 1);
+      s += "<text x='" + f1(cx) + "' y='" + f1(cy - h / 2 + 31 + k * 21) + "' text-anchor='middle' font-size='" + (sub ? 13.5 : 19) + "' font-weight='" + (sub ? 600 : 800) + "' fill='" + (sub ? "#FFE08A" : "#fff") + "'>" + esc(l) + "</text>";
+    });
+    return { s: s + "</g>", h: h, a: a, b: b };
+  }
+  function largeurC(C, min, max) { return Math.min(max || 999, Math.max(min, Math.round(Math.max.apply(null, C.map(function (l, i) { return l.length * (i ? 7.8 : 11.2); })) + 30))); }
+  function defs(B) {
+    return "<defs><linearGradient id='" + P + "g' x1='0' y1='0' x2='1' y2='1'><stop offset='0' stop-color='#3D5BD8'/><stop offset='.55' stop-color='#2A2F9E'/><stop offset='1' stop-color='#0C1F55'/></linearGradient>" +
+      "<pattern id='" + P + "q' width='18' height='18' patternUnits='userSpaceOnUse'><circle cx='9' cy='9' r='1.1' fill='" + (ARD() ? "rgba(255,255,255,.08)" : PIT() ? "#D2B482" : "#DCE3EF") + "'/></pattern>" +
+      "<linearGradient id='" + P + "p' x1='0' y1='0' x2='1' y2='1'><stop offset='0' stop-color='#FFF6E8'/><stop offset='.5' stop-color='#FDF2FA'/><stop offset='1' stop-color='#EAF3FF'/></linearGradient>" +
+      B.map(function (b, i) { return "<marker id='" + P + "f" + i + "' markerWidth='18' markerHeight='18' refX='11' refY='9' orient='auto' markerUnits='userSpaceOnUse'><path d='M2 2.5L14 9L2 15.5' fill='none' stroke='" + trait(b.color) + "' stroke-width='3.4' stroke-linecap='round' stroke-linejoin='round'/></marker>"; }).join("") + "</defs>";
+  }
+  /* fond blanc pour tous les styles (18/11/2026, « arrière-fond en blanc pour plus de lisibilité ») ; l'ardoise garde son tableau si on la demande */
+  function fond(Wd, H) {
+    if (ARD()) return "<rect width='" + Wd + "' height='" + Math.round(H) + "' rx='18' fill='#6B4423'/><rect x='9' y='9' width='" + (Wd - 18) + "' height='" + Math.round(H - 18) + "' rx='10' fill='#24453B'/>";
+    return "<rect x='.5' y='.5' width='" + (Wd - 1) + "' height='" + Math.round(H - 1) + "' rx='16' fill='#fff' stroke='#EEF1F6'/>";
+  }
+  /* centre selon le style : nuage (main levée), cartouche dégradé (coloré), cartouche sobre */
+  function centre(cx, cy, lignes, w) {
+    /* titre trop long pour la place : il passe à la ligne au lieu de déborder */
+    var lim = cx < 300 ? Math.max(200, 2 * cx - 40) : 420, L2 = [];
+    lignes.forEach(function (l, k) { couper(l, Math.floor((lim - 40) / (k ? 7.8 : 11.2))).forEach(function (x) { L2.push(k && !L2.length ? x : x); }); if (!k && L2.length > 1) L2.titre = L2.length; });
+    L2.nt = L2.titre || 1; lignes = L2;
+    w = Math.min(lim, Math.max(w, largeurC(lignes, 0, lim)));
+    if (STYLE === "main" || ARD()) return nuage(cx, cy, lignes, w);
+    if (PIT()) {
+      var hp = 30 + lignes.length * 21, sp = "<g class='cm-c' transform='rotate(-2 " + f1(cx) + " " + f1(cy) + ")'><rect x='" + f1(cx - w / 2 + 5) + "' y='" + f1(cy - hp / 2 + 7) + "' width='" + w + "' height='" + hp + "' fill='#000' opacity='.15'/><rect x='" + f1(cx - w / 2) + "' y='" + f1(cy - hp / 2) + "' width='" + w + "' height='" + hp + "' fill='#FFE066'/><path d='M" + f1(cx + w / 2 - 22) + " " + f1(cy + hp / 2) + " L" + f1(cx + w / 2) + " " + f1(cy + hp / 2 - 22) + " V" + f1(cy + hp / 2) + "Z' fill='#E8C53A'/><rect x='" + f1(cx - 34) + "' y='" + f1(cy - hp / 2 - 8) + "' width='68' height='16' fill='rgba(255,255,255,.7)' transform='rotate(3 " + f1(cx) + " " + f1(cy - hp / 2) + ")'/>";
+      lignes.forEach(function (l, k) { var sub = k >= (lignes.nt || 1); sp += "<text x='" + f1(cx) + "' y='" + f1(cy - hp / 2 + 34 + k * 21) + "' text-anchor='middle' font-size='" + (sub ? 13.5 : 19) + "' font-weight='" + (sub ? 600 : 800) + "' fill='" + (sub ? "#8A5A00" : "#142554") + "'>" + esc(l) + "</text>"; });
+      return { s: sp + "</g>", h: hp, a: w / 2, b: hp / 2 };
+    }
+    var h = 26 + lignes.length * 21, sob = STYLE === "sobre", s = "<g class='cm-c'>" + (sob ? "" : "<rect x='" + f1(cx - w / 2 + 3) + "' y='" + f1(cy - h / 2 + 5) + "' width='" + w + "' height='" + h + "' rx='" + (h / 2) + "' fill='#001136' opacity='.12'/>") +
+      "<rect x='" + f1(cx - w / 2) + "' y='" + f1(cy - h / 2) + "' width='" + w + "' height='" + h + "' rx='" + (sob ? 10 : h / 2) + "' fill='" + (sob ? "#1D2B53" : "url(#" + P + "g)") + "'" + (sob ? "" : " stroke='#FFC93C' stroke-width='3'") + "/>";
+    lignes.forEach(function (l, k) { var sub = k >= (lignes.nt || 1); s += "<text x='" + f1(cx) + "' y='" + f1(cy - h / 2 + 31 + k * 21) + "' text-anchor='middle' font-size='" + (sub ? 13.5 : 19) + "' font-weight='" + (sub ? 600 : 800) + "' fill='" + (sub ? (sob ? "#C9D3EA" : "#FFE08A") : "#fff") + "'>" + esc(l) + "</text>"; });
+    return { s: s + "</g>", h: h, a: w / 2, b: h / 2 };
+  }
+  function trait(col) { return STYLE === "sobre" ? "#8A93A6" : col; }
+
+  /* écran large : en étoile, branches paires à gauche, impaires à droite */
+  function large(C, B, alt) {
+    var Wd = 920, cx = 460, T = 15, LH = T * 1.24, NC = 16, cotes = [[], []];
+    B.forEach(function (b, i) { b.n = i + 1; b.i = i; cotes[i % 2].push(b); });
+    function bloc(b) { var h = 0; b.items.forEach(function (it) { h += couper(it, NC).length * LH + 14; }); return Math.max(h, 70) + 28; }
+    var cw = largeurC(C, 180, 260), cen0 = centre(cx, 0, C, cw), trou = cen0.h + 56;
+    var hauts = cotes.map(function (c) { return c.reduce(function (a, b) { return a + bloc(b); }, 0) + (c.length >= 2 ? trou : 0); });
+    var H = Math.max(hauts[0], hauts[1], 300) + 40, cy = H / 2, s = "", dessus = "";
+    var cen = centre(cx, cy, C, cw);
+    cotes.forEach(function (liste, cote) {
+      var sg = cote ? 1 : -1, col0 = cx + sg * 248, y0 = (H - hauts[cote]) / 2;
+      liste.forEach(function (b, kb) {
+        if (liste.length >= 2 && kb === Math.ceil(liste.length / 2)) y0 += trou;
+        var h = bloc(b), hy = y0 + h / 2, col = b.color, ly = y0 + 14, hmax = h / 2;
+        var et = etiquette(0, 0, b.label, col, b.n, 17), w = et.w, ox = col0 - sg * 44, hx = ox - sg * w / 2, ix = hx - sg * w / 2;
+        /* étiquette qui mordrait sur le nuage : on la monte (ou descend) au-dessus de lui */
+        if (Math.abs(ix - cx) < cen.a + 18 && Math.abs(hy - cy) < cen.b + et.h / 2 + 8) hy = cy + (hy > cy + 1 ? 1 : -1) * (cen.b + et.h / 2 + 10);
+        var th = Math.atan2((hy - cy) / cen.b, (ix - cx) / cen.a), sx = cx + cen.a * Math.cos(th), sy = cy + cen.b * Math.sin(th), ex = ix - sg * 10;
+        s += "<path class='cm-t' d='M" + f1(sx) + " " + f1(sy) + " C" + f1(sx + (ex - sx) * 0.25) + " " + f1(sy + (hy - sy) * 0.85) + " " + f1(ex - sg * 40) + " " + f1(hy) + " " + f1(ex) + " " + f1(hy) + "' fill='none' stroke='" + trait(col) + "' stroke-width='" + (STYLE === "sobre" ? 3 : 5) + "' stroke-linecap='round' marker-end='url(#" + P + "f" + b.i + ")'/>";
+        b.items.forEach(function (it) {
+          var L = couper(it, NC), hh = L.length * LH, my = ly + hh / 2 - 4, d = (my - hy) / hmax, dx = col0 - sg * 26 * d * d;
+          s += "<path class='cm-l' d='M" + f1(ox) + " " + f1(hy) + " Q" + f1(ox + (dx - ox) * 0.55) + " " + f1(my) + " " + f1(dx) + " " + f1(my) + "' fill='none' stroke='" + clair(col, .3) + "' stroke-width='2.6' stroke-linecap='round'/>" +
+            "<circle class='cm-p' cx='" + f1(dx) + "' cy='" + f1(my) + "' r='5' fill='" + col + "' stroke='#fff' stroke-width='1.6'/>" +
+            texte(dx + sg * 11, my + 5 - (L.length - 1) * LH / 2, L, { t: T, a: cote ? "start" : "end" });
+          ly += hh + 14;
+        });
+        dessus += "<g transform='translate(" + f1(hx) + " " + f1(hy) + ")'>" + et.s + "</g>";
+        y0 += h;
+      });
+    });
+    return "<svg class='cm-large' viewBox='0 0 " + Wd + " " + Math.round(H) + "' role='img' aria-label='" + esc(alt) + "' font-family='Poppins,Inter,Roboto,Arial,sans-serif'>" + defs(B) + fond(Wd, H) + s + dessus + cen.s + "</svg>";
+  }
+
+  /* téléphone : en arbre, tronc pointillé à gauche, mots en éventail sous chaque étiquette */
+  function etroit(C, B, alt) {
+    var Wd = 400, T = 15, LH = T * 1.24, NC = 32, tronc = 30;
+    var cen = centre(200, 0, C, largeurC(C, 240, 330)), haut = cen.h / 2 + cen.b - cen.h / 2 + 22, y = haut + cen.b + 30, s = "", dessus = "", avant = haut + cen.b;
+    B.forEach(function (b, i) {
+      var col = b.color, et = etiquette(0, 0, b.label, col, i + 1), hy = y + 22, hx = 52 + et.w / 2;
+      s += "<path class='cm-t' d='M" + tronc + " " + f1(avant) + " V" + f1(hy) + "' stroke='#C3CBDA' stroke-width='3' stroke-dasharray='2 7' stroke-linecap='round' fill='none'/>" +
+        "<path class='cm-t' d='M" + tronc + " " + f1(hy) + " H" + f1(hx - et.w / 2 - 10) + "' stroke='" + trait(col) + "' stroke-width='4.6' fill='none' stroke-linecap='round' marker-end='url(#" + P + "f" + i + ")'/>";
+      var ly = hy + 38;
+      avant = hy;
+      b.items.forEach(function (it) {
+        var L = couper(it, NC), hh = L.length * LH, my = ly + 4;
+        s += "<path class='cm-l' d='M" + (tronc + 22) + " " + f1(hy + 16) + " Q" + (tronc + 22) + " " + f1(my) + " 58 " + f1(my) + "' fill='none' stroke='" + clair(col, .3) + "' stroke-width='2.6'/>" +
+          "<circle class='cm-p' cx='64' cy='" + f1(my) + "' r='5' fill='" + col + "' stroke='#fff' stroke-width='1.6'/>" + texte(78, my + 5, L, { t: T });
+        ly += hh + 12;
+      });
+      dessus += "<circle cx='" + tronc + "' cy='" + f1(hy) + "' r='6' fill='" + col + "'/><g transform='translate(" + f1(hx) + " " + f1(hy) + ")'>" + et.s + "</g>";
+      y = ly + 18;
+    });
+    var cs = "<g transform='translate(0 " + f1(haut) + ")'>" + cen.s + "</g>";
+    return "<svg class='cm-etroit' viewBox='0 0 " + Wd + " " + Math.round(y) + "' role='img' aria-label='" + esc(alt) + "' font-family='Poppins,Inter,Roboto,Arial,sans-serif'>" + defs(B) + fond(Wd, y) + s + dessus + cs + "</svg>";
+  }
+
+  /* ════════ AUTRES FORMES (18/11/2026, « varie les styles de cartes ») ════════ */
+  var T2 = 15, LH2 = T2 * 1.24;
+  function puce(x, y, col) {
+    if (STYLE === "sobre") return "<rect class='cm-p' x='" + f1(x - 4) + "' y='" + f1(y - 1) + "' width='8' height='2.2' rx='1' fill='#8A93A6'/>";
+    return "<circle class='cm-p' cx='" + f1(x) + "' cy='" + f1(y) + "' r='" + (STYLE === "colore" ? 5 : 4) + "' fill='" + col + "'" + (STYLE === "colore" ? " stroke='#fff' stroke-width='1.5'" : "") + "/>";
+  }
+  function hListe(items, NC) { return items.reduce(function (a, it) { return a + couper(it, NC).length * LH2 + 8; }, 0) - 8; }
+  /* liste à puces : y = ligne de base du premier élément */
+  function liste(items, x, y, NC, col, centre) {
+    var s = "", yy = y;
+    items.forEach(function (it) {
+      var L = couper(it, NC);
+      s += centre ? texte(x, yy, L, { t: T2, a: "middle" }) : puce(x + 5, yy - 5, col) + texte(x + 17, yy, L, { t: T2 });
+      yy += L.length * LH2 + 8;
+    });
+    return s;
+  }
+  /* cadre : bords à main levée, coloré (bandeau) ou sobre */
+  function cadre(x, y, w, h, col, coupe) {
+    if (PIT()) { var r = ((x + y) % 3) - 1; return "<g transform='rotate(" + (r * 1.2) + " " + f1(x + w / 2) + " " + f1(y + h / 2) + ")'><rect x='" + (x + 4) + "' y='" + (y + 6) + "' width='" + w + "' height='" + h + "' fill='#000' opacity='.12'/><rect x='" + x + "' y='" + y + "' width='" + w + "' height='" + h + "' fill='" + clair(col, .72) + "'/><path d='M" + (x + w - 26) + " " + (y + h) + " L" + (x + w) + " " + (y + h - 26) + " V" + (y + h) + "Z' fill='" + clair(col, .45) + "'/><rect x='" + (x + w / 2 - 36) + "' y='" + (y - 8) + "' width='72' height='16' fill='rgba(255,255,255,.7)' transform='rotate(" + (-r * 3) + " " + (x + w / 2) + " " + y + ")'/></g>"; }
+    if (STYLE === "main" || ARD()) {
+      var d = "", k = 0, pts = [[x, y], [x + w, y], [x + w, y + h], [x, y + h], [x, y + 1]];
+      for (var i = 0; i < 4; i++) for (var t = 0; t <= 1; t += 0.1, k++) {
+        var px = pts[i][0] + (pts[i + 1][0] - pts[i][0]) * t, py = pts[i][1] + (pts[i + 1][1] - pts[i][1]) * t, j = 1.4 * Math.sin(k * 1.7 + x);
+        d += (k ? "L" : "M") + f1(px + (i % 2 ? j : 0)) + " " + f1(py + (i % 2 ? 0 : j));
+      }
+      return "<path d='" + d + "' fill='" + teinte(col, .93) + "' stroke='" + col + "' stroke-width='2.2' stroke-linejoin='round'/>";
+    }
+    if (coupe) { var c = 16; return "<path d='M" + (x + c) + " " + y + "H" + (x + w - c) + "L" + (x + w) + " " + (y + c) + "V" + (y + h - c) + "L" + (x + w - c) + " " + (y + h) + "H" + (x + c) + "L" + x + " " + (y + h - c) + "V" + (y + c) + "Z' fill='" + (STYLE === "colore" ? clair(col, .9) : "#fff") + "' stroke='" + (STYLE === "colore" ? col : "#AEB6C6") + "' stroke-width='" + (STYLE === "colore" ? 2 : 1.2) + "'/>"; }
+    if (STYLE === "colore") return "<rect x='" + x + "' y='" + y + "' width='" + w + "' height='" + h + "' rx='16' fill='#fff' stroke='" + col + "' stroke-width='2'/><path d='M" + x + " " + (y + 16) + "a16 16 0 0 1 16 -16H" + (x + w - 16) + "a16 16 0 0 1 16 16V" + (y + 46) + "H" + x + "Z' fill='" + col + "'/>";
+    return "<rect x='" + x + "' y='" + y + "' width='" + w + "' height='" + h + "' rx='10' fill='#fff' stroke='#C9D0DC' stroke-width='1.2'/><rect x='" + x + "' y='" + y + "' width='" + w + "' height='4' rx='2' fill='" + col + "'/>";
+  }
+  /* boîte de branche : numéro, titre, liste ; retourne { s, h } */
+  function hBoite(b, w) { var NC = Math.floor((w - 44) / 8.2); return 52 + couper(b.label, Math.floor((w - 60) / 9.4)).length * 19 + hListe(b.items, NC) + 18; }
+  function boite(x, y, w, b, n, hex, hImpose) {
+    var NC = Math.floor((w - 44) / 8.2), Lt = couper(b.label, Math.floor((w - 60) / 9.4)), h = hImpose || hBoite(b, w), col = b.color, s = "<g class='cm-h'>" + cadre(x, y, w, h, col, hex);
+    var badge = hex ? "<path d='" + hexa(x + 26, y + 26, 14) + "' fill='" + col + "'/>" : "<circle cx='" + (x + 26) + "' cy='" + (y + 25) + "' r='13' fill='" + (STYLE === "colore" ? "#fff" : col) + "'/>";
+    s += badge + "<text x='" + (x + 26) + "' y='" + (y + 30) + "' text-anchor='middle' font-size='14' font-weight='800' fill='" + (STYLE === "colore" && !hex ? col : "#fff") + "'>" + n + "</text>";
+    Lt.forEach(function (l, k) { s += "<text x='" + (x + 48) + "' y='" + (y + 30 + k * 19) + "' font-size='16' font-weight='800' fill='" + (STYLE === "colore" && !hex ? "#fff" : STYLE === "sobre" ? encre("#1D2330") : col) + "'>" + esc(l) + "</text>"; });
+    return { s: s + "</g>" + liste(b.items, x + 16, y + 38 + Lt.length * 19 + 14, NC, col), h: h };
+  }
+  function hexa(cx, cy, r) { var d = ""; for (var i = 0; i < 6; i++) { var a = Math.PI / 3 * i; d += (i ? "L" : "M") + f1(cx + r * Math.cos(a)) + " " + f1(cy + r * Math.sin(a)); } return d + "Z"; }
+  function fleche(x1, y1, x2, y2, col, i, courbe) {
+    var d = courbe ? "M" + f1(x1) + " " + f1(y1) + " C" + f1(x1) + " " + f1((y1 + y2) / 2) + " " + f1(x2) + " " + f1((y1 + y2) / 2) + " " + f1(x2) + " " + f1(y2) : "M" + f1(x1) + " " + f1(y1) + " L" + f1(x2) + " " + f1(y2);
+    return "<path class='cm-t' d='" + d + "' fill='none' stroke='" + trait(col) + "' stroke-width='" + (STYLE === "sobre" ? 2.8 : 4.6) + "' stroke-linecap='round'" + (i == null ? "" : " marker-end='url(#" + P + "f" + i + ")'") + "/>";
+  }
+  function svgDe(cls, Wd, H, alt, B, corps) {
+    return "<svg class='" + cls + "' viewBox='0 0 " + Wd + " " + Math.round(H) + "' role='img' aria-label='" + esc(alt) + "' font-family='Poppins,Inter,Roboto,Arial,sans-serif'>" + defs(B) + fond(Wd, H) + corps + "</svg>";
+  }
+  function placerCentre(cx, C, w) { var c0 = centre(cx, 0, C, w); return { c: c0, y: c0.b + 20, s: "<g transform='translate(0 " + f1(c0.b + 20) + ")'>" + c0.s + "</g>" }; }
+
+  /* ARBORESCENTE : organigramme de haut en bas */
+  function arbre(C, B, alt) {
+    var Wd = 920, n = B.length, colW = (Wd - 40) / n, NC = Math.max(12, Math.floor((colW - 44) / 8.2)), pc = placerCentre(460, C, largeurC(C, 220, 460)), s = "", dessus = "", bas = 0;
+    var bus = pc.y + pc.c.b + 30, labY = bus + 56;
+    s += fleche(460, pc.y + pc.c.b, 460, bus, "#8A93A6") + "<path class='cm-t' d='M" + f1(20 + colW / 2) + " " + bus + " H" + f1(20 + colW * (n - .5)) + "' stroke='" + (STYLE === "sobre" ? "#8A93A6" : "#9AA4B6") + "' stroke-width='" + (STYLE === "sobre" ? 2.8 : 4.6) + "' fill='none' stroke-linecap='round'/>";
+    B.forEach(function (b, i) {
+      var x = 20 + colW * (i + .5), et = etiquette(x, labY, b.label, b.color, i + 1, Math.max(8, Math.floor((colW - 50) / 9.2))), y0 = labY + et.h / 2 + 30, hl = hListe(b.items, NC);
+      s += fleche(x, bus, x, labY - et.h / 2 - 8, b.color, i) + "<path class='cm-l' d='M" + f1(x - colW / 2 + 24) + " " + f1(labY + et.h / 2 + 2) + " V" + f1(y0 + hl - 6) + "' stroke='" + clair(trait(b.color), .45) + "' stroke-width='2' fill='none'/>" + liste(b.items, x - colW / 2 + 20, y0, NC, b.color);
+      dessus += et.s; bas = Math.max(bas, y0 + hl);
+    });
+    return svgDe("cm-large", Wd, bas + 24, alt, B, s + dessus + pc.s);
+  }
+
+  /* EN BULLES / EN TOILE : bulles ovales reliées souplement autour du centre (deux colonnes) */
+  function bulle(cx, cy, rx, ry, b, n, NC) {
+    var col = b.color, Lt = couper(b.label, NC - 6), s = "<g class='cm-h'>";
+    if (STYLE === "main") s += boucle(cx, cy, rx, ry, col, n * 2.3).replace("stroke-width='2.6'", "stroke-width='2.4'");
+    else s += "<ellipse cx='" + f1(cx) + "' cy='" + f1(cy) + "' rx='" + f1(rx) + "' ry='" + f1(ry) + "' fill='" + (STYLE === "colore" ? clair(col, .86) : teinte(col, .9)) + "' stroke='" + (STYLE === "sobre" ? "#AEB6C6" : col) + "' stroke-width='" + (STYLE === "sobre" ? 1.3 : 2.4) + "'/>";
+    var h = Lt.length * 19 + 10 + hListe(b.items, NC), y = cy - h / 2 + 14;
+    Lt.forEach(function (l, k) { s += "<text x='" + f1(cx) + "' y='" + f1(y + k * 19) + "' text-anchor='middle' font-size='16' font-weight='800' fill='" + (STYLE === "sobre" ? encre("#1D2330") : col) + "'>" + esc(l) + "</text>"; });
+    var bx = cx - rx * .78, by = cy - ry * .66;
+    s += "<circle cx='" + f1(bx) + "' cy='" + f1(by) + "' r='13' fill='" + col + "' stroke='#fff' stroke-width='2'/><text x='" + f1(bx) + "' y='" + f1(by + 5) + "' text-anchor='middle' font-size='13' font-weight='800' fill='#fff'>" + n + "</text></g>";
+    return s + liste(b.items, cx, y + Lt.length * 19 + 10, NC, col, true);
+  }
+  function tBulle(b, NC, w) { var h = couper(b.label, NC - 6).length * 19 + 10 + hListe(b.items, NC); return { rx: w / 2, ry: h / 2 + 52 }; }
+  function bulles(C, B, alt) {
+    var Wd = 920, cx = 460, W0 = 290, NC = 26, cotes = [[], []], s = "", dessus = "", cw = largeurC(C, 170, 240);
+    B.forEach(function (b, i) { b.i = i; b.t = tBulle(b, NC, W0); cotes[i % 2].push(b); });
+    var hauts = cotes.map(function (c) { return c.reduce(function (a, b) { return a + b.t.ry * 2 + 26; }, 0); }), H = Math.max(hauts[0], hauts[1], 320) + 20, cy = H / 2, cen = centre(cx, cy, C, cw);
+    cotes.forEach(function (liste, cote) {
+      var sg = cote ? 1 : -1, bx = cx + sg * (450 - W0 / 2 - 14), y = (H - hauts[cote]) / 2 + 13, prev = null;
+      liste.forEach(function (b) {
+        var by = y + b.t.ry, ex = bx - sg * b.t.rx * .92, ey = by + (cy - by) * .15, sx = cx + sg * cen.a * .8, sy = cy + (by - cy) * .12;
+        s += "<path class='cm-t' d='M" + f1(sx) + " " + f1(sy) + " C" + f1(sx + sg * 40) + " " + f1(sy) + " " + f1(ex - sg * 50) + " " + f1(ey) + " " + f1(ex) + " " + f1(ey) + "' fill='none' stroke='" + trait(b.color) + "' stroke-width='" + (STYLE === "sobre" ? 2.8 : 4.6) + "' stroke-linecap='round' marker-end='url(#" + P + "f" + b.i + ")'/>";
+        if (prev) s += "<path class='cm-l' d='M" + f1(bx + sg * 30) + " " + f1(prev) + " Q" + f1(bx + sg * 110) + " " + f1((prev + by) / 2) + " " + f1(bx + sg * 30) + " " + f1(by - b.t.ry + 4) + "' fill='none' stroke='#C9D0DC' stroke-width='1.5' stroke-dasharray='3 6'/>";
+        dessus += bulle(bx, by, b.t.rx, b.t.ry, b, b.i + 1, NC); prev = by + b.t.ry - 4; y += b.t.ry * 2 + 26;
+      });
+    });
+    return svgDe("cm-large", Wd, H, alt, B, s + dessus + cen.s);
+  }
+  function bullesEtroit(C, B, alt) {
+    var Wd = 400, NC = 32, pc = placerCentre(200, C, largeurC(C, 240, 340)), y = pc.y + pc.c.b + 34, s = "", dessus = "", prev = [200, pc.y + pc.c.b];
+    B.forEach(function (b, i) {
+      var t = tBulle(b, NC, 330), bx = 200 + (i % 2 ? 14 : -14), by = y + t.ry;
+      s += "<path class='cm-t' d='M" + f1(prev[0]) + " " + f1(prev[1]) + " Q" + f1(prev[0] + (i % 2 ? -50 : 50)) + " " + f1((prev[1] + by - t.ry) / 2) + " " + f1(bx) + " " + f1(by - t.ry - 4) + "' fill='none' stroke='" + trait(b.color) + "' stroke-width='4.6' marker-end='url(#" + P + "f" + i + ")'/>";
+      dessus += bulle(bx, by, t.rx, t.ry, b, i + 1, NC); prev = [bx, by + t.ry]; y = by + t.ry + 36;
+    });
+    return svgDe("cm-etroit", Wd, y - 10, alt, B, s + dessus + pc.s);
+  }
+
+  /* EN ACCOLADE : le tout et ses parties */
+  function accol(x, y1, y2, col, w) {
+    /* « { » : pointe en x (vers le tout, à gauche), bras en x + 2w (vers les parties) */
+    w = w || 12; var ym = (y1 + y2) / 2, r = Math.min(16, (y2 - y1) / 4), xa = x + 2 * w, xm = x + w;
+    return "<path class='cm-t' d='M" + f1(xa) + " " + f1(y1) + " C" + f1(xm) + " " + f1(y1) + " " + f1(xm) + " " + f1(y1 + r * .4) + " " + f1(xm) + " " + f1(y1 + r) + " V" + f1(ym - r) + " C" + f1(xm) + " " + f1(ym - r * .3) + " " + f1(x + w * .4) + " " + f1(ym) + " " + f1(x) + " " + f1(ym) +
+      " C" + f1(x + w * .4) + " " + f1(ym) + " " + f1(xm) + " " + f1(ym + r * .3) + " " + f1(xm) + " " + f1(ym + r) + " V" + f1(y2 - r) + " C" + f1(xm) + " " + f1(y2 - r * .4) + " " + f1(xm) + " " + f1(y2) + " " + f1(xa) + " " + f1(y2) + "' fill='none' stroke='" + trait(col) + "' stroke-width='" + (STYLE === "sobre" ? 2.8 : 4.6) + "' stroke-linecap='round' stroke-linejoin='round'/>";
+  }
+  function accolade(C, B, alt) {
+    var Wd = 920, cw = largeurC(C, 170, 250), xb = 20 + cw + 30, xl = xb + 40, lw = 190, xs = xl + lw + 14, xi = xs + 34, NC = Math.floor((Wd - xi - 30) / 8.2);
+    var blocs = B.map(function (b) { return Math.max(70, hListe(b.items, NC) + 16) + 22; }), H = blocs.reduce(function (a, b) { return a + b; }, 0) + 40, y = 20, s = "", dessus = "";
+    var cen = centre(20 + cw / 2 + (STYLE === "main" ? 14 : 0), H / 2, C, cw);
+    s += accol(xb, 24, H - 24, encre("#5B6478"), 14);
+    B.forEach(function (b, i) {
+      var h = blocs[i] - 22, ym = y + h / 2, et = etiquette(xl + lw / 2, ym, b.label, b.color, i + 1, 15), hl = hListe(b.items, NC);
+      s += (b.items.length ? accol(xs, ym - hl / 2 - 8, ym + hl / 2 + 8, b.color, 10) : "") + liste(b.items, xi, ym - hl / 2 + 11, NC, b.color);
+      dessus += et.s; y += blocs[i];
+    });
+    return svgDe("cm-large", Wd, H, alt, B, s + dessus + cen.s);
+  }
+  function accoladeEtroit(C, B, alt) {
+    var Wd = 400, NC = 34, pc = placerCentre(200, C, largeurC(C, 240, 340)), y = pc.y + pc.c.b + 24, s = "", dessus = "";
+    B.forEach(function (b, i) {
+      var et = etiquette(0, 0, b.label, b.color, i + 1), ly = y + et.h / 2 + 4, hl = hListe(b.items, NC), y1 = ly + et.h / 2 + 12;
+      dessus += "<g transform='translate(" + f1(24 + et.w / 2) + " " + f1(ly) + ")'>" + et.s + "</g>";
+      s += accol(22, y1, y1 + hl + 10, b.color, 9) + liste(b.items, 50, y1 + 15, NC, b.color);
+      y = y1 + hl + 34;
+    });
+    return svgDe("cm-etroit", Wd, y, alt, B, s + dessus + pc.s);
+  }
+
+  /* MODULAIRE EN ALVÉOLES : centre hexagonal, cellules à pans coupés */
+  function alveoles(C, B, alt, Wd) {
+    var n = B.length, cols = Wd < 500 ? 1 : (n === 4 || n === 2 ? 2 : 3), g = 18, w = (Wd - 40 - (cols - 1) * g) / cols, pc0 = centre(0, 0, C, largeurC(C, 220, Wd - 60));
+    var hy = pc0.b + 30, s = "", dessus = "", top = hy * 2 + 34, y = top;
+    var r6 = Math.min(Wd / 2 - 20, pc0.a + 34), cen = "<g class='cm-c'><path d='" + hexa(Wd / 2, hy, r6).replace(/(\d+(\.\d+)?) (\d+(\.\d+)?)/g, function (m, a, _, b) { return f1(Wd / 2 + (a - Wd / 2)) + " " + f1(hy + (b - hy) * (pc0.b + 18) / r6); }) + "' fill='" + (STYLE === "sobre" ? "#1D2B53" : "url(#" + P + "g)") + "' stroke='" + (STYLE === "sobre" ? "#1D2B53" : "#FFC93C") + "' stroke-width='3'/>";
+    C.forEach(function (l, k) { cen += "<text x='" + Wd / 2 + "' y='" + f1(hy - (C.length - 1) * 10.5 + 6 + k * 21) + "' text-anchor='middle' font-size='" + (k ? 13.5 : 19) + "' font-weight='" + (k ? 600 : 800) + "' fill='" + (k ? "#FFE08A" : "#fff") + "'>" + esc(l) + "</text>"; });
+    cen += "</g>";
+    for (var r0 = 0; r0 < n; r0 += cols) {
+      var rang = B.slice(r0, r0 + cols), hr = Math.max.apply(null, rang.map(function (b) { return hBoite(b, w); }));
+      rang.forEach(function (b, k) {
+        var x = 20 + k * (w + g), bx = boite(x, y, w, b, r0 + k + 1, true, hr);
+        if (r0 === 0) s += fleche(Wd / 2, hy + pc0.b + 18, x + w / 2, y - 6, b.color, r0 + k, true);
+        dessus += bx.s;
+      });
+      y += hr + g;
+    }
+    return svgDe(Wd < 500 ? "cm-etroit" : "cm-large", Wd, y + 2, alt, B, s + dessus + cen);
+  }
+
+  /* EN FLUX : étapes enchaînées par des flèches (serpentin) */
+  function flux(C, B, alt, Wd) {
+    var n = B.length, cols = Wd < 500 ? 1 : Math.min(n, 3), g = 46, w = (Wd - 40 - (cols - 1) * g) / cols, pc = placerCentre(Wd / 2, C, largeurC(C, 220, Wd - 60)), y = pc.y + pc.c.b + 30, s = "", dessus = "", prev = null;
+    for (var r0 = 0, rg = 0; r0 < n; r0 += cols, rg++) {
+      var rang = B.slice(r0, r0 + cols), hr = Math.max.apply(null, rang.map(function (b) { return hBoite(b, w); }));
+      rang.forEach(function (b, k) {
+        var kk = rg % 2 ? cols - 1 - k : k, x = 20 + kk * (w + g), bx = boite(x, y, w, b, r0 + k + 1, false, hr);
+        if (prev) s += prev.y === y ? fleche(prev.x + (kk > prev.k ? w + 4 : -4), y + 30, x + (kk > prev.k ? -8 : w + 8), y + 30, b.color, r0 + k) : fleche(prev.x + w / 2, prev.y + prev.h + 4, x + w / 2, y - 8, b.color, r0 + k, true);
+        dessus += bx.s; prev = { x: x, y: y, h: hr, k: kk };
+      });
+      y += hr + 40;
+    }
+    return svgDe(Wd < 500 ? "cm-etroit" : "cm-large", Wd, y - 14, alt, B, s + dessus + pc.s);
+  }
+
+  /* CAUSES ET CONSÉQUENCES (multi-flux) */
+  function causes(C, B, alt, Wd, gauche) {
+    var g0 = B.filter(function (b, i) { return gauche[i]; }), d0 = B.filter(function (b, i) { return !gauche[i]; }), s = "", dessus = "";
+    if (Wd < 500) {
+      var w1 = Wd - 40, y = 18, out = "";
+      g0.forEach(function (b) { var bx = boite(20, y, w1, b, B.indexOf(b) + 1, false); out += bx.s; y += bx.h + 14; });
+      out += fleche(Wd / 2, y - 4, Wd / 2, y + 24, g0[0].color, B.indexOf(g0[0])); y += 34;
+      var c = centre(Wd / 2, 0, C, largeurC(C, 240, Wd - 40)); dessus += "<g transform='translate(0 " + f1(y + c.b) + ")'>" + c.s + "</g>"; y += c.b * 2 + 14;
+      out += fleche(Wd / 2, y - 6, Wd / 2, y + 22, d0[0].color, B.indexOf(d0[0])); y += 32;
+      d0.forEach(function (b) { var bx = boite(20, y, w1, b, B.indexOf(b) + 1, false); out += bx.s; y += bx.h + 14; });
+      return svgDe("cm-etroit", Wd, y + 6, alt, B, out + dessus);
+    }
+    var w = 290, hg = g0.reduce(function (a, b) { return a + hBoite(b, w) + 16; }, 0), hd = d0.reduce(function (a, b) { return a + hBoite(b, w) + 16; }, 0), H = Math.max(hg, hd, 240) + 30, cy = H / 2;
+    var cen = centre(Wd / 2, cy, C, 250), yg = (H - hg) / 2 + 8, yd = (H - hd) / 2 + 8;
+    g0.forEach(function (b) { var i = B.indexOf(b), bx = boite(20, yg, w, b, i + 1, false); s += fleche(20 + w + 4, yg + bx.h / 2, Wd / 2 - cen.a - 10, cy, b.color, i, false); dessus += bx.s; yg += bx.h + 16; });
+    d0.forEach(function (b) { var i = B.indexOf(b), bx = boite(Wd - 20 - w, yd, w, b, i + 1, false); s += fleche(Wd / 2 + cen.a + 4, cy, Wd - 20 - w - 10, yd + bx.h / 2, b.color, i, false); dessus += bx.s; yd += bx.h + 16; });
+    return svgDe("cm-large", Wd, H, alt, B, s + dessus + cen.s);
+  }
+
+  /* ════════ ROUE, ARÊTE DE POISSON, ARBRE DESSINÉ, FRISE (18/11/2026, « varie les formes : roue, poisson, arbre, frise ») ════════ */
+  function secteur(cx, cy, r0, r1, a0, a1) {
+    var g = a1 - a0 > Math.PI ? 1 : 0, c = Math.cos, s = Math.sin;
+    return "M" + f1(cx + r1 * c(a0)) + " " + f1(cy + r1 * s(a0)) + " A" + r1 + " " + r1 + " 0 " + g + " 1 " + f1(cx + r1 * c(a1)) + " " + f1(cy + r1 * s(a1)) + " L" + f1(cx + r0 * c(a1)) + " " + f1(cy + r0 * s(a1)) + " A" + r0 + " " + r0 + " 0 " + g + " 0 " + f1(cx + r0 * c(a0)) + " " + f1(cy + r0 * s(a0)) + "Z";
+  }
+  function moyeu(cx, cy, r, C) {
+    var s = "<g class='cm-c'><circle cx='" + f1(cx) + "' cy='" + f1(cy) + "' r='" + r + "' fill='" + (STYLE === "sobre" ? "#1D2B53" : "url(#" + P + "g)") + "' stroke='" + (STYLE === "sobre" ? "#fff" : "#FFC93C") + "' stroke-width='3'/>", L = [];
+    C.forEach(function (l, k) { couper(l, k ? 16 : 13).forEach(function (x) { L.push([x, k]); }); });
+    L.forEach(function (x, k) { s += "<text x='" + f1(cx) + "' y='" + f1(cy - (L.length - 1) * 8.5 + 5 + k * 17) + "' text-anchor='middle' font-size='" + (x[1] ? 11.5 : 14.5) + "' font-weight='" + (x[1] ? 600 : 800) + "' fill='" + (x[1] ? "#FFE08A" : "#fff") + "'>" + esc(x[0]) + "</text>"; });
+    return s + "</g>";
+  }
+  function roueSvg(cx, cy, R, r0, B) {
+    var n = B.length, s = "", dA = 2 * Math.PI / n;
+    B.forEach(function (b, i) {
+      var a0 = -Math.PI / 2 + i * dA + .015, a1 = a0 + dA - .03, am = (a0 + a1) / 2, rm = (r0 + R) / 2, L = couper(b.label, 11).slice(0, 3);
+      s += "<path class='cm-h' d='" + secteur(cx, cy, r0, R, a0, a1) + "' fill='" + (STYLE === "sobre" ? clair(b.color, .82) : STYLE === "colore" ? b.color : ARD() ? alpha(b.color, .45) : clair(b.color, .55)) + "' stroke='#fff' stroke-width='3'/>";
+      L.forEach(function (l, k) { s += "<text x='" + f1(cx + rm * Math.cos(am)) + "' y='" + f1(cy + rm * Math.sin(am) - (L.length - 1) * 7.5 + 4 + k * 15) + "' text-anchor='middle' font-size='12.5' font-weight='800' fill='" + (STYLE === "colore" ? "#fff" : encre("#1D2330")) + "'>" + esc(l) + "</text>"; });
+      s += "<circle cx='" + f1(cx + (R + 14) * Math.cos(am)) + "' cy='" + f1(cy + (R + 14) * Math.sin(am)) + "' r='12' fill='" + b.color + "' stroke='#fff' stroke-width='2.5'/><text x='" + f1(cx + (R + 14) * Math.cos(am)) + "' y='" + f1(cy + (R + 14) * Math.sin(am) + 4.5) + "' text-anchor='middle' font-size='12' font-weight='800' fill='#fff'>" + (i + 1) + "</text>";
+    });
+    return s;
+  }
+  function blocTexte(x, y, w, b, n, anc) {
+    var NC = Math.floor((w - 20) / 8.2), Lt = couper(b.label, NC), s = "";
+    Lt.forEach(function (l, k) { s += "<text x='" + f1(x) + "' y='" + f1(y + k * 19) + "' font-size='16' font-weight='800' fill='" + (STYLE === "sobre" ? encre("#1D2330") : b.color) + "'>" + (k ? "" : n + ". ") + esc(l) + "</text>"; });
+    return { s: s + liste(b.items, x, y + Lt.length * 19 + 8, NC - 2, b.color), h: Lt.length * 19 + 8 + hListe(b.items, NC - 2) };
+  }
+  function roue(C, B, alt, Wd) {
+    var n = B.length, dA = 2 * Math.PI / n, s = "", etr = Wd < 500;
+    if (etr) {
+      var R = 156, r0 = 66, cy = R + 32, y = cy + R + 46;
+      s += roueSvg(200, cy, R, r0, B) + moyeu(200, cy, r0 - 6, C);
+      B.forEach(function (b, i) { var bt = blocTexte(24, y, 360, b, i + 1); s += "<rect x='14' y='" + f1(y - 22) + "' width='6' height='" + f1(bt.h + 14) + "' rx='3' fill='" + b.color + "'/>" + bt.s; y += bt.h + 30; });
+      return svgDe("cm-etroit", Wd, y - 6, alt, B, s);
+    }
+    var R = 165, r0 = 72, cx = 460, cols = [[], []];
+    B.forEach(function (b, i) { var am = -Math.PI / 2 + (i + .5) * dA; cols[Math.cos(am) < -1e-6 ? 0 : 1].push({ b: b, i: i, am: am }); });
+    cols[0].sort(function (p, q) { return Math.sin(p.am) - Math.sin(q.am); }); cols[1].sort(function (p, q) { return Math.sin(p.am) - Math.sin(q.am); });
+    var bw = 230, hs = cols.map(function (c) { return c.reduce(function (a, e) { return a + blocTexte(0, 0, bw, e.b, 1).h + 34; }, 0); }), H = Math.max(hs[0], hs[1], 2 * R + 60) + 20, cy = H / 2;
+    cols.forEach(function (c, cote) {
+      var y = (H - hs[cote]) / 2 + 26, x = cote ? cx + R + 50 : 20;
+      c.forEach(function (e) {
+        var bt = blocTexte(x, y, bw, e.b, e.i + 1), ax = cx + (R + 28) * Math.cos(e.am), ay = cy + (R + 28) * Math.sin(e.am), tx = cote ? x - 10 : x + bw - 6, ty = y - 6;
+        s += "<path class='cm-l' d='M" + f1(ax) + " " + f1(ay) + " Q" + f1((ax + tx) / 2) + " " + f1(ty) + " " + f1(tx) + " " + f1(ty) + "' fill='none' stroke='" + trait(e.b.color) + "' stroke-width='2' stroke-dasharray='1 5' stroke-linecap='round'/>" + bt.s;
+        y += bt.h + 34;
+      });
+    });
+    return svgDe("cm-large", Wd, H, alt, B, roueSvg(cx, cy, R, r0, B) + moyeu(cx, cy, r0 - 6, C) + s);
+  }
+
+  /* ARÊTE DE POISSON : la tête porte le sujet, chaque arête une branche, les mots en arêtes secondaires */
+  function poisson(C, B, alt, Wd) {
+    var s = "", etr = Wd < 500, enc = encre("#2E3A55");
+    if (etr) {
+      var y = 26, sx = 34, out = "", dessus = "";
+      B.forEach(function (b, i) {
+        var Lt = couper(b.label, 24), by = y + 10, hl = hListe(b.items, 30);
+        out += "<path class='cm-t' d='M" + sx + " " + f1(by + 46) + " L" + (sx + 46) + " " + f1(by + 6) + "' stroke='" + trait(b.color) + "' stroke-width='3.5' stroke-linecap='round'/>";
+        dessus += "<circle cx='" + (sx + 58) + "' cy='" + f1(by) + "' r='12' fill='" + b.color + "'/><text x='" + (sx + 58) + "' y='" + f1(by + 4.5) + "' text-anchor='middle' font-size='12.5' font-weight='800' fill='#fff'>" + (i + 1) + "</text>";
+        Lt.forEach(function (l, k) { dessus += "<text x='" + (sx + 78) + "' y='" + f1(by + 5 + k * 19) + "' font-size='16' font-weight='800' fill='" + (STYLE === "sobre" ? encre("#1D2330") : b.color) + "'>" + esc(l) + "</text>"; });
+        out += liste(b.items, sx + 74, by + Lt.length * 19 + 22, 30, b.color);
+        y = by + Lt.length * 19 + 22 + hl + 22;
+      });
+      var hy = y + 10, hh = 44 + C.length * 18;
+      out = "<path class='cm-t' d='M" + sx + " 14 V" + f1(hy) + "' stroke='" + enc + "' stroke-width='6' stroke-linecap='round'/><path d='M" + (sx - 16) + " 4 L" + sx + " 22 L" + (sx + 16) + " 4' fill='none' stroke='" + enc + "' stroke-width='4' stroke-linejoin='round'/>" + out;
+      var head = "<path class='cm-c' d='M16 " + f1(hy) + " H384 Q384 " + f1(hy + hh) + " 200 " + f1(hy + hh + 26) + " Q16 " + f1(hy + hh) + " 16 " + f1(hy) + "Z' fill='" + (STYLE === "sobre" ? "#1D2B53" : "url(#" + P + "g)") + "' stroke='#FFC93C' stroke-width='3'/>";
+      C.forEach(function (l, k) { head += "<text x='200' y='" + f1(hy + 32 + k * 19) + "' text-anchor='middle' font-size='" + (k ? 13 : 17) + "' font-weight='" + (k ? 600 : 800) + "' fill='" + (k ? "#FFE08A" : "#fff") + "'>" + esc(l) + "</text>"; });
+      head += "<circle cx='364' cy='" + f1(hy + 16) + "' r='6' fill='#fff'/><circle cx='365' cy='" + f1(hy + 17) + "' r='3' fill='#001136'/>";
+      return svgDe("cm-etroit", Wd, hy + hh + 40, alt, B, out + dessus + head);
+    }
+    var haut = B.filter(function (b, i) { return i % 2 === 0; }), bas = B.filter(function (b, i) { return i % 2 === 1; }), m = Math.max(haut.length, bas.length), x0 = 40, xh = 680, S = (xh - x0) / m, NC = Math.max(14, Math.floor((S - 130) / 8.2));
+    function hBras(b) { return couper(b.label, NC + 2).length * 19 + 22 + hListe(b.items, NC) + 26; }
+    var Ht = Math.max.apply(null, haut.map(hBras).concat([90])), Hb = bas.length ? Math.max.apply(null, bas.map(hBras).concat([90])) : 60, cy = Ht + 30, H = cy + Hb + 30, dessus = "";
+    function bras(b, j, sg) {
+      var i = B.indexOf(b), bx = x0 + S * (j + 1) - 12, Lb = hBras(b) - 6, ex = bx - .42 * Lb, ey = cy - sg * Lb, Lt = couper(b.label, NC + 2), col = b.color;
+      s += "<path class='cm-t' d='M" + f1(bx) + " " + f1(cy) + " L" + f1(ex) + " " + f1(ey + sg * 8) + "' stroke='" + trait(col) + "' stroke-width='5.5' stroke-linecap='round'/>";
+      var tw = Math.max.apply(null, Lt.map(function (l) { return l.length; })) * 9 + 30, lx = ex - tw / 2, ly = ey - (sg > 0 ? Lt.length * 19 + 2 : -8);
+      dessus += "<g class='cm-h'><rect x='" + f1(lx) + "' y='" + f1(ly - 4) + "' width='" + f1(tw) + "' height='" + f1(Lt.length * 19 + 10) + "' rx='9' fill='" + (STYLE === "colore" ? col : "#fff") + "' stroke='" + col + "' stroke-width='2'/>";
+      Lt.forEach(function (l, k) { dessus += "<text x='" + f1(ex) + "' y='" + f1(ly + 14 + k * 19) + "' text-anchor='middle' font-size='15' font-weight='800' fill='" + (STYLE === "colore" ? "#fff" : col) + "'>" + (k ? "" : (i + 1) + ". ") + esc(l) + "</text>"; });
+      dessus += "</g>";
+      var yy = sg > 0 ? ey + Lt.length * 19 + 30 : ey - Lt.length * 19 - 22 - hListe(b.items, NC) + 4;
+      b.items.forEach(function (it) {
+        var L = couper(it, NC), xb = bx - .42 * Math.abs(cy - (yy - 5));
+        s += "<path class='cm-l' d='M" + f1(xb - 2) + " " + f1(yy - 5) + " H" + f1(xb - 18) + "' stroke='" + clair(trait(col), .3) + "' stroke-width='2'/>" + texte(xb - 24, yy, L, { t: T2, a: "end" });
+        yy += L.length * LH2 + 8;
+      });
+    }
+    haut.forEach(function (b, j) { bras(b, j, 1); }); bas.forEach(function (b, j) { bras(b, j, -1); });
+    var head = "<path class='cm-c' d='M" + (xh - 10) + " " + f1(cy - 64) + " Q" + (xh + 190) + " " + f1(cy - 70) + " 906 " + f1(cy) + " Q" + (xh + 190) + " " + f1(cy + 70) + " " + (xh - 10) + " " + f1(cy + 64) + " Q" + (xh + 14) + " " + f1(cy) + " " + (xh - 10) + " " + f1(cy - 64) + "Z' fill='" + (STYLE === "sobre" ? "#1D2B53" : "url(#" + P + "g)") + "' stroke='#FFC93C' stroke-width='3'/>";
+    var LC = []; C.forEach(function (l, k) { couper(l, k ? 22 : 16).forEach(function (x) { LC.push([x, k]); }); });
+    LC.forEach(function (x, k) { head += "<text x='" + (xh + 98) + "' y='" + f1(cy - (LC.length - 1) * 9 + 5 + k * 18) + "' text-anchor='middle' font-size='" + (x[1] ? 12.5 : 16) + "' font-weight='" + (x[1] ? 600 : 800) + "' fill='" + (x[1] ? "#FFE08A" : "#fff") + "'>" + esc(x[0]) + "</text>"; });
+    head += "<circle cx='" + (xh + 176) + "' cy='" + f1(cy - 22) + "' r='7' fill='#fff'/><circle cx='" + (xh + 178) + "' cy='" + f1(cy - 21) + "' r='3.5' fill='#001136'/>";
+    var dos = "<path class='cm-t' d='M" + (x0 - 6) + " " + f1(cy) + " H" + (xh + 4) + "' stroke='" + enc + "' stroke-width='7' stroke-linecap='round'/><path d='M" + (x0 + 12) + " " + f1(cy) + " L" + (x0 - 22) + " " + f1(cy - 30) + " M" + (x0 + 12) + " " + f1(cy) + " L" + (x0 - 22) + " " + f1(cy + 30) + "' stroke='" + enc + "' stroke-width='5' stroke-linecap='round'/>";
+    return svgDe("cm-large", Wd, H, alt, B, dos + s + dessus + head);
+  }
+
+  /* ARBRE DESSINÉ : un tronc qui porte le sujet, des branches qui montent vers des feuillages (une idée chacun) */
+  function feuillage(cx, cy, rx, ry, b, n, NC) {
+    var col = b.color, s = "<g class='cm-h'>", k, d = "";
+    for (k = 0; k <= 72; k++) { var u = 2 * Math.PI * k / 72, j = 1 + .045 * Math.sin(7 * u + n) + .02 * Math.sin(13 * u); d += (k ? "L" : "M") + f1(cx + rx * j * Math.cos(u)) + " " + f1(cy + ry * j * Math.sin(u)); }
+    var fill = STYLE === "sobre" ? "#F4F8F2" : STYLE === "colore" ? clair(col, .78) : teinte(col, .88);
+    s += "<path d='" + d + "Z' fill='" + fill + "' stroke='" + (STYLE === "sobre" ? "#9DB59A" : col) + "' stroke-width='" + (STYLE === "sobre" ? 1.4 : 2.4) + "' stroke-linejoin='round'/>";
+    for (k = 0; k < 5; k++) { var a = -2.6 + k * .45, lx = cx + rx * .98 * Math.cos(a), ly = cy + ry * .98 * Math.sin(a); s += "<path d='M" + f1(lx) + " " + f1(ly) + " q6 -10 14 -4 q-4 9 -14 4z' fill='" + (STYLE === "sobre" ? "#9DB59A" : col) + "' opacity='.75'/>"; }
+    var Lt = couper(b.label, NC - 4), h = Lt.length * 19 + 10 + hListe(b.items, NC), y = cy - h / 2 + 14;
+    Lt.forEach(function (l, q) { s += "<text x='" + f1(cx) + "' y='" + f1(y + q * 19) + "' text-anchor='middle' font-size='16' font-weight='800' fill='" + (STYLE === "sobre" ? encre("#1D2330") : col) + "'>" + (q ? "" : n + ". ") + esc(l) + "</text>"; });
+    return s + "</g>" + liste(b.items, cx, y + Lt.length * 19 + 10, NC, col, true);
+  }
+  function tronc(cx, yTop, yBas, C) {
+    var bois = STYLE === "sobre" ? "#8B7B6B" : "#8A5A2D", s = "<path d='M" + (cx - 34) + " " + yBas + " C" + (cx - 26) + " " + (yBas - 40) + " " + (cx - 22) + " " + (yTop + 40) + " " + (cx - 16) + " " + yTop + " H" + (cx + 16) + " C" + (cx + 22) + " " + (yTop + 40) + " " + (cx + 26) + " " + (yBas - 40) + " " + (cx + 34) + " " + yBas + " Q" + (cx + 60) + " " + (yBas + 4) + " " + (cx + 76) + " " + (yBas + 10) + " H" + (cx - 76) + " Q" + (cx - 60) + " " + (yBas + 4) + " " + (cx - 34) + " " + yBas + "Z' fill='" + bois + "'/>";
+    s += "<path d='M" + (cx - 8) + " " + (yTop + 30) + " q6 40 -2 80 M" + (cx + 9) + " " + (yTop + 60) + " q-5 30 3 60' stroke='#6B4423' stroke-width='2' fill='none' opacity='.6'/><rect x='" + (cx - 200) + "' y='" + (yBas + 10) + "' width='400' height='6' rx='3' fill='#7FB069' opacity='.5'/>";
+    var LC = []; C.forEach(function (l, k) { couper(l, k ? 26 : 22).forEach(function (x) { LC.push([x, k]); }); });
+    var ph = LC.length * 19 + 18, pw = Math.min(380, Math.max.apply(null, LC.map(function (x) { return x[0].length * (x[1] ? 7.8 : 10.4); })) + 40), py = (yTop + yBas) / 2 - ph / 2;
+    s += "<g class='cm-c'><rect x='" + f1(cx - pw / 2) + "' y='" + f1(py) + "' width='" + f1(pw) + "' height='" + f1(ph) + "' rx='8' fill='" + (STYLE === "sobre" ? "#1D2B53" : "url(#" + P + "g)") + "' stroke='#FFC93C' stroke-width='2.5'/>";
+    LC.forEach(function (x, k) { s += "<text x='" + cx + "' y='" + f1(py + 24 + k * 19) + "' text-anchor='middle' font-size='" + (x[1] ? 12.5 : 16) + "' font-weight='" + (x[1] ? 600 : 800) + "' fill='" + (x[1] ? "#FFE08A" : "#fff") + "'>" + esc(x[0]) + "</text>"; });
+    return s + "</g>";
+  }
+  function arbreDessin(C, B, alt, Wd) {
+    var etr = Wd < 500, n = B.length, cols = etr ? 1 : (n <= 2 ? n : n === 4 ? 2 : 3), g = 22, w = (Wd - 30 - (cols - 1) * g) / cols, NC = Math.floor((w - 96) / 8), rangs = [], y = 18;
+    for (var r0 = 0; r0 < n; r0 += cols) rangs.push(B.slice(r0, r0 + cols));
+    var pos = [];
+    rangs.forEach(function (rg, ri) {
+      var hs = rg.map(function (b) { return couper(b.label, NC - 4).length * 19 + 10 + hListe(b.items, NC) + 70; }), hr = Math.max.apply(null, hs), dec = cols > 1 && rg.length < cols ? (cols - rg.length) * (w + g) / 2 : 0;
+      rg.forEach(function (b, k) { pos.push({ b: b, cx: 15 + dec + k * (w + g) + w / 2, cy: y + hr / 2, rx: w / 2, ry: hs[k] / 2 }); });
+      y += hr + (etr ? 26 : 30);
+    });
+    var yTop = y + 10, yBas = yTop + 150, cx = Wd / 2, bois = STYLE === "sobre" ? "#8B7B6B" : "#8A5A2D", s = "", dessus = "";
+    pos.forEach(function (p, i) {
+      var ex = etr ? cx : p.cx, ey = p.cy + p.ry * .6, sw = etr ? 9 : 12 - Math.min(5, (yTop - ey) / 90);
+      s += "<path class='cm-t' d='M" + f1(cx + (etr ? 0 : (p.cx - cx) * .04)) + " " + f1(yTop + 4) + " C" + f1(cx + (p.cx - cx) * .1) + " " + f1(yTop - 60) + " " + f1(ex - (ex - cx) * .2) + " " + f1(ey + 70) + " " + f1(ex) + " " + f1(ey) + "' fill='none' stroke='" + bois + "' stroke-width='" + f1(sw) + "' stroke-linecap='round'/>";
+      dessus += feuillage(p.cx, p.cy, p.rx, p.ry, p.b, i + 1, NC);
+    });
+    return svgDe(etr ? "cm-etroit" : "cm-large", Wd, yBas + 24, alt, B, s + dessus + tronc(cx, yTop, yBas, C));
+  }
+
+  /* FRISE CHRONOLOGIQUE : un axe fléché, les moments en cartes, alternées dessus / dessous */
+  function frise(C, B, alt, Wd) {
+    var n = B.length, s = "", dessus = "", col0 = encre("#2E3A55");
+    if (Wd < 500) {
+      var pc = placerCentre(200, C, largeurC(C, 240, 360)), y = pc.y + pc.c.b + 30, x = 30, d0 = y;
+      B.forEach(function (b, i) { var bx = boite(56, y, 326, b, i + 1, false); dessus += "<circle cx='" + x + "' cy='" + f1(y + 25) + "' r='9' fill='#fff' stroke='" + b.color + "' stroke-width='4'/><path d='M" + (x + 10) + " " + f1(y + 25) + " H54' stroke='" + trait(b.color) + "' stroke-width='2.5'/>" + bx.s; y += bx.h + 22; });
+      s += "<path class='cm-t' d='M" + x + " " + f1(d0 - 6) + " V" + f1(y + 4) + "' stroke='" + col0 + "' stroke-width='4' stroke-linecap='round' marker-end='url(#" + P + "fx)'/>";
+      return svgDe("cm-etroit", Wd, y + 22, alt, B, s.replace("#" + P + "fx", "#" + P + "f0") + dessus + pc.s);
+    }
+    var pc2 = placerCentre(Wd / 2, C, largeurC(C, 240, 600)), x0 = 60, x1 = Wd - 70, pas = n > 1 ? (x1 - x0) / (n - 1) : 0, cw = Math.min(268, n > 1 ? pas * 2 - 24 : 300);
+    var hs = B.map(function (b) { return hBoite(b, cw); }), Hh = Math.max.apply(null, hs.filter(function (h, i) { return i % 2 === 0; }).concat([60])), Hb = Math.max.apply(null, hs.filter(function (h, i) { return i % 2 === 1; }).concat([40]));
+    var top = pc2.y + pc2.c.b + 24, ay = top + Hh + 40, H = ay + 40 + Hb + 20;
+    s += "<path class='cm-t' d='M24 " + f1(ay) + " H" + (Wd - 26) + "' stroke='" + col0 + "' stroke-width='5' stroke-linecap='round'/><path d='M" + (Wd - 40) + " " + f1(ay - 12) + " L" + (Wd - 20) + " " + f1(ay) + " L" + (Wd - 40) + " " + f1(ay + 12) + "' fill='none' stroke='" + col0 + "' stroke-width='5' stroke-linejoin='round' stroke-linecap='round'/>";
+    B.forEach(function (b, i) {
+      var x = x0 + i * pas, haut = i % 2 === 0, bx0 = Math.max(16, Math.min(Wd - 16 - cw, x - cw / 2)), by = haut ? ay - 40 - hs[i] : ay + 40, bx = boite(bx0, by, cw, b, i + 1, false, hs[i]);
+      s += "<path class='cm-l' d='M" + f1(x) + " " + f1(ay + (haut ? -12 : 12)) + " V" + f1(haut ? ay - 40 : ay + 40) + "' stroke='" + trait(b.color) + "' stroke-width='2.5' stroke-dasharray='2 5' stroke-linecap='round'/>";
+      dessus += "<circle cx='" + f1(x) + "' cy='" + f1(ay) + "' r='11' fill='#fff' stroke='" + b.color + "' stroke-width='5'/>" + bx.s;
+    });
+    return svgDe("cm-large", Wd, H, alt, B, s + dessus + pc2.s);
+  }
+
+  var FORMES = ["radiale", "organigramme", "bulles", "accolade", "alveoles", "roue", "poisson", "arbre"], STYLES = ["main", "colore", "postit"];
+  function hache(t) { var h = 7; for (var i = 0; i < t.length; i++) h = (h * 31 + t.charCodeAt(i)) % 100003; return h; }
+
+  /* carte = { centre: "Titre\nSous-titre" | [lignes], branches: [{ label, color?, items: [] }] } */
+  function VRT_CM(carte) {
+    var C = (Array.isArray(carte.centre) ? carte.centre : String(carte.centre || "").split("\n")).map(function (x) { return String(x).trim(); }).filter(Boolean);
+    var B = (carte.branches || []).filter(function (b) { return b && ((b.items || []).length || (carte.depuisSchema && b.label)); }).map(function (b, i) {
+      return { label: String(b.label || "").trim(), color: /^#[0-9a-f]{6}$/i.test(b.color || "") ? b.color : COUL[i % COUL.length], items: b.items.map(function (x) { return String(x).replace(/\s+/g, " ").trim(); }).filter(Boolean) };
+    }).filter(function (b) { return b.items.length || (carte.depuisSchema && b.label); });
+    if (!B.length) return "";
+    var alt = "Carte mentale : " + C.join(", ") + ". " + B.map(function (b) { return b.label + " : " + b.items.join(" ; "); }).join(". ");
+    /* forme et style : imposés par la carte, sinon tirés du titre (stables d'une génération à l'autre et variés d'une carte à l'autre) */
+    var hh = hache(C.join(" ")), pal = PALETTES[Math.floor(hh / 13) % PALETTES.length];
+    if (!carte.garderCouleurs) B.forEach(function (b, i) { b.color = pal[i % pal.length]; });
+    var forme = carte.forme || FORMES[hh % FORMES.length], st = carte.style || STYLES[Math.floor(hh / 7) % STYLES.length];
+    var gauche = B.map(function (b) { return /cause|origine|facteur|pourquoi/i.test(b.label) && !/conséquence|effet|impact/i.test(b.label); });
+    if (forme === "causes" && (gauche.indexOf(true) < 0 || gauche.indexOf(false) < 0)) forme = "radiale";
+    if (forme === "organigramme" && B.length > 5) forme = "radiale";
+    var n = ++NUM, h = "", cp = function () { return B.map(function (b) { return Object.assign({}, b); }); };
+    if (st === "ardoise" && !carte.garderCouleurs) B.forEach(function (b, i) { b.color = ["#FFD166", "#FF8FA3", "#8BE9FD", "#B9F18C", "#FFB86B", "#D0A9FF"][i % 6]; });
+    STYLE = st;
+    P = "cm" + n + "a";
+    h += forme === "organigramme" ? arbre(C, cp(), alt) : forme === "roue" ? roue(C, cp(), alt, 920) : forme === "poisson" ? poisson(C, cp(), alt, 920) : forme === "arbre" ? arbreDessin(C, cp(), alt, 920) : forme === "frise" ? frise(C, cp(), alt, 920) : forme === "bulles" ? bulles(C, cp(), alt) : forme === "accolade" ? accolade(C, cp(), alt) : forme === "alveoles" ? alveoles(C, cp(), alt, 920) : forme === "flux" ? flux(C, cp(), alt, 920) : forme === "causes" ? causes(C, cp(), alt, 920, gauche) : large(C, cp(), alt);
+    P = "cm" + n + "b";
+    h += forme === "roue" ? roue(C, cp(), alt, 400) : forme === "poisson" ? poisson(C, cp(), alt, 400) : forme === "arbre" ? arbreDessin(C, cp(), alt, 400) : forme === "frise" ? frise(C, cp(), alt, 400) : forme === "bulles" ? bullesEtroit(C, cp(), alt) : forme === "accolade" ? accoladeEtroit(C, cp(), alt) : forme === "alveoles" ? alveoles(C, cp(), alt, 400) : forme === "flux" ? flux(C, cp(), alt, 400) : forme === "causes" ? causes(C, cp(), alt, 400, gauche) : etroit(C, cp(), alt);
+    STYLE = "main";
+    return "<div class='cm cm-" + forme + " cm-s-" + st + "' data-forme='" + forme + "'>" + h + "</div>";
+  }
+
+  /* carte d'une leçon : une branche par partie (hors entraînement), les mots tirés de « à retenir »
+     (coupé aux « ; » et aux phrases), à défaut des titres en gras de la partie. */
+  function nu(h) { return String(h || "").replace(/<[^>]+>/g, " ").replace(/&nbsp;/g, " ").replace(/&amp;/g, "&").replace(/&lt;/g, "<").replace(/&gt;/g, ">").replace(/&#39;|&rsquo;/g, "’").replace(/&quot;/g, "\"").replace(/\s+/g, " ").trim(); }
+  function morceaux(r) {
+    var t = nu(r).replace(/^Savoir-être[^:]*:\s*/i, ""), m = t.replace(/([.!?])\s+(?=[A-ZÀ-Ý«])/g, "$1\u0001").split(/\s*;\s*|\u0001/).map(function (x) { return x.replace(/[.]\s*$/, "").trim(); }).filter(function (x) { return x.length > 1; });
+    return m.length ? m : (t ? [t] : []);
+  }
+  function VRT_CM_LECON(L) {
+    if (!L || !L.parties) return "";
+    var B = [];
+    L.parties.forEach(function (p) {
+      if (p.verrou || /entraînement|entrainement|intégration|exercices?\b/i.test(p.t || "")) return;
+      var it = p.retenir ? morceaux(p.retenir) : [];
+      if (it.length < 2) {
+        var g = (String(p.html || "").match(/<(?:strong|b)>([^<]{3,60})<\/(?:strong|b)>/g) || []).map(nu).filter(function (x, i, a) { return a.indexOf(x) === i && x.split(" ").length <= 4 && it.indexOf(x) < 0 && !/^(Définition|Exemple|Attention|Astuce|Le savais-tu|Remarque|Méthode|Retiens|Comparer|À retenir)/i.test(x) && !/^(que|qui|dont|où|et|le|la|les|un|une|de|des)\s/i.test(x); });
+        it = it.concat(g.slice(0, 5 - it.length));
+      }
+      if (it.length) B.push({ label: nu(p.t).replace(/^\d+\.\s*/, "").slice(0, 42), items: it.slice(0, 6) });
+    });
+    if (B.length < 2) return "";
+    /* forme selon le contenu : étapes → flux ; causes et conséquences → multi-flux ; sinon variée selon le titre */
+    var lab = B.map(function (b) { return b.label; }).join(" | "), forme = /étape|méthode|démarche|procédure|phase/i.test(lab) ? "flux" : (B.some(function (b) { return /cause|origine/i.test(b.label) && !/conséquence|effet|impact/i.test(b.label); }) && B.some(function (b) { return /conséquence|effet|impact/i.test(b.label) && !/cause|origine/i.test(b.label); })) ? "causes" : /hist/i.test(L.m || "") || /\b1[0-9]{3}\b|siècle/.test(lab) ? "frise" : null;
+    return VRT_CM({ centre: [nu(L.cle || L.titre)].concat(L.c ? [L.c] : []), branches: B.slice(0, 6), forme: forme });
+  }
+  VRT_CM.lecon = VRT_CM_LECON;
+  /* ════════ SCHÉMAS EN CARTES MENTALES (18/11/2026, « change en vraies cartes mentales esthétiques ») ════════
+     Les schémas des leçons (p.illus.svg, générés hors dépôt : titre, cadres, titres en gras, listes à puces, notes,
+     flèches) sont relus dans le navigateur et redessinés en carte mentale. Un schéma non reconnu reste tel quel. */
+  function depuisSvg(src) {
+    if (typeof DOMParser === "undefined" || !src) return "";
+    try {
+      var doc = new DOMParser().parseFromString(src, "image/svg+xml"), root = doc.documentElement;
+      if (!root || root.nodeName.toLowerCase() !== "svg" || doc.getElementsByTagName("parsererror").length) return "";
+      var vb = (root.getAttribute("viewBox") || "0 0 480 312").split(/[\s,]+/).map(Number), Wv = vb[2] || 480, Hv = vb[3] || 312;
+      function n(e, a) { return +(e.getAttribute(a) || 0); }
+      var boites = [].slice.call(root.getElementsByTagName("rect")).map(function (r) { return { x: n(r, "x"), y: n(r, "y"), w: n(r, "width"), h: n(r, "height"), t: [] }; })
+        .filter(function (r) { return r.w > 24 && r.h > 12 && r.w < Wv * .96; });
+      /* seulement les schémas en cadres : pas de courbe, de tracé, de quadrillage, d'ellipse ni de dessin */
+      var chemins = [].slice.call(root.getElementsByTagName("path")).map(function (e) { return e.getAttribute("d") || ""; });
+      if (chemins.some(function (d) { return /[CcQqAaSsTt]/.test(d) || (d.match(/[LlHhVv]/g) || []).length > 3; })) return "";
+      if (chemins.length > boites.length * 2 + 6) return "";
+      if (["ellipse", "polygon", "polyline", "image", "use"].some(function (t) { return root.getElementsByTagName(t).length; })) return "";
+      var grandsRonds = [].slice.call(root.getElementsByTagName("circle")).filter(function (c) { return n(c, "r") >= 18; }).length;
+      if ((root.getElementsByTagName("line").length > 4 && !grandsRonds) || root.getElementsByTagName("circle").length > 1) return "";
+      /* tableaux, échelles et grilles : leurs lignes et colonnes ont un sens, on les garde */
+      if (/^(Tableau|Table |Échiquier|Échelle|Les \d+ premiers éléments|Comparaison entre)/i.test(root.getAttribute("aria-label") || "")) return "";
+      /* grille de pixels (≥ 6 petits carrés) ou tableau (≥ 6 lignes de même taille empilées dans une même colonne) */
+      var tous = [].slice.call(root.getElementsByTagName("rect")).map(function (r) { return { x: n(r, "x"), w: n(r, "width"), h: n(r, "height") }; });
+      if (tous.filter(function (b) { return b.w < 24 && b.h < 24 && b.w > 0; }).length >= 6) return "";
+      var formats = {}; tous.filter(function (b) { return b.w >= 24 && b.w < Wv * .96; }).forEach(function (b) { var k = Math.round(b.x) + ":" + Math.round(b.w) + "x" + Math.round(b.h); formats[k] = (formats[k] || 0) + 1; });
+      if (Object.keys(formats).some(function (k) { return formats[k] >= 5; })) return "";
+      var ronds = [].slice.call(root.getElementsByTagName("circle")).map(function (c) { return { cx: n(c, "cx"), cy: n(c, "cy"), r: n(c, "r"), t: [] }; }).filter(function (c) { return c.r >= 18; });
+      var titre = "", libres = [], textes = [].slice.call(root.getElementsByTagName("text"));
+      if (textes.length < 4) return "";
+      textes.forEach(function (t) {
+        var x = n(t, "x"), y = n(t, "y"), fs = +(t.getAttribute("font-size") || 10), g = /600|700|800|900|bold/.test(t.getAttribute("font-weight") || ""), an = t.getAttribute("text-anchor") || "start", lignes = [];
+        var propre = ""; [].slice.call(t.childNodes).forEach(function (c) { if (c.nodeType === 3) propre += c.nodeValue; });
+        var brutes = []; if (propre.trim()) brutes.push(propre.trim());
+        [].slice.call(t.getElementsByTagName("tspan")).forEach(function (s) { var v = (s.textContent || "").trim(); if (v) brutes.push(v); });
+        /* une ligne coupée continue la précédente ; seule une puce (•, –) ouvre un nouvel élément */
+        brutes.forEach(function (v, k) { if (k && !/^[•·–\-]\s/.test(v)) lignes[lignes.length - 1] += " " + v; else lignes.push(v); });
+        if (!lignes.length || fs < 7.6 || /^Schéma VÉRITAS$/.test(lignes[0])) return;
+        var lg = Math.max.apply(null, brutes.map(function (l) { return l.length; })) * fs * .5, cx = an === "middle" ? x : an === "end" ? x - lg / 2 : x + lg / 2;
+        var T = { x: cx, y: y, g: g, fs: fs, l: lignes, br: brutes, lmax: Math.max.apply(null, brutes.map(function (v) { return v.length; })) };
+        if (!titre && y < 28 && g) { titre = lignes.join(" "); return; }
+        if (/^[\d\s,.\-−+%°]+$/.test(lignes.join(" "))) return;
+        var rd = ronds.filter(function (c) { return Math.hypot(cx - c.cx, y - 3 - c.cy) < c.r; })[0];
+        if (rd) { rd.t.push(T); return; }
+        var dans = boites.filter(function (b) { return cx >= b.x - 2 && cx <= b.x + b.w + 2 && y - 3 >= b.y && y - 3 <= b.y + b.h; }).sort(function (a, b) { return a.w * a.h - b.w * b.h; })[0];
+        if (dans) dans.t.push(T); else libres.push(T);
+      });
+      var net = function (s) { return String(s).replace(/^[•·\-–]\s*/, "").replace(/\s+/g, " ").trim(); };
+      var B = [];
+      boites.filter(function (b) { return b.t.length; }).forEach(function (b) {
+        b.t.sort(function (p, q) { return p.y - q.y; });
+        var tout = [].concat.apply([], b.t.map(function (t) { return t.l.map(function (l) { return { v: l, g: t.g }; }); })), label, items;
+        if (b.t.length === 1 && b.t[0].g) { label = net(b.t[0].br.join(" ")); items = []; }
+        else if (b.t.length === 1 && b.t[0].br.length >= 2 && !/^[•·–\-]/.test(b.t[0].br[1])) {
+          /* texte normal sur plusieurs lignes : une ligne terminée par « : » appelle la suivante */
+          var L2 = []; b.t[0].br.forEach(function (v) { if (L2.length && /:\s*$/.test(L2[L2.length - 1])) L2[L2.length - 1] += " " + v; else L2.push(v); });
+          var m0 = L2[0].match(/^(.{3,40}?)\s*:\s*(.+)$/);
+          if (m0) { label = net(m0[1]); items = [net(m0[2])].concat(L2.slice(1).map(net)); } else { label = net(L2[0]); items = L2.slice(1).map(net); }
+        }
+        else if (tout.length === 1) { label = net(tout[0].v); items = []; }
+        else if (b.t[0].g || b.t.length > 1) { label = net(b.t[0].l.join(" ")); items = [].concat.apply([], b.t.slice(1).map(function (t) { return t.l; })).map(net); }
+        else { label = net(tout[0].v); items = tout.slice(1).map(function (o) { return net(o.v); }); }
+        B.push({ label: label, items: items, x: b.x + b.w / 2, y: b.y, bas: b.y + b.h, b: b });
+      });
+      /* textes libres sous un cadre : ses explications ; les autres : à retenir */
+      var notes = [];
+      libres.sort(function (p, q) { return p.y - q.y; }).forEach(function (t) {
+        var lt = t.lmax * t.fs * .5;
+        var br = B.filter(function (o) { return o.b && t.y > o.bas && t.y - o.bas < 64 && Math.abs(t.x - o.x) < o.b.w * .35 + 6 && lt < o.b.w * 1.4; }).sort(function (p, q) { return (t.y - p.bas) - (t.y - q.bas); })[0];
+        if (br) br.items = br.items.concat(t.l.map(net)); else notes.push(t.l.map(net).join(" "));
+      });
+      B.forEach(function (o) {
+        if (o.items.length) return;
+        var m = o.label.match(/^(.{3,40}?)\s*:\s*(.{3,})$/), p = o.label.match(/^(.{2,40}?)\s*\(([^)]{2,40})\)$/);
+        if (m) { o.label = m[1]; o.items = [m[2]]; } else if (p) { o.label = p[1]; o.items = [p[2]]; }
+      });
+      if (notes.length) B.push({ label: "À retenir", items: notes });
+      if (B.length < 2) return "";
+      var C = [titre || (ronds[0] && ronds[0].t.length ? [].concat.apply([], ronds[0].t.map(function (t) { return t.l; })).join(" ") : "Schéma")];
+      /* forme : une suite de cadres alignés reliés par des flèches → flux ; un rond central → radiale */
+      var avecB = B.filter(function (o) { return o.b; }), lig = [];
+      avecB.forEach(function (o) { var g = avecB.filter(function (q) { return Math.abs(q.y - o.y) < 8; }); if (g.length > lig.length) lig = g; });
+      lig.sort(function (p, q) { return p.x - q.x; });
+      var segs = [].slice.call(root.getElementsByTagName("path")).map(function (e) { var m = (e.getAttribute("d") || "").match(/^M\s*([\d.]+)[\s,]+([\d.]+)\s*L\s*([\d.]+)[\s,]+([\d.]+)/); return m ? m.slice(1).map(Number) : null; }).filter(Boolean);
+      var liens = 0;
+      for (var q = 0; q + 1 < lig.length; q++) { var A = lig[q].b, Bq = lig[q + 1].b; if (segs.some(function (g) { return Math.abs(g[1] - g[3]) < 4 && g[0] >= A.x + A.w - 12 && g[2] <= Bq.x + 12; })) liens++; }
+      var memeLigne = lig.length >= 3 && liens >= Math.ceil((lig.length - 1) / 2);
+      var fleches = root.getElementsByTagName("path").length >= lig.length - 1, forme = memeLigne && fleches ? "flux" : ronds.length ? "radiale" : null;
+      if (memeLigne) B = lig.sort(function (p, q) { return p.x - q.x; }).concat(B.filter(function (o) { return lig.indexOf(o) < 0; }));
+      if (typeof document !== "undefined" && !document.getElementById("cmCss")) { var st = document.createElement("style"); st.id = "cmCss"; st.textContent = VRT_CM.css; document.head.appendChild(st); }
+      return VRT_CM({ centre: C, branches: B.map(function (o) { return { label: o.label, items: o.items }; }), forme: forme, depuisSchema: true });
+    } catch (e) { return ""; }
+  }
+  VRT_CM.depuisSvg = depuisSvg;
+
+  VRT_CM.css = ".cm{margin:6px 0}.cm svg{display:block;width:100%;height:auto;border-radius:18px}.cm .cm-etroit{display:none}" +
+    "@media (max-width:640px){.cm .cm-large{display:none}.cm .cm-etroit{display:block}}" +
+    "@media (prefers-reduced-motion:no-preference){.cm .cm-t,.cm .cm-l{stroke-dasharray:1200;stroke-dashoffset:1200;animation:cmTrace 1.2s ease-out forwards}" +
+    ".cm .cm-etroit .cm-t[stroke-dasharray='2 7']{stroke-dasharray:2 7;stroke-dashoffset:0;animation:none}" +
+    ".cm .cm-l{animation-delay:.4s}.cm .cm-p,.cm text,.cm .cm-h{opacity:0;animation:cmVoir .5s ease-out .75s forwards}.cm .cm-c,.cm .cm-c text{opacity:1;animation:none}" +
+    ".cm .cm-c{transform-box:fill-box;transform-origin:center;animation:cmGonfle .7s cubic-bezier(.34,1.56,.64,1) both}}" +
+    "@keyframes cmTrace{to{stroke-dashoffset:0}}@keyframes cmVoir{to{opacity:1}}@keyframes cmGonfle{from{transform:scale(.6);opacity:0}to{transform:scale(1);opacity:1}}" +
+    "@media print{.cm .cm-large{display:block!important}.cm .cm-etroit{display:none!important}}";
+  W.VRT_CM = VRT_CM;
+  if (typeof module !== "undefined" && module.exports) module.exports = VRT_CM;
+})(typeof window !== "undefined" ? window : globalThis);
+
 /* VÉRITAS — Apprendre : registre des leçons rédigées (fichier généré : ne pas éditer lecons.js à la main,
    éditer apprendre/_src/*.js puis reconstruire avec tools/build_apprendre.sh). */
 window.VRT_LECONS = {};
@@ -4060,20 +4713,52 @@ VRT_PLUS("3e-en-articles", [
     },
     parties: [
       { t: "Grandeur, unité, instrument", html: (M_OLD ? M_OLD.parties[0].html : "") +
-        "<div class='methode'><b>Lire un pied à coulisse au 1/10 de mm</b><ol><li>Lis sur la règle les millimètres entiers placés <strong>avant</strong> le zéro du vernier.</li><li>Cherche le trait du vernier qui est <strong>exactement aligné</strong> avec un trait de la règle.</li><li>Son numéro donne les dixièmes de millimètre.</li></ol></div>",
-        planches: [{ type: "3d", titre: "Le pied à coulisse", legende: "Tourne l'instrument : la règle graduée en mm, le coulisseau portant le vernier (10 divisions sur 9 mm) et les deux becs qui serrent un tuyau en cuivre. Le curseur fait glisser le coulisseau.",
+        "<div class='methode'><b>Lire un pied à coulisse au 1/10 de mm</b><ol><li>Lis sur la règle les millimètres entiers placés <strong>avant</strong> le zéro du vernier.</li><li>Cherche le trait du vernier qui est <strong>exactement aligné</strong> avec un trait de la règle.</li><li>Son numéro donne les dixièmes de millimètre.</li></ol></div>" +
+        "<div class='def'><b>Définition</b><strong>Mesurer</strong> une grandeur, c'est la comparer à une grandeur de même nature choisie comme <strong>unité</strong>. Un résultat s'écrit toujours : <strong>grandeur = nombre × unité</strong>, par exemple m = 24,2 kg ; L = 23,7 mm.</div>" +
+        "<div class='ex'><b>Exemple : lire le vernier</b>Le zéro du vernier est juste après le trait <strong>23 mm</strong> de la règle, et c'est le <strong>7ᵉ trait</strong> du vernier qui est aligné : diamètre du tuyau L = 23 + 0,7 = <strong>23,7 mm</strong>. La précision de l'instrument est 0,1 mm.</div>" +
+        "<div class='ex'><b>Exemple : la balance non tarée</b>À vide, la balance affiche 0,8 kg. Un sac posé dessus affiche 25,0 kg : sa masse réelle est 25,0 − 0,8 = <strong>24,2 kg</strong>.</div>" +
+        "<div class='astuce'><b>Astuce</b>Avant de mesurer, fais toujours le « test du vide » : l'instrument doit indiquer 0 sans rien dessus (balance, ampèremètre, pied à coulisse fermé). Sinon, tare-le ou retranche le décalage.</div>",
+        planches: [{ type: "2D", titre: "Lire 23,7 mm sur le vernier", legende: "Le zéro du vernier dépasse 23 mm ; le 7ᵉ trait du vernier coïncide avec un trait de la règle : 23 mm + 7 dixièmes = 23,7 mm.", svg: (function () {
+          var s = "<rect x='20' y='40' width='600' height='60' rx='6' fill='#E3E7ED' stroke='#8C95A3'/>", i, x0 = 40, mm = 13;
+          for (i = 0; i <= 44; i++) { var x = x0 + i * mm; s += "<path d='M" + x + " 40V" + (i % 10 === 0 ? 72 : i % 5 === 0 ? 64 : 56) + "' stroke='" + NUIT + "' stroke-width='" + (i % 10 ? 1.2 : 2) + "'/>"; if (i % 10 === 0) s += txt(x, 90, i, { s: 11 }); }
+          var xv = x0 + 23.7 * mm;
+          s += "<rect x='" + (xv - 6) + "' y='100' width='" + (9 * mm * 1 + 24) + "' height='54' rx='6' fill='#C6CCD6' stroke='#8C95A3'/>";
+          for (i = 0; i <= 10; i++) { var xx = xv + i * 0.9 * mm; s += "<path d='M" + xx.toFixed(1) + " 100V" + (i % 5 === 0 ? 126 : 116) + "' stroke='" + (i === 7 ? ROUGE : NUIT) + "' stroke-width='" + (i === 7 ? 2.6 : 1.2) + "'/>"; if (i % 5 === 0) s += txt(xx.toFixed(1), 142, i, { s: 11 }); }
+          s += "<path d='M" + (x0 + 30 * mm) + " 36V100' stroke='" + ROUGE + "' stroke-width='2' stroke-dasharray='4 3'/>" + txt(x0 + 30 * mm + 6, 30, "7ᵉ trait aligné", { s: 12, c: ROUGE, a: "start" });
+          s += "<path d='M" + xv + " 168V150' stroke='" + BLEU + "' stroke-width='2'/>" + txt(xv - 8, 184, "zéro du vernier : après 23 mm", { s: 12, c: BLEU, a: "end" });
+          s += "<rect x='420' y='160' width='190' height='40' rx='10' fill='#ECF7F0' stroke='#BFDCC9'/>" + txt(515, 186, "L = 23 + 0,7 = 23,7 mm", { s: 14, c: "#17784D" });
+          return svg(640, 210, "Règle graduée en millimètres et vernier au dixième : le zéro du vernier après 23 millimètres, le septième trait aligné", "", s);
+        })() }, { type: "3d", titre: "Le pied à coulisse", legende: "Tourne l'instrument : la règle graduée en mm, le coulisseau portant le vernier (10 divisions sur 9 mm) et les deux becs qui serrent un tuyau en cuivre. Le curseur fait glisser le coulisseau.",
           modele: { h: 340, rx: -46, ry: 8, echelle: 1.05, alt: "Pied à coulisse en trois dimensions serrant un tuyau de cuivre", eclate: "Ouvrir les becs", jouer: "Ouvrir les becs", objets: piedCoulisse3D(),
             etiquettes: [{ p: [120, 6, -10], t: "Règle (mm)", cote: "d" }, { p: [-140, 12, 16], t: "Vernier au 1/10", ec: [44, 0, 0] }, { p: [-192, 30, 70], t: "Tuyau mesuré" }, { p: [-205, 4, 100], t: "Bec fixe" }] } }],
         fil: { html: "<p>Samuel commence par vérifier sa balance : à vide, l'aiguille est sur <strong>0</strong>. Celle du commerçant affiche 0,8 kg à vide : elle n'est pas « remise à zéro » (tarée). Un instrument électronique peut donc se tromper s'il est mal réglé.</p>", verdicts: [[0, "rejetee", "La balance affiche 0,8 kg à vide : elle est mal tarée, toutes ses pesées sont faussées."]] },
         retenir: "Grandeur + nombre + unité ; vérifier le zéro de l'instrument avant de mesurer." },
 
-      { t: "Les différents types d'erreur", html: (M_OLD ? M_OLD.parties[1].html : ""),
+      { t: "Les différents types d'erreur", html: (M_OLD ? M_OLD.parties[1].html : "") +
+        "<div class='ex'><b>Exemple d'erreur systématique</b>Un chronomètre déclenché toujours 0,04 s en retard donne des durées toutes trop courtes de 0,04 s : T lue = 1,36 s, T corrigée = 1,36 + 0,04 = <strong>1,40 s</strong>. Répéter la mesure ne corrige rien : il faut corriger l'instrument ou la méthode.</div>" +
+        "<div class='ex'><b>Exemple d'erreur aléatoire</b>Lire l'aiguille d'une balance un peu de côté (erreur de <strong>parallaxe</strong>) donne 24,1 kg, puis 24,3 kg : l'écart change de sens d'une lecture à l'autre. On répète et on fait la moyenne.</div>" +
+        "<div class='attention'><b>Attention</b>Une erreur systématique ne se voit pas en répétant la mesure : toutes les valeurs sont décalées du même côté. Seule une comparaison avec un autre instrument ou un test à vide la révèle.</div>",
         planches: [{ type: "2D", titre: "Erreur systématique ou erreur aléatoire ?", legende: "Des mesures groupées mais décalées trahissent une erreur systématique (on corrige l'instrument) ; des mesures dispersées autour du centre trahissent une erreur aléatoire (on répète et on fait la moyenne).", svg: PLANCHE_CIBLES }],
         fil: { html: "<p>Les 0,8 kg affichés à vide s'ajoutent à <strong>chaque</strong> pesée du commerçant, toujours dans le même sens : c'est une erreur <strong>systématique</strong>. 25,0 − 0,8 = <strong>24,2 kg</strong>. Les petits écarts entre les pesées de Samuel (24,0 à 24,4) vont tantôt en plus, tantôt en moins : erreur <strong>aléatoire</strong> (lecture de l'aiguille, position du sac). Elle ne rend pas la balance inutilisable : on la réduit en faisant la moyenne.</p>", verdicts: [[1, "rejetee", "Des écarts aléatoires sont normaux : on les réduit par la moyenne, l'instrument reste utilisable."]] },
         retenir: "Systématique : même sens, on corrige l'instrument. Aléatoire : on répète et on fait la moyenne." },
 
       { t: "Écrire un résultat de mesure", html: (M_OLD ? M_OLD.parties[2].html : "") +
-        "<div class='methode'><b>Exploiter une série de mesures</b><ol><li>Calcule la <strong>moyenne</strong> m̄ des mesures.</li><li>Prends comme incertitude ΔG le plus grand écart entre une mesure et la moyenne (ou la demi-étendue).</li><li>Écris G = (m̄ ± ΔG) unité, puis l'incertitude relative ΔG/m̄ en %.</li></ol></div>",
+        "<div class='methode'><b>Exploiter une série de mesures</b><ol><li>Calcule la <strong>moyenne</strong> m̄ des mesures.</li><li>Prends comme incertitude ΔG le plus grand écart entre une mesure et la moyenne (ou la demi-étendue).</li><li>Écris G = (m̄ ± ΔG) unité, puis l'incertitude relative ΔG/m̄ en %.</li></ol></div>" +
+        "<p class='formule'>Valeur moyenne : m̄ = (m₁ + m₂ + … + mₙ) ÷ n</p>" +
+        "<p class='formule'>Incertitude absolue : Δm = plus grand écart |mᵢ − m̄| &nbsp;·&nbsp; Incertitude relative : (Δm ÷ m̄) × 100 %</p>" +
+        "<p class='formule'>Résultat : m = (m̄ ± Δm) unité &nbsp;⇔&nbsp; m̄ − Δm ≤ m ≤ m̄ + Δm</p>" +
+        "<div class='ex'><b>Exemple : la période d'un pendule</b>Mesures : 1,42 s ; 1,38 s ; 1,40 s ; 1,40 s (le groupe 4 corrigé). Moyenne : 5,60 ÷ 4 = 1,40 s. Plus grand écart : 0,02 s. Résultat : <strong>T = (1,40 ± 0,02) s</strong>, incertitude relative 0,02 ÷ 1,40 × 100 ≈ <strong>1,4 %</strong>.</div>" +
+        "<div class='astuce'><b>Astuce pour retenir</b>« <strong>M-É-R</strong> » : <strong>M</strong>oyenne, <strong>É</strong>cart le plus grand, <strong>R</strong>ésultat entre parenthèses avec son unité. Et garde pour la moyenne autant de décimales que l'incertitude.</div>",
+        planches: [{ type: "2D", titre: "L'intervalle de mesure du sac", legende: "Les cinq pesées (points bleus), leur moyenne 24,2 kg et l'intervalle [24,0 ; 24,4] kg : les 25 kg annoncés sont en dehors.", svg: (function () {
+          var s = "", x0 = 60, k = 520 / 1.2, X = function (v) { return (x0 + (v - 23.9) * k).toFixed(1); }, i;
+          s += "<path d='M40 120H610' stroke='" + NUIT + "' stroke-width='2.5'/>";
+          for (i = 0; i <= 12; i++) { var v = 23.9 + i * 0.1; s += "<path d='M" + X(v) + " 114V126' stroke='" + NUIT + "' stroke-width='1.5'/>" + txt(X(v), 144, v.toFixed(1).replace(".", ","), { s: 11 }); }
+          s += "<rect x='" + X(24.0) + "' y='92' width='" + (0.4 * k).toFixed(1) + "' height='22' rx='6' fill='#ECF7F0' stroke='#17784D' stroke-width='2'/>" + txt(X(24.2), 86, "m = (24,2 ± 0,2) kg", { s: 13, c: "#17784D" });
+          [24.1, 24.3, 24.2, 24.4, 24.0].forEach(function (v, j) { s += "<circle cx='" + X(v) + "' cy='" + (164 + j * 9) + "' r='5' fill='" + BLEU + "'/>"; });
+          s += "<path d='M" + X(24.2) + " 90V210' stroke='" + BLEU + "' stroke-width='2' stroke-dasharray='5 4'/>" + txt(X(24.2), 222, "moyenne 24,2", { s: 11.5, c: BLEU });
+          s += "<path d='M" + X(25.0) + " 60V130' stroke='" + ROUGE + "' stroke-width='3'/>" + txt(X(25.0), 52, "25 kg annoncés", { s: 12.5, c: ROUGE });
+          return svg(640, 232, "Axe gradué de 23,9 à 25,1 kilogrammes avec les cinq pesées, leur moyenne, l'intervalle de 24,0 à 24,4 et la valeur annoncée de 25 kilogrammes hors de l'intervalle", "", s);
+        })() }],
         fil: { html: "<p>Moyenne des cinq pesées : (24,1 + 24,3 + 24,2 + 24,4 + 24,0) ÷ 5 = 121,0 ÷ 5 = <strong>24,2 kg</strong>. Plus grand écart à la moyenne : 0,2 kg. Donc <strong>m = (24,2 ± 0,2) kg</strong>, soit une incertitude relative de 0,2 ÷ 24,2 ≈ 0,8 %. Les 25 kg annoncés sont hors de l'intervalle [24,0 ; 24,4] : il manque environ 800 g, soit 3,2 %, bien au-delà des 0,2 % tolérés.</p>", verdicts: [[2, "validee", "Balance corrigée : 25,0 − 0,8 = 24,2 kg, exactement la moyenne de Samuel : m = (24,2 ± 0,2) kg."]] },
         retenir: "G = (valeur moyenne ± incertitude) unité ; deux mesures sont compatibles si leurs intervalles se recouvrent." },
       M_OLD && M_OLD.parties[3] ? M_OLD.parties[3] : { t: "Entraînement", html: "" }
@@ -4085,6 +4770,14 @@ VRT_PLUS("3e-en-articles", [
         "Cette erreur systématique fausse toutes ses pesées : 25,0 − 0,8 = 24,2 kg (indice 2).",
         "Les écarts de Samuel sont aléatoires : on fait la moyenne (indice 2).",
         "Moyenne 24,2 kg, incertitude 0,2 kg : m = (24,2 ± 0,2) kg, 25 kg est exclu (indice 3)."
+      ],
+      formules: [
+        { nom: "Corriger l'erreur systématique de la balance du commerçant", f: "masse vraie = valeur lue − décalage à vide", calcul: "25,0 − 0,8 = 24,2 kg" },
+        { nom: "Calculer la valeur moyenne des pesées de Samuel", f: "m̄ = (m₁ + m₂ + m₃ + m₄ + m₅) ÷ 5", calcul: "(24,1 + 24,3 + 24,2 + 24,4 + 24,0) ÷ 5 = 121,0 ÷ 5 = 24,2 kg" },
+        { nom: "Calculer l'incertitude absolue", f: "Δm = plus grand écart |mᵢ − m̄|", calcul: "|24,4 − 24,2| = 0,2 kg et |24,0 − 24,2| = 0,2 kg, donc Δm = 0,2 kg" },
+        { nom: "Écrire le résultat de mesure", f: "m = (m̄ ± Δm) unité", calcul: "m = (24,2 ± 0,2) kg, soit 24,0 kg ≤ m ≤ 24,4 kg" },
+        { nom: "Calculer l'incertitude relative", f: "(Δm ÷ m̄) × 100 %", calcul: "0,2 ÷ 24,2 × 100 ≈ 0,8 % : la mesure est précise" },
+        { nom: "Comparer à l'étiquette et à la loi", f: "écart relatif = (m annoncée − m mesurée) ÷ m annoncée × 100 %", calcul: "(25 − 24,2) ÷ 25 × 100 = 3,2 %, bien plus que les 0,2 % tolérés : il manque 800 g" }
       ],
       reponse: "<p>La balance du commerçant affiche 0,8 kg à vide : elle n'est pas tarée et ajoute 0,8 kg à chaque pesée. C'est une erreur systématique, qui ne disparaît pas en répétant la mesure ; corrigée, sa lecture donne 25,0 − 0,8 = 24,2 kg. Les cinq pesées de Samuel, faites sur une balance bien tarée, varient de 24,0 à 24,4 kg : ce sont des erreurs aléatoires de lecture, que l'on réduit en calculant la moyenne, 24,2 kg. Le plus grand écart à la moyenne est de 0,2 kg, d'où le résultat <strong>m = (24,2 ± 0,2) kg</strong>, avec une incertitude relative d'environ 0,8 %. Les deux balances sont donc d'accord une fois l'erreur corrigée, et le sac ne pèse pas 25 kg : il manque environ 800 g, bien au-delà de la tolérance légale.</p>",
       transfert: "<p>Au laboratoire, quatre groupes mesurent la période d'un pendule : 1,42 s ; 1,38 s ; 1,40 s ; 1,44 s. Le chronomètre du groupe 4 démarre toujours 0,04 s en retard. Corrige la mesure du groupe 4, puis donne le résultat avec son incertitude. <em>(1,40 s ; T = (1,40 ± 0,02) s.)</em></p>"
@@ -6698,6 +7391,834 @@ VRT_PLUS("3e-en-articles", [
   });
 })();
 
+/* Leçons APPROFONDIES — 6e Mathématiques, lot 2 (18/11/2026) : trois lignes de la progression qui n'avaient aucune leçon.
+   - « Périmètre ou circonférence du cercle - Aire du disque » (le puits de Ngaoundéré)
+   - « Tableau de proportionnalité - Coefficients de proportionnalité » (le riz du marché Mfoundi)
+   - « Patron d'un cube et d'un pavé droit » (les boîtes de savon de Bafang)
+   Même gabarit que 16-approfondies-premier-cycle.js : situation de vie suivie partie après partie, hypothèses tranchées,
+   planches, simulation, situation résolue, entraînement au format de l'examen, quiz de 10 questions.
+   Leçons NOUVELLES (VRT_L), rattachées par « cle » = début du titre officiel. Simulations déclarées en fin de fichier. */
+(function () {
+  "use strict";
+  var NUIT = "#001136", BLEU = "#1E499B", GRIS = "#4D5163", VERT = "#17784D", ORANGE = "#C2540A";
+
+  function txt(x, y, t, o) {
+    o = o || {};
+    return "<text x='" + x + "' y='" + y + "' text-anchor='" + (o.a || "middle") + "' font-size='" + (o.s || 12) + "' font-weight='" + (o.w || 700) + "' fill='" + (o.c || NUIT) + "'" + (o.i ? " font-style='italic'" : "") + ">" + t + "</text>";
+  }
+  function rad(id, cs) {
+    var s = "<radialGradient id='" + id + "' cx='35%' cy='30%' r='75%'>";
+    cs.forEach(function (c, i) { s += "<stop offset='" + (i / (cs.length - 1)).toFixed(2) + "' stop-color='" + c + "'/>"; });
+    return s + "</radialGradient>";
+  }
+  function lin(id, cs, vertical) {
+    var s = "<linearGradient id='" + id + "'" + (vertical ? " x1='0' y1='0' x2='0' y2='1'" : "") + ">";
+    cs.forEach(function (c, i) { s += "<stop offset='" + (i / (cs.length - 1)).toFixed(2) + "' stop-color='" + c + "'/>"; });
+    return s + "</linearGradient>";
+  }
+  function fleche(id, c) { return "<marker id='" + id + "' markerWidth='10' markerHeight='10' refX='7' refY='5' orient='auto'><path d='M0 1L8 5L0 9Z' fill='" + c + "'/></marker>"; }
+  function svg(w, h, alt, defs, corps) {
+    return "<svg viewBox='0 0 " + w + " " + h + "' role='img' aria-label='" + alt + "' font-family='Inter,Arial,sans-serif'><rect width='" + w + "' height='" + h + "' fill='#fff'/><defs>" + defs + "</defs>" + corps +
+      "<text x='" + (w - 6) + "' y='" + (h - 5) + "' font-size='8' text-anchor='end' fill='#8A93A6'>Planche VÉRITAS</text></svg>";
+  }
+  function q(qq, bonne, f1, f2, e) { return { q: qq, r: [bonne, f1, f2], b: 0, e: e }; }
+  function perso(x, y, peau, habit, bas, s) {
+    bas = bas || "#2E3445";
+    return "<g transform='translate(" + x + " " + y + ") scale(" + (s || 1) + ")'><ellipse cx='0' cy='84' rx='18' ry='4' fill='#001136' opacity='.18'/>" +
+      "<rect x='-9' y='44' width='8' height='36' rx='3' fill='" + bas + "'/><rect x='1' y='44' width='8' height='36' rx='3' fill='" + bas + "'/>" +
+      "<ellipse cx='-6' cy='81' rx='7' ry='3.5' fill='#1F2328'/><ellipse cx='6' cy='81' rx='7' ry='3.5' fill='#1F2328'/>" +
+      "<path d='M-13 46L-16 18C-16 13 -12 11 -6 10H6C12 11 16 13 16 18L13 46Z' fill='" + habit + "'/>" +
+      "<path d='M-15 16L-20 40' stroke='" + habit + "' stroke-width='7' stroke-linecap='round'/><path d='M15 16L20 40' stroke='" + habit + "' stroke-width='7' stroke-linecap='round'/>" +
+      "<circle cx='-20' cy='42' r='3.6' fill='" + peau + "'/><circle cx='20' cy='42' r='3.6' fill='" + peau + "'/>" +
+      "<rect x='-3.5' y='5' width='7' height='7' fill='" + peau + "'/><ellipse cx='0' cy='-2' rx='9' ry='10.5' fill='" + peau + "'/>" +
+      "<path d='M-9 -4C-10 -14 -4 -13.5 0 -13.5S10 -14 9 -4C7 -9 -7 -9 -9 -4Z' fill='#1B1410'/></g>";
+  }
+  var PEAU = ["#6B4226", "#8A5A36", "#5A3620", "#7A4B2C"];
+  function entrainement(a, b) { return "<div class='integ'><h3>Partie A : évaluation des ressources</h3>" + a + "<h3>Partie B : évaluation des compétences</h3>" + b + "</div>"; }
+
+  /* ═══════════════════════ 6e — PÉRIMÈTRE DU CERCLE ET AIRE DU DISQUE ═══════════════════════ */
+  function puits(x, y, s) {
+    return "<g transform='translate(" + x + " " + y + ") scale(" + (s || 1) + ")'><ellipse cx='0' cy='46' rx='86' ry='14' fill='#001136' opacity='.12'/>" +
+      "<path d='M-70 0V40A70 16 0 0 0 70 40V0Z' fill='url(#cpPierre)'/><ellipse cx='0' cy='0' rx='70' ry='16' fill='#9C8F80'/><ellipse cx='0' cy='0' rx='58' ry='12' fill='#2B4A5E'/>" +
+      "<path d='M-70 12H70M-70 26H70' stroke='#7E7264' stroke-width='1.5' opacity='.6'/></g>";
+  }
+  VRT_L("6e-maths-cercle", {
+    c: "6e", m: "maths", cle: "Périmètre ou circonférence du cercle", titre: "Le périmètre du cercle et l'aire du disque", duree: 30,
+    accroche: "Un puits rond de 1,40 m de diamètre : combien de mètres de fer pour la bordure, combien de tôle pour le couvercle ?",
+    intro: "Au quartier Baladji de Ngaoundéré, la mairie protège le puits. Partie après partie, tu trouveras les deux mesures dont le soudeur a besoin.",
+    objectifs: ["nommer centre, rayon, diamètre, corde, arc et disque", "calculer le périmètre d'un cercle avec π ≈ 3,14", "calculer l'aire d'un disque", "ne pas confondre périmètre (m) et aire (m²)"],
+    enquete: {
+      titre: "Le puits du quartier Baladji",
+      svg: (function () {
+        var s = "<rect width='640' height='220' fill='#EAF4FB'/><rect y='160' width='640' height='60' fill='#D9C59E'/><circle cx='560' cy='42' r='22' fill='#FFC93C'/>";
+        s += puits(240, 118, 1.1) + perso(420, 96, PEAU[2], "#2F6DB5", "#24324A") + perso(470, 100, PEAU[0], "#C62828", "#3A2A20", .9);
+        s += "<path d='M163 118H317' stroke='" + ORANGE + "' stroke-width='3' marker-end='url(#cpF)' marker-start='url(#cpF)'/>" + "<rect x='210' y='78' width='60' height='20' rx='6' fill='#fff'/>" + txt(240, 93, "1,40 m", { s: 13, c: ORANGE });
+        s += "<rect x='30' y='18' width='250' height='34' rx='12' fill='#fff' stroke='#C9D8EE'/>" + txt(155, 40, "Bordure en fer + couvercle en tôle", { s: 12.5, c: BLEU });
+        return svg(640, 220, "Un puits circulaire de 1,40 m de diamètre et deux habitants du quartier", lin("cpPierre", ["#B5A794", "#8E8170"], true) + fleche("cpF", ORANGE), s);
+      })(),
+      legende: "Ngaoundéré, quartier Baladji : le puits que la mairie veut sécuriser.",
+      contexte: "<p>Le puits a une ouverture ronde de <strong>1,40 m de diamètre</strong>. Le soudeur doit poser une <strong>bordure en fer</strong> tout autour et fabriquer un <strong>couvercle en tôle</strong>.</p><p>Moussa dit : « La bordure, c'est comme un carré : 4 × 1,40 = 5,60 m. » Aïssatou répond : « Et le couvercle, c'est 3,14 × 1,40, le même calcul que la bordure. »</p>",
+      documents: [{ t: "Le devis du soudeur", html: "<table class='donnees'><tr><td>Fer plat</td><td>1 500 F le mètre</td></tr><tr><td>Tôle</td><td>6 000 F le m²</td></tr><tr><td>Valeur de π</td><td>3,14 (arrondi)</td></tr></table>" }],
+      question: "Quelle longueur de fer et quelle surface de tôle faut-il, et combien coûtent-elles ?",
+      tache: "Calcule le périmètre de l'ouverture puis l'aire du couvercle, en écrivant la formule utilisée et l'unité.",
+      hypotheses: [
+        "Le tour du cercle se calcule comme celui d'un carré : 4 × 1,40 m.",
+        "Périmètre et aire, c'est le même calcul : 3,14 × 1,40.",
+        "Périmètre = π × diamètre (en m) ; aire = π × rayon × rayon (en m²)."
+      ]
+    },
+    parties: [
+      { t: "Le vocabulaire du cercle",
+        html: "<div class='def'><b>Définition</b>Le <strong>cercle</strong> de centre O et de rayon r est formé de tous les points situés à la distance r de O. Le <strong>disque</strong> est la surface limitée par ce cercle.</div><ul><li><strong>Rayon</strong> : segment qui joint le centre à un point du cercle.</li><li><strong>Diamètre</strong> : corde qui passe par le centre ; <strong>diamètre = 2 × rayon</strong>.</li><li><strong>Corde</strong> : segment qui joint deux points du cercle ; <strong>arc</strong> : portion du cercle entre deux points.</li></ul><div class='ex'><b>Pour le puits</b>Diamètre 1,40 m, donc rayon = 1,40 ÷ 2 = <strong>0,70 m</strong>.</div>",
+        planches: [{ type: "2D", titre: "Les mots du cercle", legende: "Le rayon [OA], le diamètre [BC] qui passe par O, une corde [DE] qui n'y passe pas, et l'arc en orange.", svg: (function () {
+          var s = "<circle cx='200' cy='130' r='100' fill='#EEF4FC' stroke='" + BLEU + "' stroke-width='3'/><circle cx='200' cy='130' r='4' fill='" + NUIT + "'/>" + txt(188, 126, "O", { s: 14 });
+          s += "<path d='M200 130L270 59' stroke='" + VERT + "' stroke-width='3'/>" + txt(250, 110, "rayon", { s: 12, c: VERT }) + "<circle cx='270' cy='59' r='4' fill='" + VERT + "'/>" + txt(280, 52, "A", { s: 13 });
+          s += "<path d='M100 130H300' stroke='#C62828' stroke-width='3'/>" + txt(150, 150, "diamètre", { s: 12, c: "#C62828" }) + txt(88, 134, "B", { s: 13 }) + txt(312, 134, "C", { s: 13 });
+          s += "<path d='M128 200L272 200' stroke='#7B2CBF' stroke-width='3' transform='translate(0 -4)'/>" + txt(200, 214, "corde", { s: 12, c: "#7B2CBF" }) + txt(116, 202, "D", { s: 13 }) + txt(284, 202, "E", { s: 13 });
+          s += "<path d='M129 60A100 100 0 0 1 200 30' fill='none' stroke='" + ORANGE + "' stroke-width='6' stroke-linecap='round'/>" + txt(150, 28, "arc", { s: 12, c: ORANGE });
+          s += "<rect x='360' y='40' width='250' height='150' rx='14' fill='#FFF6E3' stroke='#F2DFA6'/>" + txt(485, 74, "diamètre = 2 × rayon", { s: 16, c: "#8A6200" }) + txt(485, 110, "1,40 m = 2 × 0,70 m", { s: 14 }) + txt(485, 146, "Le disque : toute la surface", { s: 12.5, c: GRIS }) + txt(485, 166, "à l'intérieur du cercle", { s: 12.5, c: GRIS });
+          return svg(640, 240, "Un cercle de centre O avec un rayon, un diamètre, une corde et un arc", "", s);
+        })() }, { type: "3d", titre: "Le puits et son couvercle", legende: "Fais tourner le puits : la bordure suit le cercle, le couvercle recouvre le disque. Le curseur soulève le couvercle.",
+          modele: { h: 320, rx: -26, ry: 20, echelle: .8, dy: 20, alt: "Puits cylindrique en pierre avec son couvercle de tôle soulevé", eclate: "Soulever le couvercle", jouer: "Ouvrir le puits",
+            objets: [{ f: "boite", c: [0, -6, 0], d: [380, 8, 300], coul: "#C9B48A", dessus: "#D9C59E", div: false },
+              { f: "cylindre", c: [0, -2, 0], r: 100, h: 70, n: 30, coul: "#A89A87", dessus: "#2B4A5E" },
+              { f: "cylindre", c: [0, 68, 0], r: 104, h: 6, n: 30, coul: "#5F6B78", dessus: "#C9D1DA" },
+              { f: "cylindre", c: [0, 74, 0], r: 102, h: 4, n: 30, coul: "#8C98A6", dessus: "#B9C3CE", ec: [0, 90, 0] }],
+            etiquettes: [{ p: [104, 70, 0], t: "bordure en fer : le cercle", cote: "d" }, { p: [0, 80, 0], t: "couvercle : le disque", ec: [0, 90, 0] }, { p: [-100, 20, 0], t: "diamètre 1,40 m" }] } }],
+        fil: { html: "<p>La bordure suit le <strong>cercle</strong> : c'est une longueur. Le couvercle couvre le <strong>disque</strong> : c'est une surface. Ce ne sont pas les mêmes grandeurs, donc pas le même calcul ni la même unité.</p>", verdicts: [[1, "rejetee", "Une longueur (m) et une surface (m²) ne se calculent pas pareil : il faudra deux formules."]] },
+        retenir: "Diamètre = 2 × rayon ; le cercle est une ligne, le disque une surface." },
+
+      { t: "Le périmètre du cercle",
+        html: "<p>Si l'on fait rouler une roue d'un tour complet, elle avance d'un peu plus de <strong>3 fois son diamètre</strong>. Ce nombre, toujours le même pour tous les cercles, s'appelle <strong>π</strong> (« pi ») ; on prend souvent <strong>π ≈ 3,14</strong>.</p><p class='formule'>Périmètre du cercle = π × diamètre = 2 × π × rayon</p><div class='ex'><b>Pour le puits</b>P = 3,14 × 1,40 = <strong>4,396 m</strong>, soit environ <strong>4,40 m</strong> de fer. Prix : 4,40 × 1 500 = <strong>6 600 F</strong>.</div><div class='attention'><b>Attention</b>Le tour du carré de côté 1,40 m mesure 5,60 m : un cercle de même largeur a un tour plus court.</div>",
+        planches: [{ type: "2D", titre: "La roue déroulée", legende: "Un tour de roue de diamètre d déroulé sur le sol : 3 diamètres et un petit morceau, soit π × d.", svg: (function () {
+          var s = "<rect y='180' width='640' height='8' fill='#C9B48A'/>", d = 120, i;
+          s += "<circle cx='80' cy='120' r='60' fill='#EEF4FC' stroke='" + BLEU + "' stroke-width='4'/><path d='M20 120H140' stroke='#C62828' stroke-width='3'/>" + txt(80, 112, "d", { s: 15, c: "#C62828" });
+          for (i = 0; i < 3; i++) s += "<rect x='" + (150 + i * d) + "' y='168' width='" + (d - 4) + "' height='12' rx='3' fill='" + ["#E0475B", "#F46036", "#1B998B"][i] + "'/>" + txt(150 + i * d + d / 2, 160, "d", { s: 14 });
+          s += "<rect x='510' y='168' width='" + (0.14 * d) + "' height='12' rx='3' fill='#7B2CBF'/>" + txt(540, 160, "0,14 d", { s: 12, c: "#7B2CBF" });
+          s += "<path d='M150 204H527' stroke='" + NUIT + "' stroke-width='2' marker-end='url(#crF)' marker-start='url(#crF)'/>" + txt(338, 224, "un tour de roue = π × d ≈ 3,14 × d", { s: 14, c: BLEU });
+          return svg(640, 236, "Une roue et la longueur de son tour déroulé : trois diamètres et 0,14 diamètre", fleche("crF", NUIT), s);
+        })() }],
+        fil: { html: "<p>Le tour du puits vaut π × 1,40 ≈ <strong>4,40 m</strong>, et non 5,60 m : Moussa comptait le tour d'un carré qui entourerait le puits, plus long que le cercle.</p>", verdicts: [[0, "rejetee", "4 × 1,40 = 5,60 m est le tour du carré qui entoure le puits ; le cercle mesure π × 1,40 ≈ 4,40 m."]] },
+        retenir: "Périmètre = π × diamètre ; π ≈ 3,14 ; résultat en m." },
+
+      { t: "L'aire du disque",
+        html: "<p>Découpe un disque en parts égales et range-les tête-bêche : on obtient presque un rectangle de longueur <strong>la moitié du périmètre</strong> (π × r) et de largeur <strong>le rayon</strong> (r).</p><p class='formule'>Aire du disque = π × rayon × rayon</p><div class='ex'><b>Pour le couvercle</b>A = 3,14 × 0,70 × 0,70 = 3,14 × 0,49 = <strong>1,5386 m²</strong>, soit environ <strong>1,54 m²</strong> de tôle. Prix : 1,54 × 6 000 = <strong>9 240 F</strong>.</div><div class='astuce'><b>Astuce</b>Pour l'aire, on utilise le <strong>rayon</strong>, pas le diamètre : prendre 1,40 × 1,40 donnerait une aire quatre fois trop grande.</div>",
+        planches: [{ type: "2D", titre: "Le disque découpé et redressé", legende: "Seize parts rangées tête-bêche forment presque un rectangle de côtés π × r et r : son aire vaut π × r × r.", svg: (function () {
+          var s = "", n = 16, R = 70, i, cx = 110, cy = 120, col = ["#F46036", "#2E86AB"];
+          for (i = 0; i < n; i++) { var a0 = 2 * Math.PI * i / n, a1 = 2 * Math.PI * (i + 1) / n; s += "<path d='M" + cx + " " + cy + "L" + (cx + R * Math.cos(a0)).toFixed(1) + " " + (cy + R * Math.sin(a0)).toFixed(1) + "A" + R + " " + R + " 0 0 1 " + (cx + R * Math.cos(a1)).toFixed(1) + " " + (cy + R * Math.sin(a1)).toFixed(1) + "Z' fill='" + col[i % 2] + "' stroke='#fff'/>"; }
+          s += "<path d='M200 120H250' stroke='" + NUIT + "' stroke-width='3' marker-end='url(#cdF)'/>";
+          var w = 3.14 * R / 8;
+          for (i = 0; i < n; i++) { var x = 270 + Math.floor(i / 2) * w + (i % 2 ? w / 2 : 0), up = i % 2 === 0; s += "<path d='" + (up ? "M" + x + " 160L" + (x + w / 2) + " 90L" + (x + w) + " 160Z" : "M" + x + " 90L" + (x + w / 2) + " 160L" + (x + w) + " 90Z") + "' fill='" + col[i % 2] + "' stroke='#fff'/>"; }
+          s += "<path d='M270 176H" + (270 + 8 * w + w / 2) + "' stroke='" + NUIT + "' stroke-width='2'/>" + txt(270 + 4 * w, 196, "π × r", { s: 14, c: BLEU }) + "<path d='M" + (285 + 8 * w + w / 2) + " 90V160' stroke='" + NUIT + "' stroke-width='2'/>" + txt(305 + 8 * w + w / 2, 130, "r", { s: 15, c: "#C62828" });
+          s += txt(430, 226, "aire = π × r × r", { s: 15, c: VERT });
+          return svg(640, 240, "Un disque découpé en seize parts réarrangées en un quasi-rectangle de côtés pi fois r et r", fleche("cdF", NUIT), s);
+        })() }],
+        fil: { html: "<p>Le couvercle mesure π × 0,70 × 0,70 ≈ <strong>1,54 m²</strong>. Le calcul d'Aïssatou (3,14 × 1,40) donnait 4,40 : c'est le périmètre en mètres, pas une aire.</p>", verdicts: [[2, "validee", "Périmètre ≈ 4,40 m de fer (6 600 F) ; aire ≈ 1,54 m² de tôle (9 240 F)."]] },
+        retenir: "Aire du disque = π × r × r ; résultat en m²." },
+
+      { t: "Entraînement", html: entrainement(
+        "<p><strong>Question de cours.</strong> Écris la formule du périmètre d'un cercle et celle de l'aire d'un disque.</p><details><summary>Voir la réponse</summary><p>P = π × d (ou 2 × π × r) ; A = π × r × r.</p></details><p><strong>Exercice.</strong> Un cercle a un rayon de 5 cm. Calcule son diamètre, son périmètre et l'aire du disque (π ≈ 3,14).</p><details><summary>Voir la réponse</summary><p>d = 10 cm ; P = 3,14 × 10 = 31,4 cm ; A = 3,14 × 5 × 5 = 78,5 cm².</p></details>",
+        "<p><strong>Situation.</strong> Le club de sport du lycée de Kousséri trace une piste circulaire de 20 m de diamètre et veut gazonner l'intérieur. Un sac de gazon couvre 10 m².</p><p><strong>Tâche.</strong> Calcule la longueur d'un tour de piste et le nombre de sacs nécessaires.</p><details><summary>Voir une réponse attendue</summary><p>Tour : 3,14 × 20 = 62,8 m. Aire : 3,14 × 10 × 10 = 314 m², soit 314 ÷ 10 = 31,4 : il faut <strong>32 sacs</strong> (on arrondit au-dessus).</p></details>"),
+        retenir: "Savoir-être : soigner un équipement commun du quartier." }
+    ],
+    denouement: {
+      titre: "4,40 m de fer et 1,54 m² de tôle",
+      etapes: ["Rayon = 1,40 ÷ 2 = 0,70 m (indice 1).", "Périmètre = 3,14 × 1,40 ≈ 4,40 m de fer (indice 2).", "Aire = 3,14 × 0,70 × 0,70 ≈ 1,54 m² de tôle (indice 3).", "Coût : 4,40 × 1 500 + 1,54 × 6 000 = 6 600 + 9 240 = 15 840 F."],
+      reponse: "<p>Le soudeur a besoin d'environ <strong>4,40 m de fer</strong> (P = π × d = 3,14 × 1,40) et d'environ <strong>1,54 m² de tôle</strong> (A = π × r × r = 3,14 × 0,70 × 0,70), pour un total de <strong>15 840 F</strong>. Moussa calculait le tour d'un carré (5,60 m), Aïssatou confondait l'aire et le périmètre.</p>",
+      transfert: "<p>Un autre puits a 1 m de rayon. Longueur de fer et surface de tôle ? <em>(P = 3,14 × 2 = 6,28 m ; A = 3,14 × 1 × 1 = 3,14 m².)</em></p>"
+    },
+    revision: ["Diamètre = <strong>2 × rayon</strong>.", "Périmètre du cercle = <strong>π × diamètre</strong>, π ≈ 3,14 (en m, cm…).", "Aire du disque = <strong>π × rayon × rayon</strong> (en m², cm²…).", "Le cercle est une ligne, le disque une surface."],
+    exo: "<p>Une roue de vélo a 70 cm de diamètre. Quelle distance parcourt-elle en 100 tours ? <em>(3,14 × 70 = 219,8 cm par tour, soit 21 980 cm ≈ 220 m.)</em></p>",
+    quiz: [
+      q("Le diamètre d'un cercle de rayon 6 cm mesure :", "12 cm", "3 cm", "36 cm", "d = 2 × r."),
+      q("Le périmètre d'un cercle de diamètre 10 cm vaut environ :", "31,4 cm", "314 cm", "40 cm", "3,14 × 10."),
+      q("L'aire d'un disque de rayon 10 cm vaut environ :", "314 cm²", "62,8 cm²", "31,4 cm²", "3,14 × 10 × 10."),
+      q("Le disque, c'est :", "la surface à l'intérieur du cercle", "le tour du cercle", "un segment", "Le cercle est la ligne, le disque la surface."),
+      q("Un segment qui joint deux points du cercle s'appelle :", "une corde", "un rayon", "un arc", "S'il passe par le centre, c'est un diamètre."),
+      q("π vaut environ :", "3,14", "2", "4", "Le même nombre pour tous les cercles."),
+      q("L'aire d'un disque s'exprime en :", "m² ou cm²", "m ou cm", "degrés", "C'est une surface."),
+      q("Pour l'aire, on multiplie π par :", "rayon × rayon", "diamètre", "diamètre × diamètre", "A = π × r × r."),
+      q("Le tour du carré de côté 1,40 m est :", "plus long que le tour du cercle de diamètre 1,40 m", "égal", "plus court", "5,60 m contre 4,40 m."),
+      q("Une roue de diamètre 50 cm avance en un tour de :", "157 cm", "50 cm", "200 cm", "3,14 × 50.")
+    ],
+    apc: { module: "Mathématiques de 6e", famille: "Vie économique et environnement", agir: "Calculer des longueurs et des surfaces pour un aménagement", situation: "La bordure et le couvercle d'un puits de quartier.", tache: "Calculer la longueur de fer et la surface de tôle nécessaires." }
+  });
+
+  /* ═══════════════════════ 6e — TABLEAU DE PROPORTIONNALITÉ ═══════════════════════ */
+  function sacRiz(x, y, s) {
+    return "<g transform='translate(" + x + " " + y + ") scale(" + (s || 1) + ")'><path d='M-18 0Q-22 34 -16 44H16Q22 34 18 0Z' fill='#EDE3CF' stroke='#B9A57C'/><path d='M-14 -4H14L12 4H-12Z' fill='#C62828'/>" + txt(0, 28, "1 kg", { s: 9, c: "#8A6200" }) + "</g>";
+  }
+  VRT_L("6e-maths-proportionnalite", {
+    c: "6e", m: "maths", cle: "Tableau de proportionnalité", titre: "Le tableau de proportionnalité", duree: 30,
+    accroche: "3 kg de riz pour 1 500 F, 6 mangues pour 900 F : qui vend vraiment « au même prix » quand on achète plus ?",
+    intro: "Au marché Mfoundi de Yaoundé, Ngono fait les courses de la famille. À chaque partie, un outil l'aide à comparer et à calculer sans se tromper.",
+    objectifs: ["reconnaître un tableau de proportionnalité", "calculer et utiliser le coefficient de proportionnalité", "trouver une quatrième proportionnelle", "appliquer un pourcentage et une échelle"],
+    enquete: {
+      titre: "Les courses au marché Mfoundi",
+      svg: (function () {
+        var s = "<rect width='640' height='220' fill='#FFF6E8'/><rect y='170' width='640' height='50' fill='#E8D3AE'/>", i;
+        s += "<path d='M20 60H300L280 30H40Z' fill='#E0475B'/><rect x='30' y='120' width='260' height='14' fill='#8A5A2D'/>";
+        for (i = 0; i < 5; i++) s += sacRiz(60 + i * 46, 74, 1);
+        s += "<rect x='40' y='138' width='240' height='26' rx='8' fill='#fff' stroke='#E3DCCB'/>" + txt(160, 156, "Riz : 3 kg → 1 500 F", { s: 12.5, c: "#8A6200" });
+        s += "<path d='M340 60H620L600 30H360Z' fill='#1B998B'/><rect x='350' y='120' width='260' height='14' fill='#8A5A2D'/>";
+        for (i = 0; i < 9; i++) s += "<ellipse cx='" + (380 + (i % 5) * 44) + "' cy='" + (100 - Math.floor(i / 5) * 18) + "' rx='16' ry='12' fill='url(#ppM)'/>";
+        s += "<rect x='360' y='138' width='240' height='26' rx='8' fill='#fff' stroke='#E3DCCB'/>" + txt(480, 156, "Mangues : 3 → 500 F ; 6 → 900 F", { s: 12, c: VERT });
+        s += perso(320, 112, PEAU[1], "#7B2CBF", "#3A2A20", .8);
+        return svg(640, 220, "Deux étals du marché : sacs de riz et tas de mangues avec leurs prix", rad("ppM", ["#FFD166", "#F4A261", "#E76F51"]), s);
+      })(),
+      legende: "Marché Mfoundi, samedi matin : les prix affichés par deux commerçantes.",
+      contexte: "<p>Mama Bella vend le riz : <strong>3 kg pour 1 500 F</strong>, 5 kg pour 2 500 F. Mama Ewodo vend les mangues : <strong>3 mangues pour 500 F</strong>, 6 mangues pour 900 F.</p><p>Ngono doit acheter <strong>7 kg de riz</strong>. Son frère dit : « 7 kg, c'est 1 500 × 7. » Sa sœur ajoute : « Plus on achète, plus on paie : les deux prix sont proportionnels. »</p>",
+      documents: [{ t: "La liste de courses", html: "<table class='donnees'><tr><td>Riz</td><td>7 kg</td></tr><tr><td>Mangues</td><td>9</td></tr><tr><td>Budget</td><td>5 000 F</td></tr></table>" }],
+      question: "Quels prix sont proportionnels aux quantités, et combien Ngono paiera-t-elle ses 7 kg de riz ?",
+      tache: "Construis le tableau de chaque commerçante, cherche un coefficient qui marche pour toutes les colonnes, puis calcule le prix de 7 kg.",
+      hypotheses: [
+        "Dès que le prix augmente avec la quantité, il y a proportionnalité.",
+        "Un tableau est proportionnel si l'on passe de la quantité au prix en multipliant toujours par le même nombre.",
+        "Le prix de 7 kg de riz est 1 500 × 7."
+      ]
+    },
+    parties: [
+      { t: "Reconnaître un tableau de proportionnalité",
+        html: "<div class='def'><b>Définition</b>Un tableau est un <strong>tableau de proportionnalité</strong> lorsqu'on obtient les nombres de la 2ᵉ ligne en multipliant ceux de la 1ʳᵉ ligne par un <strong>même nombre</strong>, le <strong>coefficient de proportionnalité</strong>.</div><div class='ex'><b>Le riz</b>1 500 ÷ 3 = 500 et 2 500 ÷ 5 = 500 : le coefficient est <strong>500</strong> (500 F le kg). Le tableau est proportionnel.</div><div class='ex'><b>Les mangues</b>500 ÷ 3 ≈ 167 mais 900 ÷ 6 = 150 : pas le même nombre. Le tableau <strong>n'est pas</strong> proportionnel (il y a une réduction).</div>",
+        planches: [{ type: "2D", titre: "Deux tableaux, un seul coefficient", legende: "Pour le riz, chaque flèche « × 500 » fonctionne. Pour les mangues, le quotient change : pas de proportionnalité.", svg: (function () {
+          function tab(x, y, h1, l1, l2, col, ok, coef) {
+            var s = "<rect x='" + x + "' y='" + y + "' width='280' height='92' rx='10' fill='#fff' stroke='#C9D0DC'/>", i;
+            s += txt(x + 44, y + 34, h1[0], { s: 12, c: GRIS }) + txt(x + 44, y + 74, h1[1], { s: 12, c: GRIS });
+            l1.forEach(function (v, k) { var cx = x + 112 + k * 64; s += txt(cx, y + 34, v, { s: 15 }) + txt(cx, y + 76, l2[k], { s: 15, c: col }) + "<path d='M" + cx + " " + (y + 41) + "V" + (y + 56) + "' stroke='" + (ok ? col : "#C62828") + "' stroke-width='2' marker-end='url(#ptF" + (ok ? "v" : "r") + ")'/>" + txt(cx + 7, y + 53, coef[k], { s: 10, c: ok ? col : "#C62828", a: "start" }); });
+            return s;
+          }
+          var s = tab(20, 30, ["kg", "prix (F)"], ["1", "3", "5"], ["500", "1 500", "2 500"], VERT, true, ["×500", "×500", "×500"]);
+          s += tab(340, 30, ["mangues", "prix (F)"], ["3", "6", "9"], ["500", "900", "1 200"], VERT, false, ["×167", "×150", "×133"]);
+          s += txt(160, 150, "proportionnel ✓", { s: 15, c: VERT }) + txt(480, 150, "pas proportionnel ✗", { s: 15, c: "#C62828" });
+          return svg(640, 172, "Tableau du riz avec un coefficient constant de 500 et tableau des mangues sans coefficient constant", fleche("ptFv", VERT) + fleche("ptFr", "#C62828"), s);
+        })() }, { type: "3d", titre: "Les sacs et les pièces", legende: "Pour chaque kilo de riz, 5 pièces de 100 F : 1 kg → 5 pièces, 3 kg → 15 pièces. Le curseur écarte les colonnes.",
+          modele: { h: 320, rx: -24, ry: 28, echelle: .7, dy: 30, alt: "Trois sacs de riz, chacun accompagné d'une pile de cinq pièces", eclate: "Écarter les kilos", jouer: "Compter les pièces",
+            objets: (function () { var o = [{ f: "boite", c: [0, -6, 0], d: [460, 8, 220], coul: "#B38B5D", dessus: "#C9A26F", div: false }], i, k;
+              for (i = 0; i < 3; i++) { o.push({ f: "boite", c: [-170 + i * 150, 30, 0], d: [60, 70, 50], coul: "#E6D9BE", dessus: "#F2E8D2", ec: [(i - 1) * 40, 0, 0] });
+                for (k = 0; k < 5; k++) o.push({ f: "cylindre", c: [-118 + i * 150, k * 9, 10], r: 20, h: 7, n: 18, coul: "#C9A227", dessus: "#E8C547", ec: [(i - 1) * 40, k * 6, 0] }); }
+              return o; })(),
+            etiquettes: [{ p: [-170, 70, 0], t: "1 kg de riz" }, { p: [182, 50, 10], t: "5 pièces de 100 F par kilo", cote: "d" }] } }],
+        fil: { html: "<p>Les mangues coûtent plus quand on en prend plus, mais pas proportionnellement : le prix par mangue baisse. Augmenter ensemble ne suffit pas, il faut <strong>le même coefficient partout</strong>.</p>", verdicts: [[0, "rejetee", "Les mangues : le prix augmente, mais le coefficient change (167, puis 150) : pas de proportionnalité."], [1, "validee", "Le riz : × 500 dans toutes les colonnes, c'est la définition."]] },
+        retenir: "Proportionnel = même coefficient pour toutes les colonnes." },
+
+      { t: "Calculer une quatrième proportionnelle",
+        html: "<p>Dans un tableau de proportionnalité, on peut trouver un nombre manquant de trois façons :</p><ul><li><strong>Avec le coefficient</strong> : 7 × 500 = <strong>3 500 F</strong>.</li><li><strong>Par le passage à l'unité</strong> : 1 kg coûte 1 500 ÷ 3 = 500 F, donc 7 kg coûtent 7 × 500 F.</li><li><strong>En additionnant des colonnes</strong> : 7 kg = 2 kg + 5 kg, donc 1 000 F + 2 500 F = 3 500 F.</li></ul><div class='ex'><b>Dans l'autre sens</b>Avec 4 000 F, Ngono peut acheter 4 000 ÷ 500 = <strong>8 kg</strong>.</div>",
+        planches: [{ type: "2D", titre: "Trois chemins vers 3 500 F", legende: "Le coefficient, le passage à l'unité et l'addition de colonnes donnent le même prix pour 7 kg.", svg: (function () {
+          var s = "", cols = [["1", "500"], ["2", "1 000"], ["3", "1 500"], ["5", "2 500"], ["7", "?"]], i;
+          s += "<rect x='40' y='20' width='560' height='90' rx='12' fill='#fff' stroke='#C9D0DC'/>" + txt(80, 54, "kg", { s: 12, c: GRIS }) + txt(80, 92, "F", { s: 12, c: GRIS });
+          cols.forEach(function (c, k) { s += txt(170 + k * 100, 54, c[0], { s: 16 }) + txt(170 + k * 100, 92, c[1], { s: 16, c: k === 4 ? "#C62828" : VERT }); });
+          s += "<rect x='40' y='130' width='170' height='70' rx='10' fill='#EEF4FC'/>" + txt(125, 158, "coefficient", { s: 12.5, c: BLEU }) + txt(125, 184, "7 × 500", { s: 15 });
+          s += "<rect x='235' y='130' width='170' height='70' rx='10' fill='#FFF6E3'/>" + txt(320, 158, "unité", { s: 12.5, c: "#8A6200" }) + txt(320, 184, "1 kg = 500 F", { s: 15 });
+          s += "<rect x='430' y='130' width='170' height='70' rx='10' fill='#ECF7F0'/>" + txt(515, 158, "colonnes", { s: 12.5, c: VERT }) + txt(515, 184, "1 000 + 2 500", { s: 15 });
+          s += txt(320, 226, "7 kg → 3 500 F", { s: 16, c: "#C62828" });
+          return svg(640, 240, "Tableau du riz et trois méthodes pour trouver le prix de sept kilos", "", s);
+        })() }],
+        fil: { html: "<p>1 500 × 7 = 10 500 F serait le prix de <strong>21 kg</strong> (7 fois 3 kg) ! Le bon prix de 7 kg est 7 × 500 = <strong>3 500 F</strong>.</p>", verdicts: [[2, "rejetee", "1 500 F est le prix de 3 kg : 1 500 × 7 donne 21 kg. On multiplie le prix d'UN kilo : 7 × 500 = 3 500 F."]] },
+        retenir: "Quatrième proportionnelle : coefficient, unité ou somme de colonnes." },
+
+      { t: "Pourcentage et échelle",
+        html: "<p>Un <strong>pourcentage</strong> est une proportion sur 100 : prendre 20 %, c'est multiplier par 20 ÷ 100.</p><div class='ex'><b>Une réduction</b>Mama Bella fait 10 % de remise sur 3 500 F : 3 500 × 10 ÷ 100 = <strong>350 F</strong> ; Ngono paie 3 150 F.</div><p>Une <strong>échelle</strong> relie une longueur sur le plan à la longueur réelle : c'est aussi un coefficient de proportionnalité.</p><div class='ex'><b>Le plan du marché</b>Échelle 1/1 000 : 1 cm sur le plan = 1 000 cm = 10 m en vrai. 6 cm sur le plan = <strong>60 m</strong>.</div>",
+        planches: [{ type: "2D", titre: "10 % de 3 500 F et l'échelle du plan", legende: "La bande des 100 % découpée en 10 parts de 350 F ; à droite, 1 cm du plan vaut 10 m au marché.", svg: (function () {
+          var s = "", i;
+          for (i = 0; i < 10; i++) s += "<rect x='" + (30 + i * 30) + "' y='60' width='28' height='40' fill='" + (i === 0 ? "#E0475B" : "#2E86AB") + "' opacity='" + (i === 0 ? 1 : .55) + "'/>";
+          s += txt(180, 46, "3 500 F = 100 %", { s: 13 }) + txt(44, 124, "10 % = 350 F", { s: 13, c: "#E0475B", a: "start" });
+          s += "<rect x='380' y='40' width='230' height='120' rx='10' fill='#F4F1E6' stroke='#D8CFAF'/><path d='M400 140H580' stroke='" + NUIT + "' stroke-width='3'/>";
+          for (i = 0; i <= 6; i++) s += "<path d='M" + (400 + i * 30) + " 132V148' stroke='" + NUIT + "' stroke-width='2'/>";
+          s += txt(495, 126, "6 cm sur le plan", { s: 12 }) + txt(495, 172, "= 60 m au marché", { s: 13, c: VERT }) + txt(495, 66, "échelle 1/1 000", { s: 13, c: BLEU });
+          return svg(640, 190, "Une bande de dix parts pour dix pour cent et une barre d'échelle", "", s);
+        })() }],
+        fil: { html: "<p>Pourcentages et échelles sont des tableaux de proportionnalité « cachés » : on multiplie toujours par le même nombre.</p>", verdicts: [] },
+        retenir: "p % de x = x × p ÷ 100 ; échelle = coefficient plan → réel." },
+
+      { t: "Entraînement", html: entrainement(
+        "<p><strong>Question de cours.</strong> Comment savoir si un tableau est un tableau de proportionnalité ?</p><details><summary>Voir la réponse</summary><p>On divise chaque nombre de la 2ᵉ ligne par celui de la 1ʳᵉ : si l'on trouve toujours le même quotient (le coefficient), le tableau est proportionnel.</p></details><p><strong>Exercice.</strong> 4 cahiers coûtent 1 000 F. Complète : 6 cahiers → … F ; … cahiers → 2 500 F.</p><details><summary>Voir la réponse</summary><p>Coefficient 250 : 6 × 250 = 1 500 F ; 2 500 ÷ 250 = 10 cahiers.</p></details>",
+        "<p><strong>Situation.</strong> Pour la fête de l'école de Dschang, la recette de jus de foléré prévoit 2 L d'eau pour 150 g de fleurs, pour 10 élèves. On attend 45 élèves.</p><p><strong>Tâche.</strong> Calcule les quantités d'eau et de fleurs, en présentant un tableau de proportionnalité.</p><details><summary>Voir une réponse attendue</summary><p>Coefficient 45 ÷ 10 = 4,5 : eau 2 × 4,5 = <strong>9 L</strong> ; fleurs 150 × 4,5 = <strong>675 g</strong>.</p></details>"),
+        retenir: "Savoir-être : gérer un budget familial avec rigueur." }
+    ],
+    denouement: {
+      titre: "3 500 F pour 7 kg de riz",
+      etapes: ["Riz : même coefficient 500 dans toutes les colonnes → proportionnel (indice 1).", "Mangues : 167 puis 150 → pas proportionnel (indice 1).", "7 kg : 7 × 500 = 3 500 F, pas 1 500 × 7 (indice 2)."],
+      reponse: "<p>Seul le prix du riz est <strong>proportionnel</strong> à la quantité (coefficient 500 F/kg). Pour <strong>7 kg</strong>, Ngono paiera <strong>7 × 500 = 3 500 F</strong>. Son frère calculait le prix de 21 kg ; sa sœur oubliait que « augmenter ensemble » ne suffit pas : les mangues sont moins chères à l'unité par 6.</p>",
+      transfert: "<p>Avec ses 5 000 F, Ngono achète ses 7 kg de riz. Combien lui reste-t-il, et combien de kilos en plus pourrait-elle acheter ? <em>(5 000 − 3 500 = 1 500 F, soit 3 kg de plus.)</em></p>"
+    },
+    revision: ["Tableau proportionnel : <strong>même coefficient</strong> pour toutes les colonnes.", "Coefficient = 2ᵉ ligne ÷ 1ʳᵉ ligne.", "Quatrième proportionnelle : <strong>coefficient</strong>, <strong>passage à l'unité</strong> ou <strong>somme de colonnes</strong>.", "p % de x = x × p ÷ 100.", "Échelle : longueur sur le plan → longueur réelle, même multiplication."],
+    exo: "<p>Un taxi-moto demande 200 F pour 2 km, 300 F pour 4 km. Ce tarif est-il proportionnel ? <em>(200 ÷ 2 = 100 et 300 ÷ 4 = 75 : non.)</em></p>",
+    quiz: [
+      q("Un tableau est proportionnel si :", "on multiplie toujours par le même nombre", "les deux lignes augmentent", "les nombres sont rangés", "C'est la définition du coefficient."),
+      q("3 kg coûtent 1 500 F. Le coefficient vaut :", "500", "1 500", "3", "1 500 ÷ 3."),
+      q("Au même prix, 7 kg coûtent :", "3 500 F", "10 500 F", "1 507 F", "7 × 500."),
+      q("Avec 4 000 F à 500 F le kg, on achète :", "8 kg", "4 kg", "2 000 kg", "4 000 ÷ 500."),
+      q("3 mangues 500 F, 6 mangues 900 F : c'est", "pas proportionnel", "proportionnel", "impossible", "Le prix par mangue change."),
+      q("10 % de 3 500 F valent :", "350 F", "35 F", "3 150 F", "3 500 × 10 ÷ 100."),
+      q("Échelle 1/1 000 : 6 cm sur le plan représentent :", "60 m", "6 m", "600 m", "6 × 1 000 cm = 6 000 cm."),
+      q("2 kg → 1 000 F et 5 kg → 2 500 F, donc 7 kg →", "3 500 F", "3 000 F", "1 500 F", "On additionne les colonnes."),
+      q("Le passage à l'unité consiste à :", "calculer le prix d'un seul objet", "multiplier par 100", "ajouter 1", "Puis on multiplie."),
+      q("Le prix est proportionnel au nombre de cahiers si :", "chaque cahier coûte le même prix", "on paie plus pour plus de cahiers", "il y a une promotion", "Prix d'un cahier = coefficient.")
+    ],
+    apc: { module: "Mathématiques de 6e", famille: "Vie économique", agir: "Comparer des prix et gérer un budget", situation: "Des courses au marché avec deux tarifs différents.", tache: "Dire quel prix est proportionnel et calculer le prix d'une quantité." }
+  });
+
+  /* ═══════════════════════ 6e — PATRON D'UN CUBE ET D'UN PAVÉ DROIT ═══════════════════════ */
+  function paveCav(x, y, L, l, h, k, coul) {
+    var dx = l * k * .5, dy = -l * k * .35, a = L * k, b = h * k;
+    return "<g transform='translate(" + x + " " + y + ")'><path d='M0 0H" + a + "V" + b + "H0Z' fill='" + coul[0] + "' stroke='" + NUIT + "' stroke-width='2'/><path d='M0 0L" + dx + " " + dy + "H" + (a + dx) + "L" + a + " 0Z' fill='" + coul[1] + "' stroke='" + NUIT + "' stroke-width='2'/><path d='M" + a + " 0L" + (a + dx) + " " + dy + "V" + (b + dy) + "L" + a + " " + b + "Z' fill='" + coul[2] + "' stroke='" + NUIT + "' stroke-width='2'/><path d='M0 " + b + "L" + dx + " " + (b + dy) + "H" + (a + dx) + "M" + dx + " " + (b + dy) + "V" + dy + "' fill='none' stroke='" + NUIT + "' stroke-width='1.5' stroke-dasharray='5 4'/></g>";
+  }
+  VRT_L("6e-maths-pave-droit", {
+    c: "6e", m: "maths", cle: "Patron d'un cube et d'un pavé droit", titre: "Le cube et le pavé droit : patron, aire et volume", duree: 35,
+    accroche: "Une boîte de 20 cm × 12 cm × 8 cm : combien de carton pour la fabriquer, combien de savons cubiques dedans ?",
+    intro: "À Bafang, la coopérative des femmes fabrique du savon. Partie après partie, tu dessines la boîte, son patron, puis tu la remplis.",
+    objectifs: ["décrire un cube et un pavé droit (faces, arêtes, sommets)", "dessiner le patron d'un pavé droit", "calculer l'aire totale d'un pavé droit", "calculer le volume d'un pavé droit et d'un cube"],
+    enquete: {
+      titre: "Les boîtes de savon de Bafang",
+      svg: (function () {
+        var s = "<rect width='640' height='220' fill='#F4FBF6'/><rect y='176' width='640' height='44' fill='#D8C9A6'/>", i;
+        s += paveCav(70, 90, 20, 12, 8, 7, ["#E9C98B", "#F3DDB0", "#D7B26B"]) + txt(140, 170, "20 cm × 12 cm × 8 cm", { s: 12, c: "#8A6200" });
+        for (i = 0; i < 6; i++) s += paveCav(330 + (i % 3) * 46, 120 - Math.floor(i / 3) * 40, 4, 4, 4, 8, ["#9AD1C4", "#C2E6DD", "#6FB8A6"]);
+        s += txt(400, 170, "savons cubiques de 4 cm", { s: 12, c: VERT });
+        s += perso(560, 92, PEAU[3], "#E07B1F", "#3A2A20") + "<rect x='300' y='14' width='300' height='34' rx='12' fill='#fff' stroke='#BFDCC9'/>" + txt(450, 36, "Coopérative Les Mains de Bafang", { s: 12.5, c: VERT });
+        return svg(640, 220, "Une boîte en carton en forme de pavé droit et des savons cubiques", "", s);
+      })(),
+      legende: "Bafang : la coopérative prépare la livraison de ses savons au marché de Bafoussam.",
+      contexte: "<p>La coopérative veut des boîtes en carton de <strong>20 cm de long, 12 cm de large et 8 cm de haut</strong>, fermées. Les savons sont des <strong>cubes de 4 cm</strong> d'arête.</p><p>Kamga affirme : « Le carton, c'est 20 × 12 × 8. » Nadia propose : « Il y a trois faces différentes : 20 × 12 + 20 × 8 + 12 × 8. »</p>",
+      documents: [{ t: "Le carton", html: "<table class='donnees'><tr><td>Feuille de carton</td><td>60 cm × 40 cm = 2 400 cm²</td></tr><tr><td>Prix d'une feuille</td><td>300 F</td></tr></table>" }],
+      question: "Quelle surface de carton faut-il pour une boîte, et combien de savons peut-elle contenir ?",
+      tache: "Dessine le patron de la boîte, calcule son aire totale, puis son volume et le nombre de savons.",
+      hypotheses: [
+        "Le carton nécessaire se calcule par 20 × 12 × 8.",
+        "Il suffit des trois faces différentes : 20 × 12 + 20 × 8 + 12 × 8.",
+        "La boîte a 6 faces, égales deux à deux ; le volume, lui, se calcule par longueur × largeur × hauteur."
+      ]
+    },
+    parties: [
+      { t: "Décrire un cube et un pavé droit",
+        html: "<div class='def'><b>Définition</b>Un <strong>pavé droit</strong> (ou parallélépipède rectangle) est un solide dont les <strong>6 faces</strong> sont des rectangles. Un <strong>cube</strong> est un pavé droit dont les 6 faces sont des carrés égaux.</div><ul><li><strong>6 faces</strong>, opposées deux à deux et égales ;</li><li><strong>12 arêtes</strong>, par groupes de 4 de même longueur ;</li><li><strong>8 sommets</strong>.</li></ul><div class='ex'><b>La boîte</b>Faces : deux de 20 × 12, deux de 20 × 8, deux de 12 × 8.</div>",
+        planches: [{ type: "2D", titre: "Le pavé droit en perspective cavalière", legende: "Les arêtes cachées sont en pointillés ; les arêtes parallèles restent parallèles sur le dessin.", svg: (function () {
+          var s = paveCav(80, 90, 20, 12, 8, 10, ["#F3DDB0", "#FBEBCB", "#E2C285"]);
+          s += txt(180, 210, "longueur 20 cm", { s: 12.5, c: ORANGE }) + txt(64, 134, "8 cm", { s: 12.5, c: ORANGE, a: "end" }) + txt(330, 60, "12 cm", { s: 12.5, c: ORANGE });
+          s += "<rect x='400' y='40' width='210' height='150' rx='14' fill='#EEF4FC' stroke='#C9D8EE'/>" + txt(505, 76, "6 faces", { s: 18, c: BLEU }) + txt(505, 114, "12 arêtes", { s: 18, c: VERT }) + txt(505, 152, "8 sommets", { s: 18, c: "#C62828" });
+          return svg(640, 230, "Un pavé droit de 20 sur 12 sur 8 centimètres dessiné en perspective cavalière", "", s);
+        })() }, { type: "3d", titre: "La boîte et ses 30 savons", legende: "Tourne la boîte : 5 savons dans la longueur, 3 dans la largeur, 2 couches. Le curseur soulève les couches.",
+          modele: { h: 340, rx: -26, ry: 30, echelle: .78, dy: 24, alt: "Une boîte en pavé droit ouverte remplie de trente savons cubiques en deux couches", eclate: "Soulever les couches", jouer: "Compter les savons",
+            objets: (function () { var o = [{ f: "boite", c: [0, -4, 0], d: [216, 4, 136], coul: "#D7B26B", dessus: "#E9C98B", div: false }], i, j, k, cs = ["#9AD1C4", "#F4A261"];
+              o.push({ f: "boite", c: [0, 40, -66], d: [216, 88, 4], coul: "#D7B26B", dessus: "#E9C98B", div: false, op: .28 });
+              o.push({ f: "boite", c: [-106, 40, 0], d: [4, 88, 136], coul: "#CFA75E", dessus: "#E9C98B", div: false, op: .28 });
+              for (k = 0; k < 2; k++) for (i = 0; i < 5; i++) for (j = 0; j < 3; j++) o.push({ f: "boite", c: [-80 + i * 40, 20 + k * 40, -40 + j * 40], d: [36, 36, 36], coul: cs[k], dessus: k ? "#F8C79A" : "#C2E6DD", div: false, ec: [0, k * 70, 0] });
+              return o; })(),
+            etiquettes: [{ p: [-80, 80, -40], t: "couche du haut : 15 savons", ec: [0, 70, 0] }, { p: [80, 20, 40], t: "couche du bas : 15 savons", cote: "d" }] } }],
+        fil: { html: "<p>Le carton doit couvrir les <strong>6 faces</strong> de la boîte. Les savons, eux, remplissent l'intérieur : ce sera une question de <strong>volume</strong>, pas d'aire.</p>", verdicts: [[1, "rejetee", "La boîte a 6 faces, pas 3 : chaque face existe en deux exemplaires (dessus et dessous, devant et derrière, deux côtés)."]] },
+        retenir: "Pavé droit : 6 faces rectangulaires, 12 arêtes, 8 sommets." },
+
+      { t: "Le patron et l'aire totale",
+        html: "<div class='def'><b>Définition</b>Un <strong>patron</strong> est une figure plane qui, après pliage, permet de fabriquer le solide sans recouvrement.</div><p>Le patron de la boîte réunit ses 6 faces : 2 de 20 × 12, 2 de 20 × 8 et 2 de 12 × 8.</p><p class='formule'>Aire totale = 2 × (L × l + L × h + l × h)</p><div class='ex'><b>Calcul</b>2 × (20 × 12 + 20 × 8 + 12 × 8) = 2 × (240 + 160 + 96) = 2 × 496 = <strong>992 cm²</strong>.</div><div class='astuce'><b>Astuce</b>Pour un cube d'arête a : aire totale = 6 × a × a.</div>",
+        planches: [{ type: "2D", titre: "Le patron de la boîte", legende: "Le patron : une bande de quatre faces (dessus, devant, dessous, arrière) et, de part et d'autre du dessus, les deux côtés de 12 × 8.", svg: (function () {
+          var k = 4.2, L = 20 * k, l = 12 * k, h = 8 * k, x0 = 120, y0 = 30, s = "", F = function (x, y, w, hh, c, t) { return "<rect x='" + x + "' y='" + y + "' width='" + w + "' height='" + hh + "' fill='" + c + "' stroke='" + NUIT + "' stroke-width='2'/>" + txt(x + w / 2, y + hh / 2 + 5, t, { s: 11.5 }); };
+          s += F(x0 + h, y0, L, l, "#FBEBCB", "dessus 20×12");
+          s += F(x0 + h, y0 + l, L, h, "#F3DDB0", "devant 20×8");
+          s += F(x0 + h, y0 + l + h, L, l, "#FBEBCB", "dessous 20×12");
+          s += F(x0 + h, y0 + 2 * l + h, L, h, "#F3DDB0", "arrière 20×8");
+          s += F(x0, y0, h, l, "#E2C285", "") + F(x0 + h + L, y0, h, l, "#E2C285", "");
+          s += txt(x0 + h / 2, y0 + l / 2 - 2, "côté", { s: 9 }) + txt(x0 + h / 2, y0 + l / 2 + 10, "12×8", { s: 8.5 }) + txt(x0 + h + L + h / 2, y0 + l / 2 - 2, "côté", { s: 9 }) + txt(x0 + h + L + h / 2, y0 + l / 2 + 10, "12×8", { s: 8.5 });
+          s += "<rect x='420' y='60' width='200' height='150' rx='14' fill='#ECF7F0' stroke='#BFDCC9'/>" + txt(520, 92, "2 × 240 = 480", { s: 14 }) + txt(520, 120, "2 × 160 = 320", { s: 14 }) + txt(520, 148, "2 × 96 = 192", { s: 14 }) + txt(520, 184, "total : 992 cm²", { s: 16, c: VERT });
+          return svg(640, 280, "Le patron en croix d'un pavé droit de 20 sur 12 sur 8 et le calcul de son aire totale", "", s);
+        })() }],
+        fil: { html: "<p>Le patron compte <strong>6 rectangles</strong> : 992 cm², soit le double de la somme de Nadia (496 cm²). Une feuille de 2 400 cm² suffit donc pour 2 boîtes (2 × 992 = 1 984 cm²), en théorie.</p>", verdicts: [[0, "rejetee", "20 × 12 × 8 = 1 920 est un volume (cm³), pas la surface de carton (cm²)."]] },
+        retenir: "Aire totale = 2 × (L×l + L×h + l×h) ; cube : 6 × a × a." },
+
+      { t: "Le volume",
+        html: "<p>Le <strong>volume</strong> mesure la place occupée à l'intérieur. On compte combien de cubes d'1 cm d'arête (1 cm³) remplissent le pavé.</p><p class='formule'>Volume du pavé droit = L × l × h &nbsp;&nbsp;·&nbsp;&nbsp; Volume du cube = a × a × a</p><div class='ex'><b>La boîte</b>V = 20 × 12 × 8 = <strong>1 920 cm³</strong>. Un savon : 4 × 4 × 4 = 64 cm³. Nombre de savons : 1 920 ÷ 64 = <strong>30</strong>, rangés en 5 × 3 × 2.</div><div class='attention'><b>Attention</b>Aire en cm², volume en cm³ : on ne les additionne jamais.</div>",
+        planches: [{ type: "2D", titre: "Ranger les savons couche par couche", legende: "Une couche : 5 savons × 3 savons = 15 ; deux couches dans 8 cm de hauteur : 30 savons.", svg: (function () {
+          var s = "", i, j;
+          for (i = 0; i < 5; i++) for (j = 0; j < 3; j++) s += "<rect x='" + (40 + i * 44) + "' y='" + (50 + j * 44) + "' width='40' height='40' rx='6' fill='#9AD1C4' stroke='#5FA592'/>";
+          s += txt(150, 36, "5 × 3 = 15 savons par couche", { s: 13, c: VERT });
+          s += paveCav(330, 120, 5, 3, 2, 26, ["#9AD1C4", "#C2E6DD", "#6FB8A6"]) + "<path d='M330 146H460' stroke='#fff' stroke-width='2'/>";
+          s += txt(470, 216, "2 couches → 30 savons", { s: 14, c: VERT }) + txt(470, 236, "1 920 ÷ 64 = 30", { s: 13 });
+          return svg(640, 250, "Une couche de quinze savons vue de dessus et un empilement de deux couches", "", s);
+        })() }],
+        fil: { html: "<p>La boîte contient exactement <strong>30 savons</strong> : 1 920 cm³ ÷ 64 cm³. Les deux grandeurs se calculent différemment : aire = 992 cm², volume = 1 920 cm³.</p>", verdicts: [[2, "validee", "6 faces → 992 cm² de carton ; L × l × h → 1 920 cm³ → 30 savons."]] },
+        retenir: "Volume du pavé = L × l × h (en cm³) ; cube : a × a × a." },
+
+      { t: "Entraînement", html: entrainement(
+        "<p><strong>Question de cours.</strong> Combien un cube a-t-il de faces, d'arêtes et de sommets ? Donne la formule de son volume.</p><details><summary>Voir la réponse</summary><p>6 faces, 12 arêtes, 8 sommets ; V = a × a × a.</p></details><p><strong>Exercice.</strong> Un cube a 5 cm d'arête. Calcule son aire totale et son volume.</p><details><summary>Voir la réponse</summary><p>Aire : 6 × 5 × 5 = 150 cm² ; volume : 5 × 5 × 5 = 125 cm³.</p></details>",
+        "<p><strong>Situation.</strong> L'école de Foumban construit une citerne en forme de pavé droit de 2 m × 1,5 m × 1 m pour recueillir l'eau de pluie.</p><p><strong>Tâche.</strong> Calcule son volume en m³ puis en litres (1 m³ = 1 000 L), et dis combien de seaux de 10 L elle peut remplir.</p><details><summary>Voir une réponse attendue</summary><p>V = 2 × 1,5 × 1 = 3 m³ = 3 000 L, soit <strong>300 seaux</strong>.</p></details>"),
+        retenir: "Savoir-être : travailler en coopérative avec méthode." }
+    ],
+    denouement: {
+      titre: "992 cm² de carton, 30 savons par boîte",
+      etapes: ["La boîte a 6 faces égales deux à deux (indice 1).", "Patron : 2 × (240 + 160 + 96) = 992 cm² (indice 2).", "Volume : 20 × 12 × 8 = 1 920 cm³ ; 1 920 ÷ 64 = 30 savons (indice 3)."],
+      reponse: "<p>Il faut <strong>992 cm² de carton</strong> par boîte (6 faces : 2 × 240 + 2 × 160 + 2 × 96), sans compter les languettes de collage. La boîte a un volume de <strong>1 920 cm³</strong> et contient <strong>30 savons</strong> cubiques de 4 cm (5 × 3 × 2). Kamga calculait un volume à la place d'une aire ; Nadia oubliait la moitié des faces.</p>",
+      transfert: "<p>La coopérative veut une boîte cubique de 12 cm d'arête. Carton et nombre de savons ? <em>(Aire : 6 × 144 = 864 cm² ; volume 1 728 cm³ ÷ 64 = 27 savons, 3 × 3 × 3.)</em></p>"
+    },
+    revision: ["Pavé droit : <strong>6 faces</strong> rectangulaires, <strong>12 arêtes</strong>, <strong>8 sommets</strong> ; cube : 6 carrés égaux.", "<strong>Patron</strong> : figure plane qui se plie en solide sans recouvrement.", "Aire totale du pavé = <strong>2 × (L×l + L×h + l×h)</strong> ; cube : 6 × a × a.", "Volume du pavé = <strong>L × l × h</strong> ; cube : a × a × a (en cm³, m³).", "1 dm³ = 1 L ; 1 m³ = 1 000 L."],
+    exo: "<p>Une brique mesure 20 cm × 10 cm × 5 cm. Calcule son volume et l'aire de toutes ses faces. <em>(V = 1 000 cm³ ; A = 2 × (200 + 100 + 50) = 700 cm².)</em></p>",
+    quiz: [
+      q("Un pavé droit a :", "6 faces, 12 arêtes, 8 sommets", "4 faces, 8 arêtes, 6 sommets", "6 faces, 8 arêtes, 12 sommets", "À retenir par cœur."),
+      q("Le volume d'un pavé 20 × 12 × 8 (cm) vaut :", "1 920 cm³", "992 cm²", "40 cm", "L × l × h."),
+      q("L'aire totale de ce pavé vaut :", "992 cm²", "496 cm²", "1 920 cm²", "2 × (240 + 160 + 96)."),
+      q("Le volume d'un cube de 4 cm d'arête est :", "64 cm³", "16 cm³", "12 cm³", "4 × 4 × 4."),
+      q("L'aire totale d'un cube de 3 cm d'arête est :", "54 cm²", "27 cm²", "9 cm²", "6 × 3 × 3."),
+      q("Un patron est :", "une figure plane qui se plie en solide", "un dessin en perspective", "une face", "Sans recouvrement."),
+      q("Combien de cubes de 4 cm dans une boîte 20 × 12 × 8 ?", "30", "15", "60", "1 920 ÷ 64."),
+      q("Un volume s'exprime en :", "cm³ ou m³", "cm² ou m²", "cm ou m", "Trois dimensions."),
+      q("1 m³ correspond à :", "1 000 L", "100 L", "10 L", "1 dm³ = 1 L."),
+      q("Dans un pavé droit, deux faces opposées sont :", "égales", "perpendiculaires", "toujours carrées", "Elles ont les mêmes dimensions.")
+    ],
+    apc: { module: "Mathématiques de 6e", famille: "Vie économique", agir: "Fabriquer et remplir un emballage", situation: "Les boîtes de savon d'une coopérative de Bafang.", tache: "Calculer le carton d'une boîte et le nombre de savons qu'elle contient." }
+  });
+
+  /* ═══════════════════════ SIMULATIONS ═══════════════════════ */
+  function $(el, s) { return el.querySelector(s); }
+  function curseur(lib, min, max, pas, val, unite) {
+    return "<label class='labo-c'><span>" + lib + " : <b data-v>" + val + "</b>" + (unite || "") + "</span><input type='range' min='" + min + "' max='" + max + "' step='" + pas + "' value='" + val + "'></label>";
+  }
+  function f2(n) { return n.toLocaleString("fr-FR", { maximumFractionDigits: 2 }); }
+
+  /* Cercle : diamètre → périmètre déroulé et aire, comparés au carré qui l'entoure */
+  VRT_A("6e-maths-cercle", 1, "Change le diamètre : le tour du cercle contre le tour du carré", function (el) {
+    el.innerHTML = curseur("Diamètre", 0.4, 3, 0.1, 1.4, " m") + "<svg viewBox='0 0 640 200' class='an-svg' data-s></svg><p class='labo-r' data-r></p>";
+    var I = $(el, "input"), V = $(el, "[data-v]"), sv = $(el, "[data-s]");
+    function maj() {
+      var d = +I.value, r = d / 2, k = 50, P = Math.round(3.14 * d * 100) / 100, A = Math.round(3.14 * r * r * 100) / 100, s = "";
+      V.textContent = f2(d);
+      s += "<rect x='" + (100 - r * k) + "' y='" + (90 - r * k) + "' width='" + (d * k) + "' height='" + (d * k) + "' fill='none' stroke='#C62828' stroke-width='2' stroke-dasharray='6 4'/><circle cx='100' cy='90' r='" + (r * k) + "' fill='#EEF4FC' stroke='" + BLEU + "' stroke-width='3'/>";
+      s += "<rect x='240' y='60' width='" + Math.min(380, P * 22) + "' height='14' rx='4' fill='" + BLEU + "'/><text x='240' y='52' font-size='12' font-weight='700' fill='" + BLEU + "'>tour du cercle : " + f2(P) + " m</text>";
+      s += "<rect x='240' y='120' width='" + Math.min(380, 4 * d * 22) + "' height='14' rx='4' fill='#C62828'/><text x='240' y='112' font-size='12' font-weight='700' fill='#C62828'>tour du carré : " + f2(4 * d) + " m</text>";
+      sv.innerHTML = s;
+      $(el, "[data-r]").innerHTML = "Périmètre = 3,14 × " + f2(d) + " ≈ <b>" + f2(P) + " m</b> · aire du disque = 3,14 × " + f2(r) + " × " + f2(r) + " ≈ <b>" + f2(A) + " m²</b> · fer : " + Math.round(P * 1500).toLocaleString("fr-FR") + " F, tôle : " + Math.round(A * 6000).toLocaleString("fr-FR") + " F.";
+    }
+    I.addEventListener("input", maj); maj();
+  });
+
+  /* Proportionnalité : prix au kilo, quantité, promotion qui casse la proportionnalité */
+  VRT_A("6e-maths-proportionnalite", 1, "Construis le tableau : reste-t-il proportionnel ?", function (el) {
+    el.innerHTML = "<div style='display:flex;flex-wrap:wrap;gap:8px 18px'>" + curseur("Prix d'un kilo", 300, 900, 50, 500, " F") + curseur("Quantité cherchée", 1, 12, 1, 7, " kg") + "</div><label style='display:flex;gap:8px;align-items:center;margin:6px 0'><input type='checkbox' data-p> Promotion : 1 kg offert dès 5 kg</label><svg viewBox='0 0 640 170' class='an-svg' data-s></svg><p class='labo-r' data-r></p>";
+    var I = el.querySelectorAll("input[type=range]"), V = el.querySelectorAll("[data-v]"), pr = $(el, "[data-p]"), sv = $(el, "[data-s]");
+    function prix(k, p) { return pr.checked && k >= 5 ? (k - 1) * p : k * p; }
+    function maj() {
+      var p = +I[0].value, q = +I[1].value, s = "", ks = [1, 2, 3, 5, 8, 10], max = prix(12, p) || 1, coefs = {};
+      V[0].textContent = p; V[1].textContent = q;
+      ks.forEach(function (k, i) { var v = prix(k, p), h = v / max * 110, x = 40 + i * 96; coefs[(v / k).toFixed(2)] = 1;
+        s += "<rect x='" + x + "' y='" + (130 - h) + "' width='54' height='" + h + "' rx='6' fill='" + (v / k === p ? "#1B998B" : "#E0475B") + "'/><text x='" + (x + 27) + "' y='150' font-size='12' text-anchor='middle' font-weight='700'>" + k + " kg</text><text x='" + (x + 27) + "' y='" + (124 - h) + "' font-size='11' text-anchor='middle' font-weight='700'>" + v.toLocaleString("fr-FR") + "</text>"; });
+      sv.innerHTML = s;
+      var prop = Object.keys(coefs).length === 1;
+      $(el, "[data-r]").innerHTML = (prop ? "<b>Proportionnel</b> : chaque colonne × " + p + "." : "<b>Plus proportionnel</b> : le prix d'un kilo change selon la quantité (barres rouges).") + " " + q + " kg coûtent <b>" + prix(q, p).toLocaleString("fr-FR") + " F</b>.";
+    }
+    I[0].addEventListener("input", maj); I[1].addEventListener("input", maj); pr.addEventListener("change", maj); maj();
+  });
+
+  /* Pavé droit : dimensions → patron à l'échelle, aire totale, volume et nombre de savons */
+  VRT_A("6e-maths-pave-droit", 1, "Choisis les dimensions : patron, carton et savons", function (el) {
+    el.innerHTML = "<div style='display:flex;flex-wrap:wrap;gap:8px 18px'>" + curseur("Longueur", 4, 28, 4, 20, " cm") + curseur("Largeur", 4, 16, 4, 12, " cm") + curseur("Hauteur", 4, 12, 4, 8, " cm") + "</div><svg viewBox='0 0 640 260' class='an-svg' data-s></svg><p class='labo-r' data-r></p>";
+    var I = el.querySelectorAll("input"), V = el.querySelectorAll("[data-v]"), sv = $(el, "[data-s]");
+    function maj() {
+      var L = +I[0].value, l = +I[1].value, h = +I[2].value, k = Math.min(240 / (2 * l + 2 * h), 300 / (L + 2 * h)), x0 = 20, y0 = 8, s = "";
+      V[0].textContent = L; V[1].textContent = l; V[2].textContent = h;
+      function R(x, y, w, hh, c) { return "<rect x='" + (x0 + x * k).toFixed(1) + "' y='" + (y0 + y * k).toFixed(1) + "' width='" + (w * k).toFixed(1) + "' height='" + (hh * k).toFixed(1) + "' fill='" + c + "' stroke='#001136' stroke-width='1.5'/>"; }
+      s += R(h, 0, L, l, "#FBEBCB") + R(h, l, L, h, "#F3DDB0") + R(h, l + h, L, l, "#FBEBCB") + R(h, 2 * l + h, L, h, "#F3DDB0") + R(0, 0, h, l, "#E2C285") + R(h + L, 0, h, l, "#E2C285");
+      var A = 2 * (L * l + L * h + l * h), Vo = L * l * h, n = (L / 4) * (l / 4) * (h / 4);
+      s += "<text x='420' y='60' font-size='15' font-weight='700' fill='#17784D'>Aire : " + A.toLocaleString("fr-FR") + " cm²</text><text x='420' y='100' font-size='15' font-weight='700' fill='#1E499B'>Volume : " + Vo.toLocaleString("fr-FR") + " cm³</text><text x='420' y='140' font-size='15' font-weight='700' fill='#C2540A'>Savons de 4 cm : " + n + "</text>";
+      sv.innerHTML = s;
+      $(el, "[data-r]").innerHTML = "Aire = 2 × (" + L + "×" + l + " + " + L + "×" + h + " + " + l + "×" + h + ") = <b>" + A + " cm²</b> · volume = " + L + " × " + l + " × " + h + " = <b>" + Vo + " cm³</b> · " + (L / 4) + " × " + (l / 4) + " × " + (h / 4) + " = <b>" + n + " savons</b>.";
+    }
+    I.forEach(function (x) { x.addEventListener("input", maj); }); maj();
+  });
+})();
+
+/* Leçons APPROFONDIES — 6e Mathématiques, lot 3 (18/11/2026) : trois lignes de la progression qui n'avaient aucune leçon.
+   - « Numérateur, dénominateur, fractions égales » (le jus de foléré du CES de Mora)
+   - « Notions d'angle ou de secteur angulaire » (l'horloge de l'école de Kribi)
+   - « Points symétriques par rapport à une droite » (le motif ndop de Bamenda)
+   Même gabarit et mêmes outils de dessin que 16c-approfondies-6e-maths.js. Simulations en fin de fichier. */
+(function () {
+  "use strict";
+  "use strict";
+  var NUIT = "#001136", BLEU = "#1E499B", GRIS = "#4D5163", VERT = "#17784D", ORANGE = "#C2540A";
+
+  function txt(x, y, t, o) {
+    o = o || {};
+    return "<text x='" + x + "' y='" + y + "' text-anchor='" + (o.a || "middle") + "' font-size='" + (o.s || 12) + "' font-weight='" + (o.w || 700) + "' fill='" + (o.c || NUIT) + "'" + (o.i ? " font-style='italic'" : "") + ">" + t + "</text>";
+  }
+  function rad(id, cs) {
+    var s = "<radialGradient id='" + id + "' cx='35%' cy='30%' r='75%'>";
+    cs.forEach(function (c, i) { s += "<stop offset='" + (i / (cs.length - 1)).toFixed(2) + "' stop-color='" + c + "'/>"; });
+    return s + "</radialGradient>";
+  }
+  function lin(id, cs, vertical) {
+    var s = "<linearGradient id='" + id + "'" + (vertical ? " x1='0' y1='0' x2='0' y2='1'" : "") + ">";
+    cs.forEach(function (c, i) { s += "<stop offset='" + (i / (cs.length - 1)).toFixed(2) + "' stop-color='" + c + "'/>"; });
+    return s + "</linearGradient>";
+  }
+  function fleche(id, c) { return "<marker id='" + id + "' markerWidth='10' markerHeight='10' refX='7' refY='5' orient='auto'><path d='M0 1L8 5L0 9Z' fill='" + c + "'/></marker>"; }
+  function svg(w, h, alt, defs, corps) {
+    return "<svg viewBox='0 0 " + w + " " + h + "' role='img' aria-label='" + alt + "' font-family='Inter,Arial,sans-serif'><rect width='" + w + "' height='" + h + "' fill='#fff'/><defs>" + defs + "</defs>" + corps +
+      "<text x='" + (w - 6) + "' y='" + (h - 5) + "' font-size='8' text-anchor='end' fill='#8A93A6'>Planche VÉRITAS</text></svg>";
+  }
+  function q(qq, bonne, f1, f2, e) { return { q: qq, r: [bonne, f1, f2], b: 0, e: e }; }
+  function perso(x, y, peau, habit, bas, s) {
+    bas = bas || "#2E3445";
+    return "<g transform='translate(" + x + " " + y + ") scale(" + (s || 1) + ")'><ellipse cx='0' cy='84' rx='18' ry='4' fill='#001136' opacity='.18'/>" +
+      "<rect x='-9' y='44' width='8' height='36' rx='3' fill='" + bas + "'/><rect x='1' y='44' width='8' height='36' rx='3' fill='" + bas + "'/>" +
+      "<ellipse cx='-6' cy='81' rx='7' ry='3.5' fill='#1F2328'/><ellipse cx='6' cy='81' rx='7' ry='3.5' fill='#1F2328'/>" +
+      "<path d='M-13 46L-16 18C-16 13 -12 11 -6 10H6C12 11 16 13 16 18L13 46Z' fill='" + habit + "'/>" +
+      "<path d='M-15 16L-20 40' stroke='" + habit + "' stroke-width='7' stroke-linecap='round'/><path d='M15 16L20 40' stroke='" + habit + "' stroke-width='7' stroke-linecap='round'/>" +
+      "<circle cx='-20' cy='42' r='3.6' fill='" + peau + "'/><circle cx='20' cy='42' r='3.6' fill='" + peau + "'/>" +
+      "<rect x='-3.5' y='5' width='7' height='7' fill='" + peau + "'/><ellipse cx='0' cy='-2' rx='9' ry='10.5' fill='" + peau + "'/>" +
+      "<path d='M-9 -4C-10 -14 -4 -13.5 0 -13.5S10 -14 9 -4C7 -9 -7 -9 -9 -4Z' fill='#1B1410'/></g>";
+  }
+  var PEAU = ["#6B4226", "#8A5A36", "#5A3620", "#7A4B2C"];
+  function entrainement(a, b) { return "<div class='integ'><h3>Partie A : évaluation des ressources</h3>" + a + "<h3>Partie B : évaluation des compétences</h3>" + b + "</div>"; }
+
+
+  /* ═══════════════════════ 6e — FRACTIONS : NUMÉRATEUR, DÉNOMINATEUR, FRACTIONS ÉGALES ═══════════════════════ */
+  function bidon(x, y, h, part, n, col, lab) {
+    var s = "<g transform='translate(" + x + " " + y + ")'><rect x='0' y='0' width='70' height='" + h + "' rx='10' fill='#F4F7FC' stroke='" + NUIT + "' stroke-width='2.5'/>", i, hp = h / n;
+    for (i = 0; i < n; i++) s += "<rect x='2' y='" + (h - (i + 1) * hp + 1).toFixed(1) + "' width='66' height='" + (hp - 2).toFixed(1) + "' rx='4' fill='" + (i < part ? col : "transparent") + "' opacity='.85'/>" + (i ? "<path d='M0 " + (h - i * hp).toFixed(1) + "H70' stroke='" + NUIT + "' stroke-width='1' stroke-dasharray='4 3'/>" : "");
+    return s + "<rect x='22' y='-12' width='26' height='14' rx='4' fill='" + NUIT + "'/>" + (lab ? txt(35, h + 22, lab, { s: 15, c: col }) : "") + "</g>";
+  }
+  VRT_L("6e-maths-fractions", {
+    c: "6e", m: "maths", cle: "Numérateur, dénominateur, fractions égales", titre: "Les fractions : numérateur, dénominateur, fractions égales", duree: 30,
+    accroche: "Aïcha verse les 3/4 du bidon, Paul les 6/8 : qui a versé le plus de jus de foléré ?",
+    intro: "Pour la fête de fin d'année du CES de Mora, deux élèves remplissent la grande marmite de jus. Partie après partie, tu vas comparer leurs versements.",
+    objectifs: ["lire et écrire une fraction (numérateur, dénominateur)", "reconnaître et fabriquer des fractions égales", "simplifier une fraction", "trouver l'inverse d'une fraction"],
+    enquete: {
+      titre: "Le jus de foléré de la fête",
+      svg: (function () {
+        var s = "<rect width='640' height='220' fill='#FFF3F6'/><rect y='176' width='640' height='44' fill='#E8D3AE'/>";
+        s += bidon(70, 40, 120, 3, 4, "#C2185B", "3/4") + bidon(200, 40, 120, 6, 8, "#7B2CBF", "6/8");
+        s += "<ellipse cx='470' cy='150' rx='100' ry='20' fill='#5A3620'/><path d='M370 150V110Q470 90 570 110V150Z' fill='#8A5A2D'/><ellipse cx='470' cy='110' rx='100' ry='20' fill='#B4245A'/>";
+        s += perso(330, 92, PEAU[0], "#E07B1F", "#3A2A20", .85) + perso(600, 92, PEAU[2], "#1E6FD0", "#24324A", .85);
+        s += "<rect x='300' y='14' width='320' height='34' rx='12' fill='#fff' stroke='#F2C1D1'/>" + txt(460, 36, "Bidons de 12 L · jus de foléré", { s: 12.5, c: "#C2185B" });
+        return svg(640, 220, "Deux bidons de douze litres remplis aux trois quarts et aux six huitièmes, et une grande marmite", "", s);
+      })(),
+      legende: "CES de Mora : la marmite de jus de foléré pour la fête de fin d'année.",
+      contexte: "<p>Chaque bidon contient <strong>12 L</strong>. Aïcha verse les <strong>3/4</strong> de son bidon dans la marmite ; Paul verse les <strong>6/8</strong> du sien.</p><p>Paul se vante : « 6 est plus grand que 3, j'ai versé plus ! » Aïcha répond : « Mes quarts sont plus gros que tes huitièmes, c'est moi ! »</p>",
+      documents: [{ t: "Le bidon gradué", html: "<table class='donnees'><tr><td>Contenance</td><td>12 L</td></tr><tr><td>Graduation d'Aïcha</td><td>4 parts égales de 3 L</td></tr><tr><td>Graduation de Paul</td><td>8 parts égales de 1,5 L</td></tr></table>" }],
+      question: "Qui a versé le plus de jus : Aïcha avec 3/4 ou Paul avec 6/8 ?",
+      tache: "Explique ce que disent le numérateur et le dénominateur, compare les deux fractions et calcule les litres versés.",
+      hypotheses: ["Paul a versé plus : 6 est plus grand que 3.", "Aïcha a versé plus : un quart est plus gros qu'un huitième.", "Ils ont versé autant : 3/4 et 6/8 sont deux écritures du même nombre."]
+    },
+    parties: [
+      { t: "Numérateur et dénominateur",
+        html: "<div class='def'><b>Définition</b>Dans la fraction <strong>a/b</strong> (b ≠ 0), le <strong>dénominateur</strong> b dit en combien de <strong>parts égales</strong> on partage l'unité ; le <strong>numérateur</strong> a dit combien de parts on prend.</div><div class='ex'><b>Les bidons</b>3/4 : le bidon est partagé en 4 parts de 3 L, Aïcha en verse 3, soit 3 × 3 = <strong>9 L</strong>. 6/8 : 8 parts de 1,5 L, Paul en verse 6, soit 6 × 1,5 = <strong>9 L</strong>.</div>",
+        planches: [{ type: "2D", titre: "Ce que disent les deux nombres", legende: "Le dénominateur fixe la taille des parts, le numérateur leur nombre : 3 grosses parts ou 6 petites parts donnent la même quantité.", svg: (function () {
+          var s = bidon(60, 30, 150, 3, 4, "#C2185B", "") + bidon(200, 30, 150, 6, 8, "#7B2CBF", "");
+          s += txt(95, 206, "3 parts de 3 L", { s: 12, c: "#C2185B" }) + txt(235, 206, "6 parts de 1,5 L", { s: 12, c: "#7B2CBF" });
+          s += "<rect x='340' y='40' width='270' height='140' rx='14' fill='#FFF6E3' stroke='#F2DFA6'/>" + txt(475, 86, "numérateur", { s: 13, c: "#C2185B" }) + "<text x='475' y='118' text-anchor='middle' font-size='34' font-weight='800' fill='" + NUIT + "'>3</text><path d='M445 128H505' stroke='" + NUIT + "' stroke-width='3'/><text x='475' y='160' text-anchor='middle' font-size='34' font-weight='800' fill='" + NUIT + "'>4</text>" + txt(560, 152, "dénominateur", { s: 12, c: BLEU });
+          return svg(640, 222, "Deux bidons partagés en quatre et en huit parts, et la fraction trois quarts annotée", "", s);
+        })() }, { type: "3d", titre: "Le bidon en quatre parts", legende: "Le bidon découpé en 4 tranches égales : 3 sont pleines de jus, 1 est vide. Le curseur sépare les tranches.",
+          modele: { h: 340, rx: -20, ry: 26, echelle: .62, dy: 46, alt: "Bidon cylindrique découpé en quatre tranches dont trois remplies", eclate: "Séparer les quarts", jouer: "Découper le bidon",
+            objets: [{ f: "boite", c: [0, -6, 0], d: [300, 8, 220], coul: "#C9B48A", dessus: "#D9C59E", div: false },
+              { f: "cylindre", c: [0, 0, 0], r: 60, h: 48, n: 26, coul: "#C2185B", dessus: "#E05589", ec: [0, 0, 0] },
+              { f: "cylindre", c: [0, 50, 0], r: 60, h: 48, n: 26, coul: "#C2185B", dessus: "#E05589", ec: [0, 30, 0] },
+              { f: "cylindre", c: [0, 100, 0], r: 60, h: 48, n: 26, coul: "#C2185B", dessus: "#E05589", ec: [0, 60, 0] },
+              { f: "cylindre", c: [0, 150, 0], r: 60, h: 48, n: 26, coul: "#DCE6F5", dessus: "#EEF3FA", op: .45, ec: [0, 90, 0] }],
+            etiquettes: [{ p: [62, 24, 0], t: "1er quart : 3 L", cote: "d" }, { p: [62, 124, 0], t: "3e quart : 3 L", cote: "d", ec: [0, 60, 0] }, { p: [-62, 174, 0], t: "4e quart : vide", ec: [0, 90, 0] }] } }],
+        fil: { html: "<p>Comparer seulement les numérateurs n'a pas de sens : les parts de Paul sont <strong>deux fois plus petites</strong>. Il faut tenir compte du dénominateur.</p>", verdicts: [[0, "rejetee", "6 > 3, mais 6 huitièmes sont des parts deux fois plus petites que 3 quarts."]] },
+        retenir: "Dénominateur : nombre de parts égales ; numérateur : parts prises." },
+
+      { t: "Les fractions égales",
+        html: "<p class='formule'>On ne change pas une fraction en multipliant (ou en divisant) son numérateur et son dénominateur par un même nombre non nul.</p><div class='ex'><b>Exemple</b>3/4 = (3 × 2)/(4 × 2) = 6/8 = (3 × 3)/(4 × 3) = 9/12.</div><div class='astuce'><b>Astuce</b>Pour comparer deux fractions, on les écrit avec le <strong>même dénominateur</strong>, puis on compare les numérateurs.</div>",
+        planches: [{ type: "2D", titre: "Trois écritures, une même quantité", legende: "3/4, 6/8 et 9/12 colorient exactement la même longueur de bande.", svg: (function () {
+          var s = "", L = 480, rows = [[4, 3, "#C2185B"], [8, 6, "#7B2CBF"], [12, 9, "#1B998B"]], i, k;
+          rows.forEach(function (r, j) { var y = 30 + j * 56, w = L / r[0]; for (k = 0; k < r[0]; k++) s += "<rect x='" + (110 + k * w).toFixed(1) + "' y='" + y + "' width='" + (w - 2).toFixed(1) + "' height='34' rx='4' fill='" + (k < r[1] ? r[2] : "#EEF1F6") + "'/>"; s += txt(70, y + 24, r[1] + "/" + r[0], { s: 18, c: r[2] }); });
+          s += "<path d='M" + (110 + L * .75) + " 20V200' stroke='" + NUIT + "' stroke-width='2' stroke-dasharray='6 4'/>" + txt(110 + L * .75, 214, "même trait : même quantité", { s: 12 });
+          return svg(640, 226, "Trois bandes coloriées aux trois quarts, aux six huitièmes et aux neuf douzièmes", "", s);
+        })() }],
+        fil: { html: "<p>3/4 = (3 × 2)/(4 × 2) = 6/8 : les deux fractions sont <strong>égales</strong>. Les quarts d'Aïcha sont plus gros, mais elle en verse deux fois moins.</p>", verdicts: [[1, "rejetee", "Les quarts sont plus gros, mais Aïcha en prend deux fois moins : 3 quarts = 6 huitièmes."]] },
+        retenir: "a/b = (a × k)/(b × k) : multiplier en haut et en bas par le même nombre." },
+
+      { t: "Simplifier ; l'inverse d'une fraction",
+        html: "<p><strong>Simplifier</strong> une fraction, c'est diviser le numérateur et le dénominateur par un même nombre : 6/8 = (6 ÷ 2)/(8 ÷ 2) = <strong>3/4</strong>. Une fraction est <strong>irréductible</strong> quand on ne peut plus la simplifier.</p><div class='def'><b>Définition</b>L'<strong>inverse</strong> de a/b (a et b non nuls) est b/a : on échange numérateur et dénominateur. Leur produit vaut 1 : 3/4 × 4/3 = 12/12 = 1.</div>",
+        planches: [{ type: "2D", titre: "Simplifier, puis inverser", legende: "6/8 se simplifie par 2 en 3/4, irréductible ; l'inverse de 3/4 est 4/3, et 3/4 × 4/3 = 1.", svg: (function () {
+          var s = "<rect x='20' y='30' width='290' height='150' rx='14' fill='#EEF4FC' stroke='#C9D8EE'/>" + txt(165, 62, "simplifier par 2", { s: 13, c: BLEU });
+          s += "<text x='90' y='120' text-anchor='middle' font-size='30' font-weight='800' fill='#7B2CBF'>6/8</text><path d='M130 112H190' stroke='" + BLEU + "' stroke-width='3' marker-end='url(#frF)'/>" + txt(160, 100, "÷ 2", { s: 13, c: BLEU }) + "<text x='240' y='120' text-anchor='middle' font-size='30' font-weight='800' fill='#C2185B'>3/4</text>" + txt(165, 160, "3/4 est irréductible", { s: 12.5, c: GRIS });
+          s += "<rect x='330' y='30' width='290' height='150' rx='14' fill='#ECF7F0' stroke='#BFDCC9'/>" + txt(475, 62, "inverse", { s: 13, c: VERT }) + "<text x='420' y='120' text-anchor='middle' font-size='30' font-weight='800' fill='#C2185B'>3/4</text><path d='M455 112H500' stroke='" + VERT + "' stroke-width='3' marker-end='url(#frF2)'/><text x='540' y='120' text-anchor='middle' font-size='30' font-weight='800' fill='" + VERT + "'>4/3</text>" + txt(475, 160, "3/4 × 4/3 = 1", { s: 14 });
+          return svg(640, 200, "Simplification de six huitièmes en trois quarts et inverse de trois quarts", fleche("frF", BLEU) + fleche("frF2", VERT), s);
+        })() }],
+        fil: { html: "<p>6/8 se simplifie en 3/4 : Aïcha et Paul ont versé <strong>9 L chacun</strong>, soit 18 L dans la marmite.</p>", verdicts: [[2, "validee", "3/4 = 6/8 : 9 L chacun, versements égaux."]] },
+        retenir: "Simplifier : diviser en haut et en bas ; inverse de a/b : b/a." },
+
+      { t: "Entraînement", html: entrainement(
+        "<p><strong>Question de cours.</strong> Que représente le dénominateur d'une fraction ?</p><details><summary>Voir la réponse</summary><p>Le nombre de parts égales dans lesquelles on partage l'unité.</p></details><p><strong>Exercice.</strong> Complète : 2/5 = …/15 ; 12/18 = 2/… ; donne l'inverse de 5/7.</p><details><summary>Voir la réponse</summary><p>2/5 = 6/15 ; 12/18 = 2/3 ; l'inverse de 5/7 est 7/5.</p></details>",
+        "<p><strong>Situation.</strong> Au champ de Mbouda, grand-père laisse 2/6 du terrain en jachère ; son voisin laisse 1/3 du sien. Les deux champs ont la même taille.</p><p><strong>Tâche.</strong> Qui laisse le plus de terrain en jachère ? Justifie avec des fractions égales.</p><details><summary>Voir une réponse attendue</summary><p>2/6 = (2 ÷ 2)/(6 ÷ 2) = 1/3 : ils laissent <strong>la même part</strong>.</p></details>"),
+        retenir: "Savoir-être : partager équitablement." }
+    ],
+    denouement: {
+      titre: "Égalité : 9 L chacun",
+      etapes: ["Dénominateur = parts égales, numérateur = parts prises (indice 1).", "3/4 = 6/8 en multipliant en haut et en bas par 2 (indice 2).", "6/8 se simplifie en 3/4 : 9 L chacun (indice 3)."],
+      reponse: "<p>Aïcha et Paul ont versé <strong>autant</strong> : 3/4 = 6/8, car 6/8 = (3 × 2)/(4 × 2). Chacun a versé 9 L sur 12 L. Paul ne regardait que les numérateurs ; Aïcha ne regardait que la taille des parts.</p>",
+      transfert: "<p>Un troisième élève verse les 10/12 de son bidon. A-t-il versé plus ? <em>(10/12 = 5/6 et 3/4 = 9/12 : oui, 10 L contre 9 L.)</em></p>"
+    },
+    revision: ["Fraction a/b : <strong>dénominateur</strong> b = parts égales ; <strong>numérateur</strong> a = parts prises.", "Fractions égales : multiplier (ou diviser) numérateur et dénominateur par le <strong>même nombre</strong>.", "Simplifier : diviser en haut et en bas ; irréductible quand ce n'est plus possible.", "Inverse de a/b : <strong>b/a</strong> ; leur produit vaut 1."],
+    exo: "<p>Range 1/2, 3/8 et 5/8 dans l'ordre croissant. <em>(1/2 = 4/8 : 3/8 < 1/2 < 5/8.)</em></p>",
+    quiz: [
+      q("Dans 5/7, le dénominateur est :", "7", "5", "12", "Le nombre de parts égales."),
+      q("3/4 est égal à :", "6/8", "3/8", "4/3", "On multiplie en haut et en bas par 2."),
+      q("12/16 simplifié au maximum donne :", "3/4", "6/8", "4/3", "On divise par 4."),
+      q("L'inverse de 2/9 est :", "9/2", "2/9", "−2/9", "On échange les deux nombres."),
+      q("2/3 × 3/2 vaut :", "1", "6/6 + 1", "4/9", "Un nombre fois son inverse = 1."),
+      q("Les 3/4 de 12 L font :", "9 L", "4 L", "3 L", "12 ÷ 4 × 3."),
+      q("Quelle fraction est la plus grande ?", "5/8", "1/2", "3/8", "1/2 = 4/8."),
+      q("Une fraction irréductible :", "ne se simplifie plus", "a un numérateur nul", "est plus grande que 1", "Ex. : 3/4."),
+      q("Pour comparer 2/5 et 3/10, on écrit :", "4/10 et 3/10", "2/10 et 3/10", "2/5 et 3/5", "Même dénominateur."),
+      q("2/6 et 1/3 sont :", "égales", "différentes", "inverses", "2/6 = 1/3.")
+    ],
+    apc: { module: "Mathématiques de 6e", famille: "Vie sociale et économique", agir: "Partager et comparer des quantités", situation: "Deux élèves versent du jus de deux bidons gradués différemment.", tache: "Comparer deux fractions et calculer les quantités versées." }
+  });
+
+  /* ═══════════════════════ 6e — LES ANGLES ═══════════════════════ */
+  function horloge(cx, cy, r, h, m) {
+    var s = "<circle cx='" + cx + "' cy='" + cy + "' r='" + r + "' fill='#fff' stroke='" + NUIT + "' stroke-width='3'/>", i;
+    for (i = 0; i < 12; i++) { var a = i * Math.PI / 6; s += "<path d='M" + (cx + r * .82 * Math.sin(a)).toFixed(1) + " " + (cy - r * .82 * Math.cos(a)).toFixed(1) + "L" + (cx + r * .94 * Math.sin(a)).toFixed(1) + " " + (cy - r * .94 * Math.cos(a)).toFixed(1) + "' stroke='" + NUIT + "' stroke-width='" + (i % 3 ? 1.5 : 3) + "'/>"; }
+    var ah = (h % 12 + m / 60) * Math.PI / 6, am = m * Math.PI / 30;
+    s += "<path d='M" + cx + " " + cy + "L" + (cx + r * .5 * Math.sin(ah)).toFixed(1) + " " + (cy - r * .5 * Math.cos(ah)).toFixed(1) + "' stroke='#C62828' stroke-width='5' stroke-linecap='round'/>";
+    s += "<path d='M" + cx + " " + cy + "L" + (cx + r * .78 * Math.sin(am)).toFixed(1) + " " + (cy - r * .78 * Math.cos(am)).toFixed(1) + "' stroke='" + BLEU + "' stroke-width='3.5' stroke-linecap='round'/><circle cx='" + cx + "' cy='" + cy + "' r='4' fill='" + NUIT + "'/>";
+    return s;
+  }
+  function typeAngle(d) { return d === 0 ? "nul" : d < 90 ? "aigu" : d === 90 ? "droit" : d < 180 ? "obtus" : d === 180 ? "plat" : "rentrant"; }
+  VRT_L("6e-maths-angles", {
+    c: "6e", m: "maths", cle: "Notions d'angle ou de secteur angulaire", titre: "Les angles : nommer, classer, mesurer", duree: 30,
+    accroche: "À 4 heures, les aiguilles de l'horloge forment-elles un angle aigu ? Plus elles sont longues, plus l'angle est grand ?",
+    intro: "La grande horloge de l'école publique de Kribi sert de rapporteur géant : à chaque heure, ses aiguilles dessinent un angle.",
+    objectifs: ["nommer un angle par son sommet et ses côtés", "reconnaître un angle nul, aigu, droit, obtus, plat, rentrant", "mesurer un angle en degrés avec le rapporteur"],
+    enquete: {
+      titre: "L'horloge de l'école de Kribi",
+      svg: (function () {
+        var s = "<rect width='640' height='220' fill='#EAF4FB'/><rect y='180' width='640' height='40' fill='#E8D3AE'/><rect x='60' y='40' width='180' height='140' fill='#F3DDB0' stroke='#B9A57C'/>";
+        s += horloge(150, 100, 52, 4, 0) + horloge(400, 110, 46, 1, 0) + horloge(520, 110, 46, 3, 0);
+        s += txt(400, 176, "1 h", { s: 13 }) + txt(520, 176, "3 h", { s: 13 }) + txt(150, 170, "4 h : la cloche", { s: 12.5, c: "#C62828" });
+        s += perso(300, 102, PEAU[1], "#1B998B", "#24324A", .85);
+        return svg(640, 220, "La grande horloge de l'école marquant quatre heures et deux petites horloges à une heure et trois heures", "", s);
+      })(),
+      legende: "École publique de Kribi : la cloche sonne à 4 heures.",
+      contexte: "<p>Le maître demande de classer les angles formés par les aiguilles à <strong>1 h, 3 h, 4 h et 6 h</strong>.</p><p>Ebanda dit : « Sur la grande horloge, les aiguilles sont plus longues, donc l'angle est plus grand. » Ngo Mbia ajoute : « À 4 h, l'angle est aigu, il est encore petit. »</p>",
+      documents: [{ t: "Le cadran", html: "<table class='donnees'><tr><td>Tour complet</td><td>360°</td></tr><tr><td>12 heures</td><td>360° ÷ 12 = 30° par heure</td></tr></table>" }],
+      question: "Quel angle forment les aiguilles à 1 h, 3 h, 4 h et 6 h, et de quel type est-il ?",
+      tache: "Mesure ou calcule chaque angle en degrés, puis classe-le (aigu, droit, obtus, plat).",
+      hypotheses: ["Plus les aiguilles sont longues, plus l'angle est grand.", "À 4 h, l'angle est aigu.", "L'angle dépend seulement de l'ouverture : 30° par heure, soit 30°, 90°, 120° et 180°."]
+    },
+    parties: [
+      { t: "Nommer un angle",
+        html: "<div class='def'><b>Définition</b>Deux demi-droites [Ox) et [Oy) de même origine O forment un <strong>angle</strong>, noté <strong>x̂Oy</strong>. O est le <strong>sommet</strong>, [Ox) et [Oy) sont les <strong>côtés</strong>. La partie du plan comprise entre les côtés est le <strong>secteur angulaire</strong>.</div><div class='attention'><b>Attention</b>La taille d'un angle ne dépend pas de la longueur de ses côtés : on peut prolonger les côtés sans changer l'angle.</div>",
+        planches: [{ type: "2D", titre: "Sommet, côtés, secteur", legende: "L'angle x̂Oy : prolonger les côtés (en pointillés) ne change pas son ouverture.", svg: (function () {
+          var s = "<path d='M120 190L300 190A180 180 0 0 0 247 63Z' fill='#EEF4FC'/><path d='M120 190H420' stroke='" + NUIT + "' stroke-width='3'/><path d='M120 190L300 30' stroke='" + NUIT + "' stroke-width='3'/><path d='M300 30L360 -23M420 190H520' stroke='" + NUIT + "' stroke-width='2' stroke-dasharray='6 5'/>";
+          s += "<path d='M180 190A60 60 0 0 0 165 150' fill='none' stroke='#C62828' stroke-width='3'/>" + txt(112, 208, "O (sommet)", { s: 13 }) + txt(430, 182, "x", { s: 14 }) + txt(312, 34, "y", { s: 14 }) + txt(250, 150, "secteur angulaire", { s: 12, c: BLEU });
+          s += "<rect x='470' y='40' width='150' height='70' rx='12' fill='#FFF6E3' stroke='#F2DFA6'/>" + txt(545, 82, "angle x̂Oy", { s: 16, c: "#8A6200" });
+          return svg(640, 220, "Un angle de sommet O et de côtés Ox et Oy avec son secteur angulaire", "", s);
+        })() }, { type: "3d", titre: "L'horloge de l'école à 4 heures", legende: "Fais tourner l'horloge : l'ouverture entre les aiguilles reste la même quelle que soit la vue. Le curseur avance les aiguilles.",
+          modele: { h: 320, rx: -62, ry: 0, echelle: .85, dy: 10, alt: "Horloge murale carrée en relief avec ses deux aiguilles à quatre heures", eclate: "Décoller les aiguilles", jouer: "Voir l'angle",
+            objets: (function () {
+              var o = [{ f: "boite", c: [0, 7, 0], d: [250, 14, 250], coul: "#8A5A2D", dessus: "#FFFFFF" }], k;
+              for (k = 0; k < 12; k++) o.push({ f: "boite", c: [Math.round(104 * Math.sin(k * Math.PI / 6)), 19, Math.round(104 * Math.cos(k * Math.PI / 6))], d: [k % 3 ? 6 : 10, 8, k % 3 ? 6 : 10], coul: "#001136", dessus: "#001136", div: false });
+              for (k = 1; k <= 7; k++) o.push({ f: "sphere", c: [Math.round(k * 10 * .866), 24, Math.round(-k * 10 * .5)], r: 6, coul: "#C62828", ec: [0, 30, 0] });
+              for (k = 1; k <= 10; k++) o.push({ f: "sphere", c: [0, 22, k * 9.5], r: 4.5, coul: "#1E499B", ec: [0, 50, 0] });
+              o.push({ f: "sphere", c: [0, 24, 0], r: 8, coul: "#001136" });
+              return o; })(),
+            etiquettes: [{ p: [61, 24, -35], t: "petite aiguille sur 4", cote: "d", ec: [0, 30, 0] }, { p: [0, 22, 95], t: "grande aiguille sur 12", ec: [0, 50, 0] }] } }],
+        fil: { html: "<p>Les aiguilles de la grande horloge sont plus longues, mais à la même heure leur <strong>ouverture</strong> est identique à celle des petites horloges : la longueur des côtés ne compte pas.</p>", verdicts: [[0, "rejetee", "Un angle mesure une ouverture, pas une longueur : à la même heure, grande et petite horloge font le même angle."]] },
+        retenir: "Angle x̂Oy : sommet O, côtés [Ox) et [Oy) ; la longueur des côtés ne compte pas." },
+
+      { t: "Classer les angles",
+        html: "<table class='donnees'><tr><th>Angle</th><th>Mesure</th></tr><tr><td>nul</td><td>0°</td></tr><tr><td>aigu</td><td>entre 0° et 90°</td></tr><tr><td>droit</td><td>90°</td></tr><tr><td>obtus</td><td>entre 90° et 180°</td></tr><tr><td>plat</td><td>180°</td></tr><tr><td>rentrant</td><td>entre 180° et 360°</td></tr></table><div class='ex'><b>L'horloge</b>Entre deux chiffres voisins : 360° ÷ 12 = 30°. À 1 h : 30° (aigu) ; à 3 h : 90° (droit) ; à 4 h : 120° (<strong>obtus</strong>) ; à 6 h : 180° (plat).</div>",
+        planches: [{ type: "2D", titre: "Les six familles d'angles", legende: "Du nul au rentrant : la mesure dit la famille.", svg: (function () {
+          var s = "", T = [[0, "nul"], [40, "aigu"], [90, "droit"], [130, "obtus"], [180, "plat"], [250, "rentrant"]], i;
+          T.forEach(function (t, k) { var cx = 60 + (k % 3) * 200, cy = 90 + Math.floor(k / 3) * 110, a = t[0] * Math.PI / 180, L = 70;
+            s += "<path d='M" + cx + " " + cy + "H" + (cx + L) + "' stroke='" + NUIT + "' stroke-width='3'/><path d='M" + cx + " " + cy + "L" + (cx + L * Math.cos(a)).toFixed(1) + " " + (cy - L * Math.sin(a)).toFixed(1) + "' stroke='" + NUIT + "' stroke-width='3'/>";
+            if (t[0] === 90) s += "<path d='M" + (cx + 14) + " " + cy + "V" + (cy - 14) + "H" + cx + "' fill='none' stroke='#C62828' stroke-width='2.5'/>";
+            else if (t[0] > 0) s += "<path d='M" + (cx + 24) + " " + cy + "A24 24 0 " + (t[0] > 180 ? 1 : 0) + " 0 " + (cx + 24 * Math.cos(a)).toFixed(1) + " " + (cy - 24 * Math.sin(a)).toFixed(1) + "' fill='none' stroke='#C62828' stroke-width='2.5'/>";
+            s += txt(cx + 40, cy + 30, t[1] + " · " + t[0] + "°", { s: 13, c: BLEU }); });
+          return svg(640, 240, "Six angles : nul, aigu, droit, obtus, plat et rentrant avec leur mesure", "", s);
+        })() }],
+        fil: { html: "<p>À 4 h, l'écart vaut 4 × 30° = <strong>120°</strong> : plus que l'angle droit, c'est un angle <strong>obtus</strong>.</p>", verdicts: [[1, "rejetee", "4 × 30° = 120° > 90° : l'angle de 4 h est obtus, pas aigu."]] },
+        retenir: "Aigu < 90° < obtus < 180° = plat ; droit = 90°." },
+
+      { t: "Mesurer avec le rapporteur",
+        html: "<ol><li>Placer le <strong>centre</strong> du rapporteur sur le sommet de l'angle.</li><li>Aligner la <strong>graduation 0</strong> sur un côté.</li><li>Lire la mesure sur la graduation qui part de ce 0, là où passe l'autre côté.</li></ol><div class='astuce'><b>Astuce</b>Avant de lire, estime : aigu ou obtus ? Tu évites de lire sur la mauvaise graduation (60° au lieu de 120°).</div>",
+        planches: [{ type: "2D", titre: "Lire 120° sur le rapporteur", legende: "Le 0 de la graduation intérieure est sur le côté horizontal : l'autre côté passe par 120°.", svg: (function () {
+          var cx = 320, cy = 190, R = 150, s = "<path d='M" + (cx - R) + " " + cy + "A" + R + " " + R + " 0 0 1 " + (cx + R) + " " + cy + "Z' fill='#EEF4FC' stroke='" + BLEU + "' stroke-width='2'/>", i;
+          for (i = 0; i <= 180; i += 10) { var a = i * Math.PI / 180; s += "<path d='M" + (cx + R * Math.cos(a)).toFixed(1) + " " + (cy - R * Math.sin(a)).toFixed(1) + "L" + (cx + (R - (i % 30 ? 8 : 16)) * Math.cos(a)).toFixed(1) + " " + (cy - (R - (i % 30 ? 8 : 16)) * Math.sin(a)).toFixed(1) + "' stroke='" + BLEU + "' stroke-width='1.5'/>"; if (i % 30 === 0) s += txt((cx + (R - 30) * Math.cos(a)).toFixed(1), (cy - (R - 30) * Math.sin(a) + 4).toFixed(1), i, { s: 11, c: BLEU }); }
+          var b = 120 * Math.PI / 180;
+          s += "<path d='M" + cx + " " + cy + "H" + (cx + R + 30) + "' stroke='" + NUIT + "' stroke-width='3'/><path d='M" + cx + " " + cy + "L" + (cx + (R + 30) * Math.cos(b)).toFixed(1) + " " + (cy - (R + 30) * Math.sin(b)).toFixed(1) + "' stroke='#C62828' stroke-width='3'/><circle cx='" + cx + "' cy='" + cy + "' r='4' fill='" + NUIT + "'/>" + txt(cx + 10, cy + 18, "centre sur le sommet", { s: 11.5, a: "start" });
+          return svg(640, 214, "Un rapporteur placé sur un angle de 120 degrés", "", s);
+        })() }],
+        fil: { html: "<p>Les mesures sont 30° (1 h), 90° (3 h), 120° (4 h) et 180° (6 h) : seule l'ouverture compte.</p>", verdicts: [[2, "validee", "30° par heure : 30° aigu, 90° droit, 120° obtus, 180° plat."]] },
+        retenir: "Rapporteur : centre sur le sommet, 0 sur un côté, lire sur la même graduation." },
+
+      { t: "Entraînement", html: entrainement(
+        "<p><strong>Question de cours.</strong> Qu'est-ce qu'un angle obtus ?</p><details><summary>Voir la réponse</summary><p>Un angle dont la mesure est comprise entre 90° et 180°.</p></details><p><strong>Exercice.</strong> Quel angle forment les aiguilles à 2 h ? à 5 h ? Classe-les.</p><details><summary>Voir la réponse</summary><p>2 h : 60°, aigu ; 5 h : 150°, obtus.</p></details>",
+        "<p><strong>Situation.</strong> Le menuisier de Sangmélima fabrique le toit d'une case : les deux pentes doivent former au sommet un angle de 120°.</p><p><strong>Tâche.</strong> Dis de quel type est cet angle et explique comment le vérifier avec un rapporteur.</p><details><summary>Voir une réponse attendue</summary><p>120° est un angle <strong>obtus</strong>. On place le centre du rapporteur au sommet du toit, le 0 sur une pente, et on lit 120° là où passe l'autre pente.</p></details>"),
+        retenir: "Savoir-être : soin et précision dans les tracés." }
+    ],
+    denouement: {
+      titre: "30°, 90°, 120°, 180°",
+      etapes: ["Un angle mesure une ouverture, pas une longueur (indice 1).", "30° par heure : 4 h → 120°, obtus (indice 2).", "Rapporteur : centre au sommet, 0 sur un côté (indice 3)."],
+      reponse: "<p>À <strong>1 h</strong> : 30°, aigu ; à <strong>3 h</strong> : 90°, droit ; à <strong>4 h</strong> : 120°, obtus ; à <strong>6 h</strong> : 180°, plat. La longueur des aiguilles ne change rien (Ebanda avait tort) et 120° n'est pas aigu (Ngo Mbia avait tort).</p>",
+      transfert: "<p>Quel angle forment les aiguilles à 9 h ? à 10 h ? <em>(9 h : 90°, droit ; 10 h : 60°, aigu, car on prend le plus petit angle.)</em></p>"
+    },
+    revision: ["Angle x̂Oy : <strong>sommet</strong> O, <strong>côtés</strong> [Ox) et [Oy).", "Nul 0° ; aigu < 90° ; <strong>droit 90°</strong> ; obtus entre 90° et 180° ; <strong>plat 180°</strong> ; rentrant > 180°.", "Rapporteur : centre sur le sommet, 0 sur un côté.", "La longueur des côtés ne change pas l'angle."],
+    exo: "<p>Un angle de 75° et un angle de 105° : de quel type sont-ils, et que vaut leur somme ? <em>(Aigu et obtus ; 180°, un angle plat.)</em></p>",
+    quiz: [
+      q("Un angle de 90° est :", "droit", "aigu", "plat", "Le coin d'une feuille."),
+      q("Un angle de 120° est :", "obtus", "aigu", "rentrant", "Entre 90° et 180°."),
+      q("À 3 h, les aiguilles forment :", "90°", "30°", "180°", "3 × 30°."),
+      q("Le sommet de l'angle x̂Oy est :", "O", "x", "y", "La lettre du milieu."),
+      q("Allonger les côtés d'un angle :", "ne change pas sa mesure", "l'agrandit", "le rend plat", "Seule l'ouverture compte."),
+      q("Un angle plat mesure :", "180°", "90°", "360°", "Une demi-droite et son prolongement."),
+      q("Pour mesurer, on place le centre du rapporteur :", "sur le sommet", "sur un côté", "n'importe où", "Puis le 0 sur un côté."),
+      q("Un angle de 30° est :", "aigu", "obtus", "droit", "Inférieur à 90°."),
+      q("À 6 h, les aiguilles forment :", "un angle plat", "un angle droit", "un angle nul", "180°."),
+      q("Un angle de 250° est :", "rentrant", "obtus", "plat", "Plus de 180°.")
+    ],
+    apc: { module: "Mathématiques de 6e", famille: "Environnement et vie quotidienne", agir: "Lire et mesurer des angles autour de soi", situation: "Les aiguilles de l'horloge de l'école.", tache: "Mesurer et classer les angles formés à différentes heures." }
+  });
+
+  /* ═══════════════════════ 6e — SYMÉTRIE ORTHOGONALE ═══════════════════════ */
+  function grille(x, y, n, m, c) { var s = "", i; for (i = 0; i <= n; i++) s += "<path d='M" + (x + i * c) + " " + y + "V" + (y + m * c) + "' stroke='#DCE3EF'/>"; for (i = 0; i <= m; i++) s += "<path d='M" + x + " " + (y + i * c) + "H" + (x + n * c) + "' stroke='#DCE3EF'/>"; return s; }
+  VRT_L("6e-maths-symetrie-axiale", {
+    c: "6e", m: "maths", cle: "Points symétriques par rapport à une droite", titre: "La symétrie orthogonale (par rapport à une droite)", duree: 30,
+    accroche: "L'artisan a peint la moitié du motif ndop sur le mur : comment l'apprenti doit-il peindre l'autre moitié, exactement ?",
+    intro: "À Bamenda, on décore la façade de la maison du chef avec un motif symétrique. Partie après partie, tu deviens l'apprenti qui complète le dessin.",
+    objectifs: ["construire le symétrique d'un point par rapport à une droite", "construire le symétrique d'une figure sur quadrillage", "utiliser la conservation des longueurs et des angles", "trouver les axes de symétrie d'une figure"],
+    enquete: {
+      titre: "Le motif ndop de la façade",
+      svg: (function () {
+        var s = "<rect width='640' height='220' fill='#F4F1EA'/><rect x='120' y='20' width='400' height='170' fill='#1C2A55'/>";
+        s += "<path d='M320 20V190' stroke='#FFC93C' stroke-width='3' stroke-dasharray='8 6'/>";
+        s += "<path d='M320 50L260 80L300 105L240 140L320 170' fill='none' stroke='#fff' stroke-width='6' stroke-linejoin='round'/><circle cx='270' cy='60' r='9' fill='#fff'/><path d='M200 120h30v30h-30z' fill='none' stroke='#fff' stroke-width='5'/>";
+        s += "<path d='M320 50L380 80L340 105L400 140L320 170' fill='none' stroke='#fff' stroke-width='3' stroke-dasharray='4 6' opacity='.55'/>";
+        s += perso(570, 100, PEAU[3], "#7B2CBF", "#3A2A20", .9) + txt(320, 210, "axe de symétrie", { s: 12, c: "#8A6200" });
+        return svg(640, 220, "Un mur indigo portant la moitié gauche d'un motif ndop blanc et un axe vertical en pointillés", "", s);
+      })(),
+      legende: "Bamenda : la façade décorée au motif ndop, indigo et blanc.",
+      contexte: "<p>Le maître-artisan a peint la moitié gauche du motif. L'apprenti doit peindre la moitié droite pour que le motif soit <strong>symétrique par rapport à l'axe</strong> jaune.</p><p>Tamo propose : « Je recopie le dessin à côté, en le faisant glisser. » Fon propose : « Je le recopie à l'envers, de haut en bas. »</p>",
+      documents: [{ t: "Les mesures du maître", html: "<table class='donnees'><tr><td>Le rond</td><td>à 50 cm à gauche de l'axe, à 40 cm du haut</td></tr><tr><td>Le carré</td><td>côté 30 cm, à 90 cm de l'axe</td></tr></table>" }],
+      question: "Comment placer exactement chaque point de la moitié droite ?",
+      tache: "Pour chaque point du motif, construis son symétrique par rapport à l'axe et vérifie les longueurs.",
+      hypotheses: ["On fait glisser le dessin vers la droite.", "On retourne le dessin de haut en bas.", "Chaque point a son symétrique de l'autre côté de l'axe, sur la perpendiculaire à l'axe, à la même distance."]
+    },
+    parties: [
+      { t: "Le symétrique d'un point",
+        html: "<div class='def'><b>Définition</b>Le <strong>symétrique</strong> du point A par rapport à la droite (d) est le point A' tel que (d) soit la <strong>médiatrice</strong> du segment [AA'] : [AA'] est perpendiculaire à (d) et coupé en son milieu par (d). Si A est sur (d), il est son propre symétrique.</div><ol><li>Tracer la perpendiculaire à (d) passant par A (équerre).</li><li>Reporter de l'autre côté la même distance (compas ou règle).</li></ol>",
+        planches: [{ type: "2D", titre: "A et son symétrique A'", legende: "(d) coupe [AA'] en son milieu H, à angle droit : HA = HA'.", svg: (function () {
+          var s = grille(40, 20, 28, 9, 20) + "<path d='M320 10V210' stroke='#C62828' stroke-width='3'/>" + txt(334, 26, "(d)", { s: 14, c: "#C62828", a: "start" });
+          s += "<path d='M200 110H440' stroke='" + BLEU + "' stroke-width='2.5' stroke-dasharray='6 4'/><circle cx='200' cy='110' r='6' fill='" + BLEU + "'/><circle cx='440' cy='110' r='6' fill='" + VERT + "'/>" + txt(190, 100, "A", { s: 15 }) + txt(452, 100, "A'", { s: 15 }) + "<path d='M320 98H332V110' fill='none' stroke='" + NUIT + "' stroke-width='2'/>" + txt(308, 128, "H", { s: 13 });
+          s += txt(260, 150, "6 carreaux", { s: 12, c: BLEU }) + txt(380, 150, "6 carreaux", { s: 12, c: VERT });
+          return svg(640, 220, "Un point A, sa perpendiculaire à la droite d et son symétrique A prime à la même distance", "", s);
+        })() }, { type: "3d", titre: "Le miroir", legende: "Le plan de l'axe agit comme un miroir : chaque cube a son jumeau à la même distance de l'autre côté. Le curseur éloigne les jumeaux du miroir… ensemble.",
+          modele: { h: 320, rx: -22, ry: 34, echelle: .75, dy: 20, alt: "Un miroir vertical avec des cubes colorés et leurs images symétriques", eclate: "Éloigner du miroir", jouer: "Voir les jumeaux",
+            objets: [{ f: "boite", c: [0, -6, 0], d: [420, 8, 260], coul: "#C9B48A", dessus: "#E3D6B6", div: false },
+              { f: "boite", c: [0, 70, 0], d: [4, 150, 240], coul: "#9EC9E8", dessus: "#CFE6F6", op: .35, div: false },
+              { f: "boite", c: [-80, 20, -60], d: [40, 40, 40], coul: "#C62828", dessus: "#E05555", ec: [-40, 0, 0] },
+              { f: "boite", c: [80, 20, -60], d: [40, 40, 40], coul: "#C62828", dessus: "#E05555", ec: [40, 0, 0] },
+              { f: "sphere", c: [-140, 25, 60], r: 25, coul: "#1B998B", ec: [-40, 0, 0] },
+              { f: "sphere", c: [140, 25, 60], r: 25, coul: "#1B998B", ec: [40, 0, 0] }],
+            etiquettes: [{ p: [0, 150, 0], t: "l'axe (plan miroir)" }, { p: [80, 40, -60], t: "même distance au miroir", cote: "d", ec: [40, 0, 0] }] } }],
+        fil: { html: "<p>Faire glisser le dessin le décale entier vers la droite : le rond, collé à 50 cm à gauche de l'axe, se retrouverait loin à droite, pas à 50 cm. La symétrie <strong>retourne</strong> le dessin autour de l'axe.</p>", verdicts: [[0, "rejetee", "Un glissement (translation) n'est pas une symétrie : le motif doit se retourner autour de l'axe."]] },
+        retenir: "A' symétrique de A : (d) est la médiatrice de [AA']." },
+
+      { t: "Construire le symétrique d'une figure",
+        html: "<p>Pour construire le symétrique d'une figure, on construit le symétrique de ses <strong>points importants</strong> (sommets, centre d'un cercle…), puis on relie.</p><div class='ex'><b>Sur quadrillage</b>Avec un axe vertical, on compte les carreaux horizontalement de chaque côté ; la hauteur ne change pas.</div><div class='attention'><b>Attention</b>Retourner de haut en bas, c'est une symétrie par rapport à un axe <strong>horizontal</strong> : ce n'est pas l'axe de la façade.</div>",
+        planches: [{ type: "2D", titre: "Le motif complété", legende: "Chaque sommet de la moitié gauche a son image à la même distance de l'axe, à la même hauteur.", svg: (function () {
+          var s = grille(40, 10, 28, 10, 20) + "<path d='M320 0V220' stroke='#C62828' stroke-width='3'/>";
+          var P = [[320, 30], [260, 70], [300, 110], [220, 150], [320, 190]];
+          s += "<path d='M" + P.map(function (p) { return p.join(" "); }).join("L") + "' fill='none' stroke='" + BLEU + "' stroke-width='5' stroke-linejoin='round'/>";
+          s += "<path d='M" + P.map(function (p) { return (640 - p[0]) + " " + p[1]; }).join("L") + "' fill='none' stroke='" + VERT + "' stroke-width='5' stroke-linejoin='round'/>";
+          P.forEach(function (p) { if (p[0] !== 320) s += "<path d='M" + p[0] + " " + p[1] + "H" + (640 - p[0]) + "' stroke='#8A93A6' stroke-width='1.2' stroke-dasharray='3 4'/>"; });
+          s += "<circle cx='270' cy='50' r='9' fill='" + BLEU + "'/><circle cx='370' cy='50' r='9' fill='" + VERT + "'/><rect x='140' y='130' width='30' height='30' fill='none' stroke='" + BLEU + "' stroke-width='4'/><rect x='470' y='130' width='30' height='30' fill='none' stroke='" + VERT + "' stroke-width='4'/>";
+          return svg(640, 222, "Motif en zigzag, rond et carré à gauche de l'axe et leurs symétriques à droite", "", s);
+        })() }],
+        fil: { html: "<p>Retourner de haut en bas mettrait le rond en bas : ce n'est pas la symétrie par rapport à l'axe <strong>vertical</strong> de la façade.</p>", verdicts: [[1, "rejetee", "De haut en bas, c'est la symétrie par rapport à un axe horizontal, pas l'axe vertical du mur."]] },
+        retenir: "Symétrique d'une figure : symétriques des sommets, puis on relie." },
+
+      { t: "Propriétés et axes de symétrie",
+        html: "<p>La symétrie orthogonale <strong>conserve</strong> les longueurs, les angles, l'alignement et les aires : le symétrique d'un segment est un segment de même longueur, celui d'un cercle un cercle de même rayon.</p><div class='def'><b>Axe de symétrie</b>Une droite est un <strong>axe de symétrie</strong> d'une figure si la figure est son propre symétrique par rapport à elle (pliage : les deux moitiés se superposent).</div><ul><li>Rectangle : 2 axes ; carré : 4 ; losange : 2 ; triangle équilatéral : 3 ; cercle : une infinité (tous ses diamètres).</li></ul>",
+        planches: [{ type: "2D", titre: "Combien d'axes ?", legende: "Les axes de symétrie en pointillés rouges : 2 pour le rectangle, 4 pour le carré, 3 pour le triangle équilatéral.", svg: (function () {
+          var s = "<rect x='40' y='60' width='140' height='90' fill='#EEF4FC' stroke='" + BLEU + "' stroke-width='3'/><path d='M110 40V170M20 105H200' stroke='#C62828' stroke-width='2' stroke-dasharray='6 4'/>" + txt(110, 196, "rectangle : 2", { s: 13 });
+          s += "<rect x='260' y='45' width='110' height='110' fill='#ECF7F0' stroke='" + VERT + "' stroke-width='3'/><path d='M315 30V170M245 100H385M250 35L380 165M380 35L250 165' stroke='#C62828' stroke-width='2' stroke-dasharray='6 4'/>" + txt(315, 196, "carré : 4", { s: 13 });
+          s += "<path d='M520 45L585 155H455Z' fill='#FFF6E3' stroke='#C2540A' stroke-width='3'/><path d='M520 30V170M600 168L470 95M440 168L570 95' stroke='#C62828' stroke-width='2' stroke-dasharray='6 4'/>" + txt(520, 196, "équilatéral : 3", { s: 13 });
+          return svg(640, 210, "Un rectangle avec deux axes, un carré avec quatre axes et un triangle équilatéral avec trois axes", "", s);
+        })() }],
+        fil: { html: "<p>Chaque point de droite est le symétrique d'un point de gauche : le rond à 50 cm de l'axe, le carré de 30 cm de côté à 90 cm, à la même hauteur. Les longueurs se conservent.</p>", verdicts: [[2, "validee", "Perpendiculaire à l'axe, même distance : le motif complet est symétrique."]] },
+        retenir: "La symétrie conserve longueurs, angles, alignement et aires." },
+
+      { t: "Entraînement", html: entrainement(
+        "<p><strong>Question de cours.</strong> Quand dit-on que A' est le symétrique de A par rapport à (d) ?</p><details><summary>Voir la réponse</summary><p>Quand (d) est la médiatrice du segment [AA'].</p></details><p><strong>Exercice.</strong> Combien d'axes de symétrie ont un losange, un cercle et la lettre H ?</p><details><summary>Voir la réponse</summary><p>Losange : 2 ; cercle : une infinité ; H : 2.</p></details>",
+        "<p><strong>Situation.</strong> Le club de dessin de Bafoussam reproduit un masque bamiléké dont on ne voit que la moitié gauche, avec son axe vertical.</p><p><strong>Tâche.</strong> Explique la méthode pour compléter le masque et cite deux propriétés que tu vérifies.</p><details><summary>Voir une réponse attendue</summary><p>Pour chaque point important, on trace la perpendiculaire à l'axe et on reporte la même distance de l'autre côté, puis on relie. On vérifie que les longueurs et les angles du côté droit sont égaux à ceux du côté gauche.</p></details>"),
+        retenir: "Savoir-être : valoriser le patrimoine artistique camerounais." }
+    ],
+    denouement: {
+      titre: "Perpendiculaire, même distance",
+      etapes: ["Symétrique d'un point : (d) médiatrice de [AA'] (indice 1).", "On construit les symétriques des sommets, puis on relie (indice 2).", "Longueurs et angles conservés : le motif est complet (indice 3)."],
+      reponse: "<p>Pour chaque point du motif, l'apprenti trace la <strong>perpendiculaire à l'axe</strong> et reporte la <strong>même distance</strong> de l'autre côté : le rond va à 50 cm à droite de l'axe, à 40 cm du haut ; le carré de 30 cm à 90 cm à droite. Ni glissement (Tamo) ni retournement de haut en bas (Fon).</p>",
+      transfert: "<p>Le maître ajoute un triangle dont un sommet est sur l'axe. Où est le symétrique de ce sommet ? <em>(Il reste à sa place : un point de l'axe est son propre symétrique.)</em></p>"
+    },
+    revision: ["A' symétrique de A par rapport à (d) : <strong>(d) médiatrice de [AA']</strong>.", "Construction : perpendiculaire à (d), puis même distance de l'autre côté.", "Un point de l'axe est son propre symétrique.", "La symétrie conserve <strong>longueurs, angles, alignement, aires</strong>.", "Axes : rectangle 2, carré 4, triangle équilatéral 3, cercle infinité."],
+    exo: "<p>Sur un quadrillage, A est à 3 carreaux à gauche d'un axe vertical. Où est A' ? <em>(À 3 carreaux à droite, sur la même ligne.)</em></p>",
+    quiz: [
+      q("Le symétrique de A par rapport à (d) est A' si :", "(d) est la médiatrice de [AA']", "A et A' sont du même côté", "AA' = 2 cm", "Perpendiculaire et milieu."),
+      q("Un point situé sur l'axe a pour symétrique :", "lui-même", "aucun point", "un point au loin", "Distance nulle."),
+      q("La symétrie orthogonale conserve :", "les longueurs et les angles", "seulement les angles", "rien", "Et l'alignement, les aires."),
+      q("Le carré a :", "4 axes de symétrie", "2 axes", "1 axe", "Médianes et diagonales."),
+      q("Le cercle a :", "une infinité d'axes", "2 axes", "aucun axe", "Tous ses diamètres."),
+      q("A est à 5 carreaux de l'axe : A' est à", "5 carreaux de l'autre côté", "10 carreaux", "2,5 carreaux", "Même distance."),
+      q("Faire glisser un dessin, c'est :", "une translation, pas une symétrie", "une symétrie", "une rotation", "Le dessin n'est pas retourné."),
+      q("Le symétrique d'un segment de 4 cm mesure :", "4 cm", "8 cm", "2 cm", "Conservation des longueurs."),
+      q("Le rectangle (non carré) a :", "2 axes", "4 axes", "aucun", "Ses médianes."),
+      q("Pour construire A', on trace d'abord :", "la perpendiculaire à (d) passant par A", "la parallèle à (d)", "un cercle de centre A", "Avec l'équerre.")
+    ],
+    apc: { module: "Mathématiques de 6e", famille: "Art et culture", agir: "Reproduire un motif symétrique", situation: "Compléter un motif ndop symétrique sur une façade.", tache: "Construire les symétriques des points du motif et vérifier les longueurs." }
+  });
+
+  /* ═══════════════════════ SIMULATIONS ═══════════════════════ */
+  function $(el, s) { return el.querySelector(s); }
+  function curseur(lib, min, max, pas, val, unite) {
+    return "<label class='labo-c'><span>" + lib + " : <b data-v>" + val + "</b>" + (unite || "") + "</span><input type='range' min='" + min + "' max='" + max + "' step='" + pas + "' value='" + val + "'></label>";
+  }
+  /* Fractions : deux fractions côte à côte, comparées en litres */
+  VRT_A("6e-maths-fractions", 1, "Compare deux fractions du bidon de 12 L", function (el) {
+    el.innerHTML = "<div style='display:flex;flex-wrap:wrap;gap:6px 18px'>" + curseur("Numérateur A", 0, 12, 1, 3) + curseur("Dénominateur A", 1, 12, 1, 4) + curseur("Numérateur B", 0, 12, 1, 6) + curseur("Dénominateur B", 1, 12, 1, 8) + "</div><svg viewBox='0 0 640 170' class='an-svg' data-s></svg><p class='labo-r' data-r></p>";
+    var I = el.querySelectorAll("input"), V = el.querySelectorAll("[data-v]"), sv = $(el, "[data-s]");
+    function maj() {
+      var a = +I[0].value, b = +I[1].value, c = +I[2].value, d = +I[3].value; if (a > b) { a = b; I[0].value = a; } if (c > d) { c = d; I[2].value = c; }
+      [a, b, c, d].forEach(function (v, k) { V[k].textContent = v; });
+      sv.innerHTML = bidon(150, 20, 120, a, b, "#C2185B", a + "/" + b) + bidon(420, 20, 120, c, d, "#7B2CBF", c + "/" + d);
+      var la = 12 * a / b, lb = 12 * c / d, f = function (x) { return x.toLocaleString("fr-FR", { maximumFractionDigits: 2 }); };
+      $(el, "[data-r]").innerHTML = a + "/" + b + " de 12 L = <b>" + f(la) + " L</b> · " + c + "/" + d + " de 12 L = <b>" + f(lb) + " L</b> · " + (Math.abs(la - lb) < 1e-9 ? "<b>fractions égales</b> : " + a + " × " + d + " = " + b + " × " + c + " = " + (a * d) + "." : la > lb ? "A est plus grand." : "B est plus grand.");
+    }
+    I.forEach(function (x) { x.addEventListener("input", maj); }); maj();
+  });
+  /* Angles : l'heure → l'angle, son type, et le dessin */
+  VRT_A("6e-maths-angles", 1, "Choisis l'heure : quel angle font les aiguilles ?", function (el) {
+    el.innerHTML = curseur("Heure", 0, 11, 1, 4, " h") + "<svg viewBox='0 0 640 200' class='an-svg' data-s></svg><p class='labo-r' data-r></p>";
+    var I = $(el, "input"), V = $(el, "[data-v]"), sv = $(el, "[data-s]");
+    function maj() {
+      var h = +I.value, a = h * 30, pa = a > 180 ? 360 - a : a;
+      V.textContent = h;
+      var s = horloge(150, 100, 80, h, 0), cx = 420, cy = 150, r = pa * Math.PI / 180;
+      s += "<path d='M" + cx + " " + cy + "H" + (cx + 140) + "' stroke='#001136' stroke-width='3'/><path d='M" + cx + " " + cy + "L" + (cx + 140 * Math.cos(r)).toFixed(1) + " " + (cy - 140 * Math.sin(r)).toFixed(1) + "' stroke='#C62828' stroke-width='3'/>";
+      if (pa > 0 && pa !== 90) s += "<path d='M" + (cx + 40) + " " + cy + "A40 40 0 0 0 " + (cx + 40 * Math.cos(r)).toFixed(1) + " " + (cy - 40 * Math.sin(r)).toFixed(1) + "' fill='none' stroke='#1E499B' stroke-width='3'/>";
+      if (pa === 90) s += "<path d='M" + (cx + 18) + " " + cy + "V" + (cy - 18) + "H" + cx + "' fill='none' stroke='#1E499B' stroke-width='3'/>";
+      sv.innerHTML = s;
+      $(el, "[data-r]").innerHTML = "À " + h + " h : " + h + " × 30° = " + a + "°" + (a > 180 ? ", soit le petit angle 360° − " + a + "° = " + pa + "°" : "") + " · angle <b>" + typeAngle(pa) + "</b>.";
+    }
+    I.addEventListener("input", maj); maj();
+  });
+  /* Symétrie : place un point, vois son symétrique */
+  VRT_A("6e-maths-symetrie-axiale", 0, "Déplace le point A : où est son symétrique ?", function (el) {
+    el.innerHTML = "<div style='display:flex;flex-wrap:wrap;gap:6px 18px'>" + curseur("Distance à l'axe", -12, 12, 1, -6, " carreaux") + curseur("Hauteur", 1, 8, 1, 4) + "</div><svg viewBox='0 0 640 220' class='an-svg' data-s></svg><p class='labo-r' data-r></p>";
+    var I = el.querySelectorAll("input"), V = el.querySelectorAll("[data-v]"), sv = $(el, "[data-s]");
+    function maj() {
+      var dx = +I[0].value, y = +I[1].value, c = 20, ax = 320, py = 200 - y * c, x = ax + dx * c, x2 = ax - dx * c;
+      V[0].textContent = dx; V[1].textContent = y;
+      var s = grille(40, 20, 28, 9, 20) + "<path d='M320 10V210' stroke='#C62828' stroke-width='3'/>";
+      s += "<path d='M" + x + " " + py + "H" + x2 + "' stroke='#1E499B' stroke-width='2' stroke-dasharray='5 4'/><circle cx='" + x + "' cy='" + py + "' r='7' fill='#1E499B'/><circle cx='" + x2 + "' cy='" + py + "' r='7' fill='#17784D'/>";
+      s += "<text x='" + x + "' y='" + (py - 12) + "' font-size='14' font-weight='700' text-anchor='middle'>A</text><text x='" + x2 + "' y='" + (py - 12) + "' font-size='14' font-weight='700' text-anchor='middle' fill='#17784D'>A'</text>";
+      sv.innerHTML = s;
+      $(el, "[data-r]").innerHTML = dx === 0 ? "A est sur l'axe : <b>il est son propre symétrique</b>." : "A est à " + Math.abs(dx) + " carreau" + (Math.abs(dx) > 1 ? "x" : "") + " " + (dx < 0 ? "à gauche" : "à droite") + " de l'axe : A' est à <b>" + Math.abs(dx) + " carreau" + (Math.abs(dx) > 1 ? "x" : "") + " " + (dx < 0 ? "à droite" : "à gauche") + "</b>, à la même hauteur. [AA'] mesure " + (2 * Math.abs(dx)) + " carreaux et l'axe le coupe en son milieu, à angle droit.";
+    }
+    I.forEach(function (x) { x.addEventListener("input", maj); }); maj();
+  });
+})();
+
 /* Leçons APPROFONDIES — lot 9, classe d'examen de 3e (17/11/2026) : articles (anglais), verbes faibles (allemand),
    la famille (espagnol), Ésope et Homère (grec). Même gabarit et même mécanisme que 11-approfondies-lot4.js
    (remplacement EN PLACE ; ordre, clé, fiche APC, examen et scènes conservés). Les classes de 6e, 5e et 4e sont
@@ -8780,6 +10301,4515 @@ VRT_PLUS("3e-en-articles", [
   });
 })();
 
+/* Leçons APPROFONDIES — lot 14, 2nde A (18/11/2026) : ℝ et ses sous-ensembles, disciplines affinitaires de l'histoire,
+   définitions de la philosophie, lecture des cartes. Même gabarit et même mécanisme que 11-approfondies-lot4.js (remplacement
+   EN PLACE ; ordre, clé, fiche APC, examen et scènes conservés ; partie « Entraînement au format de l'examen » et quiz
+   d'origine repris). Simulations VRT_A en fin de fichier. */
+(function () {
+  "use strict";
+  var NUIT = "#001136", BLEU = "#1E499B", GRIS = "#4D5163", VERT = "#17784D", ROUGE = "#C62828", TERRE = "#C46A2B";
+
+  function txt(x, y, t, o) {
+    o = o || {};
+    return "<text x='" + x + "' y='" + y + "' text-anchor='" + (o.a || "middle") + "' font-size='" + (o.s || 12) + "' font-weight='" + (o.w || 700) + "' fill='" + (o.c || NUIT) + "'" + (o.i ? " font-style='italic'" : "") + (o.halo ? " stroke='#fff' stroke-width='3' paint-order='stroke'" : "") + ">" + t + "</text>";
+  }
+  function lin(id, cs, vertical) {
+    var s = "<linearGradient id='" + id + "'" + (vertical ? " x1='0' y1='0' x2='0' y2='1'" : "") + ">";
+    cs.forEach(function (c, i) { s += "<stop offset='" + (i / (cs.length - 1)).toFixed(2) + "' stop-color='" + c + "'/>"; });
+    return s + "</linearGradient>";
+  }
+  function rad(id, cs) {
+    var s = "<radialGradient id='" + id + "' cx='35%' cy='30%' r='75%'>";
+    cs.forEach(function (c, i) { s += "<stop offset='" + (i / (cs.length - 1)).toFixed(2) + "' stop-color='" + c + "'/>"; });
+    return s + "</radialGradient>";
+  }
+  function fleche(id, c) { return "<marker id='" + id + "' markerWidth='10' markerHeight='10' refX='7' refY='5' orient='auto'><path d='M0 1L8 5L0 9Z' fill='" + c + "'/></marker>"; }
+  function svg(w, h, alt, defs, corps) {
+    return "<svg viewBox='0 0 " + w + " " + h + "' role='img' aria-label='" + alt + "' font-family='Inter,Arial,sans-serif'><rect width='" + w + "' height='" + h + "' fill='#fff'/><defs>" + defs + "</defs>" + corps +
+      "<text x='" + (w - 6) + "' y='" + (h - 5) + "' font-size='8' text-anchor='end' fill='#8A93A6'>Planche VÉRITAS</text></svg>";
+  }
+  function ancien(id) { return window.VRT_LECONS[id]; }
+  function remplacer(id, o) {
+    var a = ancien(id);
+    if (a) ["apc", "examen", "rang", "cle", "scenes"].forEach(function (k) { if (a[k] != null && o[k] == null) o[k] = a[k]; });
+    VRT_L(id, o);
+    if (a) o.ordre = a.ordre;
+  }
+  function q(qq, bonne, f1, f2, e) { return { q: qq, r: [bonne, f1, f2], b: 0, e: e }; }
+  function partie(old, i) { return old && old.parties[i] ? old.parties[i].html : ""; }
+  function bulle(x, y, w, t, c) { return "<rect x='" + x + "' y='" + y + "' width='" + w + "' height='30' rx='12' fill='#fff' stroke='" + (c || "#C9D2E3") + "'/>" + txt(x + w / 2, y + 20, t, { s: 11.5 }); }
+  function perso(x, y, peau, habit, bas) {
+    bas = bas || "#2E3445";
+    return "<g transform='translate(" + x + " " + y + ")'><ellipse cx='0' cy='84' rx='18' ry='4' fill='#001136' opacity='.18'/>" +
+      "<rect x='-9' y='44' width='8' height='36' rx='3' fill='" + bas + "'/><rect x='1' y='44' width='8' height='36' rx='3' fill='" + bas + "'/>" +
+      "<ellipse cx='-6' cy='81' rx='7' ry='3.5' fill='#1F2328'/><ellipse cx='6' cy='81' rx='7' ry='3.5' fill='#1F2328'/>" +
+      "<path d='M-13 46L-16 18C-16 13 -12 11 -6 10H6C12 11 16 13 16 18L13 46Z' fill='" + habit + "'/>" +
+      "<path d='M-15 16L-20 40' stroke='" + habit + "' stroke-width='7' stroke-linecap='round'/><path d='M15 16L20 40' stroke='" + habit + "' stroke-width='7' stroke-linecap='round'/>" +
+      "<circle cx='-20' cy='42' r='3.6' fill='" + peau + "'/><circle cx='20' cy='42' r='3.6' fill='" + peau + "'/>" +
+      "<rect x='-3.5' y='5' width='7' height='7' fill='" + peau + "'/><ellipse cx='0' cy='-2' rx='9' ry='10.5' fill='" + peau + "'/>" +
+      "<path d='M-9 -4C-10 -14 -4 -13.5 0 -13.5S10 -14 9 -4C7 -9 -7 -9 -9 -4Z' fill='#1B1410'/><ellipse cx='-9' cy='-1' rx='1.8' ry='3' fill='" + peau + "'/><ellipse cx='9' cy='-1' rx='1.8' ry='3' fill='" + peau + "'/></g>";
+  }
+  /* portrait en buste (arbre généalogique) */
+  function portrait(x, y, peau, habit, cheveux, age) {
+    var s = "<g transform='translate(" + x + " " + y + ")'><circle r='30' fill='#F4EFE4' stroke='#C9A576' stroke-width='3'/><clipPath id='pc" + x + "_" + y + "'><circle r='28'/></clipPath><g clip-path='url(#pc" + x + "_" + y + ")'>";
+    s += "<path d='M-26 32C-26 14 -14 10 0 10S26 14 26 32Z' fill='" + habit + "'/><rect x='-4' y='2' width='8' height='10' fill='" + peau + "'/><ellipse cy='-6' rx='11' ry='13' fill='" + peau + "'/>";
+    s += age === "vieux" ? "<path d='M-11 -10C-12 -20 -4 -21 0 -21S12 -20 11 -10C9 -14 -9 -14 -11 -10Z' fill='#D8D8D8'/>" : age === "femme" ? "<path d='M-13 -6C-15 -24 15 -24 13 -6C12 -14 -12 -14 -13 -6Z' fill='" + cheveux + "'/><path d='M-13 -14h26v-6c-6 -6 -20 -6 -26 0Z' fill='" + habit + "'/>" : "<path d='M-11 -10C-12 -20 -4 -21 0 -21S12 -20 11 -10C9 -14 -9 -14 -11 -10Z' fill='" + cheveux + "'/>";
+    s += "<circle cx='-4' cy='-6' r='1.4' fill='#1B1410'/><circle cx='4' cy='-6' r='1.4' fill='#1B1410'/><path d='M-3 2q3 2 6 0' stroke='#1B1410' fill='none'/></g></g>";
+    return s;
+  }
+  /* boucle d'exercice générique : [phrase avec ___, [bonne, autres…], explication] */
+  function exercice(el, C, suivant, lib) {
+    var i = 0, ok = 0;
+    el.innerHTML = "<p class='labo-r' data-q style='font-size:16px'></p><div style='display:flex;gap:8px;flex-wrap:wrap' data-c></div><p class='an-note' data-e></p><p class='labo-r' data-s></p>";
+    function $(s) { return el.querySelector(s); }
+    function poser() {
+      var c = C[i];
+      $("[data-q]").innerHTML = (i + 1) + ". " + c[0].replace("___", "<b style='border-bottom:2px dashed #1E499B;padding:0 14px'>?</b>");
+      $("[data-e]").textContent = ""; $("[data-s]").innerHTML = lib + " " + (i + 1) + " / " + C.length + " · score : <b>" + ok + "</b>";
+      $("[data-c]").innerHTML = c[1].slice().sort().map(function (x) { return "<button type='button' class='btn-l' data-v='" + x + "'>" + x + "</button>"; }).join("");
+      el.querySelectorAll("[data-v]").forEach(function (b) {
+        b.addEventListener("click", function () {
+          var bon = b.dataset.v === c[1][0]; if (bon) ok++;
+          $("[data-q]").innerHTML = (i + 1) + ". " + c[0].replace("___", "<b style='color:" + (bon ? VERT : ROUGE) + "'>" + c[1][0] + "</b>");
+          $("[data-e]").innerHTML = (bon ? "✔ " : "✘ ") + c[2];
+          el.querySelectorAll("[data-v]").forEach(function (x) { x.disabled = true; });
+          var nx = document.createElement("button"); nx.type = "button"; nx.className = "btn-l"; nx.textContent = i + 1 < C.length ? suivant : "↺";
+          nx.addEventListener("click", function () { i = (i + 1) % C.length; if (!i) ok = 0; poser(); });
+          $("[data-c]").appendChild(nx);
+          $("[data-s]").innerHTML = lib + " " + (i + 1) + " / " + C.length + " · score : <b>" + ok + "</b>";
+        });
+      });
+    }
+    poser();
+  }
+
+  function alea(g) { return function () { g = (g * 16807) % 2147483647; return (g - 1) / 2147483646; }; }
+  function pgcd(a, b) { a = Math.abs(a); b = Math.abs(b); while (b) { var r = a % b; a = b; b = r; } return a; }
+  function facteurs(n) { var f = [], d = 2; while (n > 1) { while (n % d === 0) { f.push(d); n /= d; } d++; } return f; }
+  function developpe(p, q) { var ent = Math.floor(Math.abs(p) / q), r = Math.abs(p) % q, vus = {}, ch = "", i = 0; while (r && !(r in vus) && i < 40) { vus[r] = i++; r *= 10; ch += Math.floor(r / q); r %= q; } var e = String(ent).replace(/\B(?=(\d{3})+(?!\d))/g, " "); if (!r) return (p < 0 ? "−" : "") + e + (ch ? "," + ch : ""); var k = vus[r]; return (p < 0 ? "−" : "") + e + "," + ch.slice(0, k) + "<span style='text-decoration:overline'>" + ch.slice(k) + "</span>…"; }
+  function milliers(n) { return String(n).replace(/\B(?=(\d{3})+(?!\d))/g, " "); }
+  /* motif de pagne wax */
+  function wax(id, fond, a, b) { return "<pattern id='" + id + "' width='22' height='22' patternUnits='userSpaceOnUse'><rect width='22' height='22' fill='" + fond + "'/><circle cx='11' cy='11' r='7' fill='" + a + "'/><circle cx='11' cy='11' r='3' fill='" + b + "'/><path d='M0 0l5 5M22 0l-5 5M0 22l5 -5M22 22l-5 -5' stroke='" + a + "' stroke-width='2'/></pattern>"; }
+
+  /* ═══════════════════════ 2nde A MATHS — ℝ ET SES SOUS-ENSEMBLES ═══════════════════════ */
+  var AR_OLD = ancien("2nde-a-maths-reels");
+  function pagne3D() {
+    var o = [], k, C = ["#E8A33D", "#1E499B", "#C62828", "#2E7D32"];
+    o.push({ f: "boite", c: [0, -20, 0], d: [300, 20, 300], coul: "#8B5A2B", dessus: "#A06A38" });
+    [[-130, -130], [130, -130], [130, 130], [-130, 130]].forEach(function (p) { o.push({ f: "cylindre", c: [p[0], -130, p[1]], r: 7, h: 100, n: 10, coul: "#6B4423" }); });
+    for (k = 0; k < 25; k++) { var i = k % 5, j = Math.floor(k / 5); o.push({ f: "boite", c: [-80 + i * 40, -9, -80 + j * 40], d: [40, 2, 40], coul: C[(i + j) % 4], dessus: C[(i + 2 * j) % 4], div: false }); }
+    for (k = 0; k <= 28; k++) { var t = k / 28; o.push({ f: "sphere", c: [-100 + 200 * t, -5, -100 + 200 * t], r: 2.6, coul: "#FBF8F2" }); }
+    o.push({ f: "boite", c: [60, -6, -130], d: [120, 1, 12], coul: "#F7C948", dessus: "#F7C948", div: false });
+    for (k = 0; k < 7; k++) o.push({ f: "boite", c: [6 + k * 18, -5, -126], d: [1.5, 1, 6], coul: "#1F2328", div: false });
+    o.push({ f: "boite", c: [-118, -6, 60], d: [6, 2, 60], coul: "#9AA3AF", dessus: "#C9CED6", div: false });
+    o.push({ f: "boite", c: [-108, -6, 60], d: [6, 2, 60], coul: "#9AA3AF", dessus: "#C9CED6", div: false });
+    o.push({ f: "cylindre", c: [-122, -7, 100], r: 9, r2: 9, h: 3, n: 14, coul: "#1F2328" });
+    o.push({ f: "cylindre", c: [-104, -7, 100], r: 9, r2: 9, h: 3, n: 14, coul: "#1F2328" });
+    return o;
+  }
+  remplacer("2nde-a-maths-reels", {
+    c: "2nde A", m: "maths", titre: "ℝ et ses sous-ensembles", duree: 35,
+    accroche: "« Chacune aura 16 666,66 F tout rond ! » annonce la trésorière de la tontine. Une dette de 3 000 F, est-ce « moins que rien » ? Et la diagonale du pagne, combien mesure-t-elle exactement ?",
+    intro: "La tontine d'un atelier de couture de Bafoussam te sert de fil rouge : à chaque partie, un indice t'aide à trancher entre trois affirmations.",
+    objectifs: ["nommer les ensembles ℕ, ℤ, 𝔻, ℚ, ℝ et leurs inclusions", "reconnaître un décimal, un rationnel, un irrationnel", "placer un nombre dans le plus petit ensemble qui le contient", "arrondir un partage de façon juste"],
+    enquete: {
+      titre: "La tontine des couturières de Bafoussam",
+      svg: svg(640, 220, "Atelier de couture : une trésorière tient un cahier et une calculatrice affichant 16666,66667, des pagnes wax sur la table", wax("arW", "#E8A33D", "#1E499B", "#C62828") + wax("arW2", "#2E7D32", "#F7C948", "#C62828") + lin("arM", ["#F4EDE1", "#E9DFCF"], true),
+        "<rect width='640' height='220' fill='url(#arM)'/><rect y='170' width='640' height='50' fill='#B88A5A'/><rect x='30' y='130' width='300' height='14' rx='3' fill='#8B5A2B'/><rect x='40' y='144' width='10' height='40' fill='#6B4423'/><rect x='310' y='144' width='10' height='40' fill='#6B4423'/>" +
+        "<path d='M50 130l20 -38h110l20 38Z' fill='url(#arW)' stroke='#8A5A20'/><path d='M190 130l12 -26h90l14 26Z' fill='url(#arW2)' stroke='#2E5D22'/>" +
+        "<rect x='400' y='26' width='200' height='76' rx='10' fill='#1F2328'/><rect x='410' y='36' width='180' height='40' fill='#B8D8A8'/>" + txt(582, 66, "16666,66667", { s: 22, a: "end", c: "#1F2328" }) + txt(500, 94, "100 000 ÷ 6", { s: 11, c: "#B8D8A8", w: 500 }) +
+        perso(380, 90, "#5A3A1E", "#7B3F99", "#2E3445") + "<rect x='392' y='118' width='26' height='32' rx='2' fill='#FBF8F2' stroke='#9AA3AF'/>" + perso(560, 96, "#6B4423", "#C62828", "#1E499B") + bulle(420, 150, 200, "16 666,66 F tout rond !", "#F7C948")),
+      legende: "À Bafoussam, six couturières cotisent chaque mois ; ce mois-ci, la caisse contient 100 000 F à partager à parts égales.",
+      contexte: "<p>La trésorière tape 100 000 ÷ 6 et annonce : « Chacune aura 16 666,66 F tout rond. » Une couturière, qui doit encore <strong>3 000 F</strong> à la caisse, plaisante : « Mon solde est moins que rien, ce n'est même pas un nombre ! » Enfin, pour un foulard, l'atelier coupe un pagne carré de <strong>1 m</strong> de côté le long de sa diagonale : « Elle mesure 1,41 m, c'est exact », dit l'apprentie.</p>",
+      documents: [{ t: "Le cahier de la trésorière", html: "<table class='donnees'><tr><th>Ligne</th><th>Nombre</th><th>Commentaire</th></tr><tr><td>Part de chacune</td><td>100 000 ÷ 6</td><td>« 16 666,66 F tout rond »</td></tr><tr><td>Solde de Mama Ngo</td><td>−3 000 F</td><td>« moins que rien »</td></tr><tr><td>Biais du pagne</td><td>diagonale d'un carré de 1 m</td><td>« 1,41 m exactement »</td></tr></table>" }],
+      question: "Ces trois nombres sont-ils bien décrits ? Dans quel ensemble les ranger, et comment payer chacune justement ?",
+      tache: "Range 100 000/6, −3 000 et la diagonale dans le plus petit ensemble possible, en justifiant, puis propose un partage réel en francs.",
+      hypotheses: ["100 000 ÷ 6 = 16 666,66 exactement : c'est un décimal.", "−3 000 n'est pas un nombre : on ne peut pas avoir moins que rien.", "−3 000 ∈ ℤ ; 100 000/6 ∈ ℚ mais ∉ 𝔻 ; la diagonale √2 m est irrationnelle : on paie et on mesure avec des arrondis."]
+    },
+    parties: [
+      { t: "Des entiers aux réels", html: partie(AR_OLD, 0),
+        planches: [{ type: "2D", titre: "Chaque nombre a sa place sur la droite", legende: "Sur la droite graduée, tous les nombres de la tontine ont une place : la dette −3 (milliers de francs) est un entier relatif, 1/4 est décimal, 2/3 est rationnel non décimal, √2 et π sont irrationnels. Tous sont des réels.", svg: (function () {
+          var X = function (v) { return 320 + v * 80; }, s = "<rect width='640' height='210' fill='#FBF8F2'/><path d='M30 105H612' stroke='" + NUIT + "' stroke-width='2.5' marker-end='url(#arF)'/>", v;
+          for (v = -3; v <= 3; v++) s += "<path d='M" + X(v) + " 98V112' stroke='" + NUIT + "' stroke-width='2'/>" + txt(X(v), 128, v < 0 ? "−" + (-v) : String(v), { s: 12, c: GRIS, w: 600 });
+          [[-3, ROUGE, "−3 ∈ ℤ (dette de 3 000 F)", 60, "start", 30], [0.25, "#C2540A", "1/4 = 0,25 ∈ 𝔻", 168, "middle"], [2 / 3, "#7B3F99", "2/3 = 0,666… ∈ ℚ", 46, "middle"], [Math.SQRT2, VERT, "√2 ≈ 1,414… ∈ ℝ", 192, "middle"], [3, BLEU, "3 ∈ ℕ", 60, "middle"], [Math.PI, VERT, "π ≈ 3,14… ∈ ℝ", 168, "middle"]].forEach(function (p) {
+            var x = X(p[0]); s += "<path d='M" + x + " 105V" + (p[3] < 105 ? p[3] + 6 : p[3] - 14) + "' stroke='" + p[1] + "' stroke-dasharray='3 3'/><circle cx='" + x + "' cy='105' r='6' fill='" + p[1] + "' stroke='#fff' stroke-width='2'/>" + txt(p[5] || x, p[3], p[2], { s: 12, c: p[1], a: p[4], halo: true });
+          });
+          return svg(640, 210, "Droite graduée de −3 à 3 avec les nombres −3, 1/4, 2/3, racine de 2, 3 et pi et leur ensemble", fleche("arF", NUIT), s);
+        })() }],
+        labo: { type: "ensembles" },
+        fil: { html: "<p>Une dette se note avec un signe moins : −3 000 est un <strong>entier relatif</strong>, élément de ℤ (et donc de 𝔻, ℚ, ℝ). Sur la droite graduée, il est à gauche de 0. Les nombres négatifs servent tous les jours : soldes, températures en altitude, étages en sous-sol.</p>", verdicts: [[1, "rejetee", "−3 000 est un nombre : un entier relatif, élément de ℤ."]] },
+        retenir: "ℕ ⊂ ℤ ⊂ 𝔻 ⊂ ℚ ⊂ ℝ." },
+      { t: "Reconnaître un décimal", html: partie(AR_OLD, 1),
+        fil: { html: "<p>100 000/6 = 50 000/3 : le dénominateur 3 n'est ni 2 ni 5, donc l'écriture décimale ne s'arrête pas : 16 666,666… La calculatrice affiche un arrondi (16 666,66667) et la trésorière tronque à 16 666,66. Ce nombre est <strong>rationnel</strong>, pas décimal ; et de toute façon, aucune pièce ne vaut 0,66 F.</p>", verdicts: [[0, "rejetee", "100 000/6 = 16 666,666… : rationnel non décimal ; 16 666,66 n'est qu'un arrondi."]] },
+        retenir: "Fraction irréductible décimale ⟺ dénominateur fait seulement de 2 et de 5." },
+      { t: "Des nombres qui ne sont pas des fractions", html: partie(AR_OLD, 2),
+        planches: [{ type: "3d", titre: "Le pagne carré et son biais", legende: "Tourne la table de coupe : un pagne wax carré de 1 m de côté, le mètre ruban jaune et les ciseaux. Le fil blanc suit la diagonale (le biais) : sa longueur est √2 m. On coupe à 1,41 m ou 1,414 m, mais aucune de ces valeurs n'est exacte.",
+          modele: { h: 340, rx: -40, ry: 28, echelle: 0.95, alt: "Table de couture avec un pagne carré à carreaux colorés, un fil blanc en diagonale, un mètre ruban et des ciseaux", objets: pagne3D(),
+            etiquettes: [{ p: [0, 0, 0], t: "biais : √2 m ≈ 1,414 m" }, { p: [100, -4, -100], t: "côté : 1 m", cote: "d" }, { p: [-113, -4, 100], t: "ciseaux", cote: "g" }] } }],
+        fil: { html: "<p>D'après Pythagore, diagonale² = 1² + 1² = 2, donc la diagonale vaut <strong>√2 m</strong>. Or √2 n'est pas une fraction : c'est un <strong>irrationnel</strong>, son écriture décimale (1,41421356…) est infinie et non périodique. « 1,41 m » est une valeur approchée au centimètre, suffisante pour couper, mais pas exacte.</p>", verdicts: [[2, "validee", "−3 000 ∈ ℤ, 100 000/6 ∈ ℚ \\ 𝔻, √2 irrationnel : arrondis nécessaires."]] },
+        retenir: "Irrationnel : ni décimal ni fraction (√2, π)." },
+      AR_OLD && AR_OLD.parties[3] ? AR_OLD.parties[3] : { t: "Entraînement", html: "" }
+    ],
+    denouement: {
+      titre: "Le cahier corrigé",
+      etapes: ["−3 000 : entier relatif, ∈ ℤ (indice 1).", "100 000/6 = 50 000/3 : facteur 3, rationnel non décimal (indice 2).", "Diagonale √2 m : irrationnelle (indice 3)."],
+      reponse: "<p>Le solde de −3 000 F est un nombre tout à fait correct : c'est un entier relatif négatif, élément de ℤ (et donc de 𝔻, ℚ et ℝ). La part de chacune vaut 100 000/6 = 50 000/3 ; le dénominateur 3 n'est fait ni de 2 ni de 5, donc l'écriture décimale est infinie : 16 666,666… C'est un rationnel non décimal, et « 16 666,66 » n'en est qu'une valeur tronquée. En pratique, on verse 16 666 F à chacune (6 × 16 666 = 99 996 F) et les 4 F restants restent dans la caisse commune, ce qui est juste et transparent. Enfin, la diagonale du pagne mesure √2 m d'après Pythagore : c'est un irrationnel ; 1,41 m est une valeur approchée au centimètre près, suffisante pour couper le foulard.</p>",
+      transfert: "<p>Une tontine de 7 membres partage 50 000 F. Calcule 50 000/7, dis dans quel plus petit ensemble il se trouve, et propose un partage en francs. <em>(7 142,857142… ∈ ℚ ; 7 142 F chacune, 6 F en caisse.)</em></p>"
+    },
+    revision: (AR_OLD ? AR_OLD.revision : []).concat(["Une calculatrice affiche un arrondi : 16 666,66667 n'est pas la valeur exacte de 100 000/6."]),
+    exo: AR_OLD ? AR_OLD.exo : "",
+    quiz: AR_OLD ? AR_OLD.quiz : []
+  });
+
+  /* ═══════════════════════ 2nde A HISTOIRE — LES DISCIPLINES AFFINITAIRES ═══════════════════════ */
+  var HD_OLD = ancien("2nde-a-histoire-disciplines");
+  function fouille3D() {
+    var o = [], k, R = alea(77);
+    [[105, 30, "#3B2A1E", "#4E7D2A"], [65, 50, "#B5651D", null], [10, 60, "#8C8577", null], [-40, 40, "#6E6A63", null]].forEach(function (c) { o.push({ f: "boite", c: [0, c[0], 0], d: [360, c[1], 140], coul: c[2], dessus: c[3] || c[2], div: false }); });
+    for (k = 0; k < 4; k++) o.push({ f: "boite", c: [-150 + k * 34, 108, -71], d: [12, 6, 2], coul: "#2F80ED", div: false });
+    for (k = 0; k < 10; k++) o.push({ f: "sphere", c: [-60 + R() * 120, 52 + R() * 26, -72], r: 3.2, coul: k % 2 ? "#1E6FD9" : "#F7C948" });
+    for (k = 0; k < 7; k++) o.push({ f: "boite", c: [-140 + k * 34 + R() * 10, 2 + R() * 22, -72], d: [18 + R() * 8, 8, 3], coul: "#A0522D", dessus: "#B8693A", div: false });
+    for (k = 0; k < 9; k++) o.push({ f: "sphere", c: [40 + R() * 110, 4 + R() * 26, -72], r: 4.2, coul: "#1B1410" });
+    for (k = 0; k < 8; k++) o.push({ f: "boite", c: [192, -50 + k * 25 + 12.5, -66], d: [8, 25, 4], coul: k % 2 ? "#FBF8F2" : "#C62828", div: false });
+    o.push({ f: "boite", c: [-210, 128, -40], d: [6, 4, 50], coul: "#6B4423", div: false });
+    o.push({ f: "boite", c: [-210, 128, -76], d: [16, 2, 24], coul: "#9AA3AF", dessus: "#C9CED6", div: false });
+    o.push({ f: "boite", c: [150, 124, 30], d: [60, 8, 40], coul: "#C9B28A", dessus: "#E9DFCF", div: false });
+    return o;
+  }
+  remplacer("2nde-a-histoire-disciplines", {
+    c: "2nde A", m: "histoire", titre: "Les disciplines affinitaires de l'histoire", duree: 35,
+    accroche: "Des tessons de poterie et du charbon de bois sortent d'une tranchée à Mbalmayo. « Des débris ! » dit le propriétaire. « Nos ancêtres, il y a sept générations », dit le chef. Et si les deux se trompaient ?",
+    intro: "Une découverte sur un chantier de Mbalmayo te sert de fil rouge : à chaque partie, un indice t'aide à trancher entre trois explications.",
+    objectifs: ["définir les disciplines affinitaires de l'histoire", "dire ce que chacune apporte : vestiges, couches, dates, paroles, langues", "dater un reste organique au carbone 14", "critiquer et croiser des sources"],
+    enquete: {
+      titre: "Les tessons du chantier de Mbalmayo",
+      svg: svg(640, 220, "Une tranchée de chantier montre des couches de terre colorées avec des tessons de poterie ; un ouvrier, le propriétaire et un vieux chef discutent", lin("hdC", ["#DCEBF5", "#F4F1EA"], true),
+        "<rect width='640' height='220' fill='url(#hdC)'/><rect y='120' width='640' height='100' fill='#7A5530'/><rect x='120' y='120' width='300' height='100' fill='#5A3A1E'/>" +
+        "<rect x='130' y='120' width='280' height='16' fill='#3B2A1E'/><rect x='130' y='136' width='280' height='30' fill='#B5651D'/><rect x='130' y='166' width='280' height='40' fill='#8C8577'/><rect x='130' y='206' width='280' height='14' fill='#6E6A63'/><path d='M130 120V220M410 120V220' stroke='#2B1D12' stroke-width='3'/>" +
+        [[170, 180], [215, 188], [262, 176], [300, 190], [345, 182]].map(function (p, i) { return "<path d='M" + p[0] + " " + p[1] + "q8 -7 18 -2l-3 7q-8 -3 -15 0Z' fill='#A0522D' stroke='#6B3A1E'/>" + (i % 2 ? "<circle cx='" + (p[0] + 22) + "' cy='" + (p[1] + 8) + "' r='4' fill='#1B1410'/>" : ""); }).join("") +
+        [160, 200, 240, 280].map(function (x) { return "<circle cx='" + x + "' cy='150' r='3' fill='#1E6FD9'/>"; }).join("") +
+        perso(80, 36, "#5A3A1E", "#C2540A", "#2E3445") + "<path d='M100 70L118 128' stroke='#6B4423' stroke-width='4'/><path d='M112 124l14 8l-6 6Z' fill='#9AA3AF'/>" +
+        perso(470, 36, "#6B4423", "#1E499B", "#2E3445") + perso(560, 40, "#4A2E1A", "#F4F1EA", "#7A5530") + "<path d='M578 70L586 124' stroke='#5D3A1E' stroke-width='3'/><path d='M548 30h24' stroke='#C62828' stroke-width='5'/>" +
+        bulle(380, 6, 130, "Des débris !", "#9FC5E8") + bulle(480, 6, 150, "Sept générations…", "#F7C948")),
+      legende: "À Mbalmayo, sur les bords du Nyong : en creusant des fondations, les ouvriers mettent au jour des tessons décorés et du charbon de bois.",
+      contexte: "<p>Le propriétaire veut tout jeter pour finir ses fondations : « Ce ne sont que des débris. » Le chef du village, consulté, affirme : « Ces pots sont ceux de nos ancêtres, qui ont fondé le village il y a <strong>sept générations</strong>. » Une étudiante en histoire de l'université de Yaoundé I fait arrêter les travaux, relève les couches de terre et envoie un morceau de charbon au laboratoire.</p>",
+      documents: [{ t: "Le relevé de la tranchée", html: "<table class='donnees'><tr><th>Couche</th><th>Profondeur</th><th>Ce qu'on y trouve</th></tr><tr><td>1</td><td>0 à 30 cm</td><td>terre noire, sachets plastique</td></tr><tr><td>2</td><td>30 à 80 cm</td><td>argile ocre, perles de verre de traite européenne</td></tr><tr><td>3</td><td>80 à 140 cm</td><td>sol gris, tessons décorés à la roulette, charbon de bois</td></tr></table>" },
+        { t: "La fiche du laboratoire", html: "<p>Échantillon : charbon de bois, couche 3. Résultat : il reste <strong>88 %</strong> du carbone 14 d'origine. (Demi-vie du carbone 14 : 5 730 ans.)</p>" }],
+      question: "Ces vestiges ont-ils une valeur, et de quand datent-ils vraiment ?",
+      tache: "Explique au propriétaire et au chef ce que chaque discipline apprend sur ces vestiges, puis propose une date pour les tessons.",
+      hypotheses: ["Ce ne sont que des débris sans valeur : on peut tout jeter.", "Le récit du chef suffit : les tessons datent de la fondation du village, il y a sept générations.", "Il faut croiser les disciplines : couches, carbone 14 et tradition orale montrent que les tessons sont bien plus anciens que le village actuel."]
+    },
+    parties: [
+      { t: "Pourquoi des disciplines « affinitaires » ?", html: partie(HD_OLD, 0),
+        planches: [{ type: "2D", titre: "L'historien et ses alliés", legende: "Autour de l'historien, les disciplines qui lui fournissent des sources : vestiges, fossiles, coutumes, langues, paroles, monnaies, inscriptions et noms de lieux. Il critique chacune et les croise.", svg: (function () {
+          var s = "<rect width='640' height='300' fill='#FBF8F2'/>", D = [
+            ["Archéologie", "vestiges", "<path d='M-9 -12h18l-3 6q8 6 4 16h-20q-4 -10 4 -16Z' fill='#A0522D' stroke='#6B3A1E'/><path d='M-8 -2h16' stroke='#E9DFCF' stroke-dasharray='2 2'/>"],
+            ["Paléontologie", "fossiles", "<path d='M0 0m-12 0a12 12 0 1 1 12 12a8 8 0 1 1 -8 -8a4 4 0 1 1 4 4' fill='none' stroke='#8C8577' stroke-width='3'/>"],
+            ["Ethnologie", "coutumes", "<ellipse rx='10' ry='15' fill='#6B4423'/><ellipse cx='-4' cy='-4' rx='3' ry='2' fill='#F7C948'/><ellipse cx='4' cy='-4' rx='3' ry='2' fill='#F7C948'/><path d='M-4 7h8' stroke='#F7C948' stroke-width='2'/>"],
+            ["Linguistique", "langues", "<rect x='-15' y='-12' width='22' height='14' rx='4' fill='" + BLEU + "'/><rect x='-6' y='-1' width='22' height='14' rx='4' fill='#7B3F99'/>" + txt(-4, -2, "ba", { s: 8, c: "#fff" }) + txt(5, 10, "ntu", { s: 8, c: "#fff" })],
+            ["Tradition orale", "griots, récits", "<rect x='-8' y='-8' width='16' height='20' rx='3' fill='#8B5A2B'/><ellipse cy='-8' rx='8' ry='3' fill='#E9DFCF' stroke='#6B4423'/><path d='M-8 0l16 8M-8 8l16 -8' stroke='#5A3A1E'/>"],
+            ["Numismatique", "monnaies", "<circle r='12' fill='#D4A017' stroke='#8A6A10' stroke-width='2'/><circle r='7' fill='none' stroke='#8A6A10'/>"],
+            ["Épigraphie", "inscriptions", "<path d='M-10 14V-6q0 -10 10 -10t10 10v20Z' fill='#9AA3AF'/><path d='M-6 -2h12M-6 3h12M-6 8h12' stroke='#4D5163'/>"],
+            ["Toponymie", "noms de lieux", "<path d='M0 -14V14' stroke='#6B4423' stroke-width='3'/><path d='M-2 -12h16l5 5l-5 5h-16Z' fill='" + VERT + "'/>"]];
+          D.forEach(function (d, k) { var a = -Math.PI / 2 + k * Math.PI / 4, x = 320 + 250 * Math.cos(a), y = 140 + 100 * Math.sin(a); s += "<path d='M320 140L" + x.toFixed(0) + " " + y.toFixed(0) + "' stroke='#C9D2E3' stroke-width='2'/>"; });
+          s += "<circle cx='320' cy='140' r='52' fill='" + NUIT + "'/>" + txt(320, 134, "L'historien", { s: 13, c: "#fff" }) + txt(320, 150, "critique et croise", { s: 10, c: "#F7C948", w: 600 });
+          D.forEach(function (d, k) { var a = -Math.PI / 2 + k * Math.PI / 4, x = 320 + 250 * Math.cos(a), y = 140 + 100 * Math.sin(a); s += "<circle cx='" + x.toFixed(0) + "' cy='" + y.toFixed(0) + "' r='24' fill='#fff' stroke='#C9A576' stroke-width='2'/><g transform='translate(" + x.toFixed(0) + " " + y.toFixed(0) + ")'>" + d[2] + "</g>" + txt(x, y + (k === 0 ? -32 : 38), d[0], { s: 11, halo: true }) + txt(x, y + (k === 0 ? -20 : 50), d[1], { s: 9, c: GRIS, w: 500, halo: true }); });
+          return svg(640, 300, "L’historien au centre, entouré de huit disciplines avec leur symbole", "", s);
+        })() }],
+        fil: { html: "<p>Pour l'historien, tout vestige est une <strong>source</strong> : une poterie renseigne sur la technique, l'alimentation, les échanges ; un charbon de bois peut être daté. Jeter ces tessons, c'est détruire une page d'histoire que personne n'a écrite. Il faut arrêter de creuser à cet endroit et prévenir les spécialistes.</p>", verdicts: [[0, "rejetee", "Tessons et charbon sont des sources : archéologie et datation."]] },
+        retenir: "Plus les écrits sont rares, plus les disciplines affinitaires sont précieuses." },
+      { t: "Les principales disciplines", html: partie(HD_OLD, 1),
+        planches: [{ type: "3d", titre: "La tranchée : une coupe stratigraphique", legende: "Tourne la tranchée : sous l'herbe, la couche 1 (terre noire et plastique), la couche 2 (argile ocre et perles de verre), la couche 3 (sol gris, tessons et charbon de bois). La mire rouge et blanche mesure la profondeur : plus une couche est basse, plus elle est ancienne.",
+          modele: { h: 360, rx: -16, ry: 26, echelle: 0.9, alt: "Coupe de terrain en quatre couches de couleurs différentes avec des tessons, des perles, du charbon et une mire de mesure", objets: fouille3D(),
+            etiquettes: [{ p: [-180, 105, -70], t: "couche 1 : sachets plastique", cote: "g" }, { p: [-180, 65, -70], t: "couche 2 : perles de traite", cote: "g" }, { p: [-180, 10, -70], t: "couche 3 : tessons, charbon", cote: "g" }, { p: [192, 40, -70], t: "mire (profondeur)", cote: "d" }] } }],
+        fil: { html: "<p>La <strong>stratigraphie</strong> lit les couches comme les pages d'un livre posé à plat : la plus basse est la plus ancienne. Les perles de verre de la couche 2 viennent de la traite européenne (XVIIIᵉ-XIXᵉ siècles) : elles correspondent bien aux « sept générations » du chef (7 × 25 à 30 ans ≈ 175 à 210 ans). Mais les tessons sont <strong>en dessous</strong>, dans la couche 3 : ils sont plus anciens. La tradition orale est précieuse, mais elle parle de la dernière installation, pas de la plus ancienne.</p>", verdicts: [[1, "rejetee", "Les tessons sont sous la couche des perles de traite : plus anciens que sept générations."]] },
+        retenir: "Archéologie, paléontologie, ethnologie, linguistique, tradition orale, numismatique, épigraphie, toponymie." },
+      { t: "Dater le passé : l'apport des sciences", html: partie(HD_OLD, 2),
+        fil: { html: "<p>Il reste 88 % du carbone 14. En une demi-vie (5 730 ans), il en resterait 50 % : l'échantillon a donc moins de 5 730 ans. Le calcul (simulation ci-dessus) donne environ <strong>1 060 ans</strong> : le charbon date de la fin du Xᵉ siècle, vers l'an 970. Croisée avec la stratigraphie et la tradition orale, la datation révèle <strong>deux occupations</strong> : une très ancienne (tessons) et celle des fondateurs du village actuel (perles).</p>", verdicts: [[2, "validee", "Stratigraphie + carbone 14 + tradition orale : deux occupations, les tessons ont environ mille ans."]] },
+        retenir: "Carbone 14 : la moitié disparaît tous les 5 730 ans environ." },
+      HD_OLD && HD_OLD.parties[3] ? HD_OLD.parties[3] : { t: "Entraînement", html: "" }
+    ],
+    denouement: {
+      titre: "Le rapport de l'étudiante",
+      etapes: ["Tessons et charbon sont des sources (indice 1).", "Stratigraphie : les tessons sont sous les perles de traite (indice 2).", "Carbone 14 : 88 % restant ≈ 1 060 ans (indice 3)."],
+      reponse: "<p>Les tessons et le charbon ne sont pas des débris : ce sont des sources pour l'historien. L'archéologie étudie les poteries (forme, décor à la roulette, technique) ; la stratigraphie ordonne les couches : la couche 2, avec ses perles de verre de traite européenne, date des derniers siècles et correspond au récit du chef sur la fondation du village il y a sept générations (environ 200 ans). Mais les tessons et le charbon se trouvent dessous, dans la couche 3 : ils sont plus anciens. Le carbone 14 le confirme : il reste 88 % du carbone 14, ce qui correspond à environ 1 060 ans, donc vers l'an 970. Le site a été occupé deux fois : par une population ancienne de potiers, puis par les fondateurs du village actuel. La tradition orale n'est pas fausse, mais elle ne remonte pas aussi loin ; seule la confrontation des disciplines donne une histoire complète. Le propriétaire doit protéger le site et prévenir la délégation régionale des Arts et de la Culture.</p>",
+      transfert: "<p>Un os trouvé dans un abri sous roche contient 25 % de son carbone 14 d'origine. Quel est son âge ? <em>(Deux demi-vies : environ 11 460 ans.)</em></p>"
+    },
+    revision: (HD_OLD ? HD_OLD.revision : []).concat(["Stratigraphie : la couche la plus basse est la plus ancienne."]),
+    exo: HD_OLD ? HD_OLD.exo : "",
+    quiz: HD_OLD ? HD_OLD.quiz : []
+  });
+
+  /* ═══════════════════════ 2nde A PHILOSOPHIE — QU'EST-CE QUE LA PHILOSOPHIE ? ═══════════════════════ */
+  var PD_OLD = ancien("2nde-a-philo-definitions");
+  function palabre3D() {
+    var o = [], k, R = alea(11);
+    o.push({ f: "cylindre", c: [0, -6, 0], r: 230, h: 6, n: 30, coul: "#B88A5A", dessus: "#C9A06E" });
+    o.push({ f: "cylindre", c: [0, 0, 0], r: 26, r2: 18, h: 150, n: 14, coul: "#6B4A2B" });
+    [[-40, 150, 0], [40, 150, 10], [0, 150, -40], [0, 150, 40]].forEach(function (b) { o.push({ f: "cylindre", c: [b[0] * 0.3, 140, b[2] * 0.3], r: 7, r2: 4, h: 40, n: 8, coul: "#5D3A1E" }); });
+    for (k = 0; k < 22; k++) { var a = k * 2.4, d = 30 + R() * 110; o.push({ f: "sphere", c: [Math.cos(a) * d, 175 + R() * 45, Math.sin(a) * d], r: 34 + R() * 16, coul: ["#2E6B2A", "#3E8E3A", "#356F2E"][k % 3] }); }
+    var H = [["#7B3F99", "#5A3A1E"], ["#C62828", "#6B4423"], ["#1E499B", "#4A2E1A"], ["#E8A33D", "#5A3A1E"], ["#2E7D32", "#6B4423"], ["#F4F1EA", "#4A2E1A"]];
+    for (k = 0; k < 6; k++) {
+      var t = Math.PI / 2 + k * Math.PI / 3, x = Math.cos(t) * 120, z = -Math.sin(t) * 120;
+      o.push({ f: "cylindre", c: [x, 0, z], r: 12, h: 18, n: 10, coul: "#8B5A2B", dessus: "#A06A38" });
+      o.push({ f: "cylindre", c: [x, 18, z], r: 11, r2: 8, h: 32, n: 10, coul: H[k][0] });
+      o.push({ f: "sphere", c: [x, 58, z], r: 9, coul: H[k][1] });
+    }
+    o.push({ f: "boite", c: [0, -1, -60], d: [70, 2, 40], coul: "#C9B28A", dessus: "#D9C49C", div: false });
+    return o;
+  }
+  remplacer("2nde-a-philo-definitions", {
+    c: "2nde A", m: "philo", titre: "Qu'est-ce que la philosophie ?", duree: 35,
+    accroche: "« URGENT : les élèves de la série A ne trouvent jamais de travail. La philo ne sert à rien. Partage à 10 amis ! » Moussa doit-il transférer le message ?",
+    intro: "Un message reçu sur WhatsApp par un élève de Ngaoundéré te sert de fil rouge : à chaque partie, un indice t'aide à trancher entre trois idées de la philosophie.",
+    objectifs: ["donner l'étymologie et une définition de la philosophie", "distinguer opinion (doxa) et réflexion philosophique", "appliquer la démarche socratique à une rumeur", "citer des philosophes africains, dont Towa et Njoh-Mouelle"],
+    enquete: {
+      titre: "Le message qui circule à Ngaoundéré",
+      svg: svg(640, 220, "Un élève tient un téléphone affichant un message alarmant ; son ami lui dit que la philosophie ne sert à rien", lin("pdC", ["#EAF3E6", "#F7F3EA"], true),
+        "<rect width='640' height='220' fill='url(#pdC)'/><rect y='180' width='640' height='40' fill='#C9A06E'/>" +
+        "<rect x='250' y='18' width='150' height='190' rx='18' fill='#1F2328'/><rect x='258' y='34' width='134' height='158' rx='6' fill='#ECE5DD'/><rect x='258' y='34' width='134' height='22' fill='#075E54'/>" + txt(325, 49, "Groupe 2nde A", { s: 10, c: "#fff" }) +
+        "<rect x='264' y='62' width='122' height='96' rx='6' fill='#fff'/>" + txt(270, 78, "URGENT !", { s: 10, a: "start", c: ROUGE }) + txt(270, 94, "Les élèves de série A", { s: 9, a: "start", w: 500 }) + txt(270, 108, "ne trouvent jamais", { s: 9, a: "start", w: 500 }) + txt(270, 122, "de travail. La philo", { s: 9, a: "start", w: 500 }) + txt(270, 136, "ne sert à rien.", { s: 9, a: "start", w: 500 }) + txt(270, 150, "Partage à 10 amis !", { s: 9, a: "start", c: ROUGE }) +
+        "<rect x='300' y='166' width='86' height='18' rx='9' fill='#25D366'/>" + txt(343, 179, "Transférer ?", { s: 9, c: "#fff" }) +
+        perso(150, 96, "#5A3A1E", "#F4F1EA", "#2E3445") + "<path d='M144 98h-14' stroke='#F7C948' stroke-width='5'/>" + perso(500, 96, "#6B4423", "#1E499B", "#2E3445") + bulle(440, 40, 190, "La philo, ça ne sert à rien !", "#9FC5E8") + bulle(30, 40, 170, "Je partage ou pas ?", "#F7C948")),
+      legende: "À Ngaoundéré, Moussa, élève de 2nde A, reçoit ce message sur le groupe de sa classe. Son ami Paul en rajoute.",
+      contexte: "<p>Moussa hésite. Paul lui dit : « La philosophie, c'est juste donner son avis : chacun a sa philosophie, toutes se valent. Et puis ce sont des idées de Grecs et d'Européens, loin de nos réalités. » Moussa se souvient que son professeur a parlé de Socrate et de deux philosophes camerounais. Il se demande si la philosophie peut l'aider à décider.</p>",
+      documents: [{ t: "Ce que dit le dictionnaire", html: "<p><strong>Philosophie</strong> n. f. : du grec <em>philosophia</em>, « amour de la sagesse ». Étude critique et rationnelle des grands problèmes de l'existence et de la connaissance.</p>" }, { t: "Une phrase de Kant", html: "<p>« On n'apprend pas la philosophie, on apprend à philosopher. »</p>" }],
+      question: "Philosopher, est-ce simplement donner son avis ? La philosophie peut-elle aider Moussa face à ce message ?",
+      tache: "Définis la philosophie, puis montre, en appliquant sa démarche au message, qu'elle n'est ni une simple opinion ni une affaire étrangère.",
+      hypotheses: ["Philosopher, c'est donner son opinion : chacun a sa philosophie, toutes se valent.", "La philosophie ne sert à rien : elle reste loin de la vie concrète.", "La philosophie est l'amour de la sagesse : une réflexion critique et rationnelle qui examine les opinions par des arguments ; elle aide à juger le message et existe aussi en Afrique."]
+    },
+    parties: [
+      { t: "Le mot et la chose", html: partie(PD_OLD, 0),
+        planches: [{ type: "2D", titre: "Philein + sophia = philosophia", legende: "Deux mots grecs forment « philosophie » : aimer (philein) et la sagesse (sophia). Pythagore se disait « ami de la sagesse » et non « sage » : le philosophe cherche la vérité, il ne prétend pas la posséder.", svg: (function () {
+          var s = "<rect width='640' height='230' fill='#FBF8F2'/>";
+          s += "<rect x='30' y='40' width='170' height='90' rx='14' fill='" + BLEU + "'/>" + txt(115, 72, "φιλεῖν", { s: 24, c: "#fff" }) + txt(115, 96, "philein", { s: 13, c: "#DCE6F2", i: true }) + txt(115, 116, "aimer", { s: 13, c: "#F7C948" });
+          s += txt(225, 92, "+", { s: 30, c: NUIT });
+          s += "<rect x='250' y='40' width='170' height='90' rx='14' fill='#7B3F99'/>" + txt(335, 72, "σοφία", { s: 24, c: "#fff" }) + txt(335, 96, "sophia", { s: 13, c: "#E9DCF2", i: true }) + txt(335, 116, "la sagesse, le savoir", { s: 12, c: "#F7C948" });
+          s += "<path d='M430 85H462' stroke='" + NUIT + "' stroke-width='3' marker-end='url(#pdF)'/><rect x='470' y='40' width='150' height='90' rx='14' fill='" + NUIT + "'/>" + txt(545, 72, "philosophia", { s: 16, c: "#fff", i: true }) + txt(545, 98, "amour", { s: 13, c: "#F7C948" }) + txt(545, 116, "de la sagesse", { s: 13, c: "#F7C948" });
+          s += portrait(70, 186, "#C8A27A", "#F4EFE4", "#DADADA", "vieux") + bulle(110, 170, 300, "« Je ne suis pas sage, je suis ami de la sagesse. »", "#C9A576") + txt(70, 228, "Pythagore", { s: 10, c: GRIS });
+          return svg(640, 230, "Le mot grec philein, aimer, et sophia, sagesse, forment philosophia ; portrait de Pythagore", fleche("pdF", NUIT), s);
+        })() }],
+        fil: { html: "<p>« Avoir sa philosophie de la vie », dans le langage courant, c'est avoir une opinion. Mais le philosophe est <strong>ami</strong> de la sagesse : il la <strong>cherche</strong>, par une réflexion <strong>critique</strong> et <strong>rationnelle</strong>. Toutes les opinions ne se valent donc pas : une idée justifiée par des arguments vaut mieux qu'un « on dit ».</p>", verdicts: [[0, "rejetee", "Philosopher, c'est examiner les opinions par la raison, pas les juxtaposer."]] },
+        retenir: "Philosophie = amour de la sagesse = réflexion critique et rationnelle." },
+      { t: "Philosopher, ce n'est pas avoir une opinion", html: partie(PD_OLD, 1),
+        planches: [{ type: "2D", titre: "La méthode de Socrate appliquée au message", legende: "Socrate questionnait les certitudes marche après marche. Appliquée au message, sa méthode montre une généralisation sans preuve : la philosophie sert, ici, à ne pas propager une rumeur.", svg: (function () {
+          var M = [["Opinion", "« Les élèves de série A ne trouvent jamais de travail. »", "#C62828"], ["Question", "Qui l'affirme ? Sur quelles preuves ?", "#C2540A"], ["Examen", "« Jamais » : un seul contre-exemple suffit (juriste, journaliste, enseignant…).", "#B8860B"], ["Définition", "Distinguer un fait vérifié d'une généralisation.", VERT], ["Sagesse", "Savoir ce qu'on ne sait pas : je ne transfère pas.", BLEU]], s = "<rect width='640' height='270' fill='#F5F7FB'/>";
+          M.forEach(function (m, i) { var x = 20 + i * 18, y = 214 - i * 48, w = 600 - i * 18; s += "<rect x='" + x + "' y='" + y + "' width='" + w + "' height='40' rx='8' fill='#fff' stroke='" + m[2] + "' stroke-width='2'/><rect x='" + x + "' y='" + y + "' width='106' height='40' rx='8' fill='" + m[2] + "'/>" + txt(x + 53, y + 25, m[0], { s: 13, c: "#fff" }) + txt(x + 118, y + 25, m[1], { s: 11, a: "start", w: 500 }); });
+          return svg(640, 270, "Escalier de cinq marches : opinion, question, examen, définition, sagesse, appliqué au message", "", s);
+        })() }],
+        fil: { html: "<p>Moussa applique la méthode de Socrate : qui affirme cela ? Sur quelles preuves ? « Jamais » est une généralisation qu'un seul contre-exemple suffit à ruiner (des juristes, journalistes, enseignants, diplomates sont passés par la série A). La philosophie vient de lui servir : elle lui évite de propager une rumeur. Elle n'est pas loin de la vie concrète.</p>", verdicts: [[1, "rejetee", "Examiner la rumeur, c'est déjà philosopher : la philosophie sert dans la vie concrète."]] },
+        retenir: "L'opinion affirme ; la philosophie questionne et argumente." },
+      { t: "Philosopher en Afrique", html: partie(PD_OLD, 2),
+        planches: [{ type: "3d", titre: "L'arbre à palabres", legende: "Tourne la scène : sous le grand arbre du village, les anciens et les jeunes sont assis en cercle pour débattre d'une question commune. Comme l'agora de Socrate à Athènes, la palabre est un lieu où l'on écoute, où l'on argumente et où l'on cherche ensemble ce qui est juste.",
+          modele: { h: 360, rx: -22, ry: 18, echelle: 0.8, alt: "Grand arbre au feuillage vert, six personnes assises en cercle sur des tabourets, une natte au centre", objets: palabre3D(),
+            etiquettes: [{ p: [0, 200, 0], t: "l'arbre à palabres" }, { p: [0, 60, -120], t: "chacun prend la parole", cote: "d" }, { p: [-35, 2, -60], t: "la natte", cote: "g" }] } }],
+        fil: { html: "<p>La philosophie n'est pas réservée aux Grecs : l'Égypte ancienne a ses sagesses, la palabre africaine a ses débats argumentés, et des philosophes camerounais ont écrit des œuvres au programme. <strong>Marcien Towa</strong> appelle l'Afrique à une pensée critique et libératrice ; <strong>Ebénézer Njoh-Mouelle</strong> invite chacun à passer « de la médiocrité à l'excellence ». La définition tient : amour de la sagesse, réflexion critique et rationnelle, présente partout où l'on examine ses opinions.</p>", verdicts: [[2, "validee", "Amour de la sagesse, réflexion critique ; utile contre la rumeur ; Towa et Njoh-Mouelle en Afrique."]] },
+        retenir: "Towa et Njoh-Mouelle : deux philosophes camerounais au programme." },
+      PD_OLD && PD_OLD.parties[3] ? PD_OLD.parties[3] : { t: "Entraînement", html: "" }
+    ],
+    denouement: {
+      titre: "La réponse de Moussa",
+      etapes: ["Philosophie = amour de la sagesse, réflexion critique (indice 1).", "Méthode de Socrate : la rumeur ne résiste pas à l'examen (indice 2).", "Palabre, Towa, Njoh-Mouelle : la philosophie existe en Afrique (indice 3)."],
+      reponse: "<p>Le mot « philosophie » vient du grec philein (aimer) et sophia (la sagesse) : c'est l'amour de la sagesse, c'est-à-dire une réflexion critique et rationnelle sur les grandes questions de l'existence. Ce n'est donc pas une simple opinion : l'opinion affirme sans preuve, la philosophie examine et argumente. Appliquée au message, la démarche de Socrate le montre : qui l'affirme ? sur quelles preuves ? « Jamais » est une généralisation qu'un seul contre-exemple suffit à réfuter. Moussa ne transfère pas le message et répond au groupe en demandant des sources. La philosophie lui a servi à résister à une rumeur : elle n'est pas loin de la vie. Enfin, elle n'est pas étrangère à l'Afrique : la palabre est un lieu de débat argumenté, et les Camerounais Marcien Towa et Ebénézer Njoh-Mouelle ont réfléchi à la libération et à l'excellence.</p>",
+      transfert: "<p>Un camarade affirme : « Les gens riches sont forcément heureux. » Applique les cinq marches de Socrate à cette phrase.</p>"
+    },
+    revision: (PD_OLD ? PD_OLD.revision : []).concat(["Face à une rumeur : qui l'affirme ? sur quelles preuves ? existe-t-il un contre-exemple ?"]),
+    exo: PD_OLD ? PD_OLD.exo : "",
+    quiz: PD_OLD ? PD_OLD.quiz : []
+  });
+
+  /* ═══════════════════════ 2nde A GÉOGRAPHIE — LIRE UNE CARTE ═══════════════════════ */
+  var GC_OLD = ancien("2nde-a-geo-cartes");
+  function quartier3D() {
+    var o = [], k, R = alea(5);
+    o.push({ f: "boite", c: [0, -8, 0], d: [520, 8, 400], coul: "#7A6A4A", dessus: "#9DB36A" });
+    o.push({ f: "boite", c: [-225, -3, 0], d: [70, 4, 400], coul: "#2F6EA5", dessus: "#4A90C2", div: false });
+    for (k = 0; k < 14; k++) o.push({ f: "sphere", c: [-178 + R() * 14, 6, -190 + k * 29], r: [12, 9, 12], coul: k % 2 ? "#2E6B2A" : "#3E7D32" });
+    o.push({ f: "boite", c: [-110, -2, -40], d: [110, 2, 320], coul: "#7FB2D9", dessus: "#A9CDE8", div: false });
+    o.push({ f: "boite", c: [0, -2, 0], d: [14, 2, 400], coul: "#6F737C", dessus: "#8E939C", div: false });
+    o.push({ f: "boite", c: [40, -2, -60], d: [400, 2, 14], coul: "#6F737C", dessus: "#8E939C", div: false });
+    [-140, -100, -60].forEach(function (x, i) { [-175, -135, -20, 20, 70, 120].forEach(function (z, j) { o.push({ f: "boite", c: [x, 10, z], d: [24, 20, 22], coul: "#E9E2D2", dessus: (i + j) % 3 ? "#9AA3AF" : "#B5651D" }); }); });
+    [40, 80, 120].forEach(function (x, i) { [-175, -135, -20].forEach(function (z, j) { o.push({ f: "boite", c: [x, 10, z], d: [24, 20, 22], coul: "#E9E2D2", dessus: (i + j) % 2 ? "#9AA3AF" : "#B5651D" }); }); });
+    o.push({ f: "cone", c: [150, -4, 120], r: 110, h: 60, n: 20, coul: "#8C9A5A" });
+    o.push({ f: "boite", c: [150, 70, 120], d: [70, 24, 34], coul: "#F4E7C8", dessus: "#C62828" });
+    o.push({ f: "cylindre", c: [192, 56, 120], r: 1.6, h: 44, n: 6, coul: "#C9CED6" });
+    o.push({ f: "boite", c: [204, 94, 120], d: [24, 14, 1], coul: "#F7C948", div: false });
+    o.push({ f: "cylindre", c: [-80, 0, -95], r: 16, h: 14, n: 14, coul: "#C2540A", dessus: "#E8A33D" });
+    for (k = 0; k <= 18; k++) { var t = k / 18; o.push({ f: "sphere", c: [-80 + 230 * t, 18 + 44 * Math.max(0, (t - 0.45) / 0.55), -95 + 215 * t], r: 3, coul: ROUGE }); }
+    o.push({ f: "cylindre", c: [220, 0, -170], r: 26, h: 3, n: 20, coul: "#FBF8F2" });
+    o.push({ f: "boite", c: [220, 5, -158], d: [6, 2, 24], coul: "#C62828", div: false });
+    o.push({ f: "boite", c: [220, 5, -182], d: [6, 2, 24], coul: "#1F2328", div: false });
+    return o;
+  }
+  remplacer("2nde-a-geo-cartes", {
+    c: "2nde A", m: "geo", titre: "Lire une carte", duree: 35,
+    accroche: "« Sur la carte, le refuge est à 3,5 cm du marché : 3,5 km, c'est trop loin pour y courir ! » Le club environnement doit-il abandonner son plan d'évacuation ?",
+    intro: "La carte des zones inondables d'un quartier de Douala, préparée par un club environnement, te sert de fil rouge : à chaque partie, un indice t'aide à trancher entre trois affirmations.",
+    objectifs: ["identifier titre, orientation, légende, échelle et source", "calculer une distance réelle avec l'échelle et convertir les unités", "s'orienter avec la rose des vents", "produire une carte utile à la sécurité collective"],
+    enquete: {
+      titre: "Le plan d'évacuation du club environnement",
+      svg: svg(640, 220, "Des élèves penchés sur une carte dessinée à la main avec une rivière bleue ; l’un affirme que 3,5 cm font 3,5 km", lin("gcC", ["#E6EEF7", "#F4F1EA"], true),
+        "<rect width='640' height='220' fill='url(#gcC)'/><rect x='150' y='120' width='340' height='16' rx='3' fill='#8B5A2B'/><rect x='165' y='136' width='10' height='70' fill='#6B4423'/><rect x='465' y='136' width='10' height='70' fill='#6B4423'/>" +
+        "<path d='M190 120L214 66H436L460 120Z' fill='#FBF3DC' stroke='#C9B28A'/><path d='M228 66q-10 20 -6 54' stroke='#4A90C2' stroke-width='6' fill='none'/><path d='M240 110l40 -18l40 6l60 -24' stroke='#9AA3AF' stroke-width='2' fill='none'/><circle cx='275' cy='104' r='5' fill='#E8A33D'/><rect x='380' y='74' width='10' height='8' fill='#C62828'/><path d='M275 104L385 78' stroke='#C62828' stroke-dasharray='4 3'/>" +
+        perso(100, 76, "#5A3A1E", "#2E7D32", "#2E3445") + perso(540, 76, "#6B4423", "#F7C948", "#1E499B") + perso(320, 10, "#4A2E1A", "#DCE6F2", "#2E3445") + bulle(400, 160, 220, "3,5 cm… donc 3,5 km ?", "#F7C948") + bulle(20, 160, 200, "Il manque des choses…", "#9FC5E8")),
+      legende: "À Douala, près du Wouri : le club environnement prépare pour les habitants une carte des zones inondables au 1/10 000.",
+      contexte: "<p>Le brouillon montre le fleuve, des maisons, le marché et une école sur une petite colline, choisie comme <strong>point de refuge</strong>. Un membre dit : « Pas besoin de titre ni de légende : les habitants reconnaîtront leur quartier. » Un autre mesure 3,5 cm entre le marché et l'école et conclut : « 3,5 km, c'est trop loin pour y courir pendant une crue. »</p>",
+      documents: [{ t: "Les notes du brouillon", html: "<table class='donnees'><tr><th>Élément</th><th>Sur le brouillon</th></tr><tr><td>Échelle</td><td>1/10 000</td></tr><tr><td>Marché → école-refuge</td><td>3,5 cm, en direction du Nord-Est</td></tr><tr><td>Titre, légende, flèche du Nord, source</td><td>absents</td></tr></table>" }],
+      question: "Le brouillon peut-il servir aux habitants, et le refuge est-il vraiment trop loin ?",
+      tache: "Liste ce qui manque à la carte, calcule la distance réelle marché–refuge et indique la direction à suivre.",
+      hypotheses: ["Titre et légende sont décoratifs : un dessin du quartier suffit.", "3,5 cm sur la carte, c'est 3,5 km : le refuge est trop loin.", "Il faut titre, orientation, légende, échelle et source ; 3,5 cm × 10 000 = 35 000 cm = 350 m vers le Nord-Est : quelques minutes à pied."]
+    },
+    parties: [
+      { t: "Les éléments obligatoires d'une carte", html: partie(GC_OLD, 0),
+        planches: [{ type: "2D", titre: "La carte terminée : TOLES", legende: "La carte complète : Titre, Orientation (flèche du Nord), Légende, Échelle (graphique), Source. Sans légende, impossible de savoir que les hachures bleues sont des zones inondables et que le carré rouge est le refuge.", svg: (function () {
+          var s = "<defs><pattern id='gcH' width='8' height='8' patternUnits='userSpaceOnUse' patternTransform='rotate(45)'><rect width='8' height='8' fill='#DCEBF7'/><path d='M0 0V8' stroke='#4A90C2' stroke-width='2.5'/></pattern></defs><rect width='640' height='340' fill='#fff'/>";
+          s += txt(240, 26, "Zones inondables et évacuation — quartier riverain du Wouri (Douala)", { s: 13 }) + "<circle cx='22' cy='22' r='10' fill='#F7C948'/>" + txt(22, 26, "T", { s: 11 });
+          s += "<rect x='20' y='44' width='440' height='260' fill='#F3EFE2' stroke='" + NUIT + "' stroke-width='2'/>";
+          s += "<path d='M20 44H70Q90 120 66 190T84 304H20Z' fill='#4A90C2'/>" + txt(44, 180, "Wouri", { s: 11, c: "#fff", i: true });
+          s += "<path d='M70 44Q90 120 66 190T84 304H112Q118 240 100 190T104 44Z' fill='#5E9E4E'/>";
+          s += "<path d='M104 44Q122 120 100 190T112 304H230Q236 220 210 170T220 44Z' fill='url(#gcH)' opacity='.95'/>";
+          s += "<path d='M240 44V304M110 190H460M240 250L460 150' stroke='#8E939C' stroke-width='5'/>";
+          var k; for (k = 0; k < 30; k++) { var x = 130 + (k % 6) * 52 + (k % 6 > 1 ? 20 : 0), y = 60 + Math.floor(k / 6) * 48; if (Math.abs(x - 240) < 14 || Math.abs(y - 190) < 12) continue; s += "<rect x='" + x + "' y='" + y + "' width='14' height='11' fill='#6F737C'/>"; }
+          s += "<ellipse cx='388' cy='108' rx='56' ry='34' fill='none' stroke='#A07850'/><ellipse cx='388' cy='108' rx='34' ry='20' fill='none' stroke='#A07850'/><rect x='380' y='100' width='18' height='14' fill='#C62828' stroke='#fff' stroke-width='2'/>";
+          s += "<circle cx='180' cy='232' r='9' fill='#E8A33D' stroke='#fff' stroke-width='2'/><path d='M180 232L389 107' stroke='#C62828' stroke-width='3' stroke-dasharray='8 5' marker-end='url(#gcF)'/>";
+          s += "<g transform='translate(430 78)'><circle r='20' fill='#fff' stroke='" + NUIT + "'/><path d='M0 -18L6 0H-6Z' fill='#C62828'/><path d='M0 18L6 0H-6Z' fill='" + NUIT + "'/>" + txt(0, -24, "N", { s: 12 }) + "</g><circle cx='404' cy='56' r='10' fill='#F7C948'/>" + txt(404, 60, "O", { s: 11 });
+          s += "<rect x='34' y='284' width='67' height='8' fill='" + NUIT + "'/><rect x='101' y='284' width='67' height='8' fill='#fff' stroke='" + NUIT + "'/>" + txt(34, 280, "0", { s: 9, w: 600 }) + txt(101, 280, "100", { s: 9, w: 600 }) + txt(168, 280, "200 m", { s: 9, w: 600 }) + txt(102, 300, "1/10 000", { s: 9, w: 600 }) + "<circle cx='186' cy='290' r='10' fill='#F7C948'/>" + txt(186, 294, "E", { s: 11 });
+          s += "<rect x='476' y='44' width='150' height='260' rx='8' fill='#fff' stroke='#C9D2E3'/>" + txt(551, 64, "Légende", { s: 13 }) + "<circle cx='612' cy='60' r='10' fill='#F7C948'/>" + txt(612, 64, "L", { s: 11 });
+          [["<rect width='22' height='14' fill='url(#gcH)'/>", "zone inondable"], ["<rect width='22' height='14' fill='#5E9E4E'/>", "mangrove"], ["<rect width='22' height='14' fill='#4A90C2'/>", "fleuve Wouri"], ["<rect x='4' y='2' width='14' height='11' fill='#6F737C'/>", "habitations"], ["<path d='M0 7H22' stroke='#8E939C' stroke-width='5'/>", "route"], ["<rect x='4' y='0' width='14' height='14' fill='#C62828'/>", "point de refuge"], ["<circle cx='11' cy='7' r='7' fill='#E8A33D'/>", "marché"], ["<path d='M0 7H22' stroke='#C62828' stroke-width='3' stroke-dasharray='6 4'/>", "itinéraire"], ["<ellipse cx='11' cy='7' rx='11' ry='6' fill='none' stroke='#A07850'/>", "colline"]].forEach(function (l, i) { s += "<g transform='translate(486 " + (78 + i * 24) + ")'>" + l[0] + "</g>" + txt(516, 90 + i * 24, l[1], { s: 11, a: "start", w: 500 }); });
+          s += txt(20, 326, "Source : relevés du club environnement, 2026", { s: 10, a: "start", c: GRIS, w: 500 }) + "<circle cx='300' cy='322' r='10' fill='#F7C948'/>" + txt(300, 326, "S", { s: 11 });
+          return svg(640, 340, "Carte d’un quartier de Douala au bord du Wouri : zone inondable hachurée, mangrove, maisons, routes, marché, refuge sur une colline, flèche du Nord, échelle et légende", fleche("gcF", "#C62828"), s);
+        })() }],
+        fil: { html: "<p>Un habitant qui n'a pas participé au brouillon ne peut pas deviner que les hachures signalent un danger, ni où est le Nord, ni quelle distance sépare deux points. Sans <strong>titre</strong>, on ne sait pas ce que montre la carte ; sans <strong>légende</strong>, les symboles sont muets ; sans <strong>orientation</strong> et <strong>échelle</strong>, on ne peut ni s'orienter ni mesurer ; sans <strong>source</strong>, on ne sait pas si l'on peut s'y fier.</p>", verdicts: [[0, "rejetee", "Sans titre, légende, orientation, échelle et source, la carte est illisible."]] },
+        retenir: "TOLES : Titre, Orientation, Légende, Échelle, Source." },
+      { t: "Calculer avec l'échelle", html: partie(GC_OLD, 1),
+        fil: { html: "<p>Au 1/10 000, <strong>1 cm sur la carte = 10 000 cm sur le terrain</strong>. Donc 3,5 cm représentent 3,5 × 10 000 = 35 000 cm. On convertit : 35 000 cm = 350 m = 0,35 km. L'erreur consistait à oublier de multiplier par le dénominateur et à changer d'unité au hasard. À pied (environ 5 km/h, soit 83 m par minute), 350 m se parcourent en un peu plus de 4 minutes.</p>", verdicts: [[1, "rejetee", "3,5 cm × 10 000 = 35 000 cm = 350 m, et non 3,5 km."]] },
+        retenir: "Distance réelle = distance sur la carte × dénominateur, puis conversion." },
+      { t: "S'orienter", html: partie(GC_OLD, 2),
+        planches: [{ type: "3d", titre: "La maquette du quartier", legende: "Tourne la maquette : à l'Ouest, le Wouri et sa mangrove ; la zone basse inondable en bleu clair ; les maisons et les routes ; au Nord-Est, l'école sur sa colline, avec son drapeau. L'itinéraire rouge monte du marché vers le refuge. La rose des vents donne le Nord (pointe rouge).",
+          modele: { h: 380, rx: -42, ry: 20, echelle: 0.75, alt: "Maquette d’un quartier : fleuve, mangrove, zone inondable, maisons, routes, colline avec une école, itinéraire rouge et rose des vents", objets: quartier3D(),
+            etiquettes: [{ p: [150, 90, 120], t: "refuge (Nord-Est)", cote: "d" }, { p: [-80, 16, -95], t: "marché", cote: "g" }, { p: [-225, 2, 100], t: "Wouri (Ouest)", cote: "g" }, { p: [220, 8, -146], t: "Nord", cote: "d" }] } }],
+        fil: { html: "<p>La flèche du Nord pointe vers le haut de la carte : le refuge est en haut et à droite du marché, donc au <strong>Nord-Est</strong>, à l'opposé du fleuve qui coule à l'Ouest. La carte complète permet de dire aux habitants : « En cas de crue, quittez la zone hachurée et marchez 350 m vers le Nord-Est, jusqu'à l'école de la colline. »</p>", verdicts: [[2, "validee", "TOLES complet ; 350 m vers le Nord-Est : le refuge est accessible à pied."]] },
+        retenir: "Le Nord est en haut, sauf indication contraire de la flèche." },
+      GC_OLD && GC_OLD.parties[3] ? GC_OLD.parties[3] : { t: "Entraînement", html: "" }
+    ],
+    denouement: {
+      titre: "La carte remise aux habitants",
+      etapes: ["Ajouter titre, orientation, légende, échelle, source (indice 1).", "3,5 cm × 10 000 = 350 m (indice 2).", "Refuge au Nord-Est, loin du fleuve (indice 3)."],
+      reponse: "<p>Le brouillon n'est pas encore une carte : il lui faut un titre (« Zones inondables et évacuation du quartier… »), une orientation (flèche du Nord), une légende (zone inondable hachurée, mangrove, habitations, routes, marché, point de refuge, itinéraire), une échelle (1/10 000 et une échelle graphique) et une source avec sa date. La distance se calcule avec l'échelle : 3,5 cm × 10 000 = 35 000 cm = 350 m, et non 3,5 km. Le refuge, l'école sur la colline, se trouve à 350 m au Nord-Est du marché, à l'opposé du Wouri : environ 4 à 5 minutes de marche. Le plan d'évacuation est donc réaliste, et la carte complète permettra à tous les habitants de le suivre.</p>",
+      transfert: "<p>Sur une carte au 1/50 000, Bonabéri et Akwa sont séparés de 9 cm. Quelle distance réelle ? <em>(9 × 50 000 = 450 000 cm = 4,5 km.)</em></p>"
+    },
+    revision: (GC_OLD ? GC_OLD.revision : []).concat(["Conversions : 100 cm = 1 m ; 100 000 cm = 1 km."]),
+    exo: GC_OLD ? GC_OLD.exo : "",
+    quiz: GC_OLD ? GC_OLD.quiz : []
+  });
+
+  /* ═══════════════════════ SIMULATIONS ═══════════════════════ */
+  VRT_A("2nde-a-maths-reels", 1, "Partage la tontine : décimal ou pas, et combien en francs ?", function (el) {
+    el.innerHTML = "<div style='display:flex;flex-wrap:wrap;gap:8px 18px;align-items:end'><label class='labo-c'><span>Caisse (F)</span><input type='number' value='100000' min='1' step='500' data-c style='width:120px;font:inherit;padding:6px'></label><label class='labo-c'><span>Membres : <b data-nv>6</b></span><input type='range' min='2' max='16' value='6' data-n></label></div><div data-v style='display:flex;flex-wrap:wrap;gap:4px;margin:10px 0'></div><p class='labo-r' data-r></p>";
+    var C = el.querySelector("[data-c]"), N = el.querySelector("[data-n]");
+    function maj() {
+      var c = Math.max(1, parseInt(C.value, 10) || 0), n = parseInt(N.value, 10), g = pgcd(c, n), p = c / g, qq = n / g, F = facteurs(qq), ok = F.every(function (x) { return x === 2 || x === 5; }), part = Math.floor(c / n), reste = c - part * n, k, v = "";
+      el.querySelector("[data-nv]").textContent = n;
+      for (k = 0; k < n; k++) v += "<span style='display:inline-flex;flex-direction:column;align-items:center;padding:4px 6px;border-radius:8px;background:" + ["#E8A33D", "#1E499B", "#C62828", "#2E7D32"][k % 4] + ";color:#fff;font-size:12px;font-weight:700'>👗<span>" + milliers(part) + " F</span></span>";
+      el.querySelector("[data-v]").innerHTML = v + (reste ? "<span style='align-self:center;padding:4px 8px;border:2px dashed #4D5163;border-radius:8px;font-size:12px;font-weight:700'>caisse : " + reste + " F</span>" : "");
+      el.querySelector("[data-r]").innerHTML = milliers(c) + " ÷ " + n + " = " + (g > 1 ? milliers(p) + "/" + qq + " = " : "") + "<b>" + developpe(p, qq) + "</b> · " + (qq === 1 ? "<b style='color:" + VERT + "'>entier : partage exact</b>" : "dénominateur " + qq + " = " + F.join(" × ") + " · " + (ok ? "<b style='color:" + VERT + "'>décimal</b>" : "<b style='color:" + ROUGE + "'>rationnel non décimal</b>")) + " · en francs : <b>" + milliers(part) + " F</b> chacune" + (reste ? ", <b>" + reste + " F</b> restent en caisse" : ", rien en caisse");
+    }
+    C.addEventListener("input", maj); N.addEventListener("input", maj); maj();
+  });
+  VRT_A("2nde-a-histoire-disciplines", 2, "Datation au carbone 14 : règle le pourcentage restant", function (el) {
+    el.innerHTML = "<label class='labo-c'><span>Carbone 14 restant : <b data-pv>88</b> %</span><input type='range' min='1' max='100' step='0.5' value='88' data-p style='width:260px'></label><div style='display:flex;flex-wrap:wrap;gap:6px;margin:8px 0'>" + [[88, "charbon de Mbalmayo"], [50, "une demi-vie"], [25, "deux demi-vies"], [3, "abri ancien"]].map(function (b) { return "<button type='button' class='btn-l' data-b='" + b[0] + "'>" + b[0] + " % · " + b[1] + "</button>"; }).join("") + "</div><div data-g></div><p class='labo-r' data-r></p>";
+    var P = el.querySelector("[data-p]"), T = 5730, TM = 30000, X = function (t) { return 50 + t / TM * 400; }, Y = function (p) { return 170 - p * 1.5; };
+    var courbe = "", t; for (t = 0; t <= TM; t += 300) courbe += (t ? "L" : "M") + X(t).toFixed(1) + " " + Y(100 * Math.pow(0.5, t / T)).toFixed(1);
+    function maj() {
+      var p = parseFloat(P.value), age = Math.round(T * Math.log(100 / p) / Math.LN2 / 10) * 10, an = 2026 - age, s = "<rect width='470' height='200' fill='#FBF8F2'/><path d='M50 20V170H455' stroke='" + NUIT + "' stroke-width='2' fill='none'/>", k;
+      for (k = 0; k <= 5; k++) s += "<path d='M" + X(k * T) + " 170v5' stroke='" + NUIT + "'/>" + txt(X(k * T), 188, k ? milliers(k * T) : "0", { s: 9, c: GRIS, w: 600 });
+      [100, 50, 25].forEach(function (v) { s += txt(44, Y(v) + 4, v + " %", { s: 9, a: "end", c: GRIS, w: 600 }) + "<path d='M50 " + Y(v) + "H455' stroke='#E3E7EF' stroke-dasharray='3 3'/>"; });
+      s += "<path d='" + courbe + "' stroke='" + VERT + "' stroke-width='3' fill='none'/>";
+      var x = Math.min(X(age), 455), y = Y(p);
+      s += "<path d='M50 " + y + "H" + x + "V170' stroke='" + ROUGE + "' stroke-dasharray='4 3' fill='none'/><circle cx='" + x + "' cy='" + y + "' r='6' fill='" + ROUGE + "' stroke='#fff' stroke-width='2'/>" + txt(250, 16, "années écoulées depuis la mort de l'arbre", { s: 10, c: GRIS, w: 600 });
+      el.querySelector("[data-pv]").textContent = String(p).replace(".", ",");
+      el.querySelector("[data-g]").innerHTML = "<svg viewBox='0 0 470 200' style='max-width:520px;width:100%' role='img' aria-label='Courbe de décroissance du carbone 14'>" + s + "</svg>";
+      el.querySelector("[data-r]").innerHTML = "Âge ≈ 5 730 × log₂(100 / " + String(p).replace(".", ",") + ") ≈ <b>" + milliers(age) + " ans</b> · " + (age > TM ? "au-delà du graphique · " : "") + "date ≈ <b>" + (an > 0 ? "an " + an : milliers(-an + 1) + " av. J.-C.") + "</b>";
+    }
+    P.addEventListener("input", maj);
+    el.querySelectorAll("[data-b]").forEach(function (b) { b.addEventListener("click", function () { P.value = b.dataset.b; maj(); }); });
+    maj();
+  });
+  VRT_A("2nde-a-philo-definitions", 1, "Opinion ou question philosophique ?", function (el) {
+    exercice(el, [["« Les filles n'aiment pas les maths. » C'est… ___", ["une opinion", "une question philosophique", "un fait vérifié"], "Généralisation sans preuve : une opinion (doxa)."], ["« Qu'est-ce qui rend une loi juste ? » C'est… ___", ["une question philosophique", "une opinion", "un fait vérifié"], "Question sur une notion fondamentale : la justice."], ["« Yaoundé est la capitale du Cameroun. » C'est… ___", ["un fait vérifié", "une opinion", "une question philosophique"], "Vérifiable : un fait."], ["« Tout le monde sait que l'argent fait le bonheur. » C'est… ___", ["une opinion", "un fait vérifié", "une question philosophique"], "« Tout le monde sait » : formule typique de l'opinion."], ["« Le bonheur dépend-il de l'argent ? » C'est… ___", ["une question philosophique", "une opinion", "un fait vérifié"], "Elle appelle des arguments, pas un simple avis."], ["« Doit-on toujours obéir à ses parents ? » C'est… ___", ["une question philosophique", "un fait vérifié", "une opinion"], "Question sur le devoir et la liberté."], ["« Les élèves de série A ne trouvent jamais de travail. » C'est… ___", ["une opinion", "un fait vérifié", "une question philosophique"], "« Jamais » : un contre-exemple suffit à la réfuter."]], "Phrase suivante", "Phrase");
+  });
+  VRT_A("2nde-a-geo-cartes", 1, "Mesure sur la carte, trouve la distance réelle", function (el) {
+    el.innerHTML = "<div style='display:flex;flex-wrap:wrap;gap:8px 18px;align-items:end'><label class='labo-c'><span>Échelle</span><select data-e style='font:inherit;padding:6px'>" + [10000, 25000, 50000, 200000, 500000].map(function (d) { return "<option value='" + d + "'>1/" + milliers(d) + "</option>"; }).join("") + "</select></label><label class='labo-c'><span>Sur la carte : <b data-dv>3,5</b> cm</span><input type='range' min='0.5' max='15' step='0.5' value='3.5' data-d style='width:220px'></label></div><div data-g style='margin:10px 0'></div><p class='labo-r' data-r></p>";
+    var E = el.querySelector("[data-e]"), D = el.querySelector("[data-d]");
+    function nb(x) { return milliers(Math.round(x * 1000) / 1000).replace(".", ","); }
+    function maj() {
+      var e = parseInt(E.value, 10), d = parseFloat(D.value), cm = d * e, m = cm / 100, km = m / 1000, px = d * 28;
+      el.querySelector("[data-dv]").textContent = String(d).replace(".", ",");
+      var s = "<rect width='470' height='70' fill='#F3EFE2'/><rect x='10' y='40' width='" + (15 * 28 + 10) + "' height='22' fill='#F7C948' stroke='#B8860B'/>", k;
+      for (k = 0; k <= 15; k++) s += "<path d='M" + (15 + k * 28) + " 40v" + (k % 5 ? 8 : 13) + "' stroke='#1F2328'/>" + (k % 5 ? "" : txt(15 + k * 28, 60, String(k), { s: 9, c: "#1F2328", w: 600 }));
+      s += "<circle cx='15' cy='22' r='7' fill='#E8A33D' stroke='#fff' stroke-width='2'/><rect x='" + (8 + px) + "' y='15' width='14' height='14' fill='#C62828' stroke='#fff' stroke-width='2'/><path d='M15 22H" + (8 + px) + "' stroke='#C62828' stroke-width='3' stroke-dasharray='6 4'/>";
+      el.querySelector("[data-g]").innerHTML = "<svg viewBox='0 0 470 70' style='max-width:520px;width:100%' role='img' aria-label='Règle graduée en centimètres sous un trajet du marché au refuge'>" + s + "</svg>";
+      el.querySelector("[data-r]").innerHTML = String(d).replace(".", ",") + " cm × " + milliers(e) + " = <b>" + nb(cm) + " cm</b> = <b>" + nb(m) + " m</b> = <b>" + nb(km) + " km</b>" + (m < 2000 ? " · à pied (5 km/h) : environ <b>" + Math.max(1, Math.round(m / 83)) + " min</b>" : " · à pied : environ <b>" + nb(Math.round(km / 5 * 10) / 10) + " h</b>");
+    }
+    E.addEventListener("change", maj); D.addEventListener("input", maj); maj();
+  });
+})();
+
+/* Leçons APPROFONDIES — lot 15, 5e et 4e (18/11/2026) : subordonnée relative, Pygmées et Sao, croissance de la population (5e),
+   alphabet grec (4e). Même gabarit et même mécanisme que 11-approfondies-lot4.js (remplacement EN PLACE ; ordre, clé, fiche APC,
+   examen et scènes conservés ; partie « Entraînement au format de l'examen » et quiz d'origine repris). Simulations VRT_A en fin. */
+(function () {
+  "use strict";
+  var NUIT = "#001136", BLEU = "#1E499B", GRIS = "#4D5163", VERT = "#17784D", ROUGE = "#C62828", TERRE = "#C46A2B";
+
+  function txt(x, y, t, o) {
+    o = o || {};
+    return "<text x='" + x + "' y='" + y + "' text-anchor='" + (o.a || "middle") + "' font-size='" + (o.s || 12) + "' font-weight='" + (o.w || 700) + "' fill='" + (o.c || NUIT) + "'" + (o.i ? " font-style='italic'" : "") + (o.halo ? " stroke='#fff' stroke-width='3' paint-order='stroke'" : "") + ">" + t + "</text>";
+  }
+  function lin(id, cs, vertical) {
+    var s = "<linearGradient id='" + id + "'" + (vertical ? " x1='0' y1='0' x2='0' y2='1'" : "") + ">";
+    cs.forEach(function (c, i) { s += "<stop offset='" + (i / (cs.length - 1)).toFixed(2) + "' stop-color='" + c + "'/>"; });
+    return s + "</linearGradient>";
+  }
+  function rad(id, cs) {
+    var s = "<radialGradient id='" + id + "' cx='35%' cy='30%' r='75%'>";
+    cs.forEach(function (c, i) { s += "<stop offset='" + (i / (cs.length - 1)).toFixed(2) + "' stop-color='" + c + "'/>"; });
+    return s + "</radialGradient>";
+  }
+  function fleche(id, c) { return "<marker id='" + id + "' markerWidth='10' markerHeight='10' refX='7' refY='5' orient='auto'><path d='M0 1L8 5L0 9Z' fill='" + c + "'/></marker>"; }
+  function svg(w, h, alt, defs, corps) {
+    return "<svg viewBox='0 0 " + w + " " + h + "' role='img' aria-label='" + alt + "' font-family='Inter,Arial,sans-serif'><rect width='" + w + "' height='" + h + "' fill='#fff'/><defs>" + defs + "</defs>" + corps +
+      "<text x='" + (w - 6) + "' y='" + (h - 5) + "' font-size='8' text-anchor='end' fill='#8A93A6'>Planche VÉRITAS</text></svg>";
+  }
+  function ancien(id) { return window.VRT_LECONS[id]; }
+  function remplacer(id, o) {
+    var a = ancien(id);
+    if (a) ["apc", "examen", "rang", "cle", "scenes"].forEach(function (k) { if (a[k] != null && o[k] == null) o[k] = a[k]; });
+    VRT_L(id, o);
+    if (a) o.ordre = a.ordre;
+  }
+  function q(qq, bonne, f1, f2, e) { return { q: qq, r: [bonne, f1, f2], b: 0, e: e }; }
+  function partie(old, i) { return old && old.parties[i] ? old.parties[i].html : ""; }
+  function bulle(x, y, w, t, c) { return "<rect x='" + x + "' y='" + y + "' width='" + w + "' height='30' rx='12' fill='#fff' stroke='" + (c || "#C9D2E3") + "'/>" + txt(x + w / 2, y + 20, t, { s: 11.5 }); }
+  function perso(x, y, peau, habit, bas) {
+    bas = bas || "#2E3445";
+    return "<g transform='translate(" + x + " " + y + ")'><ellipse cx='0' cy='84' rx='18' ry='4' fill='#001136' opacity='.18'/>" +
+      "<rect x='-9' y='44' width='8' height='36' rx='3' fill='" + bas + "'/><rect x='1' y='44' width='8' height='36' rx='3' fill='" + bas + "'/>" +
+      "<ellipse cx='-6' cy='81' rx='7' ry='3.5' fill='#1F2328'/><ellipse cx='6' cy='81' rx='7' ry='3.5' fill='#1F2328'/>" +
+      "<path d='M-13 46L-16 18C-16 13 -12 11 -6 10H6C12 11 16 13 16 18L13 46Z' fill='" + habit + "'/>" +
+      "<path d='M-15 16L-20 40' stroke='" + habit + "' stroke-width='7' stroke-linecap='round'/><path d='M15 16L20 40' stroke='" + habit + "' stroke-width='7' stroke-linecap='round'/>" +
+      "<circle cx='-20' cy='42' r='3.6' fill='" + peau + "'/><circle cx='20' cy='42' r='3.6' fill='" + peau + "'/>" +
+      "<rect x='-3.5' y='5' width='7' height='7' fill='" + peau + "'/><ellipse cx='0' cy='-2' rx='9' ry='10.5' fill='" + peau + "'/>" +
+      "<path d='M-9 -4C-10 -14 -4 -13.5 0 -13.5S10 -14 9 -4C7 -9 -7 -9 -9 -4Z' fill='#1B1410'/><ellipse cx='-9' cy='-1' rx='1.8' ry='3' fill='" + peau + "'/><ellipse cx='9' cy='-1' rx='1.8' ry='3' fill='" + peau + "'/></g>";
+  }
+  /* portrait en buste (arbre généalogique) */
+  function portrait(x, y, peau, habit, cheveux, age) {
+    var s = "<g transform='translate(" + x + " " + y + ")'><circle r='30' fill='#F4EFE4' stroke='#C9A576' stroke-width='3'/><clipPath id='pc" + x + "_" + y + "'><circle r='28'/></clipPath><g clip-path='url(#pc" + x + "_" + y + ")'>";
+    s += "<path d='M-26 32C-26 14 -14 10 0 10S26 14 26 32Z' fill='" + habit + "'/><rect x='-4' y='2' width='8' height='10' fill='" + peau + "'/><ellipse cy='-6' rx='11' ry='13' fill='" + peau + "'/>";
+    s += age === "vieux" ? "<path d='M-11 -10C-12 -20 -4 -21 0 -21S12 -20 11 -10C9 -14 -9 -14 -11 -10Z' fill='#D8D8D8'/>" : age === "femme" ? "<path d='M-13 -6C-15 -24 15 -24 13 -6C12 -14 -12 -14 -13 -6Z' fill='" + cheveux + "'/><path d='M-13 -14h26v-6c-6 -6 -20 -6 -26 0Z' fill='" + habit + "'/>" : "<path d='M-11 -10C-12 -20 -4 -21 0 -21S12 -20 11 -10C9 -14 -9 -14 -11 -10Z' fill='" + cheveux + "'/>";
+    s += "<circle cx='-4' cy='-6' r='1.4' fill='#1B1410'/><circle cx='4' cy='-6' r='1.4' fill='#1B1410'/><path d='M-3 2q3 2 6 0' stroke='#1B1410' fill='none'/></g></g>";
+    return s;
+  }
+  /* boucle d'exercice générique : [phrase avec ___, [bonne, autres…], explication] */
+  function exercice(el, C, suivant, lib) {
+    var i = 0, ok = 0;
+    el.innerHTML = "<p class='labo-r' data-q style='font-size:16px'></p><div style='display:flex;gap:8px;flex-wrap:wrap' data-c></div><p class='an-note' data-e></p><p class='labo-r' data-s></p>";
+    function $(s) { return el.querySelector(s); }
+    function poser() {
+      var c = C[i];
+      $("[data-q]").innerHTML = (i + 1) + ". " + c[0].replace("___", "<b style='border-bottom:2px dashed #1E499B;padding:0 14px'>?</b>");
+      $("[data-e]").textContent = ""; $("[data-s]").innerHTML = lib + " " + (i + 1) + " / " + C.length + " · score : <b>" + ok + "</b>";
+      $("[data-c]").innerHTML = c[1].slice().sort().map(function (x) { return "<button type='button' class='btn-l' data-v='" + x + "'>" + x + "</button>"; }).join("");
+      el.querySelectorAll("[data-v]").forEach(function (b) {
+        b.addEventListener("click", function () {
+          var bon = b.dataset.v === c[1][0]; if (bon) ok++;
+          $("[data-q]").innerHTML = (i + 1) + ". " + c[0].replace("___", "<b style='color:" + (bon ? VERT : ROUGE) + "'>" + c[1][0] + "</b>");
+          $("[data-e]").innerHTML = (bon ? "✔ " : "✘ ") + c[2];
+          el.querySelectorAll("[data-v]").forEach(function (x) { x.disabled = true; });
+          var nx = document.createElement("button"); nx.type = "button"; nx.className = "btn-l"; nx.textContent = i + 1 < C.length ? suivant : "↺";
+          nx.addEventListener("click", function () { i = (i + 1) % C.length; if (!i) ok = 0; poser(); });
+          $("[data-c]").appendChild(nx);
+          $("[data-s]").innerHTML = lib + " " + (i + 1) + " / " + C.length + " · score : <b>" + ok + "</b>";
+        });
+      });
+    }
+    poser();
+  }
+
+  function alea(g) { return function () { g = (g * 16807) % 2147483647; return (g - 1) / 2147483646; }; }
+  function bloc(x, y, w, h, c, l1, l2) {
+    return "<rect x='" + x + "' y='" + y + "' width='" + w + "' height='" + h + "' rx='10' fill='" + c + "'/>" + txt(x + w / 2, y + h / 2 - (l2 ? 3 : -5), l1, { s: 14, c: "#fff" }) + (l2 ? txt(x + w / 2, y + h / 2 + 14, l2, { s: 10, c: "#fff", w: 500 }) : "");
+  }
+  /* case à toit conique (3D) */
+  function case3D(o, x, z, r, h, toit, mur, y0) {
+    y0 = y0 || 0;
+    o.push({ f: "cylindre", c: [x, y0, z], r: r, h: h, n: 14, coul: mur || "#B5793F" });
+    o.push({ f: "cone", c: [x, y0 + h, z], r: r * 1.25, h: r * 1.3, n: 14, coul: toit || "#8A6E4B" });
+  }
+  function bonhomme3D(o, x, z, habit, peau, y0) {
+    y0 = y0 || 0;
+    o.push({ f: "cylindre", c: [x, y0, z], r: 7, r2: 5, h: 26, n: 10, coul: habit });
+    o.push({ f: "sphere", c: [x, y0 + 32, z], r: 6, coul: peau || "#5A3A1E" });
+  }
+
+  /* ═══════════════════════ 5e FRANÇAIS — LA SUBORDONNÉE RELATIVE ═══════════════════════ */
+  var SR_OLD = ancien("5e-francais-subordonnee-relative");
+  function bandjoun3D() {
+    var o = [], k, R = alea(17);
+    o.push({ f: "boite", c: [0, -8, 0], d: [520, 8, 380], coul: "#7A5530", dessus: "#6E9B45" });
+    o.push({ f: "boite", c: [0, 40, 60], d: [110, 80, 110], coul: "#6B3A1E", dessus: "#6B3A1E" });
+    o.push({ f: "cone", c: [0, 80, 60], r: 92, h: 150, n: 4, coul: "#8A6E4B" });
+    [-40, -14, 14, 40].forEach(function (x) { o.push({ f: "cylindre", c: [x, 0, 2], r: 5, h: 78, n: 8, coul: "#4A2E1A" }); o.push({ f: "boite", c: [x, 40, 0], d: [6, 50, 2], coul: "#C62828", div: false }); });
+    o.push({ f: "boite", c: [0, 22, 4], d: [22, 44, 2], coul: "#2B1D12", div: false });
+    [[-160, 90], [160, 110], [-150, -40]].forEach(function (p) { o.push({ f: "boite", c: [p[0], 22, p[1]], d: [50, 44, 50], coul: "#8B5A2B", dessus: "#8B5A2B" }); o.push({ f: "cone", c: [p[0], 44, p[1]], r: 42, h: 64, n: 4, coul: "#9C7D52" }); });
+    for (k = 0; k < 10; k++) { var x = 170 + (R() - 0.5) * 80, z = -110 + (R() - 0.5) * 90; o.push({ f: "cylindre", c: [x, 0, z], r: 4, h: 40, n: 6, coul: "#5D3A1E" }); o.push({ f: "sphere", c: [x, 52, z], r: 22 + R() * 8, coul: k % 2 ? "#2E6B2A" : "#3E7D32" }); }
+    [[-40, -130], [10, -130], [60, -130]].forEach(function (p, i) { o.push({ f: "boite", c: [p[0], 14, p[1]], d: [40, 2, 28], coul: "#9AA3AF", dessus: "#B8BFCC", div: false }); [-16, 16].forEach(function (dx) { [-12, 12].forEach(function (dz) { o.push({ f: "cylindre", c: [p[0] + dx, 0, p[1] + dz], r: 1.6, h: 14, n: 6, coul: "#6B4423" }); }); }); o.push({ f: "boite", c: [p[0], 4, p[1]], d: [34, 8, 20], coul: "#8B5A2B", dessus: ["#E8A33D", "#C62828", "#3E8E3A"][i], div: false }); });
+    bonhomme3D(o, -20, -100, "#7B3F99"); bonhomme3D(o, 40, -100, "#E8A33D", "#6B4423");
+    o.push({ f: "boite", c: [0, -3, -60], d: [30, 2, 120], coul: "#B88A5A", dessus: "#C9A06E", div: false });
+    return o;
+  }
+  remplacer("5e-francais-subordonnee-relative", {
+    c: "5e", m: "francais", titre: "La proposition subordonnée relative", duree: 30,
+    accroche: "« Le chef que je t'ai parlé… », « le marché que les femmes vont… » : la lettre de Junior sonne faux. Pourquoi ?",
+    intro: "Une lettre écrite par un élève de Bandjoun à son correspondant belge te sert de fil rouge : à chaque partie, un indice t'aide à trancher entre trois conseils.",
+    objectifs: ["reconnaître une subordonnée relative, son pronom et son antécédent", "choisir qui, que, dont ou où selon la fonction", "distinguer « que » relatif et « que » conjonction", "éviter les répétitions en reliant des phrases"],
+    enquete: {
+      titre: "La lettre de Junior à son correspondant",
+      svg: svg(640, 220, "Un élève écrit une lettre à une table ; au fond, une chefferie au grand toit pointu sur une colline", lin("srC", ["#CFE3F2", "#F4F1EA"], true),
+        "<rect width='640' height='220' fill='url(#srC)'/><path d='M0 150Q160 110 320 130T640 120V220H0Z' fill='#6E9B45'/>" +
+        "<rect x='440' y='86' width='70' height='50' fill='#6B3A1E'/><path d='M420 88L475 18L530 88Z' fill='#8A6E4B'/><path d='M450 136V96M462 136V96M488 136V96M500 136V96' stroke='#C62828' stroke-width='4'/><rect x='468' y='106' width='14' height='30' fill='#2B1D12'/>" +
+        "<rect x='560' y='110' width='40' height='30' fill='#8B5A2B'/><path d='M552 112L580 74L608 112Z' fill='#9C7D52'/>" +
+        "<rect x='40' y='150' width='300' height='12' rx='3' fill='#8B5A2B'/><rect x='52' y='162' width='10' height='50' fill='#6B4423'/><rect x='318' y='162' width='10' height='50' fill='#6B4423'/>" +
+        "<g transform='rotate(-3 200 120)'><rect x='120' y='60' width='190' height='92' fill='#FFFBEA' stroke='#E3D7A6'/>" + txt(130, 80, "Cher Thomas,", { s: 11, a: "start", c: BLEU, i: true }) + txt(130, 98, "Le chef que je t'ai parlé", { s: 11, a: "start", c: ROUGE, i: true }) + txt(130, 116, "habite la chefferie.", { s: 11, a: "start", c: BLEU, i: true }) + txt(130, 134, "Le marché que les femmes vont…", { s: 11, a: "start", c: ROUGE, i: true }) + "</g>" +
+        perso(80, 66, "#5A3A1E", "#DCE6F2", "#1E499B") + bulle(330, 20, 170, "Ça sonne faux…", "#F7C948")),
+      legende: "À Bandjoun, dans l'Ouest : Junior écrit à Thomas, son correspondant de Liège, pour lui présenter son village.",
+      contexte: "<p>Le premier brouillon de Junior répétait sans cesse les mêmes mots : « Mon village s'appelle Bandjoun. Bandjoun est sur une colline. Le chef habite la chefferie. Je t'ai parlé du chef. » Son grand frère lui conseille de relier les phrases. Junior écrit alors : « Le chef <strong>que</strong> je t'ai parlé habite la chefferie. Le marché <strong>que</strong> les femmes vont ouvre le samedi. Je pense <strong>que</strong> tu aimeras Bandjoun. » Sa sœur dit : « Mets plutôt des “et” partout, c'est plus simple. »</p>",
+      documents: [{ t: "Le brouillon de Junior", html: "<p>« Mon village s'appelle Bandjoun. Bandjoun est sur une colline. Le chef habite la chefferie. Je t'ai parlé du chef. Les femmes vont au marché. Le marché ouvre le samedi. »</p>" }],
+      question: "Comment relier correctement ces phrases, et pourquoi « que » ne convient-il pas partout ?",
+      tache: "Réécris le brouillon avec des subordonnées relatives correctes, en justifiant chaque pronom relatif.",
+      hypotheses: ["Il suffit de relier avec « et » : « Le chef habite la chefferie et je t'ai parlé du chef. »", "« Que » convient partout : c'est le pronom relatif passe-partout.", "Le pronom dépend de sa fonction dans la relative (qui sujet, que COD, dont « de… », où lieu) ; et sans antécédent, « que » n'est pas relatif."]
+    },
+    parties: [
+      { t: "Reconnaître la relative", html: partie(SR_OLD, 0),
+        planches: [{ type: "2D", titre: "Antécédent, pronom relatif, relative", legende: "La relative s'accroche au nom qu'elle complète (l'antécédent) par un pronom relatif. Elle remplace la phrase répétée : le nom n'est écrit qu'une fois.", svg: (function () {
+          var s = "<rect width='640' height='230' fill='#FBF8F2'/>" + txt(320, 30, "Le chef habite la chefferie.  +  Je t'ai parlé du chef.", { s: 14, c: GRIS }) + "<path d='M320 42V64' stroke='" + NUIT + "' stroke-width='2' marker-end='url(#srF)'/>";
+          s += "<rect x='40' y='80' width='96' height='40' rx='8' fill='" + BLEU + "'/>" + txt(88, 106, "Le chef", { s: 16, c: "#fff" }) + "<rect x='142' y='80' width='60' height='40' rx='8' fill='" + ROUGE + "'/>" + txt(172, 106, "dont", { s: 16, c: "#fff" }) + "<rect x='208' y='80' width='170' height='40' rx='8' fill='#fff' stroke='" + ROUGE + "' stroke-width='2' stroke-dasharray='5 3'/>" + txt(293, 106, "je t'ai parlé", { s: 16, c: ROUGE }) + "<rect x='384' y='80' width='216' height='40' rx='8' fill='#E9EEF6'/>" + txt(492, 106, "habite la chefferie.", { s: 16 });
+          s += "<path d='M172 124Q130 160 88 124' stroke='" + ROUGE + "' stroke-width='2' fill='none' marker-end='url(#srF2)'/>" + txt(130, 170, "remplace « du chef »", { s: 11, c: ROUGE });
+          s += "<path d='M142 196H378' stroke='" + ROUGE + "' stroke-width='3'/><path d='M142 190V202M378 190V202' stroke='" + ROUGE + "' stroke-width='3'/>" + txt(260, 216, "subordonnée relative", { s: 12, c: ROUGE }) + txt(88, 72, "antécédent", { s: 11, c: BLEU });
+          return svg(640, 230, "Deux phrases réunies : le chef dont je t’ai parlé habite la chefferie ; flèche du pronom dont vers son antécédent le chef", fleche("srF", NUIT) + fleche("srF2", ROUGE), s);
+        })() }],
+        fil: { html: "<p>Avec « et », le nom « chef » reste répété deux fois. La subordonnée relative, elle, <strong>remplace le nom répété par un pronom relatif</strong> et s'accroche juste après l'antécédent : « Le chef dont je t'ai parlé habite la chefferie. » Une seule phrase, une seule fois le mot « chef ».</p>", verdicts: [[0, "rejetee", "« Et » garde la répétition ; la relative remplace le nom par un pronom."]] },
+        retenir: "Pronom relatif + verbe conjugué, juste après l'antécédent." },
+      { t: "Choisir le bon pronom", html: partie(SR_OLD, 1),
+        planches: [{ type: "3d", titre: "Le village de Junior", legende: "Tourne le village : la chefferie au grand toit de chaume et aux piliers sculptés, les cases, le bois sacré, le marché du samedi. Chaque lieu donne une relative : la chefferie où vit le chef, le marché où vont les femmes, le bois sacré dont on parle à voix basse.",
+          modele: { h: 380, rx: -24, ry: 24, echelle: 0.8, alt: "Village de l’Ouest du Cameroun : grande chefferie au toit pyramidal de chaume, cases, bois sacré, étals de marché", objets: bandjoun3D(),
+            etiquettes: [{ p: [0, 200, 60], t: "la chefferie où vit le chef" }, { p: [10, 20, -130], t: "le marché où vont les femmes", cote: "g" }, { p: [170, 70, -110], t: "le bois sacré dont on parle", cote: "d" }] } }],
+        fil: { html: "<p>Remplace le pronom par l'antécédent : « je t'ai parlé <em>du chef</em> » → complément en « de » → <strong>dont</strong>. « Les femmes vont <em>au marché</em> » → lieu → <strong>où</strong>. « Que » ne convient que pour un COD : « le pagne <strong>que</strong> ma mère a acheté » (elle a acheté <em>le pagne</em>).</p>", verdicts: [[1, "rejetee", "« Que » est COD seulement : « dont je t'ai parlé », « où les femmes vont »."]] },
+        retenir: "qui = sujet ; que = COD ; dont = « de… » ; où = lieu ou temps." },
+      { t: "La fonction de la relative", html: partie(SR_OLD, 2),
+        fil: { html: "<p>Dans « Je pense que tu aimeras Bandjoun », il n'y a pas de nom avant « que » : pas d'antécédent, donc ce n'est pas un pronom relatif mais une <strong>conjonction</strong> ; cette phrase est correcte telle quelle. La relative, elle, complète toujours un nom, comme un adjectif.</p>", verdicts: [[2, "validee", "Pronom choisi selon sa fonction ; « que » sans antécédent est une conjonction."]] },
+        retenir: "Pas d'antécédent, pas de relative." },
+      SR_OLD && SR_OLD.parties[3] ? SR_OLD.parties[3] : { t: "Entraînement", html: "" }
+    ],
+    denouement: {
+      titre: "La lettre corrigée",
+      etapes: ["La relative remplace le nom répété (indice 1).", "dont = « de… », où = lieu, que = COD (indice 2).", "« Je pense que… » : conjonction, pas de relative (indice 3)."],
+      reponse: "<p>Relier avec « et » ne supprime pas la répétition ; la subordonnée relative la supprime, car le pronom relatif reprend l'antécédent. Mais le pronom dépend de sa fonction dans la relative : on dit « je t'ai parlé du chef », donc « le chef <strong>dont</strong> je t'ai parlé » ; « les femmes vont au marché », lieu, donc « le marché <strong>où</strong> les femmes vont ». « Que » est réservé au COD. Enfin, « Je pense que tu aimeras Bandjoun » est juste : « que » n'y a pas d'antécédent, c'est une conjonction. Lettre corrigée : « Mon village, <strong>qui</strong> s'appelle Bandjoun, est sur une colline. Le chef <strong>dont</strong> je t'ai parlé habite la chefferie. Le marché <strong>où</strong> vont les femmes ouvre le samedi. Les masques <strong>que</strong> nous portons à la fête sont célèbres. Je pense que tu aimeras Bandjoun. »</p>",
+      transfert: "<p>Relie par une relative : « J'ai visité la case. Mon grand-père est né dans cette case. » <em>(J'ai visité la case où mon grand-père est né.)</em></p>"
+    },
+    revision: (SR_OLD ? SR_OLD.revision : []).concat(["Test : remplace le pronom par l'antécédent pour trouver sa fonction."]),
+    exo: SR_OLD ? SR_OLD.exo : "",
+    quiz: SR_OLD ? SR_OLD.quiz : []
+  });
+
+  /* ═══════════════════════ 5e HISTOIRE — LES PYGMÉES ET LES SAO ═══════════════════════ */
+  var PS_OLD = ancien("5e-histoire-pygmees-sao");
+  var CMR = [[8.6, 4.6], [9.3, 6.0], [10.1, 6.9], [11.1, 6.5], [11.8, 7.1], [12.3, 8.4], [13.0, 9.4], [13.6, 10.2], [14.1, 11.2], [14.6, 12.0], [14.1, 13.0], [14.6, 13.1], [15.0, 12.0], [15.1, 10.8], [15.6, 10.0], [14.4, 9.9], [14.9, 8.7], [15.5, 7.5], [14.6, 6.3], [14.5, 5.0], [15.0, 4.1], [16.1, 3.0], [16.2, 2.2], [15.0, 1.9], [13.3, 2.2], [11.3, 2.2], [9.8, 2.3], [9.8, 3.0], [9.5, 3.9], [9.0, 4.0]];
+  function butte3D() {
+    var o = [], k, R = alea(23);
+    o.push({ f: "boite", c: [0, -8, 0], d: [560, 6, 420], coul: "#3E6E8E", dessus: "#5B8FB0" });
+    o.push({ f: "cone", c: [0, -5, 20], r: 190, r2: 130, h: 34, n: 24, coul: "#9C7A4E" });
+    o.push({ f: "cylindre", c: [0, 29, 20], r: 130, h: 2, n: 24, coul: "#B89466", dessus: "#C9A87A" });
+    [[-60, 60], [40, 90], [70, 0], [-30, -20], [-90, -30]].forEach(function (p, i) { case3D(o, p[0], p[1], 20 - (i % 2) * 3, 30, "#A68A5E", "#B07A44", 31); });
+    for (k = 0; k < 3; k++) { o.push({ f: "cylindre", c: [20 + k * 26, 31, -70], r: 9, r2: 11, h: 20, n: 12, coul: "#A0522D" }); o.push({ f: "cylindre", c: [20 + k * 26, 51, -70], r: 11, r2: 6, h: 8, n: 12, coul: "#8B4513" }); }
+    for (k = 0; k < 14; k++) { var a = R() * 6.28, d = 210 + R() * 40; o.push({ f: "cylindre", c: [Math.cos(a) * d, -5, Math.sin(a) * d * 0.9], r: 2, h: 18 + R() * 10, n: 5, coul: "#6E8B3D" }); }
+    o.push({ f: "boite", c: [-180, -2, -150], d: [50, 4, 14], coul: "#5D3A1E", dessus: "#7A5530" });
+    bonhomme3D(o, -180, -150, "#C9B28A", "#4A2E1A");
+    bonhomme3D(o, -40, -60, "#E9DFCF", "#4A2E1A", 31);
+    return o;
+  }
+  var CIRE = [
+    ["1. Modèle en cire", "On sculpte la statuette dans la cire d'abeille.", function () { return "<path d='M0 40c-14 0 -16 -30 -6 -38c-8 -8 -4 -22 6 -22s14 14 6 22c10 8 8 38 -6 38Z' fill='#E8C46A' stroke='#B8902A'/>"; }],
+    ["2. Moule en argile", "On recouvre la cire d'argile, en laissant un trou (l'entonnoir).", function () { return "<path d='M-30 46h60v-62q-30 -30 -60 0Z' fill='#A0522D'/><path d='M0 40c-14 0 -16 -30 -6 -38c-8 -8 -4 -22 6 -22s14 14 6 22c10 8 8 38 -6 38Z' fill='#E8C46A' opacity='.55'/><path d='M-6 -40h12l-4 10h-4Z' fill='#8B4513'/>"; }],
+    ["3. Chauffe : la cire fond", "Au feu, l'argile durcit ; la cire fond et s'écoule : elle est « perdue ».", function () { return "<path d='M-30 46h60v-62q-30 -30 -60 0Z' fill='#A0522D'/><path d='M0 40c-14 0 -16 -30 -6 -38c-8 -8 -4 -22 6 -22s14 14 6 22c10 8 8 38 -6 38Z' fill='#3B2416'/><path d='M-3 -40q-3 -14 0 -22' stroke='#E8C46A' stroke-width='4'/><path d='M-40 62q10 -24 20 0q10 -24 20 0q10 -24 20 0q10 -24 20 0' fill='#F28C28'/>"; }],
+    ["4. Coulée du bronze", "On verse le bronze fondu (cuivre + étain, plus de 1 000 °C) dans le vide.", function () { return "<path d='M-30 46h60v-62q-30 -30 -60 0Z' fill='#A0522D'/><path d='M0 40c-14 0 -16 -30 -6 -38c-8 -8 -4 -22 6 -22s14 14 6 22c10 8 8 38 -6 38Z' fill='#F2A33A'/><path d='M14 -64l-14 22' stroke='#F2A33A' stroke-width='5'/><path d='M8 -72h26l-4 12h-18Z' fill='#5C6478'/>"; }],
+    ["5. On casse le moule", "Après refroidissement, on brise l'argile : la statuette de bronze apparaît.", function () { return "<path d='M-34 46l10 -18l8 18ZM20 46l10 -22l8 22Z' fill='#A0522D'/><path d='M0 40c-14 0 -16 -30 -6 -38c-8 -8 -4 -22 6 -22s14 14 6 22c10 8 8 38 -6 38Z' fill='#B87333' stroke='#7A4A1E'/><circle cx='-3' cy='-16' r='1.6' fill='#3B2416'/><circle cx='3' cy='-16' r='1.6' fill='#3B2416'/>"; }]];
+  remplacer("5e-histoire-pygmees-sao", {
+    c: "5e", m: "histoire", titre: "Les Pygmées et les Sao, premiers peuples du Cameroun", duree: 30,
+    accroche: "Au Musée national, deux élèves se disputent : « Les Sao étaient des géants ! » « Non, c'étaient des petits hommes de la forêt, comme les Pygmées ! » Qui a raison ?",
+    intro: "Une visite de classe au Musée national de Yaoundé te sert de fil rouge : à chaque partie, un indice t'aide à trancher entre trois affirmations.",
+    objectifs: ["localiser les peuples pygmées et les Sao sur la carte du Cameroun", "décrire leur mode de vie", "expliquer la technique du bronze à la cire perdue", "distinguer ce que disent l'archéologie et la tradition orale"],
+    enquete: {
+      titre: "La dispute du Musée national",
+      svg: svg(640, 220, "Salle de musée : une vitrine avec une statuette de bronze et une grande jarre ; deux élèves se disputent devant", lin("psC", ["#F4EDE1", "#E2D5BF"], true),
+        "<rect width='640' height='220' fill='url(#psC)'/><rect y='186' width='640' height='34' fill='#8B6B4A'/><rect x='220' y='40' width='200' height='120' fill='#DCEBF5' opacity='.7' stroke='#9AA3AF' stroke-width='3'/><rect x='210' y='160' width='220' height='30' fill='#5D3A1E'/>" +
+        "<g transform='translate(270 128)'><path d='M0 30c-14 0 -16 -30 -6 -38c-8 -8 -4 -22 6 -22s14 14 6 22c10 8 8 38 -6 38Z' fill='#B87333' stroke='#7A4A1E'/></g><path d='M340 158c-20 0 -26 -60 -10 -80h40c16 20 10 80 -10 80Z' fill='#A0522D' stroke='#6B3A1E'/><path d='M336 78h28' stroke='#6B3A1E' stroke-width='4'/>" +
+        txt(320, 30, "Civilisation Sao — Extrême-Nord", { s: 11, c: GRIS }) +
+        perso(110, 100, "#5A3A1E", "#DCE6F2", "#1E499B") + perso(530, 100, "#6B4423", "#DCE6F2", "#1E499B") + bulle(20, 50, 170, "Des géants !", "#F7C948") + bulle(450, 50, 180, "Des petits hommes !", "#9FC5E8")),
+      legende: "Au Musée national de Yaoundé, la classe de 5e découvre une statuette de bronze et une jarre funéraire sao.",
+      contexte: "<p>Devant la vitrine, Esther affirme : « Mon grand-père dit que les Sao étaient des <strong>géants</strong> : c'est donc vrai. » Brice réplique : « Les Sao et les Pygmées, c'est pareil : de petits hommes qui vivaient dans la forêt du Sud. » Le guide sourit et propose de vérifier avec la carte, les objets et ce que disent les archéologues.</p>",
+      documents: [{ t: "Le cartel de la vitrine", html: "<p>« Statuette en bronze, technique de la cire perdue. Jarre funéraire. Civilisation Sao, plaine du Logone et du Chari, Extrême-Nord du Cameroun. Objets issus de fouilles archéologiques. »</p>" }],
+      question: "Où vivaient les Pygmées et les Sao, comment vivaient-ils, et que valent les deux affirmations ?",
+      tache: "Situe les deux peuples, décris leur mode de vie et dis comment on les connaît.",
+      hypotheses: ["Pygmées et Sao vivaient au même endroit, dans la forêt du Sud.", "Les Sao étaient de vrais géants : la tradition orale le dit, c'est donc prouvé.", "Les peuples pygmées (Baka, Bagyeli, Bedzang) vivent dans la forêt du Sud et de l'Est ; les Sao, agriculteurs et bronziers, vivaient au sud du lac Tchad ; l'archéologie corrige la légende."]
+    },
+    parties: [
+      { t: "Les Pygmées, peuple de la forêt", html: partie(PS_OLD, 0),
+        planches: [{ type: "2D", titre: "Deux peuples, deux milieux", legende: "La forêt dense du Sud et de l'Est (vert foncé) est le domaine des Baka, Bagyeli et Bedzang ; la plaine inondable du Logone et du Chari, au sud du lac Tchad (Extrême-Nord), était celui des Sao. Plus de 1 000 km les séparent.", svg: (function () {
+          var X = function (l) { return 40 + (l - 8.3) * 32; }, Y = function (l) { return 380 - (l - 1.6) * 30; }, pts = CMR.map(function (p) { return X(p[0]).toFixed(1) + " " + Y(p[1]).toFixed(1); }).join("L"), s = "<rect width='640' height='400' fill='#DCEBF5'/><clipPath id='psK'><path d='M" + pts + "Z'/></clipPath>";
+          s += "<path d='M" + pts + "Z' fill='#000' opacity='.12' transform='translate(4 5)'/><g clip-path='url(#psK)'>" + [[1.5, 5.6, "#2E6B34"], [5.6, 7.0, "#7E9D57"], [7.0, 8.3, "#A9B46A"], [8.3, 10.9, "#CDBB78"], [10.9, 13.4, "#E6D6A2"]].map(function (b) { return "<rect x='0' y='" + Y(b[1]) + "' width='400' height='" + (Y(b[0]) - Y(b[1])) + "' fill='" + b[2] + "'/>"; }).join("") + "<path d='M" + X(14.3) + " " + Y(12.9) + "Q" + X(14.8) + " " + Y(11.6) + " " + X(14.6) + " " + Y(10.8) + "L" + X(15.2) + " " + Y(10.4) + "L" + X(15.4) + " " + Y(12.2) + "Z' fill='#9FC6A6' opacity='.8'/></g>";
+          s += "<path d='M" + pts + "Z' fill='none' stroke='#5B3A1A' stroke-width='2' stroke-linejoin='round'/><path d='M" + X(14.1) + " " + Y(13.0) + "q10 -14 26 -8q8 10 -6 18Z' fill='#5BA3D9' stroke='#2F6DB5'/>" + txt(X(14.2), Y(13.35), "lac Tchad", { s: 10, c: "#2F6DB5", i: true, a: "end" });
+          s += "<path d='M" + X(15.1) + " " + Y(10.5) + "Q" + X(14.6) + " " + Y(11.7) + " " + X(14.4) + " " + Y(12.8) + "' stroke='#2F6DB5' stroke-width='2' fill='none'/>";
+          [["Baka", 14.2, 3.2], ["Baka", 12.6, 2.8], ["Bagyeli", 10.2, 3.0], ["Bedzang", 11.6, 4.9]].forEach(function (p) { s += "<circle cx='" + X(p[1]) + "' cy='" + Y(p[2]) + "' r='6' fill='#F7C948' stroke='#5B3A1A'/>" + txt(X(p[1]) + 9, Y(p[2]) + 4, p[0], { s: 11, a: "start", c: "#fff", halo: false }); });
+          s += "<rect x='" + (X(14.4) - 7) + "' y='" + (Y(11.9) - 7) + "' width='14' height='14' fill='#B87333' stroke='#fff' stroke-width='2'/>" + txt(X(14.4) + 12, Y(11.9) + 4, "Sao", { s: 12, a: "start", halo: true });
+          s += "<rect x='360' y='40' width='260' height='140' rx='12' fill='#fff' stroke='#2E6B34' stroke-width='2'/>" + txt(376, 64, "Peuples pygmées", { s: 14, a: "start", c: "#2E6B34" }) + ["forêt dense du Sud et de l'Est", "Baka, Bagyeli, Bedzang", "chasse, pêche, cueillette (miel)", "semi-nomades, campements", "plantes médicinales"].map(function (t, i) { return txt(376, 88 + i * 18, "• " + t, { s: 11, a: "start", w: 500 }); }).join("");
+          s += "<rect x='360' y='200' width='260' height='150' rx='12' fill='#fff' stroke='#B87333' stroke-width='2'/>" + txt(376, 224, "Civilisation Sao", { s: 14, a: "start", c: "#8B4513" }) + ["plaine du Logone et du Chari", "au sud du lac Tchad", "agriculture, élevage, pêche", "villages sur des buttes", "poterie et bronze (cire perdue)", "jusque vers le XVIᵉ siècle"].map(function (t, i) { return txt(376, 248 + i * 17, "• " + t, { s: 11, a: "start", w: 500 }); }).join("");
+          return svg(640, 400, "Carte du Cameroun : forêt du Sud avec les peuples Baka, Bagyeli, Bedzang ; plaine au sud du lac Tchad avec les Sao", "", s);
+        })() }],
+        fil: { html: "<p>La carte est sans appel : les peuples pygmées vivent dans la <strong>forêt dense</strong> du Sud et de l'Est (Baka vers Lomié et Djoum, Bagyeli vers Kribi et Lolodorf, Bedzang au centre), tandis que les Sao occupaient la <strong>plaine du Logone et du Chari</strong>, au sud du lac Tchad, à plus de 1 000 km. Deux milieux, deux peuples, deux modes de vie.</p>", verdicts: [[0, "rejetee", "Forêt du Sud et de l'Est pour les Pygmées ; sud du lac Tchad pour les Sao."]] },
+        retenir: "Baka, Bagyeli, Bedzang : chasseurs-cueilleurs de la forêt." },
+      { t: "Les Sao, une civilisation du lac Tchad", html: partie(PS_OLD, 1),
+        planches: [{ type: "3d", titre: "Un village sao sur sa butte", legende: "Tourne la scène : pendant la crue, la plaine du Logone est inondée ; le village, bâti sur une butte de terre, reste au sec. Cases rondes à toit de paille, jarres de terre cuite, une pirogue de pêcheur.",
+          modele: { h: 360, rx: -28, ry: 22, echelle: 0.8, alt: "Plaine inondée avec une butte de terre portant des cases rondes, des jarres et une pirogue", objets: butte3D(),
+            etiquettes: [{ p: [0, 30, 150], t: "butte de terre", cote: "d" }, { p: [46, 60, -70], t: "jarres", cote: "d" }, { p: [-180, 10, -150], t: "pirogue (pêche)", cote: "g" }, { p: [-220, -4, 120], t: "plaine inondée", cote: "g" }] } }],
+        fil: { html: "<p>Les objets de la vitrine viennent des fouilles des buttes : jarres, perles, statuettes de bronze coulées à la <strong>cire perdue</strong> (simulation ci-dessus). Ce sont les traces d'une société d'agriculteurs, d'éleveurs, de pêcheurs et d'artisans très habiles, et non d'un peuple de chasseurs de la forêt.</p>", verdicts: [] },
+        retenir: "Buttes, jarres funéraires, bronze à la cire perdue : les traces des Sao." },
+      { t: "Comment les connaissons-nous ?", html: partie(PS_OLD, 2),
+        fil: { html: "<p>Les Sao n'ont pas laissé d'écrits. Les récits des peuples voisins en font des « géants » : une façon de dire leur force et leur prestige. Mais les archéologues qui ont fouillé leurs buttes et leurs jarres funéraires y ont trouvé des restes d'êtres humains de taille ordinaire. La tradition orale est précieuse, mais elle doit être <strong>confrontée</strong> à l'archéologie.</p>", verdicts: [[1, "rejetee", "La légende des « géants » n'est pas confirmée par les fouilles."], [2, "validee", "Deux peuples, deux milieux ; l'archéologie corrige la légende."]] },
+        retenir: "Sans écrits : fouilles et récits des anciens, qu'on confronte." },
+      PS_OLD && PS_OLD.parties[3] ? PS_OLD.parties[3] : { t: "Entraînement", html: "" }
+    ],
+    denouement: {
+      titre: "Le guide tranche",
+      etapes: ["Deux milieux différents sur la carte (indice 1).", "Buttes, jarres, bronze : une civilisation d'agriculteurs et d'artisans (indice 2).", "Les fouilles ne confirment pas les « géants » (indice 3)."],
+      reponse: "<p>Esther et Brice se trompent tous les deux. Les peuples pygmées (Baka, Bagyeli, Bedzang) vivent dans la forêt dense du Sud et de l'Est ; chasseurs, pêcheurs et cueilleurs semi-nomades, ils connaissent remarquablement les plantes et les animaux. Les Sao, eux, vivaient dans la plaine du Logone et du Chari, au sud du lac Tchad, jusque vers le XVIᵉ siècle : agriculteurs, éleveurs et pêcheurs, ils bâtissaient leurs villages sur des buttes pour échapper aux crues et maîtrisaient la poterie et le bronze à la cire perdue. Ce ne sont donc pas les mêmes peuples. Quant aux « géants », c'est une image de la tradition orale des peuples voisins ; les fouilles n'ont rien trouvé de tel. Les Kotoko d'aujourd'hui se disent leurs descendants. Les deux peuples méritent respect : ils sont à la racine de l'histoire du Cameroun.</p>",
+      transfert: "<p>Explique en trois lignes pourquoi il ne faut pas employer « pygmée » comme une moquerie, et comment nommer ces peuples.</p>"
+    },
+    revision: (PS_OLD ? PS_OLD.revision : []).concat(["Cire perdue : modèle en cire, moule d'argile, cire fondue, bronze coulé, moule cassé."]),
+    exo: PS_OLD ? PS_OLD.exo : "",
+    quiz: PS_OLD ? PS_OLD.quiz : []
+  });
+
+  /* ═══════════════════════ 5e GÉOGRAPHIE — LA CROISSANCE DE LA POPULATION ═══════════════════════ */
+  var CP_OLD = ancien("5e-geo-croissance-population");
+  var PYR = [15.5, 14, 12.5, 11, 9.5, 8, 7, 5.5, 4.5, 3.5, 3, 2.2, 1.6, 1.1, 0.8, 0.7];
+  function pyramide3D() {
+    var o = [];
+    o.push({ f: "boite", c: [0, -6, 0], d: [420, 6, 120], coul: "#C9B28A", dessus: "#E9DFCF" });
+    PYR.forEach(function (p, i) { var w = p * 11; o.push({ f: "boite", c: [-w / 2 - 3, 7 + i * 14, 0], d: [w, 12, 40], coul: "#2F6DB5", dessus: "#4A90C2" }); o.push({ f: "boite", c: [w / 2 + 3, 7 + i * 14, 0], d: [w, 12, 40], coul: "#C2540A", dessus: "#E8A33D" }); });
+    o.push({ f: "boite", c: [0, 112, 0], d: [2, 224, 2], coul: "#1F2328", div: false });
+    return o;
+  }
+  remplacer("5e-geo-croissance-population", {
+    c: "5e", m: "geo", titre: "La croissance rapide de la population mondiale", duree: 30,
+    accroche: "112 élèves dans une classe de CM1 à Garoua. « C'est une mauvaise année, ça passera », dit un conseiller municipal. Et si c'était le début d'une tendance ?",
+    intro: "Une classe surchargée d'une école publique de Garoua te sert de fil rouge : à chaque partie, un indice t'aide à trancher entre trois explications.",
+    objectifs: ["décrire l'évolution de la population mondiale et camerounaise", "calculer un taux d'accroissement naturel et l'exprimer en %", "lire une pyramide des âges", "expliquer causes et conséquences de la croissance"],
+    enquete: {
+      titre: "La classe de 112 élèves",
+      svg: svg(640, 220, "Une salle de classe bondée : de nombreux élèves serrés sur des bancs, une maîtresse au tableau", lin("cpC", ["#F4EDE1", "#E6DAC4"], true),
+        "<rect width='640' height='220' fill='url(#cpC)'/><rect x='30' y='20' width='170' height='90' fill='#2E4A3A' stroke='#6B4423' stroke-width='5'/>" + txt(115, 52, "Effectif : 112", { s: 15, c: "#F4F1EA" }) + txt(115, 76, "Places : 60", { s: 13, c: "#F4F1EA", w: 500 }) + txt(115, 98, "CM1 — Garoua", { s: 11, c: "#C9D2E3", w: 500 }) + perso(240, 70, "#5A3A1E", "#7B3F99", "#2E3445") +
+        (function () { var s = "", r, c; for (r = 0; r < 4; r++) { s += "<rect x='" + (300 - r * 10) + "' y='" + (100 + r * 28) + "' width='" + (320 + r * 20) + "' height='8' fill='#8B5A2B'/>"; for (c = 0; c < 9 + r; c++) { var x = 312 - r * 10 + c * 34, y = 84 + r * 28; s += "<circle cx='" + x + "' cy='" + y + "' r='8' fill='" + ["#4A2E1A", "#5A3A1E", "#6B4423"][(r + c) % 3] + "'/><path d='M" + (x - 10) + " " + (y + 18) + "q10 -14 20 0Z' fill='" + (c % 2 ? "#DCE6F2" : "#F7F3EA") + "'/>"; } } return s; })()),
+      legende: "À Garoua, dans le Nord : la classe de CM1 de l'école publique compte 112 élèves pour 60 places.",
+      contexte: "<p>Au conseil municipal, un conseiller dit : « C'est une mauvaise année ; la population a toujours augmenté doucement, ça va se calmer. » Un autre calcule : « Natalité 36 ‰, mortalité 9 ‰ : l'accroissement est de 36 + 9 = 45 ‰. » Le maire demande à la délégation de l'Éducation de lui expliquer la situation et de prévoir l'avenir.</p>",
+      documents: [{ t: "Les chiffres de la commune", html: "<table class='donnees'><tr><th>Indicateur</th><th>Valeur</th></tr><tr><td>Population</td><td>environ 400 000 habitants</td></tr><tr><td>Natalité</td><td>36 ‰</td></tr><tr><td>Mortalité</td><td>9 ‰</td></tr><tr><td>Moins de 15 ans</td><td>plus de 4 habitants sur 10</td></tr></table>" }],
+      question: "La croissance de la population est-elle passagère, et à quel rythme la commune grandit-elle ?",
+      tache: "Calcule l'accroissement naturel, explique ses causes et dis ce qu'il faut prévoir pour les écoles.",
+      hypotheses: ["La population a toujours augmenté doucement : c'est passager.", "L'accroissement naturel est natalité + mortalité = 45 ‰.", "Mortalité en baisse, natalité élevée : 36 − 9 = 27 ‰ ≈ 2,7 % par an ; la population très jeune double en environ 26 ans : il faut planifier écoles et enseignants."]
+    },
+    parties: [
+      { t: "Une croissance récente et rapide", html: partie(CP_OLD, 0),
+        planches: [{ type: "2D", titre: "8 milliards en 2022", legende: "Il a fallu des millénaires pour atteindre 1 milliard d'humains (vers 1804) ; depuis 1950, on en ajoute un tous les 12 à 15 ans. La courbe se redresse brusquement au XXᵉ siècle : c'est l'« explosion démographique ».", svg: (function () {
+          var D = [[1750, 0.79], [1804, 1], [1850, 1.26], [1900, 1.65], [1927, 2], [1950, 2.5], [1960, 3], [1974, 4], [1987, 5], [1999, 6], [2011, 7], [2022, 8]], X = function (a) { return 60 + (a - 1750) / 280 * 540; }, Y = function (v) { return 240 - v * 26; }, s = "<rect width='640' height='280' fill='#FBF8F2'/><path d='M60 20V240H610' stroke='" + NUIT + "' stroke-width='2' fill='none'/>", k;
+          for (k = 0; k <= 8; k += 2) s += "<path d='M60 " + Y(k) + "H610' stroke='#E3E7EF'/>" + txt(52, Y(k) + 4, k + " Md", { s: 10, a: "end", c: GRIS, w: 600 });
+          [1750, 1800, 1850, 1900, 1950, 2000].forEach(function (a) { s += txt(X(a), 258, String(a), { s: 10, c: GRIS, w: 600 }); });
+          s += "<path d='" + D.map(function (d, i) { return (i ? "L" : "M") + X(d[0]).toFixed(1) + " " + Y(d[1]).toFixed(1); }).join("") + "' stroke='" + ROUGE + "' stroke-width='3.5' fill='none'/>";
+          D.forEach(function (d) { if (d[1] >= 1 && d[1] % 1 === 0) s += "<circle cx='" + X(d[0]) + "' cy='" + Y(d[1]) + "' r='4.5' fill='" + ROUGE + "' stroke='#fff' stroke-width='1.5'/>" + txt(X(d[0]) - 8, Y(d[1]) - 6, String(d[0]), { s: 9, a: "end", c: NUIT, halo: true }); });
+          s += "<rect x='90' y='40' width='200' height='56' rx='10' fill='#fff' stroke='#C9D2E3'/>" + txt(190, 62, "Cameroun", { s: 12, c: VERT }) + txt(190, 84, "≈ 5 M (1960) → ≈ 29 M (auj.)", { s: 11, w: 600 });
+          return svg(640, 280, "Courbe de la population mondiale de 1750 à 2022, de 0,8 à 8 milliards, avec les années de chaque milliard", "", s);
+        })() }],
+        fil: { html: "<p>La courbe montre le contraire d'une croissance « douce » : il a fallu des millénaires pour atteindre 1 milliard d'habitants, mais seulement 11 ans pour passer de 7 à 8 milliards. Au Cameroun, la population a été multipliée par plus de cinq depuis l'indépendance. Ce n'est pas une mauvaise année : c'est une tendance de fond.</p>", verdicts: [[0, "rejetee", "La croissance est récente, rapide et durable."]] },
+        retenir: "La population mondiale a plus que triplé depuis 1950." },
+      { t: "Mesurer la croissance", html: partie(CP_OLD, 1),
+        fil: { html: "<p>Les naissances <strong>ajoutent</strong> des habitants, les décès en <strong>retirent</strong> : on soustrait. 36 − 9 = <strong>27 ‰</strong>, soit 2,7 % par an. Additionner la mortalité n'a pas de sens : plus de décès ne peut pas faire grandir la population. À 2,7 % par an, la population double en environ 70 ÷ 2,7 ≈ 26 ans (simulation ci-dessus).</p>", verdicts: [[1, "rejetee", "Accroissement naturel = natalité − mortalité = 27 ‰."]] },
+        retenir: "Accroissement naturel = natalité − mortalité ; ‰ ÷ 10 = %." },
+      { t: "Causes et conséquences", html: partie(CP_OLD, 2),
+        planches: [{ type: "3d", titre: "La pyramide des âges du Cameroun", legende: "Tourne la pyramide : chaque étage est une tranche de 5 ans (de 0-4 ans en bas à 75 ans et plus en haut), hommes en bleu à gauche, femmes en orange à droite. La base très large montre une population très jeune : plus de 4 habitants sur 10 ont moins de 15 ans. Ordres de grandeur.",
+          modele: { h: 360, rx: -12, ry: 26, echelle: 0.85, alt: "Pyramide des âges en barres empilées, très large à la base et étroite au sommet, hommes en bleu et femmes en orange", objets: pyramide3D(),
+            etiquettes: [{ p: [-90, 7, -20], t: "0-4 ans : la base la plus large", cote: "g" }, { p: [10, 217, -20], t: "75 ans et plus", cote: "d" }, { p: [70, 63, -20], t: "femmes", cote: "d" }, { p: [-70, 63, -20], t: "hommes", cote: "g" }] } }],
+        fil: { html: "<p>Grâce aux vaccins, à l'eau potable et aux soins, la <strong>mortalité a baissé</strong>, surtout celle des enfants, alors que la <strong>natalité reste élevée</strong>. La pyramide en forme de triangle à base large le montre : chaque année, plus d'enfants arrivent à l'âge d'aller à l'école. Il faut donc planifier salles, tables-bancs et enseignants pour les années à venir.</p>", verdicts: [[2, "validee", "27 ‰, doublement en ≈ 26 ans, population jeune : planifier."]] },
+        retenir: "La mortalité baisse plus vite que la natalité : la population augmente." },
+      CP_OLD && CP_OLD.parties[3] ? CP_OLD.parties[3] : { t: "Entraînement", html: "" }
+    ],
+    denouement: {
+      titre: "Le rapport au maire",
+      etapes: ["Croissance récente et durable (indice 1).", "36 − 9 = 27 ‰ = 2,7 % par an (indice 2).", "Pyramide jeune : plus d'élèves chaque année (indice 3)."],
+      reponse: "<p>La classe de 112 élèves n'est pas un accident. La population mondiale est passée de 2,5 milliards en 1950 à plus de 8 milliards en 2022, et celle du Cameroun d'environ 5 à près de 29 millions depuis 1960. Dans la commune, l'accroissement naturel vaut natalité − mortalité = 36 − 9 = 27 ‰, soit 2,7 % par an (et non 45 ‰ : les décès se retranchent). À ce rythme, la population double en environ 26 ans. La cause : la mortalité a baissé grâce aux progrès de la santé, tandis que la natalité reste élevée ; la population est donc très jeune, avec plus de 4 habitants sur 10 de moins de 15 ans. Il faut construire des salles, recruter des enseignants et, en attendant, organiser des cours en double flux ; à plus long terme, l'éducation des filles et la santé familiale aident à mieux espacer les naissances.</p>",
+      transfert: "<p>Une ville a 30 ‰ de natalité et 10 ‰ de mortalité. Calcule son accroissement naturel et son temps de doublement approximatif. <em>(20 ‰ = 2 % ; 70 ÷ 2 = 35 ans.)</em></p>"
+    },
+    revision: (CP_OLD ? CP_OLD.revision : []).concat(["Temps de doublement ≈ 70 ÷ (taux en %)."]),
+    exo: CP_OLD ? CP_OLD.exo : "",
+    quiz: CP_OLD ? CP_OLD.quiz : []
+  });
+
+  /* ═══════════════════════ 4e GREC — L'ALPHABET GREC ═══════════════════════ */
+  var GA_OLD = ancien("4e-gr-alphabet");
+  var TRAITS = {
+    "Α": [[0, 0, 15, 40], [15, 40, 30, 0], [7, 16, 23, 16]], "Η": [[0, 0, 0, 40], [30, 0, 30, 40], [0, 20, 30, 20]], "Ν": [[0, 0, 0, 40], [0, 40, 30, 0], [30, 0, 30, 40]], "Θ": "o", "Ρ": [[0, 0, 0, 40], [0, 40, 22, 40], [22, 40, 28, 33], [28, 33, 28, 27], [28, 27, 22, 20], [22, 20, 0, 20]]
+  };
+  function stele3D() {
+    var o = [];
+    o.push({ f: "boite", c: [0, -110, 0], d: [380, 20, 140], coul: "#8C8577", dessus: "#A39D90" });
+    o.push({ f: "boite", c: [0, 10, 0], d: [320, 220, 34], coul: "#E7E1D4", dessus: "#F2EEE4" });
+    o.push({ f: "boite", c: [0, 126, 0], d: [340, 14, 40], coul: "#D8D1C2", dessus: "#E7E1D4" });
+    function point(x, y) { o.push({ f: "sphere", c: [x, y, -17.5], r: 2.4, coul: "#5C564C" }); }
+    function mot(m, x0, y0, s) {
+      m.split("").forEach(function (L, i) {
+        var bx = x0 + i * 46 * s, T = TRAITS[L];
+        if (T === "o") { var k; for (k = 0; k < 28; k++) { var a = k / 28 * 6.283; point(bx + (15 + 14 * Math.cos(a)) * s, y0 + (20 + 20 * Math.sin(a)) * s); } T = [[8, 20, 22, 20]]; }
+        T.forEach(function (t) { var L2 = Math.hypot(t[2] - t[0], t[3] - t[1]), n = Math.max(2, Math.round(L2 / 3.4)), k; for (k = 0; k <= n; k++) point(bx + (t[0] + (t[2] - t[0]) * k / n) * s, y0 + (t[1] + (t[3] - t[1]) * k / n) * s); });
+      });
+    }
+    mot("ΑΘΗΝΑ", -110, 30, 1);
+    return o;
+  }
+  remplacer("4e-gr-alphabet", {
+    c: "4e", m: "grec", titre: "L'alphabet grec : écriture et prononciation", duree: 30,
+    accroche: "Sur la carte postale de son oncle, Nadia lit « A-T-H-H-N-A ». Son frère y voit « ATHENA ». Les lettres grecques se lisent-elles comme les nôtres ?",
+    intro: "Une carte postale envoyée d'Athènes à une élève de Douala te sert de fil rouge : à chaque partie, un indice t'aide à trancher entre trois affirmations.",
+    objectifs: ["expliquer l'origine phénicienne de l'alphabet grec et l'invention des voyelles", "lire et transcrire les 24 lettres", "éviter les faux amis Η, Ρ, Χ", "reconnaître des racines grecques dans des mots français"],
+    enquete: {
+      titre: "La carte postale d'Athènes",
+      svg: svg(640, 220, "Une carte postale montrant un temple grec et le mot ΑΘΗΝΑ ; une élève perplexe la tient", lin("gaC", ["#BFE0F7", "#EAF4FB"], true),
+        "<rect width='640' height='220' fill='#F4F1EA'/><g transform='rotate(-3 250 110)'><rect x='90' y='24' width='320' height='180' rx='6' fill='url(#gaC)' stroke='#C9D2E3' stroke-width='3'/><rect x='90' y='150' width='320' height='54' fill='#C9B28A'/>" +
+        "<path d='M160 70L250 44L340 70Z' fill='#EDE7DA' stroke='#B8AE9C'/><rect x='160' y='70' width='180' height='10' fill='#E2DACB'/>" + [0, 1, 2, 3, 4, 5].map(function (k) { return "<rect x='" + (168 + k * 31) + "' y='80' width='12' height='62' fill='#F2EEE4' stroke='#C9C0AE'/>"; }).join("") + "<rect x='152' y='142' width='196' height='10' fill='#D8D1C2'/>" +
+        txt(250, 186, "ΑΘΗΝΑ", { s: 28, c: "#1E499B" }) + "</g>" + perso(500, 96, "#5A3A1E", "#C62828", "#2E3445") + bulle(420, 22, 200, "A-T-H-H-N-A ?", "#F7C948") + txt(470, 205, "ΠΛΑΚΑ · ΑΚΡΟΠΟΛΙΣ", { s: 11, c: GRIS })),
+      legende: "À Douala, Nadia (4e) reçoit une carte postale de son oncle, en voyage à Athènes.",
+      contexte: "<p>Nadia lit « ΑΘΗΝΑ » lettre par lettre en croyant reconnaître notre alphabet : « A, T, H, H, N, A. » Son frère hésite : « Le Η ressemble à un H, le Ρ de ΑΚΡΟΠΟΛΙΣ à un P, et le Χ à un X. » Leur cousine, en 3e, ajoute : « De toute façon, le grec, ça n'a rien à voir avec le français. »</p>",
+      documents: [{ t: "Au dos de la carte", html: "<p>« Χαῖρε, Nadia ! (Bonjour !) Je suis à ΑΘΗΝΑ, au pied de l'ΑΚΡΟΠΟΛΙΣ. Ton oncle qui t'embrasse. »</p>" }],
+      question: "Comment se lisent ΑΘΗΝΑ et ΑΚΡΟΠΟΛΙΣ, et le grec a-t-il un lien avec le français ?",
+      tache: "Transcris les deux mots en lettres latines, explique les pièges de lecture et montre un lien entre le grec et notre langue.",
+      hypotheses: ["Les lettres grecques se lisent comme les lettres latines qui leur ressemblent : Η = h, Ρ = p, Χ = x.", "Le grec n'a rien à voir avec le français.", "Η se lit ê, Ρ se lit r, Χ se lit kh, Θ se lit th : ΑΘΗΝΑ = Athêna, ΑΚΡΟΠΟΛΙΣ = Akropolis ; notre alphabet et beaucoup de nos mots viennent du grec."]
+    },
+    parties: [
+      { t: "D'où vient l'alphabet grec ?", html: partie(GA_OLD, 0),
+        planches: [{ type: "2D", titre: "Du phénicien au français", legende: "Les Phéniciens notaient seulement les consonnes. Les Grecs ont repris leurs signes, les ont retournés ou redressés, et ont transformé certains en voyelles (aleph → alpha). Les Romains ont adapté l'alphabet grec, et nous écrivons avec l'alphabet latin.", svg: (function () {
+          var C = [["aleph", "<path d='M-12 -14L12 -2L-12 10M-4 -16L4 14' stroke='#7A1F1F' stroke-width='3' fill='none'/>", "Α", "alpha", "A"], ["beth", "<path d='M8 14V-14H-6L-10 -4L8 -2' stroke='#7A1F1F' stroke-width='3' fill='none'/>", "Β", "bêta", "B"], ["gimel", "<path d='M-6 14L4 -14L10 -6' stroke='#7A1F1F' stroke-width='3' fill='none'/>", "Γ", "gamma", "C, G"], ["daleth", "<path d='M8 -14L-10 0L8 6Z' stroke='#7A1F1F' stroke-width='3' fill='none'/>", "Δ", "delta", "D"]], s = "<rect width='640' height='260' fill='#FBF8F2'/>";
+          s += txt(110, 30, "Phénicien", { s: 13, c: "#7A1F1F" }) + txt(110, 46, "(vers 1050 av. J.-C.)", { s: 10, c: GRIS, w: 500 }) + txt(320, 30, "Grec", { s: 13, c: BLEU }) + txt(320, 46, "(VIIIᵉ s. av. J.-C.)", { s: 10, c: GRIS, w: 500 }) + txt(530, 30, "Latin / français", { s: 13, c: VERT }) + txt(530, 46, "(Rome, puis nous)", { s: 10, c: GRIS, w: 500 });
+          C.forEach(function (c, i) { var y = 80 + i * 46; s += "<rect x='70' y='" + (y - 20) + "' width='80' height='40' rx='8' fill='#F2E6D6'/><g transform='translate(92 " + y + ")'>" + c[1] + "</g>" + txt(130, y + 5, c[0], { s: 10, c: "#7A1F1F", w: 600, a: "start" }) + "<path d='M156 " + y + "H254' stroke='#C9D2E3' stroke-width='3' marker-end='url(#gaF)'/><rect x='262' y='" + (y - 20) + "' width='116' height='40' rx='8' fill='#DCE6F2'/>" + txt(290, y + 8, c[2], { s: 22, c: BLEU }) + txt(312, y + 5, c[3], { s: 11, c: BLEU, a: "start", w: 600 }) + "<path d='M384 " + y + "H482' stroke='#C9D2E3' stroke-width='3' marker-end='url(#gaF)'/><rect x='490' y='" + (y - 20) + "' width='80' height='40' rx='8' fill='#DDEFE3'/>" + txt(530, y + 8, c[4], { s: 22, c: VERT }); });
+          s += "<rect x='262' y='238' width='116' height='18' rx='6' fill='" + BLEU + "'/>" + txt(320, 251, "+ les voyelles !", { s: 11, c: "#fff" });
+          return svg(640, 260, "Quatre lettres phéniciennes aleph, beth, gimel, daleth, devenues alpha, bêta, gamma, delta puis A, B, C, D", fleche("gaF", "#9AA3AF"), s);
+        })() }],
+        fil: { html: "<p>Notre alphabet descend directement de l'alphabet grec, par l'intermédiaire du latin : A vient de alpha, B de bêta, D de delta. Le mot « alphabet » lui-même est grec. Et des milliers de mots français sont formés de racines grecques (téléphone, géographie, biologie). Le grec a donc beaucoup à voir avec le français.</p>", verdicts: [[1, "rejetee", "Notre alphabet et beaucoup de nos mots viennent du grec."]] },
+        retenir: "Phénicien → grec (avec les voyelles) → latin → français." },
+      { t: "Les 24 lettres", html: partie(GA_OLD, 1),
+        planches: [{ type: "3d", titre: "Une stèle gravée : ΑΘΗΝΑ", legende: "Tourne la stèle de marbre : le nom de la ville est gravé en capitales grecques, point par point, comme le faisaient les tailleurs de pierre. Lis-le lettre à lettre : alpha (a), thêta (th), êta (ê), nu (n), alpha (a) : Athêna.",
+          modele: { h: 340, rx: -10, ry: 24, echelle: 0.8, alt: "Stèle de marbre blanc posée sur un socle, avec le mot ΑΘΗΝΑ gravé en points", objets: stele3D(),
+            etiquettes: [{ p: [-49, 50, -18], t: "Θ = th", cote: "g" }, { p: [-3, 50, -18], t: "Η = ê (pas h !)", cote: "d" }, { p: [43, 50, -18], t: "Ν = n", cote: "d" }] } }],
+        fil: { html: "<p>Certaines capitales grecques ressemblent à nos lettres mais ne se lisent pas pareil : <strong>Η</strong> est un êta (ê long), <strong>Ρ</strong> un rhô (r), <strong>Χ</strong> un khi (kh), <strong>Ν</strong> un nu (n). ΑΘΗΝΑ se lit donc « Athêna », et ΑΚΡΟΠΟΛΙΣ « Akropolis ». Se fier à la ressemblance, c'est tomber dans le piège des faux amis.</p>", verdicts: [[0, "rejetee", "Faux amis : Η = ê, Ρ = r, Χ = kh."]] },
+        retenir: "24 lettres ; η = ê, ρ = r, χ = kh ; σ devient ς en fin de mot." },
+      { t: "Le grec dans nos mots", html: partie(GA_OLD, 2),
+        planches: [{ type: "2D", titre: "L'atelier des racines", legende: "Deux racines grecques s'assemblent pour former un mot français savant : ἀκρο- (le haut) + πόλις (la cité) donnent « acropole », la ville haute. Le même jeu fabrique géographie, biologie, téléphone, démocratie.", svg: (function () {
+          var R = [["ἄκρος", "akros", "haut", "πόλις", "polis", "cité", "acropole"], ["γῆ", "gê", "terre", "γράφω", "graphô", "écrire", "géographie"], ["βίος", "bios", "vie", "λόγος", "logos", "étude", "biologie"], ["τῆλε", "têle", "loin", "φωνή", "phônê", "voix", "téléphone"]], s = "<rect width='640' height='260' fill='#FBF8F2'/>";
+          R.forEach(function (r, i) { var y = 20 + i * 60; s += bloc(30, y, 150, 46, BLEU, r[0] + " · " + r[1], r[2]) + txt(198, y + 30, "+", { s: 22 }) + bloc(214, y, 150, 46, "#7B3F99", r[3] + " · " + r[4], r[5]) + "<path d='M372 " + (y + 23) + "H418' stroke='" + NUIT + "' stroke-width='3' marker-end='url(#gaF2)'/><rect x='426' y='" + y + "' width='190' height='46' rx='10' fill='#fff' stroke='" + VERT + "' stroke-width='2'/>" + txt(521, y + 29, r[6], { s: 16, c: VERT }); });
+          return svg(640, 260, "Quatre assemblages de racines grecques : acropole, géographie, biologie, téléphone", fleche("gaF2", NUIT), s);
+        })() }],
+        fil: { html: "<p>Nadia peut maintenant tout relire : ΑΘΗΝΑ = Athêna, la ville d'Athéna ; ΑΚΡΟΠΟΛΙΣ = Akropolis, de ἄκρος (haut) et πόλις (cité) : la « ville haute ». Et le français en a tiré « acropole », comme « politique » (de πόλις). Lire le grec, c'est mieux comprendre sa propre langue.</p>", verdicts: [[2, "validee", "Bonne lecture des faux amis et racines grecques du français."]] },
+        retenir: "Beaucoup de mots savants du français sont faits de racines grecques." }
+    ],
+    denouement: {
+      titre: "Nadia déchiffre sa carte",
+      etapes: ["Notre alphabet vient du grec (indice 1).", "Faux amis : Η = ê, Ρ = r, Χ = kh (indice 2).", "Racines : ἄκρος + πόλις = acropole (indice 3)."],
+      reponse: "<p>Il ne faut pas lire les lettres grecques d'après leur ressemblance avec les nôtres. Dans ΑΘΗΝΑ, Θ (thêta) se lit « th » et Η (êta) se lit « ê » : le mot se transcrit Athêna, le nom de la ville d'Athènes et de sa déesse. Dans ΑΚΡΟΠΟΛΙΣ, Ρ (rhô) se lit « r » et Σ (sigma) « s » : Akropolis. Le Χ de Χαῖρε se lit « kh » : khaïré, « bonjour ». Le grec n'est pas étranger au français : les Grecs ont adapté l'alphabet phénicien en y ajoutant les voyelles, les Romains l'ont repris, et nous écrivons avec cet héritage ; de plus, « acropole » vient de ἄκρος (haut) et πόλις (cité), comme « politique » ou « métropole ».</p>",
+      transfert: "<p>Transcris : ΔΗΜΟΚΡΑΤΙΑ et ΦΩΤΟΓΡΑΦΙΑ, puis donne le mot français. <em>(dêmokratia → démocratie ; phôtographia → photographie.)</em></p>"
+    },
+    revision: (GA_OLD ? GA_OLD.revision : []).concat(["Faux amis : Η (ê), Ρ (r), Χ (kh), Ν (n)."]),
+    exo: GA_OLD ? GA_OLD.exo : "",
+    quiz: [
+      q("Combien de lettres compte l'alphabet grec ?", "24", "26", "22", "D'alpha à oméga."),
+      q("La lettre Η (êta) se lit…", "ê", "h", "n", "Un e long ; faux ami du H."),
+      q("La lettre Ρ (rhô) se lit…", "r", "p", "b", "Faux ami du P."),
+      q("La lettre Χ (khi) se lit…", "kh", "x", "ks", "Le son ks est noté par ξ (xi)."),
+      q("ΑΘΗΝΑ se transcrit…", "Athêna", "Athhna", "Atena", "Θ = th, Η = ê."),
+      q("Les Grecs ont ajouté à l'alphabet phénicien…", "les voyelles", "les consonnes", "les chiffres", "Le phénicien ne notait que les consonnes."),
+      q("Le sigma final s'écrit…", "ς", "σ", "Σ", "Comme dans λόγος."),
+      q("« Philosophie » signifie…", "amour de la sagesse", "étude de la Terre", "écriture de la vie", "philos (ami) + sophia (sagesse)."),
+      q("ἄκρος + πόλις a donné…", "acropole", "métropole", "politesse", "La ville haute."),
+      q("Le mot « alphabet » vient…", "des deux premières lettres grecques", "d'un mot latin signifiant « lettre »", "du phénicien « aleph » seul", "Alpha + bêta.")
+    ]
+  });
+
+  /* ═══════════════════════ SIMULATIONS ═══════════════════════ */
+  VRT_A("5e-francais-subordonnee-relative", 1, "Qui, que, dont ou où ? Complète la lettre", function (el) {
+    exercice(el, [["Le chef ___ je t'ai parlé habite la chefferie.", ["dont", "que", "où"], "Je t'ai parlé du chef : « de… » → dont."], ["Le marché ___ les femmes vont ouvre le samedi.", ["où", "que", "dont"], "Les femmes vont au marché : lieu → où."], ["Mon village, ___ s'appelle Bandjoun, est sur une colline.", ["qui", "que", "dont"], "Le village s'appelle… : sujet → qui."], ["Les masques ___ nous portons sont célèbres.", ["que", "qui", "où"], "Nous portons les masques : COD → que."], ["Le jour ___ je suis né, il pleuvait.", ["où", "que", "dont"], "Temps → où."], ["Le pagne ___ ma mère est fière vient de Foumban.", ["dont", "que", "où"], "Elle est fière du pagne → dont."], ["Le griot ___ chante ce soir vient de Foumban.", ["qui", "que", "dont"], "Le griot chante : sujet → qui."], ["La rivière ___ nous nous baignons est fraîche.", ["où", "que", "qui"], "Nous nous baignons dans la rivière : lieu → où."]], "Phrase suivante", "Phrase");
+  });
+  VRT_A("5e-histoire-pygmees-sao", 1, "Coule une statuette de bronze à la cire perdue", function (el) {
+    var i = 0;
+    el.innerHTML = "<div data-g></div><p class='labo-r' data-r></p><div style='display:flex;gap:8px;flex-wrap:wrap'><button type='button' class='btn-l' data-av>Étape suivante ▶</button><button type='button' class='btn-l' data-ra>↺ Recommencer</button></div>";
+    function maj() {
+      var s = "<rect width='470' height='170' fill='#F4EDE1'/><rect y='140' width='470' height='30' fill='#8B6B4A'/>";
+      CIRE.forEach(function (c, k) { s += "<rect x='" + (12 + k * 92) + "' y='148' width='80' height='14' rx='7' fill='" + (k <= i ? "#B87333" : "#D8CFC0") + "'/>"; });
+      s += "<g transform='translate(235 76)'>" + CIRE[i][2]() + "</g>";
+      el.querySelector("[data-g]").innerHTML = "<svg viewBox='0 0 470 170' style='max-width:520px;width:100%' role='img' aria-label='Étape de la fonte du bronze à la cire perdue'>" + s + "</svg>";
+      el.querySelector("[data-r]").innerHTML = "<b>" + CIRE[i][0] + "</b> — " + CIRE[i][1];
+      el.querySelector("[data-av]").disabled = i === CIRE.length - 1;
+    }
+    el.querySelector("[data-av]").addEventListener("click", function () { if (i < CIRE.length - 1) { i++; maj(); } });
+    el.querySelector("[data-ra]").addEventListener("click", function () { i = 0; maj(); });
+    maj();
+  });
+  VRT_A("5e-geo-croissance-population", 1, "Règle natalité et mortalité, observe la population grandir", function (el) {
+    el.innerHTML = "<div style='display:flex;flex-wrap:wrap;gap:8px 18px'><label class='labo-c'><span>Natalité : <b data-nv>36</b> ‰</span><input type='range' min='8' max='50' value='36' data-n></label><label class='labo-c'><span>Mortalité : <b data-mv>9</b> ‰</span><input type='range' min='5' max='30' value='9' data-m></label></div><div data-g style='margin-top:8px'></div><p class='labo-r' data-r></p>";
+    var N = el.querySelector("[data-n]"), M = el.querySelector("[data-m]"), P0 = 400000;
+    function maj() {
+      var n = +N.value, m = +M.value, t = (n - m) / 1000, s = "<rect width='470' height='190' fill='#FBF8F2'/><path d='M50 15V160H455' stroke='" + NUIT + "' stroke-width='2' fill='none'/>", k, d = "", Pmax = 1600000;
+      el.querySelector("[data-nv]").textContent = n; el.querySelector("[data-mv]").textContent = m;
+      [400000, 800000, 1200000, 1600000].forEach(function (v) { var y = 160 - v / Pmax * 140; s += "<path d='M50 " + y + "H455' stroke='#E3E7EF'/>" + txt(46, y + 4, (v / 1000) + " k", { s: 9, a: "end", c: GRIS, w: 600 }); });
+      for (k = 0; k <= 50; k += 10) s += txt(50 + k * 8, 176, (2026 + k) + "", { s: 9, c: GRIS, w: 600 });
+      for (k = 0; k <= 50; k++) { var P = P0 * Math.pow(1 + t, k); d += (k ? "L" : "M") + (50 + k * 8) + " " + Math.max(10, 160 - P / Pmax * 140).toFixed(1); }
+      s += "<path d='" + d + "' stroke='" + (t > 0 ? ROUGE : VERT) + "' stroke-width='3' fill='none'/>";
+      el.querySelector("[data-g]").innerHTML = "<svg viewBox='0 0 470 190' style='max-width:520px;width:100%' role='img' aria-label='Projection de la population de la commune sur 50 ans'>" + s + "</svg>";
+      var P20 = Math.round(P0 * Math.pow(1 + t, 20) / 1000) * 1000;
+      el.querySelector("[data-r]").innerHTML = "Accroissement naturel = " + n + " − " + m + " = <b>" + (n - m) + " ‰</b> = <b>" + String((n - m) / 10).replace(".", ",") + " %</b> par an · " + (t > 0 ? "doublement en ≈ <b>" + Math.round(Math.log(2) / Math.log(1 + t)) + " ans</b> · " : t < 0 ? "la population diminue · " : "population stable · ") + "dans 20 ans : <b>" + P20.toLocaleString("fr-FR") + "</b> habitants";
+    }
+    N.addEventListener("input", maj); M.addEventListener("input", maj); maj();
+  });
+  VRT_A("4e-gr-alphabet", 1, "Lis les mots grecs : choisis la bonne transcription", function (el) {
+    exercice(el, [["ΑΘΗΝΑ se lit… ___", ["Athêna", "Athhna", "Atena"], "Θ = th, Η = ê."], ["ΑΚΡΟΠΟΛΙΣ se lit… ___", ["Akropolis", "Akpopolis", "Akropolix"], "Ρ = r, Σ = s."], ["Χαῖρε (bonjour) se lit… ___", ["khaïré", "xaïpé", "kaïré"], "Χ = kh, ρ = r."], ["ΦΩΣ (lumière) se lit… ___", ["phôs", "fos", "pôs"], "Φ = ph, Ω = ô long, Σ = s."], ["ΨΥΧΗ (âme) se lit… ___", ["psukhê", "puxh", "psikh"], "Ψ = ps, Υ = u, Χ = kh, Η = ê."], ["ΛΟΓΟΣ (parole) se lit… ___", ["logos", "loyos", "lorox"], "Γ = g dur, Σ = s."], ["ΒΙΟΣ (vie) se lit… ___", ["bios", "biox", "vios"], "Β = b."], ["ΔΗΜΟΣ (peuple) se lit… ___", ["dêmos", "dhmos", "demox"], "Δ = d, Η = ê."]], "Mot suivant", "Mot");
+  });
+})();
+
+/* Leçons APPROFONDIES — lot 16, 4e et 6e (18/11/2026) : tons des langues nationales (4e), carte linguistique, intelligence
+   artificielle, composants de l'ordinateur (6e). Même gabarit et même mécanisme que 11-approfondies-lot4.js (remplacement EN PLACE ;
+   ordre, clé, scènes conservés ; schémas d'origine (illus) repris ; quiz portés à 10 questions). Simulations VRT_A en fin. */
+(function () {
+  "use strict";
+  var NUIT = "#001136", BLEU = "#1E499B", GRIS = "#4D5163", VERT = "#17784D", ROUGE = "#C62828", TERRE = "#C46A2B";
+
+  function txt(x, y, t, o) {
+    o = o || {};
+    return "<text x='" + x + "' y='" + y + "' text-anchor='" + (o.a || "middle") + "' font-size='" + (o.s || 12) + "' font-weight='" + (o.w || 700) + "' fill='" + (o.c || NUIT) + "'" + (o.i ? " font-style='italic'" : "") + (o.halo ? " stroke='#fff' stroke-width='3' paint-order='stroke'" : "") + ">" + t + "</text>";
+  }
+  function lin(id, cs, vertical) {
+    var s = "<linearGradient id='" + id + "'" + (vertical ? " x1='0' y1='0' x2='0' y2='1'" : "") + ">";
+    cs.forEach(function (c, i) { s += "<stop offset='" + (i / (cs.length - 1)).toFixed(2) + "' stop-color='" + c + "'/>"; });
+    return s + "</linearGradient>";
+  }
+  function rad(id, cs) {
+    var s = "<radialGradient id='" + id + "' cx='35%' cy='30%' r='75%'>";
+    cs.forEach(function (c, i) { s += "<stop offset='" + (i / (cs.length - 1)).toFixed(2) + "' stop-color='" + c + "'/>"; });
+    return s + "</radialGradient>";
+  }
+  function fleche(id, c) { return "<marker id='" + id + "' markerWidth='10' markerHeight='10' refX='7' refY='5' orient='auto'><path d='M0 1L8 5L0 9Z' fill='" + c + "'/></marker>"; }
+  function svg(w, h, alt, defs, corps) {
+    return "<svg viewBox='0 0 " + w + " " + h + "' role='img' aria-label='" + alt + "' font-family='Inter,Arial,sans-serif'><rect width='" + w + "' height='" + h + "' fill='#fff'/><defs>" + defs + "</defs>" + corps +
+      "<text x='" + (w - 6) + "' y='" + (h - 5) + "' font-size='8' text-anchor='end' fill='#8A93A6'>Planche VÉRITAS</text></svg>";
+  }
+  function ancien(id) { return window.VRT_LECONS[id]; }
+  function remplacer(id, o) {
+    var a = ancien(id);
+    if (a) ["apc", "examen", "rang", "cle", "scenes"].forEach(function (k) { if (a[k] != null && o[k] == null) o[k] = a[k]; });
+    VRT_L(id, o);
+    if (a) o.ordre = a.ordre;
+  }
+  function q(qq, bonne, f1, f2, e) { return { q: qq, r: [bonne, f1, f2], b: 0, e: e }; }
+  function partie(old, i) { return old && old.parties[i] ? old.parties[i].html : ""; }
+  function bulle(x, y, w, t, c) { return "<rect x='" + x + "' y='" + y + "' width='" + w + "' height='30' rx='12' fill='#fff' stroke='" + (c || "#C9D2E3") + "'/>" + txt(x + w / 2, y + 20, t, { s: 11.5 }); }
+  function perso(x, y, peau, habit, bas) {
+    bas = bas || "#2E3445";
+    return "<g transform='translate(" + x + " " + y + ")'><ellipse cx='0' cy='84' rx='18' ry='4' fill='#001136' opacity='.18'/>" +
+      "<rect x='-9' y='44' width='8' height='36' rx='3' fill='" + bas + "'/><rect x='1' y='44' width='8' height='36' rx='3' fill='" + bas + "'/>" +
+      "<ellipse cx='-6' cy='81' rx='7' ry='3.5' fill='#1F2328'/><ellipse cx='6' cy='81' rx='7' ry='3.5' fill='#1F2328'/>" +
+      "<path d='M-13 46L-16 18C-16 13 -12 11 -6 10H6C12 11 16 13 16 18L13 46Z' fill='" + habit + "'/>" +
+      "<path d='M-15 16L-20 40' stroke='" + habit + "' stroke-width='7' stroke-linecap='round'/><path d='M15 16L20 40' stroke='" + habit + "' stroke-width='7' stroke-linecap='round'/>" +
+      "<circle cx='-20' cy='42' r='3.6' fill='" + peau + "'/><circle cx='20' cy='42' r='3.6' fill='" + peau + "'/>" +
+      "<rect x='-3.5' y='5' width='7' height='7' fill='" + peau + "'/><ellipse cx='0' cy='-2' rx='9' ry='10.5' fill='" + peau + "'/>" +
+      "<path d='M-9 -4C-10 -14 -4 -13.5 0 -13.5S10 -14 9 -4C7 -9 -7 -9 -9 -4Z' fill='#1B1410'/><ellipse cx='-9' cy='-1' rx='1.8' ry='3' fill='" + peau + "'/><ellipse cx='9' cy='-1' rx='1.8' ry='3' fill='" + peau + "'/></g>";
+  }
+  /* portrait en buste (arbre généalogique) */
+  function portrait(x, y, peau, habit, cheveux, age) {
+    var s = "<g transform='translate(" + x + " " + y + ")'><circle r='30' fill='#F4EFE4' stroke='#C9A576' stroke-width='3'/><clipPath id='pc" + x + "_" + y + "'><circle r='28'/></clipPath><g clip-path='url(#pc" + x + "_" + y + ")'>";
+    s += "<path d='M-26 32C-26 14 -14 10 0 10S26 14 26 32Z' fill='" + habit + "'/><rect x='-4' y='2' width='8' height='10' fill='" + peau + "'/><ellipse cy='-6' rx='11' ry='13' fill='" + peau + "'/>";
+    s += age === "vieux" ? "<path d='M-11 -10C-12 -20 -4 -21 0 -21S12 -20 11 -10C9 -14 -9 -14 -11 -10Z' fill='#D8D8D8'/>" : age === "femme" ? "<path d='M-13 -6C-15 -24 15 -24 13 -6C12 -14 -12 -14 -13 -6Z' fill='" + cheveux + "'/><path d='M-13 -14h26v-6c-6 -6 -20 -6 -26 0Z' fill='" + habit + "'/>" : "<path d='M-11 -10C-12 -20 -4 -21 0 -21S12 -20 11 -10C9 -14 -9 -14 -11 -10Z' fill='" + cheveux + "'/>";
+    s += "<circle cx='-4' cy='-6' r='1.4' fill='#1B1410'/><circle cx='4' cy='-6' r='1.4' fill='#1B1410'/><path d='M-3 2q3 2 6 0' stroke='#1B1410' fill='none'/></g></g>";
+    return s;
+  }
+  /* boucle d'exercice générique : [phrase avec ___, [bonne, autres…], explication] */
+  function exercice(el, C, suivant, lib) {
+    var i = 0, ok = 0;
+    el.innerHTML = "<p class='labo-r' data-q style='font-size:16px'></p><div style='display:flex;gap:8px;flex-wrap:wrap' data-c></div><p class='an-note' data-e></p><p class='labo-r' data-s></p>";
+    function $(s) { return el.querySelector(s); }
+    function poser() {
+      var c = C[i];
+      $("[data-q]").innerHTML = (i + 1) + ". " + c[0].replace("___", "<b style='border-bottom:2px dashed #1E499B;padding:0 14px'>?</b>");
+      $("[data-e]").textContent = ""; $("[data-s]").innerHTML = lib + " " + (i + 1) + " / " + C.length + " · score : <b>" + ok + "</b>";
+      $("[data-c]").innerHTML = c[1].slice().sort().map(function (x) { return "<button type='button' class='btn-l' data-v='" + x + "'>" + x + "</button>"; }).join("");
+      el.querySelectorAll("[data-v]").forEach(function (b) {
+        b.addEventListener("click", function () {
+          var bon = b.dataset.v === c[1][0]; if (bon) ok++;
+          $("[data-q]").innerHTML = (i + 1) + ". " + c[0].replace("___", "<b style='color:" + (bon ? VERT : ROUGE) + "'>" + c[1][0] + "</b>");
+          $("[data-e]").innerHTML = (bon ? "✔ " : "✘ ") + c[2];
+          el.querySelectorAll("[data-v]").forEach(function (x) { x.disabled = true; });
+          var nx = document.createElement("button"); nx.type = "button"; nx.className = "btn-l"; nx.textContent = i + 1 < C.length ? suivant : "↺";
+          nx.addEventListener("click", function () { i = (i + 1) % C.length; if (!i) ok = 0; poser(); });
+          $("[data-c]").appendChild(nx);
+          $("[data-s]").innerHTML = lib + " " + (i + 1) + " / " + C.length + " · score : <b>" + ok + "</b>";
+        });
+      });
+    }
+    poser();
+  }
+
+  function alea(g) { return function () { g = (g * 16807) % 2147483647; return (g - 1) / 2147483646; }; }
+  function ill(old, i) { return old && old.parties[i] ? old.parties[i].illus : undefined; }
+  function bloc(x, y, w, h, c, l1, l2) {
+    return "<rect x='" + x + "' y='" + y + "' width='" + w + "' height='" + h + "' rx='10' fill='" + c + "'/>" + txt(x + w / 2, y + h / 2 - (l2 ? 3 : -5), l1, { s: 14, c: "#fff" }) + (l2 ? txt(x + w / 2, y + h / 2 + 14, l2, { s: 10, c: "#fff", w: 500 }) : "");
+  }
+  var CMR = [[8.6, 4.6], [9.3, 6.0], [10.1, 6.9], [11.1, 6.5], [11.8, 7.1], [12.3, 8.4], [13.0, 9.4], [13.6, 10.2], [14.1, 11.2], [14.6, 12.0], [14.1, 13.0], [14.6, 13.1], [15.0, 12.0], [15.1, 10.8], [15.6, 10.0], [14.4, 9.9], [14.9, 8.7], [15.5, 7.5], [14.6, 6.3], [14.5, 5.0], [15.0, 4.1], [16.1, 3.0], [16.2, 2.2], [15.0, 1.9], [13.3, 2.2], [11.3, 2.2], [9.8, 2.3], [9.8, 3.0], [9.5, 3.9], [9.0, 4.0]];
+  function dedans(x, y) { var c = false, i, j; for (i = 0, j = CMR.length - 1; i < CMR.length; j = i++) { var a = CMR[i], b = CMR[j]; if ((a[1] > y) !== (b[1] > y) && x < (b[0] - a[0]) * (y - a[1]) / (b[1] - a[1]) + a[0]) c = !c; } return c; }
+  var FAM = { bantou: ["#2E7D32", "langues bantoues"], grass: ["#C2540A", "langues des Grassfields"], adam: ["#B8860B", "langues adamawa-oubanguiennes"], tchad: ["#7B3F99", "langues tchadiques"] };
+  function famille(lon, lat) { if (lat > 10) return "tchad"; if (lon < 11.6 && lat > 5 && lat < 7.3) return "grass"; if (lat > 6.4 || (lon > 13.4 && lat > 3.6)) return "adam"; return "bantou"; }
+
+  /* ═══════════════════════ 4e LANGUES NATIONALES — LES TONS ═══════════════════════ */
+  var LT_OLD = ancien("4e-ln-tons");
+  var TONS = [["haut", "á", [260, 260]], ["bas", "à", [150, 150]], ["moyen", "ā", [200, 200]], ["montant", "ǎ", [150, 270]], ["descendant", "â", [270, 150]]];
+  function nkul3D() {
+    var o = [], k;
+    [-80, 80].forEach(function (x) { o.push({ f: "boite", c: [x, 10, 0], d: [16, 20, 90], coul: "#5D3A1E", dessus: "#6B4423" }); });
+    o.push({ f: "boite", c: [0, -4, 0], d: [320, 8, 160], coul: "#8B6B4A", dessus: "#A68A5E" });
+    o.push({ f: "cylindre", c: [-120, 54, 0], r: 34, h: 240, n: 22, axe: "x", coul: "#7A4A1E" });
+    o.push({ f: "boite", c: [0, 88.5, 0], d: [160, 1.5, 7], coul: "#1F140C", div: false });
+    o.push({ f: "boite", c: [0, 88.6, -12], d: [150, 1, 14], coul: "#9C6A3A", div: false });
+    o.push({ f: "boite", c: [0, 88.6, 12], d: [150, 1, 14], coul: "#6B4423", div: false });
+    for (k = 0; k < 2; k++) { o.push({ f: "cylindre", c: [40 + k * 30, 96, -70], r: 2.5, h: 70, n: 6, axe: "z", coul: "#C9A06E" }); o.push({ f: "sphere", c: [40 + k * 30, 96, -76], r: 7, coul: "#3B2416" }); }
+    o.push({ f: "cylindre", c: [-120, 54, 0], r: 34.4, h: 2, n: 22, axe: "x", coul: "#5D3A1E" });
+    o.push({ f: "cylindre", c: [118, 54, 0], r: 34.4, h: 2, n: 22, axe: "x", coul: "#5D3A1E" });
+    return o;
+  }
+  remplacer("4e-ln-tons", {
+    c: "4e", m: "ln", titre: "Les tons de nos langues", duree: 30,
+    accroche: "« Les accents, c'est pour faire joli : enlevons-les de l'affiche ! » Le club de langues nationales a-t-il raison ?",
+    intro: "Une affiche préparée par le club de langues nationales d'un lycée de Yaoundé te sert de fil rouge : à chaque partie, un indice t'aide à trancher entre trois idées sur les tons.",
+    objectifs: ["définir le ton comme hauteur mélodique d'une syllabe", "distinguer ton et volume de la voix", "noter les tons selon l'AGLC (´ ` ¯ ˇ ˆ)", "reconnaître un ton à l'oreille"],
+    enquete: {
+      titre: "L'affiche du club de langues nationales",
+      svg: svg(640, 220, "Deux élèves devant une affiche écrite en langue nationale avec des accents sur les voyelles ; l’un veut effacer les accents", lin("ltC", ["#F4EDE1", "#E9DFCF"], true),
+        "<rect width='640' height='220' fill='url(#ltC)'/><rect y='190' width='640' height='30' fill='#B88A5A'/><rect x='190' y='26' width='260' height='150' rx='6' fill='#FFFBEA' stroke='#C9B28A' stroke-width='3'/>" + txt(320, 58, "Club de langues nationales", { s: 13, c: VERT }) + txt(320, 100, "bá · bà · bā · bǎ · bâ", { s: 26, c: BLEU }) + txt(320, 136, "Un même « ba », cinq mélodies", { s: 12, c: GRIS, w: 600 }) + "<path d='M232 92l18 -18' stroke='" + ROUGE + "' stroke-width='3'/><path d='M228 74l22 22' stroke='" + ROUGE + "' stroke-width='3' opacity='0'/>" +
+        perso(110, 96, "#5A3A1E", "#F7C948", "#2E3445") + "<path d='M128 116l60 -30' stroke='#6B4423' stroke-width='4'/>" + perso(540, 96, "#6B4423", "#2E7D32", "#1E499B") + bulle(20, 40, 170, "On efface les accents ?", "#F7C948") + bulle(462, 40, 160, "Tu changes les mots !", "#9FC5E8")),
+      legende: "Au lycée bilingue d'Etoug-Ebé, à Yaoundé : le club de langues nationales prépare une affiche pour la journée des langues maternelles.",
+      contexte: "<p>L'affiche montre le même « ba » écrit avec cinq signes différents. Paul veut les effacer : « Ce sont des accents décoratifs ; et de toute façon, le ton, c'est juste parler plus fort ou moins fort. » Marie proteste : « En français déjà, “a” et “à” ne veulent pas dire la même chose ! » Le professeur leur propose d'écouter, puis de vérifier dans l'AGLC.</p>",
+      documents: [{ t: "Extrait de l'AGLC (1979)", html: "<p>« Les tons sont notés sur la voyelle : ton haut par l'accent aigu, ton bas par l'accent grave, ton moyen par le macron, ton montant par le caron, ton descendant par l'accent circonflexe. »</p>" }],
+      question: "Qu'est-ce qu'un ton, et peut-on supprimer ces signes sans changer les mots ?",
+      tache: "Définis le ton, montre que ce n'est pas le volume, puis explique le rôle des signes de l'AGLC.",
+      hypotheses: ["Les signes sont des accents décoratifs : on peut les supprimer.", "Le ton, c'est le volume : parler fort ou doucement.", "Le ton est la hauteur mélodique d'une syllabe ; il distingue des mots ; l'AGLC le note par ´ ` ¯ ˇ ˆ."]
+    },
+    parties: [
+      { t: "Qu'est-ce qu'un ton ?", html: partie(LT_OLD, 0),
+        planches: [{ type: "2D", titre: "Hauteur ou volume ?", legende: "À gauche, on chante « ba » plus haut ou plus bas : c'est la hauteur, le ton change. À droite, on dit « ba » plus fort ou plus doucement : c'est le volume, le ton ne change pas. Seule la hauteur distingue les mots.", svg: (function () {
+          var s = "<rect width='640' height='250' fill='#FBF8F2'/><rect x='20' y='20' width='290' height='210' rx='12' fill='#fff' stroke='" + VERT + "' stroke-width='2'/><rect x='330' y='20' width='290' height='210' rx='12' fill='#fff' stroke='" + ROUGE + "' stroke-width='2'/>";
+          s += txt(165, 44, "La HAUTEUR change : le ton change", { s: 12, c: VERT });
+          [[60, 0.06], [190, 0.025]].forEach(function (w, i) { var d = "", x; for (x = 0; x <= 110; x += 2) d += (x ? "L" : "M") + (w[0] - 20 + x) + " " + (130 + 34 * Math.sin(x * w[1] * 6.28)).toFixed(1); s += "<path d='" + d + "' stroke='" + VERT + "' stroke-width='2.5' fill='none'/>" + txt(w[0] + 35, 196, i ? "bà : son grave" : "bá : son aigu", { s: 12 }); });
+          s += txt(475, 44, "Le VOLUME change : même ton", { s: 12, c: ROUGE });
+          [[370, 40], [500, 14]].forEach(function (w, i) { var d = "", x; for (x = 0; x <= 110; x += 2) d += (x ? "L" : "M") + (w[0] - 20 + x) + " " + (130 + w[1] * Math.sin(x * 0.045 * 6.28)).toFixed(1); s += "<path d='" + d + "' stroke='" + ROUGE + "' stroke-width='2.5' fill='none'/>" + txt(w[0] + 35, 196, i ? "ba (doucement)" : "BA ! (fort)", { s: 12 }); });
+          s += txt(165, 216, "vagues serrées = aigu ; larges = grave", { s: 10, c: GRIS, w: 500 }) + txt(475, 216, "vagues hautes = fort ; basses = doux", { s: 10, c: GRIS, w: 500 });
+          return svg(640, 250, "Deux ondes de fréquences différentes pour les tons haut et bas, et deux ondes de même fréquence mais d’amplitudes différentes pour le volume", "", s);
+        })() }],
+        fil: { html: "<p>Crier « BA ! » ou murmurer « ba » ne change pas le mot : c'est le <strong>volume</strong> (la hauteur des vagues sonores). Le ton, lui, est la <strong>hauteur musicale</strong> (des vagues plus ou moins serrées) : aigu ou grave, montant ou descendant. Un enfant et un adulte qui disent le même mot ont des voix différentes, mais la même mélodie.</p>", verdicts: [[1, "rejetee", "Le volume ne change pas le mot ; le ton est une hauteur musicale."]] },
+        retenir: "Ton = hauteur musicale d'une syllabe, pas volume." },
+      { t: "Les tons et leur notation (AGLC)", html: partie(LT_OLD, 1), illus: ill(LT_OLD, 1),
+        planches: [{ type: "3d", titre: "Le tambour d'appel (nkul)", legende: "Tourne le tambour à fente : un tronc évidé, fendu sur le dessus. Ses deux lèvres n'ont pas la même épaisseur : la lèvre fine sonne aigu, la lèvre épaisse sonne grave. En frappant l'une ou l'autre, le joueur reproduit la mélodie des mots et transmet des messages d'un village à l'autre : la preuve que, dans nos langues, la mélodie porte le sens.",
+          modele: { h: 340, rx: -26, ry: 30, echelle: 0.95, alt: "Tambour à fente en bois posé sur deux supports, avec deux baguettes", objets: nkul3D(),
+            etiquettes: [{ p: [0, 90, -12], t: "lèvre fine : son aigu (ton haut)", cote: "g" }, { p: [0, 90, 12], t: "lèvre épaisse : son grave (ton bas)", cote: "d" }, { p: [55, 96, -76], t: "baguettes", cote: "g" }] } }],
+        fil: { html: "<p>Si l'on efface les signes, bá, bà, bā, bǎ et bâ s'écrivent tous « ba » : cinq mots deviennent impossibles à distinguer à l'écrit, comme si l'on écrivait « a » pour « à » en français. Les tambours parleurs le montrent : on peut transmettre un message <strong>avec les seuls tons</strong>. Les signes ne sont pas décoratifs.</p>", verdicts: [[0, "rejetee", "Sans les signes de ton, des mots différents s'écrivent pareil."]] },
+        retenir: "Haut ´, bas `, moyen ¯, montant ˇ, descendant ˆ." },
+      { t: "S'entraîner", html: partie(LT_OLD, 2),
+        fil: { html: "<p>En écoutant les cinq mélodies (simulation ci-dessus), on entend que la hauteur seule change. On retrouve la définition : le ton est la <strong>hauteur mélodique</strong> d'une syllabe, qui peut distinguer des mots ; l'AGLC le note par un signe sur la voyelle.</p>", verdicts: [[2, "validee", "Hauteur mélodique, sens distinctif, notation AGLC."]] },
+        retenir: "Fredonner la mélodie aide à entendre les tons." }
+    ],
+    denouement: {
+      titre: "L'affiche reste intacte",
+      etapes: ["Le ton n'est pas le volume (indice 1).", "Sans signes, des mots différents se confondent ; le tambour parle avec les tons (indice 2).", "Hauteur mélodique notée par l'AGLC (indice 3)."],
+      reponse: "<p>Paul se trompe deux fois. Le ton n'est pas le volume : on peut crier ou chuchoter un mot sans le changer. Le ton est la hauteur musicale d'une syllabe : haut, bas, moyen, montant ou descendant. Dans la plupart des langues camerounaises, cette hauteur suffit à distinguer des mots qui ont les mêmes consonnes et les mêmes voyelles ; les tambours d'appel transmettent même des messages avec les seules mélodies. Les signes de l'affiche ne sont donc pas décoratifs : ce sont les notations de l'Alphabet général des langues camerounaises (accent aigu pour le ton haut, grave pour le bas, macron pour le moyen, caron pour le montant, circonflexe pour le descendant). Les effacer, ce serait confondre cinq mots en un.</p>",
+      transfert: "<p>Avec ton enseignant, trouve dans la langue étudiée en classe deux mots qui ne diffèrent que par le ton ; fredonne-les, trace leur courbe et note-les avec les signes de l'AGLC.</p>"
+    },
+    revision: (LT_OLD ? LT_OLD.revision : []).concat(["Le volume (fort / doux) ne change pas le ton."]),
+    exo: LT_OLD ? LT_OLD.exo : "",
+    quiz: [
+      q("Le ton est…", "la hauteur musicale d'une syllabe", "le volume de la voix", "la vitesse de parole", "Aigu ou grave, montant ou descendant."),
+      q("Le ton haut se note…", "á (accent aigu)", "à (accent grave)", "ā (macron)", "Accent aigu."),
+      q("Le ton bas se note…", "à", "á", "â", "Accent grave."),
+      q("Le ton moyen se note…", "ā (macron)", "ǎ (caron)", "â (circonflexe)", "Un trait au-dessus de la voyelle."),
+      q("Un ton montant va…", "du bas vers le haut", "du haut vers le bas", "reste plat", "Noté ǎ (caron)."),
+      q("Un ton descendant se note…", "â", "ǎ", "ā", "Accent circonflexe."),
+      q("Crier un mot au lieu de le murmurer…", "ne change pas son ton", "change toujours son sens", "le rend montant", "C'est le volume, pas la hauteur."),
+      q("Dans une langue à tons, le ton peut…", "changer le sens du mot", "ne rien changer", "remplacer les consonnes", "D'où l'importance de bien le noter."),
+      q("L'AGLC a été adopté en…", "1979", "1960", "2001", "Alphabet général des langues camerounaises."),
+      q("Le tambour d'appel peut transmettre un message parce que…", "il reproduit la mélodie des mots", "il imite les consonnes", "il parle français", "Ses deux lèvres donnent deux hauteurs.")
+    ]
+  });
+
+  /* ═══════════════════════ 6e LANGUES NATIONALES — LA CARTE LINGUISTIQUE ═══════════════════════ */
+  var LC_OLD = ancien("6e-ln-carte");
+  function maquetteCMR() {
+    var o = [], lon, lat, P = 0.42, K = 40, X = function (l) { return (l - 12.3) * K; }, Z = function (l) { return (l - 7.4) * K; };
+    o.push({ f: "boite", c: [0, -10, 0], d: [380, 6, 500], coul: "#5B8FB0", dessus: "#9CC3DD" });
+    for (lat = 1.9; lat < 13.2; lat += P) for (lon = 8.6; lon < 16.3; lon += P) {
+      if (!dedans(lon + P / 2, lat + P / 2)) continue;
+      var f = famille(lon + P / 2, lat + P / 2);
+      o.push({ f: "boite", c: [X(lon + P / 2), -2, Z(lat + P / 2)], d: [P * K - 1, 10, P * K - 1], coul: "#7A6A55", dessus: FAM[f][0], div: false });
+    }
+    [["ewondo", 11.5, 3.87, "bantou"], ["duala", 9.7, 4.05, "bantou"], ["ghomálá'", 10.42, 5.48, "grass"], ["mbum", 13.58, 7.32, "adam"], ["mafa", 13.8, 10.8, "tchad"], ["gbaya", 14.6, 5.2, "adam"]].forEach(function (v) { o.push({ f: "cylindre", c: [X(v[1]), 3, Z(v[2])], r: 1.6, h: 34, n: 6, coul: "#4D5163" }); o.push({ f: "sphere", c: [X(v[1]), 40, Z(v[2])], r: 6, coul: "#F7C948" }); });
+    return o;
+  }
+  remplacer("6e-ln-carte", {
+    c: "6e", m: "ln", titre: "La carte linguistique du Cameroun", duree: 30,
+    accroche: "« Au Cameroun, on parle deux langues : le français et l'anglais. » « Non : on parle une seule langue avec plein d'accents ! » Et si les deux avaient tort ?",
+    intro: "L'arrivée d'un nouvel élève de Maroua dans une classe de 6e à Yaoundé te sert de fil rouge : à chaque partie, un indice t'aide à trancher entre trois affirmations.",
+    objectifs: ["savoir que le Cameroun compte plus de 250 langues nationales", "nommer les grandes familles et les situer", "connaître les quatre grandes aires culturelles", "savoir à quoi sert l'AGLC"],
+    enquete: {
+      titre: "Le nouvel élève venu de Maroua",
+      svg: svg(640, 220, "Une salle de classe : un nouvel élève en boubou salue en fulfulde ; deux camarades discutent", lin("lcC", ["#EAF3E6", "#F7F3EA"], true),
+        "<rect width='640' height='220' fill='url(#lcC)'/><rect y='186' width='640' height='34' fill='#C9A06E'/><rect x='240' y='18' width='170' height='96' fill='#2E4A3A' stroke='#6B4423' stroke-width='5'/>" + txt(325, 48, "Bienvenue Moussa !", { s: 13, c: "#F4F1EA" }) + txt(325, 72, "Jam waali ? (fulfulde)", { s: 11, c: "#F7C948", w: 500 }) + txt(325, 94, "Mbəmbə kídí (ewondo)", { s: 11, c: "#9FC5E8", w: 500 }) +
+        perso(325, 110, "#4A2E1A", "#F4F1EA", "#F4F1EA") + "<path d='M308 132h34v30h-34Z' fill='#E9E2D2' opacity='.6'/>" + perso(110, 100, "#5A3A1E", "#DCE6F2", "#1E499B") + perso(540, 100, "#6B4423", "#DCE6F2", "#1E499B") + bulle(20, 40, 180, "Deux langues seulement !", "#F7C948") + bulle(440, 40, 190, "Une seule, avec des accents !", "#9FC5E8")),
+      legende: "Dans un collège de Yaoundé, Moussa, arrivé de Maroua, salue sa nouvelle classe en fulfulde ; sa voisine répond en ewondo.",
+      contexte: "<p>Après les salutations, Brice affirme : « Au Cameroun, on parle deux langues, le français et l'anglais ; le reste, ce sont des patois. » Clarisse réplique : « Le fulfulde et l'ewondo, c'est la même langue avec des accents différents. » La maîtresse sort la carte linguistique du Cameroun.</p>",
+      documents: [{ t: "Ce que disent les linguistes", html: "<p>« Le Cameroun compte plus de 250 langues nationales, réparties en plusieurs grandes familles, auxquelles s'ajoutent deux langues officielles, le français et l'anglais. »</p>" }],
+      question: "Combien de langues parle-t-on au Cameroun, et l'ewondo et le fulfulde sont-ils une même langue ?",
+      tache: "À l'aide de la carte, réponds à Brice et à Clarisse en citant les grandes familles de langues et leurs régions.",
+      hypotheses: ["On ne parle que deux langues au Cameroun : le français et l'anglais.", "Toutes nos langues sont une seule langue avec des accents différents.", "Plus de 250 langues nationales, réparties en grandes familles selon les régions, plus deux langues officielles."]
+    },
+    parties: [
+      { t: "Une grande diversité", html: partie(LC_OLD, 0),
+        planches: [{ type: "2D", titre: "Bonjour, de toutes les manières", legende: "Une même salutation dans quelques langues du Cameroun, en plus du français et de l'anglais : chaque langue a son vocabulaire et sa grammaire. Les deux langues officielles s'ajoutent aux langues nationales, elles ne les remplacent pas.", svg: (function () {
+          var L = [["français", "Bonjour", BLEU, "officielle"], ["anglais", "Good morning", BLEU, "officielle"], ["fulfulde", "Jam waali", "#B8860B", "Nord"], ["ewondo", "Mbəmbə kídí", "#2E7D32", "Centre"], ["duala", "Bwam", "#2E7D32", "Littoral"], ["ghomálá'", "Ǒ zǐ nyɛ̀", "#C2540A", "Ouest"]], s = "<rect width='640' height='240' fill='#FBF8F2'/>";
+          L.forEach(function (l, i) { var x = 20 + (i % 3) * 206, y = 20 + Math.floor(i / 3) * 104; s += "<rect x='" + x + "' y='" + y + "' width='190' height='88' rx='14' fill='#fff' stroke='" + l[2] + "' stroke-width='2.5'/><rect x='" + x + "' y='" + y + "' width='190' height='26' rx='12' fill='" + l[2] + "'/>" + txt(x + 95, y + 18, l[0], { s: 12, c: "#fff" }) + txt(x + 95, y + 56, l[1], { s: 17 }) + txt(x + 95, y + 78, l[3], { s: 10, c: GRIS, w: 500 }); });
+          return svg(640, 240, "Six cartes de salutation : français, anglais, fulfulde, ewondo, duala, ghomálá’", "", s);
+        })() }],
+        fil: { html: "<p>Le français et l'anglais sont les deux langues <strong>officielles</strong> (administration, école). Mais à côté d'elles, plus de <strong>250 langues nationales</strong> sont parlées en famille, au marché, dans les cérémonies. Ce ne sont pas des « patois » : ce sont de vraies langues, avec leur grammaire et leur vocabulaire.</p>", verdicts: [[0, "rejetee", "Deux langues officielles, mais plus de 250 langues nationales."]] },
+        retenir: "Plus de 250 langues nationales + 2 langues officielles." },
+      { t: "Les grandes familles", html: partie(LC_OLD, 1),
+        planches: [{ type: "3d", titre: "La maquette des familles de langues", legende: "Tourne la maquette : chaque couleur est une grande famille. Vert : langues bantoues (Sud, Centre, Littoral) ; orange : Grassfields (Ouest, Nord-Ouest) ; ocre : adamawa-oubanguiennes (Adamaoua, Est) ; violet : tchadiques (Extrême-Nord). Les épingles marquent quelques langues. Limites approximatives : les langues se mêlent aux frontières.",
+          modele: { h: 400, rx: -48, ry: 0, echelle: 0.62, alt: "Maquette du Cameroun en carreaux colorés selon les familles de langues, avec six épingles", objets: maquetteCMR(),
+            etiquettes: [{ p: [(11.5 - 12.3) * 40, 46, (3.87 - 7.4) * 40], t: "ewondo (bantoue)", cote: "d" }, { p: [(9.7 - 12.3) * 40, 46, (4.05 - 7.4) * 40], t: "duala (bantoue)", cote: "g" }, { p: [(10.42 - 12.3) * 40, 46, (5.48 - 7.4) * 40], t: "ghomálá' (Grassfields)", cote: "g" }, { p: [(13.58 - 12.3) * 40, 46, (7.32 - 7.4) * 40], t: "mbum (adamawa)", cote: "d" }, { p: [(13.8 - 12.3) * 40, 46, (10.8 - 7.4) * 40], t: "mafa (tchadique)", cote: "d" }, { p: [(14.6 - 12.3) * 40, 46, (5.2 - 7.4) * 40], t: "gbaya (adamawa)", cote: "d" }] } }],
+        fil: { html: "<p>L'ewondo appartient à la famille <strong>bantoue</strong>, au Centre ; le fulfulde à la famille <strong>atlantique</strong>, venue avec les Peuls et devenue langue de communication dans le Nord. Leurs mots, leurs sons et leur grammaire sont très différents : ce ne sont pas des « accents » d'une même langue, mais des langues de familles distinctes.</p>", verdicts: [[1, "rejetee", "Ewondo (bantoue) et fulfulde (atlantique) sont des langues de familles différentes."]] },
+        retenir: "Bantou au Sud, Grassfields à l'Ouest, adamawa à l'Adamaoua et l'Est, tchadique à l'Extrême-Nord." },
+      { t: "Quatre grandes aires culturelles", html: partie(LC_OLD, 2), illus: ill(LC_OLD, 2),
+        fil: { html: "<p>Les langues se regroupent aussi avec les modes de vie : Moussa vient de l'aire <strong>soudano-sahélienne</strong>, sa voisine ewondo de l'aire <strong>fang-béti</strong>. Chaque aire a ses traditions, et souvent des langues voisines.</p>", verdicts: [] },
+        retenir: "Quatre aires : soudano-sahélienne, Grassfields, sawa, fang-béti." },
+      { t: "Écrire nos langues", html: partie(LC_OLD, 3),
+        fil: { html: "<p>Toutes ces langues peuvent s'écrire avec un même alphabet, l'<strong>AGLC</strong>, qui note aussi les tons. La réponse à la classe est donc : plus de 250 langues nationales, réparties en grandes familles selon les régions, plus deux langues officielles ; une richesse à connaître et à respecter.</p>", verdicts: [[2, "validee", "Plus de 250 langues, grandes familles, régions, deux langues officielles."]] },
+        retenir: "AGLC : un alphabet commun pour toutes nos langues." }
+    ],
+    denouement: {
+      titre: "La réponse de la maîtresse",
+      etapes: ["2 langues officielles, plus de 250 langues nationales (indice 1).", "Familles différentes : bantoue, Grassfields, adamawa, tchadique, atlantique (indice 2).", "Aires culturelles et AGLC (indices 3 et 4)."],
+      reponse: "<p>Brice confond langues officielles et langues parlées : le français et l'anglais sont les deux langues officielles, mais le Cameroun compte plus de 250 langues nationales. Clarisse se trompe aussi : ces langues ne sont pas une seule langue avec des accents ; elles appartiennent à de grandes familles différentes, réparties selon les régions : langues bantoues au Sud et au Centre (ewondo, bulu, duala, basaa), langues des Grassfields à l'Ouest et au Nord-Ouest (ghomálá', medumba, lamnso'), langues adamawa-oubanguiennes dans l'Adamaoua et l'Est (mbum, gbaya), langues tchadiques dans l'Extrême-Nord (mafa, giziga) ; le fulfulde, de la famille atlantique, sert de langue de communication dans tout le Nord. Toutes peuvent s'écrire avec l'AGLC. Moussa parle fulfulde, sa voisine ewondo : deux langues, deux familles, un même pays.</p>",
+      transfert: "<p>Interroge tes parents : quelle langue parlent-ils ? À quelle famille et à quelle aire culturelle appartient-elle ? Place-la sur la carte.</p>"
+    },
+    revision: (LC_OLD ? LC_OLD.revision : []).concat(["Langues officielles (français, anglais) ≠ langues nationales (plus de 250)."]),
+    exo: LC_OLD ? LC_OLD.exo : "",
+    quiz: [
+      q("Combien de langues nationales environ ?", "Plus de 250", "Une vingtaine", "Exactement 2", "Une des plus grandes diversités d'Afrique."),
+      q("Les deux langues officielles sont…", "le français et l'anglais", "l'ewondo et le fulfulde", "le duala et le basaa", "Langues de l'administration et de l'école."),
+      q("L'ewondo est une langue…", "bantoue", "tchadique", "atlantique", "Comme le bulu et le duala."),
+      q("Le ghomálá' appartient aux langues…", "des Grassfields", "tchadiques", "adamawa-oubanguiennes", "Ouest du Cameroun."),
+      q("Les langues tchadiques sont surtout parlées…", "dans l'Extrême-Nord", "sur la côte", "dans le Centre", "Mafa, giziga…"),
+      q("Le fulfulde est la langue de communication…", "du Nord", "de Douala", "du Sud-Ouest", "Famille atlantique, langue des Peuls."),
+      q("Le mbum et le gbaya sont des langues…", "adamawa-oubanguiennes", "bantoues", "tchadiques", "Adamaoua et Est."),
+      q("Que signifie AGLC ?", "Alphabet général des langues camerounaises", "Association générale des lycées camerounais", "Atlas géographique du Cameroun", "Adopté en 1979."),
+      q("Les Duala et les Bakweri appartiennent à l'aire culturelle…", "sawa", "soudano-sahélienne", "des Grassfields", "Les peuples de la côte."),
+      q("Ewondo et fulfulde sont…", "deux langues de familles différentes", "la même langue", "deux accents du français", "Bantoue et atlantique.")
+    ]
+  });
+
+  /* ═══════════════════════ 6e INFORMATIQUE — L'INTELLIGENCE ARTIFICIELLE ═══════════════════════ */
+  var IA_OLD = ancien("6e-info-ia");
+  function telephone3D() {
+    var o = [];
+    o.push({ f: "boite", c: [0, -8, 0], d: [360, 10, 220], coul: "#6B4423", dessus: "#8B5A2B" });
+    o.push({ f: "boite", c: [0, 6, 0], d: [90, 6, 180], coul: "#1F2328", dessus: "#2A2F36" });
+    o.push({ f: "boite", c: [0, 9.2, 4], d: [80, 0.6, 150], coul: "#BFE3C8", dessus: "#DDEFE3", div: false });
+    o.push({ f: "boite", c: [0, 9.6, 40], d: [60, 0.4, 60], coul: "#F2B33D", dessus: "#F2B33D", div: false });
+    o.push({ f: "boite", c: [0, 9.6, -40], d: [60, 0.4, 16], coul: "#2E7D32", dessus: "#2E7D32", div: false });
+    o.push({ f: "cylindre", c: [0, 9, 82], r: 4, h: 1.2, n: 12, coul: "#0B0D10" });
+    o.push({ f: "sphere", c: [110, 18, 30], r: [30, 22, 20], coul: "#F2B33D" });
+    o.push({ f: "sphere", c: [128, 14, 50], r: [8, 6, 6], coul: "#E07A2A" });
+    o.push({ f: "sphere", c: [-120, 18, 40], r: [20, 24, 28], coul: "#3E6B2A" });
+    o.push({ f: "sphere", c: [-115, 14, -40], r: [18, 22, 26], coul: "#4E7D2A" });
+    return o;
+  }
+  remplacer("6e-info-ia", {
+    c: "6e", m: "info", titre: "L'intelligence artificielle, c'est quoi ?", duree: 30,
+    accroche: "Pour son exposé, Fadimatou demande à une IA la hauteur du mont Cameroun : « 6 095 mètres ». Son frère : « L'IA pense comme nous, elle ne se trompe jamais. » Vraiment ?",
+    intro: "L'exposé d'une élève de 6e à Buea te sert de fil rouge : à chaque partie, un indice t'aide à trancher entre trois idées sur l'intelligence artificielle.",
+    objectifs: ["définir l'intelligence artificielle", "expliquer qu'une IA apprend à partir d'exemples", "comprendre pourquoi une IA peut se tromper", "vérifier une information donnée par une IA"],
+    enquete: {
+      titre: "L'exposé sur le mont Cameroun",
+      svg: svg(640, 220, "Une élève tient un téléphone affichant une réponse d’IA, avec le mont Cameroun en arrière-plan", lin("iaC", ["#CFE3F2", "#F4F1EA"], true),
+        "<rect width='640' height='220' fill='url(#iaC)'/><path d='M0 170L180 70L250 40L330 80L520 150L640 160V220H0Z' fill='#5E6B4A'/><path d='M222 54L250 40L280 56L262 60L248 52L236 60Z' fill='#E9E2D2'/><rect y='180' width='640' height='40' fill='#6E9B45'/>" +
+        "<rect x='380' y='30' width='140' height='170' rx='16' fill='#1F2328'/><rect x='388' y='44' width='124' height='140' rx='6' fill='#F4F7FB'/>" + txt(450, 62, "Assistant IA", { s: 10, c: GRIS }) + "<rect x='396' y='70' width='108' height='26' rx='8' fill='#DCE6F2'/>" + txt(450, 87, "Hauteur du mont Cameroun ?", { s: 8, w: 600 }) + "<rect x='396' y='104' width='108' height='44' rx='8' fill='#E7F2E8'/>" + txt(450, 122, "Le mont Cameroun", { s: 9, w: 500 }) + txt(450, 138, "mesure 6 095 m.", { s: 11, c: ROUGE }) +
+        perso(330, 100, "#5A3A1E", "#C62828", "#2E3445") + perso(580, 104, "#6B4423", "#1E499B", "#2E3445") + bulle(30, 100, 220, "L'IA ne se trompe jamais !", "#9FC5E8") + txt(250, 34, "mont Cameroun", { s: 10, c: "#2E3445", i: true })),
+      legende: "À Buea, au pied du mont Cameroun : Fadimatou prépare un exposé avec un assistant d'intelligence artificielle.",
+      contexte: "<p>L'assistant répond avec assurance : « Le mont Cameroun mesure 6 095 m. » Son grand frère affirme : « L'IA est un robot qui pense et comprend comme nous ; elle sait tout, elle ne se trompe jamais. Copie ! » Fadimatou a un doute : dans son manuel de géographie, elle a lu un autre chiffre.</p>",
+      documents: [{ t: "Le manuel de géographie", html: "<p>« Le mont Cameroun, volcan actif situé près de Buea, culmine à <strong>4 095 m</strong> : c'est le point le plus haut d'Afrique de l'Ouest et centrale. »</p>" }],
+      question: "Qu'est-ce qu'une IA, et peut-on lui faire confiance sans vérifier ?",
+      tache: "Explique à son frère ce qu'est une IA, comment elle apprend et pourquoi Fadimatou doit vérifier.",
+      hypotheses: ["L'IA est un être qui pense et comprend comme nous.", "L'IA ne se trompe jamais : on peut tout copier.", "L'IA est un programme qui apprend à partir d'exemples ; elle peut se tromper avec assurance : il faut vérifier (4 095 m)."]
+    },
+    parties: [
+      { t: "Définition", html: partie(IA_OLD, 0),
+        planches: [{ type: "2D", titre: "Ce qu'une IA fait, ce qu'elle ne fait pas", legende: "Une IA imite certaines capacités humaines (reconnaître, traduire, répondre) grâce à des calculs. Elle n'a ni conscience, ni sentiments, ni expérience du monde : elle ne « sait » pas ce qu'est une montagne.", svg: (function () {
+          var s = "<rect width='640' height='240' fill='#FBF8F2'/><rect x='20' y='20' width='290' height='200' rx='14' fill='#fff' stroke='" + VERT + "' stroke-width='2.5'/><rect x='330' y='20' width='290' height='200' rx='14' fill='#fff' stroke='" + ROUGE + "' stroke-width='2.5'/>" + txt(165, 48, "✔ Elle sait faire (en calculant)", { s: 13, c: VERT }) + txt(475, 48, "✘ Elle n'a pas", { s: 13, c: ROUGE });
+          ["reconnaître une voix, un visage", "traduire une phrase", "rédiger une réponse", "recommander une vidéo", "calculer très vite"].forEach(function (t, i) { s += txt(40, 84 + i * 28, "• " + t, { s: 12, a: "start", w: 500 }); });
+          ["de conscience", "de sentiments", "d'expérience du monde", "de certitude : elle peut se tromper", "de responsabilité : c'est toi qui vérifies"].forEach(function (t, i) { s += txt(350, 84 + i * 28, "• " + t, { s: 12, a: "start", w: 500 }); });
+          return svg(640, 240, "Deux colonnes : ce qu’une IA sait faire et ce qu’elle n’a pas", "", s);
+        })() }],
+        fil: { html: "<p>Une IA n'est ni vivante ni consciente : c'est un <strong>programme</strong> qui calcule. Elle produit des phrases qui « ressemblent » à des réponses, sans comprendre ce qu'est une montagne. Le frère de Fadimatou lui prête une pensée qu'elle n'a pas.</p>", verdicts: [[0, "rejetee", "Une IA est un programme qui calcule, sans conscience."]] },
+        retenir: "L'IA imite l'intelligence, elle ne pense pas comme nous." },
+      { t: "Comment une IA apprend", html: partie(IA_OLD, 1), illus: ill(IA_OLD, 1),
+        fil: { html: "<p>Une IA apprend à partir d'<strong>exemples</strong> (simulation ci-dessus). Avec peu d'exemples, ou des exemples mal choisis, elle se trompe : elle peut confondre une mangue verte avec un avocat (essaie-le dans la partie suivante). Pour un texte, elle peut mélanger des chiffres lus ailleurs et inventer « 6 095 m ». Elle ne se trompe pas toujours, mais elle <strong>peut</strong> se tromper, même avec assurance.</p>", verdicts: [[1, "rejetee", "Une IA dépend de ses exemples : elle peut se tromper."]] },
+        retenir: "Pas d'exemples, pas d'apprentissage : l'IA dépend de ses données." },
+      { t: "L'IA autour de toi", html: partie(IA_OLD, 2),
+        planches: [{ type: "3d", titre: "Le téléphone qui reconnaît un fruit", legende: "Tourne la scène : la caméra du téléphone photographie un fruit, et l'IA de l'application compare l'image aux milliers d'exemples qu'elle a vus. L'écran affiche une proposition (« mangue, 92 % »), jamais une certitude : une mangue encore verte peut être prise pour un avocat.",
+          modele: { h: 340, rx: -40, ry: 18, echelle: 0.9, alt: "Table en bois avec un téléphone, une mangue et deux avocats", objets: telephone3D(),
+            etiquettes: [{ p: [0, 10, 40], t: "écran : « mangue 92 % »", cote: "d" }, { p: [0, 10, 82], t: "caméra (capteur)", cote: "d" }, { p: [110, 40, 30], t: "mangue", cote: "d" }, { p: [-120, 42, 40], t: "avocats", cote: "g" }] } }],
+        fil: { html: "<p>La simulation ci-dessus le montre : entraînée seulement sur des mangues bien jaunes, l'IA prend les mangues vertes pour des avocats. Traduction, reconnaissance de visage, assistant vocal : l'IA est partout, et utile. Mais Fadimatou fait ce qu'il faut : elle <strong>vérifie</strong> dans son manuel, une source fiable. Le mont Cameroun mesure 4 095 m, pas 6 095 m.</p>", verdicts: [[2, "validee", "Programme, apprentissage par exemples, erreurs possibles : vérifier."]] },
+        retenir: "L'IA est un outil : utile, rapide, mais faillible." }
+    ],
+    denouement: {
+      titre: "L'exposé corrigé",
+      etapes: ["Une IA est un programme, pas un être pensant (indice 1).", "Elle apprend d'exemples et peut se tromper (indice 2).", "On vérifie dans une source fiable (indice 3)."],
+      reponse: "<p>L'intelligence artificielle est un ensemble de techniques qui permettent à un programme d'imiter certaines capacités humaines : reconnaître une image, comprendre une question, rédiger une réponse. Elle ne pense pas comme nous : elle n'a ni conscience ni expérience du monde ; elle calcule à partir des milliers d'exemples qu'on lui a montrés. Si ces exemples sont insuffisants ou mal choisis, ou si elle mélange des informations, elle peut se tromper, et même avec assurance. Fadimatou a donc eu raison de vérifier dans son manuel : le mont Cameroun culmine à 4 095 m, et non 6 095 m. L'IA reste un outil précieux, à condition de garder son esprit critique.</p>",
+      transfert: "<p>Pose à un assistant IA une question dont tu connais la réponse (la capitale d'une région, une date d'histoire) et compare sa réponse à ton manuel.</p>"
+    },
+    revision: (IA_OLD ? IA_OLD.revision : []).concat(["Toujours vérifier une réponse d'IA dans une source fiable."]),
+    exo: IA_OLD ? IA_OLD.exo : "",
+    quiz: [
+      q("Une IA est…", "un programme informatique", "un être vivant", "un robot toujours humanoïde", "Ce sont des calculs, pas une conscience."),
+      q("Pour apprendre, une IA a surtout besoin…", "d'exemples", "de sommeil", "de musique", "Elle repère des régularités dans les données."),
+      q("Une réponse donnée par une IA est…", "à vérifier", "toujours juste", "interdite à l'école", "Une IA peut se tromper : on vérifie."),
+      q("Le mont Cameroun culmine à…", "4 095 m", "6 095 m", "2 095 m", "Point culminant d'Afrique de l'Ouest et centrale."),
+      q("Une IA a-t-elle des sentiments ?", "Non", "Oui, comme nous", "Seulement la nuit", "Elle n'a ni conscience ni sentiments."),
+      q("Avec des exemples mal choisis, une IA…", "se trompe plus souvent", "devient parfaite", "refuse de répondre", "Elle dépend de ses données."),
+      q("Lequel utilise l'IA ?", "la traduction automatique", "une règle graduée", "un crayon", "Elle « comprend » une phrase pour la traduire."),
+      q("Déverrouiller un téléphone avec son visage, c'est…", "de la reconnaissance faciale par IA", "de la magie", "un code PIN", "La caméra compare ton visage à des exemples."),
+      q("Une source fiable pour vérifier est…", "ton manuel ou ton enseignant", "une rumeur", "un message anonyme", "On croise les sources."),
+      q("Prof. Ambassa sur VÉRITAS est…", "un assistant pédagogique à IA", "un vrai professeur caché", "un jeu vidéo", "Utile, mais à vérifier comme toute IA.")
+    ]
+  });
+
+  /* ═══════════════════════ 6e INFORMATIQUE — LES COMPOSANTS DE BASE ═══════════════════════ */
+  var CO_OLD = ancien("6e-info-composants");
+  function pc3D() {
+    var o = [];
+    o.push({ f: "boite", c: [0, -6, 0], d: [300, 6, 260], coul: "#8E96A6", dessus: "#B8BFCC" });
+    o.push({ f: "boite", c: [44, 90, 0], d: [4, 180, 200], coul: "#2B2F36", div: false });
+    o.push({ f: "boite", c: [0, 179, 0], d: [92, 4, 200], coul: "#2B2F36", div: false });
+    o.push({ f: "boite", c: [0, 0, 0], d: [92, 4, 200], coul: "#2B2F36", div: false });
+    o.push({ f: "boite", c: [0, 90, 100], d: [92, 180, 4], coul: "#2B2F36", div: false });
+    o.push({ f: "boite", c: [0, 90, -102], d: [92, 180, 4], coul: "#1F2328", dessus: "#3A3F47", div: false });
+    o.push({ f: "cylindre", c: [0, 150, -105], r: 5, h: 2, n: 12, axe: "z", coul: "#4FC3F7" });
+    o.push({ f: "boite", c: [-48, 90, 0], d: [4, 180, 200], coul: "#3A3F47", dessus: "#4A505A", div: false, ec: [-90, 0, 0] });
+    o.push({ f: "boite", c: [38, 100, 10], d: [4, 140, 160], coul: "#1E6B3A", div: false, ec: [40, 0, 0] });
+    o.push({ f: "boite", c: [32, 120, 0], d: [8, 26, 26], coul: "#B8BFCC", dessus: "#D8DDE5", ec: [-30, 20, 0] });
+    o.push({ f: "cylindre", c: [28, 120, 0], r: 16, h: 10, n: 16, axe: "x", coul: "#4D5163", ec: [-60, 20, 0] });
+    [0, 1].forEach(function (k) { o.push({ f: "boite", c: [32, 120, 30 + k * 10], d: [8, 50, 4], coul: "#1E499B", dessus: "#2F6DB5", ec: [-40, 60, 0] }); });
+    o.push({ f: "boite", c: [0, 156, 70], d: [80, 40, 50], coul: "#5C6478", dessus: "#6F7788", ec: [0, 80, 40] });
+    o.push({ f: "boite", c: [0, 30, -60], d: [60, 14, 44], coul: "#9AA3AF", dessus: "#C9CED6", ec: [-20, -10, -90] });
+    return o;
+  }
+  remplacer("6e-info-composants", {
+    c: "6e", m: "info", titre: "Les composants de base d'un micro-ordinateur", duree: 30,
+    accroche: "Coupure de courant dans la salle informatique de Bertoua : Junior arrache la prise et déclare « l'écran, c'est l'ordinateur ». Sa voisine : « la souris, c'est une sortie ». Qui a raison ?",
+    intro: "Une séance mouvementée en salle informatique te sert de fil rouge : à chaque partie, un indice t'aide à trancher entre trois affirmations.",
+    objectifs: ["nommer les composants de l'unité centrale et leur rôle", "distinguer périphériques d'entrée et de sortie", "expliquer le trajet de l'information", "adopter les bons gestes pour protéger le matériel"],
+    enquete: {
+      titre: "La séance coupée de la salle informatique",
+      svg: svg(640, 220, "Salle informatique : un élève tient une prise arrachée près d’un écran noir, une élève montre une souris", lin("coC", ["#E6EEF7", "#F4F1EA"], true),
+        "<rect width='640' height='220' fill='url(#coC)'/><rect x='80' y='132' width='480' height='14' rx='3' fill='#8B5A2B'/><rect x='94' y='146' width='10' height='60' fill='#6B4423'/><rect x='536' y='146' width='10' height='60' fill='#6B4423'/>" +
+        "<rect x='240' y='40' width='150' height='92' rx='6' fill='#1F2328'/><rect x='248' y='48' width='134' height='72' fill='#0B0D10'/><rect x='300' y='122' width='30' height='10' fill='#2B2F36'/><rect x='410' y='60' width='46' height='72' rx='4' fill='#2B2F36'/><circle cx='433' cy='74' r='4' fill='#4FC3F7' opacity='.3'/><rect x='240' y='136' width='120' height='10' rx='2' fill='#C9CED6'/><ellipse cx='388' cy='140' rx='9' ry='6' fill='#C9CED6'/>" +
+        perso(150, 76, "#5A3A1E", "#F7C948", "#2E3445") + "<path d='M170 118l30 20' stroke='#1F2328' stroke-width='3'/><rect x='196' y='134' width='12' height='8' fill='#F4F1EA' stroke='#1F2328'/>" + perso(500, 76, "#6B4423", "#7B3F99", "#2E3445") + bulle(40, 20, 190, "L'écran, c'est l'ordinateur !", "#F7C948") + bulle(420, 20, 210, "La souris, c'est une sortie !", "#9FC5E8")),
+      legende: "Au lycée de Bertoua, en salle informatique : le courant saute pendant que la classe de 6e travaille.",
+      contexte: "<p>Pendant la coupure, Junior arrache la prise de son poste : « Pas grave, l'écran, c'est l'ordinateur : c'est lui qui calcule et garde nos fichiers. » Sa voisine Awa ajoute : « La souris est un périphérique de sortie, puisqu'elle sort de l'unité centrale par un fil. » Au retour du courant, le poste de Junior met longtemps à redémarrer et son fichier non enregistré est perdu.</p>",
+      documents: [{ t: "L'affiche de la salle", html: "<p>« Enregistrez souvent. Éteignez par le menu Démarrer. Ne débranchez jamais un poste allumé. Chaque poste est protégé par un onduleur. »</p>" }],
+      question: "Où se trouve vraiment l'« ordinateur », et comment classer la souris ?",
+      tache: "Explique le rôle de l'unité centrale et des périphériques, classe la souris, puis dis ce que Junior aurait dû faire.",
+      hypotheses: ["L'écran est l'ordinateur : c'est lui qui calcule et garde les fichiers.", "La souris est un périphérique de sortie, puisqu'elle sort de l'unité centrale par un fil.", "L'unité centrale calcule et stocke ; la souris envoie des informations : c'est une entrée ; on enregistre et on éteint par le menu."]
+    },
+    parties: [
+      { t: "L'unité centrale, le cerveau", html: partie(CO_OLD, 0),
+        planches: [{ type: "3d", titre: "L'unité centrale ouverte", legende: "Tourne le boîtier, puis écarte les pièces avec le curseur : la carte mère (verte), le processeur sous son ventilateur, les barrettes de mémoire vive (bleues), l'alimentation (en haut) et le disque de stockage (en bas). C'est ici, et non dans l'écran, que l'information est traitée et conservée.",
+          modele: { h: 380, rx: -18, ry: -36, echelle: 0.95, eclate: "Ouvrir et écarter les pièces", alt: "Boîtier d’unité centrale ouvert : carte mère, processeur et ventilateur, barrettes de mémoire, alimentation, disque", objets: pc3D(),
+            etiquettes: [{ p: [28, 120, 0], t: "processeur + ventilateur", cote: "g", ec: [-60, 20, 0] }, { p: [32, 145, 35], t: "mémoire vive (RAM)", cote: "d", ec: [-40, 60, 0] }, { p: [0, 160, 70], t: "alimentation", cote: "d", ec: [0, 80, 40] }, { p: [0, 30, -60], t: "disque (stockage)", cote: "g", ec: [-20, -10, -90] }, { p: [38, 60, 60], t: "carte mère", cote: "d", ec: [40, 0, 0] }] } }],
+        fil: { html: "<p>L'écran n'est qu'un <strong>périphérique de sortie</strong> : il affiche. Le calcul se fait dans le <strong>processeur</strong>, le travail en cours est gardé dans la <strong>mémoire vive</strong> (qui s'efface quand le courant coupe : d'où le fichier perdu), et les fichiers enregistrés sont sur le <strong>disque</strong>. Tout cela est dans l'unité centrale.</p>", verdicts: [[0, "rejetee", "L'écran affiche ; l'unité centrale calcule et stocke."]] },
+        retenir: "L'unité centrale traite l'information." },
+      { t: "Entrée, sortie", html: partie(CO_OLD, 1), illus: ill(CO_OLD, 1),
+        fil: { html: "<p>Le sens qui compte n'est pas celui du fil, mais celui de l'<strong>information</strong>. Quand Awa bouge la souris ou clique, elle <strong>envoie</strong> une information à l'ordinateur : la souris est un périphérique d'<strong>entrée</strong>, comme le clavier. L'écran et l'imprimante <strong>reçoivent</strong> l'information : ce sont des sorties.</p>", verdicts: [[1, "rejetee", "La souris envoie des informations : c'est une entrée."]] },
+        retenir: "Entrée : vers l'ordinateur. Sortie : depuis l'ordinateur." },
+      { t: "Prendre soin du matériel", html: partie(CO_OLD, 2),
+        fil: { html: "<p>Arracher la prise d'un poste allumé peut abîmer le disque et fait perdre ce qui n'est pas enregistré. Junior aurait dû enregistrer souvent ; pendant une coupure, l'<strong>onduleur</strong> donne quelques minutes pour enregistrer et éteindre par le menu.</p>", verdicts: [[2, "validee", "Unité centrale, entrée / sortie, bons gestes."]] },
+        retenir: "Un matériel bien traité dure plus longtemps." }
+    ],
+    denouement: {
+      titre: "Le bilan de la séance",
+      etapes: ["L'écran affiche ; l'unité centrale calcule et stocke (indice 1).", "La souris envoie l'information : entrée (indice 2).", "Enregistrer, éteindre par le menu, onduleur (indice 3)."],
+      reponse: "<p>Junior se trompe : l'écran n'est qu'un périphérique de sortie qui affiche. L'ordinateur proprement dit, c'est l'unité centrale : le processeur y calcule, la mémoire vive y garde le travail en cours (elle s'efface quand le courant coupe, c'est pourquoi son fichier non enregistré a été perdu) et le disque y conserve les fichiers enregistrés. Awa se trompe aussi : on classe un périphérique selon le trajet de l'information, pas selon le fil. La souris envoie des informations à l'ordinateur : c'est un périphérique d'entrée, comme le clavier, le micro ou le scanner ; l'écran, l'imprimante et les haut-parleurs sont des sorties. Enfin, il faut enregistrer souvent, éteindre par le menu et ne jamais arracher la prise ; l'onduleur laisse le temps de le faire pendant une coupure.</p>",
+      transfert: "<p>Classe : webcam, clé USB, écran tactile, imprimante, micro. <em>(Entrée : webcam, micro ; sortie : imprimante ; entrée et sortie : écran tactile ; stockage : clé USB.)</em></p>"
+    },
+    revision: (CO_OLD ? CO_OLD.revision : []).concat(["La mémoire vive s'efface quand le courant coupe : enregistre souvent."]),
+    exo: CO_OLD ? CO_OLD.exo : "",
+    quiz: [
+      q("La souris est un périphérique…", "d'entrée", "de sortie", "de stockage", "Elle envoie des informations à l'ordinateur."),
+      q("Quel élément calcule dans l'unité centrale ?", "Le processeur", "L'écran", "Le câble", "Il exécute les instructions."),
+      q("L'imprimante est un périphérique…", "de sortie", "d'entrée", "central", "Elle reçoit les informations."),
+      q("La mémoire vive (RAM)…", "s'efface quand le courant coupe", "garde les fichiers pour toujours", "est un périphérique", "Il faut enregistrer sur le disque."),
+      q("Les fichiers enregistrés sont gardés…", "sur le disque de stockage", "dans l'écran", "dans la souris", "Le disque conserve même éteint."),
+      q("Le clavier est un périphérique…", "d'entrée", "de sortie", "de stockage", "On tape : l'information va vers l'ordinateur."),
+      q("Les haut-parleurs sont des périphériques…", "de sortie", "d'entrée", "de calcul", "Ils diffusent le son venu de l'ordinateur."),
+      q("Pour éteindre un ordinateur, on…", "passe par le menu", "arrache la prise", "débranche l'écran", "Pour ne pas abîmer le disque."),
+      q("Un onduleur sert à…", "alimenter le poste quelques minutes pendant une coupure", "imprimer", "refroidir le processeur", "Le temps d'enregistrer et d'éteindre."),
+      q("On classe un périphérique selon…", "le trajet de l'information", "la couleur du fil", "sa taille", "Vers l'ordinateur : entrée ; depuis : sortie.")
+    ]
+  });
+
+  /* ═══════════════════════ SIMULATIONS ═══════════════════════ */
+  VRT_A("4e-ln-tons", 2, "Écoute les cinq tons, puis reconnais-les à l'oreille", function (el) {
+    var ctx = null, cible = -1, ok = 0, n = 0;
+    el.innerHTML = "<div style='display:flex;flex-wrap:wrap;gap:6px'>" + TONS.map(function (t, i) { return "<button type='button' class='btn-l' data-t='" + i + "'>🔊 b" + t[1].slice(-1) + " · " + t[0] + "</button>"; }).join("") + "</div><div data-g style='margin:8px 0'></div><div style='display:flex;flex-wrap:wrap;gap:6px;align-items:center'><button type='button' class='btn-l' data-j>🎲 Devine un ton</button><span data-c style='display:flex;gap:6px;flex-wrap:wrap'></span></div><p class='labo-r' data-r>Clique sur un ton pour l'entendre et voir sa courbe.</p>";
+    function jouer(i) {
+      var f = TONS[i][2], AC = window.AudioContext || window.webkitAudioContext;
+      try {
+        if (AC) { ctx = ctx || new AC(); var o = ctx.createOscillator(), g = ctx.createGain(), t0 = ctx.currentTime; o.type = "triangle"; o.frequency.setValueAtTime(f[0], t0); o.frequency.linearRampToValueAtTime(f[1], t0 + 0.5); g.gain.setValueAtTime(0.0001, t0); g.gain.exponentialRampToValueAtTime(0.25, t0 + 0.05); g.gain.exponentialRampToValueAtTime(0.0001, t0 + 0.6); o.connect(g); g.connect(ctx.destination); o.start(t0); o.stop(t0 + 0.62); }
+      } catch (e) { }
+    }
+    function courbe(i, cache) {
+      var s = "<rect width='470' height='120' fill='#FBF8F2'/>" + [[30, "haut"], [60, "moyen"], [90, "bas"]].map(function (l) { return "<path d='M60 " + l[0] + "H450' stroke='#E3E7EF'/>" + txt(54, l[0] + 4, l[1], { s: 10, a: "end", c: GRIS, w: 600 }); }).join("");
+      if (i >= 0 && !cache) { var Y = function (f) { return 90 - (f - 150) / 110 * 60; }, f = TONS[i][2]; s += "<path d='M120 " + Y(f[0]).toFixed(1) + "L390 " + Y(f[1]).toFixed(1) + "' stroke='" + (f[0] === f[1] ? "#A84200" : "#0E7C86") + "' stroke-width='7' stroke-linecap='round'/>" + txt(255, 114, "b" + TONS[i][1].slice(-1) + " — ton " + TONS[i][0], { s: 12 }); }
+      else if (cache) s += txt(255, 66, "? Écoute bien…", { s: 16, c: GRIS });
+      el.querySelector("[data-g]").innerHTML = "<svg viewBox='0 0 470 120' style='max-width:520px;width:100%' role='img' aria-label='Courbe mélodique du ton'>" + s + "</svg>";
+    }
+    el.querySelectorAll("[data-t]").forEach(function (b) { b.addEventListener("click", function () { var i = +b.dataset.t; jouer(i); courbe(i); el.querySelector("[data-r]").innerHTML = "Ton <b>" + TONS[i][0] + "</b>, noté <b>" + TONS[i][1] + "</b>."; }); });
+    el.querySelector("[data-j]").addEventListener("click", function () {
+      cible = Math.floor(Math.random() * TONS.length); jouer(cible); courbe(-1, true);
+      el.querySelector("[data-c]").innerHTML = TONS.map(function (t, i) { return "<button type='button' class='btn-l' data-v='" + i + "'>" + t[1] + "</button>"; }).join("") + "<button type='button' class='btn-l' data-re>🔁 Réécouter</button>";
+      el.querySelector("[data-re]").addEventListener("click", function () { jouer(cible); });
+      el.querySelectorAll("[data-v]").forEach(function (b) { b.addEventListener("click", function () { var v = +b.dataset.v; n++; if (v === cible) ok++; courbe(cible); el.querySelector("[data-r]").innerHTML = (v === cible ? "✔ Bravo : " : "✘ Non : c'était ") + "le ton <b>" + TONS[cible][0] + "</b> (" + TONS[cible][1] + "). Score : <b>" + ok + " / " + n + "</b>"; el.querySelector("[data-c]").innerHTML = ""; }); });
+      el.querySelector("[data-r]").textContent = "Quel ton as-tu entendu ?";
+    });
+    courbe(-1);
+  });
+  VRT_A("6e-ln-carte", 1, "À quelle famille appartient cette langue ?", function (el) {
+    exercice(el, [["L'ewondo (Centre) est une langue… ___", ["bantoue", "tchadique", "des Grassfields"], "Comme le bulu, le duala, le basaa."], ["Le ghomálá' (Ouest) est une langue… ___", ["des Grassfields", "bantoue", "tchadique"], "Comme le medumba, le fe'efe'e."], ["Le mafa (Extrême-Nord) est une langue… ___", ["tchadique", "bantoue", "adamawa-oubanguienne"], "Comme le giziga."], ["Le mbum (Adamaoua) est une langue… ___", ["adamawa-oubanguienne", "tchadique", "des Grassfields"], "Comme le gbaya."], ["Le duala (Littoral) est une langue… ___", ["bantoue", "des Grassfields", "adamawa-oubanguienne"], "Famille bantoue, aire sawa."], ["Le fulfulde (Nord) est une langue… ___", ["atlantique", "bantoue", "tchadique"], "Langue des Peuls, véhiculaire au Nord."], ["Le lamnso' (Nord-Ouest) est une langue… ___", ["des Grassfields", "tchadique", "bantoue"], "Parlée par les Nso."], ["Le bulu (Sud) est une langue… ___", ["bantoue", "adamawa-oubanguienne", "des Grassfields"], "Proche de l'ewondo."]], "Langue suivante", "Langue");
+  });
+  VRT_A("6e-info-ia", 2, "Quand les exemples sont mal choisis : l’IA se trompe", function (el) {
+    el.innerHTML = "<div style='display:flex;flex-wrap:wrap;gap:8px 18px;align-items:end'><label class='labo-c'><span>Exemples d'entraînement : <b data-nv>20</b></span><input type='range' min='2' max='60' step='2' value='20' data-n></label><label class='labo-c' style='flex-direction:row;align-items:center;gap:6px'><input type='checkbox' data-b> <span>exemples mal choisis (seulement des mangues bien jaunes)</span></label></div><div data-g style='margin:8px 0'></div><p class='labo-r' data-r></p>";
+    var N = el.querySelector("[data-n]"), B = el.querySelector("[data-b]");
+    function fruits(nb, graine, biais) { var R = alea(graine), L = [], k; for (k = 0; k < nb; k++) { var m = k % 2 === 0, x, y; do { x = m ? 0.62 + (R() - 0.5) * 0.6 : 0.3 + (R() - 0.5) * 0.4; } while (m && biais && x < 0.8); y = m ? 0.4 + (R() - 0.5) * 0.36 : 0.62 + (R() - 0.5) * 0.36; L.push([Math.min(0.97, Math.max(0.03, x)), Math.min(0.97, Math.max(0.03, y)), m]); } return L; }
+    var TEST = fruits(80, 999, false);
+    function maj() {
+      var n = +N.value, biais = B.checked, T = fruits(n, 7, biais), cm = [0, 0, 0], ca = [0, 0, 0];
+      T.forEach(function (f) { var c = f[2] ? cm : ca; c[0] += f[0]; c[1] += f[1]; c[2]++; });
+      cm = [cm[0] / cm[2], cm[1] / cm[2]]; ca = [ca[0] / ca[2], ca[1] / ca[2]];
+      function predit(f) { return Math.hypot(f[0] - cm[0], f[1] - cm[1]) < Math.hypot(f[0] - ca[0], f[1] - ca[1]); }
+      var bons = TEST.filter(function (f) { return predit(f) === f[2]; }).length, X = function (v) { return 40 + v * 400; }, Y = function (v) { return 20 + v * 160; }, s = "<rect width='470' height='210' fill='#FBF8F2'/>", gx, gy;
+      for (gx = 0; gx < 40; gx++) for (gy = 0; gy < 16; gy++) { var p = [(gx + 0.5) / 40, (gy + 0.5) / 16]; s += "<rect x='" + X(gx / 40) + "' y='" + Y(gy / 16) + "' width='10.2' height='10.2' fill='" + (predit(p) ? "#FCE9B8" : "#DCEBD5") + "'/>"; }
+      TEST.forEach(function (f) { var ok = predit(f) === f[2]; s += "<ellipse cx='" + X(f[0]).toFixed(1) + "' cy='" + Y(f[1]).toFixed(1) + "' rx='" + (f[2] ? 7 : 5) + "' ry='" + (f[2] ? 5 : 7) + "' fill='" + (f[2] ? "#F2B33D" : "#3E6B2A") + "' opacity='.35'" + (ok ? "" : " stroke='" + ROUGE + "' stroke-width='2.5' stroke-opacity='1'") + "/>"; });
+      T.forEach(function (f) { s += "<ellipse cx='" + X(f[0]).toFixed(1) + "' cy='" + Y(f[1]).toFixed(1) + "' rx='" + (f[2] ? 8 : 6) + "' ry='" + (f[2] ? 6 : 8) + "' fill='" + (f[2] ? "#F2B33D" : "#3E6B2A") + "' stroke='#1F2328'/>"; });
+      s += "<path d='M40 192H440' stroke='" + NUIT + "'/>" + txt(40, 205, "vert", { s: 10, a: "start", c: GRIS }) + txt(440, 205, "jaune", { s: 10, a: "end", c: GRIS }) + txt(240, 205, "couleur de la peau →", { s: 10, c: GRIS, w: 600 }) + txt(452, 30, "rond", { s: 10, a: "start", c: GRIS }) + txt(452, 176, "allongé", { s: 10, a: "start", c: GRIS });
+      el.querySelector("[data-nv]").textContent = n;
+      el.querySelector("[data-g]").innerHTML = "<svg viewBox='0 0 490 210' style='max-width:540px;width:100%' role='img' aria-label='Nuage de fruits classés par l’IA selon la couleur et la forme'>" + s + "</svg>";
+      el.querySelector("[data-r]").innerHTML = "Fruits foncés = exemples d'entraînement ; fruits pâles = 80 fruits nouveaux à reconnaître ; fond jaune = l'IA dit « mangue », fond vert = « avocat ». Réussite : <b style='color:" + (bons >= 72 ? VERT : ROUGE) + "'>" + bons + " / 80</b>" + (80 - bons ? " · erreurs entourées de rouge" : "") + (biais ? " · les mangues vertes sont prises pour des avocats !" : "");
+    }
+    N.addEventListener("input", maj); B.addEventListener("change", maj); maj();
+  });
+  VRT_A("6e-info-composants", 2, "Révise : entrée, sortie ou stockage ?", function (el) {
+    exercice(el, [["Le clavier est un périphérique… ___", ["d'entrée", "de sortie", "de stockage"], "On tape : l'information va vers l'ordinateur."], ["L'écran est un périphérique… ___", ["de sortie", "d'entrée", "de stockage"], "Il affiche ce que l'ordinateur envoie."], ["La souris est un périphérique… ___", ["d'entrée", "de sortie", "de stockage"], "Elle envoie mouvements et clics."], ["L'imprimante est un périphérique… ___", ["de sortie", "d'entrée", "de stockage"], "Elle reçoit le document à imprimer."], ["Le micro est un périphérique… ___", ["d'entrée", "de sortie", "de stockage"], "Il capte ta voix."], ["Les haut-parleurs sont des périphériques… ___", ["de sortie", "d'entrée", "de stockage"], "Ils diffusent le son."], ["Le scanner est un périphérique… ___", ["d'entrée", "de sortie", "de stockage"], "Il numérise un document vers l'ordinateur."], ["La clé USB sert surtout… ___", ["de stockage", "d'entrée", "de sortie"], "Elle conserve des fichiers."]], "Périphérique suivant", "Périphérique");
+  });
+})();
+
+/* Leçons APPROFONDIES — lot 17, 6e (18/11/2026) : origine du latin, jours et mois en latin, branches des arts, piste
+   d'athlétisme. Même gabarit et même mécanisme que 11-approfondies-lot4.js (remplacement EN PLACE ; schémas d'origine (illus)
+   repris ; quiz portés à 10 questions). Simulations VRT_A en fin (la partie 1 de 6e-eps-piste garde son animation de 91-animations-2.js). */
+(function () {
+  "use strict";
+  var NUIT = "#001136", BLEU = "#1E499B", GRIS = "#4D5163", VERT = "#17784D", ROUGE = "#C62828", TERRE = "#C46A2B";
+
+  function txt(x, y, t, o) {
+    o = o || {};
+    return "<text x='" + x + "' y='" + y + "' text-anchor='" + (o.a || "middle") + "' font-size='" + (o.s || 12) + "' font-weight='" + (o.w || 700) + "' fill='" + (o.c || NUIT) + "'" + (o.i ? " font-style='italic'" : "") + (o.halo ? " stroke='#fff' stroke-width='3' paint-order='stroke'" : "") + ">" + t + "</text>";
+  }
+  function lin(id, cs, vertical) {
+    var s = "<linearGradient id='" + id + "'" + (vertical ? " x1='0' y1='0' x2='0' y2='1'" : "") + ">";
+    cs.forEach(function (c, i) { s += "<stop offset='" + (i / (cs.length - 1)).toFixed(2) + "' stop-color='" + c + "'/>"; });
+    return s + "</linearGradient>";
+  }
+  function rad(id, cs) {
+    var s = "<radialGradient id='" + id + "' cx='35%' cy='30%' r='75%'>";
+    cs.forEach(function (c, i) { s += "<stop offset='" + (i / (cs.length - 1)).toFixed(2) + "' stop-color='" + c + "'/>"; });
+    return s + "</radialGradient>";
+  }
+  function fleche(id, c) { return "<marker id='" + id + "' markerWidth='10' markerHeight='10' refX='7' refY='5' orient='auto'><path d='M0 1L8 5L0 9Z' fill='" + c + "'/></marker>"; }
+  function svg(w, h, alt, defs, corps) {
+    return "<svg viewBox='0 0 " + w + " " + h + "' role='img' aria-label='" + alt + "' font-family='Inter,Arial,sans-serif'><rect width='" + w + "' height='" + h + "' fill='#fff'/><defs>" + defs + "</defs>" + corps +
+      "<text x='" + (w - 6) + "' y='" + (h - 5) + "' font-size='8' text-anchor='end' fill='#8A93A6'>Planche VÉRITAS</text></svg>";
+  }
+  function ancien(id) { return window.VRT_LECONS[id]; }
+  function remplacer(id, o) {
+    var a = ancien(id);
+    if (a) ["apc", "examen", "rang", "cle", "scenes"].forEach(function (k) { if (a[k] != null && o[k] == null) o[k] = a[k]; });
+    VRT_L(id, o);
+    if (a) o.ordre = a.ordre;
+  }
+  function q(qq, bonne, f1, f2, e) { return { q: qq, r: [bonne, f1, f2], b: 0, e: e }; }
+  function partie(old, i) { return old && old.parties[i] ? old.parties[i].html : ""; }
+  function bulle(x, y, w, t, c) { return "<rect x='" + x + "' y='" + y + "' width='" + w + "' height='30' rx='12' fill='#fff' stroke='" + (c || "#C9D2E3") + "'/>" + txt(x + w / 2, y + 20, t, { s: 11.5 }); }
+  function perso(x, y, peau, habit, bas) {
+    bas = bas || "#2E3445";
+    return "<g transform='translate(" + x + " " + y + ")'><ellipse cx='0' cy='84' rx='18' ry='4' fill='#001136' opacity='.18'/>" +
+      "<rect x='-9' y='44' width='8' height='36' rx='3' fill='" + bas + "'/><rect x='1' y='44' width='8' height='36' rx='3' fill='" + bas + "'/>" +
+      "<ellipse cx='-6' cy='81' rx='7' ry='3.5' fill='#1F2328'/><ellipse cx='6' cy='81' rx='7' ry='3.5' fill='#1F2328'/>" +
+      "<path d='M-13 46L-16 18C-16 13 -12 11 -6 10H6C12 11 16 13 16 18L13 46Z' fill='" + habit + "'/>" +
+      "<path d='M-15 16L-20 40' stroke='" + habit + "' stroke-width='7' stroke-linecap='round'/><path d='M15 16L20 40' stroke='" + habit + "' stroke-width='7' stroke-linecap='round'/>" +
+      "<circle cx='-20' cy='42' r='3.6' fill='" + peau + "'/><circle cx='20' cy='42' r='3.6' fill='" + peau + "'/>" +
+      "<rect x='-3.5' y='5' width='7' height='7' fill='" + peau + "'/><ellipse cx='0' cy='-2' rx='9' ry='10.5' fill='" + peau + "'/>" +
+      "<path d='M-9 -4C-10 -14 -4 -13.5 0 -13.5S10 -14 9 -4C7 -9 -7 -9 -9 -4Z' fill='#1B1410'/><ellipse cx='-9' cy='-1' rx='1.8' ry='3' fill='" + peau + "'/><ellipse cx='9' cy='-1' rx='1.8' ry='3' fill='" + peau + "'/></g>";
+  }
+  /* portrait en buste (arbre généalogique) */
+  function portrait(x, y, peau, habit, cheveux, age) {
+    var s = "<g transform='translate(" + x + " " + y + ")'><circle r='30' fill='#F4EFE4' stroke='#C9A576' stroke-width='3'/><clipPath id='pc" + x + "_" + y + "'><circle r='28'/></clipPath><g clip-path='url(#pc" + x + "_" + y + ")'>";
+    s += "<path d='M-26 32C-26 14 -14 10 0 10S26 14 26 32Z' fill='" + habit + "'/><rect x='-4' y='2' width='8' height='10' fill='" + peau + "'/><ellipse cy='-6' rx='11' ry='13' fill='" + peau + "'/>";
+    s += age === "vieux" ? "<path d='M-11 -10C-12 -20 -4 -21 0 -21S12 -20 11 -10C9 -14 -9 -14 -11 -10Z' fill='#D8D8D8'/>" : age === "femme" ? "<path d='M-13 -6C-15 -24 15 -24 13 -6C12 -14 -12 -14 -13 -6Z' fill='" + cheveux + "'/><path d='M-13 -14h26v-6c-6 -6 -20 -6 -26 0Z' fill='" + habit + "'/>" : "<path d='M-11 -10C-12 -20 -4 -21 0 -21S12 -20 11 -10C9 -14 -9 -14 -11 -10Z' fill='" + cheveux + "'/>";
+    s += "<circle cx='-4' cy='-6' r='1.4' fill='#1B1410'/><circle cx='4' cy='-6' r='1.4' fill='#1B1410'/><path d='M-3 2q3 2 6 0' stroke='#1B1410' fill='none'/></g></g>";
+    return s;
+  }
+  /* boucle d'exercice générique : [phrase avec ___, [bonne, autres…], explication] */
+  function exercice(el, C, suivant, lib) {
+    var i = 0, ok = 0;
+    el.innerHTML = "<p class='labo-r' data-q style='font-size:16px'></p><div style='display:flex;gap:8px;flex-wrap:wrap' data-c></div><p class='an-note' data-e></p><p class='labo-r' data-s></p>";
+    function $(s) { return el.querySelector(s); }
+    function poser() {
+      var c = C[i];
+      $("[data-q]").innerHTML = (i + 1) + ". " + c[0].replace("___", "<b style='border-bottom:2px dashed #1E499B;padding:0 14px'>?</b>");
+      $("[data-e]").textContent = ""; $("[data-s]").innerHTML = lib + " " + (i + 1) + " / " + C.length + " · score : <b>" + ok + "</b>";
+      $("[data-c]").innerHTML = c[1].slice().sort().map(function (x) { return "<button type='button' class='btn-l' data-v='" + x + "'>" + x + "</button>"; }).join("");
+      el.querySelectorAll("[data-v]").forEach(function (b) {
+        b.addEventListener("click", function () {
+          var bon = b.dataset.v === c[1][0]; if (bon) ok++;
+          $("[data-q]").innerHTML = (i + 1) + ". " + c[0].replace("___", "<b style='color:" + (bon ? VERT : ROUGE) + "'>" + c[1][0] + "</b>");
+          $("[data-e]").innerHTML = (bon ? "✔ " : "✘ ") + c[2];
+          el.querySelectorAll("[data-v]").forEach(function (x) { x.disabled = true; });
+          var nx = document.createElement("button"); nx.type = "button"; nx.className = "btn-l"; nx.textContent = i + 1 < C.length ? suivant : "↺";
+          nx.addEventListener("click", function () { i = (i + 1) % C.length; if (!i) ok = 0; poser(); });
+          $("[data-c]").appendChild(nx);
+          $("[data-s]").innerHTML = lib + " " + (i + 1) + " / " + C.length + " · score : <b>" + ok + "</b>";
+        });
+      });
+    }
+    poser();
+  }
+
+  function alea(g) { return function () { g = (g * 16807) % 2147483647; return (g - 1) / 2147483646; }; }
+  function ill(old, i) { return old && old.parties[i] ? old.parties[i].illus : undefined; }
+  function bloc(x, y, w, h, c, l1, l2) {
+    return "<rect x='" + x + "' y='" + y + "' width='" + w + "' height='" + h + "' rx='10' fill='" + c + "'/>" + txt(x + w / 2, y + h / 2 - (l2 ? 3 : -5), l1, { s: 14, c: "#fff" }) + (l2 ? txt(x + w / 2, y + h / 2 + 14, l2, { s: 10, c: "#fff", w: 500 }) : "");
+  }
+
+  /* ═══════════════════════ 6e LATIN — ORIGINE ET IMPORTANCE ═══════════════════════ */
+  var LO_OLD = ancien("6e-la-origine");
+  function aqueduc3D() {
+    var o = [], k;
+    o.push({ f: "boite", c: [0, -6, 0], d: [520, 8, 200], coul: "#7A6A4A", dessus: "#9DB36A" });
+    o.push({ f: "boite", c: [0, -2, 0], d: [520, 3, 40], coul: "#2F6EA5", dessus: "#4A90C2", div: false });
+    for (k = 0; k < 7; k++) o.push({ f: "boite", c: [-210 + k * 70, 40, 0], d: [22, 84, 30], coul: "#C9B28A", dessus: "#D9C49C" });
+    o.push({ f: "boite", c: [0, 90, 0], d: [470, 16, 32], coul: "#BFA67A", dessus: "#D9C49C" });
+    for (k = 0; k < 13; k++) o.push({ f: "boite", c: [-216 + k * 36, 120, 0], d: [14, 44, 26], coul: "#C9B28A", dessus: "#D9C49C" });
+    o.push({ f: "boite", c: [0, 148, 0], d: [470, 12, 28], coul: "#BFA67A", dessus: "#D9C49C" });
+    o.push({ f: "boite", c: [0, 158, 0], d: [470, 8, 22], coul: "#A89270", dessus: "#A89270", div: false });
+    o.push({ f: "boite", c: [0, 162.5, 0], d: [460, 1, 12], coul: "#5BA3D9", dessus: "#7FB9E2", div: false });
+    return o;
+  }
+  var RACINES = [["aquarium", "aqua", "l'eau"], ["territoire", "terra", "la terre"], ["manuel", "manus", "la main"], ["solaire", "sol", "le soleil"], ["maternel", "mater", "la mère"], ["nocturne", "nox, noctis", "la nuit"], ["vitamine", "vita", "la vie"], ["pédestre", "pes, pedis", "le pied"]];
+  remplacer("6e-la-origine", {
+    c: "6e", m: "latin", titre: "Origine et importance du latin", duree: 30,
+    accroche: "« Le latin est une langue morte : il n'en reste rien. Et le français vient de l'anglais ! » Le grand frère de Léa a-t-il raison ?",
+    intro: "Une discussion de famille autour d'une liste de fournitures te sert de fil rouge : à chaque partie, un indice t'aide à trancher entre trois affirmations.",
+    objectifs: ["situer l'origine du latin (Latium, Rome)", "expliquer comment le latin a donné les langues romanes", "repérer des racines latines dans le français", "dire pourquoi le latin est encore utile"],
+    enquete: {
+      titre: "La liste de fournitures de Léa",
+      svg: svg(640, 220, "Une élève lit une liste de fournitures ; son grand frère affirme que le latin est mort", lin("loC", ["#F4EDE1", "#E9DFCF"], true),
+        "<rect width='640' height='220' fill='url(#loC)'/><rect y='186' width='640' height='34' fill='#B88A5A'/><g transform='rotate(-3 300 100)'><rect x='220' y='20' width='170' height='160' fill='#FFFBEA' stroke='#E3D7A6'/>" + txt(305, 44, "Fournitures 6e", { s: 13, c: BLEU }) + ["1 agenda", "1 cahier de bonus", "1 aquarelle", "crayons, gomme,", "et cetera…"].map(function (t, i) { return txt(236, 72 + i * 22, t, { s: 12, a: "start", c: i === 0 || i === 4 ? ROUGE : NUIT, i: true }); }).join("") + "</g>" +
+        perso(130, 96, "#5A3A1E", "#C62828", "#2E3445") + perso(520, 90, "#6B4423", "#1E499B", "#2E3445") + bulle(420, 26, 210, "Le latin ? Langue morte !", "#9FC5E8") + bulle(20, 40, 200, "« Agenda », c'est latin ?", "#F7C948")),
+      legende: "À Kribi, Léa prépare sa rentrée en 6e ; son lycée propose l'initiation au latin.",
+      contexte: "<p>Sur la liste, Léa lit « agenda » et « et cetera » ; le professeur de français a dit que ces mots étaient latins. Son grand frère, en 3e, se moque : « Le latin est une langue morte : il n'en reste rien aujourd'hui. D'ailleurs, le français vient de l'anglais. » Leur mère, infirmière, ajoute que les médicaments et les maladies portent souvent des noms latins.</p>",
+      documents: [{ t: "Un même mot dans cinq langues", html: "<table class='donnees'><tr><th>Latin</th><th>Français</th><th>Italien</th><th>Espagnol</th><th>Portugais</th><th>Roumain</th><th>Anglais</th></tr><tr><td>noctem</td><td>nuit</td><td>notte</td><td>noche</td><td>noite</td><td>noapte</td><td>night</td></tr></table>" }],
+      question: "D'où vient le français, et le latin a-t-il vraiment disparu ?",
+      tache: "Explique à son frère l'origine du français et donne trois preuves que le latin est encore présent.",
+      hypotheses: ["Le français vient de l'anglais.", "Le latin est mort : il n'en reste rien dans notre vie.", "Le latin, langue de Rome répandue par l'Empire, a donné les langues romanes dont le français ; il vit dans notre vocabulaire, les sciences et le droit."]
+    },
+    parties: [
+      { t: "La langue de Rome", html: partie(LO_OLD, 0), illus: ill(LO_OLD, 0),
+        planches: [{ type: "3d", titre: "Un aqueduc romain", legende: "Tourne l'aqueduc : deux étages d'arcades en pierre portent un canal (en bleu) qui conduit l'eau d'une source jusqu'à la ville, avec une pente très faible. Partout où ils allaient, les Romains bâtissaient routes, ponts et aqueducs, et apportaient leur langue. Le mot vient d'ailleurs du latin : aqua (l'eau) + ducere (conduire).",
+          modele: { h: 340, rx: -14, ry: 28, echelle: 0.85, alt: "Aqueduc romain à deux étages d’arcades en pierre au-dessus d’une rivière, avec un canal d’eau au sommet", objets: aqueduc3D(),
+            etiquettes: [{ p: [0, 163, 0], t: "canal : l'eau (aqua) conduite (ducere)", cote: "d" }, { p: [-210, 40, -15], t: "arcades de pierre", cote: "g" }, { p: [-200, -1, 0], t: "rivière", cote: "g" }] } }],
+        fil: { html: "<p>Le latin était la langue du Latium, autour de Rome. Avec la conquête, les Romains l'ont répandu autour de la Méditerranée, jusqu'en Gaule, la future France : les Gaulois ont peu à peu parlé latin.</p>", verdicts: [] },
+        retenir: "Latin = langue de Rome, répandue par la conquête romaine." },
+      { t: "Une langue mère", html: partie(LO_OLD, 1),
+        planches: [{ type: "2D", titre: "L'arbre des langues romanes", legende: "Le latin parlé s'est transformé différemment selon les régions : il a donné les langues romanes. L'anglais appartient à une autre branche, germanique ; il a seulement emprunté beaucoup de mots au latin et au français.", svg: (function () {
+          var s = "<rect width='640' height='270' fill='#FBF8F2'/><path d='M320 250V150' stroke='#6B4423' stroke-width='16' stroke-linecap='round'/>" + bloc(250, 200, 140, 46, "#7A1F1F", "latin", "noctem") + "<circle cx='320' cy='110' r='92' fill='#5E9E4E' opacity='.25'/>";
+          [["français", "nuit", 120, 60], ["italien", "notte", 240, 30], ["espagnol", "noche", 400, 30], ["portugais", "noite", 520, 60], ["roumain", "noapte", 320, 104]].forEach(function (b) { s += "<path d='M320 196Q320 150 " + b[2] + " " + (b[3] + 40) + "' stroke='#6B4423' stroke-width='5' fill='none'/>" + bloc(b[2] - 60, b[3], 120, 44, VERT, b[0], b[1]); });
+          s += "<rect x='500' y='180' width='130' height='70' rx='10' fill='#fff' stroke='#9AA3AF' stroke-dasharray='5 3'/>" + txt(565, 204, "anglais : night", { s: 12, c: GRIS }) + txt(565, 222, "branche germanique", { s: 10, c: GRIS, w: 500 }) + txt(565, 238, "(cousin éloigné)", { s: 10, c: GRIS, w: 500 });
+          return svg(640, 270, "Arbre : du latin noctem partent cinq branches, nuit, notte, noche, noite, noapte ; l’anglais night est à part", "", s);
+        })() }],
+        fil: { html: "<p>Nuit, notte, noche, noite, noapte : les cinq langues romanes ont gardé la forme du latin <em>noctem</em>. L'anglais <em>night</em> vient d'une autre famille, germanique. Le français descend donc du latin, pas de l'anglais ; l'anglais, lui, a beaucoup <strong>emprunté</strong> au français après 1066.</p>", verdicts: [[0, "rejetee", "Le français est une langue romane, issue du latin."]] },
+        retenir: "Le français est une langue romane : il descend du latin." },
+      { t: "Le latin aujourd'hui", html: partie(LO_OLD, 2),
+        fil: { html: "<p>Agenda (« ce qu'il faut faire »), et cetera (« et les autres choses »), aquarelle, les noms des médicaments et des espèces (<em>Homo sapiens</em>) : le latin est partout. On ne le parle plus à la maison, mais il vit dans nos mots, et connaître une racine aide à deviner le sens d'un mot (exercice ci-dessus).</p>", verdicts: [[1, "rejetee", "Le latin vit dans le vocabulaire, les sciences, le droit."], [2, "validee", "Latin de Rome → langues romanes ; présent partout aujourd'hui."]] },
+        retenir: "Étudier le latin, c'est mieux comprendre le français." }
+    ],
+    denouement: {
+      titre: "Léa répond à son frère",
+      etapes: ["Le latin, langue de Rome, s'est répandu avec l'Empire (indice 1).", "Il a donné les langues romanes, dont le français (indice 2).", "Il vit dans nos mots, les sciences, le droit (indice 3)."],
+      reponse: "<p>Le latin était la langue du Latium et de Rome, fondée selon la tradition en 753 avant J.-C. ; les conquêtes romaines l'ont répandu jusqu'en Gaule. En se transformant pendant des siècles, il a donné les langues romanes : français, italien, espagnol, portugais, roumain ; le tableau de « noctem » le montre. Le français ne vient donc pas de l'anglais, qui est une langue germanique ayant beaucoup emprunté au latin et au français. Et le latin n'a pas disparu : il vit dans notre vocabulaire (agenda, et cetera, maximum), dans les sciences (Homo sapiens), dans la médecine et le droit. Connaître ses racines, comme aqua ou manus, aide à comprendre et à bien écrire le français.</p>",
+      transfert: "<p>Trouve le sens de « aqueduc », « manuscrit » et « territoire » grâce à leurs racines latines.</p>"
+    },
+    revision: (LO_OLD ? LO_OLD.revision : []).concat(["L'anglais est une langue germanique, cousine éloignée du français."]),
+    exo: LO_OLD ? LO_OLD.exo : "",
+    quiz: [
+      q("Le latin était la langue…", "de Rome", "d'Athènes", "de Carthage", "Rome se trouve dans le Latium."),
+      q("Laquelle n'est pas une langue romane ?", "L'anglais", "L'espagnol", "Le roumain", "L'anglais est germanique."),
+      q("« aqua » signifie…", "l'eau", "l'air", "le feu", "D'où aquarium, aquatique, aqueduc."),
+      q("Selon la tradition, Rome est fondée en…", "753 av. J.-C.", "1066", "476 apr. J.-C.", "Date traditionnelle."),
+      q("Le français descend…", "du latin", "de l'anglais", "du grec", "C'est une langue romane."),
+      q("« noctem » a donné en français…", "nuit", "night", "notte", "Notte est italien, night anglais."),
+      q("« manus » (la main) a donné…", "manuel", "maternel", "matin", "Un manuel se tient à la main."),
+      q("« Homo sapiens » est un nom…", "latin, utilisé en sciences", "anglais", "grec moderne", "Les espèces ont un nom latin."),
+      q("Un aqueduc sert à…", "conduire l'eau", "conduire des chars", "stocker du blé", "aqua + ducere."),
+      q("« et cetera » signifie…", "et les autres choses", "c'est fini", "au revoir", "On l'abrège etc.")
+    ]
+  });
+
+  /* ═══════════════════════ 6e LATIN — LES JOURS ET LES MOIS ═══════════════════════ */
+  var LJ_OLD = ancien("6e-la-jours");
+  var ASTRES = [["Lune", "lundi", "dies Lunae", 12, "#C9CED6"], ["Mars", "mardi", "dies Martis", 10, "#C1440E"], ["Mercure", "mercredi", "dies Mercurii", 8, "#9C8F80"], ["Jupiter", "jeudi", "dies Iovis", 24, "#D8B98E"], ["Vénus", "vendredi", "dies Veneris", 12, "#E8D29A"], ["Saturne", "samedi", "dies Saturni", 20, "#D9C27A"], ["Soleil", "dimanche", "dies Solis", 34, "#F7B733"]];
+  var MOIS = ["Ianuarius", "Februarius", "Martius", "Aprilis", "Maius", "Iunius", "Iulius", "Augustus", "September", "October", "November", "December"];
+  function astres3D() {
+    var o = [];
+    o.push({ f: "boite", c: [0, -40, 0], d: [600, 4, 140], coul: "#101828", dessus: "#1B2540" });
+    ASTRES.forEach(function (a, i) {
+      var x = -252 + i * 84, yb = (i % 2 ? 70 : 0); o.push({ f: "sphere", c: [x, a[3] - 30 + yb, 0], r: a[3], coul: a[4] }); if (yb) o.push({ f: "cylindre", c: [x, -38, 0], r: 1.2, h: yb + 8, n: 6, coul: "#3A4A6A" });
+      if (a[0] === "Saturne") o.push({ f: "cylindre", c: [x, a[3] - 31 + yb, 0], r: a[3] * 1.9, h: 1.5, n: 24, coul: "#B8A16A" });
+      if (a[0] === "Jupiter") [-8, 0, 8].forEach(function (d) { o.push({ f: "cylindre", c: [x, a[3] - 30 + yb + d - 1.5, 0], r: Math.sqrt(a[3] * a[3] - d * d) + 0.4, h: 3, n: 24, coul: "#B07A4A" }); });
+    });
+    return o;
+  }
+  remplacer("6e-la-jours", {
+    c: "6e", m: "latin", titre: "Les jours de la semaine et les mois en latin", duree: 30,
+    accroche: "« Lundi, c'est “l'un-di”, le premier jour ! » « Septembre contient “sept” par erreur : c'est le 9ᵉ mois ! » Deux explications, deux erreurs ?",
+    intro: "Le calendrier affiché dans une classe de 6e à Ebolowa te sert de fil rouge : à chaque partie, un indice t'aide à trancher entre trois explications.",
+    objectifs: ["connaître les noms latins des jours et leur sens", "relier les jours aux astres et aux dieux romains", "expliquer pourquoi septembre n'est plus le 7ᵉ mois", "connaître l'origine de janvier, juillet et août"],
+    enquete: {
+      titre: "Le calendrier de la classe",
+      svg: svg(640, 220, "Un calendrier mural ouvert sur septembre, et deux élèves qui discutent de l’origine des noms", lin("ljC", ["#EAF3E6", "#F7F3EA"], true),
+        "<rect width='640' height='220' fill='url(#ljC)'/><rect x='220' y='16' width='200' height='176' rx='6' fill='#fff' stroke='#C9D2E3' stroke-width='2'/><rect x='220' y='16' width='200' height='34' rx='6' fill='" + ROUGE + "'/>" + txt(320, 39, "SEPTEMBRE · 9ᵉ mois", { s: 13, c: "#fff" }) +
+        (function () { var s = "", r, c, j = ["L", "M", "M", "J", "V", "S", "D"]; j.forEach(function (d, i) { s += txt(240 + i * 27, 68, d, { s: 11, c: i === 6 ? ROUGE : GRIS }); }); for (r = 0; r < 4; r++) for (c = 0; c < 7; c++) s += txt(240 + c * 27, 92 + r * 26, String(r * 7 + c + 1), { s: 11, w: 500, c: c === 6 ? ROUGE : NUIT }); return s; })() +
+        perso(110, 96, "#5A3A1E", "#2E7D32", "#2E3445") + perso(530, 96, "#6B4423", "#7B3F99", "#2E3445") + bulle(20, 40, 180, "Lundi = « l'un-di » !", "#F7C948") + bulle(440, 40, 190, "Sept… mais 9ᵉ mois ?!", "#9FC5E8")),
+      legende: "À Ebolowa, la classe de 6e affiche le calendrier de septembre, mois de la rentrée.",
+      contexte: "<p>Christelle explique : « Lundi vient de “l'un-di” : c'est le premier jour de la semaine. » Son camarade Steve a une autre question : « Septembre contient “sept”, mais c'est le 9ᵉ mois : c'est une erreur des inventeurs du calendrier. » Le professeur de latin propose de remonter jusqu'à Rome.</p>",
+      documents: [{ t: "Le calendrier romain primitif", html: "<p>« L'année de Romulus commençait en <strong>Martius</strong> (mars) et comptait dix mois ; les deux mois d'hiver, Ianuarius et Februarius, furent ajoutés plus tard. »</p>" }],
+      question: "D'où viennent les noms de nos jours et de nos mois ?",
+      tache: "Explique l'origine de « lundi » et de « septembre », puis celle de deux autres noms de jours ou de mois.",
+      hypotheses: ["« Lundi » veut dire « le premier jour » (l'un-di).", "« Septembre » contient « sept » par erreur : il a toujours été le 9ᵉ mois.", "Les jours portent les noms d'astres et de dieux romains (lundi = jour de la Lune) ; l'année romaine commençait en mars, d'où septembre = 7ᵉ mois."]
+    },
+    parties: [
+      { t: "Les jours : des astres et des dieux", html: partie(LJ_OLD, 0),
+        planches: [{ type: "3d", titre: "Les sept astres de la semaine", legende: "Tourne la rangée : la Lune, Mars (rouge), Mercure, Jupiter (le plus gros, à bandes), Vénus, Saturne (avec ses anneaux) et le Soleil. Ce sont les sept astres visibles à l'œil nu que les Romains associaient à leurs dieux ; chacun a donné son nom à un jour. Tailles non respectées.",
+          modele: { h: 360, rx: -10, ry: 0, echelle: 0.9, alt: "Sept astres en rangée : Lune, Mars, Mercure, Jupiter, Vénus, Saturne avec anneaux, Soleil", objets: astres3D(),
+            etiquettes: ASTRES.map(function (a, i) { return { p: [-252 + i * 84, a[3] * 2 - 26 + (i % 2 ? 70 : 0), 0], t: a[1] + " : " + a[2], cote: i < 4 ? "g" : "d" }; }) } }],
+        fil: { html: "<p>« Lundi » vient de <em>Lunae dies</em>, le <strong>jour de la Lune</strong> : « lun- » est la Lune, « -di » le jour (<em>dies</em>). De même mardi (Mars), mercredi (Mercure), jeudi (Jupiter), vendredi (Vénus). « L'un-di » est une étymologie inventée, une ressemblance de hasard.</p>", verdicts: [[0, "rejetee", "Lundi = Lunae dies, jour de la Lune."]] },
+        retenir: "-di vient de dies : le jour." },
+      { t: "Les mois", html: partie(LJ_OLD, 1), illus: ill(LJ_OLD, 1),
+        fil: { html: "<p>Dans l'année romaine primitive, qui commençait en <strong>mars</strong>, September était bien le 7ᵉ mois (<em>septem</em> = 7), October le 8ᵉ, November le 9ᵉ, December le 10ᵉ. Quand janvier et février sont passés en tête de l'année, les noms sont restés, mais les numéros ont glissé de deux rangs (simulation ci-dessus). Ce n'est pas une erreur : c'est une trace de l'histoire.</p>", verdicts: [[1, "rejetee", "Septembre était le 7ᵉ mois d'une année qui commençait en mars."]] },
+        retenir: "Septembre = 7ᵉ mois… d'une année qui commençait en mars." },
+      { t: "Le latin au calendrier", html: partie(LJ_OLD, 2),
+        planches: [{ type: "2D", titre: "Des mois renommés pour des hommes et des dieux", legende: "Quintilis (le 5ᵉ) devient Iulius en l'honneur de Jules César ; Sextilis (le 6ᵉ) devient Augustus pour l'empereur Auguste ; Ianuarius est le mois de Janus, le dieu à deux visages qui regarde l'année passée et l'année qui vient.", svg: (function () {
+          var s = "<rect width='640' height='230' fill='#FBF8F2'/>";
+          [["Quintilis", "« le 5ᵉ »", "Iulius", "Jules César", "juillet"], ["Sextilis", "« le 6ᵉ »", "Augustus", "l'empereur Auguste", "août"]].forEach(function (m, i) { var y = 20 + i * 70; s += bloc(20, y, 150, 52, "#9AA3AF", m[0], m[1]) + "<path d='M178 " + (y + 26) + "H228' stroke='" + NUIT + "' stroke-width='3' marker-end='url(#ljF)'/>" + bloc(236, y, 170, 52, "#7A1F1F", m[2], m[3]) + "<path d='M414 " + (y + 26) + "H464' stroke='" + NUIT + "' stroke-width='3' marker-end='url(#ljF)'/>" + bloc(472, y, 140, 52, BLEU, m[4]); });
+          s += "<g transform='translate(90 190)'><ellipse rx='26' ry='30' fill='#C9B28A' stroke='#8A7350'/><path d='M0 -30V30' stroke='#8A7350' stroke-width='2'/><circle cx='-12' cy='-6' r='2.5' fill='#3B2416'/><circle cx='12' cy='-6' r='2.5' fill='#3B2416'/><path d='M-26 2l-8 4l8 2M26 2l8 4l-8 2' fill='#C9B28A' stroke='#8A7350'/></g>" + txt(140, 186, "Janus, dieu des portes et des commencements :", { s: 12, a: "start" }) + txt(140, 206, "Ianuarius → janvier, la porte de l'année", { s: 12, a: "start", c: BLEU });
+          return svg(640, 230, "Quintilis devient Iulius puis juillet, Sextilis devient Augustus puis août ; Janus à deux visages pour janvier", fleche("ljF", NUIT), s);
+        })() }],
+        fil: { html: "<p>Les noms des jours viennent des astres et des dieux, ceux des mois de nombres, de dieux et d'empereurs. Les deux explications de la classe étaient des erreurs ; le latin donne la vraie réponse.</p>", verdicts: [[2, "validee", "Astres et dieux pour les jours ; année commençant en mars pour les mois."]] },
+        retenir: "Chaque nom de mois raconte un peu d'histoire romaine." }
+    ],
+    denouement: {
+      titre: "Le calendrier expliqué",
+      etapes: ["Lundi = Lunae dies, jour de la Lune (indice 1).", "Année romaine commençant en mars : September = 7ᵉ (indice 2).", "Iulius, Augustus, Ianuarius : hommes et dieux (indice 3)."],
+      reponse: "<p>Christelle se trompe : « lundi » ne vient pas de « l'un-di » mais du latin dies Lunae, « le jour de la Lune ». Les autres jours suivent la même règle : mardi (Mars), mercredi (Mercure), jeudi (Jupiter), vendredi (Vénus), les Romains donnant à chaque jour le nom d'un des sept astres visibles, associés à leurs dieux. Steve se trompe aussi : il n'y a pas d'erreur. L'ancienne année romaine commençait en mars, et September (de septem, sept) était alors le 7ᵉ mois, October le 8ᵉ, November le 9ᵉ, December le 10ᵉ. Quand l'année a commencé en janvier, mois de Janus, les numéros ont glissé de deux rangs mais les noms sont restés. Juillet et août portent les noms de Jules César et d'Auguste.</p>",
+      transfert: "<p>Écris la date d'aujourd'hui en latin (dies + astre, puis le nom du mois), puis explique l'origine de « décembre ».</p>"
+    },
+    revision: (LJ_OLD ? LJ_OLD.revision : []).concat(["Les numéros des mois ont glissé de deux rangs quand l'année a commencé en janvier."]),
+    exo: LJ_OLD ? LJ_OLD.exo : "",
+    quiz: [
+      q("« dies Martis » donne…", "mardi", "mercredi", "lundi", "Le jour du dieu Mars."),
+      q("« dies » signifie…", "le jour", "le dieu", "la semaine", "D'où -di dans lundi, mardi…"),
+      q("Lundi est le jour…", "de la Lune", "du premier", "du Soleil", "dies Lunae."),
+      q("Jeudi est le jour de…", "Jupiter", "Janus", "Junon", "dies Iovis."),
+      q("Vendredi est le jour de…", "Vénus", "Vulcain", "Saturne", "dies Veneris."),
+      q("Pourquoi « septembre » contient-il « sept » ?", "C'était le 7ᵉ mois de l'année romaine primitive", "Il a 7 semaines", "Par erreur", "L'année commençait en mars."),
+      q("« octo » signifie…", "huit", "dix", "six", "D'où octobre, octogone."),
+      q("Janvier vient du dieu…", "Janus", "Jupiter", "Mars", "Dieu des portes et des débuts."),
+      q("Juillet honore…", "Jules César", "Auguste", "Romulus", "Quintilis devient Iulius."),
+      q("Août honore…", "l'empereur Auguste", "Jules César", "Mars", "Sextilis devient Augustus.")
+    ]
+  });
+
+  /* ═══════════════════════ 6e ARTS — LES BRANCHES DES ARTS ═══════════════════════ */
+  var AB_OLD = ancien("6e-arts-branches");
+  function balafon3D() {
+    var o = [], k;
+    o.push({ f: "boite", c: [0, -6, 0], d: [420, 6, 200], coul: "#8B6B4A", dessus: "#A68A5E" });
+    [-40, 40].forEach(function (z) { o.push({ f: "boite", c: [0, 60, z], d: [330, 8, 8], coul: "#5D3A1E" }); });
+    [-160, 160].forEach(function (x) { [-40, 40].forEach(function (z) { o.push({ f: "boite", c: [x, 28, z], d: [8, 60, 8], coul: "#5D3A1E" }); }); });
+    for (k = 0; k < 12; k++) {
+      var x = -143 + k * 26, L = 100 - k * 4.5;
+      o.push({ f: "boite", c: [x, 68, 0], d: [20, 5, L], coul: "#8B4A1E", dessus: "#A65A28" });
+      o.push({ f: "sphere", c: [x, 38 - (12 - k) * 0.6, 0], r: 15 - k * 0.6, coul: "#D9B77A" });
+    }
+    [[60, -80], [100, -84]].forEach(function (p) { o.push({ f: "cylindre", c: [p[0], 78, p[1]], r: 1.6, h: 70, n: 6, axe: "z", coul: "#C9A06E" }); o.push({ f: "sphere", c: [p[0], 78, p[1] + 72], r: 6, coul: "#2B1D12" }); });
+    return o;
+  }
+  remplacer("6e-arts-branches", {
+    c: "6e", m: "arts", titre: "Les différentes branches des arts", duree: 30,
+    accroche: "Festival culturel à Foumban : « Le conte n'est pas de l'art, c'est juste parler ! » « Le balafon est en bois sculpté : jury des arts plastiques ! » Le comité s'emmêle.",
+    intro: "La répartition des œuvres entre les jurys d'un festival culturel scolaire à Foumban te sert de fil rouge : à chaque partie, un indice t'aide à trancher entre trois avis.",
+    objectifs: ["distinguer arts plastiques, musicaux et scéniques", "classer une œuvre selon ce qu'on crée et ce que perçoit le public", "citer des formes d'art camerounaises", "respecter toutes les formes de création"],
+    enquete: {
+      titre: "Les trois jurys du festival",
+      svg: svg(640, 220, "Une table d’inscription avec trois urnes de couleur : arts plastiques, arts musicaux, arts scéniques ; des élèves présentent un balafon, une statuette, un conte", lin("abC", ["#F4EDE1", "#E9DFCF"], true),
+        "<rect width='640' height='220' fill='url(#abC)'/><rect y='176' width='640' height='44' fill='#B88A5A'/>" + [["PLASTIQUES", "#352C72", 170], ["MUSICAUX", "#6B4E00", 320], ["SCÉNIQUES", "#6E1F43", 470]].map(function (u) { return "<rect x='" + (u[2] - 55) + "' y='96' width='110' height='70' rx='8' fill='" + u[1] + "'/>" + txt(u[2], 136, u[0], { s: 12, c: "#fff" }); }).join("") +
+        "<g transform='translate(60 120)'><path d='M0 46c-14 0 -16 -30 -6 -38c-8 -8 -4 -22 6 -22s14 14 6 22c10 8 8 38 -6 38Z' fill='#B87333' stroke='#7A4A1E'/></g>" + perso(570, 76, "#5A3A1E", "#E8A33D", "#2E3445") + bulle(470, 20, 160, "Le conte, de l'art ?", "#9FC5E8") + bulle(30, 20, 200, "Balafon = bois sculpté !", "#F7C948") + "<rect x='250' y='60' width='140' height='10' rx='3' fill='#8B4A1E'/>" + [0, 1, 2, 3, 4, 5].map(function (k) { return "<circle cx='" + (262 + k * 23) + "' cy='80' r='" + (8 - k * 0.6) + "' fill='#D9B77A'/>"; }).join("")),
+      legende: "À Foumban, ville des artisans du bronze et du bois, le lycée organise son festival culturel annuel.",
+      contexte: "<p>Six œuvres sont inscrites : une statuette en bronze, un pagne ndop tissé, une photographie du palais, un air de balafon, un conte de la tortue, une danse. Rodrigue affirme : « Le conte n'est pas de l'art : c'est juste parler. » Amina ajoute : « Le balafon est un objet en bois sculpté : il va au jury des arts plastiques. » Le proviseur demande au comité de bien répartir les œuvres.</p>",
+      documents: [{ t: "Le règlement du festival", html: "<p>« Trois jurys : <strong>arts plastiques</strong> (œuvres à regarder), <strong>arts musicaux</strong> (œuvres à écouter), <strong>arts scéniques</strong> (spectacles joués devant un public). »</p>" }],
+      question: "Le conte est-il un art, et à quel jury confier le balafon ?",
+      tache: "Répartis les six œuvres entre les trois jurys en justifiant chaque choix.",
+      hypotheses: ["Le conte n'est pas de l'art : c'est juste parler.", "Le balafon relève des arts plastiques, parce que c'est un objet en bois.", "Trois familles : plastiques (on façonne : bronze, tissage, photo), musicaux (balafon, chant), scéniques (conte, danse) ; on classe selon ce qu'on crée et ce que perçoit le public."]
+    },
+    parties: [
+      { t: "Les arts plastiques", html: partie(AB_OLD, 0),
+        planches: [{ type: "2D", titre: "Trois œuvres plastiques camerounaises", legende: "Une statuette coulée en bronze à Foumban, un pagne ndop teint à l'indigo dans les Grassfields, une jarre de terre cuite : on façonne la matière (métal, fil, argile) pour créer une œuvre qu'on regarde, et parfois qu'on touche.", svg: (function () {
+          var s = "<rect width='640' height='250' fill='#FBF8F2'/>";
+          s += "<rect x='30' y='20' width='180' height='190' rx='12' fill='#fff' stroke='#C9D2E3'/><g transform='translate(120 140)'><rect x='-30' y='40' width='60' height='12' fill='#5D3A1E'/><path d='M0 40c-22 0 -26 -46 -10 -60c-12 -12 -6 -34 10 -34s22 22 10 34c16 14 12 60 -10 60Z' fill='#B87333' stroke='#7A4A1E' stroke-width='2'/><circle cx='-5' cy='-30' r='2' fill='#3B2416'/><circle cx='5' cy='-30' r='2' fill='#3B2416'/></g>" + txt(120, 230, "statuette en bronze", { s: 12 });
+          s += "<rect x='230' y='20' width='180' height='190' rx='12' fill='#1F2A5A'/>" + (function () { var r = "", i, j; for (i = 0; i < 5; i++) for (j = 0; j < 6; j++) r += "<g transform='translate(" + (252 + i * 34) + " " + (40 + j * 30) + ")'><path d='M0 -9L9 0L0 9L-9 0Z' fill='none' stroke='#F4F1EA' stroke-width='2'/><circle r='2' fill='#F4F1EA'/></g>"; return r; })() + txt(320, 230, "pagne ndop (indigo)", { s: 12 });
+          s += "<rect x='430' y='20' width='180' height='190' rx='12' fill='#fff' stroke='#C9D2E3'/><path d='M490 190c-26 0 -36 -70 -16 -110h52c20 40 10 110 -16 110Z' fill='#A0522D' stroke='#6B3A1E' stroke-width='2'/><path d='M486 80h28v-12h-28Z' fill='#8B4513'/><path d='M482 120q38 8 56 0M480 140q40 8 60 0' stroke='#E9DFCF' stroke-width='2' fill='none'/>" + txt(520, 230, "jarre en terre cuite", { s: 12 });
+          return svg(640, 250, "Trois œuvres : une statuette en bronze, un pagne ndop bleu indigo à motifs blancs, une jarre en terre cuite décorée", "", s);
+        })() }],
+        fil: { html: "<p>La statuette de bronze, le pagne ndop et la photographie du palais sont des œuvres qu'on <strong>regarde</strong> : elles vont au jury des arts plastiques. On y façonne la matière ou les images.</p>", verdicts: [] },
+        retenir: "Arts plastiques : on façonne la matière et les formes." },
+      { t: "Les arts musicaux et scéniques", html: partie(AB_OLD, 1), illus: ill(AB_OLD, 1),
+        planches: [{ type: "3d", titre: "Le balafon", legende: "Tourne le balafon : des lames de bois dur, de plus en plus courtes, posées sur un cadre ; sous chacune, une calebasse sert de caisse de résonance, plus petite pour les sons aigus. L'instrument est fabriqué par un artisan, mais l'œuvre d'art, c'est la musique qu'on en tire.",
+          modele: { h: 320, rx: -26, ry: 24, echelle: 0.95, alt: "Balafon : douze lames de bois sur un cadre, avec des calebasses sous les lames et deux baguettes", objets: balafon3D(),
+            etiquettes: [{ p: [-143, 72, 0], t: "lame longue : son grave", cote: "g" }, { p: [143, 72, 0], t: "lame courte : son aigu", cote: "d" }, { p: [-100, 30, 0], t: "calebasses (résonance)", cote: "g" }, { p: [80, 80, -84], t: "baguettes", cote: "d" }] } }],
+        fil: { html: "<p>Ce que le public reçoit du balafon, c'est un <strong>air de musique</strong> : il va au jury des arts musicaux, même si l'objet a été taillé avec art. Le conte, lui, est un <strong>art scénique</strong> : le conteur joue avec sa voix, ses gestes, ses silences, fait participer le public ; c'est un spectacle, comme la danse et le théâtre.</p>", verdicts: [[0, "rejetee", "Le conte est un art scénique."], [1, "rejetee", "Le balafon produit de la musique : arts musicaux."]] },
+        retenir: "Plastiques : voir ; musicaux : entendre ; scéniques : un spectacle." },
+      { t: "Des arts camerounais", html: partie(AB_OLD, 2),
+        fil: { html: "<p>La répartition est claire : plastiques (bronze, ndop, photographie), musicaux (balafon), scéniques (conte, danse). On classe une œuvre selon <strong>ce qu'on crée</strong> et <strong>ce que perçoit le public</strong>, pas selon la matière de l'objet (exercice ci-dessus).</p>", verdicts: [[2, "validee", "Trois familles, classement selon l'œuvre et le public."]] },
+        retenir: "Le patrimoine artistique camerounais est immense et varié." }
+    ],
+    denouement: {
+      titre: "La répartition du comité",
+      etapes: ["Bronze, ndop, photographie : arts plastiques (indice 1).", "Balafon : musical ; conte : scénique (indice 2).", "On classe selon l'œuvre et le public (indice 3)."],
+      reponse: "<p>Les arts se rangent en trois grandes familles. Les arts plastiques façonnent la matière ou l'image pour qu'on la regarde : la statuette en bronze, le pagne ndop tissé et teint, la photographie du palais vont à ce jury. Les arts musicaux produisent des sons organisés : l'air de balafon y va, car l'œuvre est la musique, même si l'instrument a été taillé avec soin. Les arts scéniques sont des spectacles joués devant un public : la danse, mais aussi le conte, où le conteur joue avec sa voix, ses gestes et les réponses du public ; Rodrigue a donc tort, le conte est un art à part entière. Ce classement aide à juger chaque œuvre avec les bons critères, et à respecter toutes les formes de création, du bronze de Foumban au mvet du Sud.</p>",
+      transfert: "<p>Classe : un masque de danse porté pendant une cérémonie. Est-il plastique, scénique, ou les deux ? Justifie.</p>"
+    },
+    revision: (AB_OLD ? AB_OLD.revision : []).concat(["On classe une œuvre selon ce qu'elle donne au public, pas selon la matière de l'objet."]),
+    exo: AB_OLD ? AB_OLD.exo : "",
+    quiz: [
+      q("La sculpture appartient aux arts…", "plastiques", "musicaux", "scéniques", "On façonne la matière."),
+      q("Le conte est un art…", "scénique", "plastique", "musical seulement", "Il se joue devant un public."),
+      q("Le mvet est…", "un instrument et un art du récit", "une danse", "une sculpture", "Il accompagne les récits épiques."),
+      q("Un air de balafon relève des arts…", "musicaux", "plastiques", "scéniques", "L'œuvre est la musique."),
+      q("La photographie est un art…", "plastique", "musical", "scénique", "Une image à regarder."),
+      q("La danse est un art…", "scénique", "plastique", "musical seulement", "Un spectacle du corps."),
+      q("Foumban est célèbre pour…", "le bronze et le bois sculpté", "le mvet", "la poterie seulement", "Ville d'artisans."),
+      q("Le pagne ndop est…", "un textile teint à l'indigo", "un instrument", "une danse", "Arts textiles, donc plastiques."),
+      q("Sous les lames du balafon, les calebasses servent…", "de caisses de résonance", "de décoration", "de baguettes", "Elles amplifient le son."),
+      q("On classe une œuvre selon…", "ce qu'elle donne au public", "la matière de l'objet", "son prix", "Voir, entendre, assister à un spectacle.")
+    ]
+  });
+
+  /* ═══════════════════════ 6e EPS — LA PISTE D'ATHLÉTISME ═══════════════════════ */
+  var EP_OLD = ancien("6e-eps-piste");
+  var PI = { L: 84.39, R0: 36.5, W: 1.22 };
+  function Rmes(i) { return i === 1 ? PI.R0 + 0.3 : PI.R0 + (i - 1) * PI.W + 0.2; }
+  function stade3D() {
+    var o = [], K = 3, cx = PI.L / 2 * K, n = 12;
+    function ring(r1, r2, coul) {
+      var k, a0, a1;
+      [-1, 1].forEach(function (s) {
+        o.push({ f: "poly", pts: [[-cx, 0, s * r1 * K], [cx, 0, s * r1 * K], [cx, 0, s * r2 * K], [-cx, 0, s * r2 * K]], coul: coul });
+        for (k = 0; k < n; k++) {
+          var C = s * cx, d = s > 0 ? 1 : -1;
+          var p = function (r, a) { return [C + d * r * K * Math.sin(a), 0, r * K * Math.cos(a)]; };
+          var b0 = k * Math.PI / n, b1 = b0 + Math.PI / n;
+          o.push({ f: "poly", pts: [p(r1, b0), p(r1, b1), p(r2, b1), p(r2, b0)], coul: coul });
+        }
+      });
+    }
+    var k;
+    o.push({ f: "boite", c: [0, -4, 0], d: [cx * 2 + 2 * (PI.R0 + 14) * K, 4, 2 * (PI.R0 + 14) * K], coul: "#5E7D3A", dessus: "#6E9B45" });
+    for (k = 0; k < 8; k++) { var r1 = PI.R0 + k * PI.W, r2 = r1 + PI.W; ring(r1 + 0.06, r2 - 0.06, "#B5442C"); ring(r2 - 0.06, r2 + 0.06, "#F4F1EA"); }
+    ring(PI.R0 - 0.1, PI.R0 + 0.06, "#F4F1EA");
+    ring(PI.R0 + 8 * PI.W + 0.06, PI.R0 + 8 * PI.W + 2.5, "#B5442C");
+    o.push({ f: "boite", c: [cx, 0.6, -(PI.R0 + 4 * PI.W) * K], d: [2, 0.6, 8 * PI.W * K], coul: "#F4F1EA", div: false });
+    o.push({ f: "boite", c: [cx, 10, -(PI.R0 + 8 * PI.W + 4) * K], d: [3, 20, 3], coul: "#1F2328" });
+    return o;
+  }
+  remplacer("6e-eps-piste", {
+    c: "6e", m: "eps", titre: "La piste d'athlétisme et son vocabulaire", duree: 30,
+    accroche: "Finale du 200 m au stade de Ngaoundéré : « Ce n'est pas juste, celui du couloir 8 part loin devant ! » Et un coureur coupe le virage en passant à l'intérieur…",
+    intro: "Une finale de 200 m pendant la journée sportive d'un lycée te sert de fil rouge : à chaque partie, un indice t'aide à trancher entre trois réclamations.",
+    objectifs: ["nommer les parties d'une piste de 400 m", "connaître le sens de course et la règle des couloirs", "expliquer et calculer le décalage des départs", "employer le vocabulaire de l'athlétisme"],
+    enquete: {
+      titre: "La réclamation de la finale du 200 m",
+      svg: svg(640, 220, "Une piste rouge à couloirs blancs ; des coureurs alignés en escalier au départ d’un virage ; un élève proteste", lin("epC", ["#CFE3F2", "#F4F1EA"], true),
+        "<rect width='640' height='220' fill='url(#epC)'/><path d='M0 100Q320 60 640 100V220H0Z' fill='#6E9B45'/><path d='M0 120Q320 80 640 120V220H0Z' fill='#B5442C'/>" + [0, 1, 2, 3, 4, 5, 6, 7, 8].map(function (k) { return "<path d='M0 " + (120 + k * 12) + "Q320 " + (80 + k * 13) + " 640 " + (120 + k * 12) + "' stroke='#F4F1EA' stroke-width='1.5' fill='none'/>"; }).join("") +
+        [0, 1, 2, 3, 4, 5, 6, 7].map(function (k) { var x = 120 + k * 40, y = 98 + k * 12.6; return "<circle cx='" + x + "' cy='" + (y - 12) + "' r='4' fill='#4A2E1A'/><path d='M" + (x - 4) + " " + (y - 8) + "h8v10h-8Z' fill='" + ["#1E499B", "#C62828", "#2E7D32", "#F7C948", "#7B3F99", "#E8A33D", "#0E7C86", "#F4F1EA"][k] + "'/>"; }).join("") +
+        perso(560, 30, "#5A3A1E", "#C62828", "#2E3445") + bulle(380, 10, 160, "Pas juste !", "#F7C948") + txt(140, 210, "couloir 1", { s: 10, c: "#fff" }) + txt(420, 210, "couloir 8", { s: 10, c: "#fff" })),
+      legende: "Au stade du lycée de Ngaoundéré : la finale du 200 m de la journée sportive.",
+      contexte: "<p>Au départ, les huit coureurs sont placés en escalier dans le virage. Ibrahim, couloir 1, proteste : « Le couloir 8 part 26 mètres devant moi : il est avantagé ! » Pendant la course, un autre coureur quitte son couloir pour couper le virage à la corde. Un spectateur demande pourquoi tout le monde tourne « dans le même sens ».</p>",
+      documents: [{ t: "Le règlement (extrait)", html: "<p>« La piste mesure 400 m au couloir 1. On court dans le sens inverse des aiguilles d'une montre. Au 200 m et au 400 m, chaque coureur reste dans son couloir du départ à l'arrivée. »</p>" }],
+      question: "Le décalage est-il injuste, et que penser du coureur qui coupe le virage ?",
+      tache: "Réponds à Ibrahim en expliquant le décalage, puis dis ce que l'arbitre doit faire pour le coureur qui a quitté son couloir.",
+      hypotheses: ["Le départ décalé avantage les couloirs extérieurs.", "Chacun peut quitter son couloir pour raccourcir son virage.", "Piste de 400 m, sens inverse des aiguilles d'une montre, chacun dans son couloir ; le décalage compense la longueur des virages extérieurs : même distance pour tous."]
+    },
+    parties: [
+      { t: "Une piste de 400 mètres", html: partie(EP_OLD, 0),
+        planches: [{ type: "3d", titre: "Le stade et sa piste", legende: "Tourne le stade : la piste en tartan rouge entoure la pelouse ; deux lignes droites de 84,39 m et deux virages ; huit couloirs de 1,22 m séparés par des lignes blanches ; la corde le long du couloir 1 ; la ligne d'arrivée commune au bout de la ligne droite.",
+          modele: { h: 340, rx: -46, ry: 0, echelle: 0.62, alt: "Stade d’athlétisme : piste rouge à huit couloirs blancs autour d’une pelouse verte, ligne d’arrivée", objets: stade3D(),
+            etiquettes: [{ p: [0, 1, -(PI.R0 + 0.2) * 3], t: "la corde (couloir 1)", cote: "g" }, { p: [PI.L / 2 * 3, 2, -(PI.R0 + 4 * PI.W) * 3], t: "ligne d'arrivée", cote: "d" }, { p: [0, 1, -(PI.R0 + 7.5 * PI.W) * 3], t: "couloir 8", cote: "d" }, { p: [0, 1, 0], t: "pelouse (lancers, sauts)", cote: "g" }] } }],
+        fil: { html: "<p>La piste mesure <strong>400 m dans le couloir 1</strong>. Mais les couloirs extérieurs font le tour d'un virage plus large : un tour complet dans le couloir 8 mesure environ 453 m. Si tout le monde partait sur la même ligne, le couloir 8 courrait plus que les autres.</p>", verdicts: [] },
+        retenir: "400 m au couloir 1 ; couloir 1 = le plus proche de la corde." },
+      { t: "Le sens et les départs", html: partie(EP_OLD, 1),
+        fil: { html: "<p>Au 200 m, chaque coureur fait un virage dans son couloir. Le virage du couloir 8 est plus long d'environ 26,5 m que celui du couloir 1 : le coureur du couloir 8 part donc 26,5 m <strong>devant</strong>, pour courir exactement 200 m comme Ibrahim (simulation ci-dessus). Ce n'est pas un avantage, c'est l'égalité. Et quitter son couloir pour couper le virage, c'est courir moins que les autres : <strong>disqualification</strong>.</p>", verdicts: [[0, "rejetee", "Le décalage compense le virage plus long : même distance."], [1, "rejetee", "Quitter son couloir au 200 m, c'est la disqualification."]] },
+        retenir: "Départs décalés = même distance pour tous les couloirs." },
+      { t: "Le vocabulaire", html: partie(EP_OLD, 2),
+        fil: { html: "<p>Couloir, corde, décalage, ligne d'arrivée, faux départ : avec ces mots, on peut expliquer la course. Sens inverse des aiguilles d'une montre, chacun dans son couloir, décalage pour l'égalité : la course était juste.</p>", verdicts: [[2, "validee", "Sens de course, couloirs, décalage égalisateur."]] },
+        retenir: "Respecter son couloir, c'est respecter la règle et les autres." }
+    ],
+    denouement: {
+      titre: "La décision de l'arbitre",
+      etapes: ["Un tour = 400 m au couloir 1, plus dans les couloirs extérieurs (indice 1).", "Décalage du couloir 8 au 200 m : environ 26,5 m (indice 2).", "Couloirs, sens, vocabulaire (indice 3)."],
+      reponse: "<p>La piste mesure 400 m dans le couloir 1, le long de la corde ; plus on s'éloigne de la corde, plus le virage est long. Au 200 m, chaque coureur court un virage puis la ligne droite, dans son couloir : le virage du couloir 8 étant plus long d'environ 26,5 m, son départ est avancé d'autant, pour que chacun parcoure exactement 200 m. Ibrahim n'est donc pas désavantagé. En revanche, le coureur qui a quitté son couloir pour couper le virage a couru moins que les autres : l'arbitre doit le disqualifier. Enfin, tout le monde court dans le sens inverse des aiguilles d'une montre, la corde à sa gauche, et la ligne d'arrivée est commune à toutes les courses.</p>",
+      transfert: "<p>Au 400 m, les coureurs font deux virages dans leur couloir. Le décalage du couloir 8 est-il plus grand ou plus petit qu'au 200 m ? <em>(Environ deux fois plus grand : près de 53 m.)</em></p>"
+    },
+    revision: (EP_OLD ? EP_OLD.revision : []).concat(["Quitter son couloir au 200 m ou au 400 m entraîne la disqualification."]),
+    exo: EP_OLD ? EP_OLD.exo : "",
+    quiz: [
+      q("Combien mesure un tour de piste au couloir 1 ?", "400 m", "200 m", "1 000 m", "Deux droites et deux virages."),
+      q("Pourquoi les départs du 200 m sont-ils décalés ?", "Pour que tous courent la même distance", "Par tirage au sort", "Pour avantager le couloir 8", "Les virages extérieurs sont plus longs."),
+      q("La corde est…", "le bord intérieur de la piste", "le bord extérieur", "la ligne d'arrivée", "Le couloir 1 la longe."),
+      q("On court dans le sens…", "inverse des aiguilles d'une montre", "des aiguilles d'une montre", "que l'on veut", "La corde est à gauche."),
+      q("Une piste compte en général…", "8 couloirs", "4 couloirs", "12 couloirs", "Numérotés de l'intérieur vers l'extérieur."),
+      q("Un coureur qui coupe son virage au 200 m est…", "disqualifié", "félicité", "avantagé sans sanction", "Il a couru moins que les autres."),
+      q("La ligne d'arrivée est…", "commune à toutes les courses", "différente pour chaque couloir", "au milieu du virage", "Au bout de la ligne droite."),
+      q("Un faux départ, c'est…", "partir avant le signal", "partir en retard", "tomber au départ", "Il est sanctionné."),
+      q("La zone de transmission sert…", "au passage du témoin en relais", "aux lancers", "à l'échauffement", "Relais 4 × 100 m."),
+      q("Le décalage du couloir 8 au 200 m est d'environ…", "26,5 m", "2,6 m", "100 m", "π × (45,24 − 36,8) ≈ 26,5 m.")
+    ]
+  });
+
+  /* ═══════════════════════ SIMULATIONS ═══════════════════════ */
+  VRT_A("6e-la-origine", 2, "D'où vient ce mot ? Retrouve la racine latine", function (el) {
+    exercice(el, RACINES.map(function (r) { return ["« " + r[0] + " » vient du latin ___", [r[1] + " (" + r[2] + ")"].concat(RACINES.filter(function (x) { return x[1] !== r[1]; }).slice(0, 2).map(function (x) { return x[1] + " (" + x[2] + ")"; })), "« " + r[0] + " » contient " + r[1] + ", " + r[2] + "."]; }), "Mot suivant", "Mot");
+  });
+  VRT_A("6e-la-jours", 1, "Fais commencer l'année en mars ou en janvier", function (el) {
+    el.innerHTML = "<div style='display:flex;gap:8px;flex-wrap:wrap'><button type='button' class='btn-l' data-d='2'>Année romaine primitive (début en mars)</button><button type='button' class='btn-l' data-d='0'>Notre calendrier (début en janvier)</button></div><div data-g style='margin:8px 0'></div><p class='labo-r' data-r></p>";
+    function maj(d) {
+      var s = "<rect width='480' height='160' fill='#FBF8F2'/>", k;
+      for (k = 0; k < 12; k++) { var m = (k + d) % 12, x = 10 + k * 38.5, sp = m >= 8; s += "<rect x='" + x + "' y='30' width='35' height='90' rx='6' fill='" + (sp ? "#7A1F1F" : "#DCE6F2") + "'/>" + txt(x + 17.5, 52, String(k + 1), { s: 15, c: sp ? "#fff" : BLEU }) + "<text x='" + (x + 22) + "' y='112' font-size='10' font-weight='700' fill='" + (sp ? "#fff" : NUIT) + "' transform='rotate(-90 " + (x + 22) + " 112)'>" + MOIS[m] + "</text>"; }
+      s += txt(240, 20, d ? "L'année commence en Martius : September est le 7ᵉ mois" : "L'année commence en Ianuarius : September devient le 9ᵉ mois", { s: 12, c: d ? "#7A1F1F" : BLEU }) + txt(240, 146, "septem 7 · octo 8 · novem 9 · decem 10", { s: 11, c: GRIS, w: 600 });
+      el.querySelector("[data-g]").innerHTML = "<svg viewBox='0 0 480 160' style='max-width:540px;width:100%' role='img' aria-label='Douze mois numérotés selon le mois de début de l’année'>" + s + "</svg>";
+      el.querySelector("[data-r]").innerHTML = d ? "Début en mars : <b>September = 7ᵉ</b>, October = 8ᵉ, November = 9ᵉ, December = 10ᵉ : les noms correspondent aux nombres." : "Début en janvier : les mêmes noms glissent de <b>deux rangs</b> ; September devient le <b>9ᵉ</b> mois.";
+    }
+    el.querySelectorAll("[data-d]").forEach(function (b) { b.addEventListener("click", function () { maj(+b.dataset.d); }); });
+    maj(2);
+  });
+  VRT_A("6e-arts-branches", 2, "Quel jury ? Classe chaque œuvre", function (el) {
+    exercice(el, [["Une statuette en bronze de Foumban : arts ___", ["plastiques", "musicaux", "scéniques"], "On la regarde : matière façonnée."], ["Un air de balafon : arts ___", ["musicaux", "plastiques", "scéniques"], "L'œuvre est la musique."], ["Un conte de la tortue dit devant la classe : arts ___", ["scéniques", "musicaux", "plastiques"], "Un spectacle de parole."], ["Un pagne ndop tissé et teint : arts ___", ["plastiques", "scéniques", "musicaux"], "Arts textiles."], ["Une danse bikutsi : arts ___", ["scéniques", "plastiques", "musicaux"], "Spectacle du corps (avec musique)."], ["Une photographie du palais du sultan : arts ___", ["plastiques", "musicaux", "scéniques"], "Une image à regarder."], ["Une chorale qui chante l'hymne : arts ___", ["musicaux", "scéniques", "plastiques"], "Chant."], ["Une pièce de théâtre du club : arts ___", ["scéniques", "plastiques", "musicaux"], "Joué devant un public."]], "Œuvre suivante", "Œuvre");
+  });
+  VRT_A("6e-eps-piste", 1, "Calcule le décalage des départs", function (el) {
+    el.innerHTML = "<div style='display:flex;flex-wrap:wrap;gap:8px 18px;align-items:end'><div style='display:flex;gap:6px'><button type='button' class='btn-l' data-c='200'>200 m</button><button type='button' class='btn-l' data-c='400'>400 m</button></div><label class='labo-c'><span>Couloir : <b data-lv>8</b></span><input type='range' min='1' max='8' value='8' data-l></label></div><div data-g style='margin:8px 0'></div><p class='labo-r' data-r></p>";
+    var course = 200, Lc = el.querySelector("[data-l]");
+    function maj() {
+      var c = +Lc.value, K = 3.1, cy = 165, cx1 = 320 - PI.L / 2 * K, cx2 = 320 + PI.L / 2 * K, s = "<rect width='640' height='330' fill='#6E9B45'/>", k;
+      function stadeP(r) { r *= K; return "M" + cx1 + " " + (cy - r) + "H" + cx2 + "A" + r + " " + r + " 0 0 1 " + cx2 + " " + (cy + r) + "H" + cx1 + "A" + r + " " + r + " 0 0 1 " + cx1 + " " + (cy - r) + "Z"; }
+      s += "<path d='" + stadeP(PI.R0 + 8 * PI.W + 1) + "' fill='#B5442C'/><path d='" + stadeP(PI.R0) + "' fill='#5E9E4E'/>";
+      for (k = 0; k <= 8; k++) s += "<path d='" + stadeP(PI.R0 + k * PI.W) + "' fill='none' stroke='#F4F1EA' stroke-width='1.2'/>";
+      s += "<path d='M" + cx2 + " " + (cy + PI.R0 * K) + "V" + (cy + (PI.R0 + 8 * PI.W) * K) + "' stroke='#fff' stroke-width='4'/>" + txt(cx2 + 6, cy + (PI.R0 + 10 * PI.W) * K + 6, "arrivée", { s: 11, c: "#fff", a: "start" });
+      function pos(i, longueur) { var R = Rmes(i), d = longueur, P = [], t; if (course === 200) { var th = Math.PI * (R - Rmes(1)) / R; for (t = th; t <= Math.PI + 1e-9; t += 0.05) P.push([cx1 - R * K * Math.sin(t), cy - R * K * Math.cos(t)]); P.push([cx1, cy + R * K], [cx2, cy + R * K]); return { th: th, P: P, start: [cx1 - R * K * Math.sin(th), cy - R * K * Math.cos(th), th, cx1, -1] }; } var th2 = 2 * Math.PI * (R - Rmes(1)) / R; for (t = th2; t <= Math.PI + 1e-9; t += 0.05) P.push([cx2 + R * K * Math.sin(t), cy + R * K * Math.cos(t)]); P.push([cx2, cy - R * K], [cx1, cy - R * K]); for (t = 0; t <= Math.PI + 1e-9; t += 0.05) P.push([cx1 - R * K * Math.sin(t), cy - R * K * Math.cos(t)]); P.push([cx2, cy + R * K]); return { th: th2, P: P, start: [cx2 + R * K * Math.sin(th2), cy + R * K * Math.cos(th2), th2, cx2, 1] }; }
+      for (k = 1; k <= 8; k++) { var p = pos(k), a = p.start[2], rin = (PI.R0 + (k - 1) * PI.W) * K, rout = rin + PI.W * K; var x1 = course === 200 ? cx1 - rin * Math.sin(a) : cx2 + rin * Math.sin(a), y1 = course === 200 ? cy - rin * Math.cos(a) : cy + rin * Math.cos(a), x2 = course === 200 ? cx1 - rout * Math.sin(a) : cx2 + rout * Math.sin(a), y2 = course === 200 ? cy - rout * Math.cos(a) : cy + rout * Math.cos(a); s += "<path d='M" + x1.toFixed(1) + " " + y1.toFixed(1) + "L" + x2.toFixed(1) + " " + y2.toFixed(1) + "' stroke='" + (k === c ? "#F7C948" : "#fff") + "' stroke-width='" + (k === c ? 4 : 2) + "'/>"; }
+      var pc = pos(c); s += "<path d='" + pc.P.map(function (q, i) { return (i ? "L" : "M") + q[0].toFixed(1) + " " + q[1].toFixed(1); }).join("") + "' stroke='#F7C948' stroke-width='3' fill='none' stroke-dasharray='8 5'/><circle cx='" + pc.start[0].toFixed(1) + "' cy='" + pc.start[1].toFixed(1) + "' r='6' fill='#F7C948' stroke='#1F2328'/>";
+      s += txt(320, cy - 6, course + " m · couloir " + c, { s: 16, c: "#fff" }) + txt(320, cy + 16, "trait jaune : le trajet du coureur", { s: 11, c: "#fff", w: 500 });
+      el.querySelector("[data-lv]").textContent = c;
+      el.querySelector("[data-g]").innerHTML = "<svg viewBox='0 0 640 330' style='max-width:640px;width:100%' role='img' aria-label='Vue de dessus de la piste avec les départs décalés'>" + s + "</svg>";
+      var nv = course === 200 ? 1 : 2, dec = nv * Math.PI * (Rmes(c) - Rmes(1));
+      el.querySelector("[data-r]").innerHTML = "Rayon de course du couloir " + c + " : <b>" + Rmes(c).toFixed(2).replace(".", ",") + " m</b> (couloir 1 : 36,80 m) · " + (c === 1 ? "pas de décalage" : "virage" + (nv > 1 ? "s" : "") + " plus long" + (nv > 1 ? "s" : "") + " de " + nv + " × π × (" + Rmes(c).toFixed(2).replace(".", ",") + " − 36,80) ≈ <b>" + dec.toFixed(1).replace(".", ",") + " m</b> → départ avancé d'autant") + " · distance courue : <b>" + course + " m</b> pour tous. Sans décalage, le couloir " + c + " courrait <b>" + (course + dec).toFixed(1).replace(".", ",") + " m</b>.";
+    }
+    el.querySelectorAll("[data-c]").forEach(function (b) { b.addEventListener("click", function () { course = +b.dataset.c; maj(); }); });
+    Lc.addEventListener("input", maj); maj();
+  });
+})();
+
+/* Leçons APPROFONDIES — lot 18, 6e (18/11/2026) : coordination bras-jambes, matériel de dessin, site d'une pépinière.
+   Même gabarit et même mécanisme que 11-approfondies-lot4.js (remplacement EN PLACE ; schémas d'origine (illus) repris ; quiz
+   portés à 10 questions). Simulations VRT_A en fin (la partie 1 de 6e-eps-bras-jambes garde son animation de 91-animations-2.js). */
+(function () {
+  "use strict";
+  var NUIT = "#001136", BLEU = "#1E499B", GRIS = "#4D5163", VERT = "#17784D", ROUGE = "#C62828", TERRE = "#C46A2B";
+
+  function txt(x, y, t, o) {
+    o = o || {};
+    return "<text x='" + x + "' y='" + y + "' text-anchor='" + (o.a || "middle") + "' font-size='" + (o.s || 12) + "' font-weight='" + (o.w || 700) + "' fill='" + (o.c || NUIT) + "'" + (o.i ? " font-style='italic'" : "") + (o.halo ? " stroke='#fff' stroke-width='3' paint-order='stroke'" : "") + ">" + t + "</text>";
+  }
+  function lin(id, cs, vertical) {
+    var s = "<linearGradient id='" + id + "'" + (vertical ? " x1='0' y1='0' x2='0' y2='1'" : "") + ">";
+    cs.forEach(function (c, i) { s += "<stop offset='" + (i / (cs.length - 1)).toFixed(2) + "' stop-color='" + c + "'/>"; });
+    return s + "</linearGradient>";
+  }
+  function rad(id, cs) {
+    var s = "<radialGradient id='" + id + "' cx='35%' cy='30%' r='75%'>";
+    cs.forEach(function (c, i) { s += "<stop offset='" + (i / (cs.length - 1)).toFixed(2) + "' stop-color='" + c + "'/>"; });
+    return s + "</radialGradient>";
+  }
+  function fleche(id, c) { return "<marker id='" + id + "' markerWidth='10' markerHeight='10' refX='7' refY='5' orient='auto'><path d='M0 1L8 5L0 9Z' fill='" + c + "'/></marker>"; }
+  function svg(w, h, alt, defs, corps) {
+    return "<svg viewBox='0 0 " + w + " " + h + "' role='img' aria-label='" + alt + "' font-family='Inter,Arial,sans-serif'><rect width='" + w + "' height='" + h + "' fill='#fff'/><defs>" + defs + "</defs>" + corps +
+      "<text x='" + (w - 6) + "' y='" + (h - 5) + "' font-size='8' text-anchor='end' fill='#8A93A6'>Planche VÉRITAS</text></svg>";
+  }
+  function ancien(id) { return window.VRT_LECONS[id]; }
+  function remplacer(id, o) {
+    var a = ancien(id);
+    if (a) ["apc", "examen", "rang", "cle", "scenes"].forEach(function (k) { if (a[k] != null && o[k] == null) o[k] = a[k]; });
+    VRT_L(id, o);
+    if (a) o.ordre = a.ordre;
+  }
+  function q(qq, bonne, f1, f2, e) { return { q: qq, r: [bonne, f1, f2], b: 0, e: e }; }
+  function partie(old, i) { return old && old.parties[i] ? old.parties[i].html : ""; }
+  function bulle(x, y, w, t, c) { return "<rect x='" + x + "' y='" + y + "' width='" + w + "' height='30' rx='12' fill='#fff' stroke='" + (c || "#C9D2E3") + "'/>" + txt(x + w / 2, y + 20, t, { s: 11.5 }); }
+  function perso(x, y, peau, habit, bas) {
+    bas = bas || "#2E3445";
+    return "<g transform='translate(" + x + " " + y + ")'><ellipse cx='0' cy='84' rx='18' ry='4' fill='#001136' opacity='.18'/>" +
+      "<rect x='-9' y='44' width='8' height='36' rx='3' fill='" + bas + "'/><rect x='1' y='44' width='8' height='36' rx='3' fill='" + bas + "'/>" +
+      "<ellipse cx='-6' cy='81' rx='7' ry='3.5' fill='#1F2328'/><ellipse cx='6' cy='81' rx='7' ry='3.5' fill='#1F2328'/>" +
+      "<path d='M-13 46L-16 18C-16 13 -12 11 -6 10H6C12 11 16 13 16 18L13 46Z' fill='" + habit + "'/>" +
+      "<path d='M-15 16L-20 40' stroke='" + habit + "' stroke-width='7' stroke-linecap='round'/><path d='M15 16L20 40' stroke='" + habit + "' stroke-width='7' stroke-linecap='round'/>" +
+      "<circle cx='-20' cy='42' r='3.6' fill='" + peau + "'/><circle cx='20' cy='42' r='3.6' fill='" + peau + "'/>" +
+      "<rect x='-3.5' y='5' width='7' height='7' fill='" + peau + "'/><ellipse cx='0' cy='-2' rx='9' ry='10.5' fill='" + peau + "'/>" +
+      "<path d='M-9 -4C-10 -14 -4 -13.5 0 -13.5S10 -14 9 -4C7 -9 -7 -9 -9 -4Z' fill='#1B1410'/><ellipse cx='-9' cy='-1' rx='1.8' ry='3' fill='" + peau + "'/><ellipse cx='9' cy='-1' rx='1.8' ry='3' fill='" + peau + "'/></g>";
+  }
+  /* portrait en buste (arbre généalogique) */
+  function portrait(x, y, peau, habit, cheveux, age) {
+    var s = "<g transform='translate(" + x + " " + y + ")'><circle r='30' fill='#F4EFE4' stroke='#C9A576' stroke-width='3'/><clipPath id='pc" + x + "_" + y + "'><circle r='28'/></clipPath><g clip-path='url(#pc" + x + "_" + y + ")'>";
+    s += "<path d='M-26 32C-26 14 -14 10 0 10S26 14 26 32Z' fill='" + habit + "'/><rect x='-4' y='2' width='8' height='10' fill='" + peau + "'/><ellipse cy='-6' rx='11' ry='13' fill='" + peau + "'/>";
+    s += age === "vieux" ? "<path d='M-11 -10C-12 -20 -4 -21 0 -21S12 -20 11 -10C9 -14 -9 -14 -11 -10Z' fill='#D8D8D8'/>" : age === "femme" ? "<path d='M-13 -6C-15 -24 15 -24 13 -6C12 -14 -12 -14 -13 -6Z' fill='" + cheveux + "'/><path d='M-13 -14h26v-6c-6 -6 -20 -6 -26 0Z' fill='" + habit + "'/>" : "<path d='M-11 -10C-12 -20 -4 -21 0 -21S12 -20 11 -10C9 -14 -9 -14 -11 -10Z' fill='" + cheveux + "'/>";
+    s += "<circle cx='-4' cy='-6' r='1.4' fill='#1B1410'/><circle cx='4' cy='-6' r='1.4' fill='#1B1410'/><path d='M-3 2q3 2 6 0' stroke='#1B1410' fill='none'/></g></g>";
+    return s;
+  }
+  /* boucle d'exercice générique : [phrase avec ___, [bonne, autres…], explication] */
+  function exercice(el, C, suivant, lib) {
+    var i = 0, ok = 0;
+    el.innerHTML = "<p class='labo-r' data-q style='font-size:16px'></p><div style='display:flex;gap:8px;flex-wrap:wrap' data-c></div><p class='an-note' data-e></p><p class='labo-r' data-s></p>";
+    function $(s) { return el.querySelector(s); }
+    function poser() {
+      var c = C[i];
+      $("[data-q]").innerHTML = (i + 1) + ". " + c[0].replace("___", "<b style='border-bottom:2px dashed #1E499B;padding:0 14px'>?</b>");
+      $("[data-e]").textContent = ""; $("[data-s]").innerHTML = lib + " " + (i + 1) + " / " + C.length + " · score : <b>" + ok + "</b>";
+      $("[data-c]").innerHTML = c[1].slice().sort().map(function (x) { return "<button type='button' class='btn-l' data-v='" + x + "'>" + x + "</button>"; }).join("");
+      el.querySelectorAll("[data-v]").forEach(function (b) {
+        b.addEventListener("click", function () {
+          var bon = b.dataset.v === c[1][0]; if (bon) ok++;
+          $("[data-q]").innerHTML = (i + 1) + ". " + c[0].replace("___", "<b style='color:" + (bon ? VERT : ROUGE) + "'>" + c[1][0] + "</b>");
+          $("[data-e]").innerHTML = (bon ? "✔ " : "✘ ") + c[2];
+          el.querySelectorAll("[data-v]").forEach(function (x) { x.disabled = true; });
+          var nx = document.createElement("button"); nx.type = "button"; nx.className = "btn-l"; nx.textContent = i + 1 < C.length ? suivant : "↺";
+          nx.addEventListener("click", function () { i = (i + 1) % C.length; if (!i) ok = 0; poser(); });
+          $("[data-c]").appendChild(nx);
+          $("[data-s]").innerHTML = lib + " " + (i + 1) + " / " + C.length + " · score : <b>" + ok + "</b>";
+        });
+      });
+    }
+    poser();
+  }
+
+  function alea(g) { return function () { g = (g * 16807) % 2147483647; return (g - 1) / 2147483646; }; }
+  function ill(old, i) { return old && old.parties[i] ? old.parties[i].illus : undefined; }
+  function chaine(o, pts, r, coul, z) {
+    var k; for (k = 0; k < pts.length - 1; k++) { var a = pts[k], b = pts[k + 1], L = Math.hypot(b[0] - a[0], b[1] - a[1], (b[2] || z) - (a[2] || z)), n = Math.max(2, Math.round(L / (r * 0.9))), j; for (j = 0; j <= n; j++) { var t = j / n; o.push({ f: "sphere", c: [a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t, (a[2] == null ? z : a[2]) + (((b[2] == null ? z : b[2]) - (a[2] == null ? z : a[2])) * t)], r: r, coul: coul }); } }
+  }
+
+  /* ═══════════════════════ 6e EPS — LA COORDINATION BRAS-JAMBES ═══════════════════════ */
+  var BJ_OLD = ancien("6e-eps-bras-jambes");
+  function coureur3D() {
+    var o = [], OR = "#E8A33D", BL = "#2F6DB5", PEAU = "#6B4423";
+    o.push({ f: "boite", c: [0, 22, 0], d: [260, 6, 120], coul: "#B5442C", dessus: "#C0533A" });
+    o.push({ f: "boite", c: [0, 25.5, 30], d: [260, 1, 2], coul: "#F4F1EA", div: false });
+    o.push({ f: "boite", c: [0, 25.5, -30], d: [260, 1, 2], coul: "#F4F1EA", div: false });
+    chaine(o, [[0, 100], [24, 78], [32, 48], [42, 46]], 5, OR, -8);
+    chaine(o, [[0, 100], [-8, 64], [-32, 46], [-40, 40]], 5, BL, 8);
+    o.push({ f: "sphere", c: [0, 132, 0], r: [13, 34, 11], coul: "#F4F1EA" });
+    o.push({ f: "sphere", c: [0, 104, 0], r: [12, 9, 11], coul: "#1E499B" });
+    chaine(o, [[0, 158, 14], [16, 138, 14], [30, 152, 14]], 4, OR);
+    chaine(o, [[0, 158, -14], [-18, 136, -14], [-10, 118, -14]], 4, BL);
+    o.push({ f: "sphere", c: [5, 182, 0], r: 12, coul: PEAU });
+    o.push({ f: "cylindre", c: [2, 164, 0], r: 5, h: 8, n: 8, coul: PEAU });
+    o.push({ f: "sphere", c: [44, 46, -8], r: [8, 4, 5], coul: "#1F2328" });
+    o.push({ f: "sphere", c: [-42, 40, 8], r: [8, 4, 5], coul: "#1F2328" });
+    o.forEach(function (b) { b.c[1] -= 105; });
+    return o;
+  }
+  remplacer("6e-eps-bras-jambes", {
+    c: "6e", m: "eps", titre: "Courir mieux : la coordination bras-jambes", duree: 30,
+    accroche: "Au 60 m du lycée de Bafia, Samuel court les bras serrés contre le corps : « Les bras ne servent à rien ! » Son camarade balance le bras du même côté que la jambe. Et personne ne s'est échauffé…",
+    intro: "Une séance de vitesse au lycée de Bafia te sert de fil rouge : à chaque partie, un indice t'aide à trancher entre trois conseils.",
+    objectifs: ["décrire la coordination croisée bras-jambes", "expliquer pourquoi elle équilibre la course", "adopter une bonne posture de course", "s'échauffer et récupérer"],
+    enquete: {
+      titre: "La séance de vitesse de Bafia",
+      svg: svg(640, 220, "Trois élèves courent sur une piste : l’un bras collés au corps, l’un bras et jambe du même côté, l’un en coordination croisée", lin("bjC", ["#CFE3F2", "#F4F1EA"], true),
+        "<rect width='640' height='220' fill='url(#bjC)'/><rect y='150' width='640' height='70' fill='#B5442C'/><path d='M0 170H640M0 196H640' stroke='#F4F1EA' stroke-width='2'/>" +
+        [[120, "serrés", 0], [320, "même côté", 1], [520, "croisés", 2]].map(function (c) {
+          var x = c[0], s = "<g transform='translate(" + x + " 70)'><circle cx='0' cy='0' r='10' fill='#5A3A1E'/><path d='M0 10V52' stroke='#F4F1EA' stroke-width='12' stroke-linecap='round'/>";
+          s += "<path d='M0 52L16 72L12 96M0 52L-12 74L-26 90' stroke='#1E499B' stroke-width='7' fill='none' stroke-linecap='round'/>";
+          if (c[2] === 0) s += "<path d='M-4 16V44M4 16V44' stroke='#5A3A1E' stroke-width='5'/>";
+          if (c[2] === 1) s += "<path d='M0 18L14 30L22 20M0 18L-12 32L-6 44' stroke='#5A3A1E' stroke-width='5' fill='none'/>";
+          if (c[2] === 2) s += "<path d='M0 18L-14 32L-8 44M0 18L14 30L22 20' stroke='#5A3A1E' stroke-width='5' fill='none'/>";
+          return s + "</g>" + txt(x, 214, c[1], { s: 11, c: "#fff" });
+        }).join("") + bulle(30, 14, 190, "Les bras ? Inutiles !", "#F7C948") + bulle(420, 14, 200, "Qui va le plus droit ?", "#9FC5E8")),
+      legende: "Au lycée de Bafia, la classe de 6e prépare le 60 m de l'épreuve sportive.",
+      contexte: "<p>Samuel court les bras collés au corps : « Les bras ne servent à rien, ce sont les jambes qui courent. » Aboubakar balance le bras droit en même temps que la jambe droite et zigzague un peu. Christelle, elle, court fluide. À la deuxième course, deux élèves qui ne se sont pas échauffés se plaignent d'une crampe au mollet.</p>",
+      documents: [{ t: "Les temps du 60 m", html: "<table class='donnees'><tr><th>Élève</th><th>Bras</th><th>Temps</th></tr><tr><td>Samuel</td><td>collés au corps</td><td>10,4 s</td></tr><tr><td>Aboubakar</td><td>même côté que la jambe</td><td>10,9 s</td></tr><tr><td>Christelle</td><td>bras opposé à la jambe</td><td>9,6 s</td></tr></table>" }],
+      question: "Les bras servent-ils à courir, et comment doivent-ils bouger ?",
+      tache: "Explique à Samuel et Aboubakar comment coordonner bras et jambes, puis propose un échauffement.",
+      hypotheses: ["Les bras ne servent à rien : seules les jambes comptent.", "Il faut avancer le bras du même côté que la jambe.", "Coordination croisée (bras opposé à la jambe), coudes à 90°, regard devant ; et un échauffement avant l'effort."]
+    },
+    parties: [
+      { t: "La coordination croisée", html: partie(BJ_OLD, 0),
+        planches: [{ type: "2D", titre: "Une foulée décomposée", legende: "Quatre instants d'une foulée : à chaque fois, le bras qui avance (orange) est opposé à la jambe qui avance (orange). Les bras donnent le rythme et empêchent le buste de tourner.", svg: (function () {
+          var s = "<rect width='640' height='230' fill='#FBF8F2'/><rect y='196' width='640' height='34' fill='#B5442C'/>", k;
+          for (k = 0; k < 4; k++) {
+            var x = 80 + k * 160, ph = k % 2 ? -1 : 1, OR = "#E8A33D", BL = "#2F6DB5", g = "<g transform='translate(" + x + " 60)'>";
+            g += "<circle cx='6' cy='0' r='12' fill='#6B4423'/><path d='M2 12L0 74' stroke='#F4F1EA' stroke-width='14' stroke-linecap='round'/>";
+            g += "<path d='M0 74L" + (24 * ph) + " 100L" + (30 * ph) + " 134' stroke='" + (ph > 0 ? OR : BL) + "' stroke-width='8' fill='none' stroke-linecap='round'/>";
+            g += "<path d='M0 74L" + (-10 * ph) + " 110L" + (-34 * ph) + " 128' stroke='" + (ph > 0 ? BL : OR) + "' stroke-width='8' fill='none' stroke-linecap='round'/>";
+            g += "<path d='M0 20L" + (-18 * ph) + " 40L" + (-10 * ph) + " 58' stroke='" + (ph > 0 ? BL : OR) + "' stroke-width='6' fill='none' stroke-linecap='round'/>";
+            g += "<path d='M0 20L" + (16 * ph) + " 40L" + (30 * ph) + " 26' stroke='" + (ph > 0 ? OR : BL) + "' stroke-width='6' fill='none' stroke-linecap='round'/></g>";
+            s += g + txt(x, 222, ["jambe A devant", "jambe B devant", "jambe A devant", "jambe B devant"][k], { s: 11, c: "#fff" });
+          }
+          return svg(640, 230, "Quatre silhouettes de coureur : chaque fois, le bras orange et la jambe orange opposés avancent ensemble", "", s);
+        })() }],
+        fil: { html: "<p>Christelle, la plus rapide, utilise ses bras : quand sa jambe droite avance, son bras gauche avance. Ce mouvement <strong>croisé</strong> équilibre la rotation du bassin par celle des épaules et donne le rythme. Les bras collés de Samuel freinent la course : ils servent bien à courir.</p>", verdicts: [[0, "rejetee", "Les bras équilibrent et rythment la course."]] },
+        retenir: "Bras et jambe opposés avancent ensemble." },
+      { t: "La bonne posture", html: partie(BJ_OLD, 1),
+        planches: [{ type: "3d", titre: "Le coureur en pleine foulée", legende: "Tourne le coureur : la jambe droite (orange, côté proche) monte devant pendant que le bras gauche (orange, côté éloigné) avance, coude plié à 90° ; la jambe gauche et le bras droit (bleus) sont en arrière. Regard devant, buste droit, appui sur l'avant du pied.",
+          modele: { h: 360, rx: -8, ry: 32, echelle: 1.2, alt: "Coureur articulé en pleine foulée sur une piste, membres opposés de même couleur", objets: coureur3D(),
+            etiquettes: [{ p: [30, 47, 14], t: "bras gauche devant (coude 90°)", cote: "d" }, { p: [24, -27, -8], t: "jambe droite devant", cote: "d" }, { p: [-18, 31, -14], t: "bras droit en arrière", cote: "g" }, { p: [-8, -41, 8], t: "jambe gauche en arrière", cote: "g" }] } }],
+        fil: { html: "<p>Avec le bras droit et la jambe droite ensemble, Aboubakar fait tourner tout son corps du même côté à chaque pas : il zigzague et perd du temps (simulation ci-dessus). La règle est inverse : bras <strong>opposé</strong> à la jambe, coudes à 90°, mains d'avant en arrière.</p>", verdicts: [[1, "rejetee", "Bras du même côté : le buste tourne ; il faut le bras opposé."]] },
+        retenir: "Coudes à 90°, épaules relâchées, regard devant." },
+      { t: "S'échauffer et récupérer", html: partie(BJ_OLD, 2),
+        fil: { html: "<p>Les crampes viennent souvent de muscles froids sollicités brutalement. Un échauffement progressif (footing, montées de genoux, talons-fesses, rotations) prépare les muscles et le cœur. Coordination croisée, bonne posture, échauffement : les trois conseils de Christelle.</p>", verdicts: [[2, "validee", "Coordination croisée, posture et échauffement."]] },
+        retenir: "Un corps échauffé se blesse moins." }
+    ],
+    denouement: {
+      titre: "Les conseils du professeur",
+      etapes: ["Les bras équilibrent et rythment (indice 1).", "Bras opposé à la jambe, coudes à 90° (indice 2).", "S'échauffer avant, récupérer après (indice 3)."],
+      reponse: "<p>Les bras servent à courir : en avançant en même temps que la jambe opposée, ils compensent la rotation du bassin et gardent le buste face à la course ; ils donnent aussi le rythme, et pour accélérer on accélère d'abord les bras. Samuel, bras collés, se prive de cet équilibre ; Aboubakar, bras et jambe du même côté, fait tourner son corps à chaque pas et zigzague. La bonne technique est celle de Christelle : coordination croisée, coudes pliés à environ 90°, épaules relâchées, mains qui vont d'avant en arrière sans traverser devant la poitrine, regard loin devant, appuis sur l'avant du pied. Enfin, on s'échauffe avant de courir (footing, montées de genoux, talons-fesses) et on récupère après (marche, étirements doux, eau) pour éviter crampes et blessures.</p>",
+      transfert: "<p>Observe un camarade sur 30 m : ses bras sont-ils croisés avec ses jambes ? Ses mains traversent-elles devant sa poitrine ? Donne-lui un conseil.</p>"
+    },
+    revision: (BJ_OLD ? BJ_OLD.revision : []).concat(["Bras du même côté que la jambe : le buste tourne, on zigzague."]),
+    exo: BJ_OLD ? BJ_OLD.exo : "",
+    quiz: [
+      q("Quand la jambe droite avance, quel bras avance ?", "Le gauche", "Le droit", "Aucun", "Coordination croisée."),
+      q("Angle conseillé des coudes :", "environ 90°", "bras tendus", "45°", "Les bras pliés donnent le rythme."),
+      q("Pour accélérer, on peut…", "accélérer les bras", "regarder ses pieds", "serrer les épaules", "Les jambes suivent le rythme des bras."),
+      q("Courir les bras collés au corps…", "freine la course", "fait gagner du temps", "est obligatoire", "On perd l'équilibre et le rythme."),
+      q("Bras et jambe du même côté ensemble…", "font tourner le buste", "aident à aller droit", "sont conseillés", "Le corps zigzague."),
+      q("Le regard du coureur se porte…", "loin devant", "sur ses pieds", "sur le côté", "Tête dans l'axe du corps."),
+      q("Les mains doivent…", "aller d'avant en arrière", "traverser devant la poitrine", "rester sur les hanches", "Sans croiser devant le corps."),
+      q("L'appui se fait sur…", "l'avant du pied", "le talon seulement", "le bord du pied", "Pour une foulée dynamique."),
+      q("Avant l'effort, on…", "s'échauffe progressivement", "court tout de suite à fond", "s'étire longuement à froid", "Footing, montées de genoux, talons-fesses."),
+      q("Après l'effort, on…", "marche, s'étire doucement et boit", "s'arrête net et s'assoit", "refait un sprint", "C'est la récupération.")
+    ]
+  });
+
+  /* ═══════════════════════ 6e TECHNOLOGIE — LE MATÉRIEL DE DESSIN ═══════════════════════ */
+  var MD_OLD = ancien("6e-tm-materiel-dessin");
+  function table3D() {
+    var o = [], k;
+    o.push({ f: "boite", c: [0, -10, 0], d: [420, 14, 300], coul: "#8B5A2B", dessus: "#FBF8F2" });
+    o.push({ f: "boite", c: [-10, 1, -70], d: [240, 3, 24], coul: "#E8D27A", dessus: "#F2E4A6", div: false });
+    for (k = 0; k <= 20; k++) o.push({ f: "boite", c: [-128 + k * 11.8, 2.8, -78 + (k % 5 ? 3 : 0)], d: [0.8, 0.4, k % 5 ? 6 : 10], coul: "#2B2F36", div: false });
+    o.push({ f: "boite", c: [95, 1.5, -35], d: [110, 3, 10], coul: "#7CC4C8", dessus: "#9ED8DB" });
+    o.push({ f: "boite", c: [45, 1.5, 15], d: [10, 3, 100], coul: "#7CC4C8", dessus: "#9ED8DB" });
+    for (k = 0; k <= 18; k++) { var tq = k / 18; o.push({ f: "boite", c: [146 - 101 * tq, 1.5, -36 + 101 * tq], d: [9, 3, 9], coul: "#7CC4C8", dessus: "#9ED8DB" }); }
+    o.push({ f: "boite", c: [44, 2, -36], d: [6, 0.2, 6], coul: "#0A4F55", div: false });
+    o.push({ f: "boite", c: [-120, 1.5, 40], d: [76, 3, 6], coul: "#9EC5E3", dessus: "#C9E3F5" });
+    for (k = 0; k <= 16; k++) { var aq = Math.PI * k / 16; o.push({ f: "boite", c: [-120 + 36 * Math.cos(aq), 1.5, 40 + 36 * Math.sin(aq)], d: [7, 3, 7], coul: "#9EC5E3", dessus: "#C9E3F5" }); }
+    chaine(o, [[-40, 44, 20], [-56, 2, 4]], 2, "#9AA3AF");
+    chaine(o, [[-40, 44, 20], [-24, 2, 36]], 2, "#9AA3AF");
+    o.push({ f: "cylindre", c: [-40, 44, 20], r: 3, h: 10, n: 10, coul: "#1F2328" });
+    o.push({ f: "sphere", c: [-24, 3, 36], r: 2.4, coul: "#3A3F47" });
+    [[-20, "#F7C948", "H"], [10, "#2E7D32", "HB"], [40, "#C62828", "4B"]].forEach(function (c, i) {
+      o.push({ f: "cylindre", c: [90 + 0 * i, 4, 90 + i * 14 - 14], r: 4, h: 90, n: 6, axe: "x", coul: c[1] });
+      o.push({ f: "cylindre", c: [180, 4, 90 + i * 14 - 14], r: 4, r2: 0.6, h: 14, n: 6, axe: "x", coul: "#D9B77A" });
+    });
+    o.push({ f: "boite", c: [150, 3, 30], d: [22, 6, 12], coul: "#E57373", dessus: "#F8BBD0" });
+    return o;
+  }
+  var DURETE = [["4H", 0.18, 0.7, "très gris, très fin : traits de construction"], ["2H", 0.3, 0.9, "gris fin : construction"], ["HB", 0.55, 1.3, "moyen : écriture, traits courants"], ["2B", 0.75, 1.7, "foncé : traits définitifs"], ["4B", 0.9, 2.2, "très foncé et épais : ombres, croquis"]];
+  remplacer("6e-tm-materiel-dessin", {
+    c: "6e", m: "tm", titre: "Le matériel de dessin", duree: 30,
+    accroche: "Pour dessiner le kiosque du lycée, Jordan prend un crayon 4B, appuie fort, trace le toit rond avec un couvercle et les angles « à l'œil ». Résultat : un plan sale et faux. Que faut-il changer ?",
+    intro: "Le plan du kiosque à construire au lycée de Bafoussam te sert de fil rouge : à chaque partie, un indice t'aide à trancher entre trois idées sur le matériel de dessin.",
+    objectifs: ["nommer les instruments de dessin et leur rôle", "choisir la dureté du crayon (H, HB, B)", "tracer cercles, angles droits et angles avec le bon instrument", "entretenir et ranger son matériel"],
+    enquete: {
+      titre: "Le plan raté du kiosque",
+      svg: svg(640, 220, "Une feuille de plan aux traits épais et salis, un couvercle utilisé comme gabarit de cercle ; un élève perplexe", lin("mdC", ["#F4EDE1", "#E9DFCF"], true),
+        "<rect width='640' height='220' fill='url(#mdC)'/><rect x='170' y='20' width='300' height='180' fill='#FBF8F2' stroke='#C9B28A'/><path d='M210 170H430M210 170V90L320 46L430 90V170' stroke='#2B2F36' stroke-width='5' fill='none' stroke-linejoin='round'/><path d='M216 168l-8 8M300 52l6 -10' stroke='#6E6A63' stroke-width='3'/><ellipse cx='320' cy='120' rx='34' ry='30' fill='none' stroke='#2B2F36' stroke-width='4'/><path d='M230 186q40 -10 80 4q30 8 70 -2' stroke='#9AA3AF' stroke-width='10' opacity='.35' fill='none'/>" +
+        "<circle cx='520' cy='160' r='30' fill='#C9CED6' stroke='#8E96A6' stroke-width='4'/>" + txt(520, 204, "couvercle", { s: 10, c: GRIS }) + perso(90, 90, "#5A3A1E", "#7B3F99", "#2E3445") + "<path d='M108 110l40 -6' stroke='#C62828' stroke-width='5'/>" + bulle(20, 30, 170, "Un crayon, c'est un crayon !", "#F7C948") + bulle(470, 24, 160, "Angles « à l'œil »…", "#9FC5E8")),
+      legende: "Au lycée de Bafoussam, chaque élève de 6e doit dessiner le plan du kiosque que l'atelier va construire.",
+      contexte: "<p>Jordan a tracé ses traits de construction avec un crayon 4B en appuyant fort : impossible de les gommer, la feuille est grise. Il a dessiné le toit rond en suivant un couvercle et les angles droits « à l'œil » avec sa règle. Le professeur rend le plan : « Les angles ne sont pas droits, le cercle n'a pas le bon rayon, et on ne voit plus les traits définitifs. » Jordan répond : « Un crayon, c'est un crayon ; et une règle suffit pour tout. »</p>",
+      documents: [{ t: "La consigne", html: "<p>« Plan du kiosque au 1/50 : murs perpendiculaires, toit circulaire de 4 cm de rayon, porte inclinée à 60°. Traits de construction légers, traits définitifs foncés. »</p>" }],
+      question: "Quel matériel fallait-il utiliser, et comment ?",
+      tache: "Pour chaque élément du plan, indique l'instrument et le crayon à utiliser, puis donne deux règles d'entretien.",
+      hypotheses: ["Tous les crayons se valent : un 4B convient pour les traits de construction.", "Une règle suffit : on peut tracer cercles et angles droits à main levée.", "Chaque outil a son rôle : H léger pour construire, B pour repasser ; compas pour le cercle, équerre pour l'angle droit, rapporteur pour 60° ; et on entretient le matériel."]
+    },
+    parties: [
+      { t: "Pour tracer", html: partie(MD_OLD, 0), illus: ill(MD_OLD, 0),
+        planches: [{ type: "3d", titre: "La table à dessin", legende: "Tourne la planche à dessin : la règle graduée, l'équerre transparente (angle droit dans le coin), le rapporteur (demi-cercle gradué), le compas ouvert et trois crayons de dureté différente (H, HB, 4B), avec la gomme. Chaque instrument a son rôle.",
+          modele: { h: 360, rx: -44, ry: 12, echelle: 0.9, alt: "Table à dessin avec une feuille, une règle, une équerre, un rapporteur, un compas, trois crayons et une gomme", objets: table3D(),
+            etiquettes: [{ p: [-10, 2, -70], t: "règle graduée", cote: "g" }, { p: [44, 3, -36], t: "équerre : angle droit", cote: "d" }, { p: [-120, 2, 60], t: "rapporteur : angles", cote: "g" }, { p: [-40, 50, 20], t: "compas : cercles", cote: "g" }, { p: [130, 6, 76], t: "crayons H, HB, 4B", cote: "d" }, { p: [150, 7, 30], t: "gomme", cote: "d" }] } }],
+        fil: { html: "<p>La règle trace des droites et mesure ; mais l'<strong>angle droit</strong> se trace avec l'<strong>équerre</strong>, le <strong>cercle</strong> de 4 cm de rayon avec le <strong>compas</strong> ouvert à 4 cm, et l'angle de 60° avec le <strong>rapporteur</strong>. Un couvercle ne donne pas le bon rayon, et l'œil se trompe de quelques degrés.</p>", verdicts: [[1, "rejetee", "Équerre, compas et rapporteur sont indispensables."]] },
+        retenir: "Règle : droites ; équerre : angle droit ; compas : cercle ; rapporteur : angle." },
+      { t: "Pour corriger et colorier", html: partie(MD_OLD, 1),
+        fil: { html: "<p>Un crayon <strong>H</strong> (dur) laisse un trait fin et clair qui se gomme facilement : parfait pour les traits de construction. Un crayon <strong>B</strong> (tendre) laisse un trait foncé et épais, presque impossible à effacer : il sert à repasser les traits définitifs (simulation ci-dessus). Le 4B de Jordan était le pire choix pour construire.</p>", verdicts: [[0, "rejetee", "Construire au H, repasser au B : les crayons ne se valent pas."]] },
+        retenir: "H = dur et clair ; B = tendre et foncé." },
+      { t: "Entretenir son matériel", html: partie(MD_OLD, 2),
+        fil: { html: "<p>Une mine bien taillée, une règle et une équerre propres, un compas rangé pointe protégée : un outil propre fait un dessin propre. Avec le bon instrument et le bon crayon, le plan du kiosque sera juste et net.</p>", verdicts: [[2, "validee", "Le bon outil et le bon crayon pour chaque trait ; matériel entretenu."]] },
+        retenir: "Un outil propre fait un dessin propre." }
+    ],
+    denouement: {
+      titre: "Le plan refait",
+      etapes: ["Équerre, compas, rapporteur pour angles et cercles (indice 1).", "H pour construire, B pour repasser (indice 2).", "Mine taillée, outils propres, compas protégé (indice 3)."],
+      reponse: "<p>Jordan doit choisir un outil pour chaque tâche. Les traits de construction se font au crayon H (dur), en appuyant peu : ils sont fins, clairs et se gomment facilement ; les traits définitifs sont ensuite repassés au crayon HB ou B (tendre, foncé). Les murs se tracent à la règle graduée, les angles droits avec l'équerre, le toit circulaire avec le compas ouvert à 4 cm (le rayon demandé), la porte inclinée à 60° avec le rapporteur. Le couvercle et le tracé « à l'œil » donnent des mesures fausses. Enfin, il garde une mine bien taillée, nettoie règle et équerre pour ne pas salir la feuille, et range son compas pointe protégée. Son nouveau plan sera juste et propre.</p>",
+      transfert: "<p>Dresse la liste du matériel pour dessiner un carré de 6 cm, son cercle inscrit et une diagonale ; pour chaque trait, indique l'instrument et le crayon.</p>"
+    },
+    revision: (MD_OLD ? MD_OLD.revision : []).concat(["Construire au H (léger), repasser au B (foncé)."]),
+    exo: MD_OLD ? MD_OLD.exo : "",
+    quiz: [
+      q("Pour tracer un cercle, on utilise…", "le compas", "l'équerre", "le rapporteur", "Le compas trace cercles et arcs."),
+      q("Un crayon 4B donne un trait…", "foncé et tendre", "clair et dur", "coloré", "B = tendre, foncé."),
+      q("Pour un angle droit, on utilise…", "l'équerre", "la gomme", "le calque", "Elle a un angle de 90°."),
+      q("Pour mesurer un angle de 60°, on utilise…", "le rapporteur", "le compas", "la règle seule", "Un demi-cercle gradué en degrés."),
+      q("Les traits de construction se font…", "au crayon H, en appuyant peu", "au 4B, en appuyant fort", "au feutre", "Fins, clairs, faciles à gommer."),
+      q("Un crayon H est…", "dur", "tendre", "en couleur", "H pour hard : dur."),
+      q("Pour un cercle de 4 cm de rayon, on ouvre le compas de…", "4 cm", "8 cm", "2 cm", "L'écartement = le rayon."),
+      q("Pourquoi nettoyer la règle ?", "La mine salit la feuille", "Pour qu'elle brille", "Pour la rendre plus longue", "Un outil propre fait un dessin propre."),
+      q("On range le compas…", "pointe protégée", "pointe en l'air dans la trousse", "ouvert au maximum", "C'est un outil piquant."),
+      q("La règle graduée sert à…", "tracer des droites et mesurer", "tracer des cercles", "mesurer des angles", "Graduée en centimètres et millimètres.")
+    ]
+  });
+
+  /* ═══════════════════════ 6e TECHNOLOGIE — LE SITE D'UNE PÉPINIÈRE ═══════════════════════ */
+  var SP_OLD = ancien("6e-tm-site-pepiniere");
+  var CRIT = ["eau", "sol", "relief", "lumière", "accès", "protection"];
+  var TERRAINS = [["Terrain A : sous le grand fromager, près du bas-fond", [2, 0, 1, 0, 1, 1]], ["Terrain B : à côté du forage, plat et dégagé", [2, 2, 2, 2, 2, 1]]];
+  function pepiniere3D() {
+    var o = [], k, j, R = alea(41);
+    o.push({ f: "boite", c: [0, -8, 0], d: [520, 8, 360], coul: "#6B4A2B", dessus: "#8C6A44" });
+    [[-140, -90], [140, -90], [-140, 90], [140, 90], [0, -90], [0, 90]].forEach(function (p) { o.push({ f: "cylindre", c: [p[0], 0, p[1]], r: 4, h: 110, n: 8, coul: "#6B4423" }); });
+    for (k = 0; k < 14; k++) o.push({ f: "boite", c: [-140 + k * 21.5, 112, 0], d: [12, 3, 200], coul: "#8B7A4A", dessus: "#A6935C", div: false });
+    for (k = 0; k < 8; k++) for (j = 0; j < 6; j++) { var x = -120 + k * 34, z = -70 + j * 28; o.push({ f: "cylindre", c: [x, 0, z], r: 6, h: 12, n: 8, coul: "#1F2328" }); o.push({ f: "cylindre", c: [x, 12, z], r: 1, h: 10, n: 5, coul: "#4E7D2A" }); o.push({ f: "sphere", c: [x + (R() - 0.5) * 2, 25, z], r: 6 + R() * 2, coul: j % 2 ? "#3E8E3A" : "#5AA14A" }); }
+    for (k = 0; k <= 12; k++) { o.push({ f: "cylindre", c: [-200 + k * 33.3, 0, -160], r: 2.5, h: 40, n: 6, coul: "#8B5A2B" }); o.push({ f: "cylindre", c: [-200 + k * 33.3, 0, 160], r: 2.5, h: 40, n: 6, coul: "#8B5A2B" }); }
+    for (k = 0; k <= 9; k++) { o.push({ f: "cylindre", c: [-200, 0, -160 + k * 35.5], r: 2.5, h: 40, n: 6, coul: "#8B5A2B" }); o.push({ f: "cylindre", c: [200, 0, -160 + k * 35.5], r: 2.5, h: 40, n: 6, coul: "#8B5A2B" }); }
+    [14, 30].forEach(function (y) { o.push({ f: "boite", c: [0, y, -160], d: [400, 1, 1], coul: "#9AA3AF", div: false }); o.push({ f: "boite", c: [0, y, 160], d: [400, 1, 1], coul: "#9AA3AF", div: false }); o.push({ f: "boite", c: [-200, y, 0], d: [1, 1, 320], coul: "#9AA3AF", div: false }); o.push({ f: "boite", c: [200, y, 0], d: [1, 1, 320], coul: "#9AA3AF", div: false }); });
+    o.push({ f: "cylindre", c: [230, 0, -100], r: 8, h: 40, n: 12, coul: "#5C6478" });
+    o.push({ f: "boite", c: [240, 40, -100], d: [30, 4, 4], coul: "#3A3F47" });
+    o.push({ f: "cylindre", c: [220, 26, -100], r: 2, h: 10, n: 6, axe: "x", coul: "#3A3F47" });
+    o.push({ f: "cylindre", c: [235, -2, -70], r: 14, h: 18, n: 12, coul: "#2F6DB5", dessus: "#4A90C2" });
+    o.push({ f: "boite", c: [0, -3.5, -210], d: [520, 1, 40], coul: "#B88A5A", dessus: "#C9A06E", div: false });
+    return o;
+  }
+  remplacer("6e-tm-site-pepiniere", {
+    c: "6e", m: "tm", titre: "Choisir le site d'une pépinière", duree: 30,
+    accroche: "Le club agricole veut une pépinière de cacaoyers : « Sous le grand fromager, l'ombre est gratuite ! » « Non, près du forage ! » « Ou à côté de la classe, c'est plus pratique. » Comment décider ?",
+    intro: "Le projet de pépinière du club agricole d'un lycée de Mbalmayo te sert de fil rouge : à chaque partie, un indice t'aide à trancher entre trois avis.",
+    objectifs: ["définir une pépinière et son rôle", "énumérer les six critères de choix du site", "repérer les pièges (zone inondable, grand arbre)", "justifier un choix avec une grille notée"],
+    enquete: {
+      titre: "Où installer la pépinière du club agricole ?",
+      svg: svg(640, 220, "Deux terrains : l’un sous un immense arbre près d’un bas-fond humide, l’autre plat et ensoleillé près d’un forage", lin("spC", ["#CFE3F2", "#F4F1EA"], true),
+        "<rect width='640' height='220' fill='url(#spC)'/><rect y='140' width='640' height='80' fill='#6E9B45'/><path d='M0 170Q120 150 240 175V220H0Z' fill='#5B8FB0' opacity='.7'/>" +
+        "<path d='M130 140V60' stroke='#8C8577' stroke-width='22'/><path d='M130 140l-30 10M130 140l30 10' stroke='#8C8577' stroke-width='10'/><ellipse cx='130' cy='50' rx='110' ry='40' fill='#2E6B2A'/><ellipse cx='70' cy='60' rx='50' ry='26' fill='#3E7D32'/>" + txt(130, 210, "Terrain A", { s: 12, c: "#fff" }) +
+        "<path d='M330 140h220' stroke='#C9A06E' stroke-width='4'/><rect x='520' y='96' width='14' height='44' fill='#5C6478'/><path d='M534 102h20' stroke='#3A3F47' stroke-width='4'/><circle cx='580' cy='40' r='16' fill='#F7C948'/>" + txt(440, 210, "Terrain B", { s: 12, c: "#fff" }) +
+        perso(300, 70, "#5A3A1E", "#2E7D32", "#2E3445") + perso(400, 70, "#6B4423", "#E8A33D", "#2E3445") + bulle(200, 14, 180, "L'ombre est gratuite !", "#F7C948") + bulle(400, 14, 170, "Près du forage !", "#9FC5E8")),
+      legende: "À Mbalmayo, le club agricole du lycée veut produire 300 plants de cacaoyers pour les familles des élèves.",
+      contexte: "<p>Deux terrains sont possibles. Le terrain A est sous un immense fromager, au bord d'un bas-fond où l'eau stagne en saison des pluies. Le terrain B est plat, en plein soleil, à 20 m du forage et au bord de la piste ; il faudra le clôturer et y construire une ombrière. Paul préfère A : « L'ombre et l'humidité sont gratuites. » Rose propose de choisir le terrain le plus proche de la salle de classe, « parce que c'est plus pratique ».</p>",
+      documents: [{ t: "Les observations du club", html: "<table class='donnees'><tr><th>Critère</th><th>Terrain A</th><th>Terrain B</th></tr><tr><td>Eau</td><td>bas-fond tout proche</td><td>forage à 20 m</td></tr><tr><td>Sol</td><td>gorgé d'eau en saison des pluies</td><td>meuble, bien drainé</td></tr><tr><td>Relief</td><td>cuvette</td><td>plat</td></tr><tr><td>Lumière</td><td>ombre épaisse toute la journée</td><td>plein soleil (ombrière à prévoir)</td></tr><tr><td>Accès</td><td>sentier boueux</td><td>bord de piste</td></tr><tr><td>Protection</td><td>racines et branches mortes</td><td>chèvres du quartier (clôture à prévoir)</td></tr></table>" }],
+      question: "Quel terrain choisir, et comment justifier ce choix ?",
+      tache: "Compare les deux terrains avec une grille de six critères notés de 0 à 2 et justifie le choix du club.",
+      hypotheses: ["Le terrain sous le grand arbre est idéal : ombre et humidité gratuites.", "On choisit le terrain le plus proche de la salle de classe, c'est plus pratique.", "On note les six critères (eau, sol, relief, lumière, accès, protection) et on retient le meilleur total : le terrain B, avec ombrière et clôture."]
+    },
+    parties: [
+      { t: "Qu'est-ce qu'une pépinière ?", html: partie(SP_OLD, 0),
+        planches: [{ type: "3d", titre: "Une pépinière bien installée", legende: "Tourne la pépinière : des rangées de sachets noirs portant chacun un jeune cacaoyer, sous une ombrière de palmes qui filtre le soleil ; un forage à pompe et un fût pour l'arrosage ; une clôture de piquets et de fil contre les chèvres ; la piste pour sortir les plants.",
+          modele: { h: 380, rx: -36, ry: 24, echelle: 0.78, alt: "Pépinière : sachets noirs avec jeunes plants sous une ombrière de palmes, clôture, forage et fût d’eau", objets: pepiniere3D(),
+            etiquettes: [{ p: [0, 114, 0], t: "ombrière (palmes)", cote: "g" }, { p: [-120, 26, -70], t: "jeunes plants en sachets", cote: "g" }, { p: [230, 40, -100], t: "forage (eau)", cote: "d" }, { p: [200, 30, 60], t: "clôture", cote: "d" }, { p: [0, -3, -210], t: "piste (accès)", cote: "d" }] } }],
+        fil: { html: "<p>Une pépinière est le <strong>berceau</strong> des jeunes plants : ils y germent et grandissent, protégés, avant d'être plantés au champ. Pendant plusieurs mois, il faut donc les arroser chaque jour, leur donner une lumière douce et les protéger des animaux.</p>", verdicts: [] },
+        retenir: "Pépinière = berceau des jeunes plants." },
+      { t: "Les critères du bon site", html: partie(SP_OLD, 1), illus: ill(SP_OLD, 1),
+        fil: { html: "<p>Le terrain A cumule les pièges : le bas-fond est <strong>inondable</strong> (les racines pourrissent dans l'eau stagnante), l'ombre du fromager est trop épaisse et permanente, ses racines prennent l'eau et l'engrais, ses branches mortes peuvent tomber et ses feuilles porter des maladies. L'ombre et l'humidité « gratuites » coûtent en réalité les plants.</p>", verdicts: [[0, "rejetee", "Bas-fond inondable, ombre trop épaisse, racines et branches : terrain à éviter."]] },
+        retenir: "Eau ; sol ; relief ; lumière ; accès ; protection." },
+      { t: "Sur le terrain", html: partie(SP_OLD, 2),
+        fil: { html: "<p>La proximité de la classe n'est pas un critère : ce qui compte, ce sont l'eau, le sol, le relief, la lumière, l'accès et la protection. Avec la grille (simulation ci-dessus), le terrain A obtient 5 sur 12 et le terrain B 11 sur 12 : on choisit B, en y ajoutant une ombrière et une clôture.</p>", verdicts: [[1, "rejetee", "« Plus pratique » n'est pas un critère : on note les six critères."], [2, "validee", "Grille notée : terrain B (11/12), avec ombrière et clôture."]] },
+        retenir: "Un choix se justifie par des critères notés." }
+    ],
+    denouement: {
+      titre: "Le choix du club agricole",
+      etapes: ["Pépinière : berceau des plants, à arroser et protéger (indice 1).", "Terrain A : inondable, trop ombragé, sous un grand arbre (indice 2).", "Grille : A = 5/12, B = 11/12 (indice 3)."],
+      reponse: "<p>Une pépinière doit offrir aux jeunes cacaoyers de l'eau toute l'année, un sol meuble et bien drainé, un terrain plat, une lumière filtrée, un accès facile et une protection contre les animaux. Le terrain A semble pratique, mais il est en bas-fond inondable (les racines pourriraient), sous une ombre trop épaisse, et le grand fromager vole l'eau, laisse tomber des branches et peut transmettre des maladies. Choisir le terrain le plus proche de la classe n'est pas un critère. Avec une grille notée de 0 à 2 sur les six critères, le terrain A obtient 5 sur 12 et le terrain B 11 sur 12 : le club retient le terrain B, près du forage et de la piste, en construisant une ombrière de palmes et une clôture contre les chèvres.</p>",
+      transfert: "<p>Repère deux terrains autour de ton établissement, remplis la grille des six critères et présente ton choix à la classe.</p>"
+    },
+    revision: (SP_OLD ? SP_OLD.revision : []).concat(["Éviter le pied d'un grand arbre : racines, branches, maladies."]),
+    exo: SP_OLD ? SP_OLD.exo : "",
+    quiz: [
+      q("Le critère le plus important pour arroser :", "un point d'eau proche", "un grand arbre", "une route goudronnée", "Les jeunes plants ont besoin d'arrosage régulier."),
+      q("Une zone inondable est…", "à éviter", "idéale", "obligatoire", "Les racines pourrissent dans l'eau stagnante."),
+      q("Pourquoi une clôture ?", "Pour protéger des animaux", "Pour décorer", "Pour faire de l'ombre", "Les chèvres adorent les jeunes plants !"),
+      q("Une pépinière est…", "un lieu où l'on fait grandir de jeunes plants", "un champ de cacao adulte", "un marché aux fleurs", "Le berceau des plants."),
+      q("Le relief idéal est…", "plat ou en légère pente", "une cuvette", "une forte pente", "Pas d'eau stagnante, pas d'érosion."),
+      q("Une ombrière sert à…", "filtrer le soleil", "arroser", "clôturer", "Lumière douce pour les jeunes plants."),
+      q("Le sol doit être…", "meuble, fertile et bien drainé", "dur et compact", "toujours gorgé d'eau", "Les racines respirent."),
+      q("Pourquoi éviter le pied d'un grand arbre ?", "ses racines prennent l'eau et ses branches peuvent tomber", "il fait trop chaud", "il attire le soleil", "Et ses feuilles portent des maladies."),
+      q("Pour justifier un choix de site, on…", "note chaque critère et on compare les totaux", "tire au sort", "prend le plus proche de la classe", "Une grille notée."),
+      q("Combien de critères dans la grille ?", "six", "trois", "dix", "Eau, sol, relief, lumière, accès, protection.")
+    ]
+  });
+
+  /* ═══════════════════════ SIMULATIONS ═══════════════════════ */
+  VRT_A("6e-eps-bras-jambes", 1, "Change la façon de bouger les bras et observe le buste", function (el) {
+    var mode = 2, t0 = null;
+    el.innerHTML = "<div style='display:flex;gap:6px;flex-wrap:wrap'><button type='button' class='btn-l' data-m='0'>Bras collés</button><button type='button' class='btn-l' data-m='1'>Bras du même côté</button><button type='button' class='btn-l' data-m='2'>Bras croisés (opposés)</button></div><div data-g style='margin:8px 0'></div><p class='labo-r' data-r></p>";
+    var TXT = ["Bras collés : rien ne compense la rotation du bassin, le buste tourne et le rythme manque.", "Bras du même côté : épaules et bassin tournent dans le même sens, le buste se tord fort : on zigzague.", "Bras opposés : les épaules tournent à l'inverse du bassin, le buste reste face à la course : équilibre et rythme."];
+    function dessin(t) {
+      var p = Math.sin(t * 5), jA = 26 * p, bA = mode === 2 ? -26 * p : mode === 1 ? 26 * p : 0, tors = mode === 2 ? 3 : mode === 1 ? 22 : 12, s = "<rect width='480' height='200' fill='#FBF8F2'/><rect y='176' width='480' height='24' fill='#B5442C'/>";
+      function seg(x, y, a, L) { return [x + L * Math.sin(a * Math.PI / 180), y + L * Math.cos(a * Math.PI / 180)]; }
+      var H = [140, 100], S = [140, 50], k1 = seg(H[0], H[1], jA, 38), f1 = seg(k1[0], k1[1], jA - 20, 36), k2 = seg(H[0], H[1], -jA, 38), f2 = seg(k2[0], k2[1], -jA - 20, 36), e1 = seg(S[0], S[1], bA, 24), h1 = seg(e1[0], e1[1], bA + 80, 22), e2 = seg(S[0], S[1], -bA, 24), h2 = seg(e2[0], e2[1], -bA + 80, 22);
+      s += "<path d='M" + H + "L" + k2 + "L" + f2 + "' stroke='#2F6DB5' stroke-width='8' fill='none' stroke-linecap='round'/><path d='M" + S + "L" + e2 + "L" + h2 + "' stroke='#E8A33D' stroke-width='6' fill='none' stroke-linecap='round'/>";
+      s += "<path d='M" + S + "L" + H + "' stroke='#F4F1EA' stroke-width='16' stroke-linecap='round'/><circle cx='145' cy='30' r='13' fill='#6B4423'/>";
+      s += "<path d='M" + H + "L" + k1 + "L" + f1 + "' stroke='#E8A33D' stroke-width='8' fill='none' stroke-linecap='round'/><path d='M" + S + "L" + e1 + "L" + h1 + "' stroke='#2F6DB5' stroke-width='6' fill='none' stroke-linecap='round'/>";
+      var rot = tors * p, w = 70;
+      s += txt(370, 22, "Vue de dessus : épaules et bassin", { s: 11, c: GRIS }) + "<g transform='translate(370 100)'><ellipse rx='" + w + "' ry='14' fill='#DCE6F2' stroke='#1E499B' transform='rotate(" + (mode === 2 ? -jA * 0.5 : mode === 1 ? jA * 0.5 : 0) + ")'/><ellipse rx='" + (w - 14) + "' ry='12' fill='#F4E7C8' stroke='#B8860B' transform='rotate(" + (jA * 0.5) + ")'/></g>" + txt(370, 150, "torsion du buste", { s: 11, c: GRIS }) + "<rect x='310' y='158' width='120' height='10' rx='5' fill='#E3E7EF'/><rect x='310' y='158' width='" + (Math.abs(rot) / 22 * 120).toFixed(1) + "' height='10' rx='5' fill='" + (tors > 15 ? ROUGE : tors > 5 ? "#E8A33D" : VERT) + "'/>";
+      el.querySelector("[data-g]").innerHTML = "<svg viewBox='0 0 480 200' style='max-width:540px;width:100%' role='img' aria-label='Coureur animé et torsion du buste vue de dessus'>" + s + "</svg>";
+    }
+    function boucle(ts) { if (!el.isConnected) return; if (t0 === null) t0 = ts; dessin((ts - t0) / 1000); requestAnimationFrame(boucle); }
+    el.querySelectorAll("[data-m]").forEach(function (b) { b.addEventListener("click", function () { mode = +b.dataset.m; el.querySelector("[data-r]").textContent = TXT[mode]; }); });
+    el.querySelector("[data-r]").textContent = TXT[mode]; dessin(0.15); requestAnimationFrame(boucle);
+  });
+  VRT_A("6e-tm-materiel-dessin", 1, "Choisis la dureté du crayon, trace, puis gomme", function (el) {
+    var d = 0, gomme = false;
+    el.innerHTML = "<label class='labo-c'><span>Crayon : <b data-dv>4H</b></span><input type='range' min='0' max='4' value='0' data-d style='width:220px'></label><button type='button' class='btn-l' data-g style='margin-left:10px'>🧽 Gommer</button><div data-s style='margin:8px 0'></div><p class='labo-r' data-r></p>";
+    function maj() {
+      var c = DURETE[d], restant = gomme ? c[1] * c[1] * 0.9 : c[1], s = "<rect width='480' height='130' fill='#FBF8F2' stroke='#E3D7A6'/>", k;
+      for (k = 0; k < 4; k++) s += "<path d='M30 " + (30 + k * 24) + "Q240 " + (20 + k * 24) + " 450 " + (30 + k * 24) + "' stroke='#1F2328' stroke-opacity='" + restant.toFixed(2) + "' stroke-width='" + c[2] + "' fill='none'/>";
+      if (gomme) s += "<rect x='300' y='96' width='60' height='24' rx='4' fill='#F8BBD0' stroke='#E57373'/>";
+      el.querySelector("[data-dv]").textContent = c[0];
+      el.querySelector("[data-s]").innerHTML = "<svg viewBox='0 0 480 130' style='max-width:540px;width:100%' role='img' aria-label='Traits de crayon plus ou moins foncés'>" + s + "</svg>";
+      el.querySelector("[data-r]").innerHTML = "<b>" + c[0] + "</b> : " + c[3] + (gomme ? " · après gommage : " + (restant < 0.1 ? "<b style='color:" + VERT + "'>effacé</b>" : restant < 0.35 ? "presque effacé" : "<b style='color:" + ROUGE + "'>trace encore bien visible</b>") : "");
+    }
+    el.querySelector("[data-d]").addEventListener("input", function (e) { d = +e.target.value; gomme = false; maj(); });
+    el.querySelector("[data-g]").addEventListener("click", function () { gomme = true; maj(); });
+    maj();
+  });
+  VRT_A("6e-tm-materiel-dessin", 2, "Quel instrument pour chaque trait du plan ?", function (el) {
+    exercice(el, [["Tracer les murs perpendiculaires : ___", ["l'équerre", "le compas", "le rapporteur"], "L'angle droit de l'équerre."], ["Tracer le toit circulaire de 4 cm de rayon : ___", ["le compas", "l'équerre", "un couvercle"], "Compas ouvert à 4 cm."], ["Tracer la porte inclinée à 60° : ___", ["le rapporteur", "la règle seule", "l'équerre"], "Le rapporteur mesure les angles."], ["Tracer une droite de 12 cm : ___", ["la règle graduée", "le compas", "le rapporteur"], "La règle trace et mesure."], ["Faire les traits de construction : ___", ["un crayon H", "un crayon 4B", "un feutre"], "Fins, clairs, faciles à gommer."], ["Repasser les traits définitifs : ___", ["un crayon B", "un crayon 4H", "la gomme"], "Trait foncé et net."]], "Trait suivant", "Trait");
+  });
+  VRT_A("6e-tm-site-pepiniere", 2, "Note les deux terrains avec la grille", function (el) {
+    var N = TERRAINS.map(function (t) { return t[1].slice(); });
+    el.innerHTML = "<div data-t style='overflow-x:auto'></div><p class='labo-r' data-r></p>";
+    function maj() {
+      var h = "<table class='donnees' style='min-width:420px'><tr><th>Critère</th>" + TERRAINS.map(function (t) { return "<th>" + t[0].split(" :")[0] + "</th>"; }).join("") + "</tr>";
+      CRIT.forEach(function (c, i) { h += "<tr><td>" + c + "</td>" + N.map(function (n, j) { return "<td>" + [0, 1, 2].map(function (v) { return "<button type='button' class='btn-l' data-j='" + j + "' data-i='" + i + "' data-v='" + v + "' style='padding:2px 9px;margin:1px;" + (n[i] === v ? "background:#1E499B;color:#fff" : "") + "'>" + v + "</button>"; }).join("") + "</td>"; }).join("") + "</tr>"; });
+      var T = N.map(function (n) { return n.reduce(function (a, b) { return a + b; }, 0); });
+      h += "<tr><th>Total / 12</th>" + T.map(function (t, j) { return "<th style='color:" + (t === Math.max.apply(null, T) ? VERT : ROUGE) + "'>" + t + "</th>"; }).join("") + "</tr></table>";
+      el.querySelector("[data-t]").innerHTML = h;
+      el.querySelectorAll("[data-v]").forEach(function (b) { b.addEventListener("click", function () { N[+b.dataset.j][+b.dataset.i] = +b.dataset.v; maj(); }); });
+      el.querySelector("[data-r]").innerHTML = T[0] === T[1] ? "Égalité : regarde le critère le plus important, l'eau, puis le sol." : "Terrain retenu : <b>" + TERRAINS[T[0] > T[1] ? 0 : 1][0] + "</b> (" + Math.max(T[0], T[1]) + " / 12). Les notes de départ viennent des observations du club ; modifie-les si tu observes autre chose.";
+    }
+    maj();
+  });
+})();
+
+/* Leçons APPROFONDIES — révision, lot 19 (18/11/2026) : mise à niveau des leçons déjà approfondies auxquelles il manquait
+   une planche 3D, une simulation, une planche 2D ou des questions de quiz (audit sur les 91 leçons). AJOUTS SEULEMENT (completer) :
+   rien n'est retiré. Dénombrement 2nde A (r26, r27, r28), Kamerun et mangrove (3e), bac (Tle), piste (6e), production (2nde C). */
+(function () {
+  "use strict";
+  var NUIT = "#001136", BLEU = "#1E499B", GRIS = "#4D5163", VERT = "#17784D", ROUGE = "#C62828", TERRE = "#C46A2B";
+
+  function txt(x, y, t, o) {
+    o = o || {};
+    return "<text x='" + x + "' y='" + y + "' text-anchor='" + (o.a || "middle") + "' font-size='" + (o.s || 12) + "' font-weight='" + (o.w || 700) + "' fill='" + (o.c || NUIT) + "'" + (o.i ? " font-style='italic'" : "") + (o.halo ? " stroke='#fff' stroke-width='3' paint-order='stroke'" : "") + ">" + t + "</text>";
+  }
+  function lin(id, cs, vertical) {
+    var s = "<linearGradient id='" + id + "'" + (vertical ? " x1='0' y1='0' x2='0' y2='1'" : "") + ">";
+    cs.forEach(function (c, i) { s += "<stop offset='" + (i / (cs.length - 1)).toFixed(2) + "' stop-color='" + c + "'/>"; });
+    return s + "</linearGradient>";
+  }
+  function rad(id, cs) {
+    var s = "<radialGradient id='" + id + "' cx='35%' cy='30%' r='75%'>";
+    cs.forEach(function (c, i) { s += "<stop offset='" + (i / (cs.length - 1)).toFixed(2) + "' stop-color='" + c + "'/>"; });
+    return s + "</radialGradient>";
+  }
+  function fleche(id, c) { return "<marker id='" + id + "' markerWidth='10' markerHeight='10' refX='7' refY='5' orient='auto'><path d='M0 1L8 5L0 9Z' fill='" + c + "'/></marker>"; }
+  function svg(w, h, alt, defs, corps) {
+    return "<svg viewBox='0 0 " + w + " " + h + "' role='img' aria-label='" + alt + "' font-family='Inter,Arial,sans-serif'><rect width='" + w + "' height='" + h + "' fill='#fff'/><defs>" + defs + "</defs>" + corps +
+      "<text x='" + (w - 6) + "' y='" + (h - 5) + "' font-size='8' text-anchor='end' fill='#8A93A6'>Planche VÉRITAS</text></svg>";
+  }
+  function ancien(id) { return window.VRT_LECONS[id]; }
+  function remplacer(id, o) {
+    var a = ancien(id);
+    if (a) ["apc", "examen", "rang", "cle", "scenes"].forEach(function (k) { if (a[k] != null && o[k] == null) o[k] = a[k]; });
+    VRT_L(id, o);
+    if (a) o.ordre = a.ordre;
+  }
+  function q(qq, bonne, f1, f2, e) { return { q: qq, r: [bonne, f1, f2], b: 0, e: e }; }
+  function partie(old, i) { return old && old.parties[i] ? old.parties[i].html : ""; }
+  function bulle(x, y, w, t, c) { return "<rect x='" + x + "' y='" + y + "' width='" + w + "' height='30' rx='12' fill='#fff' stroke='" + (c || "#C9D2E3") + "'/>" + txt(x + w / 2, y + 20, t, { s: 11.5 }); }
+  function perso(x, y, peau, habit, bas) {
+    bas = bas || "#2E3445";
+    return "<g transform='translate(" + x + " " + y + ")'><ellipse cx='0' cy='84' rx='18' ry='4' fill='#001136' opacity='.18'/>" +
+      "<rect x='-9' y='44' width='8' height='36' rx='3' fill='" + bas + "'/><rect x='1' y='44' width='8' height='36' rx='3' fill='" + bas + "'/>" +
+      "<ellipse cx='-6' cy='81' rx='7' ry='3.5' fill='#1F2328'/><ellipse cx='6' cy='81' rx='7' ry='3.5' fill='#1F2328'/>" +
+      "<path d='M-13 46L-16 18C-16 13 -12 11 -6 10H6C12 11 16 13 16 18L13 46Z' fill='" + habit + "'/>" +
+      "<path d='M-15 16L-20 40' stroke='" + habit + "' stroke-width='7' stroke-linecap='round'/><path d='M15 16L20 40' stroke='" + habit + "' stroke-width='7' stroke-linecap='round'/>" +
+      "<circle cx='-20' cy='42' r='3.6' fill='" + peau + "'/><circle cx='20' cy='42' r='3.6' fill='" + peau + "'/>" +
+      "<rect x='-3.5' y='5' width='7' height='7' fill='" + peau + "'/><ellipse cx='0' cy='-2' rx='9' ry='10.5' fill='" + peau + "'/>" +
+      "<path d='M-9 -4C-10 -14 -4 -13.5 0 -13.5S10 -14 9 -4C7 -9 -7 -9 -9 -4Z' fill='#1B1410'/><ellipse cx='-9' cy='-1' rx='1.8' ry='3' fill='" + peau + "'/><ellipse cx='9' cy='-1' rx='1.8' ry='3' fill='" + peau + "'/></g>";
+  }
+  /* portrait en buste (arbre généalogique) */
+  function portrait(x, y, peau, habit, cheveux, age) {
+    var s = "<g transform='translate(" + x + " " + y + ")'><circle r='30' fill='#F4EFE4' stroke='#C9A576' stroke-width='3'/><clipPath id='pc" + x + "_" + y + "'><circle r='28'/></clipPath><g clip-path='url(#pc" + x + "_" + y + ")'>";
+    s += "<path d='M-26 32C-26 14 -14 10 0 10S26 14 26 32Z' fill='" + habit + "'/><rect x='-4' y='2' width='8' height='10' fill='" + peau + "'/><ellipse cy='-6' rx='11' ry='13' fill='" + peau + "'/>";
+    s += age === "vieux" ? "<path d='M-11 -10C-12 -20 -4 -21 0 -21S12 -20 11 -10C9 -14 -9 -14 -11 -10Z' fill='#D8D8D8'/>" : age === "femme" ? "<path d='M-13 -6C-15 -24 15 -24 13 -6C12 -14 -12 -14 -13 -6Z' fill='" + cheveux + "'/><path d='M-13 -14h26v-6c-6 -6 -20 -6 -26 0Z' fill='" + habit + "'/>" : "<path d='M-11 -10C-12 -20 -4 -21 0 -21S12 -20 11 -10C9 -14 -9 -14 -11 -10Z' fill='" + cheveux + "'/>";
+    s += "<circle cx='-4' cy='-6' r='1.4' fill='#1B1410'/><circle cx='4' cy='-6' r='1.4' fill='#1B1410'/><path d='M-3 2q3 2 6 0' stroke='#1B1410' fill='none'/></g></g>";
+    return s;
+  }
+  /* boucle d'exercice générique : [phrase avec ___, [bonne, autres…], explication] */
+  function exercice(el, C, suivant, lib) {
+    var i = 0, ok = 0;
+    el.innerHTML = "<p class='labo-r' data-q style='font-size:16px'></p><div style='display:flex;gap:8px;flex-wrap:wrap' data-c></div><p class='an-note' data-e></p><p class='labo-r' data-s></p>";
+    function $(s) { return el.querySelector(s); }
+    function poser() {
+      var c = C[i];
+      $("[data-q]").innerHTML = (i + 1) + ". " + c[0].replace("___", "<b style='border-bottom:2px dashed #1E499B;padding:0 14px'>?</b>");
+      $("[data-e]").textContent = ""; $("[data-s]").innerHTML = lib + " " + (i + 1) + " / " + C.length + " · score : <b>" + ok + "</b>";
+      $("[data-c]").innerHTML = c[1].slice().sort().map(function (x) { return "<button type='button' class='btn-l' data-v='" + x + "'>" + x + "</button>"; }).join("");
+      el.querySelectorAll("[data-v]").forEach(function (b) {
+        b.addEventListener("click", function () {
+          var bon = b.dataset.v === c[1][0]; if (bon) ok++;
+          $("[data-q]").innerHTML = (i + 1) + ". " + c[0].replace("___", "<b style='color:" + (bon ? VERT : ROUGE) + "'>" + c[1][0] + "</b>");
+          $("[data-e]").innerHTML = (bon ? "✔ " : "✘ ") + c[2];
+          el.querySelectorAll("[data-v]").forEach(function (x) { x.disabled = true; });
+          var nx = document.createElement("button"); nx.type = "button"; nx.className = "btn-l"; nx.textContent = i + 1 < C.length ? suivant : "↺";
+          nx.addEventListener("click", function () { i = (i + 1) % C.length; if (!i) ok = 0; poser(); });
+          $("[data-c]").appendChild(nx);
+          $("[data-s]").innerHTML = lib + " " + (i + 1) + " / " + C.length + " · score : <b>" + ok + "</b>";
+        });
+      });
+    }
+    poser();
+  }
+
+  function alea(g) { return function () { g = (g * 16807) % 2147483647; return (g - 1) / 2147483646; }; }
+  function bloc(x, y, w, h, c, l1, l2) {
+    return "<rect x='" + x + "' y='" + y + "' width='" + w + "' height='" + h + "' rx='10' fill='" + c + "'/>" + txt(x + w / 2, y + h / 2 - (l2 ? 3 : -5), l1, { s: 14, c: "#fff" }) + (l2 ? txt(x + w / 2, y + h / 2 + 14, l2, { s: 10, c: "#fff", w: 500 }) : "");
+  }
+  /* ajoute des planches à une partie et des questions au quiz, sans rien retirer */
+  function completer(id, ajouts, questions) {
+    var L = ancien(id); if (!L) return;
+    (ajouts || []).forEach(function (a) { var p = L.parties[a[0]]; if (p) p.planches = (p.planches || []).concat(a[1]); });
+    if (questions) { var vus = {}; (L.quiz || []).forEach(function (x) { vus[x.q] = 1; }); L.quiz = (L.quiz || []).concat(questions.filter(function (x) { return !vus[x.q]; })).slice(0, 10); }
+  }
+  function pion(o, x, z, coul, peau) { o.push({ f: "cylindre", c: [x, 0, z], r: 4.5, r2: 3.2, h: 16, n: 8, coul: coul }); o.push({ f: "sphere", c: [x, 20, z], r: 4, coul: peau || "#5A3A1E" }); }
+
+  /* ═══════════ 2nde A — DIAGRAMME DE VENN ET TABLEAU À DOUBLE ENTRÉE ═══════════ */
+  function classeTriee3D() {
+    var o = [], R = alea(9), Z = [["lecture et danse", 7, -70, -60, "#7B3F99"], ["lecture seulement", 13, 70, -60, "#1E499B"], ["danse seulement", 11, -70, 60, "#C2540A"], ["aucun club", 17, 70, 60, "#6F737C"]];
+    o.push({ f: "boite", c: [0, -6, 0], d: [340, 6, 290], coul: "#8B6B4A", dessus: "#C9B28A" });
+    Z.forEach(function (z) {
+      o.push({ f: "boite", c: [z[2], -2, z[3]], d: [130, 2, 110], coul: z[4], dessus: z[4], div: false });
+      var k; for (k = 0; k < z[1]; k++) pion(o, z[2] - 48 + (k % 5) * 24 + (R() - 0.5) * 3, z[3] - 36 + Math.floor(k / 5) * 22, ["#F4F1EA", "#DCE6F2", "#F7C948"][k % 3], ["#5A3A1E", "#6B4423", "#4A2E1A"][k % 3]);
+    });
+    return o;
+  }
+  completer("2nde-a-maths-r26", [[1, [{ type: "3d", titre: "La classe rangée dans le tableau", legende: "Tourne la cour : les 48 élèves se sont rangés sur quatre tapis, comme dans les quatre cases du tableau à double entrée. Violet : lecture et danse (7) ; bleu : lecture seulement (13) ; orange : danse seulement (11) ; gris : aucun club (17). Chaque élève est sur un seul tapis.",
+    modele: { h: 360, rx: -40, ry: 18, echelle: 0.85, alt: "Quatre tapis de couleur avec 7, 13, 11 et 17 élèves debout", objets: classeTriee3D(),
+      etiquettes: [{ p: [-70, 24, -60], t: "lecture et danse : 7", cote: "g" }, { p: [70, 24, -60], t: "lecture seulement : 13", cote: "d" }, { p: [-70, 24, 60], t: "danse seulement : 11", cote: "g" }, { p: [70, 24, 60], t: "aucun club : 17", cote: "d" }] } }]]],
+    [q("Dans le tableau à double entrée, le total général vaut…", "l'effectif de la classe, 48", "20 + 18 = 38", "7", "Chaque élève est compté une seule fois."), q("La case « lecture : non ; danse : non » contient…", "les élèves sans club", "les élèves des deux clubs", "les élèves de danse", "48 − 31 = 17.")]);
+
+  /* ═══════════ 2nde A — ARBRE DE CHOIX ET ARBRE DES PARTIES ═══════════ */
+  var PAGNES = [["ndop", "#1F2A5A"], ["kaba", "#E8A33D"], ["wax", "#C62828"]];
+  function tenues3D() {
+    var o = [];
+    o.push({ f: "boite", c: [0, -6, 0], d: [420, 6, 260], coul: "#8B5A2B", dessus: "#A06A38" });
+    PAGNES.forEach(function (p, i) {
+      var z = -80 + i * 80;
+      [0, 1, 2, 3].forEach(function (j) {
+        var x = -135 + j * 90, robe = j < 2, coiffe = j % 2 === 0;
+        if (robe) o.push({ f: "cylindre", c: [x, 0, z], r: 18, r2: 8, h: 44, n: 14, coul: p[1] });
+        else { o.push({ f: "cylindre", c: [x, 0, z], r: 11, r2: 10, h: 24, n: 12, coul: p[1] }); o.push({ f: "cylindre", c: [x, 24, z], r: 9, r2: 8, h: 20, n: 12, coul: p[1] }); o.push({ f: "boite", c: [x, 25, z], d: [20, 3, 20], coul: "#F4F1EA", div: false }); }
+        o.push({ f: "cylindre", c: [x, 44, z], r: 3, h: 6, n: 8, coul: "#6B4423" });
+        o.push({ f: "sphere", c: [x, 56, z], r: 8, coul: "#6B4423" });
+        if (coiffe) o.push({ f: "sphere", c: [x, 64, z], r: [11, 7, 10], coul: p[1] });
+      });
+    });
+    return o;
+  }
+  completer("2nde-a-maths-r27", [[1, [{ type: "3d", titre: "Les 12 tenues sur leurs mannequins", legende: "Tourne le défilé : trois rangées de pagnes (ndop indigo, kaba orange, wax rouge) ; dans chaque rangée, deux robes puis deux ensembles, chacun avec ou sans coiffe. 3 rangées × 4 colonnes = 12 tenues, toutes différentes : une par fille.",
+    modele: { h: 360, rx: -30, ry: 24, echelle: 0.85, alt: "Douze mannequins en trois rangées de pagnes, robes et ensembles, avec ou sans coiffe", objets: tenues3D(),
+      etiquettes: [{ p: [-180, 30, -80], t: "ndop", cote: "g" }, { p: [-180, 30, 0], t: "kaba", cote: "g" }, { p: [-180, 30, 80], t: "wax", cote: "g" }, { p: [-135, 70, -80], t: "robe + coiffe", cote: "d" }, { p: [135, 50, -80], t: "ensemble sans coiffe", cote: "d" }] } }]]],
+    [q("Avec 3 pagnes, 2 modèles et une coiffe obligatoire (1 option) :", "6 tenues", "12 tenues", "5 tenues", "3 × 2 × 1 = 6."), q("Un arbre de choix à 3 étapes de 2 branches chacune a…", "8 chemins", "6 chemins", "3 chemins", "2 × 2 × 2 = 8.")]);
+
+  /* ═══════════ 2nde A — INTÉGRATION : LA KERMESSE ═══════════ */
+  completer("2nde-a-maths-r28", null, [q("75 au stand, 50 aux dames, 30 aux deux : dames seulement ?", "20", "50", "45", "50 − 30 = 20."), q("Pour 30 tickets et 4 × 3 × 2 plateaux :", "les tickets suffisent (24 ≤ 30)", "il en manque 6", "il faut 9 tickets", "4 × 3 × 2 = 24.")]);
+
+  /* ═══════════ 3e HISTOIRE — LE KAMERUN ═══════════ */
+  completer("3e-hist-kamerun", null, null);
+
+  /* ═══════════ 3e GÉOGRAPHIE — LA MANGROVE ═══════════ */
+  completer("3e-geo-mangrove", null, null);
+
+  /* ═══════════ Tle — PRÉPARER LE BAC ═══════════ */
+  completer("tle-orient-bac", [[2, [{ type: "2D", titre: "Une journée d'élève de Terminale équilibrée", legende: "Une journée de 24 heures en période de cours : environ 8 heures de sommeil, les cours, deux heures de travail personnel, du sport ou de la marche, des repas réguliers et un temps libre. Le sommeil n'est pas du temps perdu : c'est pendant la nuit que la mémoire fixe ce qu'on a appris.", svg: (function () {
+    var P = [["sommeil", 8, "#2F3E73"], ["toilette, repas", 2, "#E8A33D"], ["trajet", 1, "#9AA3AF"], ["cours", 7, "#4A90C2"], ["sport / marche", 1, VERT], ["travail perso", 2, "#7B3F99"], ["détente, famille", 2, "#C2540A"], ["repas du soir", 1, "#D9B77A"]], s = "<rect width='640' height='260' fill='#FBF8F2'/>", a = -Math.PI / 2, cx = 150, cy = 130, R = 105;
+    P.forEach(function (p) { var b = a + p[1] / 24 * 2 * Math.PI, x1 = cx + R * Math.cos(a), y1 = cy + R * Math.sin(a), x2 = cx + R * Math.cos(b), y2 = cy + R * Math.sin(b); s += "<path d='M" + cx + " " + cy + "L" + x1.toFixed(1) + " " + y1.toFixed(1) + "A" + R + " " + R + " 0 " + (b - a > Math.PI ? 1 : 0) + " 1 " + x2.toFixed(1) + " " + y2.toFixed(1) + "Z' fill='" + p[2] + "' stroke='#fff' stroke-width='2'/>"; a = b; });
+    s += "<circle cx='" + cx + "' cy='" + cy + "' r='34' fill='#fff'/>" + txt(cx, cy + 5, "24 h", { s: 16 });
+    P.forEach(function (p, i) { s += "<rect x='300' y='" + (24 + i * 28) + "' width='18' height='18' rx='4' fill='" + p[2] + "'/>" + txt(328, 38 + i * 28, p[0] + " : " + p[1] + " h", { s: 13, a: "start", w: 600 }); });
+    return svg(640, 260, "Diagramme circulaire d’une journée de 24 heures : 8 h de sommeil, 7 h de cours, 2 h de travail personnel, sport, repas, détente", "", s);
+  })() }]]], null);
+
+  /* ═══════════ 6e EPS — LA PISTE ═══════════ */
+  completer("6e-eps-piste", [[2, [{ type: "2D", titre: "Le relais 4 × 100 m et sa zone de transmission", legende: "Au relais, le témoin passe de main en main à l'intérieur de la zone de transmission (30 m depuis 2018 : elle commence 10 m avant la ligne des 100 m et finit 20 m après). Un témoin passé hors de la zone entraîne la disqualification de l'équipe.", svg: (function () {
+    var s = "<rect width='640' height='200' fill='#6E9B45'/><rect y='60' width='640' height='90' fill='#B5442C'/><path d='M0 60H640M0 90H640M0 120H640M0 150H640' stroke='#F4F1EA' stroke-width='2'/>";
+    s += "<rect x='200' y='90' width='300' height='30' fill='#F7C948' opacity='.45'/><path d='M200 84V126M500 84V126' stroke='#F7C948' stroke-width='4'/><path d='M300 84V126' stroke='#fff' stroke-width='3' stroke-dasharray='4 3'/>";
+    s += txt(350, 40, "zone de transmission : 30 m", { s: 13, c: "#fff" }) + "<path d='M200 50H500' stroke='#fff' stroke-width='2'/><path d='M200 44V56M500 44V56' stroke='#fff' stroke-width='2'/>" + txt(250, 176, "10 m", { s: 12, c: "#fff" }) + txt(400, 176, "20 m", { s: 12, c: "#fff" }) + txt(300, 192, "ligne des 100 m", { s: 11, c: "#fff", w: 500 });
+    s += "<g transform='translate(250 105)'><circle cx='0' cy='-24' r='6' fill='#5A3A1E'/><path d='M0 -18V2M0 2l-8 14M0 2l8 14M0 -12l12 4' stroke='#1E499B' stroke-width='4' fill='none'/><rect x='12' y='-12' width='12' height='4' fill='#F7C948'/></g><g transform='translate(282 105)'><circle cx='0' cy='-24' r='6' fill='#6B4423'/><path d='M0 -18V2M0 2l-8 14M0 2l8 14M0 -12l-12 4' stroke='#C62828' stroke-width='4' fill='none'/></g>";
+    s += "<path d='M60 105H170' stroke='#fff' stroke-width='3' marker-end='url(#rlF)'/>" + txt(115, 100, "sens de course", { s: 11, c: "#fff" });
+    return svg(640, 200, "Couloir de piste avec la zone de transmission de 30 m en jaune et deux relayeurs qui se passent le témoin", fleche("rlF", "#fff"), s);
+  })() }]]], null);
+
+  /* ═══════════ 2nde C ECM — LA PRODUCTION ═══════════ */
+  completer("2nde-c-ecm-production", [[1, [{ type: "2D", titre: "Les trois facteurs de production de la chocolaterie", legende: "Pour fabriquer des tablettes, Nadège combine la nature (fèves, eau, énergie), le travail (planteurs, ouvrières, vendeuse) et le capital (séchoir, broyeur, moules, argent investi). Sans l'un des trois, pas de production.", svg: (function () {
+    var s = "<rect width='640' height='250' fill='#FBF8F2'/>";
+    [[30, VERT, "NATURE", ["fèves de cacao", "eau, terre", "énergie (bois, électricité)"]], [236, BLEU, "TRAVAIL", ["planteurs", "ouvrières de l'atelier", "vendeuse, comptable"]], [442, "#7A4A1E", "CAPITAL", ["séchoir, broyeur", "moules, emballages", "argent investi"]]].forEach(function (c) {
+      s += "<rect x='" + c[0] + "' y='20' width='170' height='170' rx='14' fill='#fff' stroke='" + c[1] + "' stroke-width='2.5'/><rect x='" + c[0] + "' y='20' width='170' height='34' rx='12' fill='" + c[1] + "'/>" + txt(c[0] + 85, 43, c[2], { s: 14, c: "#fff" });
+      c[3].forEach(function (t, i) { s += txt(c[0] + 14, 84 + i * 30, "• " + t, { s: 12, a: "start", w: 500 }); });
+    });
+    s += "<path d='M115 196V214H527V196M321 196V214' stroke='" + NUIT + "' stroke-width='2' fill='none'/><path d='M321 214V226' stroke='" + NUIT + "' stroke-width='2' marker-end='url(#pfF)'/>" + txt(321, 246, "tablettes de chocolat (biens) vendues à Yaoundé (service)", { s: 12, c: NUIT });
+    return svg(640, 255, "Trois colonnes : nature, travail, capital, qui se combinent pour produire des tablettes de chocolat", fleche("pfF", NUIT), s);
+  })() }]]], null);
+
+  /* ═══════════════════════ SIMULATIONS ═══════════════════════ */
+  VRT_A("2nde-a-maths-r26", 0, "Règle les effectifs, le diagramme se met à jour", function (el) {
+    var V = { n: 48, a: 20, b: 18, ab: 7 };
+    el.innerHTML = [["n", "Élèves de la classe", 20, 80], ["a", "Club de lecture", 0, 60], ["b", "Club de danse", 0, 60], ["ab", "Aux deux clubs", 0, 40]].map(function (c) { return "<label class='labo-c'><span>" + c[1] + " : <b data-v" + c[0] + ">" + V[c[0]] + "</b></span><input type='range' min='" + c[2] + "' max='" + c[3] + "' value='" + V[c[0]] + "' data-" + c[0] + "></label>"; }).join("") + "<div data-g style='margin:8px 0'></div><p class='labo-r' data-r></p>";
+    function maj() {
+      ["n", "a", "b", "ab"].forEach(function (k) { V[k] = +el.querySelector("[data-" + k + "]").value; el.querySelector("[data-v" + k + "]").textContent = V[k]; });
+      var ok = V.ab <= Math.min(V.a, V.b) && V.a + V.b - V.ab <= V.n, u = V.a + V.b - V.ab, s = "<rect width='480' height='220' fill='#FBF8F2'/><rect x='10' y='10' width='460' height='200' rx='12' fill='#fff' stroke='#9AA3AF'/>" + txt(30, 34, "E (" + V.n + ")", { s: 13, a: "start", c: GRIS });
+      s += "<circle cx='190' cy='115' r='80' fill='#1E499B' fill-opacity='.18' stroke='#1E499B' stroke-width='2'/><circle cx='290' cy='115' r='80' fill='#C2540A' fill-opacity='.18' stroke='#C2540A' stroke-width='2'/>" + txt(150, 50, "Lecture", { s: 12, c: BLEU }) + txt(330, 50, "Danse", { s: 12, c: "#C2540A" });
+      if (ok) s += txt(160, 122, String(V.a - V.ab), { s: 22, c: BLEU }) + txt(240, 122, String(V.ab), { s: 22, c: "#7B3F99" }) + txt(320, 122, String(V.b - V.ab), { s: 22, c: "#C2540A" }) + txt(420, 196, String(V.n - u), { s: 20, c: GRIS });
+      el.querySelector("[data-g]").innerHTML = "<svg viewBox='0 0 480 220' style='max-width:520px;width:100%' role='img' aria-label='Diagramme de Venn avec les effectifs de chaque zone'>" + s + "</svg>";
+      el.querySelector("[data-r]").innerHTML = ok ? "Au moins un club : " + V.a + " + " + V.b + " − " + V.ab + " = <b>" + u + "</b> · sans club : " + V.n + " − " + u + " = <b>" + (V.n - u) + "</b> · " + (V.n - u >= 15 ? "<b style='color:" + VERT + "'>le troisième club ouvre (≥ 15)</b>" : "<b style='color:" + ROUGE + "'>pas assez pour un troisième club</b>") : "<b style='color:" + ROUGE + "'>Impossible</b> : l'intersection ne peut dépasser aucun des deux clubs, et la réunion ne peut dépasser la classe.";
+    }
+    el.querySelectorAll("input").forEach(function (i) { i.addEventListener("input", maj); }); maj();
+  });
+  VRT_A("2nde-a-maths-r27", 1, "Construis l'arbre des tenues", function (el) {
+    var V = { p: 3, m: 2, o: 2, f: 12 };
+    el.innerHTML = [["p", "Pagnes", 1, 5], ["m", "Modèles", 1, 3], ["o", "Options (coiffe ou non…)", 1, 3], ["f", "Filles qui défilent", 1, 40]].map(function (c) { return "<label class='labo-c'><span>" + c[1] + " : <b data-v" + c[0] + ">" + V[c[0]] + "</b></span><input type='range' min='" + c[2] + "' max='" + c[3] + "' value='" + V[c[0]] + "' data-" + c[0] + "></label>"; }).join("") + "<div data-g style='margin:8px 0'></div><p class='labo-r' data-r></p>";
+    var COUL = ["#1F2A5A", "#E8A33D", "#C62828", "#2E7D32", "#7B3F99"];
+    function maj() {
+      ["p", "m", "o", "f"].forEach(function (k) { V[k] = +el.querySelector("[data-" + k + "]").value; el.querySelector("[data-v" + k + "]").textContent = V[k]; });
+      var N = V.p * V.m * V.o, H = 260, s = "<rect width='480' height='" + H + "' fill='#FBF8F2'/>", i, j, k, feu = 0;
+      var Y = function (idx, tot) { return 14 + (idx + 0.5) * (H - 28) / tot; };
+      for (i = 0; i < V.p; i++) { var yp = Y(i, V.p); s += "<path d='M20 " + H / 2 + "L140 " + yp + "' stroke='" + COUL[i] + "' stroke-width='2.5'/><circle cx='140' cy='" + yp + "' r='5' fill='" + COUL[i] + "'/>";
+        for (j = 0; j < V.m; j++) { var ym = Y(i * V.m + j, V.p * V.m); s += "<path d='M140 " + yp + "L280 " + ym + "' stroke='" + COUL[i] + "' stroke-width='1.8'/><circle cx='280' cy='" + ym + "' r='4' fill='" + COUL[i] + "'/>";
+          for (k = 0; k < V.o; k++) { var yo = Y(feu, N); s += "<path d='M280 " + ym + "L420 " + yo + "' stroke='" + COUL[i] + "' stroke-width='1.2'/><circle cx='420' cy='" + yo + "' r='3' fill='" + (feu < V.f ? VERT : "#9AA3AF") + "'/>"; feu++; } } }
+      s += txt(140, H - 2, "pagne", { s: 10, c: GRIS }) + txt(280, H - 2, "modèle", { s: 10, c: GRIS }) + txt(420, H - 2, "option", { s: 10, c: GRIS });
+      el.querySelector("[data-g]").innerHTML = "<svg viewBox='0 0 480 " + H + "' style='max-width:520px;width:100%' role='img' aria-label='Arbre de choix des tenues'>" + s + "</svg>";
+      el.querySelector("[data-r]").innerHTML = V.p + " × " + V.m + " × " + V.o + " = <b>" + N + "</b> tenues différentes · " + (N >= V.f ? "<b style='color:" + VERT + "'>assez pour les " + V.f + " filles</b>" : "<b style='color:" + ROUGE + "'>il manque " + (V.f - N) + " tenue" + (V.f - N > 1 ? "s" : "") + "</b>");
+    }
+    el.querySelectorAll("input").forEach(function (i) { i.addEventListener("input", maj); }); maj();
+  });
+  VRT_A("2nde-a-maths-r28", 2, "Le tableau de bord du comité de la kermesse", function (el) {
+    var V = { e: 120, s: 75, d: 50, sd: 30, b: 4, p: 3, de: 2, t: 25 };
+    var C = [["e", "Élèves de 2nde", 50, 200], ["s", "Tiennent un stand", 0, 150], ["d", "Tournoi de dames", 0, 150], ["sd", "Les deux", 0, 100], ["b", "Boissons", 1, 6], ["p", "Plats", 1, 5], ["de", "Desserts", 1, 4], ["t", "Modèles de tickets", 1, 60]];
+    el.innerHTML = "<div style='display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:4px 14px'>" + C.map(function (c) { return "<label class='labo-c'><span>" + c[1] + " : <b data-v" + c[0] + ">" + V[c[0]] + "</b></span><input type='range' min='" + c[2] + "' max='" + c[3] + "' value='" + V[c[0]] + "' data-" + c[0] + "></label>"; }).join("") + "</div><p class='labo-r' data-r></p>";
+    function maj() {
+      C.forEach(function (c) { V[c[0]] = +el.querySelector("[data-" + c[0] + "]").value; el.querySelector("[data-v" + c[0] + "]").textContent = V[c[0]]; });
+      var ok = V.sd <= Math.min(V.s, V.d) && V.s + V.d - V.sd <= V.e, u = V.s + V.d - V.sd, P = V.b * V.p * V.de;
+      el.querySelector("[data-r]").innerHTML = (ok ? "<b>Participants</b> (Venn) : " + V.s + " + " + V.d + " − " + V.sd + " = <b>" + u + "</b> ; sans activité : <b>" + (V.e - u) + "</b>" : "<b style='color:" + ROUGE + "'>Effectifs impossibles</b> (vérifie « les deux » et le total)") + "<br><b>Plateaux</b> (arbre) : " + V.b + " × " + V.p + " × " + V.de + " = <b>" + P + "</b> ; tickets : " + V.t + " → " + (P <= V.t ? "<b style='color:" + VERT + "'>suffisants</b>" : "<b style='color:" + ROUGE + "'>il en manque " + (P - V.t) + "</b>");
+    }
+    el.querySelectorAll("input").forEach(function (i) { i.addEventListener("input", maj); }); maj();
+  });
+  VRT_A("3e-hist-kamerun", 2, "Remets les événements du Kamerun à leur date", function (el) {
+    exercice(el, [["Traité germano-douala : le Cameroun devient protectorat allemand : ___", ["1884", "1914", "1916"], "12 juillet 1884, avec les chefs douala."], ["Les Bakweri de Kuva Likenye repoussent une colonne allemande à Buea : ___", ["1891", "1884", "1910"], "Victoire bakweri, avant la conquête de 1894."], ["Révolte des Bulu dans le Sud : ___", ["1899-1901", "1884", "1914"], "Contre la mainmise allemande sur le commerce."], ["Les Douala sont expropriés du plateau Joss : ___", ["1910-1914", "1891", "1884"], "Rudolf Duala Manga Bell conteste l'expropriation."], ["Rudolf Duala Manga Bell et Ngoso Din sont pendus ; Martin-Paul Samba est fusillé : ___", ["août 1914", "1916", "1884"], "Le 8 août 1914, au début de la Première Guerre mondiale."], ["Les dernières troupes allemandes capitulent à Mora : fin du Kamerun : ___", ["1916", "1914", "1919"], "Février 1916 ; le territoire est ensuite partagé."]], "Événement suivant", "Événement");
+  });
+  VRT_A("3e-geo-mangrove", 3, "Modèle simplifié : que se passe-t-il quand on coupe la mangrove ?", function (el) {
+    el.innerHTML = "<label class='labo-c'><span>Mangrove coupée : <b data-cv>30</b> %</span><input type='range' min='0' max='90' step='5' value='30' data-c style='width:240px'></label><label class='labo-c' style='flex-direction:row;align-items:center;gap:6px'><input type='checkbox' data-f> <span>foyers améliorés et reboisement des berges</span></label><div data-g style='margin:8px 0'></div><p class='labo-r' data-r></p>";
+    function maj() {
+      var c = +el.querySelector("[data-c]").value / 100, f = el.querySelector("[data-f]").checked, reste = Math.min(1, (1 - c) + (f ? 0.15 : 0)), crev = Math.round(100 * Math.pow(reste, 1.3)), inond = Math.round(20 + 80 * Math.pow(1 - reste, 1.2)), bois = Math.round((f ? 55 : 100) * (0.4 + 0.6 * reste));
+      el.querySelector("[data-cv]").textContent = Math.round(c * 100);
+      var B = [["crevettes pêchées", crev, VERT], ["risque d'inondation", inond, ROUGE], ["bois de fumage disponible", bois, "#8B5A2B"]], s = "<rect width='480' height='160' fill='#FBF8F2'/>";
+      B.forEach(function (b, i) { s += txt(16, 34 + i * 46, b[0], { s: 12, a: "start" }) + "<rect x='200' y='" + (20 + i * 46) + "' width='260' height='20' rx='6' fill='#E3E7EF'/><rect x='200' y='" + (20 + i * 46) + "' width='" + (2.6 * b[1]).toFixed(0) + "' height='20' rx='6' fill='" + b[2] + "'/>" + txt(456, 35 + i * 46, b[1] + " / 100", { s: 11, a: "end", c: NUIT }); });
+      el.querySelector("[data-g]").innerHTML = "<svg viewBox='0 0 480 160' style='max-width:520px;width:100%' role='img' aria-label='Barres : crevettes, risque d’inondation, bois disponible'>" + s + "</svg>";
+      el.querySelector("[data-r]").innerHTML = "Indices sur 100, pour comparer (modèle simplifié, pas des mesures réelles). " + (c >= 0.5 ? "La mangrove ne joue plus son rôle de frayère et de digue : moins de crevettes, plus d'eau dans les maisons." : "La mangrove protège encore la côte et abrite les jeunes crevettes.") + (f ? " Les foyers améliorés consomment moins de bois et le reboisement reconstitue la forêt : on concilie besoins et protection." : "");
+    }
+    el.querySelector("[data-c]").addEventListener("input", maj); el.querySelector("[data-f]").addEventListener("change", maj); maj();
+  });
+})();
+
+/* Leçons APPROFONDIES — réalisme, lot 20 (18/11/2026) : illustrations des premiers lots redessinées (personnages complets,
+   chromosomes en X, grenouilles, verrerie de laboratoire, poules, chimpanzé), plannings d'orientation lisibles (jours et mois
+   écrits) et cellules animale et végétale en haute définition (ultrastructure ; explorateur dans 92-animations-realisme.js).
+   Remplace SEULEMENT des dessins (enquete.svg, planche.svg ou planche entière par son titre) ou en AJOUTE ; aucun texte retiré. */
+(function () {
+  "use strict";
+  var NUIT = "#001136", BLEU = "#1E499B", GRIS = "#4D5163", VERT = "#17784D", ROUGE = "#C62828", TERRE = "#C46A2B";
+
+  function txt(x, y, t, o) {
+    o = o || {};
+    return "<text x='" + x + "' y='" + y + "' text-anchor='" + (o.a || "middle") + "' font-size='" + (o.s || 12) + "' font-weight='" + (o.w || 700) + "' fill='" + (o.c || NUIT) + "'" + (o.i ? " font-style='italic'" : "") + (o.halo ? " stroke='#fff' stroke-width='3' paint-order='stroke'" : "") + ">" + t + "</text>";
+  }
+  function lin(id, cs, vertical) {
+    var s = "<linearGradient id='" + id + "'" + (vertical ? " x1='0' y1='0' x2='0' y2='1'" : "") + ">";
+    cs.forEach(function (c, i) { s += "<stop offset='" + (i / (cs.length - 1)).toFixed(2) + "' stop-color='" + c + "'/>"; });
+    return s + "</linearGradient>";
+  }
+  function rad(id, cs) {
+    var s = "<radialGradient id='" + id + "' cx='35%' cy='30%' r='75%'>";
+    cs.forEach(function (c, i) { s += "<stop offset='" + (i / (cs.length - 1)).toFixed(2) + "' stop-color='" + c + "'/>"; });
+    return s + "</radialGradient>";
+  }
+  function fleche(id, c) { return "<marker id='" + id + "' markerWidth='10' markerHeight='10' refX='7' refY='5' orient='auto'><path d='M0 1L8 5L0 9Z' fill='" + c + "'/></marker>"; }
+  function svg(w, h, alt, defs, corps) {
+    return "<svg viewBox='0 0 " + w + " " + h + "' role='img' aria-label='" + alt + "' font-family='Inter,Arial,sans-serif'><rect width='" + w + "' height='" + h + "' fill='#fff'/><defs>" + defs + "</defs>" + corps +
+      "<text x='" + (w - 6) + "' y='" + (h - 5) + "' font-size='8' text-anchor='end' fill='#8A93A6'>Planche VÉRITAS</text></svg>";
+  }
+  function ancien(id) { return window.VRT_LECONS[id]; }
+  function remplacer(id, o) {
+    var a = ancien(id);
+    if (a) ["apc", "examen", "rang", "cle", "scenes"].forEach(function (k) { if (a[k] != null && o[k] == null) o[k] = a[k]; });
+    VRT_L(id, o);
+    if (a) o.ordre = a.ordre;
+  }
+  function q(qq, bonne, f1, f2, e) { return { q: qq, r: [bonne, f1, f2], b: 0, e: e }; }
+  function partie(old, i) { return old && old.parties[i] ? old.parties[i].html : ""; }
+  function bulle(x, y, w, t, c) { return "<rect x='" + x + "' y='" + y + "' width='" + w + "' height='30' rx='12' fill='#fff' stroke='" + (c || "#C9D2E3") + "'/>" + txt(x + w / 2, y + 20, t, { s: 11.5 }); }
+  function perso(x, y, peau, habit, bas) {
+    bas = bas || "#2E3445";
+    return "<g transform='translate(" + x + " " + y + ")'><ellipse cx='0' cy='84' rx='18' ry='4' fill='#001136' opacity='.18'/>" +
+      "<rect x='-9' y='44' width='8' height='36' rx='3' fill='" + bas + "'/><rect x='1' y='44' width='8' height='36' rx='3' fill='" + bas + "'/>" +
+      "<ellipse cx='-6' cy='81' rx='7' ry='3.5' fill='#1F2328'/><ellipse cx='6' cy='81' rx='7' ry='3.5' fill='#1F2328'/>" +
+      "<path d='M-13 46L-16 18C-16 13 -12 11 -6 10H6C12 11 16 13 16 18L13 46Z' fill='" + habit + "'/>" +
+      "<path d='M-15 16L-20 40' stroke='" + habit + "' stroke-width='7' stroke-linecap='round'/><path d='M15 16L20 40' stroke='" + habit + "' stroke-width='7' stroke-linecap='round'/>" +
+      "<circle cx='-20' cy='42' r='3.6' fill='" + peau + "'/><circle cx='20' cy='42' r='3.6' fill='" + peau + "'/>" +
+      "<rect x='-3.5' y='5' width='7' height='7' fill='" + peau + "'/><ellipse cx='0' cy='-2' rx='9' ry='10.5' fill='" + peau + "'/>" +
+      "<path d='M-9 -4C-10 -14 -4 -13.5 0 -13.5S10 -14 9 -4C7 -9 -7 -9 -9 -4Z' fill='#1B1410'/><ellipse cx='-9' cy='-1' rx='1.8' ry='3' fill='" + peau + "'/><ellipse cx='9' cy='-1' rx='1.8' ry='3' fill='" + peau + "'/></g>";
+  }
+  /* portrait en buste (arbre généalogique) */
+  function portrait(x, y, peau, habit, cheveux, age) {
+    var s = "<g transform='translate(" + x + " " + y + ")'><circle r='30' fill='#F4EFE4' stroke='#C9A576' stroke-width='3'/><clipPath id='pc" + x + "_" + y + "'><circle r='28'/></clipPath><g clip-path='url(#pc" + x + "_" + y + ")'>";
+    s += "<path d='M-26 32C-26 14 -14 10 0 10S26 14 26 32Z' fill='" + habit + "'/><rect x='-4' y='2' width='8' height='10' fill='" + peau + "'/><ellipse cy='-6' rx='11' ry='13' fill='" + peau + "'/>";
+    s += age === "vieux" ? "<path d='M-11 -10C-12 -20 -4 -21 0 -21S12 -20 11 -10C9 -14 -9 -14 -11 -10Z' fill='#D8D8D8'/>" : age === "femme" ? "<path d='M-13 -6C-15 -24 15 -24 13 -6C12 -14 -12 -14 -13 -6Z' fill='" + cheveux + "'/><path d='M-13 -14h26v-6c-6 -6 -20 -6 -26 0Z' fill='" + habit + "'/>" : "<path d='M-11 -10C-12 -20 -4 -21 0 -21S12 -20 11 -10C9 -14 -9 -14 -11 -10Z' fill='" + cheveux + "'/>";
+    s += "<circle cx='-4' cy='-6' r='1.4' fill='#1B1410'/><circle cx='4' cy='-6' r='1.4' fill='#1B1410'/><path d='M-3 2q3 2 6 0' stroke='#1B1410' fill='none'/></g></g>";
+    return s;
+  }
+  /* boucle d'exercice générique : [phrase avec ___, [bonne, autres…], explication] */
+  function exercice(el, C, suivant, lib) {
+    var i = 0, ok = 0;
+    el.innerHTML = "<p class='labo-r' data-q style='font-size:16px'></p><div style='display:flex;gap:8px;flex-wrap:wrap' data-c></div><p class='an-note' data-e></p><p class='labo-r' data-s></p>";
+    function $(s) { return el.querySelector(s); }
+    function poser() {
+      var c = C[i];
+      $("[data-q]").innerHTML = (i + 1) + ". " + c[0].replace("___", "<b style='border-bottom:2px dashed #1E499B;padding:0 14px'>?</b>");
+      $("[data-e]").textContent = ""; $("[data-s]").innerHTML = lib + " " + (i + 1) + " / " + C.length + " · score : <b>" + ok + "</b>";
+      $("[data-c]").innerHTML = c[1].slice().sort().map(function (x) { return "<button type='button' class='btn-l' data-v='" + x + "'>" + x + "</button>"; }).join("");
+      el.querySelectorAll("[data-v]").forEach(function (b) {
+        b.addEventListener("click", function () {
+          var bon = b.dataset.v === c[1][0]; if (bon) ok++;
+          $("[data-q]").innerHTML = (i + 1) + ". " + c[0].replace("___", "<b style='color:" + (bon ? VERT : ROUGE) + "'>" + c[1][0] + "</b>");
+          $("[data-e]").innerHTML = (bon ? "✔ " : "✘ ") + c[2];
+          el.querySelectorAll("[data-v]").forEach(function (x) { x.disabled = true; });
+          var nx = document.createElement("button"); nx.type = "button"; nx.className = "btn-l"; nx.textContent = i + 1 < C.length ? suivant : "↺";
+          nx.addEventListener("click", function () { i = (i + 1) % C.length; if (!i) ok = 0; poser(); });
+          $("[data-c]").appendChild(nx);
+          $("[data-s]").innerHTML = lib + " " + (i + 1) + " / " + C.length + " · score : <b>" + ok + "</b>";
+        });
+      });
+    }
+    poser();
+  }
+
+  function alea(g) { return function () { g = (g * 16807) % 2147483647; return (g - 1) / 2147483646; }; }
+  /* remplace seulement le dessin : la situation de départ ou une planche 2D repérée par son titre */
+  function dessinEnquete(id, s) { var L = ancien(id); if (L && L.enquete) L.enquete.svg = s; }
+  function dessinPlanche(id, titre, s) { var L = ancien(id); if (!L) return; L.parties.forEach(function (p) { (p.planches || []).forEach(function (x) { if (String(x.titre).replace(/[\u00a0\u202f]/g, " ") === titre.replace(/[\u00a0\u202f]/g, " ") && !/3d/i.test(x.type)) { x.svg = s; delete x.ref; } }); }); }
+  /* décor : mur, sol, fenêtre */
+  function piece(w, h, mur, sol) { return "<rect width='" + w + "' height='" + h + "' fill='" + mur + "'/><rect y='" + (h - 46) + "' width='" + w + "' height='46' fill='" + sol + "'/><path d='M0 " + (h - 46) + "H" + w + "' stroke='#00000022' stroke-width='3'/>"; }
+  function poule(x, y, s, plume) {
+    return "<g transform='translate(" + x + " " + y + ") scale(" + s + ")'><path d='M-14 -6q-10 -10 -6 -22q6 6 8 14z' fill='#3B2A1A'/><ellipse cx='0' cy='0' rx='16' ry='12' fill='" + plume + "'/><path d='M-6 -2q6 8 14 2' stroke='#00000033' stroke-width='2' fill='none'/><circle cx='12' cy='-12' r='6.5' fill='" + plume + "'/><path d='M9 -18q2 -6 4 -1q2 -5 4 0q2 -4 3 1z' fill='#D7261E'/><path d='M18 -12l6 2l-6 2z' fill='#E8A33D'/><path d='M16 -8q2 5 -1 6' fill='#D7261E'/><circle cx='14' cy='-13' r='1.2' fill='#111'/><path d='M-3 11v9M4 11v9M-3 20l-4 2M-3 20l3 2M4 20l-3 2M4 20l4 2' stroke='#E8A33D' stroke-width='1.8'/></g>";
+  }
+  function bebeBras(x, y) { return "<g transform='translate(" + x + " " + y + ")'><ellipse rx='15' ry='9' fill='#F4E7C8' stroke='#D9C49C'/><circle cx='11' cy='-4' r='6' fill='#6B4423'/><path d='M-12 -2q10 -6 18 2' stroke='#E8A33D' stroke-width='3' fill='none'/></g>"; }
+
+  /* ═══════════ 3e SVT — CHROMOSOMES ET ADN ═══════════ */
+  var LONG = [249, 242, 198, 190, 181, 171, 159, 145, 138, 134, 135, 133, 114, 107, 102, 90, 83, 80, 59, 64, 47, 51], CENT = [0.48, 0.39, 0.46, 0.27, 0.27, 0.35, 0.36, 0.31, 0.32, 0.30, 0.40, 0.27, 0.15, 0.15, 0.17, 0.41, 0.33, 0.24, 0.45, 0.45, 0.25, 0.25];
+  function chromosome(x, yb, len, cpos, graine, couleur) {
+    var h = len * 0.36, top = yb - h, yc = top + h * cpos, R = alea(graine), s = "", w = 6.5, i;
+    [x - w - 0.6, x + 0.6].forEach(function (cx) {
+      s += "<path d='M" + cx + " " + (top + 3) + "q0 -3 " + (w / 2) + " -3q" + (w / 2) + " 0 " + (w / 2) + " 3V" + (yc - 2) + "q0 2 -" + (w * 0.18) + " 2q" + (w * 0.18) + " 0 " + (w * 0.18) + " 2V" + (yb - 3) + "q0 3 -" + (w / 2) + " 3q-" + (w / 2) + " 0 -" + (w / 2) + " -3V" + (yc + 2) + "q0 -2 " + (w * 0.18) + " -2q-" + (w * 0.18) + " 0 -" + (w * 0.18) + " -2Z' fill='" + couleur + "' stroke='#5E4A78' stroke-width='0.6'/>";
+      for (i = 0; i < Math.round(h / 9); i++) { var yy = top + 4 + R() * (h - 8), hh = 1.5 + R() * 3.5; if (Math.abs(yy - yc) > 3) s += "<rect x='" + cx + "' y='" + yy.toFixed(1) + "' width='" + w + "' height='" + hh.toFixed(1) + "' fill='#3B2A52' opacity='" + (0.55 + R() * 0.4).toFixed(2) + "'/>"; }
+    });
+    return s;
+  }
+  function caryotype(sexe) {
+    var s = "<rect width='640' height='330' fill='#F7F5F2'/>", rangs = [[1, 2, 3, 4, 5], [6, 7, 8, 9, 10, 11, 12], [13, 14, 15, 16, 17, 18], [19, 20, 21, 22, "S"]], bases = [104, 186, 252, 312];
+    rangs.forEach(function (r, ri) {
+      var pas = 600 / r.length;
+      r.forEach(function (n, k) {
+        var cx = 20 + pas * (k + 0.5), yb = bases[ri];
+        if (n === "S") {
+          s += chromosome(cx - 9, yb, 156, 0.39, 777, "#C7B5DA") + chromosome(cx + 9, yb, sexe === "XX" ? 156 : 57, sexe === "XX" ? 0.39 : 0.22, sexe === "XX" ? 778 : 779, sexe === "XX" ? "#C7B5DA" : "#E9B8B8");
+          s += txt(cx, yb + 14, sexe, { s: 11, c: ROUGE });
+        } else {
+          s += chromosome(cx - 9, yb, LONG[n - 1], CENT[n - 1], n * 31, "#C7B5DA") + chromosome(cx + 9, yb, LONG[n - 1], CENT[n - 1], n * 31 + 1, "#C7B5DA");
+          s += txt(cx, yb + 14, String(n), { s: 10, c: GRIS, w: 600 });
+        }
+      });
+    });
+    return svg(640, 330, "Caryotype " + (sexe === "XX" ? "d’une fille : 22 paires et XX" : "d’un garçon : 22 paires et XY") + " ; chromosomes en X avec leurs bandes sombres, rangés du plus grand au plus petit", "", s);
+  }
+  dessinPlanche("3e-svt-adn", "Caryotype d'une fille (simplifié)", caryotype("XX"));
+  dessinPlanche("3e-svt-adn", "Caryotype d'un garçon (simplifié)", caryotype("XY"));
+  function grenouille(x, y, s, peau, tache, oeil) {
+    var g = "<g transform='translate(" + x + " " + y + ") scale(" + s + ")'>";
+    g += "<path d='M-14 8q-26 4 -30 18q8 4 20 -2q-6 10 -18 12q10 4 22 -4M14 8q26 4 30 18q-8 4 -20 -2q6 10 18 12q-10 4 -22 -4' fill='" + peau + "' stroke='#00000033'/>";
+    g += "<path d='M-10 -6q-14 6 -18 16l6 1M10 -6q14 6 18 16l-6 1' stroke='" + peau + "' stroke-width='5' fill='none' stroke-linecap='round'/>";
+    g += "<ellipse cx='0' cy='4' rx='18' ry='22' fill='" + peau + "' stroke='#00000033'/><ellipse cx='0' cy='-14' rx='14' ry='10' fill='" + peau + "'/>";
+    if (tache) g += "<ellipse cx='-6' cy='6' rx='4' ry='3' fill='" + tache + "'/><ellipse cx='7' cy='12' rx='3.5' ry='2.5' fill='" + tache + "'/><ellipse cx='2' cy='-2' rx='3' ry='2' fill='" + tache + "'/>";
+    g += "<circle cx='-8' cy='-20' r='5' fill='" + peau + "' stroke='#00000033'/><circle cx='8' cy='-20' r='5' fill='" + peau + "' stroke='#00000033'/><circle cx='-8' cy='-21' r='2.6' fill='" + oeil + "'/><circle cx='8' cy='-21' r='2.6' fill='" + oeil + "'/></g>";
+    return g;
+  }
+  dessinPlanche("3e-svt-adn", "Le transfert de noyau", (function () {
+    var s = "<rect width='640' height='250' fill='#F2F7F1'/>";
+    s += grenouille(60, 70, 1.1, "#4E8B2E", "#2E5A1A", "#111") + txt(60, 128, "grenouille verte", { s: 11 });
+    s += "<circle cx='60' cy='190' r='26' fill='#E6F0D8' stroke='#7FA06A' stroke-width='2'/><circle cx='60' cy='190' r='10' fill='#6A4C93'/>" + txt(60, 236, "une cellule de son intestin", { s: 10, c: GRIS, w: 600 });
+    s += "<path d='M86 186Q190 120 296 118' stroke='#6A4C93' stroke-width='2.5' stroke-dasharray='6 4' fill='none' marker-end='url(#gnF)'/>" + txt(190, 132, "on prélève le noyau", { s: 11, c: "#6A4C93" });
+    s += grenouille(320, 50, 0.9, "#F1E3D8", null, "#C0392B") + txt(320, 100, "grenouille albinos", { s: 11 });
+    s += "<circle cx='320' cy='160' r='34' fill='#F7EFD8' stroke='#C9B28A' stroke-width='2'/><circle cx='320' cy='160' r='34' fill='url(#gnO)'/><path d='M346 130l40 -30' stroke='#9AA3AF' stroke-width='4'/><path d='M340 136l6 -6' stroke='#6A4C93' stroke-width='3'/>" + txt(320, 216, "son ovule, noyau détruit,", { s: 10, c: GRIS, w: 600 }) + txt(320, 230, "reçoit le noyau de la verte", { s: 10, c: GRIS, w: 600 });
+    s += "<path d='M362 160H440' stroke='" + NUIT + "' stroke-width='2.5' marker-end='url(#gnF2)'/>" + txt(400, 150, "développement", { s: 11 });
+    s += "<g transform='translate(470 160)'><ellipse rx='12' ry='9' fill='#4E8B2E'/><path d='M10 0q16 -8 26 4q-12 -2 -26 2z' fill='#4E8B2E'/></g>" + txt(478, 188, "têtard", { s: 10, c: GRIS });
+    s += grenouille(575, 120, 1.15, "#4E8B2E", "#2E5A1A", "#111") + txt(575, 182, "grenouille VERTE", { s: 12, c: VERT });
+    return svg(640, 250, "Expérience : le noyau d’une cellule de grenouille verte est placé dans l’ovule d’une grenouille albinos ; il en naît une grenouille verte", fleche("gnF", "#6A4C93") + fleche("gnF2", NUIT) + "<radialGradient id='gnO' cx='35%' cy='30%' r='70%'><stop offset='0' stop-color='#fff' stop-opacity='.7'/><stop offset='1' stop-color='#fff' stop-opacity='0'/></radialGradient>", s);
+  })());
+  dessinEnquete("3e-svt-adn", svg(640, 220, "Salon familial à Ebolowa : la grand-mère au foulard parle à Tonton Essomba ; Tata Ngo Bassong tient le bébé ; trois fillettes", "",
+    piece(640, 220, "#F2E3C6", "#B88A5A") + "<rect x='30' y='26' width='110' height='76' fill='#BFE0F7' stroke='#8B5A2B' stroke-width='6'/><path d='M85 26V102M30 64H140' stroke='#8B5A2B' stroke-width='4'/><rect x='470' y='20' width='70' height='50' fill='#C9A06E' stroke='#6B4423' stroke-width='3'/><path d='M478 60l14 -18l10 10l12 -16l16 24z' fill='#2E7D32'/>" +
+    "<rect x='420' y='120' width='200' height='54' rx='12' fill='#7A2E2E'/><rect x='420' y='104' width='200' height='26' rx='10' fill='#8E3A3A'/>" +
+    perso(170, 82, "#5A3A1E", "#1E499B", "#2E3445") + perso(250, 86, "#6B4423", "#2E7D32", "#2E7D32") + bebeBras(254, 126) + "<g transform='translate(220 140) scale(.62)'>" + perso(0, 0, "#6B4423", "#E8A33D", "#C62828") + "</g><g transform='translate(300 142) scale(.6)'>" + perso(0, 0, "#5A3A1E", "#D7261E", "#7B3F99") + "</g><g transform='translate(330 150) scale(.5)'>" + perso(0, 0, "#6B4423", "#F7C948", "#1E499B") + "</g>" +
+    perso(520, 72, "#4A2E1A", "#7B3F99", "#7B3F99") + "<path d='M509 66q11 -14 22 0q-11 -4 -22 0z' fill='#E8A33D'/>" + bulle(400, 10, 230, "« Ta femme ne te donne que des filles ! »", "#F7C948") +
+    txt(170, 214, "Tonton Essomba", { s: 10, c: "#fff" }) + txt(254, 214, "Tata et Manuela", { s: 10, c: "#fff" }) + txt(520, 214, "la grand-mère", { s: 10, c: "#fff" })));
+
+  /* ═══════════ 3e SVT — RESSEMBLANCES ═══════════ */
+  function chimpanze(x, y, s) {
+    var g = "<g transform='translate(" + x + " " + y + ") scale(" + s + ")'>";
+    g += "<ellipse cx='0' cy='34' rx='30' ry='34' fill='#2B211B'/><path d='M-26 20q-22 30 -14 58l10 0q-4 -26 10 -46z' fill='#2B211B'/><path d='M26 20q22 30 14 58l-10 0q4 -26 -10 -46z' fill='#2B211B'/>";
+    g += "<ellipse cx='-16' cy='66' rx='16' ry='8' fill='#2B211B'/><ellipse cx='16' cy='66' rx='16' ry='8' fill='#2B211B'/><ellipse cx='-34' cy='78' rx='7' ry='4' fill='#8A6B55'/><ellipse cx='34' cy='78' rx='7' ry='4' fill='#8A6B55'/>";
+    g += "<circle cx='0' cy='-6' r='20' fill='#2B211B'/><circle cx='-20' cy='-6' r='7' fill='#8A6B55'/><circle cx='20' cy='-6' r='7' fill='#8A6B55'/><path d='M-13 -10q13 -10 26 0q4 14 -4 24q-9 6 -18 0q-8 -10 -4 -24z' fill='#B08A6E'/><path d='M-10 -8q5 -3 8 0M2 -8q5 -3 8 0' stroke='#2B211B' stroke-width='2' fill='none'/><circle cx='-6' cy='-4' r='1.8' fill='#111'/><circle cx='6' cy='-4' r='1.8' fill='#111'/><path d='M-6 8q6 4 12 0' stroke='#5A3A2A' stroke-width='1.6' fill='none'/><ellipse cx='0' cy='3' rx='5' ry='2.4' fill='#8A6B55'/></g>";
+    return g;
+  }
+  dessinEnquete("3e-svt-ressemblances", svg(640, 220, "Centre de faune de Limbé : un chimpanzé assis derrière un grillage ; les jumelles Awa et Aïssa en tenue de handball et deux camarades", lin("rsC", ["#CFE3F2", "#EAF4E6"], true),
+    "<rect width='640' height='220' fill='url(#rsC)'/><ellipse cx='470' cy='70' rx='120' ry='56' fill='#2E6B2A'/><ellipse cx='580' cy='80' rx='80' ry='46' fill='#3E7D32'/><rect x='466' y='96' width='14' height='80' fill='#5D3A1E'/><rect y='160' width='640' height='60' fill='#6E9B45'/>" +
+    chimpanze(510, 104, 0.82) + (function () { var s = "", k; for (k = 0; k <= 16; k++) s += "<path d='M" + (380 + k * 16) + " 60V178' stroke='#9AA3AF' stroke-width='1.5'/>"; for (k = 0; k < 8; k++) s += "<path d='M380 " + (60 + k * 16) + "H636' stroke='#9AA3AF' stroke-width='1' opacity='.7'/>"; return s + "<path d='M376 56V180M636 56V180' stroke='#6E737C' stroke-width='5'/>"; })() +
+    perso(70, 98, "#5A3A1E", "#1E499B", "#F4F1EA") + perso(110, 98, "#5A3A1E", "#1E499B", "#F4F1EA") + perso(220, 96, "#6B4423", "#F4F1EA", "#2E3445") + perso(270, 98, "#4A2E1A", "#F4F1EA", "#2E3445") + bulle(170, 12, 200, "« Il est presque humain ! »", "#F7C948") +
+    txt(90, 212, "Awa et Aïssa (handball)", { s: 10, c: "#fff" }) + txt(245, 212, "Christelle, Ndi", { s: 10, c: "#fff" }) + txt(510, 212, "chimpanzé", { s: 10, c: "#fff" })));
+
+  /* ═══════════ 3e PCT — L'ATOME ═══════════ */
+  dessinEnquete("3e-pct-atome", svg(640, 220, "À Ngaoundéré, Ibrahim dénude un fil électrique où brillent des brins de cuivre orange ; à côté, une chaîne en or ; sa petite sœur tient une pince", "",
+    piece(640, 220, "#EFE6D6", "#C9A06E") + "<rect x='120' y='118' width='400' height='14' rx='3' fill='#8B5A2B'/><rect x='136' y='132' width='12' height='70' fill='#6B4423'/><rect x='492' y='132' width='12' height='70' fill='#6B4423'/>" +
+    "<path d='M190 110H330' stroke='#1F2328' stroke-width='9' stroke-linecap='round'/><path d='M330 110H350' stroke='#E8E8E8' stroke-width='7'/>" + [0, 1, 2, 3, 4].map(function (k) { return "<path d='M350 110q" + (14 + k * 2) + " " + (k - 2) * 3 + " " + (28 + k * 4) + " " + (k - 2) * 5 + "' stroke='#C8742E' stroke-width='1.6' fill='none'/>"; }).join("") + txt(270, 98, "fil électrique : brins de cuivre", { s: 11, c: "#8B4513" }) +
+    (function () { var s = "", k; for (k = 0; k < 18; k++) { var a = Math.PI * k / 17, x = 440 - 34 * Math.cos(a), y = 112 - 10 * Math.sin(a); s += "<ellipse cx='" + x.toFixed(1) + "' cy='" + y.toFixed(1) + "' rx='3.2' ry='2.2' fill='none' stroke='#D4A017' stroke-width='1.8'/>"; } return s; })() + "<circle cx='440' cy='116' r='5' fill='#D4A017'/>" + txt(440, 92, "chaîne en or", { s: 11, c: "#8A6A10" }) +
+    perso(70, 70, "#5A3A1E", "#1E499B", "#2E3445") + perso(580, 86, "#6B4423", "#C62828", "#7B3F99") + "<path d='M560 130l-22 -6M560 130l-22 2' stroke='#C62828' stroke-width='4'/>" + bulle(20, 10, 210, "« Or, cuivre : même matière ! »", "#9FC5E8") + bulle(410, 10, 220, "« Et si je coupe sans fin ? »", "#F7C948")));
+
+  /* ═══════════ 3e MATHS — RACINES CARRÉES ═══════════ */
+  dessinEnquete("3e-maths-racines", svg(640, 220, "Derrière une maison de Bafang : Papa Fotso tient un mètre ruban près d’un carré tracé à la ficelle entre quatre piquets ; des poules picorent", lin("rcC", ["#CFE3F2", "#F4F1EA"], true),
+    "<rect width='640' height='220' fill='url(#rcC)'/><rect y='120' width='640' height='100' fill='#9C7A4E'/><path d='M0 120Q200 112 640 124' stroke='#7A5A3A' stroke-width='3' fill='none'/>" +
+    "<rect x='470' y='40' width='130' height='82' fill='#E9DFCF' stroke='#B8AE9C'/><path d='M456 44L535 6L614 44Z' fill='#9AA3AF' stroke='#6E737C'/><rect x='520' y='74' width='26' height='48' fill='#6B4423'/><rect x='484' y='64' width='24' height='20' fill='#8FB2E3' stroke='#6B4423' stroke-width='2'/>" +
+    "<path d='M190 150L330 150L370 196L150 196Z' fill='#B88A5A' opacity='.35'/><path d='M190 150L330 150L370 196L150 196Z' fill='none' stroke='#F4F1EA' stroke-width='2' stroke-dasharray='6 4'/>" + [[190, 150], [330, 150], [370, 196], [150, 196]].map(function (p) { return "<path d='M" + p[0] + " " + p[1] + "v-16' stroke='#6B4423' stroke-width='4'/>"; }).join("") + txt(260, 182, "50 m² ?", { s: 15, c: "#fff" }) +
+    perso(90, 92, "#5A3A1E", "#2E7D32", "#2E3445") + "<path d='M110 132L190 140' stroke='#F7C948' stroke-width='3'/>" + poule(420, 176, 0.9, "#B5532A") + poule(460, 196, 0.8, "#F4F1EA") + poule(400, 204, 0.75, "#3B2A1A") + bulle(20, 14, 230, "« 200 poules, 4 par m² : 50 m². »", "#F7C948") + txt(90, 214, "Papa Fotso", { s: 10, c: "#fff" })));
+
+  /* ═══════════ 3e PCT — CONCENTRATION ET pH ═══════════ */
+  dessinEnquete("3e-pct-ph", svg(640, 220, "Cour à Obala : Tata Mbarga, gants et tablier, remue une cuvette de solution de soude ; bidon d’huile de palme, sac de soude, pains de savon qui sèchent ; Junior approche la main", lin("phC", ["#CFE3F2", "#F4F1EA"], true),
+    "<rect width='640' height='220' fill='url(#phC)'/><rect y='150' width='640' height='70' fill='#B88A5A'/><path d='M430 40L520 10L610 40V150H430Z' fill='#C9A06E' stroke='#8B5A2B' stroke-width='2'/><path d='M420 44L520 6L620 44' stroke='#8B4513' stroke-width='8' fill='none'/><rect x='500' y='96' width='34' height='54' fill='#5D3A1E'/>" +
+    "<ellipse cx='210' cy='160' rx='62' ry='14' fill='#2F6DB5'/><path d='M148 160q4 34 62 34q58 0 62 -34' fill='#2F6DB5'/><ellipse cx='210' cy='160' rx='56' ry='10' fill='#E6EEF4'/><path d='M240 120L210 158' stroke='#8B5A2B' stroke-width='5'/>" +
+    "<rect x='300' y='150' width='34' height='44' rx='4' fill='#F4F1EA' stroke='#9AA3AF'/><rect x='300' y='160' width='34' height='14' fill='#C62828'/>" + txt(317, 171, "SOUDE", { s: 7, c: "#fff" }) + "<rect x='345' y='140' width='30' height='54' rx='6' fill='#D2691E'/><rect x='352' y='132' width='16' height='10' fill='#B5532A'/>" + txt(360, 172, "huile", { s: 8, c: "#fff" }) +
+    "<rect x='390' y='182' width='150' height='8' fill='#8B5A2B'/>" + [0, 1, 2, 3, 4].map(function (k) { return "<rect x='" + (396 + k * 28) + "' y='166' width='22' height='16' rx='3' fill='#E8D27A' stroke='#C9B26A'/>"; }).join("") +
+    perso(110, 82, "#5A3A1E", "#2E7D32", "#2E7D32") + "<rect x='97' y='108' width='26' height='34' fill='#F4F1EA' opacity='.85'/><circle cx='90' cy='124' r='5' fill='#F7C948'/><circle cx='130' cy='124' r='5' fill='#F7C948'/>" + "<g transform='translate(280 112) scale(.62)'>" + perso(0, 0, "#6B4423", "#1E499B", "#2E3445") + "</g>" +
+    bulle(170, 14, 240, "« Ne touche pas, ça brûle même froid ! »", "#F7C948") + txt(110, 212, "Tata Mbarga (gants)", { s: 10, c: "#fff" }) + txt(280, 212, "Junior", { s: 10, c: "#fff" }) + txt(465, 212, "pains de savon", { s: 10, c: "#fff" })));
+  var VERRE = "<linearGradient id='vrG' x1='0' x2='1'><stop offset='0' stop-color='#DDEFF8'/><stop offset='.3' stop-color='#F8FCFF'/><stop offset='1' stop-color='#C9E1EE'/></linearGradient>";
+  dessinPlanche("3e-pct-ph", "Préparer 500 mL de solution, en quatre gestes", svg(640, 250, "Quatre gestes : peser 40 g de soude sur une balance, dissoudre dans un bécher, verser dans une fiole jaugée et compléter au trait avec la pissette, boucher et retourner", VERRE + fleche("phF", BLEU),
+    "<rect width='640' height='250' fill='#F7F5F2'/><rect y='196' width='640' height='54' fill='#DCD3C4'/>" +
+    "<g transform='translate(80 0)'><rect x='-52' y='150' width='104' height='46' rx='6' fill='#3A3F47'/><rect x='-34' y='160' width='68' height='20' rx='3' fill='#B8D8A8'/>" + txt(0, 175, "40,00 g", { s: 13, c: "#1F2328" }) + "<rect x='-36' y='140' width='72' height='8' rx='2' fill='#C9CED6'/><ellipse cx='0' cy='138' rx='26' ry='5' fill='#E9E2D2'/>" + [[-8, 134], [0, 132], [8, 134], [-3, 130], [5, 130]].map(function (p) { return "<ellipse cx='" + p[0] + "' cy='" + p[1] + "' rx='3.5' ry='2' fill='#fff' stroke='#C9CED6'/>"; }).join("") + "</g>" + txt(80, 222, "1. Peser 40 g de NaOH", { s: 11 }) +
+    "<g transform='translate(240 0)'><path d='M-34 90V188q0 8 8 8H26q8 0 8 -8V90' fill='url(#vrG)' stroke='#8AA6B8' stroke-width='2'/><path d='M-33 130V188q0 7 7 7H26q7 0 7 -7V130Z' fill='#D6ECF8' opacity='.9'/><path d='M-38 90H-30M30 90H38' stroke='#8AA6B8' stroke-width='2'/><path d='M8 70L-6 186' stroke='#9AA3AF' stroke-width='4' stroke-linecap='round'/>" + [130, 150, 170].map(function (y) { return "<path d='M-34 " + y + "h8' stroke='#8AA6B8'/>"; }).join("") + "</g>" + txt(240, 222, "2. Dissoudre dans l'eau", { s: 11 }) +
+    "<g transform='translate(400 0)'><path d='M-6 40V120q-36 10 -36 46q0 30 42 30q42 0 42 -30q0 -36 -36 -46V40Z' fill='url(#vrG)' stroke='#8AA6B8' stroke-width='2'/><path d='M-40 160q0 36 40 36q40 0 40 -36q-2 -16 -14 -26H-26q-12 10 -14 26Z' fill='#D6ECF8'/><path d='M-6 70h12' stroke='" + ROUGE + "' stroke-width='2.5'/><path d='M-6 76V118' stroke='#D6ECF8' stroke-width='10'/><path d='M-20 28h40l-14 14h-12Z' fill='url(#vrG)' stroke='#8AA6B8'/><path d='M40 30q20 -14 26 6v40h-12v-40q-4 -10 -14 -6Z' fill='#F4F1EA' stroke='#9AA3AF'/></g>" + txt(400, 222, "3. Compléter au trait (pissette)", { s: 11 }) +
+    "<g transform='translate(560 120) rotate(150)'><path d='M-6 -80V0q-36 10 -36 46q0 30 42 30q42 0 42 -30q0 -36 -36 -46V-80Z' fill='url(#vrG)' stroke='#8AA6B8' stroke-width='2'/><path d='M-40 40q0 36 40 36q40 0 40 -36q-2 -16 -14 -26H-26q-12 10 -14 26Z' fill='#D6ECF8'/><rect x='-8' y='-92' width='16' height='14' rx='3' fill='#1F2328'/></g><path d='M520 70q40 -30 80 0' stroke='" + BLEU + "' stroke-width='2.5' fill='none' marker-end='url(#phF)'/>" + txt(560, 222, "4. Boucher, retourner", { s: 11 })));
+  dessinPlanche("3e-pct-ph", "Diluer dix fois la solution de Tata", svg(640, 250, "Dilution : on prélève 50 mL de solution à 2 mol par litre avec une pipette jaugée munie d’une poire, puis on complète à 500 mL d’eau dans une fiole jaugée : 0,2 mol par litre", VERRE + fleche("dlF", NUIT),
+    "<rect width='640' height='250' fill='#F7F5F2'/><rect y='204' width='640' height='46' fill='#DCD3C4'/>" +
+    "<g transform='translate(110 0)'><path d='M-50 90V196q0 8 8 8H42q8 0 8 -8V90' fill='url(#vrG)' stroke='#8AA6B8' stroke-width='2'/><path d='M-49 110V196q0 7 7 7H42q7 0 7 -7V110Z' fill='#9EC2DE'/>" + (function () { var R = alea(5), s = "", k; for (k = 0; k < 26; k++) s += "<circle cx='" + (-40 + R() * 80).toFixed(1) + "' cy='" + (118 + R() * 80).toFixed(1) + "' r='2.6' fill='#2F3E73'/>"; return s; })() + "</g>" + txt(110, 226, "2 mol/L (pH > 13)", { s: 12 }) +
+    "<g transform='translate(250 0)'><path d='M-3 40V100h-8v30h8v60l3 6l3 -6v-60h8v-30h-8V40Z' fill='url(#vrG)' stroke='#8AA6B8' stroke-width='1.5'/><path d='M-3 70h6' stroke='" + ROUGE + "' stroke-width='2'/><ellipse cx='0' cy='30' rx='12' ry='16' fill='#C62828'/><path d='M-2 104h4v84h-4z' fill='#9EC2DE'/></g>" + txt(250, 226, "pipette : 50 mL", { s: 12 }) + txt(250, 240, "= 0,1 mol de soude", { s: 10, c: GRIS, w: 600 }) +
+    "<path d='M300 140H380' stroke='" + NUIT + "' stroke-width='3' marker-end='url(#dlF)'/>" + txt(340, 130, "+ eau jusqu'au trait", { s: 11 }) +
+    "<g transform='translate(480 0)'><path d='M-8 40V112q-48 12 -48 52q0 40 56 40q56 0 56 -40q0 -40 -48 -52V40Z' fill='url(#vrG)' stroke='#8AA6B8' stroke-width='2'/><path d='M-54 160q0 44 54 44q54 0 54 -44q-2 -20 -18 -32H-36q-16 12 -18 32Z' fill='#D6ECF8'/><path d='M-8 70h16' stroke='" + ROUGE + "' stroke-width='2.5'/><path d='M-8 76V110' stroke='#D6ECF8' stroke-width='14'/>" + (function () { var R = alea(9), s = "", k; for (k = 0; k < 6; k++) s += "<circle cx='" + (-36 + R() * 72).toFixed(1) + "' cy='" + (140 + R() * 50).toFixed(1) + "' r='2.6' fill='#2F3E73'/>"; return s; })() + "</g>" + txt(480, 226, "500 mL : 0,2 mol/L", { s: 12 }) + txt(480, 240, "10 fois moins concentrée", { s: 10, c: GRIS, w: 600 })));
+  /* ═══════════ Tle ORIENTATION — LA SEMAINE ET L'ANNÉE, EN CLAIR ═══════════ */
+  function remplacerPlanche(id, titre, nouvelle) { var L = ancien(id); if (!L) return; L.parties.forEach(function (p) { (p.planches || []).forEach(function (x, i) { if (String(x.titre).replace(/[\u00a0\u202f]/g, " ") === titre.replace(/[\u00a0\u202f]/g, " ")) p.planches[i] = nouvelle; }); }); }
+  function liege(w, h) { var s = "<rect width='" + w + "' height='" + h + "' fill='#8B5A2B'/><rect x='8' y='8' width='" + (w - 16) + "' height='" + (h - 16) + "' fill='#C89B63'/>", R = alea(3), k; for (k = 0; k < 160; k++) s += "<circle cx='" + (10 + R() * (w - 20)).toFixed(0) + "' cy='" + (10 + R() * (h - 20)).toFixed(0) + "' r='" + (0.8 + R() * 1.4).toFixed(1) + "' fill='#A97B45' opacity='.6'/>"; return s; }
+  function punaise(x, y, c) { return "<circle cx='" + x + "' cy='" + y + "' r='6' fill='" + c + "'/><circle cx='" + (x - 2) + "' cy='" + (y - 2) + "' r='2' fill='#fff' opacity='.6'/>"; }
+  var ACT = { som: ["sommeil", "#3A4E8C"], cours: ["cours", "#1E88E5"], rev: ["révisions", "#2E7D32"], sport: ["sport", "#F2994A"], repas: ["repas, toilette", "#D9B77A"], repos: ["détente, famille", "#E0E3E8"], ecran: ["téléphone", "#C62828"] };
+  var JOURS = ["Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi", "Dimanche"];
+  var SEMAINE = [
+    [["som", 6], ["repas", 1], ["cours", 7], ["repas", 1], ["repos", 1], ["rev", 2], ["repos", 1], ["repas", 1], ["ecran", 1], ["repos", 1], ["som", 2]],
+    [["som", 6], ["repas", 1], ["cours", 7], ["repas", 1], ["repos", 1], ["rev", 2], ["sport", 1], ["repas", 1], ["ecran", 1], ["repos", 1], ["som", 2]],
+    [["som", 6], ["repas", 1], ["cours", 5], ["repas", 1], ["repos", 3], ["rev", 2], ["repas", 1], ["ecran", 1], ["repos", 2], ["som", 2]],
+    [["som", 6], ["repas", 1], ["cours", 7], ["repas", 1], ["repos", 1], ["rev", 2], ["sport", 1], ["repas", 1], ["ecran", 1], ["repos", 1], ["som", 2]],
+    [["som", 6], ["repas", 1], ["cours", 7], ["repas", 1], ["repos", 1.5], ["rev", 1.5], ["repos", 1], ["repas", 1], ["ecran", 1.5], ["repos", 0.5], ["som", 2.5]],
+    [["som", 7.5], ["repas", 1.5], ["rev", 4], ["repas", 1], ["repos", 2], ["sport", 2], ["repos", 1], ["repas", 1], ["ecran", 1.5], ["repos", 1], ["som", 1.5]],
+    [["som", 8], ["repas", 1.5], ["repos", 4], ["repas", 1.5], ["repos", 1], ["rev", 2], ["repos", 2], ["repas", 1], ["ecran", 1], ["repos", 0.5], ["som", 1.5]]];
+  remplacerPlanche("tle-orient-temps", "La semaine type d'Aïcha", { type: "2D", titre: "La semaine type d'Aïcha", legende: "Le planning qu'Aïcha a punaisé au-dessus de son bureau : une colonne par jour, de minuit (en haut) à minuit (en bas). Sommeil en bleu nuit (8 h chaque nuit), cours en bleu, révisions en vert (2 h chaque soir de semaine, 4 h le samedi, 2 h le dimanche : 15 h 30), téléphone limité à 1 h à 1 h 30 (rouge).", svg: (function () {
+    var W = 640, H = 486, x0 = 74, cw = 76, y0 = 86, ph = 13, s = liege(W, H) + "<rect x='28' y='22' width='" + (W - 56) + "' height='" + (H - 44) + "' fill='#FBF8F2' stroke='#D9C49C'/>" + punaise(40, 34, "#C62828") + punaise(W - 40, 34, "#1E499B") + punaise(40, H - 34, "#2E7D32") + punaise(W - 40, H - 34, "#F7C948");
+    s += txt(W / 2, 46, "Ma semaine de révisions — Aïcha, Tle A", { s: 13, c: BLEU, i: true });
+    [0, 6, 12, 18, 24].forEach(function (hh) { var y = y0 + hh * ph; s += "<path d='M" + x0 + " " + y + "H" + (x0 + 7 * cw) + "' stroke='#C9D2E3' stroke-dasharray='3 3'/>" + txt(x0 - 6, y + 4, hh + " h", { s: 9, a: "end", c: GRIS, w: 600 }); });
+    SEMAINE.forEach(function (j, i) {
+      var x = x0 + i * cw, y = y0, rv = 0;
+      s += "<rect x='" + (x + 3) + "' y='" + (y0 - 18) + "' width='" + (cw - 6) + "' height='16' rx='4' fill='" + (i > 4 ? "#7B3F99" : NUIT) + "'/>" + txt(x + cw / 2, y0 - 6, JOURS[i], { s: 10, c: "#fff" });
+      j.forEach(function (b) { var h = b[1] * ph; s += "<rect x='" + (x + 3) + "' y='" + y.toFixed(1) + "' width='" + (cw - 6) + "' height='" + (h - 1).toFixed(1) + "' rx='3' fill='" + ACT[b[0]][1] + "'/>"; if (b[0] === "rev") { rv += b[1]; s += txt(x + cw / 2, y + h / 2 + 4, String(b[1]).replace(".", ",") + " h", { s: 10, c: "#fff" }); } y += h; });
+    });
+    var lx = 30; Object.keys(ACT).forEach(function (k, i) { var xx = 36 + i * 82; s += "<rect x='" + xx + "' y='" + (H - 58) + "' width='12' height='12' rx='3' fill='" + ACT[k][1] + "' stroke='#9AA3AF'/>" + txt(xx + 16, H - 48, ACT[k][0], { s: 9.5, a: "start", w: 600 }); });
+    return svg(W, H, "Planning d’une semaine punaisé sur un tableau en liège : sept colonnes Lundi à Dimanche, heures de 0 à 24 h, blocs de couleur pour sommeil, cours, révisions, sport, repas, détente et téléphone", "", s);
+  })() });
+  var MOISK = [["Septembre", ["cours"]], ["Octobre", ["cours", "sujet"]], ["Novembre", ["cours", "sujet"]], ["Décembre", ["cours", "sujet", "conge"]], ["Janvier", ["cours", "sujet"]], ["Février", ["cours", "sujet"]], ["Mars", ["cours", "sujet", "conge"]], ["Avril", ["cours", "blanc"]], ["Mai", ["blanc", "revision"]], ["Juin", ["bac"]]];
+  var ETQ = { cours: ["cours + fiches", "#1E88E5"], sujet: ["1 sujet / matière", "#C62828"], conge: ["congés : révisions", "#F2C94C"], blanc: ["examen blanc", "#7B3F99"], revision: ["sujets chronométrés", "#2F6DB5"], bac: ["LE BAC", "#2E7D32"] };
+  remplacerPlanche("tle-orient-bac", "L'année de Kevin, mois par mois", { type: "2D", titre: "L'année de Kevin, mois par mois", legende: "Le calendrier mural de Kevin, de septembre à juin : une case par mois. Bleu : cours et fiches ; rouge : un sujet d'examen par matière ; jaune : congés de Noël et de Pâques consacrés aux révisions ; violet : examens blancs en conditions réelles ; puis le bac, en juin.", svg: (function () {
+    var W = 640, H = 330, s = liege(W, H) + "<rect x='26' y='20' width='" + (W - 52) + "' height='" + (H - 40) + "' fill='#FBF8F2' stroke='#D9C49C'/>" + punaise(40, 32, "#1E499B") + punaise(W - 40, 32, "#C62828");
+    s += txt(W / 2, 44, "Objectif BAC — Kevin, Tle A, Bertoua", { s: 13, c: BLEU, i: true });
+    MOISK.forEach(function (m, i) {
+      var c = i % 5, r = Math.floor(i / 5), x = 40 + c * 114, y = 58 + r * 120, w = 106, h = 110;
+      s += "<rect x='" + x + "' y='" + y + "' width='" + w + "' height='" + h + "' rx='6' fill='#fff' stroke='#C9D2E3'/><rect x='" + x + "' y='" + y + "' width='" + w + "' height='22' rx='6' fill='" + (m[0] === "Juin" ? VERT : NUIT) + "'/>" + txt(x + w / 2, y + 15, m[0], { s: 11, c: "#fff" });
+      m[1].forEach(function (b, k) { s += "<rect x='" + (x + 6) + "' y='" + (y + 28 + k * 26) + "' width='" + (w - 12) + "' height='22' rx='5' fill='" + ETQ[b][1] + "'/>" + txt(x + w / 2, y + 43 + k * 26, ETQ[b][0], { s: 9.5, c: b === "conge" ? NUIT : "#fff" }); });
+      if (m[0] === "Juin") s += "<path d='M" + (x + 30) + " " + (y + 80) + "l10 12l26 -26' stroke='" + VERT + "' stroke-width='5' fill='none'/>";
+    });
+    return svg(W, H, "Calendrier mural de septembre à juin sur un tableau en liège : chaque mois porte ses étiquettes de couleur, cours, sujets d’examen, congés de révision, examens blancs, et le bac en juin", "", s);
+  })() });
+
+  /* ═══════════ CELLULE ANIMALE ET CELLULE VÉGÉTALE EN HAUTE DÉFINITION (ultrastructure) ═══════════ */
+  var DEFC = "<radialGradient id='cyA' cx='45%' cy='40%' r='65%'><stop offset='0' stop-color='#FFF4F2'/><stop offset='.7' stop-color='#FBE1E4'/><stop offset='1' stop-color='#F2C6CF'/></radialGradient>" +
+    "<radialGradient id='cyV' cx='50%' cy='45%' r='70%'><stop offset='0' stop-color='#F8FBEA'/><stop offset='1' stop-color='#E6F0C8'/></radialGradient>" +
+    "<radialGradient id='noy' cx='40%' cy='35%' r='70%'><stop offset='0' stop-color='#E6DAF4'/><stop offset='.75' stop-color='#C3ABE2'/><stop offset='1' stop-color='#9C7BC9'/></radialGradient>" +
+    "<radialGradient id='nuc' cx='35%' cy='35%' r='70%'><stop offset='0' stop-color='#7E5BB0'/><stop offset='1' stop-color='#3F2669'/></radialGradient>" +
+    "<radialGradient id='mit' cx='40%' cy='35%' r='75%'><stop offset='0' stop-color='#FBC98E'/><stop offset='1' stop-color='#D9773A'/></radialGradient>" +
+    "<radialGradient id='chl' cx='40%' cy='35%' r='75%'><stop offset='0' stop-color='#9CD27A'/><stop offset='1' stop-color='#3C8A2E'/></radialGradient>" +
+    "<radialGradient id='vac' cx='45%' cy='40%' r='70%'><stop offset='0' stop-color='#F4FAFE'/><stop offset='1' stop-color='#CFE6F4'/></radialGradient>" +
+    "<radialGradient id='lys' cx='35%' cy='35%' r='70%'><stop offset='0' stop-color='#D7F0C8'/><stop offset='1' stop-color='#7DB86A'/></radialGradient>";
+  function mito(x, y, r, s) {
+    var g = "<g transform='translate(" + x + " " + y + ") rotate(" + r + ") scale(" + (s || 1) + ")'><ellipse rx='26' ry='12' fill='url(#mit)' stroke='#A2511F' stroke-width='1.6'/><ellipse rx='22.5' ry='8.8' fill='none' stroke='#B5602A' stroke-width='1'/>", k;
+    for (k = -3; k <= 3; k++) g += "<path d='M" + (k * 6.4) + " " + (k % 2 ? -8.6 : 8.6) + "q" + (k % 2 ? 2 : -2) + " " + (k % 2 ? 9 : -9) + " 0 " + (k % 2 ? 12 : -12) + "' stroke='#A2511F' stroke-width='1.3' fill='none'/>";
+    return g + "</g>";
+  }
+  function chloro(x, y, r, s) {
+    var g = "<g transform='translate(" + x + " " + y + ") rotate(" + r + ") scale(" + (s || 1) + ")'><ellipse rx='30' ry='14' fill='url(#chl)' stroke='#2B6420' stroke-width='1.6'/><ellipse rx='26.5' ry='10.8' fill='none' stroke='#3C7A2C' stroke-width='.8'/>", k, j;
+    for (k = -2; k <= 2; k++) { for (j = 0; j < 4; j++) g += "<rect x='" + (k * 10 - 3.5) + "' y='" + (-6 + j * 3.2) + "' width='7' height='2.4' rx='1' fill='#1F5A1A'/>"; if (k < 2) g += "<path d='M" + (k * 10 + 3.5) + " " + (k % 2 ? -1 : 2) + "h3' stroke='#1F5A1A' stroke-width='.9'/>"; }
+    return g + "<ellipse cx='14' cy='-6' rx='4' ry='2.6' fill='#F4F1EA' stroke='#C9C0AE' stroke-width='.6'/></g>";
+  }
+  function golgi(x, y, r, s, coul) {
+    var g = "<g transform='translate(" + x + " " + y + ") rotate(" + r + ") scale(" + (s || 1) + ")'>", k;
+    for (k = 0; k < 5; k++) { var L = 34 - Math.abs(k - 2) * 4; g += "<path d='M" + (-L) + " " + (k * 6) + "q" + L + " -12 " + (2 * L) + " 0' stroke='" + (coul || "#E0A52A") + "' stroke-width='4.2' fill='none' stroke-linecap='round'/>"; }
+    [[-36, 8], [38, 14], [-32, 26], [34, 30], [42, -2]].forEach(function (v) { g += "<circle cx='" + v[0] + "' cy='" + v[1] + "' r='3.2' fill='#F7D774' stroke='#C9902A' stroke-width='.8'/>"; });
+    return g + "</g>";
+  }
+  function rer(x, y, r, s) {
+    var g = "<g transform='translate(" + x + " " + y + ") rotate(" + r + ") scale(" + (s || 1) + ")'>", k, R = alea(61);
+    for (k = 0; k < 4; k++) { var d = "M-40 " + (k * 9) + "q10 -8 20 0t20 0t20 0t20 0"; g += "<path d='" + d + "' stroke='#5E9CC8' stroke-width='4.5' fill='none' stroke-linecap='round'/><path d='" + d + "' stroke='#CFE6F4' stroke-width='1.6' fill='none'/>"; var j; for (j = 0; j < 12; j++) g += "<circle cx='" + (-40 + j * 7 + R() * 2).toFixed(1) + "' cy='" + (k * 9 - 3.2 + (j % 2) * 6.4 + Math.sin(j) * 1.5).toFixed(1) + "' r='1.25' fill='#1F3F6B'/>"; }
+    return g + "</g>";
+  }
+  function rel(x, y, r) { return "<g transform='translate(" + x + " " + y + ") rotate(" + r + ")'><path d='M-30 0q8 -12 18 -2t18 2t20 -6M-24 10q10 6 20 -2t22 4' stroke='#8CC6DE' stroke-width='4' fill='none' stroke-linecap='round'/></g>"; }
+  function etiq(x1, y1, x2, y2, t, cote) { return "<path d='M" + x1 + " " + y1 + "L" + x2 + " " + y2 + "' stroke='#3D4A5C' stroke-width='1'/><circle cx='" + x1 + "' cy='" + y1 + "' r='2.2' fill='#3D4A5C'/>" + txt(x2 + (cote === "g" ? -4 : 4), y2 + 4, t, { s: 11, a: cote === "g" ? "end" : "start", w: 650, c: "#1F2A3D" }); }
+  function noyauHD(x, y, rx, ry) {
+    var g = "<g data-o='noyau'><ellipse cx='" + x + "' cy='" + y + "' rx='" + (rx + 4) + "' ry='" + (ry + 4) + "' fill='#B49ADB' stroke='#6D4FA0' stroke-width='1.6'/><ellipse cx='" + x + "' cy='" + y + "' rx='" + rx + "' ry='" + ry + "' fill='url(#noy)' stroke='#6D4FA0' stroke-width='1'/>", k, R = alea(17);
+    for (k = 0; k < 12; k++) { var a = k / 12 * 6.283; g += "<circle cx='" + (x + (rx + 2) * Math.cos(a)).toFixed(1) + "' cy='" + (y + (ry + 2) * Math.sin(a)).toFixed(1) + "' r='1.8' fill='#F8F4FC'/>"; }
+    for (k = 0; k < 18; k++) g += "<path d='M" + (x - rx * 0.7 + R() * rx * 1.4).toFixed(1) + " " + (y - ry * 0.6 + R() * ry * 1.2).toFixed(1) + "q" + (R() * 8 - 4).toFixed(1) + " " + (R() * 8 - 4).toFixed(1) + " " + (R() * 10 - 5).toFixed(1) + " " + (R() * 6 - 3).toFixed(1) + "' stroke='#7A5BA8' stroke-width='1.4' fill='none' opacity='.75'/>";
+    return g + "</g><g data-o='nucleole'><circle cx='" + (x + rx * 0.2) + "' cy='" + (y - ry * 0.1) + "' r='" + (rx * 0.3) + "' fill='url(#nuc)'/></g>";
+  }
+  function celluleAnimale(interactif) {
+    var s = "<rect width='640' height='440' fill='#FBFAF8'/>", R = alea(29), k;
+    var forme = "M322 52C410 50 486 92 500 168C514 244 486 330 410 370C334 410 236 402 182 352C128 302 118 214 150 148C182 82 246 54 322 52Z";
+    s += "<g data-o='membrane'><path d='" + forme + "' fill='#E9A7B6' transform='translate(0 0)'/><path d='" + forme + "' fill='url(#cyA)' stroke='#B03A5B' stroke-width='3.2'/><path d='" + forme + "' fill='none' stroke='#F6D3DB' stroke-width='1' transform='translate(1.5 1.5) scale(.995)'/></g>";
+    for (k = 0; k < 26; k++) s += "<path d='M" + (180 + R() * 300).toFixed(0) + " " + (90 + R() * 260).toFixed(0) + "l" + (R() * 50 - 25).toFixed(0) + " " + (R() * 50 - 25).toFixed(0) + "' stroke='#E7B9C4' stroke-width='.8' opacity='.7'/>";
+    s += "<g data-o='rer'>" + rer(250, 140, -20, 1) + rer(388, 268, 30, 0.9) + "</g>";
+    s += noyauHD(310, 214, 62, 52);
+    s += "<g data-o='rel'>" + rel(224, 300, 10) + rel(420, 140, -30) + "</g>";
+    s += "<g data-o='mito'>" + mito(206, 210, 70, 1) + mito(430, 210, -20, 1) + mito(300, 330, 10, 0.95) + mito(372, 96, 15, 0.85) + "</g>";
+    s += "<g data-o='golgi'>" + golgi(402, 330, -20, 0.9) + "</g>";
+    s += "<g data-o='lysosome'><circle cx='238' cy='96' r='11' fill='url(#lys)' stroke='#4E8A3E'/><circle cx='466' cy='272' r='9' fill='url(#lys)' stroke='#4E8A3E'/>" + [[234, 93], [241, 99], [237, 101], [464, 270], [469, 275]].map(function (p) { return "<circle cx='" + p[0] + "' cy='" + p[1] + "' r='1.4' fill='#2F5A26'/>"; }).join("") + "</g>";
+    s += "<g data-o='centrosome'><g transform='translate(262 362) rotate(-10)'><rect x='-10' y='-4' width='20' height='8' rx='2' fill='#9A8FC0' stroke='#5E5390'/><path d='M-6 -4v8M-2 -4v8M2 -4v8M6 -4v8' stroke='#5E5390' stroke-width='.8'/></g><g transform='translate(276 350) rotate(80)'><rect x='-10' y='-4' width='20' height='8' rx='2' fill='#9A8FC0' stroke='#5E5390'/><path d='M-6 -4v8M-2 -4v8M2 -4v8M6 -4v8' stroke='#5E5390' stroke-width='.8'/></g></g>";
+    s += "<g data-o='vesicule'>" + [[452, 312], [462, 330], [440, 352], [178, 260]].map(function (p) { return "<circle cx='" + p[0] + "' cy='" + p[1] + "' r='5' fill='#FFF7D6' stroke='#C9A04A'/>"; }).join("") + "</g>";
+    s += "<g data-o='ribosomes'>"; for (k = 0; k < 40; k++) { var px = 175 + R() * 310, py = 80 + R() * 280; if (Math.hypot((px - 310) / 70, (py - 214) / 60) > 1) s += "<circle cx='" + px.toFixed(1) + "' cy='" + py.toFixed(1) + "' r='1.3' fill='#1F3F6B'/>"; } s += "</g>";
+    if (!interactif) {
+      s += etiq(322, 53, 120, 40, "membrane plasmique", "g") + etiq(200, 168, 120, 92, "cytoplasme", "g") + etiq(206, 210, 120, 150, "mitochondrie", "g") + etiq(232, 128, 120, 120, "réticulum rugueux", "g") + etiq(238, 96, 120, 64, "lysosome", "g") + etiq(214, 300, 120, 300, "réticulum lisse", "g") + etiq(266, 360, 120, 360, "centrosome", "g");
+      s += etiq(310, 214, 540, 214, "noyau (ADN)", "d") + etiq(322, 209, 540, 186, "nucléole", "d") + etiq(372, 170, 540, 150, "enveloppe à pores", "d") + etiq(402, 330, 540, 330, "appareil de Golgi", "d") + etiq(462, 330, 540, 360, "vésicules", "d") + etiq(430, 120, 540, 110, "ribosomes libres", "d");
+      s += "<path d='M520 394h60' stroke='#1F2A3D' stroke-width='3'/>" + txt(550, 410, "≈ 5 µm", { s: 11 }) + txt(130, 432, "Cellule animale vue au microscope électronique (schéma d'ultrastructure)", { s: 11, a: "start", c: GRIS, w: 600 });
+    }
+    return s;
+  }
+  function celluleVegetale(interactif) {
+    var s = "<rect width='640' height='440' fill='#FBFAF8'/>", R = alea(43), k;
+    s += "<g data-o='paroi'><rect x='150' y='40' width='340' height='350' rx='18' fill='#A9C978' stroke='#5F8A33' stroke-width='2'/><rect x='136' y='26' width='368' height='378' rx='24' fill='none' stroke='#C7DCA0' stroke-width='10' opacity='.6'/>";
+    [[150, 140], [150, 290], [490, 110], [490, 260], [260, 40], [380, 390]].forEach(function (p) { var v = p[0] === 150 || p[0] === 490; s += "<rect x='" + (v ? p[0] - 6 : p[0] - 3) + "' y='" + (v ? p[1] - 3 : p[1] - 6) + "' width='" + (v ? 12 : 6) + "' height='" + (v ? 6 : 12) + "' fill='#F1F7DA'/><path d='" + (v ? "M" + (p[0] - 8) + " " + p[1] + "h16" : "M" + p[0] + " " + (p[1] - 8) + "v16") + "' stroke='#5F8A33' stroke-width='1.2' data-o='plasmodesme'/>"; });
+    s += "</g><g data-o='membrane'><rect x='162' y='52' width='316' height='326' rx='12' fill='url(#cyV)' stroke='#3C6E2E' stroke-width='1.6'/></g>";
+    s += "<g data-o='vacuole'><path d='M232 108C300 92 400 96 432 132C462 168 458 260 430 300C402 340 300 346 252 320C206 294 196 220 204 170C210 134 214 112 232 108Z' fill='url(#vac)' stroke='#4F8FB8' stroke-width='2'/>";
+    for (k = 0; k < 10; k++) s += "<circle cx='" + (240 + R() * 180).toFixed(0) + "' cy='" + (130 + R() * 170).toFixed(0) + "' r='" + (1 + R() * 2).toFixed(1) + "' fill='#9EC5DE' opacity='.7'/>";
+    s += "</g>";
+    s += "<g data-o='chloroplaste'>" + chloro(196, 86, 20, 0.95) + chloro(456, 92, -30, 0.9) + chloro(186, 250, 80, 0.95) + chloro(462, 214, 95, 0.95) + chloro(300, 360, 5, 0.95) + chloro(410, 356, -10, 0.85) + "</g>";
+    s += noyauHD(220, 336, 30, 24).replace(/data-o='noyau'/, "data-o='noyau'");
+    s += "<g data-o='mito'>" + mito(452, 300, 70, 0.7) + mito(186, 176, 90, 0.7) + mito(338, 72, 0, 0.7) + "</g>";
+    s += "<g data-o='golgi'>" + golgi(458, 150, 80, 0.55, "#E0A52A") + "</g><g data-o='rer'>" + rer(270, 70, 0, 0.6) + "</g>";
+    s += "<g data-o='ribosomes'>"; for (k = 0; k < 30; k++) { var px = 168 + R() * 300, py = 58 + R() * 314; var inV = px > 210 && px < 450 && py > 100 && py < 330; if (!inV) s += "<circle cx='" + px.toFixed(1) + "' cy='" + py.toFixed(1) + "' r='1.2' fill='#1F3F6B'/>"; } s += "</g>";
+    if (!interactif) {
+      s += etiq(150, 200, 110, 200, "paroi (cellulose)", "g") + etiq(163, 120, 110, 120, "membrane plasmique", "g") + etiq(196, 86, 110, 70, "chloroplaste", "g") + etiq(204, 82, 110, 44, "grana (thylakoïdes)", "g") + etiq(186, 176, 110, 160, "mitochondrie", "g") + etiq(150, 290, 110, 290, "plasmodesme", "g") + etiq(220, 336, 110, 340, "noyau", "g") + etiq(226, 334, 110, 372, "nucléole", "g");
+      s += etiq(330, 210, 530, 210, "vacuole", "d") + etiq(432, 132, 530, 128, "tonoplaste", "d") + etiq(458, 150, 530, 160, "appareil de Golgi", "d") + etiq(270, 70, 530, 60, "réticulum", "d") + etiq(470, 360, 530, 330, "cytoplasme", "d") + etiq(314, 354, 530, 380, "grain d'amidon", "d");
+      s += "<path d='M520 400h60' stroke='#1F2A3D' stroke-width='3'/>" + txt(550, 416, "≈ 10 µm", { s: 11 }) + txt(130, 434, "Cellule végétale (feuille) au microscope électronique (schéma d'ultrastructure)", { s: 11, a: "start", c: GRIS, w: 600 });
+    }
+    return s;
+  }
+  var PL_ANI = { type: "2D", titre: "La cellule animale en haute définition", legende: "Une cellule animale telle que la révèle le microscope électronique : membrane plasmique, cytoplasme, noyau à double enveloppe percée de pores, nucléole, mitochondries à crêtes, réticulum rugueux couvert de ribosomes, réticulum lisse, appareil de Golgi et ses vésicules, lysosomes, centrosome. Couleurs conventionnelles : en réalité, les organites sont incolores.", svg: svg(760, 444, "Schéma détaillé d’une cellule animale avec ses organites légendés : membrane, noyau, nucléole, mitochondries, réticulum, Golgi, lysosomes, centrosome, ribosomes", DEFC, "<g transform='translate(60 0)'>" + celluleAnimale(false) + "</g>") };
+  var PL_VEG = { type: "2D", titre: "La cellule végétale en haute définition", legende: "Une cellule de feuille au microscope électronique : la paroi de cellulose, percée de plasmodesmes, entoure la membrane plasmique ; une grande vacuole occupe le centre et repousse le noyau et les chloroplastes (avec leurs grana et leurs grains d'amidon) contre la paroi ; mitochondries, réticulum et appareil de Golgi sont aussi présents. Couleurs conventionnelles.", svg: svg(760, 444, "Schéma détaillé d’une cellule végétale : paroi, plasmodesmes, membrane, grande vacuole, chloroplastes à grana, noyau, mitochondries, Golgi", DEFC, "<g transform='translate(60 0)'>" + celluleVegetale(false) + "</g>") };
+  (function () { var L = ancien("tle-sc-microscopie"); if (L && L.parties[3]) L.parties[3].planches = [PL_ANI, PL_VEG].concat(L.parties[3].planches || []); })();
+  (function () { var L = ancien("tle-sc-organites"); if (L && L.parties[1]) L.parties[1].planches = (L.parties[1].planches || []).concat([PL_ANI, PL_VEG]); })();
+  var ORG = {
+    membrane: ["Membrane plasmique", "Fine enveloppe qui limite la cellule et contrôle les échanges avec le milieu (eau, ions, nutriments)."],
+    noyau: ["Noyau", "Contient l'ADN (la chromatine) : il commande la cellule. Son enveloppe double est percée de pores."],
+    nucleole: ["Nucléole", "Zone dense du noyau où sont fabriqués les ribosomes."],
+    mito: ["Mitochondrie", "Centrale énergétique : la respiration cellulaire y produit l'énergie (ATP). Double membrane, la membrane interne forme des crêtes."],
+    rer: ["Réticulum endoplasmique rugueux", "Sacs aplatis couverts de ribosomes : fabrication des protéines destinées à être exportées."],
+    rel: ["Réticulum lisse", "Tubes sans ribosomes : fabrication des lipides, détoxification."],
+    golgi: ["Appareil de Golgi", "Saccules empilés qui modifient, trient et emballent les protéines dans des vésicules."],
+    lysosome: ["Lysosome (cellule animale)", "Petite vésicule pleine d'enzymes : digestion à l'intérieur de la cellule."],
+    centrosome: ["Centrosome (cellule animale)", "Deux centrioles perpendiculaires : ils organisent le fuseau lors de la division cellulaire."],
+    vesicule: ["Vésicules", "Petits sacs qui transportent des substances d'un organite à l'autre ou vers l'extérieur."],
+    ribosomes: ["Ribosomes", "Minuscules grains (libres ou fixés au réticulum) qui assemblent les protéines."],
+    paroi: ["Paroi (cellule végétale)", "Enveloppe rigide de cellulose, à l'extérieur de la membrane : elle soutient et protège la cellule."],
+    plasmodesme: ["Plasmodesmes", "Fins canaux à travers la paroi qui relient le cytoplasme des cellules voisines."],
+    vacuole: ["Vacuole (cellule végétale)", "Grande poche d'eau et de substances dissoutes : réserve, et turgescence qui maintient la plante droite."],
+    chloroplaste: ["Chloroplaste (cellule végétale)", "Siège de la photosynthèse : ses thylakoïdes, empilés en grana, captent la lumière ; il stocke l'amidon."]
+  };
+  window.VRT_CELLULES = { DEFC: DEFC, animale: celluleAnimale, vegetale: celluleVegetale, ORG: ORG, chromosome: chromosome, LONG: LONG, CENT: CENT };
+
+})();
+
+/* Leçons enrichies — lettres et langues, lot A (18/11/2026), consignes de Jacques : situation résolue avec les formules (règles,
+   structures) étape par étape, exemples, astuces, planches 2D. AJOUTS SEULEMENT (enrichir) : blocs def / formule / ex / astuce en
+   fin de partie, planches, denouement.formules. Partage avec la session des sciences : voir STATE.md. */
+(function () {
+  "use strict";
+  var NUIT = "#001136", BLEU = "#1E499B", GRIS = "#4D5163", VERT = "#17784D", ROUGE = "#C62828", TERRE = "#C46A2B";
+
+  function txt(x, y, t, o) {
+    o = o || {};
+    return "<text x='" + x + "' y='" + y + "' text-anchor='" + (o.a || "middle") + "' font-size='" + (o.s || 12) + "' font-weight='" + (o.w || 700) + "' fill='" + (o.c || NUIT) + "'" + (o.i ? " font-style='italic'" : "") + (o.halo ? " stroke='#fff' stroke-width='3' paint-order='stroke'" : "") + ">" + t + "</text>";
+  }
+  function lin(id, cs, vertical) {
+    var s = "<linearGradient id='" + id + "'" + (vertical ? " x1='0' y1='0' x2='0' y2='1'" : "") + ">";
+    cs.forEach(function (c, i) { s += "<stop offset='" + (i / (cs.length - 1)).toFixed(2) + "' stop-color='" + c + "'/>"; });
+    return s + "</linearGradient>";
+  }
+  function rad(id, cs) {
+    var s = "<radialGradient id='" + id + "' cx='35%' cy='30%' r='75%'>";
+    cs.forEach(function (c, i) { s += "<stop offset='" + (i / (cs.length - 1)).toFixed(2) + "' stop-color='" + c + "'/>"; });
+    return s + "</radialGradient>";
+  }
+  function fleche(id, c) { return "<marker id='" + id + "' markerWidth='10' markerHeight='10' refX='7' refY='5' orient='auto'><path d='M0 1L8 5L0 9Z' fill='" + c + "'/></marker>"; }
+  function svg(w, h, alt, defs, corps) {
+    return "<svg viewBox='0 0 " + w + " " + h + "' role='img' aria-label='" + alt + "' font-family='Inter,Arial,sans-serif'><rect width='" + w + "' height='" + h + "' fill='#fff'/><defs>" + defs + "</defs>" + corps +
+      "<text x='" + (w - 6) + "' y='" + (h - 5) + "' font-size='8' text-anchor='end' fill='#8A93A6'>Planche VÉRITAS</text></svg>";
+  }
+  function ancien(id) { return window.VRT_LECONS[id]; }
+  function remplacer(id, o) {
+    var a = ancien(id);
+    if (a) ["apc", "examen", "rang", "cle", "scenes"].forEach(function (k) { if (a[k] != null && o[k] == null) o[k] = a[k]; });
+    VRT_L(id, o);
+    if (a) o.ordre = a.ordre;
+  }
+  function q(qq, bonne, f1, f2, e) { return { q: qq, r: [bonne, f1, f2], b: 0, e: e }; }
+  function partie(old, i) { return old && old.parties[i] ? old.parties[i].html : ""; }
+  function bulle(x, y, w, t, c) { return "<rect x='" + x + "' y='" + y + "' width='" + w + "' height='30' rx='12' fill='#fff' stroke='" + (c || "#C9D2E3") + "'/>" + txt(x + w / 2, y + 20, t, { s: 11.5 }); }
+  function perso(x, y, peau, habit, bas) {
+    bas = bas || "#2E3445";
+    return "<g transform='translate(" + x + " " + y + ")'><ellipse cx='0' cy='84' rx='18' ry='4' fill='#001136' opacity='.18'/>" +
+      "<rect x='-9' y='44' width='8' height='36' rx='3' fill='" + bas + "'/><rect x='1' y='44' width='8' height='36' rx='3' fill='" + bas + "'/>" +
+      "<ellipse cx='-6' cy='81' rx='7' ry='3.5' fill='#1F2328'/><ellipse cx='6' cy='81' rx='7' ry='3.5' fill='#1F2328'/>" +
+      "<path d='M-13 46L-16 18C-16 13 -12 11 -6 10H6C12 11 16 13 16 18L13 46Z' fill='" + habit + "'/>" +
+      "<path d='M-15 16L-20 40' stroke='" + habit + "' stroke-width='7' stroke-linecap='round'/><path d='M15 16L20 40' stroke='" + habit + "' stroke-width='7' stroke-linecap='round'/>" +
+      "<circle cx='-20' cy='42' r='3.6' fill='" + peau + "'/><circle cx='20' cy='42' r='3.6' fill='" + peau + "'/>" +
+      "<rect x='-3.5' y='5' width='7' height='7' fill='" + peau + "'/><ellipse cx='0' cy='-2' rx='9' ry='10.5' fill='" + peau + "'/>" +
+      "<path d='M-9 -4C-10 -14 -4 -13.5 0 -13.5S10 -14 9 -4C7 -9 -7 -9 -9 -4Z' fill='#1B1410'/><ellipse cx='-9' cy='-1' rx='1.8' ry='3' fill='" + peau + "'/><ellipse cx='9' cy='-1' rx='1.8' ry='3' fill='" + peau + "'/></g>";
+  }
+  /* portrait en buste (arbre généalogique) */
+  function portrait(x, y, peau, habit, cheveux, age) {
+    var s = "<g transform='translate(" + x + " " + y + ")'><circle r='30' fill='#F4EFE4' stroke='#C9A576' stroke-width='3'/><clipPath id='pc" + x + "_" + y + "'><circle r='28'/></clipPath><g clip-path='url(#pc" + x + "_" + y + ")'>";
+    s += "<path d='M-26 32C-26 14 -14 10 0 10S26 14 26 32Z' fill='" + habit + "'/><rect x='-4' y='2' width='8' height='10' fill='" + peau + "'/><ellipse cy='-6' rx='11' ry='13' fill='" + peau + "'/>";
+    s += age === "vieux" ? "<path d='M-11 -10C-12 -20 -4 -21 0 -21S12 -20 11 -10C9 -14 -9 -14 -11 -10Z' fill='#D8D8D8'/>" : age === "femme" ? "<path d='M-13 -6C-15 -24 15 -24 13 -6C12 -14 -12 -14 -13 -6Z' fill='" + cheveux + "'/><path d='M-13 -14h26v-6c-6 -6 -20 -6 -26 0Z' fill='" + habit + "'/>" : "<path d='M-11 -10C-12 -20 -4 -21 0 -21S12 -20 11 -10C9 -14 -9 -14 -11 -10Z' fill='" + cheveux + "'/>";
+    s += "<circle cx='-4' cy='-6' r='1.4' fill='#1B1410'/><circle cx='4' cy='-6' r='1.4' fill='#1B1410'/><path d='M-3 2q3 2 6 0' stroke='#1B1410' fill='none'/></g></g>";
+    return s;
+  }
+  /* boucle d'exercice générique : [phrase avec ___, [bonne, autres…], explication] */
+  function exercice(el, C, suivant, lib) {
+    var i = 0, ok = 0;
+    el.innerHTML = "<p class='labo-r' data-q style='font-size:16px'></p><div style='display:flex;gap:8px;flex-wrap:wrap' data-c></div><p class='an-note' data-e></p><p class='labo-r' data-s></p>";
+    function $(s) { return el.querySelector(s); }
+    function poser() {
+      var c = C[i];
+      $("[data-q]").innerHTML = (i + 1) + ". " + c[0].replace("___", "<b style='border-bottom:2px dashed #1E499B;padding:0 14px'>?</b>");
+      $("[data-e]").textContent = ""; $("[data-s]").innerHTML = lib + " " + (i + 1) + " / " + C.length + " · score : <b>" + ok + "</b>";
+      $("[data-c]").innerHTML = c[1].slice().sort().map(function (x) { return "<button type='button' class='btn-l' data-v='" + x + "'>" + x + "</button>"; }).join("");
+      el.querySelectorAll("[data-v]").forEach(function (b) {
+        b.addEventListener("click", function () {
+          var bon = b.dataset.v === c[1][0]; if (bon) ok++;
+          $("[data-q]").innerHTML = (i + 1) + ". " + c[0].replace("___", "<b style='color:" + (bon ? VERT : ROUGE) + "'>" + c[1][0] + "</b>");
+          $("[data-e]").innerHTML = (bon ? "✔ " : "✘ ") + c[2];
+          el.querySelectorAll("[data-v]").forEach(function (x) { x.disabled = true; });
+          var nx = document.createElement("button"); nx.type = "button"; nx.className = "btn-l"; nx.textContent = i + 1 < C.length ? suivant : "↺";
+          nx.addEventListener("click", function () { i = (i + 1) % C.length; if (!i) ok = 0; poser(); });
+          $("[data-c]").appendChild(nx);
+          $("[data-s]").innerHTML = lib + " " + (i + 1) + " / " + C.length + " · score : <b>" + ok + "</b>";
+        });
+      });
+    }
+    poser();
+  }
+
+  function alea(g) { return function () { g = (g * 16807) % 2147483647; return (g - 1) / 2147483646; }; }
+  /* Consignes de Jacques (18/11/2026) : situation résolue avec les formules étape par étape, exemples, règles, astuces,
+     planches 2D et 3D. AJOUTS SEULEMENT : blocs en fin de partie, planches, denouement.formules. */
+  function enrichir(id, o) {
+    var L = ancien(id); if (!L) return;
+    (o.blocs || []).forEach(function (b) { var p = L.parties[b[0]]; if (p) p.html = (p.html || "") + b[1]; });
+    (o.planches || []).forEach(function (b) { var p = L.parties[b[0]]; if (p) p.planches = (p.planches || []).concat([b[1]]); });
+    if (o.formules && L.denouement && !(L.denouement.formules || []).length) L.denouement.formules = o.formules;
+  }
+  function def(t, h) { return "<div class='def'><b>" + t + "</b>" + h + "</div>"; }
+  function formule(h) { return "<p class='formule'>" + h + "</p>"; }
+  function ex(h, t) { return "<div class='ex'><b>" + (t || "Exemples") + "</b>" + h + "</div>"; }
+  function astuce(h, t) { return "<div class='astuce'><b>" + (t || "Astuce") + "</b>" + h + "</div>"; }
+  function attention(h, t) { return "<div class='attention'><b>" + (t || "Attention") + "</b>" + h + "</div>"; }
+  function methode(h, t) { return "<div class='methode'><b>" + (t || "Méthode") + "</b>" + h + "</div>"; }
+  function F(nom, f, calcul) { return { nom: nom, f: f, calcul: calcul }; }
+  /* fiche 2D en colonnes : [{t, c, l:[lignes]}] */
+  function colonnes(titre, cols, h, alt) {
+    var W = 640, n = cols.length, w = (W - 30 - (n - 1) * 12) / n, s = "<rect width='640' height='" + h + "' fill='#FBF8F2'/>" + txt(320, 28, titre, { s: 15 });
+    cols.forEach(function (c, i) {
+      var x = 15 + i * (w + 12);
+      s += "<rect x='" + x + "' y='44' width='" + w + "' height='" + (h - 58) + "' rx='12' fill='#fff' stroke='" + c.c + "' stroke-width='2'/><rect x='" + x + "' y='44' width='" + w + "' height='34' rx='11' fill='" + c.c + "'/>" + txt(x + w / 2, 66, c.t, { s: 14, c: "#fff" });
+      c.l.forEach(function (l, k) { s += txt(x + 12, 100 + k * 24, l, { s: 12, a: "start", w: l.charAt(0) === "→" ? 800 : 550, c: l.charAt(0) === "→" ? c.c : NUIT }); });
+    });
+    return svg(640, h, alt || titre, "", s);
+  }
+
+  /* ═══════════ 3e ANGLAIS — LES ARTICLES ═══════════ */
+  enrichir("3e-en-articles", {
+    blocs: [[0, def("Rule : a or an?", "Use <strong>a</strong> before a <strong>consonant sound</strong> and <strong>an</strong> before a <strong>vowel sound</strong>. Listen to the first sound, not the first letter.") + formule("a + consonant sound · an + vowel sound") + ex("a uniform (/juː/), a one-way street (/w/), a European country<br>an MP3 player (/em/), an umbrella, an honest answer (silent h)") + astuce("Say the word aloud before writing: <em>hour</em> starts with /aʊ/, so <strong>an hour</strong>; <em>university</em> starts with /juː/, so <strong>a university</strong>.", "Tip")],
+      [1, formule("the + noun already mentioned / unique / superlative / river, ocean, plural country") + ex("the Wouri, the Sanaga (rivers) · the Atlantic Ocean · the United States<br>but: Mount Cameroon, Lake Chad (no article)")],
+      [2, attention("No article before meals, sports and school subjects: <em>We have lunch at noon. He plays football. I like English.</em>", "Watch out")]],
+    planches: [[1, { type: "2D", titre: "Which article? A decision tree", legende: "Three questions decide the article: is the thing specific or unique? Is the noun singular and countable? Is it used in general or is it a name? Then listen to the first sound for a / an.", svg: (function () {
+      var s = "<rect width='640' height='300' fill='#FBF8F2'/>";
+      function b(x, y, w, t, c, f) { return "<rect x='" + x + "' y='" + y + "' width='" + w + "' height='44' rx='10' fill='" + (f || "#fff") + "' stroke='" + c + "' stroke-width='2'/>" + txt(x + w / 2, y + 27, t, { s: 12.5, c: f ? "#fff" : NUIT }); }
+      s += b(200, 14, 240, "Is it specific, known or unique?", BLEU) + "<path d='M320 58V80M320 80H120V100M320 80H520V100' stroke='" + NUIT + "' stroke-width='2' fill='none'/>" + txt(200, 76, "yes", { s: 11, c: VERT }) + txt(440, 76, "no", { s: 11, c: ROUGE });
+      s += b(40, 100, 160, "THE", VERT, VERT) + txt(120, 166, "the sun, the taxi I saw", { s: 11, w: 500 });
+      s += b(400, 100, 240, "Singular countable, first time?", BLEU) + "<path d='M520 144V166M520 166H440V186M520 166H600V186' stroke='" + NUIT + "' stroke-width='2' fill='none'/>" + txt(470, 162, "yes", { s: 11, c: VERT }) + txt(580, 162, "no", { s: 11, c: ROUGE });
+      s += b(330, 186, 200, "A / AN : listen!", "#C2540A", "#C2540A") + b(550, 186, 80, "Ø", GRIS, GRIS) + txt(430, 254, "a university · an hour", { s: 11, w: 500 }) + txt(590, 254, "Cameroon,", { s: 11, w: 500 }) + txt(590, 270, "mangoes", { s: 11, w: 500 });
+      return svg(640, 300, "Arbre de décision : chose précise ou unique, the ; singulier dénombrable cité pour la première fois, a ou an selon le son ; sinon pas d’article", "", s);
+    })() }]],
+    formules: [F("Premier son du nom", "a + son consonne ; an + son voyelle", "a university (/juː/) · an hour (/aʊ/)"), F("Chose unique ou connue", "the + nom unique, déjà cité ou superlatif", "the sun · the Atlantic Ocean · the Lobé Falls"), F("Sens général, nom de pays", "Ø + pluriel général, indénombrable ou pays", "Cameroon is beautiful · Mangoes are sweet")]
+  });
+
+  /* ═══════════ 3e ANGLAIS — LES PRÉSENTS ═══════════ */
+  enrichir("3e-en-present", {
+    blocs: [[0, formule("Subject + verb (-s with he / she / it) · do / does + not + verb · Do / Does + subject + verb?") + ex("Every Saturday, I go to the market with my mother.<br>My father works in a bank. Does he work on Sundays? No, he doesn't.") + attention("Spelling of -s: <em>watch → watches, go → goes, study → studies, play → plays</em>.", "Spelling")],
+      [1, formule("Subject + am / is / are + verb-ing") + def("Present continuous", "An action in progress <strong>now</strong>, or a <strong>temporary</strong> situation.") + ex("Look! The bus is coming.<br>My father usually works in Douala, but this month he is working in Garoua.") + astuce("Markers decide: <em>every day, usually, often</em> → simple present; <em>now, at the moment, look!, listen!</em> → present continuous.", "Tip")]],
+    planches: [[1, { type: "2D", titre: "Habit or now? Two timelines", legende: "Simple present: the action comes back again and again on the timeline (a habit). Present continuous: the action is happening around the moment of speaking (now).", svg: (function () {
+      var s = "<rect width='640' height='250' fill='#FBF8F2'/>", k;
+      [[70, "Simple present : I go to the market every Saturday", BLEU], [180, "Present continuous : I am writing a letter now", "#C2540A"]].forEach(function (r, i) {
+        s += txt(320, r[0] - 34, r[1], { s: 13, c: r[2] }) + "<path d='M40 " + r[0] + "H600' stroke='" + NUIT + "' stroke-width='2.5' marker-end='url(#tlF)'/><path d='M320 " + (r[0] - 12) + "V" + (r[0] + 12) + "' stroke='" + ROUGE + "' stroke-width='3'/>" + txt(320, r[0] + 30, "now", { s: 11, c: ROUGE });
+        if (!i) for (k = 0; k < 9; k++) s += "<circle cx='" + (70 + k * 62) + "' cy='" + r[0] + "' r='8' fill='" + BLEU + "'/>";
+        else s += "<rect x='270' y='" + (r[0] - 9) + "' width='100' height='18' rx='9' fill='#C2540A' opacity='.85'/>";
+      });
+      return svg(640, 250, "Deux lignes du temps : points répétés pour l’habitude, bande autour de maintenant pour l’action en cours", fleche("tlF", NUIT), s);
+    })() }]],
+    formules: [F("Habitude → présent simple", "every / usually + S + V(-s)", "« Every Saturday » → I go to the market"), F("Action en cours → présent continu", "now + S + am / is / are + V-ing", "« Now » → I am writing to you"), F("Verbe d'état", "know, like, want… → pas de -ing ; since / for → present perfect", "I know you · I have known you for one year")]
+  });
+
+  /* ═══════════ 3e ALLEMAND — PRÉPOSITIONS MIXTES ═══════════ */
+  enrichir("3e-de-prepositions", {
+    blocs: [[0, def("Règle", "Les neuf prépositions mixtes sont suivies du <strong>datif</strong> pour une position (Wo?) et de l'<strong>accusatif</strong> pour une direction (Wohin?).") + astuce("Retiens-les en chanson : <em>an, auf, hinter, in, neben, über, unter, vor, zwischen</em>.")],
+      [1, formule("Wo? + liegen, stehen, sitzen, hängen → DATIF (dem, der, dem, den)") + formule("Wohin? + legen, stellen, setzen, hängen → ACCUSATIF (den, die, das, die)") + ex("Das Buch liegt auf <strong>dem</strong> Tisch. → Ich lege das Buch auf <strong>den</strong> Tisch.<br>Die Katze sitzt unter <strong>dem</strong> Stuhl. → Die Katze läuft unter <strong>den</strong> Stuhl.") + methode("Repère le verbe, pose la question <em>Wo?</em> ou <em>Wohin?</em>, puis choisis le cas et l'article selon le genre du nom.")],
+      [2, attention("Un déplacement à l'intérieur d'un même lieu reste au datif : <em>Die Kinder laufen im Hof</em> (ils courent dans la cour, sans y entrer).")]],
+    planches: [[1, { type: "2D", titre: "Wo? ou Wohin? : verbes et articles", legende: "À gauche, les verbes de position et les articles du datif ; à droite, les verbes de déplacement et les articles de l'accusatif. Seul le masculin et le neutre changent vraiment : dem / den, dem / das, der / die.", svg: colonnes("Wo? → datif · Wohin? → accusatif", [{ t: "Wo? (position)", c: BLEU, l: ["liegen, stehen, sitzen, hängen, sein", "masculin : dem Tisch", "féminin : der Tasche", "neutre : dem Bett", "pluriel : den Bänken", "→ Das Heft liegt auf dem Tisch."] }, { t: "Wohin? (direction)", c: "#C2540A", l: ["legen, stellen, setzen, hängen, gehen", "masculin : den Tisch", "féminin : die Tasche", "neutre : das Bett (ins)", "pluriel : die Bänke", "→ Ich lege das Heft auf den Tisch."] }], 270, "Tableau : verbes de position et articles du datif, verbes de direction et articles de l’accusatif") }]],
+    formules: [F("Préposition mixte ?", "an, auf, hinter, in, neben, über, unter, vor, zwischen", "auf, in, unter : mixtes"), F("Position → datif", "Wo? + liegen / stehen → dem (m.), der (f.), dem (n.)", "Das Heft liegt auf dem Tisch"), F("Direction → accusatif", "Wohin? + legen / stellen → den (m.), die (f.), das (n.)", "Ich lege das Heft auf das Bett · ins Kino (in + das)")]
+  });
+
+  /* ═══════════ 3e ALLEMAND — VERBES FAIBLES ═══════════ */
+  enrichir("3e-de-verbes", {
+    blocs: [[0, def("Verbe faible", "Verbe régulier : son radical ne change pas ; on ajoute seulement les terminaisons du présent.") + formule("radical = infinitif − en ; ich -e · du -st · er/sie/es -t · wir -en · ihr -t · sie/Sie -en") + ex("wohnen : ich wohne, du wohnst, er wohnt, wir wohnen, ihr wohnt, sie wohnen.<br>kaufen : Du kaufst Bananen ; wir kaufen Brot.")],
+      [1, ex("arbeiten : du arbeitest, er arbeitet, ihr arbeitet · finden : er findet · tanzen : du tanzt (pas de -s- en plus)", "Cas particuliers") + astuce("Radical en -s, -ß, -z : <em>du</em> prend seulement <strong>-t</strong> : du tanzt, du heißt, du reist.") + attention("<em>Sie</em> (vous de politesse) se conjugue comme <em>sie</em> (ils) : Sie spielen, Herr Atangana.")]],
+    planches: [[0, { type: "2D", titre: "Spielen et arbeiten : les terminaisons en couleur", legende: "Le radical (en bleu) ne change pas ; seules les terminaisons (en orange) changent. Avec arbeiten, un e (en vert) s'ajoute devant -st et -t pour pouvoir prononcer.", svg: (function () {
+      var P = ["ich", "du", "er / sie / es", "wir", "ihr", "sie / Sie"], T = ["e", "st", "t", "en", "t", "en"], s = "<rect width='640' height='280' fill='#FBF8F2'/>";
+      [["spielen (jouer)", "spiel", 30], ["arbeiten (travailler)", "arbeit", 340]].forEach(function (v, j) {
+        s += "<rect x='" + v[2] + "' y='16' width='270' height='250' rx='12' fill='#fff' stroke='#C9D2E3'/>" + txt(v[2] + 135, 42, v[0], { s: 14, c: BLEU });
+        P.forEach(function (p, i) { var y = 76 + i * 32, e = j && (T[i] === "st" || T[i] === "t") ? "e" : ""; s += txt(v[2] + 20, y, p, { s: 13, a: "start", w: 600, c: GRIS }) + "<text x='" + (v[2] + 130) + "' y='" + y + "' font-size='16' font-weight='800'><tspan fill='" + BLEU + "'>" + v[1] + "</tspan><tspan fill='" + VERT + "'>" + e + "</tspan><tspan fill='#C2540A'>" + T[i] + "</tspan></text>"; });
+      });
+      return svg(640, 280, "Deux tableaux de conjugaison : spielen et arbeiten, radical en bleu, terminaisons en orange, e de liaison en vert", "", s);
+    })() }]],
+    formules: [F("Trouver le radical", "radical = infinitif − en", "spielen → spiel- · arbeiten → arbeit-"), F("Ajouter la terminaison", "ich -e · du -st · er -t · wir -en · ihr -t · sie -en", "ich spiele · du lernst · wir kaufen"), F("Radical en -t ou -d", "+ e devant -st et -t", "er arbeitet · du arbeitest")]
+  });
+
+  /* ═══════════ 3e ESPAGNOL — LA FAMILLE ═══════════ */
+  enrichir("3e-es-familia", {
+    blocs: [[0, def("Los parentescos", "On nomme chaque personne par son lien avec soi : <em>la tía</em> = la sœur de mon père ou de ma mère ; <em>el primo</em> = le fils de mon oncle ou de ma tante.") + ex("Mi tía Rose es la hermana de mi madre. Eric es su hijo : es mi primo.<br>Mis abuelos viven en el pueblo.") + astuce("Le masculin pluriel englobe les deux sexes : <em>los padres</em> = les parents ; <em>los hermanos</em> = frères et sœurs ; <em>los tíos</em> = l'oncle et la tante.")],
+      [1, formule("mi / tu / su + nom singulier · mis / tus / sus + nom pluriel (accord avec la chose possédée)") + ex("mi hermano → mis hermanos · su casa → sus casas · nuestra abuela")],
+      [2, formule("Somos + nombre (en casa) · Tengo + nombre + hermano(s) · Se llama + prénom")]],
+    planches: [[1, { type: "2D", titre: "Los posesivos : mi, mis, nuestro…", legende: "Le possessif s'accorde avec ce qui est possédé (singulier ou pluriel ; nuestro et vuestro aussi en genre), jamais avec le possesseur.", svg: colonnes("Los posesivos", [{ t: "un objet / une personne", c: BLEU, l: ["mi (mon, ma)", "tu (ton, ta)", "su (son, sa, leur, votre*)", "nuestro / nuestra", "vuestro / vuestra", "→ mi padre, su casa"] }, { t: "plusieurs", c: "#C2540A", l: ["mis (mes)", "tus (tes)", "sus (ses, leurs, vos*)", "nuestros / nuestras", "vuestros / vuestras", "→ mis hermanos, sus primos"] }], 270, "Tableau des possessifs espagnols au singulier et au pluriel") }]],
+    formules: [F("Nommer le lien de parenté", "hermana de mi madre = mi tía ; hijo de mi tía = mi primo", "Rose = la tía · Eric = el primo"), F("Accorder le possessif", "mi + singulier · mis + pluriel", "mis hermanos · mi padre"), F("COD de personne", "verbe + a + personne", "Quiero mucho a mi abuela")]
+  });
+
+  /* ═══════════ 3e ESPAGNOL — CHEZ LE MÉDECIN ═══════════ */
+  enrichir("3e-es-medico", {
+    blocs: [[0, formule("me / te / le duele + nom singulier · me / te / le duelen + nom pluriel") + astuce("<em>Doler</em> se construit comme <em>gustar</em> : c'est la partie du corps qui est sujet. Si elle est au pluriel, le verbe aussi : <em>me duelen las muelas</em>.") + ex("Me duele la espalda. — ¿Le duelen los oídos? — Al niño le duele la garganta.")],
+      [1, ex("Tome este jarabe <strong>tres veces al día</strong> durante <strong>cinco días</strong>.<br>Descanse y beba mucha agua.", "La receta (ordonnance)") + attention("<em>Desde ayer</em> = depuis hier ; <em>hace dos días</em> = il y a deux jours.")],
+      [2, def("Superlativo", "Relatif : <em>el / la / los / las + más / menos + adjectif + de</em> ; absolu : adjectif + <em>-ísimo</em>.") + formule("el hospital más grande de la ciudad · un médico buenísimo")]],
+    planches: [[1, { type: "2D", titre: "La receta del médico", legende: "Une ordonnance réelle se lit ainsi : le médicament, la dose, le nombre de prises par jour (veces al día) et la durée du traitement (durante… días).", svg: (function () {
+      var s = "<rect width='640' height='300' fill='#E9EEF4'/><g transform='rotate(-2 320 150)'><rect x='150' y='18' width='340' height='264' fill='#fff' stroke='#C9D2E3'/><rect x='150' y='18' width='340' height='40' fill='#2F6DB5'/>" + txt(320, 44, "Hospital Regional · Dr. Mbarga", { s: 13, c: "#fff" }) + txt(170, 80, "Paciente : Junior, 12 años", { s: 12, a: "start", w: 600 }) + txt(470, 80, "Fecha : 18/11", { s: 11, a: "end", c: GRIS });
+      [["1.", "Jarabe para la tos", "una cucharada, tres veces al día"], ["2.", "Paracetamol 500 mg", "un comprimido si tiene fiebre"], ["", "Durante cinco días", "beber mucha agua y descansar"]].forEach(function (r, i) { var y = 116 + i * 54; s += txt(170, y, r[0] + " " + r[1], { s: 14, a: "start", c: BLEU, i: true }) + txt(186, y + 20, r[2], { s: 12, a: "start", c: NUIT, i: true }); });
+      s += "<path d='M380 262q20 -20 40 0t40 -6' stroke='" + BLEU + "' stroke-width='2' fill='none'/>" + txt(430, 278, "firma", { s: 10, c: GRIS }) + "</g>";
+      return svg(640, 300, "Ordonnance espagnole manuscrite : sirop trois fois par jour, paracétamol en cas de fièvre, pendant cinq jours", "", s);
+    })() }]],
+    formules: [F("Douleur au singulier / au pluriel", "le duele + singulier · le duelen + pluriel", "Le duele la cabeza · le duelen los pies"), F("Durée et fréquence", "desde + moment · tres veces al día · durante + durée", "Tiene fiebre desde ayer · cinco días"), F("Superlatif", "el / la más + adj + de · adj + -ísimo", "el hospital más grande de la ciudad · buenísimo")]
+  });
+
+  /* ═══════════ 3e GREC — ÉSOPE ET HOMÈRE ═══════════ */
+  enrichir("3e-gr-esope-homere", {
+    blocs: [[1, def("Fable", "Récit court, souvent en prose chez Ésope, dont les personnages sont surtout des animaux ; il se termine par une <strong>morale</strong>, leçon de vie.") + formule("fable = récit court + animaux qui parlent + morale") + ex("<em>Le Corbeau et le Renard</em>, <em>La Cigale et la Fourmi</em> : d'Ésope à La Fontaine.") + astuce("Pour trouver la morale, demande-toi : quel défaut est puni, quelle qualité est récompensée ?")],
+      [0, ex("<em>Iliade</em> : la colère d'Achille pendant la guerre de Troie. <em>Odyssée</em> : dix ans de retour pour Ulysse.", "Les deux épopées") + attention("Une épopée n'est pas un roman : c'est un long poème chanté, transmis d'abord oralement par les aèdes.")]],
+    planches: [[2, { type: "2D", titre: "D'Homère à La Fontaine : une frise", legende: "Les deux genres traversent vingt-huit siècles : l'épopée d'Homère (VIIIᵉ siècle av. J.-C.), les fables d'Ésope (VIᵉ siècle av. J.-C.), reprises en vers par La Fontaine (XVIIᵉ siècle), tandis que les conteurs africains racontent toujours la ruse de la tortue.", svg: (function () {
+      var s = "<rect width='640' height='220' fill='#FBF8F2'/><path d='M30 110H610' stroke='" + NUIT + "' stroke-width='3' marker-end='url(#frF)'/>";
+      [[80, "VIIIᵉ s. av. J.-C.", "Homère", "Iliade, Odyssée", "#7A1F1F"], [210, "VIᵉ s. av. J.-C.", "Ésope", "fables en prose", VERT], [380, "XVIIᵉ siècle", "La Fontaine", "fables en vers", BLEU], [530, "aujourd'hui", "conteurs africains", "la tortue rusée", "#C2540A"]].forEach(function (e, i) { s += "<circle cx='" + e[0] + "' cy='110' r='9' fill='" + e[4] + "'/>" + txt(e[0], i % 2 ? 150 : 76, e[1], { s: 11, c: GRIS, w: 600 }) + txt(e[0], i % 2 ? 170 : 56, e[2], { s: 14, c: e[4] }) + txt(e[0], i % 2 ? 188 : 38, e[3], { s: 11, w: 500 }); });
+      return svg(640, 220, "Frise chronologique : Homère, Ésope, La Fontaine, conteurs africains", fleche("frF", NUIT), s);
+    })() }]],
+    formules: [F("Critères de l'épopée", "long poème + héros + dieux", "Odyssée : plus de 12 000 vers, Ulysse, Athéna → épopée"), F("Critères de la fable", "récit court + animaux + morale", "Le Lièvre et la Tortue → fable"), F("Héritage", "œuvres + mots + genre universel", "une odyssée, le talon d'Achille ; la tortue des contes africains")]
+  });
+
+  /* ═══════════ 3e FRANÇAIS — LA SUBORDONNÉE RELATIVE ═══════════ */
+  enrichir("3e-fr-relative", {
+    blocs: [[0, formule("antécédent + pronom relatif + (sujet) + verbe = subordonnée relative") + def("Antécédent", "Nom ou pronom que la relative complète ; le pronom relatif le représente dans la relative.")],
+      [1, ex("La route <strong>où</strong> l'accident a eu lieu est en travaux. (lieu)<br>Le chauffeur <strong>dont</strong> on parle est prudent. (parler <em>de</em>)<br>Le car <strong>que</strong> nous prenons part à 7 h. (COD)") + ex("La gare routière près de <strong>laquelle</strong> j'habite. · Les passagers <strong>auxquels</strong> il a parlé.", "Avec lequel")]],
+    planches: [[1, { type: "2D", titre: "Choisir le pronom relatif en trois gestes", legende: "On remplace le pronom par l'antécédent pour retrouver la phrase simple, on cherche la fonction, puis on choisit le pronom.", svg: (function () {
+      var s = "<rect width='640' height='250' fill='#FBF8F2'/>";
+      [["1. Phrase simple", "On parle du chauffeur.", BLEU], ["2. Fonction", "complément introduit par « de »", "#7B3F99"], ["3. Pronom", "le chauffeur DONT on parle", VERT]].forEach(function (e, i) { var x = 20 + i * 210; s += "<rect x='" + x + "' y='60' width='190' height='110' rx='14' fill='#fff' stroke='" + e[2] + "' stroke-width='2.5'/><rect x='" + x + "' y='60' width='190' height='34' rx='12' fill='" + e[2] + "'/>" + txt(x + 95, 82, e[0], { s: 14, c: "#fff" }) + txt(x + 95, 136, e[1], { s: 12, w: 600 }) + (i < 2 ? "<path d='M" + (x + 192) + " 115H" + (x + 208) + "' stroke='" + NUIT + "' stroke-width='3' marker-end='url(#rlF2)'/>" : ""); });
+      s += txt(320, 210, "sujet → qui · COD → que · de… → dont · lieu / temps → où · préposition → lequel", { s: 12, c: NUIT });
+      return svg(640, 250, "Trois étapes pour choisir le pronom relatif : phrase simple, fonction, pronom", fleche("rlF2", NUIT), s);
+    })() }]],
+    formules: [F("Repérer l'antécédent", "nom + pronom relatif + verbe", "« la gare … le car … les passagers … l'accident »"), F("Retrouver la fonction", "phrase simple : remplacer le pronom par l'antécédent", "on parle du car → dont ; le car part de la gare → d'où / de laquelle"), F("Ponctuer", "déterminative sans virgules ; explicative entre virgules", "les passagers qui étaient assis derrière (sans virgules)")]
+  });
+})();
+
+/* Leçons enrichies — lettres et langues, lot B (18/11/2026) : ESF, italien, chinois (1re), arabe (Tle). Même mécanisme que
+   29-enrichies-lettres-a.js : AJOUTS SEULEMENT (blocs def / formule / ex / astuce, planches 2D, denouement.formules). */
+(function () {
+  "use strict";
+  var NUIT = "#001136", BLEU = "#1E499B", GRIS = "#4D5163", VERT = "#17784D", ROUGE = "#C62828", TERRE = "#C46A2B";
+
+  function txt(x, y, t, o) {
+    o = o || {};
+    return "<text x='" + x + "' y='" + y + "' text-anchor='" + (o.a || "middle") + "' font-size='" + (o.s || 12) + "' font-weight='" + (o.w || 700) + "' fill='" + (o.c || NUIT) + "'" + (o.i ? " font-style='italic'" : "") + (o.halo ? " stroke='#fff' stroke-width='3' paint-order='stroke'" : "") + ">" + t + "</text>";
+  }
+  function lin(id, cs, vertical) {
+    var s = "<linearGradient id='" + id + "'" + (vertical ? " x1='0' y1='0' x2='0' y2='1'" : "") + ">";
+    cs.forEach(function (c, i) { s += "<stop offset='" + (i / (cs.length - 1)).toFixed(2) + "' stop-color='" + c + "'/>"; });
+    return s + "</linearGradient>";
+  }
+  function rad(id, cs) {
+    var s = "<radialGradient id='" + id + "' cx='35%' cy='30%' r='75%'>";
+    cs.forEach(function (c, i) { s += "<stop offset='" + (i / (cs.length - 1)).toFixed(2) + "' stop-color='" + c + "'/>"; });
+    return s + "</radialGradient>";
+  }
+  function fleche(id, c) { return "<marker id='" + id + "' markerWidth='10' markerHeight='10' refX='7' refY='5' orient='auto'><path d='M0 1L8 5L0 9Z' fill='" + c + "'/></marker>"; }
+  function svg(w, h, alt, defs, corps) {
+    return "<svg viewBox='0 0 " + w + " " + h + "' role='img' aria-label='" + alt + "' font-family='Inter,Arial,sans-serif'><rect width='" + w + "' height='" + h + "' fill='#fff'/><defs>" + defs + "</defs>" + corps +
+      "<text x='" + (w - 6) + "' y='" + (h - 5) + "' font-size='8' text-anchor='end' fill='#8A93A6'>Planche VÉRITAS</text></svg>";
+  }
+  function ancien(id) { return window.VRT_LECONS[id]; }
+  function remplacer(id, o) {
+    var a = ancien(id);
+    if (a) ["apc", "examen", "rang", "cle", "scenes"].forEach(function (k) { if (a[k] != null && o[k] == null) o[k] = a[k]; });
+    VRT_L(id, o);
+    if (a) o.ordre = a.ordre;
+  }
+  function q(qq, bonne, f1, f2, e) { return { q: qq, r: [bonne, f1, f2], b: 0, e: e }; }
+  function partie(old, i) { return old && old.parties[i] ? old.parties[i].html : ""; }
+  function bulle(x, y, w, t, c) { return "<rect x='" + x + "' y='" + y + "' width='" + w + "' height='30' rx='12' fill='#fff' stroke='" + (c || "#C9D2E3") + "'/>" + txt(x + w / 2, y + 20, t, { s: 11.5 }); }
+  function perso(x, y, peau, habit, bas) {
+    bas = bas || "#2E3445";
+    return "<g transform='translate(" + x + " " + y + ")'><ellipse cx='0' cy='84' rx='18' ry='4' fill='#001136' opacity='.18'/>" +
+      "<rect x='-9' y='44' width='8' height='36' rx='3' fill='" + bas + "'/><rect x='1' y='44' width='8' height='36' rx='3' fill='" + bas + "'/>" +
+      "<ellipse cx='-6' cy='81' rx='7' ry='3.5' fill='#1F2328'/><ellipse cx='6' cy='81' rx='7' ry='3.5' fill='#1F2328'/>" +
+      "<path d='M-13 46L-16 18C-16 13 -12 11 -6 10H6C12 11 16 13 16 18L13 46Z' fill='" + habit + "'/>" +
+      "<path d='M-15 16L-20 40' stroke='" + habit + "' stroke-width='7' stroke-linecap='round'/><path d='M15 16L20 40' stroke='" + habit + "' stroke-width='7' stroke-linecap='round'/>" +
+      "<circle cx='-20' cy='42' r='3.6' fill='" + peau + "'/><circle cx='20' cy='42' r='3.6' fill='" + peau + "'/>" +
+      "<rect x='-3.5' y='5' width='7' height='7' fill='" + peau + "'/><ellipse cx='0' cy='-2' rx='9' ry='10.5' fill='" + peau + "'/>" +
+      "<path d='M-9 -4C-10 -14 -4 -13.5 0 -13.5S10 -14 9 -4C7 -9 -7 -9 -9 -4Z' fill='#1B1410'/><ellipse cx='-9' cy='-1' rx='1.8' ry='3' fill='" + peau + "'/><ellipse cx='9' cy='-1' rx='1.8' ry='3' fill='" + peau + "'/></g>";
+  }
+  /* portrait en buste (arbre généalogique) */
+  function portrait(x, y, peau, habit, cheveux, age) {
+    var s = "<g transform='translate(" + x + " " + y + ")'><circle r='30' fill='#F4EFE4' stroke='#C9A576' stroke-width='3'/><clipPath id='pc" + x + "_" + y + "'><circle r='28'/></clipPath><g clip-path='url(#pc" + x + "_" + y + ")'>";
+    s += "<path d='M-26 32C-26 14 -14 10 0 10S26 14 26 32Z' fill='" + habit + "'/><rect x='-4' y='2' width='8' height='10' fill='" + peau + "'/><ellipse cy='-6' rx='11' ry='13' fill='" + peau + "'/>";
+    s += age === "vieux" ? "<path d='M-11 -10C-12 -20 -4 -21 0 -21S12 -20 11 -10C9 -14 -9 -14 -11 -10Z' fill='#D8D8D8'/>" : age === "femme" ? "<path d='M-13 -6C-15 -24 15 -24 13 -6C12 -14 -12 -14 -13 -6Z' fill='" + cheveux + "'/><path d='M-13 -14h26v-6c-6 -6 -20 -6 -26 0Z' fill='" + habit + "'/>" : "<path d='M-11 -10C-12 -20 -4 -21 0 -21S12 -20 11 -10C9 -14 -9 -14 -11 -10Z' fill='" + cheveux + "'/>";
+    s += "<circle cx='-4' cy='-6' r='1.4' fill='#1B1410'/><circle cx='4' cy='-6' r='1.4' fill='#1B1410'/><path d='M-3 2q3 2 6 0' stroke='#1B1410' fill='none'/></g></g>";
+    return s;
+  }
+  /* boucle d'exercice générique : [phrase avec ___, [bonne, autres…], explication] */
+  function exercice(el, C, suivant, lib) {
+    var i = 0, ok = 0;
+    el.innerHTML = "<p class='labo-r' data-q style='font-size:16px'></p><div style='display:flex;gap:8px;flex-wrap:wrap' data-c></div><p class='an-note' data-e></p><p class='labo-r' data-s></p>";
+    function $(s) { return el.querySelector(s); }
+    function poser() {
+      var c = C[i];
+      $("[data-q]").innerHTML = (i + 1) + ". " + c[0].replace("___", "<b style='border-bottom:2px dashed #1E499B;padding:0 14px'>?</b>");
+      $("[data-e]").textContent = ""; $("[data-s]").innerHTML = lib + " " + (i + 1) + " / " + C.length + " · score : <b>" + ok + "</b>";
+      $("[data-c]").innerHTML = c[1].slice().sort().map(function (x) { return "<button type='button' class='btn-l' data-v='" + x + "'>" + x + "</button>"; }).join("");
+      el.querySelectorAll("[data-v]").forEach(function (b) {
+        b.addEventListener("click", function () {
+          var bon = b.dataset.v === c[1][0]; if (bon) ok++;
+          $("[data-q]").innerHTML = (i + 1) + ". " + c[0].replace("___", "<b style='color:" + (bon ? VERT : ROUGE) + "'>" + c[1][0] + "</b>");
+          $("[data-e]").innerHTML = (bon ? "✔ " : "✘ ") + c[2];
+          el.querySelectorAll("[data-v]").forEach(function (x) { x.disabled = true; });
+          var nx = document.createElement("button"); nx.type = "button"; nx.className = "btn-l"; nx.textContent = i + 1 < C.length ? suivant : "↺";
+          nx.addEventListener("click", function () { i = (i + 1) % C.length; if (!i) ok = 0; poser(); });
+          $("[data-c]").appendChild(nx);
+          $("[data-s]").innerHTML = lib + " " + (i + 1) + " / " + C.length + " · score : <b>" + ok + "</b>";
+        });
+      });
+    }
+    poser();
+  }
+
+  function alea(g) { return function () { g = (g * 16807) % 2147483647; return (g - 1) / 2147483646; }; }
+  /* Consignes de Jacques (18/11/2026) : situation résolue avec les formules étape par étape, exemples, règles, astuces,
+     planches 2D et 3D. AJOUTS SEULEMENT : blocs en fin de partie, planches, denouement.formules. */
+  function enrichir(id, o) {
+    var L = ancien(id); if (!L) return;
+    (o.blocs || []).forEach(function (b) { var p = L.parties[b[0]]; if (p) p.html = (p.html || "") + b[1]; });
+    (o.planches || []).forEach(function (b) { var p = L.parties[b[0]]; if (p) p.planches = (p.planches || []).concat([b[1]]); });
+    if (o.formules && L.denouement && !(L.denouement.formules || []).length) L.denouement.formules = o.formules;
+  }
+  function def(t, h) { return "<div class='def'><b>" + t + "</b>" + h + "</div>"; }
+  function formule(h) { return "<p class='formule'>" + h + "</p>"; }
+  function ex(h, t) { return "<div class='ex'><b>" + (t || "Exemples") + "</b>" + h + "</div>"; }
+  function astuce(h, t) { return "<div class='astuce'><b>" + (t || "Astuce") + "</b>" + h + "</div>"; }
+  function attention(h, t) { return "<div class='attention'><b>" + (t || "Attention") + "</b>" + h + "</div>"; }
+  function methode(h, t) { return "<div class='methode'><b>" + (t || "Méthode") + "</b>" + h + "</div>"; }
+  function F(nom, f, calcul) { return { nom: nom, f: f, calcul: calcul }; }
+  /* fiche 2D en colonnes : [{t, c, l:[lignes]}] */
+  function colonnes(titre, cols, h, alt) {
+    var W = 640, n = cols.length, w = (W - 30 - (n - 1) * 12) / n, s = "<rect width='640' height='" + h + "' fill='#FBF8F2'/>" + txt(320, 28, titre, { s: 15 });
+    cols.forEach(function (c, i) {
+      var x = 15 + i * (w + 12);
+      s += "<rect x='" + x + "' y='44' width='" + w + "' height='" + (h - 58) + "' rx='12' fill='#fff' stroke='" + c.c + "' stroke-width='2'/><rect x='" + x + "' y='44' width='" + w + "' height='34' rx='11' fill='" + c.c + "'/>" + txt(x + w / 2, 66, c.t, { s: 14, c: "#fff" });
+      c.l.forEach(function (l, k) { s += txt(x + 12, 100 + k * 24, l, { s: 12, a: "start", w: l.charAt(0) === "→" ? 800 : 550, c: l.charAt(0) === "→" ? c.c : NUIT }); });
+    });
+    return svg(640, h, alt || titre, "", s);
+  }
+
+  /* ═══════════ 1re ESF — NOTIONS ═══════════ */
+  enrichir("1re-esf-notions", {
+    blocs: [[0, def("Économie sociale et familiale", "Discipline qui apprend à gérer les ressources du foyer (argent, temps, nourriture, santé, logement) pour le bien-être de chacun de ses membres.") + formule("solde du mois = recettes − dépenses ; épargne = solde positif mis de côté") + ex("Chez les Abena : 120 000 − 130 000 = −10 000 F (déficit) → l'argent manque dès le 20 du mois.")],
+      [1, ex("Acheter en gros au marché (sac de riz, bidon d'huile) plutôt qu'au détail chaque jour ; cuisiner les légumes de saison ; éteindre les ampoules inutiles.", "Bons gestes") + astuce("Écris le budget au début du mois et coche chaque dépense : on ne gère bien que ce que l'on note.")],
+      [2, attention("On n'économise jamais sur la santé et sur une alimentation équilibrée : un enfant malade coûte bien plus cher qu'un repas complet.")]],
+    planches: [[0, { type: "2D", titre: "Le cahier de budget des Abena", legende: "Le budget du mois écrit dans un cahier : à gauche les recettes, à droite les dépenses prévues et réelles. Le solde (recettes − dépenses) montre tout de suite si l'on peut épargner.", svg: (function () {
+      var D = [["Nourriture", 55, 48], ["Loyer", 25, 25], ["Transport", 12, 10], ["Eau, électricité", 8, 7], ["Téléphone", 10, 5], ["Santé", 5, 5], ["Divers", 15, 9]], s = "<rect width='640' height='320' fill='#E9EEF4'/><rect x='30' y='14' width='580' height='292' rx='6' fill='#FFFBEA' stroke='#E3D7A6'/><path d='M320 14V306' stroke='#E3D7A6' stroke-width='3'/>";
+      for (var k = 0; k < 11; k++) s += "<path d='M40 " + (60 + k * 22) + "H600' stroke='#D7E3F2'/>";
+      s += txt(175, 40, "Recettes", { s: 15, c: VERT, i: true }) + txt(70, 82, "Salaire et petit commerce", { s: 13, a: "start", c: BLEU, i: true }) + txt(300, 82, "120 000 F", { s: 13, a: "end", c: BLEU, i: true });
+      s += txt(465, 40, "Dépenses : avant → après", { s: 15, c: ROUGE, i: true });
+      D.forEach(function (d, i) { var y = 82 + i * 22; s += txt(334, y, d[0], { s: 12, a: "start", c: BLEU, i: true }) + txt(520, y, d[1] + " 000", { s: 12, a: "end", c: GRIS, i: true }) + txt(596, y, d[2] + " 000", { s: 12, a: "end", c: d[2] < d[1] ? VERT : BLEU, i: true }); });
+      s += "<path d='M334 246H600' stroke='" + NUIT + "'/>" + txt(334, 266, "Total", { s: 13, a: "start", i: true }) + txt(520, 266, "130 000", { s: 13, a: "end", c: ROUGE, i: true }) + txt(596, 266, "109 000", { s: 13, a: "end", c: VERT, i: true });
+      s += "<rect x='54' y='200' width='240' height='80' rx='10' fill='#fff' stroke='" + VERT + "' stroke-width='2'/>" + txt(174, 226, "Solde = 120 000 − 109 000", { s: 13, c: NUIT }) + txt(174, 252, "= 11 000 F épargnés", { s: 15, c: VERT }) + txt(174, 272, "33 000 F par trimestre", { s: 11, c: GRIS, w: 600 });
+      return svg(640, 320, "Cahier de budget : recettes 120 000 F, dépenses avant 130 000 F et après 109 000 F, épargne 11 000 F", "", s);
+    })() }]],
+    formules: [F("Faire le bilan", "solde = recettes − dépenses", "120 000 − 130 000 = −10 000 F : déficit"), F("Réduire sans nuire à la santé", "dépenses révisées = somme des postes après économies", "48 000 + 25 000 + 10 000 + 7 000 + 5 000 + 5 000 + 9 000 = 109 000 F"), F("Épargner pour la scolarité", "épargne = recettes − dépenses révisées ; × 3 pour un trimestre", "120 000 − 109 000 = 11 000 F/mois → 33 000 F/trimestre")]
+  });
+
+  /* ═══════════ 1re ESF — SIGNES D'ALARME ═══════════ */
+  enrichir("1re-esf-alarme", {
+    blocs: [[0, def("Fréquence respiratoire", "Nombre de respirations en une minute, comptées quand le bébé est calme, en regardant le ventre et la poitrine se soulever.") + formule("respiration rapide si : ≥ 60/min avant 2 mois · ≥ 50/min de 2 à 12 mois · ≥ 40/min de 1 à 5 ans")],
+      [1, ex("Nina, 6 mois, 62 respirations par minute : 62 ≥ 50 → respiration rapide, signe de danger.<br>Un bébé de 3 semaines à 55 par minute : 55 < 60, pas de respiration rapide (mais on surveille les autres signes).") + ex("Fièvre : température ≥ 38 °C ; chez un bébé de moins de 2 mois, toute fièvre impose de consulter.", "Seuils") + astuce("Compte pendant une minute entière, montre en main, bébé éveillé et calme : compter 15 secondes et multiplier par 4 donne souvent une erreur.")],
+      [2, methode("1. Repérer un signe de danger. 2. Partir tout de suite au centre de santé avec le carnet. 3. Pendant le trajet : garder le bébé au chaud, continuer à le faire téter s'il peut avaler. 4. Ne donner aucun remède sans avis.", "La conduite à tenir") + attention("Ne jamais donner de décoction, de purge ni de lavement à un nourrisson : ils peuvent aggraver la déshydratation ou l'empoisonner.")]],
+    formules: [F("Compter la respiration", "respirations comptées pendant 1 minute entière", "Nina : 62 respirations par minute"), F("Comparer au seuil de son âge", "2 à 12 mois : respiration rapide si ≥ 50/min", "62 ≥ 50 → respiration rapide, avec creusement sous les côtes"), F("Décider", "un seul signe de danger = consulter immédiatement", "ne tète plus + fièvre + respiration rapide → départ immédiat avec le carnet")]
+  });
+
+  /* ═══════════ 1re ITALIEN — ACCORD ET DÉSACCORD ═══════════ */
+  enrichir("1re-it-accordo", {
+    blocs: [[0, formule("Sono d'accordo con te / con Lei / con voi") + def("Accordo", "Formules pour montrer qu'on partage l'avis de quelqu'un : <em>Sono d'accordo, Hai ragione, Certo, Esatto, Proprio così</em>.") + ex("— I giovani devono aiutare in casa. — Sono d'accordo con Lei, professoressa!")],
+      [1, formule("Sì, però… · Da una parte…, dall'altra… · Non sono del tutto d'accordo") + ex("Da una parte i genitori decidono, dall'altra i figli devono poter parlare.<br>Non sono del tutto d'accordo : dipende dalla famiglia.") + astuce("Pour rester poli avec un adulte, utilise <em>Lei</em> (forme de politesse) et commence par une concession : <em>Capisco, però…</em>")],
+      [2, attention("<em>Penso che</em> est suivi du <strong>subjonctif</strong> : penso che <strong>sia</strong> importante, penso che i genitori <strong>abbiano</strong> ragione (et non <em>hanno</em>).")]],
+    planches: [[1, { type: "2D", titre: "De l'accord total au désaccord total", legende: "Une échelle pour choisir la bonne formule : plus on va vers la droite, plus on s'oppose. Au centre, les formules qui nuancent sont souvent les plus polies.", svg: (function () {
+      var E = [["Sono pienamente d'accordo", "#2E7D32"], ["Hai ragione", "#5AA14A"], ["Sì, però…", "#B8860B"], ["Dipende", "#E8A33D"], ["Non sono del tutto d'accordo", "#C2540A"], ["Non sono d'accordo", "#C62828"]], s = "<rect width='640' height='220' fill='#FBF8F2'/><defs><linearGradient id='acG'><stop offset='0' stop-color='#2E7D32'/><stop offset='.5' stop-color='#E8A33D'/><stop offset='1' stop-color='#C62828'/></linearGradient></defs><rect x='30' y='100' width='580' height='14' rx='7' fill='url(#acG)'/>";
+      E.forEach(function (e, i) { var x = 92 + i * 91; s += "<circle cx='" + x + "' cy='107' r='9' fill='#fff' stroke='" + e[1] + "' stroke-width='3'/>" + txt(x, i % 2 ? 150 : 76, e[0], { s: 11.5, c: e[1] }); });
+      s += txt(50, 196, "😀 d'accord", { s: 12, a: "start", c: VERT }) + txt(320, 196, "nuancer", { s: 12, c: "#B8860B" }) + txt(600, 196, "pas d'accord 🙁", { s: 12, a: "end", c: ROUGE });
+      return svg(640, 220, "Échelle des formules italiennes de l’accord total au désaccord total", "", s);
+    })() }]],
+    formules: [F("Exprimer un accord partiel", "Non sono del tutto d'accordo", "Non sono del tutto d'accordo con Lei, professoressa"), F("Nuancer poliment", "Da una parte…, dall'altra…", "Da una parte i genitori decidono, dall'altra i figli parlano"), F("Donner son opinion", "Penso che + subjonctif", "Penso che dipenda dalla famiglia")]
+  });
+
+  /* ═══════════ 1re ITALIEN — ADVERBES EN -MENTE ═══════════ */
+  enrichir("1re-it-avverbi", {
+    blocs: [[0, def("Avverbio", "Mot invariable qui précise un verbe, un adjectif ou un autre adverbe : il dit <em>comment</em> se fait l'action.") + formule("adjectif en -o → féminin -a + mente · adjectif en -e → + mente · -le / -re → on supprime le -e + mente") + ex("lento → lentamente · sicuro → sicuramente · veloce → velocemente · facile → facilmente · regolare → regolarmente")],
+      [1, astuce("Si le mot précise un <strong>nom</strong>, c'est un adjectif (<em>un buon libro</em>) ; s'il précise un <strong>verbe</strong>, c'est un adverbe (<em>legge bene</em>).") + attention("<em>Molto</em> est adverbe devant un adjectif (invariable : <em>molto belle</em>) mais adjectif devant un nom (variable : <em>molte ragazze</em>).")],
+      [2, ex("Ahmadou parla <strong>lentamente</strong> e risponde <strong>facilmente</strong> alle domande. Gioca <strong>bene</strong> a calcio.", "Phrase corrigée")]],
+    planches: [[0, { type: "2D", titre: "Fabriquer un adverbe en -mente", legende: "Trois cas selon la fin de l'adjectif, plus quelques irréguliers à apprendre par cœur.", svg: colonnes("Aggettivo → avverbio", [{ t: "-o", c: BLEU, l: ["on passe au féminin -a", "lento → lentamente", "sicuro → sicuramente", "vero → veramente"] }, { t: "-e", c: VERT, l: ["on ajoute -mente", "veloce → velocemente", "forte → fortemente", "dolce → dolcemente"] }, { t: "-le / -re", c: "#C2540A", l: ["on supprime le -e", "facile → facilmente", "regolare → regolarmente", "gentile → gentilmente"] }, { t: "irréguliers", c: ROUGE, l: ["buono → bene", "cattivo → male", "migliore → meglio", "peggiore → peggio"] }], 210, "Tableau de formation des adverbes italiens en mente") }]],
+    formules: [F("Adjectif en -o", "féminin en -a + mente", "lento → lenta → lentamente"), F("Adjectif en -e / -le", "+ mente (on supprime le -e après l ou r)", "veloce → velocemente · facile → facilmente"), F("Irrégulier", "buono → bene ; cattivo → male", "parla bene (et non buonamente)")]
+  });
+
+  /* ═══════════ 1re CHINOIS — 如果……就 ═══════════ */
+  enrichir("1re-zh-ruguo", {
+    blocs: [[0, def("Phrase conditionnelle", "La condition vient toujours <strong>en premier</strong> en chinois, la conséquence ensuite.") + ex("如果你累了，就休息一下。Rúguǒ nǐ lèi le, jiù xiūxi yíxià. — Si tu es fatigué, repose-toi un peu.") + astuce("就 se place <strong>après le sujet</strong> de la conséquence, juste avant le verbe : 我们<strong>就</strong>不去 (et non 就我们不去).")],
+      [1, formule("如果 + condition，(那么) + sujet + 就 + verbe") + ex("如果明天不下雨，我们就去克里比。Rúguǒ míngtiān bú xià yǔ, wǒmen jiù qù Kèlǐbǐ. — S'il ne pleut pas demain, nous irons à Kribi.")],
+      [2, formule("名词 + 有的 + A，有的 + B") + attention("有的 se place après le groupe dont on parle : 学生有的……（et non 有的学生有的……）.")]],
+    planches: [[2, { type: "2D", titre: "有的……有的…… : partager un groupe", legende: "Les élèves du club : certains (有的) lisent, d'autres (有的) font du sport. 有的 répété découpe le groupe en sous-groupes.", svg: (function () {
+      var s = "<rect width='640' height='240' fill='#FBF8F2'/><rect x='20' y='20' width='290' height='170' rx='14' fill='#DCE6F2'/><rect x='330' y='20' width='290' height='170' rx='14' fill='#DDEFE3'/>";
+      [0, 1, 2].forEach(function (k) { s += perso(70 + k * 80, 50, "#5A3A1E", "#1E499B", "#2E3445") + "<rect x='" + (58 + k * 80) + "' y='86' width='24' height='18' fill='#F4F1EA' stroke='#9AA3AF'/>"; });
+      [0, 1, 2].forEach(function (k) { s += perso(380 + k * 80, 50, "#6B4423", "#2E7D32", "#F4F1EA"); }); s += "<circle cx='600' cy='150' r='10' fill='#fff' stroke='#1F2328'/>";
+      s += txt(165, 212, "有的喜欢看书", { s: 16, c: BLEU }) + txt(475, 212, "有的喜欢运动", { s: 16, c: VERT }) + txt(165, 232, "yǒude xǐhuan kàn shū : certains aiment lire", { s: 10, c: GRIS, w: 600 }) + txt(475, 232, "yǒude xǐhuan yùndòng : d'autres le sport", { s: 10, c: GRIS, w: 600 });
+      return svg(640, 240, "Deux groupes d’élèves : certains lisent, d’autres font du sport, avec les phrases chinoises", "", s);
+    })() }]],
+    formules: [F("Condition en premier", "如果 + condition", "如果明天下雨 (s'il pleut demain)"), F("Conséquence avec 就", "sujet + 就 + verbe", "我们就不去 (nous n'irons pas)"), F("Partager un groupe", "groupe + 有的 A，有的 B", "学生有的坐车，有的走路")]
+  });
+
+  /* ═══════════ 1re CHINOIS — 不但……而且 ═══════════ */
+  enrichir("1re-zh-budan", {
+    blocs: [[0, def("不但……而且……", "Relie deux informations qui s'ajoutent, la seconde étant plus forte : « non seulement A, mais aussi B ».") + formule("sujet + 不但 + A，而且 + B (même sujet) · 不但 + sujet 1 + A，而且 + sujet 2 + B") + astuce("Même sujet : 不但 vient <strong>après</strong> le sujet (他不但会说……). Sujets différents : 不但 vient <strong>avant</strong> le premier sujet (不但他会说，而且我也会说).")],
+      [1, attention("第 + nombre donne un ordinal : 第一 (premier), 第二 (deuxième). Sans 第, 一、二 sont de simples nombres.") + ex("第一，要努力学习；第二，要帮助家人；第三，要尊重老人。<br>Dì yī… dì èr… dì sān… — Premièrement… deuxièmement… troisièmement…")]],
+    formules: [F("Ajouter une idée plus forte", "S + 不但 A，而且 B", "我的家人不但很热情，而且很团结"), F("Ordonner les arguments", "第一……，第二……，第三……", "第一，互相帮助；第二，尊重父母"), F("Écrire juste", "caractère + pinyin avec tons", "家 jiā · 帮助 bāngzhù · 尊重 zūnzhòng")]
+  });
+
+  /* ═══════════ Tle ARABE — LES TYPES DE خبر ═══════════ */
+  enrichir("tle-ar-khabar", {
+    blocs: [[0, def("La phrase nominale (الجملة الاسمية)", "Elle commence par un nom : le sujet (المبتدأ), puis l'attribut (الخبر) qui dit quelque chose de lui. Les deux sont مرفوع (cas sujet, en -u).") + formule("مبتدأ (مرفوع) + خبر (مرفوع) : الطالبُ مجتهدٌ") + ex("البيتُ كبيرٌ. — La maison est grande. · الشمسُ ساطعةٌ. — Le soleil brille.")],
+      [1, ex("خبر مفرد : الجوُّ جميلٌ · خبر جملة فعلية : الأمُّ تطبخُ · خبر جملة اسمية : الطالبُ أبوه طبيبٌ · خبر شبه جملة : الكتابُ على الطاولةِ", "Un exemple par type") + astuce("Pour trouver le type, regarde ce qui suit le sujet : un seul mot → مفرد ; un verbe → جملة فعلية ; un nom + son attribut → جملة اسمية ; une préposition ou un adverbe de lieu → شبه جملة.")],
+      [2, attention("Dans un خبر جملة, le pronom de rappel (الرابط) est obligatoire : الطالبُ أبوه طبيبٌ (ـه renvoie à الطالب).")]],
+    planches: [[1, { type: "2D", titre: "Quatre types de خبر", legende: "Un exemple par type, à lire de droite à gauche : l'attribut (خبر) peut être un mot, une phrase verbale, une phrase nominale ou un groupe prépositionnel.", svg: colonnes("أنواع الخبر", [{ t: "مفرد", c: BLEU, l: ["un seul mot", "الجوُّ جميلٌ", "le temps est beau"] }, { t: "جملة فعلية", c: VERT, l: ["une phrase verbale", "الأمُّ تطبخُ", "la mère cuisine"] }, { t: "جملة اسمية", c: "#7B3F99", l: ["une phrase nominale", "الطالبُ أبوه طبيبٌ", "son père est médecin"] }, { t: "شبه جملة", c: "#C2540A", l: ["préposition / lieu", "الكتابُ على الطاولةِ", "le livre est sur la table"] }], 200, "Tableau des quatre types d’attribut en arabe avec un exemple chacun") }]],
+    formules: [F("Repérer le sujet et l'attribut", "مبتدأ + خبر, tous deux مرفوع", "الجوُّ (مبتدأ) جميلٌ (خبر)"), F("Classer l'attribut", "un mot → مفرد ; phrase → جملة ; préposition / lieu → شبه جملة", "على الطاولةِ → خبر شبه جملة ; تطبخُ → خبر جملة فعلية"), F("Vérifier le lien", "خبر جملة + pronom de rappel الرابط", "الطالبُ أبوه طبيبٌ : ـه = الطالب")]
+  });
+
+  /* ═══════════ Tle ARABE — LAZIM ET MUTA'ADDI ═══════════ */
+  enrichir("tle-ar-verbes", {
+    blocs: [[0, def("الفعل اللازم", "Verbe dont l'action reste sur le sujet : il n'a pas de complément d'objet direct. Pour indiquer un lieu ou une personne, on passe par une préposition.") + formule("فعل لازم + فاعل (+ حرف جرّ + اسم مجرور)") + ex("جلسَ الولدُ على الكرسيِّ. · ذهبَ الطالبُ إلى المدرسةِ. · نامَ الطفلُ.")],
+      [1, formule("فعل متعدٍّ + فاعل (مرفوع) + مفعول به (منصوب)") + ex("كتبَ الطالبُ الدرسَ. · قرأتْ فاطمةُ الكتابَ. · أعطى الأبُ الولدَ كتاباً (deux compléments).") + astuce("Test : peut-on demander « quoi ? » ou « qui ? » directement après le verbe, sans préposition ? Oui → متعدٍّ ; non → لازم.")],
+      [2, attention("La forme IV (أفعلَ) et la forme II (فعّلَ) rendent souvent un verbe transitif : جلسَ → أجلسَ ، فرحَ → فرّحَ.")]],
+    planches: [[1, { type: "2D", titre: "لازم ou متعدٍّ : le tri des verbes d'Ibrahim", legende: "À gauche, les verbes dont l'action reste sur le sujet (complément seulement avec une préposition) ; à droite, ceux qui reçoivent un complément d'objet direct au cas direct.", svg: colonnes("اللازم والمتعدي", [{ t: "لازم (intransitif)", c: BLEU, l: ["جلسَ : s'asseoir", "ذهبَ : aller (إلى)", "نامَ : dormir", "→ ذهبَ الطالبُ إلى المدرسةِ"] }, { t: "متعدٍّ (transitif)", c: "#C2540A", l: ["كتبَ : écrire", "قرأَ : lire", "أعطى : donner (2 compléments)", "→ كتبَ الطالبُ الدرسَ"] }], 200, "Tableau : verbes intransitifs et transitifs arabes avec exemples") }]],
+    formules: [F("Tester le verbe", "complément direct possible ? oui → متعدٍّ ; non → لازم", "ذهبَ : non → لازم ; كتبَ : oui → متعدٍّ"), F("Corriger avec une préposition", "لازم + إلى / على / في + اسم مجرور", "ذهبَ الطالبُ إلى المدرسةِ"), F("Rendre transitif", "forme IV أفعلَ + مفعول به", "أجلسَ الأبُ الولدَ")]
+  });
+})();
+
+/* Leçons enrichies — lettres et sciences humaines, lot C (18/11/2026) : cultures nationales, orientation, philosophie (Tle, 2nde A),
+   ECM (2nde C). Même mécanisme que 29-enrichies-lettres-a.js : AJOUTS SEULEMENT. */
+(function () {
+  "use strict";
+  var NUIT = "#001136", BLEU = "#1E499B", GRIS = "#4D5163", VERT = "#17784D", ROUGE = "#C62828", TERRE = "#C46A2B";
+
+  function txt(x, y, t, o) {
+    o = o || {};
+    return "<text x='" + x + "' y='" + y + "' text-anchor='" + (o.a || "middle") + "' font-size='" + (o.s || 12) + "' font-weight='" + (o.w || 700) + "' fill='" + (o.c || NUIT) + "'" + (o.i ? " font-style='italic'" : "") + (o.halo ? " stroke='#fff' stroke-width='3' paint-order='stroke'" : "") + ">" + t + "</text>";
+  }
+  function lin(id, cs, vertical) {
+    var s = "<linearGradient id='" + id + "'" + (vertical ? " x1='0' y1='0' x2='0' y2='1'" : "") + ">";
+    cs.forEach(function (c, i) { s += "<stop offset='" + (i / (cs.length - 1)).toFixed(2) + "' stop-color='" + c + "'/>"; });
+    return s + "</linearGradient>";
+  }
+  function rad(id, cs) {
+    var s = "<radialGradient id='" + id + "' cx='35%' cy='30%' r='75%'>";
+    cs.forEach(function (c, i) { s += "<stop offset='" + (i / (cs.length - 1)).toFixed(2) + "' stop-color='" + c + "'/>"; });
+    return s + "</radialGradient>";
+  }
+  function fleche(id, c) { return "<marker id='" + id + "' markerWidth='10' markerHeight='10' refX='7' refY='5' orient='auto'><path d='M0 1L8 5L0 9Z' fill='" + c + "'/></marker>"; }
+  function svg(w, h, alt, defs, corps) {
+    return "<svg viewBox='0 0 " + w + " " + h + "' role='img' aria-label='" + alt + "' font-family='Inter,Arial,sans-serif'><rect width='" + w + "' height='" + h + "' fill='#fff'/><defs>" + defs + "</defs>" + corps +
+      "<text x='" + (w - 6) + "' y='" + (h - 5) + "' font-size='8' text-anchor='end' fill='#8A93A6'>Planche VÉRITAS</text></svg>";
+  }
+  function ancien(id) { return window.VRT_LECONS[id]; }
+  function remplacer(id, o) {
+    var a = ancien(id);
+    if (a) ["apc", "examen", "rang", "cle", "scenes"].forEach(function (k) { if (a[k] != null && o[k] == null) o[k] = a[k]; });
+    VRT_L(id, o);
+    if (a) o.ordre = a.ordre;
+  }
+  function q(qq, bonne, f1, f2, e) { return { q: qq, r: [bonne, f1, f2], b: 0, e: e }; }
+  function partie(old, i) { return old && old.parties[i] ? old.parties[i].html : ""; }
+  function bulle(x, y, w, t, c) { return "<rect x='" + x + "' y='" + y + "' width='" + w + "' height='30' rx='12' fill='#fff' stroke='" + (c || "#C9D2E3") + "'/>" + txt(x + w / 2, y + 20, t, { s: 11.5 }); }
+  function perso(x, y, peau, habit, bas) {
+    bas = bas || "#2E3445";
+    return "<g transform='translate(" + x + " " + y + ")'><ellipse cx='0' cy='84' rx='18' ry='4' fill='#001136' opacity='.18'/>" +
+      "<rect x='-9' y='44' width='8' height='36' rx='3' fill='" + bas + "'/><rect x='1' y='44' width='8' height='36' rx='3' fill='" + bas + "'/>" +
+      "<ellipse cx='-6' cy='81' rx='7' ry='3.5' fill='#1F2328'/><ellipse cx='6' cy='81' rx='7' ry='3.5' fill='#1F2328'/>" +
+      "<path d='M-13 46L-16 18C-16 13 -12 11 -6 10H6C12 11 16 13 16 18L13 46Z' fill='" + habit + "'/>" +
+      "<path d='M-15 16L-20 40' stroke='" + habit + "' stroke-width='7' stroke-linecap='round'/><path d='M15 16L20 40' stroke='" + habit + "' stroke-width='7' stroke-linecap='round'/>" +
+      "<circle cx='-20' cy='42' r='3.6' fill='" + peau + "'/><circle cx='20' cy='42' r='3.6' fill='" + peau + "'/>" +
+      "<rect x='-3.5' y='5' width='7' height='7' fill='" + peau + "'/><ellipse cx='0' cy='-2' rx='9' ry='10.5' fill='" + peau + "'/>" +
+      "<path d='M-9 -4C-10 -14 -4 -13.5 0 -13.5S10 -14 9 -4C7 -9 -7 -9 -9 -4Z' fill='#1B1410'/><ellipse cx='-9' cy='-1' rx='1.8' ry='3' fill='" + peau + "'/><ellipse cx='9' cy='-1' rx='1.8' ry='3' fill='" + peau + "'/></g>";
+  }
+  /* portrait en buste (arbre généalogique) */
+  function portrait(x, y, peau, habit, cheveux, age) {
+    var s = "<g transform='translate(" + x + " " + y + ")'><circle r='30' fill='#F4EFE4' stroke='#C9A576' stroke-width='3'/><clipPath id='pc" + x + "_" + y + "'><circle r='28'/></clipPath><g clip-path='url(#pc" + x + "_" + y + ")'>";
+    s += "<path d='M-26 32C-26 14 -14 10 0 10S26 14 26 32Z' fill='" + habit + "'/><rect x='-4' y='2' width='8' height='10' fill='" + peau + "'/><ellipse cy='-6' rx='11' ry='13' fill='" + peau + "'/>";
+    s += age === "vieux" ? "<path d='M-11 -10C-12 -20 -4 -21 0 -21S12 -20 11 -10C9 -14 -9 -14 -11 -10Z' fill='#D8D8D8'/>" : age === "femme" ? "<path d='M-13 -6C-15 -24 15 -24 13 -6C12 -14 -12 -14 -13 -6Z' fill='" + cheveux + "'/><path d='M-13 -14h26v-6c-6 -6 -20 -6 -26 0Z' fill='" + habit + "'/>" : "<path d='M-11 -10C-12 -20 -4 -21 0 -21S12 -20 11 -10C9 -14 -9 -14 -11 -10Z' fill='" + cheveux + "'/>";
+    s += "<circle cx='-4' cy='-6' r='1.4' fill='#1B1410'/><circle cx='4' cy='-6' r='1.4' fill='#1B1410'/><path d='M-3 2q3 2 6 0' stroke='#1B1410' fill='none'/></g></g>";
+    return s;
+  }
+  /* boucle d'exercice générique : [phrase avec ___, [bonne, autres…], explication] */
+  function exercice(el, C, suivant, lib) {
+    var i = 0, ok = 0;
+    el.innerHTML = "<p class='labo-r' data-q style='font-size:16px'></p><div style='display:flex;gap:8px;flex-wrap:wrap' data-c></div><p class='an-note' data-e></p><p class='labo-r' data-s></p>";
+    function $(s) { return el.querySelector(s); }
+    function poser() {
+      var c = C[i];
+      $("[data-q]").innerHTML = (i + 1) + ". " + c[0].replace("___", "<b style='border-bottom:2px dashed #1E499B;padding:0 14px'>?</b>");
+      $("[data-e]").textContent = ""; $("[data-s]").innerHTML = lib + " " + (i + 1) + " / " + C.length + " · score : <b>" + ok + "</b>";
+      $("[data-c]").innerHTML = c[1].slice().sort().map(function (x) { return "<button type='button' class='btn-l' data-v='" + x + "'>" + x + "</button>"; }).join("");
+      el.querySelectorAll("[data-v]").forEach(function (b) {
+        b.addEventListener("click", function () {
+          var bon = b.dataset.v === c[1][0]; if (bon) ok++;
+          $("[data-q]").innerHTML = (i + 1) + ". " + c[0].replace("___", "<b style='color:" + (bon ? VERT : ROUGE) + "'>" + c[1][0] + "</b>");
+          $("[data-e]").innerHTML = (bon ? "✔ " : "✘ ") + c[2];
+          el.querySelectorAll("[data-v]").forEach(function (x) { x.disabled = true; });
+          var nx = document.createElement("button"); nx.type = "button"; nx.className = "btn-l"; nx.textContent = i + 1 < C.length ? suivant : "↺";
+          nx.addEventListener("click", function () { i = (i + 1) % C.length; if (!i) ok = 0; poser(); });
+          $("[data-c]").appendChild(nx);
+          $("[data-s]").innerHTML = lib + " " + (i + 1) + " / " + C.length + " · score : <b>" + ok + "</b>";
+        });
+      });
+    }
+    poser();
+  }
+
+  function alea(g) { return function () { g = (g * 16807) % 2147483647; return (g - 1) / 2147483646; }; }
+  /* Consignes de Jacques (18/11/2026) : situation résolue avec les formules étape par étape, exemples, règles, astuces,
+     planches 2D et 3D. AJOUTS SEULEMENT : blocs en fin de partie, planches, denouement.formules. */
+  function enrichir(id, o) {
+    var L = ancien(id); if (!L) return;
+    (o.blocs || []).forEach(function (b) { var p = L.parties[b[0]]; if (p) p.html = (p.html || "") + b[1]; });
+    (o.planches || []).forEach(function (b) { var p = L.parties[b[0]]; if (p) p.planches = (p.planches || []).concat([b[1]]); });
+    if (o.formules && L.denouement && !(L.denouement.formules || []).length) L.denouement.formules = o.formules;
+  }
+  function def(t, h) { return "<div class='def'><b>" + t + "</b>" + h + "</div>"; }
+  function formule(h) { return "<p class='formule'>" + h + "</p>"; }
+  function ex(h, t) { return "<div class='ex'><b>" + (t || "Exemples") + "</b>" + h + "</div>"; }
+  function astuce(h, t) { return "<div class='astuce'><b>" + (t || "Astuce") + "</b>" + h + "</div>"; }
+  function attention(h, t) { return "<div class='attention'><b>" + (t || "Attention") + "</b>" + h + "</div>"; }
+  function methode(h, t) { return "<div class='methode'><b>" + (t || "Méthode") + "</b>" + h + "</div>"; }
+  function F(nom, f, calcul) { return { nom: nom, f: f, calcul: calcul }; }
+  /* fiche 2D en colonnes : [{t, c, l:[lignes]}] */
+  function colonnes(titre, cols, h, alt) {
+    var W = 640, n = cols.length, w = (W - 30 - (n - 1) * 12) / n, s = "<rect width='640' height='" + h + "' fill='#FBF8F2'/>" + txt(320, 28, titre, { s: 15 });
+    cols.forEach(function (c, i) {
+      var x = 15 + i * (w + 12);
+      s += "<rect x='" + x + "' y='44' width='" + w + "' height='" + (h - 58) + "' rx='12' fill='#fff' stroke='" + c.c + "' stroke-width='2'/><rect x='" + x + "' y='44' width='" + w + "' height='34' rx='11' fill='" + c.c + "'/>" + txt(x + w / 2, 66, c.t, { s: 14, c: "#fff" });
+      c.l.forEach(function (l, k) { s += txt(x + 12, 100 + k * 24, l, { s: 12, a: "start", w: l.charAt(0) === "→" ? 800 : 550, c: l.charAt(0) === "→" ? c.c : NUIT }); });
+    });
+    return svg(640, h, alt || titre, "", s);
+  }
+
+  function barres(titre, D, unite, h, alt) {
+    var max = Math.max.apply(null, D.map(function (d) { return d[1]; })), s = "<rect width='640' height='" + h + "' fill='#FBF8F2'/>" + txt(320, 28, titre, { s: 15 });
+    D.forEach(function (d, i) { var y = 52 + i * 36, w = d[1] / max * 330; s += txt(200, y + 18, d[0], { s: 12.5, a: "end", w: 600 }) + "<rect x='210' y='" + y + "' width='" + w.toFixed(0) + "' height='24' rx='6' fill='" + d[2] + "'/>" + txt(218 + w, y + 17, d[3] || (d[1].toLocaleString("fr-FR") + " " + unite), { s: 12, a: "start", c: NUIT }); });
+    return svg(640, h, alt || titre, "", s);
+  }
+
+  /* ═══════════ Tle CULTURES — LES FUNÉRAILLES ═══════════ */
+  enrichir("tle-cult-mort", {
+    blocs: [[0, def("Les funérailles", "Ensemble des rites qui accompagnent un décès : annonce, veillée, inhumation, deuil, puis cérémonie de fin de deuil ; elles honorent le défunt, réunissent la famille et transmettent sa mémoire.") + ex("Chez les Bamiléké, les grandes funérailles peuvent avoir lieu des mois ou des années après l'inhumation ; chez les Béti, le deuil est levé lors d'une cérémonie familiale.", "Selon les communautés")],
+      [1, formule("coût total = cérémonies + réception + tenues + morgue et transport + divers") + ex("Budget prévu : 3 000 000 F, dont réception 1 200 000 F, tenues 400 000 F, cérémonies 200 000 F.") + attention("Ce qui coûte le plus n'est pas le rite, mais la réception et l'apparence : on peut réduire sans manquer de respect.")],
+      [2, methode("1. Rappeler le sens des rites. 2. Lire le budget poste par poste. 3. Réduire ce qui n'est pas un rite. 4. Affecter les économies à une priorité (scolarité, caisse de solidarité). 5. Faire valider par le conseil de famille.", "Argumenter dans le débat") + astuce("Dans un débat familial, commence par ce qui unit (« nous voulons tous honorer Papa Kamga ») avant de proposer des économies.")]],
+    planches: [[2, { type: "2D", titre: "Le budget révisé des funérailles", legende: "Comparaison du budget prévu (3 000 000 F) et du budget révisé : une seule journée, réception limitée aux repas, pagne facultatif. Environ 900 000 F sont dégagés : 600 000 F pour la scolarité des quatre enfants, le reste pour la caisse de solidarité.", svg: barres("Prévu ou révisé ? (en F CFA)", [["Budget prévu", 3000000, "#C62828"], ["Budget révisé", 2100000, VERT], ["Économies", 900000, "#E8A33D"], ["dont scolarité", 600000, BLEU], ["dont caisse", 300000, "#7B3F99"]], "F", 240, "Barres : budget prévu 3 000 000 F, révisé 2 100 000 F, économies 900 000 F dont 600 000 F de scolarité") }]],
+    formules: [F("Lire le budget", "postes du rite / postes de l'apparence", "cérémonies 200 000 F ; réception 1 200 000 F ; tenues 400 000 F"), F("Économiser sans supprimer les rites", "économies = réductions de la réception, des tenues et de la durée", "≈ 900 000 F : 3 000 000 → 2 100 000 F"), F("Affecter les économies", "scolarité + caisse de solidarité", "600 000 F de scolarité + 300 000 F en caisse")]
+  });
+
+  /* ═══════════ Tle CULTURES — LA NAISSANCE ═══════════ */
+  enrichir("tle-cult-naissance", {
+    blocs: [[0, def("Rite de passage", "Cérémonie qui fait passer une personne d'un statut à un autre ; la nomination fait entrer le nouveau-né dans la famille et la lignée.") + ex("Présentation de l'enfant aux aînés, choix d'un nom qui honore un parent ou rappelle une circonstance, cadeaux et repas partagé.")],
+      [1, def("Acte de naissance", "Document d'état civil qui prouve l'identité de l'enfant (nom, date, lieu, parents) ; il est établi à partir de la déclaration faite au centre d'état civil dans les délais fixés par la loi.") + formule("grossesse → consultations prénatales → accouchement à la maternité → déclaration à l'état civil → nomination en famille") + ex("Sans acte de naissance, l'enfant ne pourra pas s'inscrire au CEP, au BEPC ou au baccalauréat, ni obtenir de carte d'identité.") + attention("Déclarer l'enfant est une obligation du père ou de la mère : on peut le faire avant la cérémonie de nomination, les deux ne s'opposent pas.")],
+      [2, astuce("Pour juger une pratique, pose deux questions : protège-t-elle la santé et les droits de l'enfant ? renforce-t-elle les liens de la famille ? Si oui aux deux, on la garde.")]],
+    planches: [[2, { type: "2D", titre: "Garder, adapter, abandonner", legende: "Trier les pratiques autour de la naissance selon deux critères : la santé et les droits de l'enfant, et le lien familial.", svg: colonnes("Tradition et vie moderne : trier", [{ t: "On garde", c: VERT, l: ["présentation à la famille", "nomination et transmission du nom", "solidarité autour de la mère", "repas partagé"] }, { t: "On adapte", c: "#E8A33D", l: ["nomination après la maternité", "conseils des aînées + suivi médical", "interdits alimentaires vérifiés", "fête simple et sans dettes"] }, { t: "On abandonne", c: ROUGE, l: ["accoucher seule au village", "remèdes non contrôlés", "refuser les vaccins", "ne pas déclarer l'enfant"] }], 230, "Tableau en trois colonnes : pratiques à garder, à adapter, à abandonner") }]],
+    formules: [F("Protéger la mère et l'enfant", "consultations prénatales + accouchement en maternité", "hôpital de district, sage-femme"), F("Donner une existence juridique", "déclaration à l'état civil dans les délais → acte de naissance", "inscription possible aux examens officiels"), F("Garder le lien familial", "présentation + nomination + solidarité", "cérémonie au retour de la maternité")]
+  });
+
+  /* ═══════════ Tle ORIENTATION — GÉRER SON TEMPS ═══════════ */
+  enrichir("tle-orient-temps", {
+    blocs: [[0, formule("temps d'écran par semaine = heures par jour × 7") + ex("Aïcha : 4,5 h × 7 = 31,5 h d'écran par semaine, plus que ses heures de cours.") + astuce("Note pendant une semaine ce que tu fais heure par heure : les « heures perdues » apparaissent tout de suite.")],
+      [1, formule("heures d'une matière = heures de révision × coefficient ÷ somme des coefficients") + ex("15 h × 5/15 = 5 h de philosophie ; 15 h × 4/15 = 4 h de français ; 3 h d'anglais ; 3 h d'histoire-géographie.", "Répartition d'Aïcha") + attention("Ne prends jamais le temps de révision sur le sommeil : il consolide la mémoire. Prends-le sur l'écran.")]],
+    planches: [[1, { type: "2D", titre: "15 heures de révision selon les coefficients", legende: "Les 15 heures hebdomadaires d'Aïcha réparties au prorata des coefficients (5, 4, 3, 3 : total 15) : 5 h, 4 h, 3 h et 3 h. On peut ensuite ajouter un bonus aux matières faibles.", svg: barres("Répartition des révisions de la semaine", [["Philosophie (coef. 5)", 5, "#7B3F99", "5 h"], ["Français (coef. 4)", 4, BLEU, "4 h"], ["Anglais (coef. 3)", 3, VERT, "3 h"], ["Histoire-géo (coef. 3)", 3, "#C2540A", "3 h"]], "h", 210, "Barres : 5 h de philosophie, 4 h de français, 3 h d’anglais, 3 h d’histoire-géographie") }]],
+    formules: [F("Faire le bilan", "écran par semaine = h par jour × 7", "4,5 × 7 = 31,5 h"), F("Libérer du temps sans toucher au sommeil", "gain = (4,5 − 1,5) h × 7", "3 × 7 = 21 h libérées → au moins 15 h de révision"), F("Répartir selon les coefficients", "h matière = 15 × coef ÷ 15", "philo 5 h · français 4 h · anglais 3 h · histoire-géo 3 h")]
+  });
+
+  /* ═══════════ Tle ORIENTATION — PRÉPARER LE BAC ═══════════ */
+  enrichir("tle-orient-bac", {
+    blocs: [[0, formule("moyenne = Σ (note × coefficient) ÷ Σ coefficients") + formule("gain de moyenne = Σ (points gagnés × coefficient) ÷ Σ coefficients") + ex("+3 en philosophie (coef. 5) : 15 ; +3 en français (coef. 4) : 12 ; +2 en anglais et en histoire-géo (coef. 3) : 6 + 6. Total 39 ÷ 22 ≈ 1,8 point : 8,6 → 10,4.") + def("Objectif SMART", "Spécifique, Mesurable, Atteignable, Réaliste, Temporel : « passer de 6 à 9 en philosophie au deuxième trimestre ».")],
+      [1, ex("Septembre-novembre : fiches et un sujet par mois ; décembre : réviser le trimestre ; avril-mai : examens blancs chronométrés.", "Calendrier type")]],
+    planches: [[0, { type: "2D", titre: "Ce que rapporte un point, selon le coefficient", legende: "Avec un total de coefficients de 22, un point gagné en philosophie (coef. 5) rapporte 0,23 point de moyenne, cinq fois plus qu'un point en EPS (coef. 1). Les efforts se concentrent d'abord sur les forts coefficients.", svg: barres("Gain de moyenne pour 1 point gagné", [["Philosophie (coef. 5)", 0.23, "#7B3F99", "+0,23"], ["Français (coef. 4)", 0.18, BLEU, "+0,18"], ["Anglais (coef. 3)", 0.14, VERT, "+0,14"], ["Mathématiques (coef. 2)", 0.09, "#C2540A", "+0,09"], ["EPS (coef. 1)", 0.05, GRIS, "+0,05"]], "", 240, "Barres : gain de moyenne par point selon le coefficient, de 0,23 en philosophie à 0,05 en EPS") }]],
+    formules: [F("Effet d'un progrès ciblé", "gain = Σ (points × coef) ÷ 22", "(3×5 + 3×4 + 2×3 + 2×3) ÷ 22 = 39 ÷ 22 ≈ 1,8"), F("Nouvelle moyenne", "moyenne visée = 8,6 + gain", "8,6 + 1,8 ≈ 10,4 : admis"), F("Planifier", "objectifs SMART + un sujet par mois + examens blancs", "philosophie : de 6 à 9 au 2ᵉ trimestre")]
+  });
+
+  /* ═══════════ Tle PHILOSOPHIE — LIBERTÉ ET RESPONSABILITÉ ═══════════ */
+  enrichir("tle-philo-liberte", {
+    blocs: [[1, ex("Le malade mental qui agresse sous l'effet d'un délire est jugé irresponsable ; le chauffeur qui boit avant de conduire est responsable de l'accident, car il a choisi de boire.", "Deux cas opposés") + astuce("Pour juger une responsabilité, pose deux questions : la personne savait-elle ce qu'elle faisait ? pouvait-elle faire autrement ? Si oui aux deux, elle est responsable.")],
+      [2, ex("Sartre : « L'homme est condamné à être libre » ; même conditionné par son milieu, il reste responsable de ce qu'il fait de ce qu'on a fait de lui.", "Une thèse") + attention("Expliquer un acte (par l'éducation, la pauvreté) n'est pas l'excuser : les déterminismes diminuent parfois la responsabilité, ils ne la suppriment pas.")]],
+    planches: [[1, { type: "2D", titre: "Responsable ou non ? Les deux conditions", legende: "On n'est responsable que si l'on a agi en connaissance de cause et sans contrainte. Les trois situations de la leçon passées au crible.", svg: colonnes("Savait-il ? Pouvait-il faire autrement ?", [{ t: "Paul (freins sabotés)", c: GRIS, l: ["savait : non", "(il ignorait le sabotage)", "n'a rien choisi", "→ pas responsable"] }, { t: "Ernest (arme pointée)", c: "#7B3F99", l: ["savait : oui", "pouvait autrement : non", "(sous la menace)", "→ pas responsable"] }, { t: "Bertrand (ivre)", c: ROUGE, l: ["savait : oui", "pouvait autrement : oui", "(il a choisi de boire)", "→ responsable"] }], 220, "Trois colonnes : Paul aux freins sabotés, Ernest menacé d’une arme, Bertrand ivre, et leur responsabilité") }]],
+    formules: [F("Définir", "liberté = pouvoir de choisir ; responsabilité = devoir répondre de ses actes", "pas de responsabilité sans liberté"), F("Tester les deux conditions", "responsable ⇔ il savait ET pouvait faire autrement", "Paul ignorait le sabotage ; Ernest était menacé → non responsables"), F("Conclure", "déterminisme ≠ excuse", "Bertrand a choisi de boire puis de conduire → responsable")]
+  });
+
+  /* ═══════════ Tle PHILOSOPHIE — LES PASSIONS ═══════════ */
+  enrichir("tle-philo-passions", {
+    blocs: [[0, formule("émotion = choc bref et intense · passion = inclination durable, exclusive, qui oriente toute la vie") + ex("La colère d'un supporter après un but : émotion. L'amour du football qui organise toutes ses journées : passion.")],
+      [1, ex("Junior ne pense plus qu'au jeu vidéo, néglige ses devoirs et trouve des excuses à tout ; Sali, passionnée de musique, répète des heures et joue au festival du lycée.", "Mêmes signes, deux destins") + astuce("Exclusivité, cristallisation, aveuglement : reconnais ces trois mots dans un sujet et tu sauras que l'on parle de passion.")]],
+    formules: [F("Distinguer", "passion (durable, exclusive) ≠ émotion (brève)", "le jeu de Junior dure des mois : passion"), F("Repérer les manifestations", "exclusivité + cristallisation + aveuglement", "Junior et Sali : mêmes signes"), F("Juger", "servitude si la passion gouverne la raison ; grandeur si la raison la gouverne", "Junior : servitude · Sali : grandeur (Hegel)")]
+  });
+
+  /* ═══════════ 2nde A PHILOSOPHIE — DÉFINITIONS ═══════════ */
+  enrichir("2nde-a-philo-definitions", {
+    blocs: [[1, astuce("Face à une affirmation, pose les trois questions de Socrate : Qu'est-ce que cela veut dire ? Comment le sait-on ? Existe-t-il un contre-exemple ?") + attention("Philosopher n'est pas contredire tout le monde : c'est examiner avec méthode, puis accepter l'argument le plus solide, même s'il n'est pas le sien.")]],
+    formules: [F("Définir", "philosophie = philein (aimer) + sophia (sagesse)", "amour de la sagesse, réflexion critique et rationnelle"), F("Examiner l'opinion", "qui l'affirme ? sur quelles preuves ? contre-exemple ?", "« jamais de travail » : un contre-exemple suffit"), F("Situer", "la philosophie existe partout où l'on argumente", "palabre ; Towa, Njoh-Mouelle")]
+  });
+
+  /* ═══════════ 2nde C ECM — LA PRODUCTION ═══════════ */
+  enrichir("2nde-c-ecm-production", {
+    blocs: [[0, formule("production = biens (matériels) + services (immatériels)") + ex("Biens : chocolat, ciment, savon. Services : transport des tablettes, vente au supermarché, soins à l'hôpital.")],
+      [2, def("Valeur ajoutée", "Richesse créée par une entreprise : valeur de ce qu'elle produit moins la valeur de ce qu'elle a acheté pour produire.") + formule("valeur ajoutée = valeur de la production − consommations intermédiaires") + ex("Une tablette vendue 1 000 F, fabriquée avec 400 F de fèves, de sucre et d'emballage : valeur ajoutée = 600 F, gardée au Cameroun au lieu de partir à l'étranger.", "Exemple chiffré")]],
+    planches: [[2, { type: "2D", titre: "La valeur ajoutée, de la fève à la tablette", legende: "En exportant des fèves, la coopérative ne garde que la valeur du premier maillon ; en transformant elle-même, elle garde la valeur ajoutée de la chocolaterie et de la vente (exemple chiffré).", svg: barres("Valeur ajoutée par tablette (exemple)", [["Fèves, sucre, emballage", 400, "#8B5A2B", "400 F (achats)"], ["Tablette vendue", 1000, "#7A4A1E", "1 000 F"], ["Valeur ajoutée", 600, VERT, "600 F gardés sur place"]], "F", 170, "Barres : 400 F d’achats, tablette vendue 1 000 F, valeur ajoutée 600 F") }]],
+    formules: [F("Qu'est-ce que produire ?", "production = biens + services", "tablette = bien ; transport et vente = services"), F("Les facteurs", "nature + travail + capital + esprit d'entreprise", "fèves ; ouvriers ; torréfacteur, broyeuse ; plan d'affaires"), F("Ce que rapporte la transformation", "valeur ajoutée = production − consommations intermédiaires", "1 000 − 400 = 600 F par tablette")]
+  });
+})();
+
+/* Leçons enrichies — premier cycle, lot D (18/11/2026) : langues nationales, arts, EPS, latin, grec. Même mécanisme que
+   29-enrichies-lettres-a.js : AJOUTS SEULEMENT. */
+(function () {
+  "use strict";
+  var NUIT = "#001136", BLEU = "#1E499B", GRIS = "#4D5163", VERT = "#17784D", ROUGE = "#C62828", TERRE = "#C46A2B";
+
+  function txt(x, y, t, o) {
+    o = o || {};
+    return "<text x='" + x + "' y='" + y + "' text-anchor='" + (o.a || "middle") + "' font-size='" + (o.s || 12) + "' font-weight='" + (o.w || 700) + "' fill='" + (o.c || NUIT) + "'" + (o.i ? " font-style='italic'" : "") + (o.halo ? " stroke='#fff' stroke-width='3' paint-order='stroke'" : "") + ">" + t + "</text>";
+  }
+  function lin(id, cs, vertical) {
+    var s = "<linearGradient id='" + id + "'" + (vertical ? " x1='0' y1='0' x2='0' y2='1'" : "") + ">";
+    cs.forEach(function (c, i) { s += "<stop offset='" + (i / (cs.length - 1)).toFixed(2) + "' stop-color='" + c + "'/>"; });
+    return s + "</linearGradient>";
+  }
+  function rad(id, cs) {
+    var s = "<radialGradient id='" + id + "' cx='35%' cy='30%' r='75%'>";
+    cs.forEach(function (c, i) { s += "<stop offset='" + (i / (cs.length - 1)).toFixed(2) + "' stop-color='" + c + "'/>"; });
+    return s + "</radialGradient>";
+  }
+  function fleche(id, c) { return "<marker id='" + id + "' markerWidth='10' markerHeight='10' refX='7' refY='5' orient='auto'><path d='M0 1L8 5L0 9Z' fill='" + c + "'/></marker>"; }
+  function svg(w, h, alt, defs, corps) {
+    return "<svg viewBox='0 0 " + w + " " + h + "' role='img' aria-label='" + alt + "' font-family='Inter,Arial,sans-serif'><rect width='" + w + "' height='" + h + "' fill='#fff'/><defs>" + defs + "</defs>" + corps +
+      "<text x='" + (w - 6) + "' y='" + (h - 5) + "' font-size='8' text-anchor='end' fill='#8A93A6'>Planche VÉRITAS</text></svg>";
+  }
+  function ancien(id) { return window.VRT_LECONS[id]; }
+  function remplacer(id, o) {
+    var a = ancien(id);
+    if (a) ["apc", "examen", "rang", "cle", "scenes"].forEach(function (k) { if (a[k] != null && o[k] == null) o[k] = a[k]; });
+    VRT_L(id, o);
+    if (a) o.ordre = a.ordre;
+  }
+  function q(qq, bonne, f1, f2, e) { return { q: qq, r: [bonne, f1, f2], b: 0, e: e }; }
+  function partie(old, i) { return old && old.parties[i] ? old.parties[i].html : ""; }
+  function bulle(x, y, w, t, c) { return "<rect x='" + x + "' y='" + y + "' width='" + w + "' height='30' rx='12' fill='#fff' stroke='" + (c || "#C9D2E3") + "'/>" + txt(x + w / 2, y + 20, t, { s: 11.5 }); }
+  function perso(x, y, peau, habit, bas) {
+    bas = bas || "#2E3445";
+    return "<g transform='translate(" + x + " " + y + ")'><ellipse cx='0' cy='84' rx='18' ry='4' fill='#001136' opacity='.18'/>" +
+      "<rect x='-9' y='44' width='8' height='36' rx='3' fill='" + bas + "'/><rect x='1' y='44' width='8' height='36' rx='3' fill='" + bas + "'/>" +
+      "<ellipse cx='-6' cy='81' rx='7' ry='3.5' fill='#1F2328'/><ellipse cx='6' cy='81' rx='7' ry='3.5' fill='#1F2328'/>" +
+      "<path d='M-13 46L-16 18C-16 13 -12 11 -6 10H6C12 11 16 13 16 18L13 46Z' fill='" + habit + "'/>" +
+      "<path d='M-15 16L-20 40' stroke='" + habit + "' stroke-width='7' stroke-linecap='round'/><path d='M15 16L20 40' stroke='" + habit + "' stroke-width='7' stroke-linecap='round'/>" +
+      "<circle cx='-20' cy='42' r='3.6' fill='" + peau + "'/><circle cx='20' cy='42' r='3.6' fill='" + peau + "'/>" +
+      "<rect x='-3.5' y='5' width='7' height='7' fill='" + peau + "'/><ellipse cx='0' cy='-2' rx='9' ry='10.5' fill='" + peau + "'/>" +
+      "<path d='M-9 -4C-10 -14 -4 -13.5 0 -13.5S10 -14 9 -4C7 -9 -7 -9 -9 -4Z' fill='#1B1410'/><ellipse cx='-9' cy='-1' rx='1.8' ry='3' fill='" + peau + "'/><ellipse cx='9' cy='-1' rx='1.8' ry='3' fill='" + peau + "'/></g>";
+  }
+  /* portrait en buste (arbre généalogique) */
+  function portrait(x, y, peau, habit, cheveux, age) {
+    var s = "<g transform='translate(" + x + " " + y + ")'><circle r='30' fill='#F4EFE4' stroke='#C9A576' stroke-width='3'/><clipPath id='pc" + x + "_" + y + "'><circle r='28'/></clipPath><g clip-path='url(#pc" + x + "_" + y + ")'>";
+    s += "<path d='M-26 32C-26 14 -14 10 0 10S26 14 26 32Z' fill='" + habit + "'/><rect x='-4' y='2' width='8' height='10' fill='" + peau + "'/><ellipse cy='-6' rx='11' ry='13' fill='" + peau + "'/>";
+    s += age === "vieux" ? "<path d='M-11 -10C-12 -20 -4 -21 0 -21S12 -20 11 -10C9 -14 -9 -14 -11 -10Z' fill='#D8D8D8'/>" : age === "femme" ? "<path d='M-13 -6C-15 -24 15 -24 13 -6C12 -14 -12 -14 -13 -6Z' fill='" + cheveux + "'/><path d='M-13 -14h26v-6c-6 -6 -20 -6 -26 0Z' fill='" + habit + "'/>" : "<path d='M-11 -10C-12 -20 -4 -21 0 -21S12 -20 11 -10C9 -14 -9 -14 -11 -10Z' fill='" + cheveux + "'/>";
+    s += "<circle cx='-4' cy='-6' r='1.4' fill='#1B1410'/><circle cx='4' cy='-6' r='1.4' fill='#1B1410'/><path d='M-3 2q3 2 6 0' stroke='#1B1410' fill='none'/></g></g>";
+    return s;
+  }
+  /* boucle d'exercice générique : [phrase avec ___, [bonne, autres…], explication] */
+  function exercice(el, C, suivant, lib) {
+    var i = 0, ok = 0;
+    el.innerHTML = "<p class='labo-r' data-q style='font-size:16px'></p><div style='display:flex;gap:8px;flex-wrap:wrap' data-c></div><p class='an-note' data-e></p><p class='labo-r' data-s></p>";
+    function $(s) { return el.querySelector(s); }
+    function poser() {
+      var c = C[i];
+      $("[data-q]").innerHTML = (i + 1) + ". " + c[0].replace("___", "<b style='border-bottom:2px dashed #1E499B;padding:0 14px'>?</b>");
+      $("[data-e]").textContent = ""; $("[data-s]").innerHTML = lib + " " + (i + 1) + " / " + C.length + " · score : <b>" + ok + "</b>";
+      $("[data-c]").innerHTML = c[1].slice().sort().map(function (x) { return "<button type='button' class='btn-l' data-v='" + x + "'>" + x + "</button>"; }).join("");
+      el.querySelectorAll("[data-v]").forEach(function (b) {
+        b.addEventListener("click", function () {
+          var bon = b.dataset.v === c[1][0]; if (bon) ok++;
+          $("[data-q]").innerHTML = (i + 1) + ". " + c[0].replace("___", "<b style='color:" + (bon ? VERT : ROUGE) + "'>" + c[1][0] + "</b>");
+          $("[data-e]").innerHTML = (bon ? "✔ " : "✘ ") + c[2];
+          el.querySelectorAll("[data-v]").forEach(function (x) { x.disabled = true; });
+          var nx = document.createElement("button"); nx.type = "button"; nx.className = "btn-l"; nx.textContent = i + 1 < C.length ? suivant : "↺";
+          nx.addEventListener("click", function () { i = (i + 1) % C.length; if (!i) ok = 0; poser(); });
+          $("[data-c]").appendChild(nx);
+          $("[data-s]").innerHTML = lib + " " + (i + 1) + " / " + C.length + " · score : <b>" + ok + "</b>";
+        });
+      });
+    }
+    poser();
+  }
+
+  function alea(g) { return function () { g = (g * 16807) % 2147483647; return (g - 1) / 2147483646; }; }
+  /* Consignes de Jacques (18/11/2026) : situation résolue avec les formules étape par étape, exemples, règles, astuces,
+     planches 2D et 3D. AJOUTS SEULEMENT : blocs en fin de partie, planches, denouement.formules. */
+  function enrichir(id, o) {
+    var L = ancien(id); if (!L) return;
+    (o.blocs || []).forEach(function (b) { var p = L.parties[b[0]]; if (p) p.html = (p.html || "") + b[1]; });
+    (o.planches || []).forEach(function (b) { var p = L.parties[b[0]]; if (p) p.planches = (p.planches || []).concat([b[1]]); });
+    if (o.formules && L.denouement && !(L.denouement.formules || []).length) L.denouement.formules = o.formules;
+  }
+  function def(t, h) { return "<div class='def'><b>" + t + "</b>" + h + "</div>"; }
+  function formule(h) { return "<p class='formule'>" + h + "</p>"; }
+  function ex(h, t) { return "<div class='ex'><b>" + (t || "Exemples") + "</b>" + h + "</div>"; }
+  function astuce(h, t) { return "<div class='astuce'><b>" + (t || "Astuce") + "</b>" + h + "</div>"; }
+  function attention(h, t) { return "<div class='attention'><b>" + (t || "Attention") + "</b>" + h + "</div>"; }
+  function methode(h, t) { return "<div class='methode'><b>" + (t || "Méthode") + "</b>" + h + "</div>"; }
+  function F(nom, f, calcul) { return { nom: nom, f: f, calcul: calcul }; }
+  /* fiche 2D en colonnes : [{t, c, l:[lignes]}] */
+  function colonnes(titre, cols, h, alt) {
+    var W = 640, n = cols.length, w = (W - 30 - (n - 1) * 12) / n, s = "<rect width='640' height='" + h + "' fill='#FBF8F2'/>" + txt(320, 28, titre, { s: 15 });
+    cols.forEach(function (c, i) {
+      var x = 15 + i * (w + 12);
+      s += "<rect x='" + x + "' y='44' width='" + w + "' height='" + (h - 58) + "' rx='12' fill='#fff' stroke='" + c.c + "' stroke-width='2'/><rect x='" + x + "' y='44' width='" + w + "' height='34' rx='11' fill='" + c.c + "'/>" + txt(x + w / 2, 66, c.t, { s: 14, c: "#fff" });
+      c.l.forEach(function (l, k) { s += txt(x + 12, 100 + k * 24, l, { s: 12, a: "start", w: l.charAt(0) === "→" ? 800 : 550, c: l.charAt(0) === "→" ? c.c : NUIT }); });
+    });
+    return svg(640, h, alt || titre, "", s);
+  }
+
+  function etapes(titre, E, h, alt) {
+    var n = E.length, w = (600 - (n - 1) * 16) / n, s = "<rect width='640' height='" + h + "' fill='#FBF8F2'/>" + txt(320, 28, titre, { s: 15 });
+    E.forEach(function (e, i) { var x = 20 + i * (w + 16); s += "<rect x='" + x + "' y='46' width='" + w + "' height='" + (h - 62) + "' rx='14' fill='#fff' stroke='" + e[2] + "' stroke-width='2.5'/><circle cx='" + (x + 24) + "' cy='70' r='14' fill='" + e[2] + "'/>" + txt(x + 24, 75, String(i + 1), { s: 13, c: "#fff" }) + txt(x + w / 2 + 12, 76, e[0], { s: 13, c: e[2] }) + (e[3] ? "<g transform='translate(" + (x + w / 2) + " " + (h / 2 + 8) + ")'>" + e[3] + "</g>" : "") + txt(x + w / 2, h - 30, e[1], { s: 11, w: 600 }) + (i < n - 1 ? "<path d='M" + (x + w + 2) + " " + (h / 2 + 10) + "h12' stroke='" + NUIT + "' stroke-width='2.5' marker-end='url(#etF)'/>" : ""); });
+    return svg(640, h, alt || titre, fleche("etF", NUIT), s);
+  }
+  function bonhomme(pose) {
+    var P = { course: "M0 -30V0M0 0l-10 18M0 0l12 14l-2 8M0 -22l-12 10M0 -22l12 -6", genoux: "M0 -30V0M0 0l0 24M0 0l14 -4l2 14M0 -22l-12 10M0 -22l12 10", talons: "M0 -30V0M0 0l-2 24M0 0l6 12l-12 4M0 -22l-12 10M0 -22l12 10", bras: "M0 -30V0M0 0l-8 24M0 0l8 24M0 -22l-16 -10M0 -22l16 -10" };
+    return "<circle cx='0' cy='-38' r='7' fill='#6B4423'/><path d='" + P[pose] + "' stroke='" + NUIT + "' stroke-width='4' stroke-linecap='round' fill='none'/>";
+  }
+
+  /* ═══════════ 4e LANGUES NATIONALES — LES TONS ═══════════ */
+  enrichir("4e-ln-tons", {
+    blocs: [[0, def("Ton", "Hauteur musicale d'une syllabe ; dans une langue à tons, changer le ton peut changer le sens du mot.") + ex("En français déjà, l'intonation change le sens d'une phrase : « Il vient. » (affirmation) / « Il vient ? » (question). Dans nos langues, c'est le mot lui-même qui change.")],
+      [1, formule("haut : ´ (á) · bas : ` (à) · moyen : ¯ (ā) · montant : ˇ (ǎ) · descendant : ˆ (â)") + ex("bá (haut), bà (bas), bā (moyen), bǎ (montant), bâ (descendant) : cinq mélodies sur la même syllabe.") + astuce("Accent aigu = la voix monte en haut ; accent grave = elle descend en bas ; le signe dessine la mélodie : ˇ monte, ˆ descend.")],
+      [2, attention("Ne confonds pas ton et accent tonique : en français, on appuie sur la dernière syllabe sans changer le sens ; le ton, lui, distingue des mots.")]],
+    planches: [[2, { type: "2D", titre: "Noter le ton d'un mot en quatre gestes", legende: "La méthode de la leçon en quatre gestes : écouter le mot, le fredonner sur « la-la », tracer sa mélodie avec la main, puis noter le signe AGLC sur la voyelle.", svg: etapes("Noter le ton d'un mot en quatre gestes", [["Écouter", "le mot dit par l'enseignant", "#1E499B", "<path d='M-14 -6q6 -10 14 0M-20 -12q12 -18 26 0' stroke='#1E499B' stroke-width='3' fill='none'/><circle r='5' fill='#1E499B'/>"], ["Fredonner", "« la-la » sur la mélodie", "#7B3F99", "<path d='M-18 6q10 -20 18 -6t18 -10' stroke='#7B3F99' stroke-width='3' fill='none'/><circle cx='-18' cy='6' r='4' fill='#7B3F99'/>"], ["Tracer", "la courbe avec la main", "#C2540A", "<path d='M-20 10L0 -10L20 10' stroke='#C2540A' stroke-width='4' fill='none' stroke-linecap='round'/>"], ["Noter", "le signe AGLC sur la voyelle", "#2E7D32", "<text y='8' text-anchor='middle' font-size='30' font-weight='800' fill='#2E7D32'>bâ</text>"]], 200, "Quatre étapes pour noter un ton : écouter, fredonner, tracer, noter") }]],
+    formules: [F("Définir", "ton = hauteur musicale d'une syllabe", "le volume (fort / doux) ne change pas le ton"), F("Vérifier l'effet sur le sens", "mêmes sons + ton différent = mot différent", "bá ≠ bà ≠ bā ≠ bǎ ≠ bâ"), F("Noter selon l'AGLC", "´ haut · ` bas · ¯ moyen · ˇ montant · ˆ descendant", "les signes de l'affiche restent")]
+  });
+
+  /* ═══════════ 6e ARTS — LES BRANCHES ═══════════ */
+  enrichir("6e-arts-branches", {
+    blocs: [[0, def("Arts plastiques", "Arts qui façonnent la matière, les formes et les couleurs pour créer une œuvre que l'on regarde : dessin, peinture, sculpture, poterie, tissage, photographie, architecture.") + ex("Les sculptures en bois de Foumban, les poteries décorées, les pagnes ndop teints à l'indigo.")],
+      [1, def("Arts musicaux et arts scéniques", "Arts musicaux : on organise des sons (chant, instruments). Arts scéniques : on donne un spectacle devant un public (théâtre, danse, conte, mime, marionnettes).") + ex("Musical : un air de balafon, un chant de chorale. Scénique : un conte de la tortue dit à la veillée, une danse bikutsi.") + astuce("Demande-toi ce que reçoit le public : il regarde une œuvre → plastique ; il écoute → musical ; il assiste à un spectacle joué → scénique.")]],
+    planches: [[2, { type: "2D", titre: "Quel jury ? L'arbre de décision", legende: "Deux questions suffisent pour ranger une œuvre : le public la regarde-t-il comme un objet ? sinon, l'écoute-t-il seulement ou assiste-t-il à un spectacle ?", svg: (function () {
+      var s = "<rect width='640' height='260' fill='#FBF8F2'/>";
+      function b(x, y, w, t, c, f) { return "<rect x='" + x + "' y='" + y + "' width='" + w + "' height='44' rx='10' fill='" + (f ? c : "#fff") + "' stroke='" + c + "' stroke-width='2'/>" + txt(x + w / 2, y + 27, t, { s: 12.5, c: f ? "#fff" : NUIT }); }
+      s += b(170, 14, 300, "Le public regarde un objet créé ?", BLEU) + "<path d='M320 58V78H120V96M320 78H470V96' stroke='" + NUIT + "' stroke-width='2' fill='none'/>" + txt(210, 74, "oui", { s: 11, c: VERT }) + txt(420, 74, "non", { s: 11, c: ROUGE });
+      s += b(30, 96, 180, "ARTS PLASTIQUES", "#352C72", true) + txt(120, 160, "bronze, ndop, photo", { s: 11, w: 500 });
+      s += b(340, 96, 260, "Il écoute seulement ?", BLEU) + "<path d='M470 140V160H380V178M470 160H560V178' stroke='" + NUIT + "' stroke-width='2' fill='none'/>" + txt(415, 156, "oui", { s: 11, c: VERT }) + txt(525, 156, "non", { s: 11, c: ROUGE });
+      s += b(300, 178, 160, "ARTS MUSICAUX", "#6B4E00", true) + b(470, 178, 160, "ARTS SCÉNIQUES", "#6E1F43", true) + txt(380, 242, "balafon, chant", { s: 11, w: 500 }) + txt(550, 242, "conte, danse, théâtre", { s: 11, w: 500 });
+      return svg(640, 260, "Arbre de décision : objet regardé, arts plastiques ; sinon, écoute seule, arts musicaux ; spectacle, arts scéniques", "", s);
+    })() }]],
+    formules: [F("Ce que perçoit le public", "regarder → plastique ; écouter → musical ; spectacle → scénique", "statuette → plastique · balafon → musical"), F("Ne pas se fier à la matière", "on classe l'œuvre, pas l'objet", "balafon en bois sculpté → air de musique → musical"), F("Reconnaître le conte", "parole + gestes + public = spectacle", "conte de la tortue → scénique")]
+  });
+
+  /* ═══════════ 6e EPS — COORDINATION BRAS-JAMBES ═══════════ */
+  enrichir("6e-eps-bras-jambes", {
+    blocs: [[0, def("Coordination croisée", "En course, le bras qui avance est toujours opposé à la jambe qui avance : bras gauche avec jambe droite, bras droit avec jambe gauche.") + formule("jambe droite devant ⇔ bras gauche devant · jambe gauche devant ⇔ bras droit devant") + ex("Observe un sprinteur au ralenti : à chaque foulée, son épaule gauche avance avec son genou droit.")],
+      [2, ex("Footing 5 minutes, rotations des chevilles, genoux et épaules, 2 × 20 m de montées de genoux, 2 × 20 m de talons-fesses, puis deux accélérations progressives.", "Un échauffement de 10 minutes") + astuce("Pour retrouver la coordination, marche d'abord en exagérant le balancement des bras, puis trottine, puis accélère.")]],
+    planches: [[2, { type: "2D", titre: "L'échauffement en quatre exercices", legende: "Un échauffement simple avant de courir : footing lent, montées de genoux, talons-fesses, rotations des articulations.", svg: etapes("L'échauffement en quatre exercices", [["Footing", "5 min, allure lente", "#1E499B", bonhomme("course")], ["Montées de genoux", "2 × 20 m", "#7B3F99", bonhomme("genoux")], ["Talons-fesses", "2 × 20 m", "#C2540A", bonhomme("talons")], ["Rotations", "chevilles, épaules", "#2E7D32", bonhomme("bras")]], 210, "Quatre silhouettes : footing, montées de genoux, talons-fesses, rotations des bras") }]],
+    formules: [F("Rôle des bras", "bras = équilibre + rythme", "bras collés de Samuel → course freinée"), F("Coordination croisée", "bras opposé à la jambe", "Aboubakar, bras du même côté → le buste tourne, il zigzague"), F("Prévenir les crampes", "échauffement progressif avant, récupération après", "footing, montées de genoux, talons-fesses")]
+  });
+
+  /* ═══════════ 6e EPS — LA PISTE ═══════════ */
+  enrichir("6e-eps-piste", {
+    blocs: [[0, def("Piste réglementaire", "Anneau de 400 m mesuré dans le couloir 1, composé de deux lignes droites et de deux virages, avec en général huit couloirs de 1,22 m.") + ex("Un tour de piste = 400 m ; le 800 m = deux tours ; le 1 500 m = trois tours trois quarts.")],
+      [1, formule("décalage au 200 m ≈ π × (rayon du couloir − rayon du couloir 1)") + ex("Couloir 8 : π × (45,24 − 36,80) ≈ 26,5 m d'avance au départ du 200 m ; au 400 m (deux virages) : environ 53 m.") + astuce("Le coureur qui part le plus loin devant (couloir 8) ne voit pas ses adversaires : il doit courir « à l'aveugle » et garder son allure.") + attention("Au 200 m et au 400 m, mettre le pied dans le couloir voisin, surtout à l'intérieur du virage, entraîne la disqualification.")]],
+    planches: [[1, { type: "2D", titre: "La piste vue de dessus : son vocabulaire", legende: "Vue de dessus d'une piste : deux lignes droites, deux virages, huit couloirs, la corde à l'intérieur, la ligne d'arrivée au bout de la ligne droite et le sens de course (inverse des aiguilles d'une montre).", svg: (function () {
+      var s = "<rect width='640' height='300' fill='#6E9B45'/>", cy = 150, cx1 = 200, cx2 = 440;
+      function st(r) { return "M" + cx1 + " " + (cy - r) + "H" + cx2 + "A" + r + " " + r + " 0 0 1 " + cx2 + " " + (cy + r) + "H" + cx1 + "A" + r + " " + r + " 0 0 1 " + cx1 + " " + (cy - r) + "Z"; }
+      s += "<path d='" + st(126) + "' fill='#B5442C'/><path d='" + st(90) + "' fill='#5E9E4E'/>"; for (var k = 0; k <= 8; k++) s += "<path d='" + st(90 + k * 4.5) + "' fill='none' stroke='#F4F1EA' stroke-width='1'/>";
+      s += "<path d='M" + cx2 + " " + (cy + 90) + "V" + (cy + 126) + "' stroke='#fff' stroke-width='4'/><path d='M260 " + (cy + 108) + "H380' stroke='#fff' stroke-width='3' marker-end='url(#psF)'/>";
+      [[320, cy - 108, "ligne droite", "#fff"], [90, cy, "virage", "#fff"], [320, cy, "pelouse", "#fff"], [470, cy + 140, "ligne d'arrivée", "#fff"], [320, cy + 140, "sens de course", "#fff"], [560, cy - 70, "couloir 8", "#fff"], [540, cy + 60, "corde (couloir 1)", "#F7C948"]].forEach(function (e) { s += txt(e[0], e[1] + 4, e[2], { s: 12, c: e[3] }); });
+      return svg(640, 300, "Vue de dessus d’une piste rouge à huit couloirs avec le vocabulaire : ligne droite, virage, corde, ligne d’arrivée, sens de course", fleche("psF", "#fff"), s);
+    })() }]],
+    formules: [F("Longueur d'un tour", "400 m mesurés dans le couloir 1", "les couloirs extérieurs sont plus longs dans les virages"), F("Décalage au 200 m", "π × (R du couloir − R du couloir 1)", "couloir 8 : π × (45,24 − 36,80) ≈ 26,5 m"), F("Règle du couloir", "rester dans son couloir du départ à l'arrivée", "couper le virage → disqualification")]
+  });
+
+  /* ═══════════ 6e LATIN — JOURS ET MOIS ═══════════ */
+  enrichir("6e-la-jours", {
+    blocs: [[0, formule("jour = nom de l'astre (au génitif) + dies : Lunae dies → lundi") + ex("Martis dies → mardi · Mercurii dies → mercredi · Iovis dies → jeudi · Veneris dies → vendredi") + astuce("Cherche l'astre caché dans le nom du jour : lun- (Lune), mar- (Mars), mercre- (Mercure), jeu- (Jupiter), vendre- (Vénus).")],
+      [1, def("Calendrier romain primitif", "L'année de Romulus commençait en mars (Martius) et comptait dix mois ; janvier et février furent ajoutés plus tard, puis placés en tête de l'année.") + ex("September (7ᵉ) → 9ᵉ mois ; October (8ᵉ) → 10ᵉ ; November (9ᵉ) → 11ᵉ ; December (10ᵉ) → 12ᵉ.", "Le glissement de deux rangs") + attention("Samedi ne vient pas de Saturne en français (sambati dies, jour du sabbat) ; mais l'anglais Saturday garde Saturne.")]],
+    planches: [[0, { type: "2D", titre: "Un jour latin, quatre langues romanes", legende: "Les noms latins des jours se retrouvent dans toutes les langues romanes : on reconnaît la Lune, Mars, Mercure, Jupiter et Vénus.", svg: colonnes("Un jour latin, quatre langues romanes", [{ t: "latin", c: "#7A1F1F", l: ["Lunae dies", "Martis dies", "Mercurii dies", "Iovis dies", "Veneris dies"] }, { t: "français", c: BLEU, l: ["lundi", "mardi", "mercredi", "jeudi", "vendredi"] }, { t: "italien", c: VERT, l: ["lunedì", "martedì", "mercoledì", "giovedì", "venerdì"] }, { t: "espagnol", c: "#C2540A", l: ["lunes", "martes", "miércoles", "jueves", "viernes"] }], 230, "Tableau : noms latins des jours et leurs équivalents en français, italien, espagnol") }]],
+    formules: [F("Origine des jours", "astre + dies (le jour)", "Lunae dies → lundi : le jour de la Lune"), F("Calendrier primitif", "l'année commence en mars", "Martius 1ᵉʳ … September 7ᵉ"), F("Glissement", "début en janvier → les numéros glissent de deux rangs", "September devient le 9ᵉ mois")]
+  });
+
+  /* ═══════════ 6e LATIN — ORIGINE ═══════════ */
+  enrichir("6e-la-origine", {
+    blocs: [[0, def("Langue romane", "Langue issue du latin parlé dans les provinces de l'Empire romain : français, italien, espagnol, portugais, roumain.") + ex("Le Latium, région de Rome, a donné son nom au latin ; la Gaule conquise par César (58-51 av. J.-C.) a peu à peu parlé latin.")],
+      [2, formule("racine latine + suffixe français = mot savant : aqua + -rium → aquarium") + ex("terra → territoire, terrestre, enterrer · manus → manuel, manuscrit, manucure · vita → vital, vitamine") + astuce("Quand un mot te paraît difficile, cherche la racine latine cachée dedans : elle te donne souvent le sens.")]],
+    planches: [[2, { type: "2D", titre: "Trois racines latines et leurs familles de mots", legende: "Une racine latine donne toute une famille de mots français : connaître la racine, c'est deviner le sens.", svg: colonnes("Trois racines latines et leurs familles de mots", [{ t: "aqua (l'eau)", c: BLEU, l: ["aquarium", "aquatique", "aqueduc", "aquarelle"] }, { t: "terra (la terre)", c: "#8B5A2B", l: ["territoire", "terrestre", "enterrer", "terrasse"] }, { t: "manus (la main)", c: "#C2540A", l: ["manuel", "manuscrit", "manucure", "manœuvre"] }], 200, "Tableau : familles de mots français issues de aqua, terra et manus") }]],
+    formules: [F("Origine", "latin = langue du Latium et de Rome", "répandu par la conquête jusqu'en Gaule"), F("Filiation", "latin parlé → langues romanes", "noctem → nuit, notte, noche, noite, noapte"), F("Présence aujourd'hui", "racine latine → mot français", "agenda, et cetera, aquarium, Homo sapiens")]
+  });
+
+  /* ═══════════ 6e LANGUES NATIONALES — LA CARTE ═══════════ */
+  enrichir("6e-ln-carte", {
+    blocs: [[0, def("Langue officielle, langue nationale", "Langue officielle : langue de l'administration, de la justice et de l'école (français, anglais). Langue nationale : langue parlée par une communauté du pays (ewondo, duala, fulfulde…).") + ex("Au marché de Ngaoundéré, on achète en fulfulde ; au tribunal, on plaide en français ou en anglais.")],
+      [1, def("Famille de langues", "Ensemble de langues qui descendent d'une même langue ancienne et se ressemblent dans leurs mots et leur grammaire.") + ex("Bantoues : ewondo, bulu, duala, basaa · Grassfields : ghomálá', medumba · Tchadiques : mafa, giziga · Adamawa-oubanguiennes : mbum, gbaya") + astuce("Pour retenir les familles, pense à la carte du Sud au Nord : bantou (Sud, Centre, côte), Grassfields (Ouest), adamawa (Adamaoua, Est), tchadique (Extrême-Nord).")],
+      [3, attention("Écrire une langue nationale n'est pas « franciser » les sons : l'AGLC a ses propres lettres (ɛ, ɔ, ŋ…) et ses signes de tons.")]],
+    planches: [[3, { type: "2D", titre: "Les grandes familles, du Sud au Nord", legende: "Les quatre grandes familles de langues du Cameroun, leurs régions et quelques langues de chacune (limites approximatives).", svg: colonnes("Les grandes familles, du Sud au Nord", [{ t: "bantoues", c: "#2E7D32", l: ["Sud, Centre, Littoral", "ewondo, bulu", "duala, basaa"] }, { t: "Grassfields", c: "#C2540A", l: ["Ouest, Nord-Ouest", "ghomálá', medumba", "lamnso'"] }, { t: "adamawa", c: "#B8860B", l: ["Adamaoua, Est", "mbum, gbaya"] }, { t: "tchadiques", c: "#7B3F99", l: ["Extrême-Nord", "mafa, giziga"] }], 180, "Tableau des grandes familles de langues du Cameroun, de leurs régions et de quelques langues") }]],
+    formules: [F("Langues officielles et nationales", "2 langues officielles + plus de 250 langues nationales", "français, anglais ; ewondo, fulfulde…"), F("Classer par famille", "langue → famille → région", "ewondo → bantoue → Centre ; fulfulde → atlantique → Nord"), F("Écrire", "AGLC (1979) : un alphabet commun avec les tons", "toutes nos langues peuvent s'écrire")]
+  });
+
+  /* ═══════════ 4e GREC — L'ALPHABET ═══════════ */
+  enrichir("4e-gr-alphabet", {
+    blocs: [[1, formule("Η η = ê · Ρ ρ = r · Χ χ = kh · Θ θ = th · Φ φ = ph · Ψ ψ = ps · Ξ ξ = ks") + def("Faux amis", "Capitales grecques qui ressemblent à des lettres latines mais ne se lisent pas pareil : Η (êta), Ρ (rhô), Χ (khi), Ν (nu).") + ex("ΑΘΗΝΑ → Athêna · ΑΚΡΟΠΟΛΙΣ → Akropolis · ΧΑΙΡΕ → khaïré (bonjour)") + astuce("Lis chaque lettre séparément en disant son nom (alpha, thêta, êta…) avant de prononcer le mot entier.")],
+      [2, ex("τῆλε (loin) + φωνή (voix) → téléphone · γῆ (terre) + γράφω (écrire) → géographie", "Racines") + attention("En fin de mot, le sigma s'écrit ς : λόγος ; au milieu, σ : σοφία.")]],
+    formules: [F("Lire lettre par lettre", "nom de la lettre → son", "Α a · Θ th · Η ê · Ν n · Α a"), F("Éviter les faux amis", "Η = ê, Ρ = r, Χ = kh", "ΑΘΗΝΑ = Athêna, pas « Athhna »"), F("Relier au français", "racine grecque + racine grecque = mot savant", "ἄκρος + πόλις → acropole")]
+  });
+})();
+
+/* Leçons enrichies — 3e, lot E (18/11/2026) : arts, ECM, français, histoire, géographie. Même mécanisme que
+   29-enrichies-lettres-a.js : AJOUTS SEULEMENT. */
+(function () {
+  "use strict";
+  var NUIT = "#001136", BLEU = "#1E499B", GRIS = "#4D5163", VERT = "#17784D", ROUGE = "#C62828", TERRE = "#C46A2B";
+
+  function txt(x, y, t, o) {
+    o = o || {};
+    return "<text x='" + x + "' y='" + y + "' text-anchor='" + (o.a || "middle") + "' font-size='" + (o.s || 12) + "' font-weight='" + (o.w || 700) + "' fill='" + (o.c || NUIT) + "'" + (o.i ? " font-style='italic'" : "") + (o.halo ? " stroke='#fff' stroke-width='3' paint-order='stroke'" : "") + ">" + t + "</text>";
+  }
+  function lin(id, cs, vertical) {
+    var s = "<linearGradient id='" + id + "'" + (vertical ? " x1='0' y1='0' x2='0' y2='1'" : "") + ">";
+    cs.forEach(function (c, i) { s += "<stop offset='" + (i / (cs.length - 1)).toFixed(2) + "' stop-color='" + c + "'/>"; });
+    return s + "</linearGradient>";
+  }
+  function rad(id, cs) {
+    var s = "<radialGradient id='" + id + "' cx='35%' cy='30%' r='75%'>";
+    cs.forEach(function (c, i) { s += "<stop offset='" + (i / (cs.length - 1)).toFixed(2) + "' stop-color='" + c + "'/>"; });
+    return s + "</radialGradient>";
+  }
+  function fleche(id, c) { return "<marker id='" + id + "' markerWidth='10' markerHeight='10' refX='7' refY='5' orient='auto'><path d='M0 1L8 5L0 9Z' fill='" + c + "'/></marker>"; }
+  function svg(w, h, alt, defs, corps) {
+    return "<svg viewBox='0 0 " + w + " " + h + "' role='img' aria-label='" + alt + "' font-family='Inter,Arial,sans-serif'><rect width='" + w + "' height='" + h + "' fill='#fff'/><defs>" + defs + "</defs>" + corps +
+      "<text x='" + (w - 6) + "' y='" + (h - 5) + "' font-size='8' text-anchor='end' fill='#8A93A6'>Planche VÉRITAS</text></svg>";
+  }
+  function ancien(id) { return window.VRT_LECONS[id]; }
+  function remplacer(id, o) {
+    var a = ancien(id);
+    if (a) ["apc", "examen", "rang", "cle", "scenes"].forEach(function (k) { if (a[k] != null && o[k] == null) o[k] = a[k]; });
+    VRT_L(id, o);
+    if (a) o.ordre = a.ordre;
+  }
+  function q(qq, bonne, f1, f2, e) { return { q: qq, r: [bonne, f1, f2], b: 0, e: e }; }
+  function partie(old, i) { return old && old.parties[i] ? old.parties[i].html : ""; }
+  function bulle(x, y, w, t, c) { return "<rect x='" + x + "' y='" + y + "' width='" + w + "' height='30' rx='12' fill='#fff' stroke='" + (c || "#C9D2E3") + "'/>" + txt(x + w / 2, y + 20, t, { s: 11.5 }); }
+  function perso(x, y, peau, habit, bas) {
+    bas = bas || "#2E3445";
+    return "<g transform='translate(" + x + " " + y + ")'><ellipse cx='0' cy='84' rx='18' ry='4' fill='#001136' opacity='.18'/>" +
+      "<rect x='-9' y='44' width='8' height='36' rx='3' fill='" + bas + "'/><rect x='1' y='44' width='8' height='36' rx='3' fill='" + bas + "'/>" +
+      "<ellipse cx='-6' cy='81' rx='7' ry='3.5' fill='#1F2328'/><ellipse cx='6' cy='81' rx='7' ry='3.5' fill='#1F2328'/>" +
+      "<path d='M-13 46L-16 18C-16 13 -12 11 -6 10H6C12 11 16 13 16 18L13 46Z' fill='" + habit + "'/>" +
+      "<path d='M-15 16L-20 40' stroke='" + habit + "' stroke-width='7' stroke-linecap='round'/><path d='M15 16L20 40' stroke='" + habit + "' stroke-width='7' stroke-linecap='round'/>" +
+      "<circle cx='-20' cy='42' r='3.6' fill='" + peau + "'/><circle cx='20' cy='42' r='3.6' fill='" + peau + "'/>" +
+      "<rect x='-3.5' y='5' width='7' height='7' fill='" + peau + "'/><ellipse cx='0' cy='-2' rx='9' ry='10.5' fill='" + peau + "'/>" +
+      "<path d='M-9 -4C-10 -14 -4 -13.5 0 -13.5S10 -14 9 -4C7 -9 -7 -9 -9 -4Z' fill='#1B1410'/><ellipse cx='-9' cy='-1' rx='1.8' ry='3' fill='" + peau + "'/><ellipse cx='9' cy='-1' rx='1.8' ry='3' fill='" + peau + "'/></g>";
+  }
+  /* portrait en buste (arbre généalogique) */
+  function portrait(x, y, peau, habit, cheveux, age) {
+    var s = "<g transform='translate(" + x + " " + y + ")'><circle r='30' fill='#F4EFE4' stroke='#C9A576' stroke-width='3'/><clipPath id='pc" + x + "_" + y + "'><circle r='28'/></clipPath><g clip-path='url(#pc" + x + "_" + y + ")'>";
+    s += "<path d='M-26 32C-26 14 -14 10 0 10S26 14 26 32Z' fill='" + habit + "'/><rect x='-4' y='2' width='8' height='10' fill='" + peau + "'/><ellipse cy='-6' rx='11' ry='13' fill='" + peau + "'/>";
+    s += age === "vieux" ? "<path d='M-11 -10C-12 -20 -4 -21 0 -21S12 -20 11 -10C9 -14 -9 -14 -11 -10Z' fill='#D8D8D8'/>" : age === "femme" ? "<path d='M-13 -6C-15 -24 15 -24 13 -6C12 -14 -12 -14 -13 -6Z' fill='" + cheveux + "'/><path d='M-13 -14h26v-6c-6 -6 -20 -6 -26 0Z' fill='" + habit + "'/>" : "<path d='M-11 -10C-12 -20 -4 -21 0 -21S12 -20 11 -10C9 -14 -9 -14 -11 -10Z' fill='" + cheveux + "'/>";
+    s += "<circle cx='-4' cy='-6' r='1.4' fill='#1B1410'/><circle cx='4' cy='-6' r='1.4' fill='#1B1410'/><path d='M-3 2q3 2 6 0' stroke='#1B1410' fill='none'/></g></g>";
+    return s;
+  }
+  /* boucle d'exercice générique : [phrase avec ___, [bonne, autres…], explication] */
+  function exercice(el, C, suivant, lib) {
+    var i = 0, ok = 0;
+    el.innerHTML = "<p class='labo-r' data-q style='font-size:16px'></p><div style='display:flex;gap:8px;flex-wrap:wrap' data-c></div><p class='an-note' data-e></p><p class='labo-r' data-s></p>";
+    function $(s) { return el.querySelector(s); }
+    function poser() {
+      var c = C[i];
+      $("[data-q]").innerHTML = (i + 1) + ". " + c[0].replace("___", "<b style='border-bottom:2px dashed #1E499B;padding:0 14px'>?</b>");
+      $("[data-e]").textContent = ""; $("[data-s]").innerHTML = lib + " " + (i + 1) + " / " + C.length + " · score : <b>" + ok + "</b>";
+      $("[data-c]").innerHTML = c[1].slice().sort().map(function (x) { return "<button type='button' class='btn-l' data-v='" + x + "'>" + x + "</button>"; }).join("");
+      el.querySelectorAll("[data-v]").forEach(function (b) {
+        b.addEventListener("click", function () {
+          var bon = b.dataset.v === c[1][0]; if (bon) ok++;
+          $("[data-q]").innerHTML = (i + 1) + ". " + c[0].replace("___", "<b style='color:" + (bon ? VERT : ROUGE) + "'>" + c[1][0] + "</b>");
+          $("[data-e]").innerHTML = (bon ? "✔ " : "✘ ") + c[2];
+          el.querySelectorAll("[data-v]").forEach(function (x) { x.disabled = true; });
+          var nx = document.createElement("button"); nx.type = "button"; nx.className = "btn-l"; nx.textContent = i + 1 < C.length ? suivant : "↺";
+          nx.addEventListener("click", function () { i = (i + 1) % C.length; if (!i) ok = 0; poser(); });
+          $("[data-c]").appendChild(nx);
+          $("[data-s]").innerHTML = lib + " " + (i + 1) + " / " + C.length + " · score : <b>" + ok + "</b>";
+        });
+      });
+    }
+    poser();
+  }
+
+  function alea(g) { return function () { g = (g * 16807) % 2147483647; return (g - 1) / 2147483646; }; }
+  /* Consignes de Jacques (18/11/2026) : situation résolue avec les formules étape par étape, exemples, règles, astuces,
+     planches 2D et 3D. AJOUTS SEULEMENT : blocs en fin de partie, planches, denouement.formules. */
+  function enrichir(id, o) {
+    var L = ancien(id); if (!L) return;
+    (o.blocs || []).forEach(function (b) { var p = L.parties[b[0]]; if (p) p.html = (p.html || "") + b[1]; });
+    (o.planches || []).forEach(function (b) { var p = L.parties[b[0]]; if (p) p.planches = (p.planches || []).concat([b[1]]); });
+    if (o.formules && L.denouement && !(L.denouement.formules || []).length) L.denouement.formules = o.formules;
+  }
+  function def(t, h) { return "<div class='def'><b>" + t + "</b>" + h + "</div>"; }
+  function formule(h) { return "<p class='formule'>" + h + "</p>"; }
+  function ex(h, t) { return "<div class='ex'><b>" + (t || "Exemples") + "</b>" + h + "</div>"; }
+  function astuce(h, t) { return "<div class='astuce'><b>" + (t || "Astuce") + "</b>" + h + "</div>"; }
+  function attention(h, t) { return "<div class='attention'><b>" + (t || "Attention") + "</b>" + h + "</div>"; }
+  function methode(h, t) { return "<div class='methode'><b>" + (t || "Méthode") + "</b>" + h + "</div>"; }
+  function F(nom, f, calcul) { return { nom: nom, f: f, calcul: calcul }; }
+  /* fiche 2D en colonnes : [{t, c, l:[lignes]}] */
+  function colonnes(titre, cols, h, alt) {
+    var W = 640, n = cols.length, w = (W - 30 - (n - 1) * 12) / n, s = "<rect width='640' height='" + h + "' fill='#FBF8F2'/>" + txt(320, 28, titre, { s: 15 });
+    cols.forEach(function (c, i) {
+      var x = 15 + i * (w + 12);
+      s += "<rect x='" + x + "' y='44' width='" + w + "' height='" + (h - 58) + "' rx='12' fill='#fff' stroke='" + c.c + "' stroke-width='2'/><rect x='" + x + "' y='44' width='" + w + "' height='34' rx='11' fill='" + c.c + "'/>" + txt(x + w / 2, 66, c.t, { s: 14, c: "#fff" });
+      c.l.forEach(function (l, k) { s += txt(x + 12, 100 + k * 24, l, { s: 12, a: "start", w: l.charAt(0) === "→" ? 800 : 550, c: l.charAt(0) === "→" ? c.c : NUIT }); });
+    });
+    return svg(640, h, alt || titre, "", s);
+  }
+
+  /* ═══════════ 3e ARTS — OMBRE ET LUMIÈRE ═══════════ */
+  enrichir("3e-arts-ombre", {
+    blocs: [[0, ex("Un canari posé sur une table au soleil de 16 h : la face tournée vers le soleil est claire (lumière), l'autre face est sombre (ombre propre), et une tache sombre s'allonge sur la table du côté opposé (ombre portée).", "Au quotidien")],
+      [2, astuce("Plisse les yeux en regardant ton modèle : les détails disparaissent et il ne reste que les grandes masses de lumière et d'ombre, plus faciles à dessiner.") + ex("Crayon 2H pour la pénombre légère, HB pour les gris moyens, 4B pour le plus sombre de l'ombre propre et le pied de l'ombre portée.", "Choisir ses crayons")]],
+    planches: [[2, { type: "2D", titre: "Ombrer un canari en quatre étapes", legende: "1. Repérer la lumière ; 2. tracer la limite lumière-ombre ; 3. ombrer progressivement du clair au foncé ; 4. ajouter l'ombre portée, opposée à la lumière et plus longue si le soleil est bas.", svg: (function () {
+      var s = "<rect width='640' height='240' fill='#FBF8F2'/><defs><radialGradient id='cnG' cx='30%' cy='30%' r='80%'><stop offset='0' stop-color='#F2D2B0'/><stop offset='.5' stop-color='#B07A4A'/><stop offset='1' stop-color='#4A2E1A'/></radialGradient></defs>", k;
+      for (k = 0; k < 4; k++) {
+        var x = 80 + k * 160, y = 130;
+        s += "<path d='M" + (x - 40) + " " + (y + 60) + "H" + (x + 60) + "' stroke='#C9B28A' stroke-width='2'/>" + txt(x, 222, ["1. la lumière", "2. la limite", "3. le dégradé", "4. l'ombre portée"][k], { s: 12 });
+        if (k === 3) s += "<ellipse cx='" + (x + 50) + "' cy='" + (y + 58) + "' rx='56' ry='8' fill='#3B2A1A' opacity='.35'/>";
+        var fill = k < 2 ? "#fff" : "url(#cnG)";
+        s += "<path d='M" + (x - 34) + " " + (y + 10) + "q0 -44 34 -44q34 0 34 44q0 48 -34 48q-34 0 -34 -48Z' fill='" + fill + "' stroke='#4A2E1A' stroke-width='2'/><path d='M" + (x - 14) + " " + (y - 34) + "q14 -8 28 0v-10h-28Z' fill='" + fill + "' stroke='#4A2E1A' stroke-width='2'/>";
+        if (k === 1) s += "<path d='M" + (x + 6) + " " + (y - 33) + "q20 30 -8 90' stroke='#4A2E1A' stroke-dasharray='4 3' fill='none'/>";
+        if (k === 0) s += "<circle cx='" + (x - 50) + "' cy='" + (y - 70) + "' r='10' fill='#F7C948'/><path d='M" + (x - 40) + " " + (y - 62) + "l22 18' stroke='#F7C948' stroke-width='3' marker-end='url(#omF)'/>";
+      }
+      return svg(640, 240, "Quatre canaris : la flèche de lumière, la limite lumière-ombre, le dégradé, puis l’ombre portée sur la table", fleche("omF", "#E8A33D"), s);
+    })() }]],
+    formules: [F("Repérer la source", "flèche de lumière sur le dessin", "soleil en haut à gauche"), F("Ombre propre", "face opposée à la lumière, en dégradé lumière → pénombre → ombre", "côté droit du canari, crayons 2H → 4B"), F("Ombre portée", "du côté opposé à la lumière ; source basse = ombre longue", "sur la table, vers la droite, allongée en fin d'après-midi")]
+  });
+
+  /* ═══════════ 3e ECM — FONDEMENTS DE LA DÉMOCRATIE ═══════════ */
+  enrichir("3e-ecm-democratie", {
+    blocs: [[0, formule("démocratie = gouvernement du peuple, par le peuple, pour le peuple (Abraham Lincoln)") + ex("Au Cameroun, les citoyens élisent le président de la République, les députés et les conseillers municipaux.")],
+      [1, ex("Un bureau du foyer élu à vie viole l'alternance ; un président qui fait aussi les règles et juge les élèves viole la séparation des pouvoirs ; interdire de critiquer viole la liberté d'expression.", "Les piliers dans le règlement du foyer") + astuce("Pour juger si une organisation est démocratique, passe-la au crible : élection libre ? mandat limité ? pouvoirs séparés ? libertés respectées ? minorité protégée ?") + attention("La démocratie n'est pas la loi du plus grand nombre sans limites : la majorité décide, mais elle doit respecter les droits de la minorité.")]],
+    formules: [F("Définir", "pouvoir du peuple, exercé directement ou par des élus", "les élèves élisent leur bureau"), F("Vérifier les piliers", "élections libres + alternance + séparation des pouvoirs + libertés", "le règlement proposé en viole quatre"), F("Proposer", "bureau élu chaque année + contrôle par une assemblée + référendum", "le foyer redevient démocratique")]
+  });
+
+  /* ═══════════ 3e ECM — SIÈGES AU SCRUTIN PROPORTIONNEL ═══════════ */
+  enrichir("3e-ecm-sieges", {
+    blocs: [[1, ex("Quotient 12 000 ÷ 7 ≈ 1 714. A : 5 300 ÷ 1 714 = 3,09 → 3 sièges, reste ≈ 157 ; B : 3 900 → 2 sièges, reste ≈ 471 ; C : 1 800 → 1 siège, reste ≈ 86 ; D : 1 000 → 0 siège, reste 1 000. Le 7ᵉ siège va au plus fort reste : D.", "Le calcul complet")],
+      [2, ex("Avec 6 sièges au lieu de 7, le quotient serait 2 000 : A 2 (reste 1 300), B 1 (reste 1 900), C 0 (reste 1 800), D 0 (reste 1 000) ; les 3 sièges restants iraient à B, C et A.", "Et si l'on changeait le nombre de sièges ?")]],
+    planches: [[2, { type: "2D", titre: "Part des voix et part des sièges", legende: "Les pourcentages de voix (barres pleines) et de sièges (barres claires) sont proches mais pas identiques : avec 7 sièges entiers, la proportionnelle n'est qu'approchée. B obtient 2 sièges pour 32,5 % des voix (2,28 sièges « idéaux »).", svg: (function () {
+      var D = [["A", 5300, 3, "#1E499B"], ["B", 3900, 2, "#C2540A"], ["C", 1800, 1, "#2E7D32"], ["D", 1000, 1, "#7B3F99"]], s = "<rect width='640' height='260' fill='#FBF8F2'/>" + txt(320, 26, "% des voix et % des sièges (12 000 exprimés, 7 sièges)", { s: 14 });
+      D.forEach(function (d, i) { var y = 50 + i * 50, pv = d[1] / 120, ps = d[2] / 7 * 100; s += txt(46, y + 26, "Liste " + d[0], { s: 13, a: "end" }) + "<rect x='56' y='" + y + "' width='" + (pv * 5.2).toFixed(0) + "' height='18' rx='4' fill='" + d[3] + "'/>" + txt(62 + pv * 5.2, y + 14, pv.toFixed(1).replace(".", ",") + " % des voix", { s: 11, a: "start" }) + "<rect x='56' y='" + (y + 20) + "' width='" + (ps * 5.2).toFixed(0) + "' height='16' rx='4' fill='" + d[3] + "' opacity='.4'/>" + txt(62 + ps * 5.2, y + 33, d[2] + " siège" + (d[2] > 1 ? "s" : "") + " = " + ps.toFixed(1).replace(".", ",") + " %", { s: 11, a: "start", c: GRIS }); });
+      return svg(640, 260, "Barres comparant le pourcentage de voix et de sièges des listes A, B, C, D", "", s);
+    })() }]],
+    formules: [F("Suffrages exprimés", "votants − bulletins blancs et nuls", "12 600 − 600 = 12 000"), F("Quotient électoral", "suffrages exprimés ÷ nombre de sièges", "12 000 ÷ 7 ≈ 1 714 → A 3, B 2, C 1, D 0"), F("Plus fort reste", "sièges restants aux restes les plus grands", "7ᵉ siège : D (reste 1 000) → A 3, B 2, C 1, D 1")]
+  });
+
+  /* ═══════════ 3e FRANÇAIS — VILLE CRUELLE ═══════════ */
+  enrichir("3e-fr-ville-cruelle", {
+    blocs: [[0, def("Roman réaliste", "Récit qui peint fidèlement une société et ses injustices, à travers des personnages ordinaires et des lieux précis.") + ex("<em>Ville cruelle</em> (1954) peint la société coloniale du Cameroun à travers un jeune planteur, Banda, à Tanga.")],
+      [1, def("Personnage type", "Personnage qui représente tout un groupe social : Banda, le jeune paysan ; le contrôleur et ses gardes, l'oppression coloniale ; les commerçants grecs, l'exploitation.") + astuce("Pour analyser un personnage, note ce qu'il fait, ce qu'il dit, ce qu'on dit de lui et ce qu'il représente.")],
+      [3, ex("« Tanga-Nord » et « Tanga-Sud » : la ville elle-même raconte la séparation ; le feu qui brûle le cacao de Banda dit l'injustice mieux qu'un long discours.", "Le sens par les images") + methode("Justifier un titre : 1. relever les lieux ; 2. relever les épisodes de violence ; 3. montrer à qui elle profite ; 4. nuancer (le village étouffe aussi).", "Commenter le titre")]],
+    formules: [F("Le cadre", "ville coupée en deux : colons / Africains", "Tanga-Sud et Tanga-Nord"), F("Les faits", "violence + injustice + mort", "cacao brûlé, coups des gardes, mort de Koumé"), F("Le système", "colonisation + relais africains + poids du village", "« ville cruelle » : une cruauté organisée")]
+  });
+
+  /* ═══════════ 3e HISTOIRE — LE KAMERUN ═══════════ */
+  enrichir("3e-hist-kamerun", {
+    blocs: [[0, def("Protectorat", "Territoire placé sous la « protection » d'une puissance étrangère, qui en contrôle en réalité la politique extérieure, puis l'administration.") + ex("12 juillet 1884 : traité germano-douala signé par les rois Ndumbé Lobé Bell et Ngando Akwa ; Gustav Nachtigal hisse le drapeau allemand.")],
+      [1, ex("Chemin de fer du Nord (Bonabéri–Nkongsamba) et du Centre (Douala–Éséka), wharfs de Douala et de Kribi, plantations de cacao et de bananes autour du mont Cameroun.", "Les réalisations") + attention("Ces infrastructures servaient d'abord l'exportation vers l'Allemagne ; elles ont été construites par le travail forcé, dans lequel beaucoup d'ouvriers sont morts.")],
+      [2, astuce("Pour répondre à « modernisation ou oppression ? », ne choisis pas un camp : montre les deux faces (réalisations / prix payé) puis conclus en historien, avec des faits et des dates.", "Rédiger la réponse")]],
+    formules: [F("Le point de départ", "traité du 12 juillet 1884 + conditions des rois douala", "protectorat allemand"), F("Le bilan matériel", "rails + wharfs + plantations, orientés vers l'exportation", "chemin de fer du Nord, wharf de Douala"), F("Le prix humain", "travail forcé + expropriation + répression", "8 août 1914 : Rudolf Duala Manga Bell, Ngoso Din, Martin-Paul Samba ; 1916 : fin du Kamerun")]
+  });
+
+  /* ═══════════ 3e HISTOIRE — PARTAGE DE L'AFRIQUE ═══════════ */
+  enrichir("3e-hist-partage", {
+    blocs: [[1, def("Occupation effective", "Règle fixée à Berlin : pour revendiquer une côte d'Afrique, une puissance doit l'occuper réellement et le notifier aux autres signataires.") + formule("revendication = occupation effective + notification aux autres puissances") + ex("Aucun Africain n'est invité à Berlin ; quatorze États, surtout européens, y décident des règles du partage.")],
+      [2, def("Frontière artificielle", "Limite tracée sans tenir compte des peuples, souvent en ligne droite ou le long d'un fleuve, sur des cartes encore incomplètes.") + ex("La frontière entre le Cameroun et le Nigeria sépare des familles kanuri, peules ou haoussa ; la famille de Moussa vit des deux côtés.") + astuce("Une frontière parfaitement droite sur une carte d'Afrique est presque toujours un héritage de la colonisation.")]],
+    formules: [F("L'ampleur", "part de l'Afrique contrôlée par les Européens", "1880 : environ 10 % ; 1914 : environ 90 %"), F("Les règles", "occupation effective + notification (Berlin, 1884-1885)", "sans aucun représentant africain"), F("Le tracé", "traités entre Européens + lignes droites ou fleuves", "peuples séparés : la famille de Moussa")]
+  });
+
+  /* ═══════════ 3e GÉOGRAPHIE — PRÉSENTATION DU CAMEROUN ═══════════ */
+  enrichir("3e-geo-cameroun", {
+    blocs: [[0, def("Situation", "Position d'un pays sur le globe et par rapport à ses voisins : latitude, longitude, continent, océan, frontières.") + ex("Le Cameroun s'étend d'environ 2° à 13° de latitude Nord, du golfe de Guinée au lac Tchad ; il touche six pays : Nigeria, Tchad, RCA, Congo, Gabon, Guinée équatoriale.")],
+      [1, formule("densité = population ÷ superficie") + ex("Environ 29 millions d'habitants ÷ 475 650 km² ≈ 61 habitants par km² (moyenne : bien plus au Littoral et à l'Ouest, beaucoup moins à l'Est).", "Calcul")],
+      [2, def("Afrique en miniature", "Expression qui désigne le Cameroun parce qu'on y trouve presque tous les milieux du continent : forêt dense, mangrove, montagnes, plateaux, savanes et Sahel.")]],
+    formules: [F("Situer", "latitude + façade maritime + voisins", "de 2° à 13° Nord ; golfe de Guinée ; 6 voisins"), F("Mesurer", "superficie + régions + densité = population ÷ superficie", "475 650 km² ; 10 régions ; ≈ 61 hab./km²"), F("Expliquer le surnom", "diversité des milieux du sud au nord", "forêt, mangrove, montagnes, savane, Sahel ; pluies de 10 000 à 600 mm")]
+  });
+
+  /* ═══════════ 3e GÉOGRAPHIE — LA MANGROVE ═══════════ */
+  enrichir("3e-geo-mangrove", {
+    blocs: [[1, ex("Les palétuviers aux racines-échasses retiennent la vase et cassent les vagues ; entre leurs racines, les jeunes crevettes et poissons grandissent à l'abri.", "Le rôle des palétuviers")],
+      [2, ex("Une fumeuse de poisson coupe du bois de palétuvier parce qu'il brûle bien et longtemps ; un promoteur remblaie pour construire des maisons.", "Des acteurs aux besoins réels") + astuce("Dans un dossier de géographie, présente toujours chaque menace avec son acteur, sa raison et sa conséquence : c'est ce que demande l'examen.")]],
+    formules: [F("Identifier le milieu", "forêt littorale de la zone de balancement des marées", "mangrove de l'estuaire du Wouri à Youpwe"), F("Mesurer ses services", "nurserie + digue naturelle + bois", "moins de mangrove → moins de crevettes, plus d'inondations"), F("Concilier", "fumoirs améliorés + reboisement + urbanisme hors zones inondables", "refuser la destruction des 10 ha et proposer des solutions")]
+  });
+})();
+
+/* Leçons enrichies — 5e et 2nde, lot F (18/11/2026) : histoire, français, géographie. Même mécanisme que
+   29-enrichies-lettres-a.js : AJOUTS SEULEMENT. */
+(function () {
+  "use strict";
+  var NUIT = "#001136", BLEU = "#1E499B", GRIS = "#4D5163", VERT = "#17784D", ROUGE = "#C62828", TERRE = "#C46A2B";
+
+  function txt(x, y, t, o) {
+    o = o || {};
+    return "<text x='" + x + "' y='" + y + "' text-anchor='" + (o.a || "middle") + "' font-size='" + (o.s || 12) + "' font-weight='" + (o.w || 700) + "' fill='" + (o.c || NUIT) + "'" + (o.i ? " font-style='italic'" : "") + (o.halo ? " stroke='#fff' stroke-width='3' paint-order='stroke'" : "") + ">" + t + "</text>";
+  }
+  function lin(id, cs, vertical) {
+    var s = "<linearGradient id='" + id + "'" + (vertical ? " x1='0' y1='0' x2='0' y2='1'" : "") + ">";
+    cs.forEach(function (c, i) { s += "<stop offset='" + (i / (cs.length - 1)).toFixed(2) + "' stop-color='" + c + "'/>"; });
+    return s + "</linearGradient>";
+  }
+  function rad(id, cs) {
+    var s = "<radialGradient id='" + id + "' cx='35%' cy='30%' r='75%'>";
+    cs.forEach(function (c, i) { s += "<stop offset='" + (i / (cs.length - 1)).toFixed(2) + "' stop-color='" + c + "'/>"; });
+    return s + "</radialGradient>";
+  }
+  function fleche(id, c) { return "<marker id='" + id + "' markerWidth='10' markerHeight='10' refX='7' refY='5' orient='auto'><path d='M0 1L8 5L0 9Z' fill='" + c + "'/></marker>"; }
+  function svg(w, h, alt, defs, corps) {
+    return "<svg viewBox='0 0 " + w + " " + h + "' role='img' aria-label='" + alt + "' font-family='Inter,Arial,sans-serif'><rect width='" + w + "' height='" + h + "' fill='#fff'/><defs>" + defs + "</defs>" + corps +
+      "<text x='" + (w - 6) + "' y='" + (h - 5) + "' font-size='8' text-anchor='end' fill='#8A93A6'>Planche VÉRITAS</text></svg>";
+  }
+  function ancien(id) { return window.VRT_LECONS[id]; }
+  function remplacer(id, o) {
+    var a = ancien(id);
+    if (a) ["apc", "examen", "rang", "cle", "scenes"].forEach(function (k) { if (a[k] != null && o[k] == null) o[k] = a[k]; });
+    VRT_L(id, o);
+    if (a) o.ordre = a.ordre;
+  }
+  function q(qq, bonne, f1, f2, e) { return { q: qq, r: [bonne, f1, f2], b: 0, e: e }; }
+  function partie(old, i) { return old && old.parties[i] ? old.parties[i].html : ""; }
+  function bulle(x, y, w, t, c) { return "<rect x='" + x + "' y='" + y + "' width='" + w + "' height='30' rx='12' fill='#fff' stroke='" + (c || "#C9D2E3") + "'/>" + txt(x + w / 2, y + 20, t, { s: 11.5 }); }
+  function perso(x, y, peau, habit, bas) {
+    bas = bas || "#2E3445";
+    return "<g transform='translate(" + x + " " + y + ")'><ellipse cx='0' cy='84' rx='18' ry='4' fill='#001136' opacity='.18'/>" +
+      "<rect x='-9' y='44' width='8' height='36' rx='3' fill='" + bas + "'/><rect x='1' y='44' width='8' height='36' rx='3' fill='" + bas + "'/>" +
+      "<ellipse cx='-6' cy='81' rx='7' ry='3.5' fill='#1F2328'/><ellipse cx='6' cy='81' rx='7' ry='3.5' fill='#1F2328'/>" +
+      "<path d='M-13 46L-16 18C-16 13 -12 11 -6 10H6C12 11 16 13 16 18L13 46Z' fill='" + habit + "'/>" +
+      "<path d='M-15 16L-20 40' stroke='" + habit + "' stroke-width='7' stroke-linecap='round'/><path d='M15 16L20 40' stroke='" + habit + "' stroke-width='7' stroke-linecap='round'/>" +
+      "<circle cx='-20' cy='42' r='3.6' fill='" + peau + "'/><circle cx='20' cy='42' r='3.6' fill='" + peau + "'/>" +
+      "<rect x='-3.5' y='5' width='7' height='7' fill='" + peau + "'/><ellipse cx='0' cy='-2' rx='9' ry='10.5' fill='" + peau + "'/>" +
+      "<path d='M-9 -4C-10 -14 -4 -13.5 0 -13.5S10 -14 9 -4C7 -9 -7 -9 -9 -4Z' fill='#1B1410'/><ellipse cx='-9' cy='-1' rx='1.8' ry='3' fill='" + peau + "'/><ellipse cx='9' cy='-1' rx='1.8' ry='3' fill='" + peau + "'/></g>";
+  }
+  /* portrait en buste (arbre généalogique) */
+  function portrait(x, y, peau, habit, cheveux, age) {
+    var s = "<g transform='translate(" + x + " " + y + ")'><circle r='30' fill='#F4EFE4' stroke='#C9A576' stroke-width='3'/><clipPath id='pc" + x + "_" + y + "'><circle r='28'/></clipPath><g clip-path='url(#pc" + x + "_" + y + ")'>";
+    s += "<path d='M-26 32C-26 14 -14 10 0 10S26 14 26 32Z' fill='" + habit + "'/><rect x='-4' y='2' width='8' height='10' fill='" + peau + "'/><ellipse cy='-6' rx='11' ry='13' fill='" + peau + "'/>";
+    s += age === "vieux" ? "<path d='M-11 -10C-12 -20 -4 -21 0 -21S12 -20 11 -10C9 -14 -9 -14 -11 -10Z' fill='#D8D8D8'/>" : age === "femme" ? "<path d='M-13 -6C-15 -24 15 -24 13 -6C12 -14 -12 -14 -13 -6Z' fill='" + cheveux + "'/><path d='M-13 -14h26v-6c-6 -6 -20 -6 -26 0Z' fill='" + habit + "'/>" : "<path d='M-11 -10C-12 -20 -4 -21 0 -21S12 -20 11 -10C9 -14 -9 -14 -11 -10Z' fill='" + cheveux + "'/>";
+    s += "<circle cx='-4' cy='-6' r='1.4' fill='#1B1410'/><circle cx='4' cy='-6' r='1.4' fill='#1B1410'/><path d='M-3 2q3 2 6 0' stroke='#1B1410' fill='none'/></g></g>";
+    return s;
+  }
+  /* boucle d'exercice générique : [phrase avec ___, [bonne, autres…], explication] */
+  function exercice(el, C, suivant, lib) {
+    var i = 0, ok = 0;
+    el.innerHTML = "<p class='labo-r' data-q style='font-size:16px'></p><div style='display:flex;gap:8px;flex-wrap:wrap' data-c></div><p class='an-note' data-e></p><p class='labo-r' data-s></p>";
+    function $(s) { return el.querySelector(s); }
+    function poser() {
+      var c = C[i];
+      $("[data-q]").innerHTML = (i + 1) + ". " + c[0].replace("___", "<b style='border-bottom:2px dashed #1E499B;padding:0 14px'>?</b>");
+      $("[data-e]").textContent = ""; $("[data-s]").innerHTML = lib + " " + (i + 1) + " / " + C.length + " · score : <b>" + ok + "</b>";
+      $("[data-c]").innerHTML = c[1].slice().sort().map(function (x) { return "<button type='button' class='btn-l' data-v='" + x + "'>" + x + "</button>"; }).join("");
+      el.querySelectorAll("[data-v]").forEach(function (b) {
+        b.addEventListener("click", function () {
+          var bon = b.dataset.v === c[1][0]; if (bon) ok++;
+          $("[data-q]").innerHTML = (i + 1) + ". " + c[0].replace("___", "<b style='color:" + (bon ? VERT : ROUGE) + "'>" + c[1][0] + "</b>");
+          $("[data-e]").innerHTML = (bon ? "✔ " : "✘ ") + c[2];
+          el.querySelectorAll("[data-v]").forEach(function (x) { x.disabled = true; });
+          var nx = document.createElement("button"); nx.type = "button"; nx.className = "btn-l"; nx.textContent = i + 1 < C.length ? suivant : "↺";
+          nx.addEventListener("click", function () { i = (i + 1) % C.length; if (!i) ok = 0; poser(); });
+          $("[data-c]").appendChild(nx);
+          $("[data-s]").innerHTML = lib + " " + (i + 1) + " / " + C.length + " · score : <b>" + ok + "</b>";
+        });
+      });
+    }
+    poser();
+  }
+
+  function alea(g) { return function () { g = (g * 16807) % 2147483647; return (g - 1) / 2147483646; }; }
+  /* Consignes de Jacques (18/11/2026) : situation résolue avec les formules étape par étape, exemples, règles, astuces,
+     planches 2D et 3D. AJOUTS SEULEMENT : blocs en fin de partie, planches, denouement.formules. */
+  function enrichir(id, o) {
+    var L = ancien(id); if (!L) return;
+    (o.blocs || []).forEach(function (b) { var p = L.parties[b[0]]; if (p) p.html = (p.html || "") + b[1]; });
+    (o.planches || []).forEach(function (b) { var p = L.parties[b[0]]; if (p) p.planches = (p.planches || []).concat([b[1]]); });
+    if (o.formules && L.denouement && !(L.denouement.formules || []).length) L.denouement.formules = o.formules;
+  }
+  function def(t, h) { return "<div class='def'><b>" + t + "</b>" + h + "</div>"; }
+  function formule(h) { return "<p class='formule'>" + h + "</p>"; }
+  function ex(h, t) { return "<div class='ex'><b>" + (t || "Exemples") + "</b>" + h + "</div>"; }
+  function astuce(h, t) { return "<div class='astuce'><b>" + (t || "Astuce") + "</b>" + h + "</div>"; }
+  function attention(h, t) { return "<div class='attention'><b>" + (t || "Attention") + "</b>" + h + "</div>"; }
+  function methode(h, t) { return "<div class='methode'><b>" + (t || "Méthode") + "</b>" + h + "</div>"; }
+  function F(nom, f, calcul) { return { nom: nom, f: f, calcul: calcul }; }
+  /* fiche 2D en colonnes : [{t, c, l:[lignes]}] */
+  function colonnes(titre, cols, h, alt) {
+    var W = 640, n = cols.length, w = (W - 30 - (n - 1) * 12) / n, s = "<rect width='640' height='" + h + "' fill='#FBF8F2'/>" + txt(320, 28, titre, { s: 15 });
+    cols.forEach(function (c, i) {
+      var x = 15 + i * (w + 12);
+      s += "<rect x='" + x + "' y='44' width='" + w + "' height='" + (h - 58) + "' rx='12' fill='#fff' stroke='" + c.c + "' stroke-width='2'/><rect x='" + x + "' y='44' width='" + w + "' height='34' rx='11' fill='" + c.c + "'/>" + txt(x + w / 2, 66, c.t, { s: 14, c: "#fff" });
+      c.l.forEach(function (l, k) { s += txt(x + 12, 100 + k * 24, l, { s: 12, a: "start", w: l.charAt(0) === "→" ? 800 : 550, c: l.charAt(0) === "→" ? c.c : NUIT }); });
+    });
+    return svg(640, h, alt || titre, "", s);
+  }
+
+  function barres(titre, D, unite, h, alt) {
+    var max = Math.max.apply(null, D.map(function (d) { return d[1]; })), s = "<rect width='640' height='" + h + "' fill='#FBF8F2'/>" + txt(320, 28, titre, { s: 15 });
+    D.forEach(function (d, i) { var y = 52 + i * 36, w = d[1] / max * 330; s += txt(200, y + 18, d[0], { s: 12.5, a: "end", w: 600 }) + "<rect x='210' y='" + y + "' width='" + w.toFixed(0) + "' height='24' rx='6' fill='" + d[2] + "'/>" + txt(218 + w, y + 17, d[3] || (d[1].toLocaleString("fr-FR") + " " + unite), { s: 12, a: "start", c: NUIT }); });
+    return svg(640, h, alt || titre, "", s);
+  }
+  function P2(titre, legende, s) { return { type: "2D", titre: titre, legende: legende, svg: s }; }
+
+  /* ═══════════ 5e HISTOIRE — PYGMÉES ET SAO ═══════════ */
+  enrichir("5e-histoire-pygmees-sao", {
+    blocs: [[0, def("Chasseurs-cueilleurs semi-nomades", "Peuples qui vivent de la chasse, de la pêche et de la cueillette et déplacent leurs campements selon les ressources de la forêt.") + ex("Les Baka de l'Est récoltent le miel sauvage, chassent au filet et connaissent des centaines de plantes médicinales.")],
+      [1, def("Cire perdue", "Technique de fonderie : on modèle l'objet en cire, on l'enrobe d'argile, on chauffe pour faire fondre la cire, on coule le bronze dans le vide, puis on casse le moule.") + formule("modèle en cire → moule d'argile → cire fondue → bronze coulé → moule cassé") + ex("Les statuettes sao exposées au Musée national ont été coulées ainsi ; chaque pièce est unique, car le moule est détruit.")]],
+    planches: [[2, P2("Comment connaît-on les Sao ?", "Sans écrits, l'historien croise deux sources : l'archéologie (ce que l'on trouve dans le sol) et la tradition orale (ce que racontent les peuples voisins). La seconde exagère parfois : la première permet de la vérifier.", colonnes("Deux sources à croiser", [{ t: "Archéologie", c: "#8B5A2B", l: ["fouilles des buttes", "jarres funéraires", "bronzes à la cire perdue", "squelettes de taille ordinaire", "→ des agriculteurs et des artisans"] }, { t: "Tradition orale", c: "#7B3F99", l: ["récits des Kotoko, des voisins", "les Sao « géants », très forts", "fondateurs de villes", "souvenir de leur prestige", "→ une image à vérifier"] }], 250, "Tableau : ce que disent l’archéologie et la tradition orale sur les Sao"))]],
+    formules: [F("Situer", "peuples pygmées : forêt du Sud et de l'Est ; Sao : sud du lac Tchad", "plus de 1 000 km les séparent"), F("Décrire", "chasse, pêche, cueillette / agriculture, buttes, bronze", "deux modes de vie différents"), F("Critiquer les sources", "tradition orale confrontée à l'archéologie", "« géants » : non confirmé par les fouilles")]
+  });
+
+  /* ═══════════ 5e FRANÇAIS — LA RELATIVE ═══════════ */
+  enrichir("5e-francais-subordonnee-relative", {
+    blocs: [[1, def("Pronom relatif", "Mot qui reprend l'antécédent et introduit la relative ; sa forme dépend de sa fonction dans la relative.")]],
+    planches: [[2, P2("Les quatre pronoms relatifs simples", "Pour chaque pronom : sa fonction dans la relative, le test pour le trouver et un exemple tiré de la lettre de Junior.", colonnes("qui · que · dont · où", [{ t: "qui", c: BLEU, l: ["sujet", "« … qui fait l'action »", "le village qui s'appelle", "Bandjoun"] }, { t: "que", c: VERT, l: ["COD", "« on … quoi ? »", "les masques que nous", "portons"] }, { t: "dont", c: "#C2540A", l: ["complément avec « de »", "« parler de… »", "le chef dont je t'ai", "parlé"] }, { t: "où", c: "#7B3F99", l: ["lieu ou temps", "« aller où ? quand ? »", "le marché où vont", "les femmes"] }], 210, "Tableau des pronoms relatifs qui, que, dont, où avec leur fonction et un exemple"))]],
+    formules: [F("Relier sans répéter", "antécédent + pronom relatif + verbe", "le chef dont je t'ai parlé habite la chefferie"), F("Choisir le pronom", "remplacer par l'antécédent → fonction → pronom", "parler du chef → dont ; aller au marché → où"), F("Repérer un faux relatif", "pas d'antécédent → « que » conjonction", "Je pense que tu aimeras Bandjoun")]
+  });
+
+  /* ═══════════ 5e GÉOGRAPHIE — CROISSANCE DE LA POPULATION ═══════════ */
+  enrichir("5e-geo-croissance-population", {
+    planches: [[1, P2("Natalité, mortalité, accroissement à Garoua", "Les trois taux de la commune, en pour mille : l'accroissement naturel est la différence entre natalité et mortalité, et non leur somme.", barres("En ‰ par an", [["Natalité", 36, "#2E7D32", "36 ‰"], ["Mortalité", 9, "#C62828", "9 ‰"], ["Accroissement naturel", 27, BLEU, "36 − 9 = 27 ‰ = 2,7 %"]], "", 180, "Barres : natalité 36 pour mille, mortalité 9 pour mille, accroissement naturel 27 pour mille"))]],
+    formules: [F("Calculer l'accroissement", "accroissement naturel = natalité − mortalité", "36 − 9 = 27 ‰"), F("Convertir", "‰ ÷ 10 = %", "27 ‰ = 2,7 % par an"), F("Prévoir", "temps de doublement ≈ 70 ÷ taux en %", "70 ÷ 2,7 ≈ 26 ans : planifier écoles et enseignants")]
+  });
+
+  /* ═══════════ 2nde A HISTOIRE — LES DISCIPLINES ═══════════ */
+  enrichir("2nde-a-histoire-disciplines", {
+    blocs: [[0, def("Source historique", "Toute trace du passé qui renseigne l'historien : écrit, objet, parole, paysage, nom de lieu.") + def("Critique des sources", "Examen d'une source avant de l'utiliser : qui l'a produite, quand, pourquoi, et que disent les autres sources ?")],
+      [2, formule("âge ≈ 5 730 × log₂(100 ÷ pourcentage restant)") + def("Stratigraphie", "Étude de l'ordre des couches du sol : sauf bouleversement, la couche la plus basse est la plus ancienne.") + ex("88 % de carbone 14 restant : 5 730 × log₂(100 ÷ 88) ≈ 1 060 ans ; 25 % : deux demi-vies, ≈ 11 460 ans.")]],
+    planches: [[2, P2("Les couches de la tranchée et leur date", "Chaque couche est datée par ce qu'elle contient : objets récents en haut, perles de traite au milieu (XVIIIᵉ-XIXᵉ siècles), tessons et charbon en bas, datés au carbone 14.", colonnes("De haut en bas : du plus récent au plus ancien", [{ t: "Couche 1", c: "#3B2A1E", l: ["0 à 30 cm", "sachets plastique", "→ aujourd'hui"] }, { t: "Couche 2", c: "#B5651D", l: ["30 à 80 cm", "perles de traite", "→ XVIIIᵉ-XIXᵉ s."] }, { t: "Couche 3", c: "#6E6A63", l: ["80 à 140 cm", "tessons, charbon", "→ vers l'an 970"] }], 190, "Tableau : trois couches de la tranchée, leur contenu et leur date"))]],
+    formules: [F("Toute trace est une source", "vestiges + paroles + langues + noms de lieux", "tessons et charbon : à protéger"), F("Ordonner", "stratigraphie : la couche la plus basse est la plus ancienne", "tessons (couche 3) plus anciens que les perles (couche 2)"), F("Dater", "âge ≈ 5 730 × log₂(100 ÷ % restant)", "88 % → ≈ 1 060 ans → vers l'an 970")]
+  });
+
+  /* ═══════════ 2nde A FRANÇAIS — L'ÉNONCIATION ═══════════ */
+  enrichir("2nde-a-francais-enonciation", {
+    blocs: [[2, astuce("Pour transformer un énoncé ancré en énoncé coupé : je/tu → il/elle ; ici → là, à cet endroit ; demain → le lendemain ; hier → la veille ; présent ou passé composé → imparfait ou passé simple.")]],
+    planches: [[2, P2("Ancré ou coupé : le tableau de conversion", "Chaque marque de l'énoncé ancré a son équivalent dans l'énoncé coupé, qui ne dépend plus de la situation d'énonciation.", colonnes("Du billet au récit", [{ t: "Énoncé ancré", c: BLEU, l: ["je, tu, nous, vous", "ici", "aujourd'hui, maintenant", "demain / hier", "présent, passé composé"] }, { t: "Énoncé coupé", c: "#7B3F99", l: ["il, elle, ils, elles", "là, à cet endroit", "ce jour-là, alors", "le lendemain / la veille", "imparfait, passé simple"] }], 230, "Tableau de conversion des marques d’un énoncé ancré vers un énoncé coupé"))]],
+    formules: [F("Situation d'énonciation", "qui ? à qui ? où ? quand ?", "billet sans nom ni date : on ne peut pas répondre"), F("Marques explicites", "pronoms + déictiques + temps + modalisateurs + ponctuation", "Je, t', ici, demain, sans doute, !"), F("Réécrire en énoncé coupé", "je → il ; demain → le lendemain ; ici → la cour", "« Il lui avait donné rendez-vous le lendemain »")]
+  });
+
+  /* ═══════════ 2nde A GÉOGRAPHIE — LIRE UNE CARTE ═══════════ */
+  enrichir("2nde-a-geo-cartes", {
+    planches: [[1, P2("Grande ou petite échelle ?", "Plus le dénominateur est petit, plus la carte est à grande échelle : elle montre un petit espace avec beaucoup de détails. Quelques échelles courantes et ce que représente 1 cm.", colonnes("1 cm sur la carte représente…", [{ t: "1/10 000", c: VERT, l: ["100 m", "plan de quartier", "→ grande échelle"] }, { t: "1/50 000", c: BLEU, l: ["500 m", "carte topographique", "région de Douala"] }, { t: "1/200 000", c: "#C2540A", l: ["2 km", "carte routière", "d'une région"] }, { t: "1/50 000 000", c: "#7B3F99", l: ["500 km", "planisphère", "→ petite échelle"] }], 190, "Tableau : quatre échelles et la distance représentée par 1 centimètre"))]],
+    formules: [F("Compléter la carte", "TOLES : titre, orientation, légende, échelle, source", "le brouillon devient lisible"), F("Calculer la distance", "distance réelle = distance carte × dénominateur", "3,5 × 10 000 = 35 000 cm = 350 m"), F("S'orienter", "le Nord en haut, sauf indication de la flèche", "refuge au Nord-Est du marché")]
+  });
+
+  /* ═══════════ 2nde C FRANÇAIS — LE THÉÂTRE ═══════════ */
+  enrichir("2nde-c-francais-theatre", {
+    blocs: [[1, ex("Dans <em>Trois prétendants… un mari</em> de Guillaume Oyônô Mbia, les répliques vives entre le père et les prétendants font rire le public, qui comprend plus que les personnages.", "Un exemple camerounais")]],
+    formules: [F("Lire une page", "nom du personnage + réplique + didascalies", "les italiques ne se disent pas"), F("Identifier la parole", "tirade, stichomythie, monologue, aparté", "« Pas un franc… » au public : aparté"), F("Situer dans la pièce", "exposition → nœud → dénouement", "la répétition du club : mettre en scène la structure")]
+  });
+})();
+
+/* Planches 3D (18/11/2026) : les deux leçons d'orientation de Tle avaient perdu leur 3D au lot 20 (blocs illisibles remplacés par
+   des plannings 2D) ; deux modèles 3D lisibles et légendés les remplacent. AJOUTS SEULEMENT. */
+(function () {
+  "use strict";
+  var NUIT = "#001136", BLEU = "#1E499B", GRIS = "#4D5163", VERT = "#17784D", ROUGE = "#C62828", TERRE = "#C46A2B";
+
+  function txt(x, y, t, o) {
+    o = o || {};
+    return "<text x='" + x + "' y='" + y + "' text-anchor='" + (o.a || "middle") + "' font-size='" + (o.s || 12) + "' font-weight='" + (o.w || 700) + "' fill='" + (o.c || NUIT) + "'" + (o.i ? " font-style='italic'" : "") + (o.halo ? " stroke='#fff' stroke-width='3' paint-order='stroke'" : "") + ">" + t + "</text>";
+  }
+  function lin(id, cs, vertical) {
+    var s = "<linearGradient id='" + id + "'" + (vertical ? " x1='0' y1='0' x2='0' y2='1'" : "") + ">";
+    cs.forEach(function (c, i) { s += "<stop offset='" + (i / (cs.length - 1)).toFixed(2) + "' stop-color='" + c + "'/>"; });
+    return s + "</linearGradient>";
+  }
+  function rad(id, cs) {
+    var s = "<radialGradient id='" + id + "' cx='35%' cy='30%' r='75%'>";
+    cs.forEach(function (c, i) { s += "<stop offset='" + (i / (cs.length - 1)).toFixed(2) + "' stop-color='" + c + "'/>"; });
+    return s + "</radialGradient>";
+  }
+  function fleche(id, c) { return "<marker id='" + id + "' markerWidth='10' markerHeight='10' refX='7' refY='5' orient='auto'><path d='M0 1L8 5L0 9Z' fill='" + c + "'/></marker>"; }
+  function svg(w, h, alt, defs, corps) {
+    return "<svg viewBox='0 0 " + w + " " + h + "' role='img' aria-label='" + alt + "' font-family='Inter,Arial,sans-serif'><rect width='" + w + "' height='" + h + "' fill='#fff'/><defs>" + defs + "</defs>" + corps +
+      "<text x='" + (w - 6) + "' y='" + (h - 5) + "' font-size='8' text-anchor='end' fill='#8A93A6'>Planche VÉRITAS</text></svg>";
+  }
+  function ancien(id) { return window.VRT_LECONS[id]; }
+  function remplacer(id, o) {
+    var a = ancien(id);
+    if (a) ["apc", "examen", "rang", "cle", "scenes"].forEach(function (k) { if (a[k] != null && o[k] == null) o[k] = a[k]; });
+    VRT_L(id, o);
+    if (a) o.ordre = a.ordre;
+  }
+  function q(qq, bonne, f1, f2, e) { return { q: qq, r: [bonne, f1, f2], b: 0, e: e }; }
+  function partie(old, i) { return old && old.parties[i] ? old.parties[i].html : ""; }
+  function bulle(x, y, w, t, c) { return "<rect x='" + x + "' y='" + y + "' width='" + w + "' height='30' rx='12' fill='#fff' stroke='" + (c || "#C9D2E3") + "'/>" + txt(x + w / 2, y + 20, t, { s: 11.5 }); }
+  function perso(x, y, peau, habit, bas) {
+    bas = bas || "#2E3445";
+    return "<g transform='translate(" + x + " " + y + ")'><ellipse cx='0' cy='84' rx='18' ry='4' fill='#001136' opacity='.18'/>" +
+      "<rect x='-9' y='44' width='8' height='36' rx='3' fill='" + bas + "'/><rect x='1' y='44' width='8' height='36' rx='3' fill='" + bas + "'/>" +
+      "<ellipse cx='-6' cy='81' rx='7' ry='3.5' fill='#1F2328'/><ellipse cx='6' cy='81' rx='7' ry='3.5' fill='#1F2328'/>" +
+      "<path d='M-13 46L-16 18C-16 13 -12 11 -6 10H6C12 11 16 13 16 18L13 46Z' fill='" + habit + "'/>" +
+      "<path d='M-15 16L-20 40' stroke='" + habit + "' stroke-width='7' stroke-linecap='round'/><path d='M15 16L20 40' stroke='" + habit + "' stroke-width='7' stroke-linecap='round'/>" +
+      "<circle cx='-20' cy='42' r='3.6' fill='" + peau + "'/><circle cx='20' cy='42' r='3.6' fill='" + peau + "'/>" +
+      "<rect x='-3.5' y='5' width='7' height='7' fill='" + peau + "'/><ellipse cx='0' cy='-2' rx='9' ry='10.5' fill='" + peau + "'/>" +
+      "<path d='M-9 -4C-10 -14 -4 -13.5 0 -13.5S10 -14 9 -4C7 -9 -7 -9 -9 -4Z' fill='#1B1410'/><ellipse cx='-9' cy='-1' rx='1.8' ry='3' fill='" + peau + "'/><ellipse cx='9' cy='-1' rx='1.8' ry='3' fill='" + peau + "'/></g>";
+  }
+  /* portrait en buste (arbre généalogique) */
+  function portrait(x, y, peau, habit, cheveux, age) {
+    var s = "<g transform='translate(" + x + " " + y + ")'><circle r='30' fill='#F4EFE4' stroke='#C9A576' stroke-width='3'/><clipPath id='pc" + x + "_" + y + "'><circle r='28'/></clipPath><g clip-path='url(#pc" + x + "_" + y + ")'>";
+    s += "<path d='M-26 32C-26 14 -14 10 0 10S26 14 26 32Z' fill='" + habit + "'/><rect x='-4' y='2' width='8' height='10' fill='" + peau + "'/><ellipse cy='-6' rx='11' ry='13' fill='" + peau + "'/>";
+    s += age === "vieux" ? "<path d='M-11 -10C-12 -20 -4 -21 0 -21S12 -20 11 -10C9 -14 -9 -14 -11 -10Z' fill='#D8D8D8'/>" : age === "femme" ? "<path d='M-13 -6C-15 -24 15 -24 13 -6C12 -14 -12 -14 -13 -6Z' fill='" + cheveux + "'/><path d='M-13 -14h26v-6c-6 -6 -20 -6 -26 0Z' fill='" + habit + "'/>" : "<path d='M-11 -10C-12 -20 -4 -21 0 -21S12 -20 11 -10C9 -14 -9 -14 -11 -10Z' fill='" + cheveux + "'/>";
+    s += "<circle cx='-4' cy='-6' r='1.4' fill='#1B1410'/><circle cx='4' cy='-6' r='1.4' fill='#1B1410'/><path d='M-3 2q3 2 6 0' stroke='#1B1410' fill='none'/></g></g>";
+    return s;
+  }
+  /* boucle d'exercice générique : [phrase avec ___, [bonne, autres…], explication] */
+  function exercice(el, C, suivant, lib) {
+    var i = 0, ok = 0;
+    el.innerHTML = "<p class='labo-r' data-q style='font-size:16px'></p><div style='display:flex;gap:8px;flex-wrap:wrap' data-c></div><p class='an-note' data-e></p><p class='labo-r' data-s></p>";
+    function $(s) { return el.querySelector(s); }
+    function poser() {
+      var c = C[i];
+      $("[data-q]").innerHTML = (i + 1) + ". " + c[0].replace("___", "<b style='border-bottom:2px dashed #1E499B;padding:0 14px'>?</b>");
+      $("[data-e]").textContent = ""; $("[data-s]").innerHTML = lib + " " + (i + 1) + " / " + C.length + " · score : <b>" + ok + "</b>";
+      $("[data-c]").innerHTML = c[1].slice().sort().map(function (x) { return "<button type='button' class='btn-l' data-v='" + x + "'>" + x + "</button>"; }).join("");
+      el.querySelectorAll("[data-v]").forEach(function (b) {
+        b.addEventListener("click", function () {
+          var bon = b.dataset.v === c[1][0]; if (bon) ok++;
+          $("[data-q]").innerHTML = (i + 1) + ". " + c[0].replace("___", "<b style='color:" + (bon ? VERT : ROUGE) + "'>" + c[1][0] + "</b>");
+          $("[data-e]").innerHTML = (bon ? "✔ " : "✘ ") + c[2];
+          el.querySelectorAll("[data-v]").forEach(function (x) { x.disabled = true; });
+          var nx = document.createElement("button"); nx.type = "button"; nx.className = "btn-l"; nx.textContent = i + 1 < C.length ? suivant : "↺";
+          nx.addEventListener("click", function () { i = (i + 1) % C.length; if (!i) ok = 0; poser(); });
+          $("[data-c]").appendChild(nx);
+          $("[data-s]").innerHTML = lib + " " + (i + 1) + " / " + C.length + " · score : <b>" + ok + "</b>";
+        });
+      });
+    }
+    poser();
+  }
+
+  function decaler(pl, dy) { pl.modele.objets.forEach(function (o) { o.c[1] -= dy; }); (pl.modele.etiquettes || []).forEach(function (e) { e.p[1] -= dy; }); return pl; }
+  function ajouter3D(id, partie, planche) { var L = ancien(id); if (L && L.parties[partie]) L.parties[partie].planches = (L.parties[partie].planches || []).concat([planche]); }
+  function bureau3D() {
+    var o = [], k;
+    o.push({ f: "boite", c: [0, -6, 0], d: [460, 6, 300], coul: "#B88A5A", dessus: "#C9A06E" });
+    o.push({ f: "boite", c: [0, 120, 110], d: [460, 260, 10], coul: "#EFE6D6", dessus: "#EFE6D6", div: false });
+    o.push({ f: "boite", c: [0, 70, 20], d: [260, 8, 120], coul: "#8B5A2B", dessus: "#A06A38" });
+    [[-120, -30], [120, -30], [-120, 70], [120, 70]].forEach(function (p) { o.push({ f: "boite", c: [p[0], 33, p[1] + 20], d: [8, 66, 8], coul: "#6B4423" }); });
+    o.push({ f: "boite", c: [0, 170, 103], d: [200, 110, 2], coul: "#FBF8F2", div: false });
+    var C = ["#3A4E8C", "#1E88E5", "#2E7D32", "#F2994A"];
+    for (k = 0; k < 7; k++) [0, 1, 2, 3].forEach(function (j) { o.push({ f: "boite", c: [-84 + k * 28, 205 - j * 22, 101], d: [22, 18, 1], coul: C[j], div: false }); });
+    o.push({ f: "boite", c: [-60, 80, 10], d: [70, 10, 50], coul: "#C62828", dessus: "#F4F1EA" });
+    o.push({ f: "boite", c: [-60, 90, 10], d: [66, 8, 46], coul: "#1E499B", dessus: "#F4F1EA" });
+    o.push({ f: "cylindre", c: [40, 74, 0], r: 14, h: 4, n: 16, coul: "#F7C948" });
+    o.push({ f: "cylindre", c: [40, 78, 0], r: 12, h: 2, n: 16, coul: "#FBF8F2" });
+    o.push({ f: "sphere", c: [100, 92, 30], r: 16, coul: "#C62828" });
+    o.push({ f: "sphere", c: [100, 92, 14], r: 12, coul: "#F4F1EA" });
+    o.push({ f: "boite", c: [180, 20, -60], d: [60, 40, 50], coul: "#8B6B4A", dessus: "#A68A5E" });
+    o.push({ f: "boite", c: [180, 42, -60], d: [20, 2, 36], coul: "#1F2328", dessus: "#2A2F36", div: false });
+    o.push({ f: "cylindre", c: [-110, 74, 60], r: 10, h: 4, n: 12, coul: "#3A3F47" });
+    o.push({ f: "cylindre", c: [-110, 78, 60], r: 2, h: 60, n: 6, coul: "#3A3F47" });
+    o.push({ f: "cone", c: [-110, 128, 46], r: 18, h: 16, n: 14, coul: "#F7C948" });
+    return o;
+  }
+  ajouter3D("tle-orient-temps", 2, decaler({ type: "3d", titre: "Le bureau de révision d'Aïcha", legende: "Tourne le coin de révision d'Aïcha : son planning de la semaine punaisé au mur (bleu nuit : sommeil, bleu : cours, vert : révisions, orange : sport), ses cahiers ouverts, un minuteur réglé sur 45 minutes, le réveil qui rappelle l'heure du coucher, et le téléphone rangé dans une boîte, hors de portée pendant la séance.",
+    modele: { h: 360, rx: -14, ry: 26, echelle: 0.85, alt: "Bureau de révision : planning au mur, cahiers, minuteur, réveil, lampe, téléphone rangé dans une boîte", objets: bureau3D(),
+      etiquettes: [{ p: [0, 225, 100], t: "planning de la semaine", cote: "g" }, { p: [40, 80, 0], t: "minuteur : 45 min", cote: "d" }, { p: [100, 104, 30], t: "réveil : coucher à 22 h", cote: "d" }, { p: [180, 44, -60], t: "téléphone rangé", cote: "d" }, { p: [-60, 96, 10], t: "cahiers et fiches", cote: "g" }] } }, 110));
+  function escalier3D() {
+    var o = [], M = [["T1", 8.6, "#C62828"], ["T2", 9.4, "#E8A33D"], ["T3", 10.4, "#2E7D32"]], k;
+    o.push({ f: "boite", c: [0, -6, 0], d: [460, 6, 200], coul: "#C9B28A", dessus: "#E9DFCF" });
+    M.forEach(function (m, i) { var h = (m[1] - 7) * 40; o.push({ f: "boite", c: [-150 + i * 110, h / 2, 0], d: [100, h, 120], coul: m[2], dessus: m[2] }); });
+    o.push({ f: "boite", c: [180, 70, 0], d: [100, 140, 120], coul: "#1E499B", dessus: "#2F6DB5" });
+    o.push({ f: "cylindre", c: [180, 140, 0], r: 2, h: 60, n: 6, coul: "#9AA3AF" });
+    o.push({ f: "boite", c: [200, 190, 0], d: [40, 22, 2], coul: "#F7C948", div: false });
+    o.push({ f: "boite", c: [0, 120, -62], d: [420, 1.5, 1.5], coul: "#1F2328", div: false });
+    o.push({ f: "cylindre", c: [-40, 70, 0], r: 8, r2: 6, h: 30, n: 10, coul: "#F4F1EA" });
+    o.push({ f: "sphere", c: [-40, 108, 0], r: 8, coul: "#5A3A1E" });
+    return o;
+  }
+  ajouter3D("tle-orient-bac", 0, decaler({ type: "3d", titre: "L'escalier de Kevin, trimestre par trimestre", legende: "Tourne l'escalier : chaque marche est une moyenne trimestrielle visée (8,6 au premier trimestre, environ 9,4 au deuxième, 10,4 au troisième), puis la marche bleue du bac, en juin. Le fil noir marque la barre des 10 : on la franchit marche après marche, grâce aux progrès ciblés sur les forts coefficients.",
+    modele: { h: 340, rx: -18, ry: 28, echelle: 0.85, alt: "Escalier de trois marches de couleur pour les moyennes trimestrielles et une marche bleue avec un drapeau pour le bac", objets: escalier3D(),
+      etiquettes: [{ p: [-150, 66, -60], t: "1ᵉʳ trimestre : 8,6", cote: "g" }, { p: [-40, 98, -60], t: "2ᵉ trimestre : ≈ 9,4", cote: "g" }, { p: [70, 138, -60], t: "3ᵉ trimestre : 10,4", cote: "d" }, { p: [200, 200, 0], t: "juin : le bac", cote: "d" }, { p: [-200, 121, -62], t: "barre des 10", cote: "g" }] } }, 90));
+})();
+
+/* ENRICHISSEMENT des leçons de sciences (18/11/2026), consignes de Jacques :
+   « Résoudre la situation-problème de départ en donnant des formules avec les étapes de la leçon ; illustrer par des
+     exemples ; formules, détails précis, astuces pour mieux retenir ; planches 2D et 3D. »
+   Ce fichier passe APRÈS les sources des leçons (ordre alphabétique) et AVANT les animations (90-…) :
+   - formules : denouement.formules = [{ nom, f, calcul }] (affichées par lecon.html, « étape par étape ») ;
+   - ajouts   : HTML ajouté à la fin d'une partie (définitions, formules, exemples, astuces) ;
+   - planches : planches ajoutées à une partie (l'ordre des parties ne change pas : les VRT_A restent valides).
+   Contrôle : node tools/audit_lecons.cjs */
+(function () {
+  "use strict";
+  function enrichir(id, o) {
+    var L = window.VRT_LECONS[id];
+    if (!L) return;
+    if (o.formules && L.denouement) L.denouement.formules = o.formules;
+    Object.keys(o.ajouts || {}).forEach(function (k) { var p = L.parties[+k]; if (p) p.html = (p.html || "") + o.ajouts[k]; });
+    Object.keys(o.planches || {}).forEach(function (k) { var p = L.parties[+k]; if (p) p.planches = (p.planches || []).concat(o.planches[k]); });
+  }
+  function F(nom, f, calcul) { return { nom: nom, f: f, calcul: calcul }; }
+  function ex(t, h) { return "<div class='ex'><b>" + t + "</b>" + h + "</div>"; }
+  function astuce(h) { return "<div class='astuce'><b>Astuce pour retenir</b>" + h + "</div>"; }
+  function attention(h) { return "<div class='attention'><b>Attention</b>" + h + "</div>"; }
+  function def(t, h) { return "<div class='def'><b>" + t + "</b>" + h + "</div>"; }
+  function formule(h) { return "<p class='formule'>" + h + "</p>"; }
+  var NUIT = "#001136", BLEU = "#1E499B", GRIS = "#4D5163", VERT = "#17784D", ORANGE = "#C2540A", ROUGE = "#C62828";
+  function txt(x, y, t, o) { o = o || {}; return "<text x='" + x + "' y='" + y + "' text-anchor='" + (o.a || "middle") + "' font-size='" + (o.s || 12) + "' font-weight='" + (o.w || 700) + "' fill='" + (o.c || NUIT) + "'>" + t + "</text>"; }
+  function svg(w, h, alt, corps) { return "<svg viewBox='0 0 " + w + " " + h + "' role='img' aria-label='" + alt + "' font-family='Inter,Arial,sans-serif'><rect width='" + w + "' height='" + h + "' fill='#fff'/>" + corps + "<text x='" + (w - 6) + "' y='" + (h - 5) + "' font-size='8' text-anchor='end' fill='#8A93A6'>Planche VÉRITAS</text></svg>"; }
+  function pl2(titre, legende, w, h, alt, corps) { return { type: "2D", titre: titre, legende: legende, svg: svg(w, h, alt, corps) }; }
+
+  /* ─────────────── 6e Mathématiques ─────────────── */
+  enrichir("6e-maths-divisibilite", {
+    formules: [
+      F("Tester la divisibilité par 2, 5 et 10 (dernier chiffre)", "n divisible par 2 ⇔ chiffre des unités pair ; par 5 ⇔ unités 0 ou 5 ; par 10 ⇔ unités 0", "1 260 se termine par 0 : divisible par 2, par 5 et par 10"),
+      F("Tester la divisibilité par 3 et 9 (somme des chiffres)", "n divisible par 3 (ou 9) ⇔ la somme de ses chiffres est divisible par 3 (ou 9)", "1 + 2 + 6 + 0 = 9 : divisible par 3 et par 9"),
+      F("Calculer le nombre de sachets", "nombre de sachets = nombre de beignets ÷ beignets par sachet", "1 260 ÷ 2 = 630 ; ÷ 3 = 420 ; ÷ 5 = 252 ; ÷ 9 = 140 ; ÷ 10 = 126"),
+      F("Comparer les recettes", "recette = nombre de sachets × prix d'un sachet", "140 × 450 F = 63 000 F et 126 × 500 F = 63 000 F")
+    ],
+    ajouts: {
+      0: def("Définition", "a est <strong>divisible</strong> par b (b ≠ 0) lorsque le reste de la division de a par b est <strong>nul</strong> : a = b × q. On dit aussi que b est un <strong>diviseur</strong> de a et que a est un <strong>multiple</strong> de b."),
+      1: formule("Par 2 : unités 0, 2, 4, 6, 8 · par 5 : unités 0 ou 5 · par 10 : unités 0 · par 100 : se termine par 00 · par 1 000 : par 000") +
+        formule("Par 3 : somme des chiffres divisible par 3 · par 9 : somme des chiffres divisible par 9") +
+        ex("Exemple", "4 725 : unités 5 → divisible par 5, pas par 2 ni 10 ; 4 + 7 + 2 + 5 = 18 → divisible par 3 et par 9.") +
+        astuce("« <strong>Les petits regardent la queue, les grands font la somme</strong> » : 2, 5, 10 regardent le dernier chiffre ; 3 et 9 additionnent tous les chiffres. Si la somme est encore grande, recommence : 9 999 → 36 → 9.")
+    }
+  });
+
+  enrichir("6e-maths-fractions", {
+    formules: [
+      F("Calculer une fraction d'une quantité", "a/b de Q = Q ÷ b × a", "3/4 de 12 L = 12 ÷ 4 × 3 = 9 L ; 6/8 de 12 L = 12 ÷ 8 × 6 = 9 L"),
+      F("Fabriquer une fraction égale", "a/b = (a × k)/(b × k)", "3/4 = (3 × 2)/(4 × 2) = 6/8"),
+      F("Vérifier l'égalité par les produits en croix", "a/b = c/d ⇔ a × d = b × c", "3 × 8 = 24 et 4 × 6 = 24 : 3/4 = 6/8"),
+      F("Conclure", "même valeur ⇒ même quantité versée", "Aïcha et Paul versent chacun 9 L : 18 L dans la marmite")
+    ],
+    ajouts: {
+      1: astuce("Pour savoir si deux fractions sont égales, fais le <strong>produit en croix</strong> : 3/4 et 6/8 → 3 × 8 = 24 et 4 × 6 = 24, c'est égal. Pour 2/3 et 3/4 : 8 ≠ 9, elles sont différentes.") +
+        ex("Exemple", "Comparer 5/6 et 7/9 : dénominateur commun 18 → 15/18 et 14/18, donc 5/6 > 7/9.")
+    }
+  });
+
+  enrichir("6e-maths-angles", {
+    formules: [
+      F("Angle entre deux chiffres voisins du cadran", "360° ÷ 12 = 30°", "le tour complet (360°) est partagé en 12 heures"),
+      F("Angle des aiguilles à h heures pile", "angle = h × 30° (si plus de 180°, on prend 360° − angle)", "1 h → 30° ; 3 h → 90° ; 4 h → 120° ; 6 h → 180°"),
+      F("Classer l'angle", "aigu < 90° = droit < obtus < 180° = plat", "30° aigu ; 90° droit ; 120° obtus ; 180° plat")
+    ],
+    ajouts: {
+      0: def("Définition", "Deux angles sont <strong>adjacents</strong> s'ils ont le même sommet, un côté commun et sont de part et d'autre de ce côté. Deux angles sont <strong>complémentaires</strong> si leur somme vaut 90°, <strong>supplémentaires</strong> si elle vaut 180°."),
+      1: formule("aigu : 0° &lt; a &lt; 90° · droit : a = 90° · obtus : 90° &lt; a &lt; 180° · plat : a = 180°") +
+        ex("Exemple", "À 10 h, 10 × 30° = 300° : le petit angle vaut 360° − 300° = 60°, angle aigu.") +
+        ex("Exemple", "Deux angles de 35° et 55° sont complémentaires : 35° + 55° = 90°.")
+    }
+  });
+
+  enrichir("6e-maths-symetrie-axiale", {
+    formules: [
+      F("Mesurer la distance de chaque point à l'axe", "d(A ; axe) = longueur de la perpendiculaire [AH]", "le rond est à 50 cm de l'axe, le carré à 90 cm"),
+      F("Placer le symétrique de l'autre côté", "A' sur (AH), de l'autre côté de l'axe, avec HA' = HA", "rond à 50 cm à droite, à 40 cm du haut ; carré à 90 cm à droite"),
+      F("Vérifier par la conservation des longueurs", "A'B' = AB", "le carré symétrique garde 30 cm de côté")
+    ],
+    ajouts: {
+      0: ex("Exemple sur quadrillage", "Axe vertical ; A est 4 carreaux à gauche de l'axe et 2 carreaux au-dessus du bas : A' est 4 carreaux à droite, toujours 2 carreaux au-dessus du bas.") +
+        astuce("« <strong>Plier, piquer, déplier</strong> » : plie la feuille le long de l'axe, pique le point avec la pointe du compas, déplie : le trou de l'autre côté est le symétrique."),
+      2: ex("Exemple dans la vie", "Les lettres A, M, T, U, V, W, Y ont un axe de symétrie vertical ; B, C, D, E, K un axe horizontal ; H, I, O, X en ont deux.") +
+        attention("Le parallélogramme quelconque n'a <strong>aucun</strong> axe de symétrie, même s'il « paraît » régulier.")
+    }
+  });
+
+  enrichir("6e-maths-proportionnalite", {
+    formules: [
+      F("Calculer le coefficient (prix d'un kilo)", "coefficient = prix ÷ quantité", "1 500 F ÷ 3 kg = 500 F/kg ; 2 500 ÷ 5 = 500 : même coefficient, proportionnel"),
+      F("Tester les mangues", "prix ÷ quantité pour chaque colonne", "500 ÷ 3 ≈ 167 F ; 900 ÷ 6 = 150 F : coefficients différents, pas proportionnel"),
+      F("Calculer la quatrième proportionnelle", "prix = quantité × coefficient", "7 kg × 500 F = 3 500 F"),
+      F("Vérifier par les produits en croix", "3 × 3 500 = 7 × 1 500", "10 500 = 10 500 ✓")
+    ],
+    ajouts: {
+      0: formule("y = k × x &nbsp;·&nbsp; k = y ÷ x (le même pour toutes les colonnes)"),
+      1: formule("Produit en croix : si a/b = c/x alors x = b × c ÷ a") +
+        astuce("« <strong>Un kilo d'abord</strong> » : quand tu hésites, cherche toujours le prix d'UNE unité (passage à l'unité), puis multiplie. Et vérifie : plus de kilos doit donner plus cher, jamais moins.") +
+        attention("Proportionnel ne veut pas dire « augmente ensemble » : l'âge et la taille augmentent ensemble, mais ne sont pas proportionnels.")
+    }
+  });
+
+  enrichir("6e-maths-cercle", {
+    formules: [
+      F("Calculer le rayon", "r = d ÷ 2", "r = 1,40 ÷ 2 = 0,70 m"),
+      F("Calculer le périmètre (bordure en fer)", "P = π × d", "P = 3,14 × 1,40 = 4,396 ≈ 4,40 m"),
+      F("Calculer l'aire (couvercle en tôle)", "A = π × r × r", "A = 3,14 × 0,70 × 0,70 = 1,5386 ≈ 1,54 m²"),
+      F("Calculer le coût total", "coût = P × prix du mètre + A × prix du m²", "4,40 × 1 500 + 1,54 × 6 000 = 6 600 + 9 240 = 15 840 F")
+    ],
+    ajouts: {
+      2: astuce("« <strong>Le tour prend le diamètre, l'aire prend le rayon deux fois</strong> » : P = π × d ; A = π × r × r. Et l'unité te trahit : une longueur en m, une aire en m².")
+    }
+  });
+
+  enrichir("6e-maths-pave-droit", {
+    formules: [
+      F("Calculer l'aire des trois faces différentes", "L × l ; L × h ; l × h", "20 × 12 = 240 cm² ; 20 × 8 = 160 cm² ; 12 × 8 = 96 cm²"),
+      F("Calculer l'aire totale (carton)", "A = 2 × (L × l + L × h + l × h)", "2 × (240 + 160 + 96) = 2 × 496 = 992 cm²"),
+      F("Calculer le volume de la boîte", "V = L × l × h", "20 × 12 × 8 = 1 920 cm³"),
+      F("Calculer le nombre de savons", "volume de la boîte ÷ volume d'un savon (a × a × a)", "1 920 ÷ (4 × 4 × 4) = 1 920 ÷ 64 = 30 savons, soit 5 × 3 × 2")
+    ],
+    ajouts: {
+      2: astuce("« <strong>Aire = papier, volume = remplissage</strong> » : pour emballer, on additionne des surfaces (cm²) ; pour remplir, on multiplie trois longueurs (cm³).")
+    }
+  });
+
+  /* ─────────────── 5e / 4e Mathématiques ─────────────── */
+  enrichir("5e-maths-pgcd", {
+    formules: [
+      F("Écrire la condition « tomber juste »", "le côté c de la dalle divise 360 et 240", "c est un diviseur commun de 360 et 240"),
+      F("Calculer le PGCD par l'algorithme d'Euclide", "PGCD(a ; b) = PGCD(b ; r), avec a = b × q + r", "360 = 240 × 1 + 120 ; 240 = 120 × 2 + 0 → PGCD = 120"),
+      F("Calculer le nombre de dalles", "(longueur ÷ c) × (largeur ÷ c)", "(360 ÷ 120) × (240 ÷ 120) = 3 × 2 = 6 dalles"),
+      F("Calculer le coût de la pose", "nombre de dalles × prix de pose", "6 × 1 500 F = 9 000 F")
+    ],
+    ajouts: {
+      1: ex("Exemple : algorithme d'Euclide", "PGCD(84 ; 36) : 84 = 36 × 2 + 12 ; 36 = 12 × 3 + 0. Le dernier reste non nul est <strong>12</strong>.") +
+        ex("Exemple : partage équitable", "Avec 84 cahiers et 36 stylos, on fait au plus PGCD(84 ; 36) = 12 lots identiques de 7 cahiers et 3 stylos."),
+      2: ex("Exemple : fraction irréductible", "84/36 = (84 ÷ 12)/(36 ÷ 12) = 7/3 : en divisant par le PGCD, on obtient directement la fraction irréductible.")
+    }
+  });
+
+  enrichir("4e-maths-facteurs-premiers", {
+    formules: [
+      F("Décomposer par divisions successives", "diviser par 2, puis 3, puis 5… tant que c'est possible", "360 ÷ 2 = 180 ; ÷ 2 = 90 ; ÷ 2 = 45 ; ÷ 3 = 15 ; ÷ 3 = 5 ; ÷ 5 = 1"),
+      F("Écrire la décomposition", "n = p₁^a × p₂^b × p₃^c", "360 = 2³ × 3² × 5"),
+      F("Compter les diviseurs", "nombre de diviseurs = (a + 1) × (b + 1) × (c + 1)", "(3 + 1) × (2 + 1) × (1 + 1) = 4 × 3 × 2 = 24 dispositions"),
+      F("Trouver la disposition la plus proche du carré", "le diviseur d le plus proche de √n, avec n ÷ d élèves par rangée", "√360 ≈ 19 : 18 rangées de 20 élèves")
+    ]
+  });
+
+
+  /* ─────────────── Lot 2 : 5e-3e sciences ─────────────── */
+  enrichir("5e-maths-division-euclidienne", {
+    formules: [
+      F("Poser l'égalité de la division euclidienne", "a = b × q + r, avec 0 ≤ r < b", "250 = 24 × q + r"),
+      F("Trouver le quotient", "q = le plus grand entier tel que b × q ≤ a", "24 × 10 = 240 ≤ 250 et 24 × 11 = 264 > 250 : q = 10"),
+      F("Calculer le reste", "r = a − b × q", "r = 250 − 240 = 10, et 10 < 24 ✓"),
+      F("Calculer la recette", "q × prix d'une cagette + r × prix d'une mangue", "10 × 3 000 + 10 × 150 = 30 000 + 1 500 = 31 500 F")
+    ],
+    ajouts: { 1: astuce("« <strong>Le reste est toujours plus petit que le diviseur</strong> » : si ton reste dépasse le diviseur, ton quotient est trop petit d'au moins 1. Vérifie toujours : b × q + r doit redonner a.") }
+  });
+
+  enrichir("4e-pct-aimants", {
+    formules: [
+      F("Identifier le pôle Nord de l'aimant", "aimant suspendu librement : le pôle Nord se tourne vers le nord géographique", "l'extrémité qui pointe vers le nord est le pôle N"),
+      F("Confirmer avec la boussole", "pôles de même nom ⇒ répulsion ; pôles de noms contraires ⇒ attraction", "le bout coloré (N) de l'aiguille est repoussé : l'extrémité testée est bien N"),
+      F("Choisir où pêcher", "le champ magnétique est le plus intense près des pôles", "on plonge une extrémité de l'aimant, pas son milieu"),
+      F("Prévoir ce qui est attiré", "attirés : fer, acier, nickel, cobalt · non attirés : cuivre, laiton, aluminium, or", "anneau en acier attiré, clé en laiton non : la clé remonte par son anneau")
+    ],
+    ajouts: {
+      1: ex("Exemple", "On approche le pôle N d'un aimant du pôle S d'un autre aimant posé sur des crayons : il roule vers lui (attraction). On le retourne : il s'éloigne (répulsion).") +
+        ex("Exemple", "Une aiguille à coudre frottée 20 fois dans le même sens sur un aimant devient à son tour un petit aimant : posée sur un bouchon dans l'eau, elle s'oriente nord-sud.") +
+        astuce("« <strong>Les contraires s'attirent, les pareils se repoussent</strong> » : N-S s'attirent, N-N et S-S se repoussent."),
+      3: ex("Exemple au quotidien", "La porte du réfrigérateur, les haut-parleurs du téléphone et les cartes bancaires utilisent des aimants ; c'est pourquoi on n'approche pas un aimant d'une carte à piste magnétique.")
+    }
+  });
+
+  enrichir("4e-svt-photosynthese", {
+    formules: [
+      F("Faire le bilan de masse", "gain du plant = masse finale − masse initiale ; perte de la terre = masse initiale − masse finale", "le plant gagne 450 g ; la terre ne perd que 4 g (sels minéraux)"),
+      F("Séparer l'eau de la matière sèche", "masse fraîche = eau + matière sèche", "450 g = environ 360 g d'eau + 90 g de matière sèche"),
+      F("Trouver l'origine du carbone", "matière sèche ≈ 45 % de carbone, venu du CO₂ de l'air", "≈ 0,45 × 90 ≈ 40 g de carbone pris dans l'air"),
+      F("Écrire le bilan de la photosynthèse", "eau + dioxyde de carbone → (lumière, chlorophylle) → matière organique + dioxygène", "6 CO₂ + 6 H₂O → C₆H₁₂O₆ + 6 O₂")
+    ],
+    ajouts: {
+      4: ex("Exemple", "Une plante aquatique (élodée) éclairée dans l'eau dégage des bulles de dioxygène ; à l'obscurité, plus de bulles.") +
+        ex("Exemple", "Une feuille de manioc cachée deux jours par un papier aluminium puis testée à l'eau iodée ne bleuit pas là où elle était cachée : sans lumière, pas d'amidon.")
+    }
+  });
+
+  enrichir("3e-pct-ph", {
+    formules: [
+      F("Calculer la quantité de matière", "n = m ÷ M", "n = 40 g ÷ 40 g/mol = 1 mol de NaOH"),
+      F("Calculer la concentration molaire", "C = n ÷ V", "C = 1 mol ÷ 0,5 L = 2 mol/L"),
+      F("Classer la solution par son pH", "pH < 7 acide · pH = 7 neutre · pH > 7 basique", "pH > 13 : très basique, corrosive"),
+      F("Calculer la dilution", "C₁ × V₁ = C₂ × V₂", "2 × 50 mL = C₂ × 500 mL → C₂ = 0,2 mol/L (dix fois moins concentrée)")
+    ],
+    ajouts: {
+      0: ex("Exemple", "15 g de sel (NaCl, M = 58,5 g/mol) dans 250 mL : n = 15 ÷ 58,5 ≈ 0,26 mol ; C = 0,26 ÷ 0,25 ≈ 1,0 mol/L."),
+      2: ex("Exemple : facteur de dilution", "Pour diviser la concentration par 10, on prélève 10 mL de solution et on complète à 100 mL avec de l'eau : V₂ = 10 × V₁.") +
+        astuce("« <strong>Toujours l'acide (ou la soude) dans l'eau, jamais l'eau dedans</strong> » : on verse le produit concentré lentement dans beaucoup d'eau, pour éviter les projections brûlantes.")
+    }
+  });
+
+  enrichir("3e-svt-adn", {
+    formules: [
+      F("Compter les chromosomes reçus", "cellule-œuf = 23 chromosomes du père + 23 de la mère", "23 + 23 = 46 chromosomes, soit 23 paires"),
+      F("Écrire les gamètes possibles", "mère XX → ovules tous X ; père XY → spermatozoïdes X ou Y", "ovule X ; spermatozoïde X (50 %) ou Y (50 %)"),
+      F("Faire le tableau de croisement", "gamète du père × gamète de la mère", "X × X = XX (fille) ; Y × X = XY (garçon)"),
+      F("Calculer la probabilité", "probabilité = cas favorables ÷ cas possibles", "fille : 1 ÷ 2 = 50 % à chaque naissance, quel que soit le rang")
+    ],
+    ajouts: {
+      2: ex("Exemple", "Une famille a déjà trois filles. La probabilité que le 4ᵉ enfant soit un garçon reste 1 sur 2 : chaque fécondation est indépendante.") +
+        ex("Exemple : caryotype", "Un caryotype montre 22 paires semblables (autosomes) et une 23ᵉ paire XX : c'est une fille ; XY : un garçon. 47 chromosomes avec trois chromosomes 21 : trisomie 21.")
+    }
+  });
+
+  enrichir("3e-maths-racines", {
+    formules: [
+      F("Calculer l'aire nécessaire", "aire = nombre de poules ÷ densité", "200 ÷ 4 = 50 m²"),
+      F("Calculer le côté du carré", "c = √A", "c = √50 = √(25 × 2) = 5√2 ≈ 7,07 m"),
+      F("Encadrer pour vérifier", "a² < A < b² ⇒ a < √A < b", "49 < 50 < 64 donc 7 < √50 < 8"),
+      F("Calculer le grillage", "P = 4 × c", "4 × 7,07 ≈ 28,3 m : acheter 29 m"),
+      F("Calculer la diagonale", "d = c × √2", "5√2 × √2 = 5 × 2 = 10 m de fil")
+    ],
+    planches: {
+      1: [pl2("Le carré de 50 m² et sa diagonale", "Un carré d'aire 50 m² a un côté de √50 ≈ 7,07 m ; sa diagonale mesure exactement 10 m.", 640, 260, "Carré de côté racine de 50 avec sa diagonale de 10 mètres, encadré entre les carrés de 7 et 8 mètres",
+        "<rect x='70' y='30' width='196' height='196' fill='#EEF4FC' stroke='" + BLEU + "' stroke-width='3'/><rect x='70' y='30' width='224' height='224' fill='none' stroke='#9AA4B6' stroke-dasharray='6 4'/><rect x='70' y='30' width='186' height='186' fill='none' stroke='#C9D0DC' stroke-dasharray='3 4'/>" +
+        "<path d='M70 226L266 30' stroke='" + ROUGE + "' stroke-width='3'/>" + txt(168, 140, "50 m²", { s: 18, c: BLEU }) + txt(150, 106, "d = 10 m", { s: 13, c: ROUGE }) + txt(168, 248, "c = √50 ≈ 7,07 m", { s: 13 }) +
+        "<rect x='330' y='40' width='280' height='180' rx='14' fill='#FFF6E3' stroke='#F2DFA6'/>" + txt(470, 76, "7² = 49 < 50 < 64 = 8²", { s: 15, c: '#8A6200' }) + txt(470, 108, "donc 7 < √50 < 8", { s: 15 }) + txt(470, 146, "√50 = √25 × √2 = 5√2", { s: 15, c: BLEU }) + txt(470, 184, "d = 5√2 × √2 = 10 m", { s: 15, c: ROUGE }))]
+    },
+    ajouts: { 2: attention("√(a + b) ≠ √a + √b : √(9 + 16) = √25 = 5, alors que √9 + √16 = 3 + 4 = 7.") + astuce("« <strong>On sort les carrés parfaits</strong> » : √50 = √(25 × 2) = 5√2 ; √72 = √(36 × 2) = 6√2. Connais par cœur les carrés de 1 à 15.") }
+  });
+
+  enrichir("3e-pct-atome", {
+    formules: [
+      F("Compter les atomes sur une longueur", "nombre d'atomes = longueur ÷ diamètre d'un atome", "1 mm ÷ 0,000 000 25 mm ≈ 4 millions d'atomes de cuivre"),
+      F("Écrire la neutralité de l'atome", "nombre d'électrons = nombre de protons = Z", "cuivre : 29 protons et 29 électrons"),
+      F("Identifier l'élément par Z", "Z = numéro atomique, propre à chaque élément", "Z = 29 : cuivre (Cu) ; Z = 79 : or (Au)"),
+      F("Comparer les tailles", "taille de l'atome ≈ 100 000 × taille du noyau", "noyau d'1 mm ⇒ atome de 100 m, un stade")
+    ],
+    planches: {
+      2: [pl2("Deux atomes, deux éléments", "Le cuivre (Z = 29) et l'or (Z = 79) ont la même architecture, mais pas le même nombre de protons : ce sont deux éléments différents.", 640, 240, "Schéma comparé d'un atome de cuivre et d'un atome d'or avec leur numéro atomique",
+        (function () { var s = "", k; [[160, "Cu", 29, "#C77B30"], [480, "Au", 79, "#D4A017"]].forEach(function (a) { s += "<circle cx='" + a[0] + "' cy='110' r='86' fill='#F7F9FC' stroke='#C9D0DC' stroke-dasharray='4 4'/><circle cx='" + a[0] + "' cy='110' r='14' fill='" + a[3] + "'/>"; for (k = 0; k < 10; k++) { var t = k * Math.PI / 5; s += "<circle cx='" + (a[0] + 70 * Math.cos(t)).toFixed(1) + "' cy='" + (110 + 70 * Math.sin(t)).toFixed(1) + "' r='4' fill='" + BLEU + "'/>"; } s += txt(a[0], 115, a[1], { s: 13, c: "#fff" }) + txt(a[0], 220, a[1] + " : Z = " + a[2] + " protons, " + a[2] + " électrons", { s: 13 }); }); return s + txt(320, 112, "≠", { s: 30, c: ROUGE }); })())]
+    },
+    ajouts: {
+      2: def("Définition", "Le <strong>numéro atomique Z</strong> est le nombre de protons du noyau. L'atome est <strong>électriquement neutre</strong> : il a autant d'électrons (charge −e) que de protons (charge +e).") +
+        ex("Exemple", "L'atome d'oxygène (Z = 8) a 8 protons et 8 électrons ; l'atome de fer (Z = 26) a 26 protons et 26 électrons.") +
+        astuce("« <strong>Z, c'est la carte d'identité</strong> » : change le nombre de protons, et tu changes d'élément ; change le nombre d'électrons, et tu obtiens un ion du même élément.")
+    }
+  });
+
+  enrichir("3e-svt-ressemblances", {
+    formules: [
+      F("Tester l'appartenance à une espèce", "même espèce ⇔ interfécondité et descendance fertile", "humain × chimpanzé : pas de descendance → espèces différentes"),
+      F("Classer les caractères", "caractère de l'espèce : tous l'ont · caractère individuel : varie d'une personne à l'autre", "bipédie, pouce opposable, langage : espèce ; lobe d'oreille, fossettes : individuel"),
+      F("Séparer hérédité et milieu", "caractère observé = information génétique + influence du milieu", "jumelles : même information génétique ; sport et soleil changent leur peau et leurs muscles"),
+      F("Retrouver l'origine des caractères héréditaires", "cellule-œuf = information du père + information de la mère", "les caractères viennent des deux familles")
+    ],
+    planches: {
+      1: [pl2("Caractères de l'espèce et caractères individuels", "Tous les humains partagent les caractères de l'espèce ; les caractères individuels varient et partagent la classe en groupes.", 640, 230, "Deux colonnes : caractères de l'espèce humaine et caractères individuels",
+        "<rect x='20' y='20' width='290' height='190' rx='14' fill='#EEF4FC' stroke='#C9D8EE'/><rect x='330' y='20' width='290' height='190' rx='14' fill='#ECF7F0' stroke='#BFDCC9'/>" + txt(165, 50, "Caractères de l'espèce", { s: 15, c: BLEU }) + txt(475, 50, "Caractères individuels", { s: 15, c: VERT }) +
+        ["marcher debout (bipédie)", "pouce opposable", "langage articulé", "46 chromosomes"].map(function (t, k) { return txt(40, 86 + k * 30, "• " + t, { s: 13, a: "start", w: 500 }); }).join("") +
+        ["lobe d'oreille libre ou attaché", "fossettes ou non", "groupe sanguin A, B, AB, O", "enrouler la langue ou non"].map(function (t, k) { return txt(350, 86 + k * 30, "• " + t, { s: 13, a: "start", w: 500 }); }).join(""))]
+    },
+    ajouts: {
+      2: ex("Exemple", "Le groupe sanguin est héréditaire : il ne change pas avec l'alimentation. La couleur de la peau peut foncer au soleil (influence du milieu), mais la couleur de base est héréditaire.") +
+        ex("Exemple", "Deux vrais jumeaux, l'un footballeur, l'autre non, ont le même groupe sanguin mais pas la même musculature.") +
+        astuce("« <strong>Héritage + vie = ce que tu es</strong> » : pour chaque caractère, demande-toi s'il peut changer pendant la vie (milieu) ou s'il est fixé dès la cellule-œuf (hérédité).") +
+        attention("Un caractère « de famille » n'est pas toujours héréditaire : une famille peut partager un accent ou des habitudes alimentaires sans gène commun.")
+    }
+  });
+
+
+  /* ─────────────── Lot 3 : 2nde, 3e, Tle ─────────────── */
+  enrichir("3e-maths-thales", {
+    formules: [
+      F("Vérifier la configuration", "P ∈ [EA], B ∈ [ES] et (PB) // (AS)", "manche et mât verticaux, donc parallèles"),
+      F("Écrire l'égalité de Thalès", "EP / EA = EB / ES = PB / AS", "0,8 / 6,4 = 1,2 / AS"),
+      F("Calculer la longueur inaccessible (produit en croix)", "AS = EA × PB ÷ EP", "AS = 6,4 × 1,2 ÷ 0,8 = 9,6 m"),
+      F("Calculer la corde", "corde = 2 × hauteur + marge pour les nœuds", "2 × 9,6 + 1 = 20,2 m : acheter 21 m")
+    ]
+  });
+
+  enrichir("tle-maths-binaire", {
+    formules: [
+      F("Donner la valeur de chaque ampoule", "le rang k (en partant de 0, à droite) vaut 2ᵏ", "128, 64, 32, 16, 8, 4, 2, 1"),
+      F("Convertir 45 en base 2 (divisions successives par 2)", "on lit les restes de bas en haut", "45 = 2 × 22 + 1 ; 22 = 2 × 11 + 0 ; 11 = 2 × 5 + 1 ; 5 = 2 × 2 + 1 ; 2 = 2 × 1 + 0 ; 1 = 2 × 0 + 1 → 101101₂"),
+      F("Vérifier la conversion", "N = Σ bₖ × 2ᵏ", "32 + 8 + 4 + 1 = 45 ✓"),
+      F("Calculer la capacité de n ampoules", "2ⁿ combinaisons, de 0 à 2ⁿ − 1", "8 ampoules : 0 à 255 ; 300 > 255 → 9 ampoules (jusqu'à 511)")
+    ],
+    ajouts: {
+      0: def("Définition", "En <strong>base 2</strong>, un nombre s'écrit avec les seuls chiffres 0 et 1 (les <strong>bits</strong>) : N = bₙ × 2ⁿ + … + b₁ × 2 + b₀. Un <strong>octet</strong> est un groupe de 8 bits.") +
+        formule("N = bₙ × 2ⁿ + bₙ₋₁ × 2ⁿ⁻¹ + … + b₁ × 2¹ + b₀ × 2⁰, avec bₖ ∈ {0 ; 1}")
+    }
+  });
+
+  enrichir("tle-svt-osmose", {
+    formules: [
+      F("Prévoir le sens du mouvement de l'eau", "l'eau va du milieu le moins concentré (hypotonique) vers le plus concentré (hypertonique)", "eau distillée (≈ 0 g/L) → globule rouge (≈ 9 g/L) : l'eau entre"),
+      F("Comparer au plasma", "isotonique : même concentration de part et d'autre, pas de flux net", "sérum physiologique à 9 g/L de NaCl, comme le plasma"),
+      F("Calculer la concentration molaire du sérum", "C = Cm ÷ M", "C = 9 g/L ÷ 58,5 g/mol ≈ 0,15 mol/L de NaCl"),
+      F("Lire l'expérience des frites", "concentration interne ≈ concentration où la masse ne varie pas", "les frites ne changent pas de masse vers 0,28 mol/L : c'est la concentration de leurs cellules")
+    ],
+    ajouts: {
+      0: def("Définition", "L'<strong>osmose</strong> est le passage de l'eau à travers une membrane semi-perméable, du milieu le moins concentré en solutés vers le milieu le plus concentré. Un milieu est <strong>hypotonique</strong> s'il est moins concentré que la cellule, <strong>hypertonique</strong> s'il l'est plus, <strong>isotonique</strong> s'il a la même concentration."),
+      1: ex("Exemple", "Des globules rouges dans de l'eau salée à 20 g/L (hypertonique) perdent de l'eau et se ratatinent (crénelure) ; dans l'eau distillée, ils gonflent et éclatent (hémolyse)."),
+      2: ex("Exemple au quotidien", "On sale les aubergines avant de les frire : le sel (hypertonique) fait sortir leur eau, elles ramollissent et boivent moins d'huile. Des feuilles de laitue fanées redeviennent croquantes dans l'eau fraîche (turgescence).")
+    }
+  });
+
+  enrichir("2nde-c-maths-reels", {
+    formules: [
+      F("Rendre la fraction irréductible", "diviser numérateur et dénominateur par leur PGCD", "5/8 et 5/6 sont déjà irréductibles"),
+      F("Tester si c'est un décimal", "a/b irréductible est décimal ⇔ b ne contient que les facteurs 2 et 5", "8 = 2³ → 5/8 = 0,625 ∈ 𝔻 ; 6 = 2 × 3 → 5/6 ∉ 𝔻"),
+      F("Calculer la diagonale (Pythagore)", "d² = c² + c²", "d² = 1² + 1² = 2, donc d = √2 hm"),
+      F("Classer √2", "√2 n'est le quotient d'aucun couple d'entiers : irrationnel", "√2 ∈ ℝ \\ ℚ ; √2 ≈ 1,414 hm ≈ 141 m")
+    ],
+    planches: {
+      1: [pl2("Les ensembles emboîtés", "Chaque ensemble contient le précédent : ℕ ⊂ ℤ ⊂ 𝔻 ⊂ ℚ ⊂ ℝ. On y range les nombres de la situation.", 640, 260, "Cinq ensembles emboîtés N, Z, D, Q, R avec des exemples de nombres",
+        [["ℝ", 620, 240, "#F4F1FB", "#7B2CBF"], ["ℚ", 500, 200, "#EEF4FC", BLEU], ["𝔻", 380, 160, "#ECF7F0", VERT], ["ℤ", 260, 120, "#FFF6E3", "#C2540A"], ["ℕ", 140, 80, "#FCE8EC", ROUGE]].map(function (e, k) { return "<rect x='" + (10 + k * 24) + "' y='" + (10 + k * 22) + "' width='" + e[1] + "' height='" + e[2] + "' rx='16' fill='" + e[3] + "' stroke='" + e[4] + "' stroke-width='2'/>" + txt(26 + k * 24, 34 + k * 22, e[0], { s: 16, c: e[4], a: "start" }); }).join("") +
+        txt(176, 150, "3", { s: 16 }) + txt(294, 150, "−2", { s: 16, c: "#C2540A" }) + txt(390, 142, "5/8", { s: 15, c: VERT }) + txt(390, 162, "= 0,625", { s: 12, c: VERT }) + txt(486, 142, "5/6", { s: 15, c: BLEU }) + txt(486, 162, "= 0,833…", { s: 12, c: BLEU }) + txt(582, 152, "√2", { s: 17, c: "#7B2CBF" }))]
+    }
+  });
+
+  enrichir("2nde-a-maths-reels", {
+    formules: [
+      F("Classer le solde", "entier négatif ⇒ ℤ (donc aussi 𝔻, ℚ, ℝ)", "−3 000 ∈ ℤ"),
+      F("Calculer la part de chacune", "part = total ÷ nombre de personnes", "100 000 ÷ 6 = 50 000/3"),
+      F("Tester si c'est un décimal", "dénominateur irréductible fait seulement de 2 et de 5 ⇔ décimal", "3 n'est ni 2 ni 5 : 50 000/3 = 16 666,666… ∉ 𝔻"),
+      F("Payer justement (division euclidienne)", "100 000 = 6 × 16 666 + 4", "16 666 F chacune, 4 F restent dans la caisse"),
+      F("Calculer la diagonale", "d = √(c² + c²) = c√2", "d = √2 m ≈ 1,41 m, irrationnel")
+    ],
+    planches: {
+      1: [pl2("Décimal ou pas ? La règle des dénominateurs", "On rend la fraction irréductible, puis on décompose le dénominateur : seulement des 2 et des 5 → décimal.", 640, 220, "Trois fractions testées par la décomposition de leur dénominateur",
+        [["7/20", "20 = 2² × 5", "0,35 ∈ 𝔻", VERT], ["3/8", "8 = 2³", "0,375 ∈ 𝔻", VERT], ["50 000/3", "3 = 3", "16 666,6… ∉ 𝔻", ROUGE]].map(function (r, k) { var x = 20 + k * 210; return "<rect x='" + x + "' y='30' width='190' height='160' rx='14' fill='#fff' stroke='" + r[3] + "' stroke-width='2'/>" + txt(x + 95, 72, r[0], { s: 22 }) + txt(x + 95, 116, r[1], { s: 14, c: GRIS }) + txt(x + 95, 160, r[2], { s: 15, c: r[3] }); }).join(""))]
+    }
+  });
+
+  enrichir("2nde-c-chimie-rutherford", {
+    formules: [
+      F("Compter les couches traversées", "nombre de couches = épaisseur de la feuille ÷ diamètre d'un atome", "≈ 0,3 µm ÷ 0,3 nm ≈ 1 000 couches d'atomes d'or"),
+      F("Interpréter les rebonds", "proportion de rebonds ≈ 1 sur 10 000", "presque tout l'atome est vide ; la masse et la charge + sont concentrées dans le noyau"),
+      F("Comparer les tailles", "rayon de l'atome ÷ rayon du noyau ≈ 10⁻¹⁰ m ÷ 10⁻¹⁵ m", "≈ 100 000 : un noyau d'1 cm dans un atome d'1 km"),
+      F("Lire la notation du noyau", "ᴬ_Z X : Z protons, N = A − Z neutrons", "¹⁹⁷₇₉Au : 79 protons, 197 − 79 = 118 neutrons")
+    ]
+  });
+
+
+  /* ─────────────── Lot 4 : 2nde A dénombrement, Tle sciences ─────────────── */
+  function venn(a, b, i, la, lb, tot) {
+    return "<rect x='20' y='20' width='600' height='200' rx='14' fill='#FBFAF7' stroke='#C9D0DC'/>" + txt(40, 44, "U : " + tot, { s: 13, a: "start", c: GRIS }) +
+      "<circle cx='250' cy='125' r='85' fill='" + ROUGE + "' fill-opacity='.14' stroke='" + ROUGE + "' stroke-width='2.5'/><circle cx='370' cy='125' r='85' fill='" + BLEU + "' fill-opacity='.14' stroke='" + BLEU + "' stroke-width='2.5'/>" +
+      txt(215, 130, a - i, { s: 22, c: ROUGE }) + txt(310, 130, i, { s: 22 }) + txt(405, 130, b - i, { s: 22, c: BLEU }) + txt(150, 50, la, { s: 13, c: ROUGE }) + txt(470, 50, lb, { s: 13, c: BLEU }) + txt(560, 200, tot - (a + b - i), { s: 20, c: VERT }) + txt(560, 176, "aucun", { s: 12, c: VERT });
+  }
+  enrichir("2nde-a-maths-r26", {
+    formules: [
+      F("Placer l'intersection d'abord", "card(L ∩ D)", "7 élèves font les deux clubs"),
+      F("Calculer les parties propres", "card(L seul) = card(L) − card(L ∩ D)", "lecture seule : 20 − 7 = 13 ; danse seule : 18 − 7 = 11"),
+      F("Calculer la réunion", "card(L ∪ D) = card(L) + card(D) − card(L ∩ D)", "20 + 18 − 7 = 31 élèves font au moins un club"),
+      F("Calculer le complémentaire", "card(aucun) = card(U) − card(L ∪ D)", "48 − 31 = 17 ≥ 15 : on ouvre le troisième club")
+    ],
+    planches: { 0: [pl2("Le diagramme de Venn de la classe", "On place d'abord les 7 élèves des deux clubs, puis 13 et 11 dans les parties propres ; 17 élèves restent hors des cercles.", 640, 240, "Diagramme de Venn de deux clubs dans une classe de 48 élèves", venn(20, 18, 7, "Lecture : 20", "Danse : 18", 48))] },
+    ajouts: {
+      0: def("Définition", "Le <strong>cardinal</strong> d'un ensemble fini A, noté card(A), est son nombre d'éléments. A ∩ B (intersection) : éléments communs ; A ∪ B (réunion) : éléments d'au moins un des deux.") +
+        ex("Exemple", "Sur 40 élèves, 25 aiment le football, 18 le handball et 10 les deux : card(F ∪ H) = 25 + 18 − 10 = 33 ; 7 n'aiment aucun des deux.") +
+        attention("Ne pas additionner simplement 20 + 18 = 38 : les 7 élèves des deux clubs seraient comptés deux fois."),
+      1: ex("Exemple : tableau à double entrée", "Lignes : garçons / filles ; colonnes : club / pas de club. Le total de chaque ligne et de chaque colonne se vérifie, et le total général vaut card(U).")
+    }
+  });
+
+  enrichir("2nde-a-maths-r27", {
+    formules: [
+      F("Identifier les choix successifs", "une tenue = pagne puis modèle puis coiffe", "3 choix, puis 2, puis 2"),
+      F("Appliquer le principe multiplicatif", "nombre de résultats = n₁ × n₂ × … × nₖ", "3 × 2 × 2 = 12 tenues"),
+      F("Comparer au besoin", "nombre de tenues ≥ nombre de filles ?", "12 = 12 : chaque fille a une tenue différente")
+    ],
+    ajouts: { 1: astuce("« <strong>Et → je multiplie, ou → j'additionne</strong> » : un pagne ET un modèle ET une coiffe : on multiplie. Un pagne en wax OU en kita : on additionne les possibilités.") }
+  });
+
+  enrichir("2nde-a-maths-r28", {
+    formules: [
+      F("Calculer les participants (réunion)", "card(S ∪ D) = card(S) + card(D) − card(S ∩ D)", "75 + 50 − 30 = 95 élèves"),
+      F("Calculer les non-participants", "card(U) − card(S ∪ D)", "120 − 95 = 25 élèves"),
+      F("Compter les plateaux (principe multiplicatif)", "boissons × plats × desserts", "4 × 3 × 2 = 24 plateaux"),
+      F("Conclure", "24 ≤ 25", "les 25 modèles de tickets suffisent")
+    ],
+    planches: { 0: [pl2("Les participants de la kermesse", "75 tiennent un stand, 50 jouent aux dames, 30 font les deux : 95 participent, 25 ne font rien.", 640, 240, "Diagramme de Venn de la kermesse sur 120 élèves", venn(75, 50, 30, "Stand : 75", "Dames : 50", 120))] },
+    ajouts: {
+      0: def("Choisir l'outil", "<strong>Diagramme de Venn</strong> : pour des ensembles qui se chevauchent (au moins un, aucun, les deux). <strong>Arbre</strong> ou <strong>principe multiplicatif</strong> : pour des choix successifs (un élément de chaque catégorie).") +
+        formule("card(A ∪ B) = card(A) + card(B) − card(A ∩ B) · nombre de choix = n₁ × n₂ × … × nₖ") +
+        ex("Exemple", "Un code de cadenas à 3 chiffres (0 à 9) : 10 × 10 × 10 = 1 000 codes possibles."),
+      1: ex("Exemple", "Avec 2 boissons, 3 plats et 2 desserts : 2 × 3 × 2 = 12 menus ; si l'on ajoute une boisson, 3 × 3 × 2 = 18.")
+    }
+  });
+
+  enrichir("tle-sc-microscopie", {
+    formules: [
+      F("Calculer le grossissement", "G = grossissement de l'objectif × grossissement de l'oculaire", "G = 40 × 10 = 400"),
+      F("Calculer la taille réelle", "taille réelle = taille sur le dessin ÷ G", "20 mm ÷ 400 = 0,05 mm"),
+      F("Convertir en micromètres", "1 mm = 1 000 µm", "0,05 mm × 1 000 = 50 µm"),
+      F("Comparer à un objet connu", "rapport = taille de l'objet ÷ taille de la cellule", "grain de riz ≈ 6 mm : 6 ÷ 0,05 = 120 fois plus grand")
+    ]
+  });
+
+  enrichir("tle-sc-organites", {
+    formules: [
+      F("Comparer les pouvoirs de séparation", "rapport = pouvoir du microscope optique ÷ celui du microscope électronique", "0,2 µm ÷ 0,2 nm = 1 000 : 1 000 fois plus précis"),
+      F("Relier structure et fonction", "beaucoup d'énergie nécessaire ⇒ beaucoup de mitochondries", "cœur ≈ 5 000 mitochondries par cellule, peau ≈ 100"),
+      F("Écrire le bilan de la respiration cellulaire", "glucose + dioxygène → dioxyde de carbone + eau + énergie (ATP)", "C₆H₁₂O₆ + 6 O₂ → 6 CO₂ + 6 H₂O + énergie")
+    ],
+    ajouts: {
+      1: def("Définition", "Un <strong>organite</strong> est un compartiment de la cellule, limité par une ou deux membranes, qui remplit une fonction précise : la <strong>mitochondrie</strong> produit l'énergie, le <strong>ribosome</strong> fabrique les protéines, l'<strong>appareil de Golgi</strong> les emballe et les exporte, le <strong>chloroplaste</strong> (cellule végétale) réalise la photosynthèse.") +
+        formule("Respiration : C₆H₁₂O₆ + 6 O₂ → 6 CO₂ + 6 H₂O + énergie") +
+        ex("Exemple", "Les cellules du foie, très actives, comptent environ 2 000 mitochondries ; un spermatozoïde en concentre une cinquantaine dans sa pièce intermédiaire pour faire battre son flagelle.") +
+        ex("Exemple", "Les cellules du pancréas qui sécrètent l'insuline ont un réticulum endoplasmique et un appareil de Golgi très développés.") +
+        astuce("« <strong>Usine cellulaire</strong> » : le noyau est le bureau des plans, les ribosomes les ouvriers, le Golgi le service d'emballage, la mitochondrie la centrale électrique, la membrane le portail.") +
+        attention("La mitochondrie ne « stocke » pas l'énergie comme une réserve de graisse : elle la libère au fur et à mesure à partir du glucose et du dioxygène.")
+    }
+  });
+
+
+  /* ─────────────── Lot 5 : 6e Informatique et Technologie ─────────────── */
+  function boites(items, y, h, w0) {
+    var n = items.length, w = w0 || (600 - (n - 1) * 30) / n;
+    return items.map(function (it, k) {
+      var x = 20 + k * (w + 30), s = "<rect x='" + x.toFixed(1) + "' y='" + y + "' width='" + w.toFixed(1) + "' height='" + h + "' rx='12' fill='" + it[2] + "' stroke='" + it[3] + "' stroke-width='2'/>" + txt((x + w / 2).toFixed(1), y + 28, it[0], { s: 14, c: it[3] });
+      (it[1] || []).forEach(function (l, j) { s += txt((x + w / 2).toFixed(1), y + 54 + j * 18, l, { s: 11.5, w: 500, c: NUIT }); });
+      if (k < n - 1) s += "<path d='M" + (x + w + 4).toFixed(1) + " " + (y + h / 2) + "H" + (x + w + 24).toFixed(1) + "' stroke='" + NUIT + "' stroke-width='2.5'/><path d='M" + (x + w + 26).toFixed(1) + " " + (y + h / 2) + "l-8 -5v10z' fill='" + NUIT + "'/>";
+      return s;
+    }).join("");
+  }
+  enrichir("6e-info-ia", {
+    formules: [
+      F("Reconnaître une IA", "IA = programme + données d'exemples + calcul de la réponse la plus probable", "le correcteur, la traduction, l'assistant vocal sont des IA ; elles ne pensent pas"),
+      F("Comprendre pourquoi elle se trompe", "réponse = ce qui ressemble le plus aux exemples appris", "exemples insuffisants ou mélangés ⇒ réponse fausse mais bien rédigée"),
+      F("Vérifier une réponse (méthode des 3 sources)", "réponse de l'IA + manuel ou enseignant + site officiel", "si les trois concordent, on peut l'utiliser ; sinon, on garde le manuel")
+    ],
+    planches: {
+      1: [pl2("Comment une IA apprend", "On lui montre des milliers d'exemples étiquetés ; elle en tire un modèle ; devant un cas nouveau, elle donne la réponse la plus probable, qui peut être fausse.", 640, 190, "Trois étapes : exemples étiquetés, entraînement, prédiction",
+        boites([["Exemples", ["10 000 photos", "« mangue » / « papaye »"], "#EEF4FC", BLEU], ["Entraînement", ["le programme cherche", "les ressemblances"], "#FFF6E3", "#C2540A"], ["Prédiction", ["photo nouvelle →", "« mangue » à 92 %"], "#ECF7F0", VERT]], 30, 130))]
+    },
+    ajouts: {
+      0: def("Définition", "Une <strong>intelligence artificielle</strong> (IA) est un programme informatique qui imite certaines capacités humaines (reconnaître, traduire, répondre) en calculant à partir de très nombreux <strong>exemples</strong>. Elle n'a ni conscience, ni émotions, ni expérience du monde.") +
+        ex("Exemple", "L'appareil photo du téléphone qui reconnaît un visage, le traducteur qui passe du français à l'anglais, le GPS qui propose le chemin le plus rapide."),
+      1: def("Apprentissage automatique", "La machine <strong>apprend</strong> en comparant des milliers d'exemples déjà classés par des humains, puis applique ce qu'elle a trouvé à des cas nouveaux.") +
+        ex("Exemple d'erreur", "Une IA entraînée surtout avec des photos de mangues mûres jaunes peut prendre une mangue verte pour une papaye : ses exemples étaient incomplets.") +
+        astuce("« <strong>L'IA propose, je vérifie</strong> » : avant de recopier une réponse, compare-la avec ton manuel ou demande à ton enseignant.") +
+        attention("Ne donne jamais ton nom complet, ton adresse ou tes mots de passe à une application d'IA.")
+    }
+  });
+
+  enrichir("6e-info-composants", {
+    formules: [
+      F("Situer l'ordinateur", "ordinateur = unité centrale (processeur + mémoire vive + disque)", "l'écran n'est qu'un périphérique : il affiche"),
+      F("Classer un périphérique selon le trajet de l'information", "vers l'unité centrale → entrée ; vers l'utilisateur → sortie ; les deux → entrée-sortie", "souris, clavier : entrée ; écran, imprimante : sortie ; clé USB : entrée-sortie"),
+      F("Éviter de perdre son travail", "mémoire vive = effacée sans courant ; disque = conservé", "enregistrer souvent (Ctrl + S), éteindre par le menu, brancher un onduleur")
+    ],
+    planches: {
+      1: [pl2("Entrée, traitement, sortie", "L'information entre par le clavier ou la souris, est traitée par l'unité centrale, puis sort par l'écran ou l'imprimante.", 640, 190, "Schéma entrée, unité centrale, sortie avec exemples de périphériques",
+        boites([["Entrée", ["clavier, souris,", "micro, scanner"], "#EEF4FC", BLEU], ["Unité centrale", ["processeur : calcule", "RAM et disque : gardent"], "#FFF6E3", "#C2540A"], ["Sortie", ["écran, imprimante,", "haut-parleurs"], "#ECF7F0", VERT]], 30, 130))],
+      2: [pl2("Mémoire vive ou disque ?", "La mémoire vive (RAM) garde le travail en cours mais s'efface quand le courant coupe ; le disque conserve les fichiers enregistrés.", 640, 200, "Comparaison mémoire vive et disque dur",
+        "<rect x='20' y='20' width='290' height='160' rx='14' fill='#FCE8EC' stroke='" + ROUGE + "' stroke-width='2'/><rect x='330' y='20' width='290' height='160' rx='14' fill='#ECF7F0' stroke='" + VERT + "' stroke-width='2'/>" +
+        txt(165, 52, "Mémoire vive (RAM)", { s: 15, c: ROUGE }) + txt(165, 88, "travail en cours", { s: 13, w: 500 }) + txt(165, 114, "rapide", { s: 13, w: 500 }) + txt(165, 146, "s'efface sans courant ✗", { s: 13, c: ROUGE }) +
+        txt(475, 52, "Disque (HDD, SSD)", { s: 15, c: VERT }) + txt(475, 88, "fichiers enregistrés", { s: 13, w: 500 }) + txt(475, 114, "plus lent, très grand", { s: 13, w: 500 }) + txt(475, 146, "conserve tout ✓", { s: 13, c: VERT }))]
+    },
+    ajouts: {
+      0: def("Définition", "L'<strong>unité centrale</strong> contient le <strong>processeur</strong> (qui calcule), la <strong>mémoire vive</strong> ou RAM (qui garde le travail en cours) et le <strong>disque</strong> (qui conserve les fichiers). Un <strong>périphérique</strong> est un appareil branché à l'unité centrale."),
+      1: ex("Exemple", "Le clavier envoie les lettres tapées à l'unité centrale : c'est un périphérique d'<strong>entrée</strong>. L'imprimante reçoit le document à imprimer : <strong>sortie</strong>.") +
+        ex("Exemple", "Un écran tactile reçoit tes doigts (entrée) et affiche l'image (sortie) : c'est un périphérique d'<strong>entrée-sortie</strong>, comme la clé USB.") +
+        astuce("« <strong>Suis la flèche</strong> » : demande-toi dans quel sens voyage l'information. Vers l'ordinateur → entrée ; vers toi → sortie."),
+      2: formule("ordinateur = processeur + mémoire vive + disque + périphériques d'entrée et de sortie") + attention("Ne jamais éteindre en coupant le courant : le travail non enregistré, gardé dans la mémoire vive, est perdu. Enregistre (Ctrl + S) toutes les 5 minutes.")
+    }
+  });
+
+  enrichir("6e-tm-materiel-dessin", {
+    formules: [
+      F("Choisir le crayon", "H (dur) : traits fins de construction · HB ou B (tendre) : traits définitifs", "construire au H en appuyant peu, repasser au HB"),
+      F("Choisir l'outil de chaque tracé", "segment → règle · angle droit → équerre · cercle → compas · angle → rapporteur", "murs à la règle, angles à l'équerre, toit au compas, porte à 60° au rapporteur"),
+      F("Régler le compas", "écartement du compas = rayon = diamètre ÷ 2", "toit de 8 cm de diamètre : compas ouvert à 4 cm")
+    ],
+    planches: {
+      1: [pl2("Les crayons, du plus dur au plus tendre", "Plus le chiffre suivi de H est grand, plus la mine est dure et le trait clair ; plus le chiffre suivi de B est grand, plus la mine est tendre et le trait foncé.", 640, 180, "Échelle des mines de crayon de 4H à 4B",
+        ["4H", "2H", "H", "HB", "B", "2B", "4B"].map(function (m, k) { var g = 200 - k * 28, x = 30 + k * 86; return "<rect x='" + x + "' y='40' width='70' height='18' rx='4' fill='#E8C547'/><path d='M" + (x + 70) + " 40l14 9-14 9z' fill='#E3C9A0'/><path d='M" + (x + 80) + " 46l4 3-4 3z' fill='rgb(" + g + "," + g + "," + g + ")'/>" + txt(x + 35, 85, m, { s: 15 }) + "<path d='M" + x + " 110H" + (x + 70) + "' stroke='rgb(" + g + "," + g + "," + g + ")' stroke-width='" + (1 + k * .5) + "'/>"; }).join("") +
+        txt(80, 150, "dur, trait clair : construction", { s: 12, c: BLEU, a: "start" }) + txt(600, 150, "tendre, trait foncé : définitif", { s: 12, c: ROUGE, a: "end" }))],
+      2: [pl2("Choisir le bon outil", "Chaque tracé a son outil : la règle pour les segments, l'équerre pour l'angle droit, le compas pour le cercle, le rapporteur pour un angle mesuré.", 640, 200, "Quatre outils de dessin et leur usage",
+        boites([["Règle", ["segments", "et mesures"], "#EEF4FC", BLEU], ["Équerre", ["angles droits,", "perpendiculaires"], "#FFF6E3", "#C2540A"], ["Compas", ["cercles,", "reports de longueur"], "#ECF7F0", VERT], ["Rapporteur", ["angles en", "degrés"], "#F4F1FB", "#7B2CBF"]], 30, 130))]
+    },
+    ajouts: {
+      0: def("Définition", "Le <strong>matériel de dessin</strong> comprend les outils de tracé (règle, équerre, compas, rapporteur), les crayons (mines H, HB, B) et le matériel de correction (gomme, taille-crayon).") +
+        ex("Exemple", "Pour tracer un cercle de 3 cm de rayon, on ouvre le compas à 3 cm sur la règle graduée, on plante la pointe au centre et on tourne en tenant la tête du compas.") +
+        astuce("« <strong>H comme Hard (dur), B comme Black (noir)</strong> » : H pour construire léger, B pour repasser foncé."),
+      2: formule("rayon = diamètre ÷ 2 · écartement du compas = rayon") + ex("Exemple", "Une mine bien taillée trace un trait de moins de 0,5 mm ; une mine émoussée donne des traits épais qui faussent les mesures.") +
+        attention("La pointe sèche du compas se range protégée (bouchon ou étui) : elle peut blesser.")
+    }
+  });
+
+  enrichir("6e-tm-site-pepiniere", {
+    formules: [
+      F("Lister les critères d'un bon site", "eau · sol meuble et drainé · terrain plat · lumière filtrée · accès · protection", "6 critères notés sur 2 points, sauf l'accès sur 2 et la protection sur 2 : total sur 12"),
+      F("Noter chaque terrain (grille)", "note du terrain = somme des points obtenus", "terrain A : 5/12 ; terrain B : 11/12"),
+      F("Choisir et justifier", "on choisit la meilleure note et on cite les critères décisifs", "terrain B : pas inondable, lumière filtrée, loin du fromager")
+    ],
+    planches: {
+      1: [pl2("La grille de choix du site", "On note chaque terrain critère par critère ; la somme désigne le meilleur site.", 640, 240, "Grille de notation de deux terrains pour une pépinière",
+        (function () { var crit = [["Eau toute l'année", 2, 2], ["Sol meuble, drainé", 0, 2], ["Terrain plat", 1, 2], ["Lumière filtrée", 0, 2], ["Accès facile", 2, 2], ["Protection", 0, 1]], s = "<rect x='20' y='14' width='600' height='212' rx='12' fill='#fff' stroke='#C9D0DC'/>" + txt(40, 40, "Critère", { s: 13, a: "start" }) + txt(470, 40, "Terrain A", { s: 13, c: ROUGE }) + txt(570, 40, "Terrain B", { s: 13, c: VERT });
+          crit.forEach(function (c, k) { var y = 66 + k * 24; s += "<path d='M30 " + (y - 16) + "H610' stroke='#EEF1F6'/>" + txt(40, y, c[0], { s: 12.5, a: "start", w: 500 }) + txt(470, y, c[1] + " / 2", { s: 12.5, c: ROUGE }) + txt(570, y, c[2] + " / 2", { s: 12.5, c: VERT }); });
+          return s + "<path d='M30 200H610' stroke='" + NUIT + "'/>" + txt(40, 218, "Total", { s: 14, a: "start" }) + txt(470, 218, "5 / 12", { s: 15, c: ROUGE }) + txt(570, 218, "11 / 12", { s: 15, c: VERT }); })())],
+      2: [pl2("Le bon et le mauvais site", "À gauche, un bas-fond inondable sous un grand arbre ; à droite, un terrain plat, drainé, à mi-ombre, près d'un point d'eau et clôturé.", 640, 200, "Comparaison de deux terrains pour une pépinière",
+        "<rect x='20' y='20' width='290' height='160' rx='14' fill='#FCE8EC'/><path d='M20 150Q165 120 310 150V180H20Z' fill='#7FB3D5'/><circle cx='200' cy='70' r='44' fill='#2E7D32'/><rect x='194' y='100' width='12' height='50' fill='#6B4423'/>" + txt(110, 50, "Terrain A ✗", { s: 14, c: ROUGE }) + txt(110, 170, "inondable, trop d'ombre", { s: 11.5, w: 500 }) +
+        "<rect x='330' y='20' width='290' height='160' rx='14' fill='#ECF7F0'/><rect x='350' y='130' width='250' height='30' fill='#B8916A'/>" + [0, 1, 2, 3, 4, 5].map(function (k) { return "<path d='M" + (370 + k * 40) + " 130v-16' stroke='#2E7D32' stroke-width='3'/><circle cx='" + (370 + k * 40) + "' cy='110' r='7' fill='#43A047'/>"; }).join("") + "<path d='M350 80H600' stroke='#C9A227' stroke-width='3' stroke-dasharray='8 4'/>" + txt(475, 50, "Terrain B ✓", { s: 14, c: VERT }) + txt(475, 170, "plat, drainé, ombrière, clôturé", { s: 11.5, w: 500 }))]
+    },
+    ajouts: {
+      0: def("Définition", "Une <strong>pépinière</strong> est un lieu aménagé où l'on fait germer et grandir de jeunes plants (cacaoyers, caféiers, arbres fruitiers) avant de les repiquer au champ.") +
+        ex("Exemple", "Une pépinière de 500 jeunes cacaoyers en sachets, sous une ombrière de palmes, arrosée matin et soir pendant 5 à 6 mois."),
+      1: ex("Exemple", "Un terrain en pente forte est déconseillé : l'eau d'arrosage ruisselle et emporte la terre des sachets.") +
+        astuce("« <strong>EAU-SOL-PLAT-OMBRE-ACCÈS-CLÔTURE</strong> » : récite les six critères dans l'ordre et note chaque terrain sur chacun.") +
+        attention("Évite le pied d'un grand arbre : ses racines prennent l'eau, ses branches peuvent tomber et il peut transmettre des maladies aux jeunes plants.")
+    }
+  });
+
+  /* ─────────────── 2nde C Physique (formules déjà complètes) ─────────────── */
+})();
+
 /* Schémas animés et manipulables — sciences. Chaque fonction reçoit le conteneur et y dessine.
    Règles : transform/opacity uniquement pour les boucles ; tout reste lisible sans animation. */
 (function () {
@@ -9095,5 +15125,78 @@ VRT_PLUS("3e-en-articles", [
     var R = { noyau: ["Noyau", "Contient l'ADN et dirige la cellule ; enveloppe percée de pores."], mito: ["Mitochondrie", "Respiration cellulaire : produit l'énergie."], golgi: ["Appareil de Golgi", "Modifie, emballe et expédie les protéines."], ret: ["Réticulum endoplasmique", "Synthèse et transport des molécules ; porte des ribosomes."], lyso: ["Lysosome", "Digestion à l'intérieur de la cellule."], memb: ["Membrane plasmique", "Limite la cellule et contrôle les échanges."] };
     el.innerHTML = "<svg viewBox='0 0 460 260' class='an-svg an-pc'><g data-k='memb' tabindex='0' role='button' aria-label='Membrane'><ellipse cx='230' cy='130' rx='215' ry='118' fill='#FBEFF4' stroke='#B03A6E' stroke-width='4'/></g><g data-k='noyau' tabindex='0' role='button' aria-label='Noyau'><circle cx='220' cy='125' r='52' fill='#ECE8F8' stroke='#5B4FA8' stroke-width='3' stroke-dasharray='10 3'/><circle cx='230' cy='118' r='16' fill='#5B4FA8'/></g><g data-k='mito' tabindex='0' role='button' aria-label='Mitochondrie'><ellipse cx='95' cy='90' rx='38' ry='17' fill='#FDEBDD' stroke='#C24E00' stroke-width='2.5'/><path d='M66 90 q8 -12 14 0 t14 0 t14 0 t14 0' fill='none' stroke='#C24E00' stroke-width='2'/><ellipse cx='350' cy='190' rx='34' ry='15' fill='#FDEBDD' stroke='#C24E00' stroke-width='2.5'/></g><g data-k='golgi' tabindex='0' role='button' aria-label='Appareil de Golgi'><g fill='none' stroke='#0E7C86' stroke-width='5' stroke-linecap='round'><path d='M320 70 q30 12 60 0'/><path d='M318 84 q32 12 64 0'/><path d='M322 98 q28 12 56 0'/></g></g><g data-k='ret' tabindex='0' role='button' aria-label='Réticulum'><path d='M150 200 q20 -18 40 0 t40 0 t40 0' fill='none' stroke='#1E499B' stroke-width='5'/><g fill='#1E499B'><circle cx='160' cy='195' r='3'/><circle cx='200' cy='205' r='3'/><circle cx='240' cy='195' r='3'/></g></g><g data-k='lyso' tabindex='0' role='button' aria-label='Lysosome'><circle cx='110' cy='180' r='13' fill='#E0F5E5' stroke='#007E11' stroke-width='2.5'/><circle cx='380' cy='130' r='11' fill='#E0F5E5' stroke='#007E11' stroke-width='2.5'/></g></svg><div class='an-fiche' data-f><b>Clique sur un organite</b><span>Noyau, mitochondrie, appareil de Golgi, réticulum, lysosome, membrane.</span></div>";
     el.querySelectorAll("[data-k]").forEach(function (g) { function f(e) { if (e) e.stopPropagation(); el.querySelectorAll("[data-k]").forEach(function (x) { x.classList.toggle("an-sel", x === g); }); var r = R[g.dataset.k]; q(el, "[data-f]").innerHTML = "<b>" + r[0] + "</b><span>" + r[1] + "</span>"; } g.addEventListener("click", f); g.addEventListener("keydown", function (e) { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); f(e); } }); });
+  });
+})();
+
+/* Animations — réalisme, lot 20 (18/11/2026) : l'explorateur de cellules en haute définition remplace l'animation simple
+   « Clique sur un organite » de 90-animations-sciences.js (ce fichier est chargé APRÈS 90 et 91). Dessins : 28-realisme-premiers-lots.js. */
+(function () {
+  "use strict";
+  var C = window.VRT_CELLULES, VERT = "#17784D";
+  if (!C) return;
+  VRT_A("tle-sc-organites", 1, "Explore les deux cellules : clique sur un organite", function (el) {
+    var type = "ani", choix = null;
+    el.innerHTML = "<div style='display:flex;gap:6px;flex-wrap:wrap'><button type='button' class='btn-l' data-t='ani'>Cellule animale</button><button type='button' class='btn-l' data-t='veg'>Cellule végétale</button></div><div data-g style='margin:8px 0'></div><div data-b style='display:flex;gap:5px;flex-wrap:wrap'></div><p class='labo-r' data-r>Choisis un organite.</p>";
+    var LISTE = { ani: ["membrane", "noyau", "nucleole", "mito", "rer", "rel", "golgi", "vesicule", "lysosome", "centrosome", "ribosomes"], veg: ["paroi", "plasmodesme", "membrane", "vacuole", "chloroplaste", "noyau", "nucleole", "mito", "rer", "golgi", "ribosomes"] };
+    function maj() {
+      el.querySelector("[data-g]").innerHTML = "<svg viewBox='130 20 380 400' style='max-width:520px;width:100%' role='img' aria-label='Cellule interactive'><defs>" + C.DEFC + "</defs>" + (type === "ani" ? C.animale(true) : C.vegetale(true)) + "</svg>";
+      el.querySelector("[data-b]").innerHTML = LISTE[type].map(function (o) { return "<button type='button' class='btn-l' data-o='" + o + "' style='" + (o === choix ? "background:#1E499B;color:#fff" : "") + "'>" + C.ORG[o][0].replace(/ \(.*\)/, "") + "</button>"; }).join("");
+      if (choix) el.querySelectorAll("[data-g] [data-o]").forEach(function (g) { g.style.opacity = g.getAttribute("data-o") === choix || (choix === "noyau" && g.getAttribute("data-o") === "nucleole") ? "1" : "0.18"; });
+      el.querySelectorAll("[data-b] [data-o]").forEach(function (b) { b.addEventListener("click", function () { choix = b.dataset.o; el.querySelector("[data-r]").innerHTML = "<b>" + C.ORG[choix][0] + "</b> : " + C.ORG[choix][1]; maj(); }); });
+    }
+    el.querySelectorAll("[data-t]").forEach(function (b) { b.addEventListener("click", function () { type = b.dataset.t; choix = null; el.querySelector("[data-r]").textContent = "Choisis un organite."; maj(); }); });
+    maj();
+  });
+})();
+
+/* Zoom HD de la cellule jusqu'au gène (remplace la version simple de 90-animations-sciences.js) */
+(function () {
+  "use strict";
+  var C = window.VRT_CELLULES;
+  if (!C || !C.chromosome) return;
+  function T(x, y, t, o) { o = o || {}; return "<text x='" + x + "' y='" + y + "' text-anchor='" + (o.a || "middle") + "' font-size='" + (o.s || 13) + "' font-weight='" + (o.w || 700) + "' fill='" + (o.c || "#001136") + "' stroke='#fff' stroke-width='3' paint-order='stroke'>" + t + "</text>"; }
+  var BASES = { A: "#E8A33D", T: "#2F6DB5", G: "#2E9E5B", C: "#C0392B" }, PAIRE = { A: "T", T: "A", G: "C", C: "G" };
+  var SEQ = "ATGCGTACCGATTACGGCTAAGCTTGCAAT";
+  var ET = [
+    ["Cellule", "Une cellule du corps humain au microscope électronique : le noyau (en violet) contient l'information héréditaire.", function () {
+      return "<svg viewBox='130 30 400 380' role='img' aria-label='Cellule animale avec le noyau encadré'><defs>" + C.DEFC + "</defs>" + C.animale(true) + "<ellipse cx='310' cy='214' rx='78' ry='68' fill='none' stroke='#F7C948' stroke-width='4' stroke-dasharray='10 6'/>" + T(310, 304, "noyau", { s: 16 }) + "</svg>";
+    }],
+    ["Noyau", "Au moment de la division, l'ADN du noyau se condense : on voit alors 46 chromosomes (23 paires), l'enveloppe du noyau disparaît.", function () {
+      var s = "<svg viewBox='0 0 640 380' role='img' aria-label='Noyau en division avec 46 chromosomes'><defs>" + C.DEFC + "</defs><rect width='640' height='380' fill='#FBFAF8'/><ellipse cx='320' cy='190' rx='250' ry='170' fill='url(#noy)' opacity='.55'/><ellipse cx='320' cy='190' rx='250' ry='170' fill='none' stroke='#6D4FA0' stroke-width='2' stroke-dasharray='8 8'/>", k, n = 0;
+      for (k = 0; k < 46; k++) {
+        var i = k % 23, num = Math.min(i, 21), a = k * 2.399, r = 26 + 132 * Math.sqrt((k + 0.5) / 46), x = 320 + r * Math.cos(a) * 1.35, y = 190 + r * Math.sin(a) * 0.85, len = i === 22 ? 156 : C.LONG[num];
+        s += "<g transform='translate(" + x.toFixed(0) + " " + y.toFixed(0) + ") rotate(" + ((k * 47) % 180 - 90) + ") scale(.95)'>" + C.chromosome(0, len * 0.18, len, i === 22 ? 0.39 : C.CENT[num], 500 + k, "#C7B5DA") + "</g>";
+      }
+      return s + T(320, 370, "46 chromosomes condensés", { s: 15 }) + "</svg>";
+    }],
+    ["Chromosome", "Un chromosome condensé : deux chromatides identiques, reliées par le centromère. Chacune est un long filament d'ADN très enroulé.", function () {
+      var s = "<svg viewBox='0 0 640 380' role='img' aria-label='Un chromosome agrandi avec ses deux chromatides, son centromère et un filament d’ADN qui se déroule'><rect width='640' height='380' fill='#FBFAF8'/><g transform='translate(320 362) scale(3.6)'>" + C.chromosome(0, 0, 249 * 0.92, 0.46, 77, "#C7B5DA") + "</g>";
+      var d = "M362 74", k; for (k = 0; k < 40; k++) d += "q" + (6 + k * 0.3) + " " + (k % 2 ? 8 : -8) + " " + (10 + k * 0.4) + " " + (k % 2 ? -2 : 2);
+      s += "<path d='" + d + "' stroke='#5E4A78' stroke-width='2' fill='none'/>" + T(560, 60, "filament d'ADN", { s: 13, c: "#5E4A78" });
+      s += "<path d='M268 120H200' stroke='#3D4A5C'/>" + T(196, 124, "chromatide", { a: "end" }) + "<path d='M334 202H420' stroke='#3D4A5C'/>" + T(424, 206, "centromère", { a: "start" }) + "<path d='M272 300H200' stroke='#3D4A5C'/>" + T(196, 304, "bandes (régions de l'ADN)", { a: "end", s: 12 });
+      return s + "</svg>";
+    }],
+    ["ADN et gène", "Déroulé, l'ADN est une double hélice : deux brins reliés par des paires de bases (A avec T, G avec C). Un gène est un segment de cette molécule.", function () {
+      var s = "<svg viewBox='0 0 640 300' role='img' aria-label='Double hélice d’ADN avec ses paires de bases colorées et un gène encadré'><rect width='640' height='300' fill='#FBFAF8'/>", k, N = SEQ.length, X = function (i) { return 30 + i * 19.5; };
+      s += "<rect x='" + (X(9) - 10) + "' y='40' width='" + (X(20) - X(9) + 20) + "' height='200' rx='12' fill='#F7C948' opacity='.22'/>" + T((X(9) + X(20)) / 2, 30, "un gène", { s: 15, c: "#8A6A10" });
+      for (k = 0; k < N; k++) {
+        var x = X(k), ph = k * 0.55, y1 = 140 + 70 * Math.sin(ph), y2 = 140 - 70 * Math.sin(ph), b = SEQ[k], p = PAIRE[b], ym = (y1 + y2) / 2, avant = Math.cos(ph) > 0;
+        s += "<line x1='" + x + "' y1='" + y1.toFixed(1) + "' x2='" + x + "' y2='" + ym.toFixed(1) + "' stroke='" + BASES[b] + "' stroke-width='5' opacity='" + (avant ? 1 : 0.55) + "'/><line x1='" + x + "' y1='" + ym.toFixed(1) + "' x2='" + x + "' y2='" + y2.toFixed(1) + "' stroke='" + BASES[p] + "' stroke-width='5' opacity='" + (avant ? 1 : 0.55) + "'/>";
+      }
+      ["1", "2"].forEach(function (br, j) { var d = "", t; for (t = 0; t <= (N - 1) * 4; t++) { var i = t / 4, ph = i * 0.55, y = 140 + (j ? -1 : 1) * 70 * Math.sin(ph); d += (t ? "L" : "M") + X(i).toFixed(1) + " " + y.toFixed(1); } s += "<path d='" + d + "' stroke='" + (j ? "#1E3F7A" : "#4A2E7A") + "' stroke-width='7' fill='none' stroke-linecap='round'/>"; });
+      for (k = 0; k < N; k += 3) s += T(X(k), 270, SEQ[k], { s: 12, c: BASES[SEQ[k]] });
+      s += Object.keys(BASES).map(function (b, i) { return "<rect x='" + (430 + i * 50) + "' y='278' width='12' height='12' rx='3' fill='" + BASES[b] + "'/>" + T(452 + i * 50, 289, b, { s: 12, a: "start" }); }).join("");
+      return s + T(140, 292, "A-T et G-C : bases complémentaires", { s: 11, w: 600 }) + "</svg>";
+    }]
+  ];
+  VRT_A("3e-svt-adn", 3, "Zoome de la cellule jusqu'au gène", function (el) {
+    el.innerHTML = "<div style='display:flex;gap:6px;flex-wrap:wrap'>" + ET.map(function (e, i) { return "<button type='button' class='btn-l' data-i='" + i + "'>" + (i + 1) + ". " + e[0] + "</button>"; }).join("") + "</div><div data-g style='margin:8px 0;max-width:620px'></div><p class='labo-r' data-t></p>";
+    function aff(i) {
+      el.querySelector("[data-g]").innerHTML = ET[i][2]().replace("<svg ", "<svg style='width:100%' ");
+      el.querySelector("[data-t]").textContent = ET[i][1];
+      el.querySelectorAll("[data-i]").forEach(function (b, k) { b.style.background = k === i ? "#1E499B" : ""; b.style.color = k === i ? "#fff" : ""; });
+    }
+    el.querySelectorAll("[data-i]").forEach(function (b) { b.addEventListener("click", function () { aff(+b.dataset.i); }); });
+    aff(0);
   });
 })();
