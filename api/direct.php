@@ -92,7 +92,7 @@ if ($acc === null) dir_rep(['ok' => false, 'raison' => 'connexion']);
 $accId  = (string) ($acc['id'] ?? $acc['user'] ?? '');
 $droits = vrt_droits_compte($acc, $db);
 $role   = strtolower((string) ($acc['role'] ?? ''));
-$equipe = in_array($role, ['admin', 'superadmin', 'enseignant'], true);
+$equipe = vrt_compte_equipe($acc);   // un rôle « enseignant » déclaré ne suffit plus (19/11/2026)
 $droit  = $equipe || !empty($droits['direct']);
 $action = (string) ($in['action'] ?? '');
 $seances = dir_seances($db);

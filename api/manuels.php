@@ -16,6 +16,19 @@ require_once __DIR__ . '/_json_boot.php'; // en TOUTE première instruction : au
 //     Le serveur n'en garde que l'empreinte SHA-256 ; comparaison hash_equals.
 //   • La lecture sans clé ne renvoie QUE les documents et blocs publiés.
 //
+// RÉSERVÉ AUX FORMULES ENSEIGNANT (19/11/2026)
+//   Le manuel collaboratif est vendu avec les formules Prof (3, 6, toutes classes).
+//   Il se créait pourtant sans compte : n'importe qui composait des manuels gratuits.
+//   • CRÉER exige un jeton de compte (en-tête X-Vrt-Token) dont la formule est
+//     enseignante (vrt_formule_enseignant) ; le compte devient « proprio » du manuel.
+//   • MODIFIER (clé d'édition) exige que la formule du proprio soit ENCORE active :
+//     un mois payé ne donne pas un manuel modifiable à vie. Le co-enseignant n'a pas
+//     à payer : il édite sous la formule du proprio. Manuel ancien sans proprio : le
+//     premier enseignant abonné qui l'enregistre en devient le proprio.
+//   • LIRE la version publiée reste libre : c'est ce que voient les élèves.
+//   Refus ordinaires en 200 {ok:false, raison} : l'hébergeur bannit une IP à six
+//   401/403 par minute, et une salle des profs partage une IP.
+//
 // SÛRETÉ DU CONTENU
 //   Le texte des blocs est relu par d'autres navigateurs : il est nettoyé ICI
 //   (liste fermée de balises, AUCUN attribut), en plus du nettoyage côté client.
@@ -170,6 +183,32 @@ function man_cle_ok(array $m): bool {
         && hash_equals((string) ($m['cle'] ?? ''), hash('sha256', $cle));
 }
 
+/** Compte qui appelle (jeton X-Vrt-Token), ou null. */
+function man_appelant(?array $db): ?array {
+    $t = $_SERVER['HTTP_X_VRT_TOKEN'] ?? '';
+    if (!is_string($t) || $t === '' || strlen($t) > 2000 || !is_array($db)) return null;
+    $res = vrt_verify_token($t, $db);
+    return $res !== null ? $res['acc'] : null;
+}
+
+/** Compte par son id (élève ou visiteur), ou null. */
+function man_compte_id(array $db, string $accId): ?array {
+    if ($accId === '') return null;
+    foreach (['visitorAccounts', 'studentAccounts'] as $k) {
+        foreach (($db[$k] ?? []) as $a) { if (is_array($a) && (string) ($a['id'] ?? '') === $accId) return $a; }
+    }
+    return null;
+}
+
+/** Le manuel peut-il être modifié ? Formule enseignant du proprio encore active. */
+function man_proprio_actif(array $m, ?array $db): bool {
+    if (!is_array($db)) return false;
+    $p = man_compte_id($db, (string) ($m['proprio'] ?? ''));
+    return $p !== null && vrt_formule_enseignant($p, $db);
+}
+
+const MAN_MSG_FORMULE = 'Les manuels collaboratifs font partie des formules enseignant (Prof 3 classes, 6 classes ou toutes classes).';
+
 function man_entete(array $m): array {
     return ['id' => $m['id'], 'titre' => $m['titre'], 'classe' => $m['classe'], 'matiere' => $m['matiere'],
             'version' => $m['version'], 'maj' => $m['maj']];
@@ -194,6 +233,11 @@ if ($methode === 'POST' && $action === 'creer') {
     if (vrt_rate_exceeded('man_creer', MAN_CREER_MIN)) man_json(['erreur' => 'Trop de créations. Réessayez dans une minute.'], 429);
     if (count(glob(MAN_DIR . '/*.json', GLOB_NOSORT) ?: []) >= MAN_MANUELS_MAX * 2)   // ×2 : les .prev.json
         man_echec('plafond de manuels atteint', 'Le nombre maximal de manuels est atteint. Contactez VÉRITAS.', 503);
+    $db = vrt_load_db();
+    if (!is_array($db)) man_echec('base illisible (creer)', 'Service momentanément indisponible.', 503);
+    $acc = man_appelant($db);
+    if ($acc === null) man_json(['ok' => false, 'raison' => 'connexion', 'erreur' => 'Connectez-vous avec votre compte enseignant pour créer un manuel. ' . MAN_MSG_FORMULE]);
+    if (!vrt_formule_enseignant($acc, $db)) man_json(['ok' => false, 'raison' => 'formule', 'erreur' => MAN_MSG_FORMULE . ' Votre compte n\'en a pas d\'active.']);
     $in = man_corps();
     $titre = man_txt($in['titre'] ?? '', 120);
     if ($titre === '') man_json(['erreur' => 'Donnez un titre au manuel.'], 400);
@@ -201,7 +245,7 @@ if ($methode === 'POST' && $action === 'creer') {
     while (!man_id_valide($id) || is_file(man_fichier($id)));
     $cle = bin2hex(random_bytes(24));
     $m = ['id' => $id, 'titre' => $titre, 'classe' => man_txt($in['classe'] ?? '', 20), 'matiere' => man_txt($in['matiere'] ?? '', 30),
-          'cle' => hash('sha256', $cle), 'version' => 1, 'cree' => date('c'), 'maj' => date('c'),
+          'cle' => hash('sha256', $cle), 'proprio' => (string) ($acc['id'] ?? ''), 'version' => 1, 'cree' => date('c'), 'maj' => date('c'),
           'doc' => ['chapitres' => [['id' => 'c1', 'titre' => 'Chapitre 1', 'docs' => []]]]];
     $err = man_ecrire($id, $m);
     if ($err !== '') man_echec("creer $id : $err", "Le manuel n'a pas pu être enregistré sur le serveur.");
@@ -216,7 +260,10 @@ if ($methode === 'GET') {
     $m = man_lire($id);
     if ($m === null) man_echec("lire $id : fichier illisible", 'Manuel momentanément illisible.');
     $editeur = man_cle_ok($m);
-    man_json(man_entete($m) + ['editeur' => $editeur, 'doc' => $editeur ? $m['doc'] : man_vue_publique($m['doc'])]);
+    $fige = false;   // clé valide, mais la formule du proprio a pris fin : lecture complète, sans édition
+    if ($editeur && !empty($m['proprio'])) $fige = !man_proprio_actif($m, vrt_load_db());
+    man_json(man_entete($m) + ['editeur' => $editeur && !$fige, 'fige' => $fige,
+        'doc' => $editeur ? $m['doc'] : man_vue_publique($m['doc'])]);
 }
 
 // ── Enregistrer (verrou dédié, clé vérifiée AVANT de lire le corps, version contrôlée) ──
@@ -230,6 +277,17 @@ if ($methode === 'POST' && $action === 'enregistrer') {
     $m = man_lire($id);
     if ($m === null) { error_log("[manuels] enregistrer $id : fichier illisible"); $fin(['erreur' => 'Manuel illisible.'], 500); }
     if (!man_cle_ok($m)) $fin(['erreur' => "Lien d'édition invalide."], 403);
+    $db = vrt_load_db();
+    if (!is_array($db)) $fin(['erreur' => 'Service momentanément indisponible.'], 503);
+    if (empty($m['proprio'])) {
+        // Manuel créé avant le 19/11/2026 : l'enseignant abonné qui l'enregistre le reprend.
+        $acc = man_appelant($db);
+        if ($acc === null || !vrt_formule_enseignant($acc, $db))
+            $fin(['ok' => false, 'raison' => $acc === null ? 'connexion' : 'formule', 'erreur' => MAN_MSG_FORMULE . ' Connectez-vous avec un compte qui en a une pour continuer à modifier ce manuel.'], 200);
+        $m['proprio'] = (string) ($acc['id'] ?? '');
+    } elseif (!man_proprio_actif($m, $db)) {
+        $fin(['ok' => false, 'raison' => 'fige', 'erreur' => 'La formule enseignant de l\'auteur de ce manuel a pris fin : il reste lisible, mais ne se modifie plus. Renouvelez-la pour reprendre l\'édition.'], 200);
+    }
     $in = man_corps();
     if (!isset($in['doc']['chapitres']) || !is_array($in['doc']['chapitres']))
         $fin(['erreur' => 'Document invalide : rien n\'a été enregistré.'], 422);

@@ -183,6 +183,7 @@
     debit: "Trop de demandes depuis ce réseau. Réessaie dans une minute.",
     classe_hors_formule: "Ta formule ne couvre pas cette classe : toutes ses places de classe sont déjà prises. Change de formule pour ouvrir une classe de plus.",
     non_depose: "Cette épreuve est en cours de mise en ligne. Réessaie un peu plus tard.",
+    quota: "Tu as atteint le nombre de documents différents que ta formule ouvre sur cette période. Ceux déjà ouverts restent disponibles.",
     reseau: "La connexion a échoué. Vérifie ta connexion internet puis réessaie."
   };
   function fenetre(html) {
@@ -247,7 +248,8 @@
         var t = r.headers.get("X-Vrt-Token"); if (t) lsSet(CLE, t);
         if ((r.headers.get("Content-Type") || "").indexOf("application/pdf") === 0) return r.arrayBuffer();
         return r.json().then(function (j) {
-          var e = new Error(MSG[(j && j.raison) || "reseau"] || MSG.reseau); e.raison = (j && j.raison) || "reseau"; throw e;
+          /* quota (19/11/2026) : le serveur donne la phrase exacte (fenêtre atteinte, délai d'attente) */
+          var e = new Error((j && j.raison === "quota" && j.message) || MSG[(j && j.raison) || "reseau"] || MSG.reseau); e.raison = (j && j.raison) || "reseau"; throw e;
         });
       }, function () { var e = new Error(MSG.reseau); e.raison = "reseau"; throw e; });
   }
