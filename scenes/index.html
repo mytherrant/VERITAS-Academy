@@ -10,10 +10,14 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap">
 <link rel="stylesheet" href="scene.css?v=20261113a">
 <style>
-  .hub-tete{border-radius:var(--v-r);padding:28px 22px;color:#fff;margin-bottom:22px;background:var(--v-bleu2);display:grid;grid-template-columns:1fr auto;gap:16px;align-items:end}
-  .hub-tete h1{margin:4px 0 10px;color:#fff;font-size:clamp(26px,6vw,38px);line-height:1.15}
-  .hub-tete p{margin:0;max-width:62ch;color:rgba(255,255,255,.85)}
-  .hub-tete .sc-sur{color:var(--v-or)}
+  /* 19/11/2026 : en-tête façon Apprendre (fond blanc, titre à gauche, trait or) au lieu du bandeau bleu nuit */
+  .hub-tete{border-radius:0;padding:24px 0 6px;color:#001136;margin-bottom:18px;background:#fff;display:grid;grid-template-columns:1fr auto;gap:16px;align-items:end}
+  .hub-tete h1{margin:8px 0 10px;color:#001136;font-size:clamp(26px,6vw,38px);line-height:1.15}
+  .hub-tete h1::after{content:"";display:block;width:72px;height:5px;border-radius:3px;background:#FFC93C;margin-top:12px}
+  .hub-tete p{margin:0;max-width:66ch;color:#33384A;line-height:1.5}
+  .hub-tete .sc-sur{display:inline-block;background:#FFF4D6;color:#9A6F00;border-radius:999px;padding:5px 12px;font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase}
+  .hub-mode div,.hub-carte{background:#fff;border:1px solid #E6EAF2}
+  .hub-mode p,.hub-carte em,.hub-offre a > span:last-child > span{line-height:1.5}
   .hub-troupe{display:flex;align-items:flex-end}
   .hub-troupe .sc-perso{width:70px;opacity:1;transform:none}
   .hub-troupe .sc-avatar{width:70px;height:175px}
