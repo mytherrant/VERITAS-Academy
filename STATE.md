@@ -1,3 +1,12 @@
+## Apprendre : lot 4 de philosophie de Tle A réservé aux abonnés — Njoh-Mouelle, l'art et le travail (19/11/2026, branche apprendre-philo-tle-lot4)
+
+Part confiée par Jacques (partage entre sessions) : Tle A rangs 6, 7, 8 (De la médiocrité à l'excellence d'Ebénézer Njoh-Mouelle : éléments biobibliographiques ; thématiques et problématiques ; exposés, critique et valeur didactique) et 21, 22 (L'art et le travail : définitions ; raison d'être et finalité).
+
+- **5 leçons à verrou**, une par ligne de la progression : `tle-a-philo-njoh-mouelle-auteur`, `-thematiques`, `-critique`, `tle-a-philo-art-travail-definitions`, `-finalite`. Gabarit du lot 2 : situation camerounaise (Douala, Yaoundé, Garoua, Foumban, Ebolowa) avec hypothèses et indices, situation résolue avec étapes et formules, 3 parties + entraînement au format du bac (dissertation + texte), 18 planches (2 à 3 en 2D et 1 en 3D par leçon : bureau des œuvres, escalier du dépassement de soi, salle d'exposé, atelier du sculpteur, champ et scène), labo « choix », 10 QCM. Aucune citation de Njoh-Mouelle inventée (thèses reformulées) ; citations authentiques de Marx, Kant, Voltaire, Genèse.
+- Source `39-examens-philo-tle-4.js` (hors dépôt) et 5 JSON livrés à Jacques dans `livraison-payant-lot4.zip` (racine du dépôt, NON versionné) ; aperçus dans le bloc « AJOUT lot 4 philosophie Tle (abonnés) » ; `charge.js?v=a91c2f6b`.
+- ⚠️ **Doublon avec la branche `apprendre-examens-abonnes-suite`** (lot 3, non fusionnée) : elle contient `tle-a-philo-njoh-mouelle` (rang 7) et `tle-a-philo-art-travail` (rang 21). **Décision de Jacques : on garde les 5 leçons de ce lot** ; retirer ces deux leçons du lot 3 (source, JSON de la livraison cumulée, aperçus) avant de fusionner cette branche ou de lancer un build complet.
+- Vérifié : rendu abonné dans Chromium (JSON servi par interception de `api/apprendre.php`), 390 et 1200 px, aucun débordement, aucune erreur JS des leçons (seul `api/public_data.php` répond 403 en local, sans configuration) ; bancs verrou 18/18, gabarits 54 ; `build_llms.py --controle` et contrôles GEO, habillage, corrigés au vert ; aucun doublon de planche, de QCM, d'item de labo ou de situation.
+
 ## Cartes mentales des leçons : finitions (19/11/2026, branche cartes-finitions)
 
 Demande de Jacques : « Continue, ne supprime rien, rassure-toi que c'est illustré et que les situations-problèmes sont résolues, les étapes, cartes mentales ».
