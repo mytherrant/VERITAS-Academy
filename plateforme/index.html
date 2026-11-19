@@ -7204,6 +7204,22 @@ class Component extends DCLogic {
       })
         .then(r=>r.ok?r.json():Promise.reject(r.status))
         .then(j=>{if(j&&j.revision!=null)this._syncRev=j.revision;
+          /* Le serveur a ramené une partie de l'envoi à ce que ce rôle peut
+             décider (X2) : on relit tout de suite sa version, sinon ce poste
+             afficherait seul « validé » jusqu'au prochain envoi d'un collègue. */
+          /* Suppression refusée : on la retire du registre local, sinon elle
+             repartirait — et serait refusée — à chaque envoi. L'épreuve revient
+             à la relecture qui suit. */
+          if(j&&Array.isArray(j.suppRefusees)&&j.suppRefusees.length){
+            const reg=Object.assign({},this._epSuppr());
+            j.suppRefusees.forEach(id=>{delete reg[id];});
+            this.__epSuppr=reg;this._save('minesec_epsuppr',reg);
+          }
+          if(j&&(j.corriges>0||j.fusionnes>0)){
+            this._syncRev=null;
+            if(j.corriges>0)this._avis('Une validation, une publication ou une suppression demande un rôle que vous n’avez pas dans cette équipe : le serveur ne l’a pas retenue.','ko');
+            setTimeout(()=>this._syncTirer(),0);
+          }
           this.setState({syncEtat:'ok',syncLe:Date.now()});})
         /* AUCUNE REPRISE IMMEDIATE. L'envoi suivant portera tout : le
            contenu est un instantane complet, pas un delta. Reessayer
@@ -7248,7 +7264,8 @@ class Component extends DCLogic {
         /* L'annuaire et le groupe redescendent MEME si l'etat est vide :
            une equipe qu'on vient de rejoindre n'a encore rien partage, et
            c'est pourtant le moment ou l'on a besoin de savoir qui en est. */
-        const users=this._appliquerAnnuaire(j&&j.annuaire);
+        const users0=this._appliquerAnnuaire(j&&j.annuaire);
+        const users=this._appliquerRoles(users0,(j&&j.groupe&&j.groupe.id===gid)?j.groupe:null)||users0;
         if(j&&j.groupe&&j.groupe.id){
           const gs=(this.state.groupes||[]).slice();
           const i=gs.findIndex(g=>g.id===j.groupe.id);
@@ -7347,6 +7364,7 @@ class Component extends DCLogic {
         if(!gs.some(g=>g.id===gid))gid=gs.length?gs[0].id:'';
         let users=null;
         gs.forEach(g=>{const u=this._appliquerAnnuaire(g.annuaire);if(u)users=u;});
+        const ur=this._appliquerRoles(users,gs.find(g=>g.id===gid));if(ur)users=ur;
         this._save('minesec_groupes',gs);
         this._save('minesec_groupeid',gid);
         this.setState(Object.assign({groupes:gs,groupeId:gid},users?{users:users}:{}),
@@ -7505,6 +7523,42 @@ class Component extends DCLogic {
     return true;
   }
   /* Quitter une equipe, ou en retirer quelqu'un quand on la dirige. */
+  /* RÔLES D'ÉQUIPE (contre-expertise du 28/10, X2) — ceux que le serveur
+     applique. Le responsable les attribue (op=role) ; chaque poste les
+     reprend ici : sans cela, le membre désigné relecteur n'en saurait rien,
+     et le serveur refuserait les validations d'un rôle que l'écran affiche.
+     Rend la liste des utilisateurs mise à jour, ou null si rien ne change. */
+  _appliquerRoles(users,g){
+    const roles=(g&&g.roles)||{};
+    const base=(users||this.state.users||[]).slice();
+    let change=false;
+    Object.keys(roles).forEach(id=>{
+      const r=(this.ROLES||[]).find(x=>x.id===roles[id]);
+      const i=base.findIndex(u=>u&&u.id===id);
+      if(!r||i<0||base[i].role===r.nom)return;
+      base[i]=Object.assign({},base[i],{role:r.nom});change=true;
+    });
+    return change?base:null;
+  }
+  _attribuerRole(gid,membre,nom){
+    const r=(this.ROLES||[]).find(x=>x.nom===nom);
+    if(!this._jeton()||!gid||!membre||!r)return;
+    fetch(this._apiUrl('plateforme.php')+'?action=groupe&op=role',
+      {method:'POST',headers:this._entetesJeton(true),
+       body:JSON.stringify({groupe:gid,membre:membre,role:r.id})})
+      .then(rep=>rep.json().catch(()=>({})).then(j=>({http:rep.status,j:j})))
+      .then(({http,j})=>{
+        if(http!==200||!j||!j.ok){
+          this.setState({invMsg:(j&&j.error)||'Rôle non enregistré.',invMsgTon:'ko'});
+          return;
+        }
+        const users=this._appliquerRoles(null,{roles:j.roles||{}});
+        this.setState(Object.assign({invMsg:'Rôle enregistré pour toute l’équipe.',invMsgTon:'ok'},users?{users:users}:{}),
+          ()=>{if(users)this._persist();});
+        this._chargerGroupes();
+      })
+      .catch(()=>this.setState({invMsg:'Serveur injoignable.',invMsgTon:'ko'}));
+  }
   _retirerMembre(gid,membre){
     if(!this._jeton()||!gid)return;
     fetch(this._apiUrl('plateforme.php')+'?action=groupe&op=retirer',
@@ -8848,6 +8902,11 @@ class Component extends DCLogic {
     const a=this._active(),perm=this._perm(this._me().role);
     if(!a||!perm.edit||a.demo)return;
     if((a.status||'brouillon')!=='brouillon')return;
+    /* En équipe, le serveur ne retient la suppression d'un brouillon que de
+       son auteur ou d'un rôle qui valide : on ne la propose pas à un autre. */
+    if(this._groupeActif()&&a.ownerId&&a.ownerId!==this._me().id&&!perm.validate){
+      this._avis('Seul son auteur, ou un relecteur de l’équipe, peut supprimer ce brouillon.','ko');return;
+    }
     let ok=true;try{ok=window.confirm('Supprimer le brouillon « '+(a.title||'Nouvelle épreuve')+' » ? Ses textes, questions et corrigé seront effacés.');}catch(e){}
     if(!ok)return;
     const reg=Object.assign({},this._epSuppr(),{[a.id]:Date.now()});
@@ -9771,7 +9830,11 @@ class Component extends DCLogic {
            son suivi filtré sur sa classe. */
         ...(()=>{const c=ass.progId?this._progClasse(ass.progId):null;
           return{seqLigne:c&&ass.progSeq?'':'display:none',seqCourt:'S'+(ass.progSeq||''),seqLib:c?c.libelle:'',
-            voirSuivi:()=>{this.setState({suiviClasse:c?c.id:'',suiviVue:'liste'});this._go('suivi');}};})(),validBarre:'display:block;height:100%;border-radius:99px;background:'+(s0==='rejete'?'#c0392b':'#7fb08f')+';width:'+Math.round(pas/3*100)+'%',classe:e.classe||'—',count:e.textIds.length,words:wordsOf(e),statusLabel:sm.label,statusChip:this._statusChip(e.status),libChip:e.inLibrary?'font-size:10px;font-weight:700;color:var(--cc26a12,#c26a12);background:var(--cfdefdb,#fdefdb);padding:2px 9px;border-radius:999px;font-family:Poppins':hidden,ago:'MàJ '+this._ago(e.updatedAt),avatars:avStack([e.ownerId,...e.editorIds]),ownerLine:owner?owner.name.replace(/^(M\.|Mme|Mlle)\s+/,''):'',open:()=>this.setState({activeId:e.id,screen:'composeur'},()=>{this._persist();window.scrollTo(0,0);}),openLabel:perm.readOnly?'Consulter':'Ouvrir',dupStyle:perm.readOnly?hidden:'background:var(--cffffff,#fff);border:1px solid var(--cd5e0ec,#d5e0ec);color:var(--c5a6678,#5a6678);width:32px;height:32px;border-radius:8px;cursor:pointer;font-size:13px',duplicate:()=>{const id='e'+Date.now();const copy={...e,id,title:e.title+' (copie)',status:'brouillon',ownerId:me.id,editorIds:[],inLibrary:false,updatedAt:Date.now(),comments:[],activity:[{userId:me.id,text:'a dupliqué l\u2019épreuve',ts:Date.now()}]};this.setState(s=>({epreuves:[copy,...s.epreuves],activeId:id,screen:'composeur'}),()=>this._persist());}};};
+            voirSuivi:()=>{this.setState({suiviClasse:c?c.id:'',suiviVue:'liste'});this._go('suivi');}};})(),validBarre:'display:block;height:100%;border-radius:99px;background:'+(s0==='rejete'?'#c0392b':'#7fb08f')+';width:'+Math.round(pas/3*100)+'%',classe:e.classe||'—',count:e.textIds.length,words:wordsOf(e),statusLabel:sm.label,statusChip:this._statusChip(e.status),libChip:e.inLibrary?'font-size:10px;font-weight:700;color:var(--cc26a12,#c26a12);background:var(--cfdefdb,#fdefdb);padding:2px 9px;border-radius:999px;font-family:Poppins':hidden,ago:'MàJ '+this._ago(e.updatedAt),avatars:avStack([e.ownerId,...e.editorIds]),ownerLine:owner?owner.name.replace(/^(M\.|Mme|Mlle)\s+/,''):'',open:()=>this.setState({activeId:e.id,screen:'composeur'},()=>{this._persist();window.scrollTo(0,0);}),openLabel:perm.readOnly?'Consulter':'Ouvrir',dupStyle:perm.readOnly?hidden:'background:var(--cffffff,#fff);border:1px solid var(--cd5e0ec,#d5e0ec);color:var(--c5a6678,#5a6678);width:32px;height:32px;border-radius:8px;cursor:pointer;font-size:13px',duplicate:()=>{const id='e'+Date.now();const copy={...e,id,title:e.title+' (copie)',status:'brouillon',ownerId:me.id,editorIds:[],inLibrary:false,updatedAt:Date.now(),comments:[],
+          /* Une copie est une épreuve NEUVE : elle repart sans les décisions de
+             relecture, le mode solo ni l'historique de l'original (le serveur
+             retire ces décisions, que la fusion ressuscitait à chaque envoi). */
+          revue:undefined,solo:undefined,history:undefined,activity:[{userId:me.id,text:'a dupliqué l\u2019épreuve',ts:Date.now()}]};this.setState(s=>({epreuves:[copy,...s.epreuves],activeId:id,screen:'composeur'}),()=>this._persist());}};};
     /* Visibilite : une epreuve appartient a un groupe. Un groupe ferme la
        garde pour ses membres ; un groupe ouvert la montre aux autres
        membres de la plateforme ; publiee dans la bibliotheque, elle est
@@ -10004,7 +10067,12 @@ class Component extends DCLogic {
     const idsMembres=sansEquipe?[me.id]:(grpActif.membres||[me.id]);
     const membresReels=idsMembres.map(id=>st.users.find(u=>u.id===id)
       ||{id:id,name:'Membre',role:'Enseignant',quota:{limit:0,used:0}});
-    const membersView=membresReels.map(u=>{const cnt=st.epreuves.filter(e=>e.ownerId===u.id).length;return{name:u.name,initials:this._initials(u.name),avatarLg:this._av(u,40),youTag:u.id===me.id?'(vous)':'',role:u.role,roleShort:(u.role||'').split(' / ')[0],epLine:cnt+' épreuve(s) créée(s)',quotaLine:u.id===me.id?(meQuotaInconnu?'\u2014':meRemaining+'/'+meLimit):/^u\d+$/.test(String(u.id))?(u.quota.limit-u.quota.used)+'/'+u.quota.limit:'\u2014',roleDisabled:!perm.manageTeam,roleSelStyle:perm.manageTeam?'padding:7px 9px;border:1px solid var(--cd5e0ec,#d5e0ec);border-radius:8px;font-size:12.5px;color:var(--c22303f,#22303f);background:var(--cffffff,#fff)':'padding:7px 9px;border:1px solid var(--ceef2f7,#eef2f7);border-radius:8px;font-size:12.5px;color:var(--c8b97a8,#8b97a8);background:var(--cf7f9fc,#f7f9fc);pointer-events:none',setRole:e=>{const nr=val(e);this.setState(s=>({users:s.users.map(x=>x.id===u.id?{...x,role:nr}:x)}),()=>this._persist());},
+    const membersView=membresReels.map(u=>{const cnt=st.epreuves.filter(e=>e.ownerId===u.id).length;return{name:u.name,initials:this._initials(u.name),avatarLg:this._av(u,40),youTag:u.id===me.id?'(vous)':'',role:u.role,roleShort:(u.role||'').split(' / ')[0],epLine:cnt+' épreuve(s) créée(s)',quotaLine:u.id===me.id?(meQuotaInconnu?'\u2014':meRemaining+'/'+meLimit):/^u\d+$/.test(String(u.id))?(u.quota.limit-u.quota.used)+'/'+u.quota.limit:'\u2014',roleDisabled:!(sansEquipe?perm.manageTeam:jeDirige),roleSelStyle:(sansEquipe?perm.manageTeam:jeDirige)?'padding:7px 9px;border:1px solid var(--cd5e0ec,#d5e0ec);border-radius:8px;font-size:12.5px;color:var(--c22303f,#22303f);background:var(--cffffff,#fff)':'padding:7px 9px;border:1px solid var(--ceef2f7,#eef2f7);border-radius:8px;font-size:12.5px;color:var(--c8b97a8,#8b97a8);background:var(--cf7f9fc,#f7f9fc);pointer-events:none',setRole:e=>{const nr=val(e);
+        /* Dans une équipe, le rôle se fixe AU SERVEUR (op=role), qui
+           l'applique aux validations : changé ici seulement, il ne valait
+           que sur ce poste. Seul, le choix reste local. */
+        if(!sansEquipe&&jeDirige&&this._jeton()){this._attribuerRole(grpActif.id,u.id,nr);return;}
+        this.setState(s=>({users:s.users.map(x=>x.id===u.id?{...x,role:nr}:x)}),()=>this._persist());},
       /* Retirer un membre : reserve a qui dirige l'equipe, et jamais sur
          soi-meme depuis cette liste (on quitte par le bouton dedie). */
       retirerStyle:(jeDirige&&u.id!==me.id)
@@ -11300,7 +11368,8 @@ plansView,goAbo:()=>this._go('abo'),goLogin:()=>{this.setState({authed:false,scr
       setCoTitle:e=>{if(cActive&&!cLocked)this._updateCours({title:val(e)});},
       setCoField:e=>{if(!cActive||cLocked)return;const k=e&&e.target?e.target.getAttribute('data-k'):null;if(k)this._updateCours({[k]:val(e)});},
       coSubmit:()=>this._updateCours({status:'relecture'},'a soumis en relecture'),
-      coValidate:()=>this._updateCours({status:'valide',inLibrary:true},'a validé et verrouillé le cours'),
+      // Publier reste au chef et à l'inspecteur : un relecteur valide sans publier (le serveur le retirerait).
+      coValidate:()=>this._updateCours(Object.assign({status:'valide'},perm.publish?{inLibrary:true}:{}),'a validé et verrouillé le cours'),
       coUnlock:()=>this._updateCours({status:'brouillon',inLibrary:false},'a déverrouillé le cours'),
       stats:this.stats||{total:0,authors:0,corpus:0,evalC:0},cycleCards,recentEpreuves,libraryCount:st.epreuves.filter(e=>e.inLibrary).length,
       liveStrip:(()=>{const other=st.users.find(u=>u.id!==me.id&&u.role!=='Élève (lecture seule)');const rel=st.epreuves.find(e=>e.status==='relecture');return (other?other.name.replace(/^(M\.|Mme|Mlle)\s+/,''):'Un collègue')+(rel?' travaille sur « '+rel.title+' »':' est en ligne')+' · '+st.users.filter(u=>u.id!==me.id).length+' collègues actifs';})(),
@@ -11606,11 +11675,16 @@ plansView,goAbo:()=>this._go('abo'),goLogin:()=>{this.setState({authed:false,scr
           lab:'font-size:12.5px;font-family:Poppins;white-space:nowrap;font-weight:'+(x.cour?'700':'500')+';color:'+(x.cour?x.c:x.fait?vert:'var(--c8b97a8,#8b97a8)')}));})(),
       step2Label:s==='ajustement'?'Ajustement demandé':s==='rejete'?'Rejeté':'En relecture',
       ...(()=>{
-        const solo=this._estSolo(active),auteur=!!active&&(active.ownerId===me.id||perm.validate);
+        /* En ÉQUIPE, le serveur n'accepte une validation que d'un rôle qui
+           valide (contre-expertise du 28/10, X2) : le solo n'y est offert qu'à
+           lui. Proposé à un enseignant, il « validait » chez lui seul, et le
+           serveur le remettait en relecture à chaque envoi. */
+        const soloPermis=!this._groupeActif()||perm.validate;
+        const solo=soloPermis&&this._estSolo(active),auteur=!!active&&(active.ownerId===me.id||perm.validate);
         const ouvert=s1||s==='ajustement'||s==='rejete';
         const mode=on=>'flex:1;padding:6px 8px;font-size:12px;font-weight:700;font-family:Poppins;border-radius:7px;cursor:pointer;border:none;'+(on?'background:var(--cffffff,#fff);color:var(--c14375f,#14375f);box-shadow:0 1px 4px rgba(20,55,95,.12)':'background:none;color:var(--c8b97a8,#8b97a8)');
         return{
-          revModeVisible:perm.edit&&auteur&&ouvert,
+          revModeVisible:perm.edit&&auteur&&ouvert&&soloPermis,
           revModeEquipe:()=>this._updateActive({solo:false}),revModeSolo:()=>this._updateActive({solo:true}),
           revModeEquipeStyle:mode(!solo),revModeSoloStyle:mode(solo),
           revModeAide:solo?'Vous validez vous-même : aucune relecture n’est demandée, la décision reste tracée.'
