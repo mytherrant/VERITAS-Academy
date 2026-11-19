@@ -56,6 +56,20 @@
   "u": "/ressources/annales/bepc-etude-de-texte-2023.html"
  },
  {
+  "id": "bepc-correction-orthographique-2023",
+  "examen": "bepc",
+  "m": "correction-orthographique",
+  "serie": "",
+  "nomExamen": "BEPC",
+  "fiche": "ressources/bepc-francais.html",
+  "matiere": "Correction orthographique",
+  "mat": "francais",
+  "classes": "3e",
+  "annee": 2023,
+  "national": false,
+  "u": "/ressources/annales/bepc-correction-orthographique-2023.html"
+ },
+ {
   "id": "bepc-expression-ecrite-2026",
   "examen": "bepc",
   "m": "expression-ecrite",
