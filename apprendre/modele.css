@@ -404,3 +404,22 @@ html body .carte .den-formules .df-c{display:block;font:500 15.5px/1.55 var(--sa
 html body .carte .den-formules .df-c::before{content:"→ ";color:#C2540A;font-weight:800}
 html body .carte .den-formules,html body .carte .den-formules *{text-align:left!important;hyphens:manual!important;-webkit-hyphens:manual!important}
 html body .carte figure.illus .cm svg,html body figure.mur-schema .cm svg{max-height:none!important;width:100%!important}
+
+/* ════════ Encadrés typés et titrés (19/11/2026) ════════
+   Demande de Jacques (capture du bandeau « sin² α + cos² α = 1 », sans titre) : « mets l'affichage des
+   astuces, repère, point important ». Deux post-it de plus, traités comme les quatre autres (titre dans le
+   ruban blanc, icône illustrée, cadre fin de leur teinte) : .repere (bleu) et .important (orange).
+   Le bandeau de fin de partie porte désormais son titre « À retenir » (lecon.html). */
+:root{
+  --vm-ill-repere:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ccircle cx='32' cy='32' r='26' fill='%232C55C4'/%3E%3Ccircle cx='32' cy='32' r='20' fill='%23fff'/%3E%3Cpath d='M32 14 38 32H26z' fill='%23E8394B'/%3E%3Cpath d='M32 50 26 32h12z' fill='%2313307A'/%3E%3Ccircle cx='32' cy='32' r='3' fill='%23FFC93C'/%3E%3C/svg%3E");
+  --vm-ill-important:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ccircle cx='32' cy='32' r='26' fill='%23F28A2E'/%3E%3Cpath d='M32 16v20' stroke='%23fff' stroke-width='8' stroke-linecap='round'/%3E%3Ccircle cx='32' cy='47' r='4.5' fill='%23fff'/%3E%3C/svg%3E");
+}
+.carte .repere,.carte .important{padding-top:30px!important;margin-top:36px!important}
+.carte .repere::before,.carte .important::before{content:none!important;display:none!important}
+.carte .repere>b:first-child,.carte .important>b:first-child{position:relative;display:table!important;max-width:88%;box-sizing:border-box;min-height:32px!important;margin:-46px auto 12px!important;padding:5px 14px 5px 40px!important;transform:rotate(-2.5deg);background:var(--vm-i) 11px 50%/22px no-repeat,rgba(255,255,255,.9)!important;border:1px solid rgba(0,0,0,.07);box-shadow:0 2px 4px rgba(0,0,0,.06);font-size:17px!important;line-height:1.25!important;text-align:center}
+.carte .repere>b:first-child{--vm-i:var(--vm-ill-repere)}
+.carte .important>b:first-child{--vm-i:var(--vm-ill-important)}
+@media (max-width:420px){.carte .repere>b:first-child,.carte .important>b:first-child{font-size:16px!important}}
+html body .carte .repere{border:1.5px solid #A9C6F2}
+html body .carte .important{border:1.5px solid #F2B48C}
+html body .carte .partie .retenir>b{background:var(--vm-ill-retiens) 0 50%/22px no-repeat}
