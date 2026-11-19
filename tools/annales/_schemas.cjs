@@ -1093,4 +1093,317 @@ S["proba-2024-svt-c-coupe"] = () => {
   g += T([X(0), y2 + 36], "surface", fs) + T([X(6371) - 30, y2 + 36], "centre", fs);
   return svg(R.W, y2 + 44, g, "Le graphe des vitesses sismiques et, en dessous, une coupe du globe de la surface au centre : croûte jusqu'au Moho (vers 30 km), manteau supérieur avec la zone de faible vitesse (LVZ, asthénosphère) vers 100 à 250 km, manteau inférieur jusqu'à la discontinuité de Gutenberg (2 900 km), noyau externe liquide jusqu'à la discontinuité de Lehmann (5 150 km), noyau interne solide jusqu'au centre (6 371 km).");
 };
+// BEPC 2023 maths, exercice 3 : histogramme des âges (effectifs 2, 3, 7, 6, 7, 5 pour les classes de 8 à 14 ans).
+S["bepc-2023-maths-histogramme"] = () => {
+  const x0 = 34, y0 = 214, ux = 38, uy = 26, X = a => x0 + (a - 8) * ux, Y = n => y0 - n * uy, fs = ' font-size="11"';
+  let g = '<defs><pattern id="ax-hach-b23" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><path d="M0 0V6" stroke="currentColor" stroke-width="1.6"/></pattern></defs>';
+  g += '<g stroke-width="0.6" stroke-dasharray="3 3" opacity="0.5">';
+  for (let n = 1; n <= 7; n++) g += L([x0, Y(n)], [X(14) + 6, Y(n)]);
+  g += "</g>";
+  [2, 3, 7, 6, 7, 5].forEach((n, i) => { g += '<rect x="' + X(8 + i) + '" y="' + Y(n) + '" width="' + ux + '" height="' + n * uy + '" fill="url(#ax-hach-b23)" stroke-width="1.4"/>'; });
+  g += L([x0, y0], [X(14) + 10, y0], ' stroke-width="1.4"') + L([x0, y0], [x0, Y(7.6)], ' stroke-width="1.4"');
+  for (let n = 0; n <= 7; n++) g += T([x0 - 12, Y(n) + 4], String(n), fs);
+  for (let a = 8; a <= 14; a++) g += T([X(a) - 6, y0 + 15], String(a), fs);
+  g += T([x0 + 4, Y(7.6) + 2], "Effectifs", fs) + T([X(10.4), y0 + 30], "Âge en années", fs);
+  return svg(X(14) + 22, y0 + 38, g, "Histogramme des âges des 30 enfants, classes d'amplitude 1 de 8 à 14 ans : effectifs 2 pour [8 ; 9[, 3 pour [9 ; 10[, 7 pour [10 ; 11[, 6 pour [11 ; 12[, 7 pour [12 ; 13[, 5 pour [13 ; 14[.");
+};
+// BEPC 2023 maths, géométrie exercice 2 : triangle EFG rectangle en E, M sur [EF], N sur [EG], (MN) // (FG).
+S["bepc-2023-maths-triangle"] = () => {
+  const k = 26, E = [40, 200], F = [40, 200 - 6 * k], G = [40 + 8 * k, 200], M = [40, 200 - 1.5 * k], N = [40 + 2 * k, 200], fs = ' font-size="13" font-style="italic"';
+  let g = L(E, F) + L(F, G) + L(G, E) + L(M, N) + droit(E, [0, -1], [1, 0]);
+  g += T([F[0] - 4, F[1] - 8], "F", fs) + T([E[0] - 16, E[1] + 6], "E", fs) + T([G[0] + 6, G[1] + 5], "G", fs) + T([M[0] - 18, M[1] + 4], "M", fs) + T([N[0] - 4, N[1] + 16], "N", fs);
+  return svg(270, 224, g, "Triangle EFG rectangle en E ; M sur [EF] et N sur [EG], avec EF = 6 cm, EG = 8 cm, EM = 1,5 cm, EN = 2 cm.");
+};
+// BEPC 2023 maths, géométrie exercice 3 : grand cône de sommet S coupé par un plan parallèle à la base (centre O', rayon O'B).
+S["bepc-2023-maths-cone"] = () => {
+  const S0 = [110, 20], O = [110, 200], O2 = [110, 80], R = 80, r = R / 3, fs = ' font-size="13" font-style="italic"';
+  let g = L(S0, [O[0] - R, O[1]]) + L(S0, [O[0] + R, O[1]]);
+  g += '<path d="M' + (O[0] - R) + " " + O[1] + " A " + R + " 20 0 0 0 " + (O[0] + R) + " " + O[1] + '"/>' + '<path d="M' + (O[0] - R) + " " + O[1] + " A " + R + " 20 0 0 1 " + (O[0] + R) + " " + O[1] + '"' + POINTILLE + "/>";
+  g += '<ellipse cx="' + O2[0] + '" cy="' + O2[1] + '" rx="' + r + '" ry="7" stroke-width="1.2"/>';
+  g += L(S0, O, POINTILLE + ' stroke-width="1"') + L(O, [O[0] + R, O[1]], POINTILLE + ' stroke-width="1"') + L(O2, [O2[0] + r, O2[1]], POINTILLE + ' stroke-width="1"');
+  for (const p of [S0, O, O2]) g += '<circle cx="' + p[0] + '" cy="' + p[1] + '" r="2.4" fill="currentColor" stroke="none"/>';
+  g += T([S0[0] - 4, S0[1] - 6], "S", fs) + T([O2[0] + r + 6, O2[1] + 4], "B", fs) + T([O2[0] - r - 22, O2[1] + 4], "O'", fs) + T([O[0] - 6, O[1] - 6], "O", fs) + T([O[0] + R + 6, O[1] + 4], "A", fs);
+  return svg(230, 232, g, "Grand cône de révolution de sommet S, de base le disque de centre O et de rayon [OA], coupé par un plan parallèle à la base passant par O' et B ; SO'/SO = 1/3.");
+};
+// BEPC 2023 PCT : sinusoïde de période 8 div et d'amplitude 3 div, partant de l'axe des tensions (10 V/div ; 5 ms/div).
+S["bepc-2023-pct-oscillogramme"] = () => oscillo(18, 8, 3, 8, 1, [1, 17], "Oscillogramme d'une tension alternative sinusoïdale : une période occupe 8 divisions horizontales et la tension maximale 3 divisions verticales.", 1);
+// Corrigé BEPC 2023 PCT : transmission par poulies et courroie, roue motrice E (120 mm) et roue réceptrice S (20 mm).
+S["bepc-2023-pct-poulies"] = () => {
+  const E = [90, 90], RE = 72, S0 = [300, 90], RS = 12, fs = ' font-size="13" font-weight="700"';
+  const a = Math.asin((RE - RS) / (S0[0] - E[0])), t = [Math.sin(a), Math.cos(a)];
+  let g = '<circle cx="' + E[0] + '" cy="' + E[1] + '" r="' + RE + '" stroke-width="1.8"/><circle cx="' + S0[0] + '" cy="' + S0[1] + '" r="' + RS + '" stroke-width="1.8"/>';
+  g += L([E[0] + RE * t[0], E[1] - RE * t[1]], [S0[0] + RS * t[0], S0[1] - RS * t[1]], ' stroke-width="2"') + L([E[0] + RE * t[0], E[1] + RE * t[1]], [S0[0] + RS * t[0], S0[1] + RS * t[1]], ' stroke-width="2"');
+  g += '<circle cx="' + E[0] + '" cy="' + E[1] + '" r="3" fill="currentColor" stroke="none"/><circle cx="' + S0[0] + '" cy="' + S0[1] + '" r="2.5" fill="currentColor" stroke="none"/>';
+  g += T([E[0] - 70, 186], "E : roue motrice, 120 mm", ' font-size="11"') + T([S0[0] - 120, 186], "S : roue réceptrice, 20 mm", ' font-size="11"') + T([E[0] - 5, E[1] - 8], "E", fs) + T([S0[0] - 5, S0[1] - 18], "S", fs);
+  return svg(380, 196, g, "Transmission par courroie : la grande roue motrice E (diamètre 120 mm), liée au moteur, entraîne la petite roue réceptrice S (diamètre 20 mm), qui tourne six fois plus vite.");
+};
+// Probatoire 2026 sciences A-ABI : mécanisme des réactions allergiques (1er contact : étapes 1 à 5 ; 2e contact : étapes 1 et 2).
+S["proba-2026-sciences-allergie"] = () => {
+  const fs = ' font-size="12"', lignes = (x, y, t, x2 = "") => t.map((l, i) => T([x, y + i * 15], l, fs + x2)).join("");
+  const num = (x, y, n) => '<circle cx="' + x + '" cy="' + y + '" r="9" stroke-width="1.2"/>' + T([x - 3.6, y + 4.5], n, ' font-size="12" font-weight="700"');
+  const fl = (a, b) => L(a, b, ' stroke-width="2"') + fleche(b, a, 9);
+  const noyau = (x, y, rx, ry) => '<ellipse cx="' + x + '" cy="' + y + '" rx="' + rx + '" ry="' + ry + '" fill="currentColor" stroke="none" opacity=".75"/>';
+  const lympho = (x, y, nom, nx, ny) => '<ellipse cx="' + x + '" cy="' + y + '" rx="20" ry="14"/>' + noyau(x, y, 9, 6) + T([nx, ny], nom, ' font-size="11" font-weight="700"');
+  const ige = (x, y, a) => { const r = a * Math.PI / 180, u = [Math.cos(r), Math.sin(r)], n = [-u[1], u[0]], b = [x + 7 * u[0], y + 7 * u[1]];
+    return L([x, y], b, ' stroke-width="1.3"') + L(b, [b[0] + 5 * u[0] + 4 * n[0], b[1] + 5 * u[1] + 4 * n[1]], ' stroke-width="1.3"') + L(b, [b[0] + 5 * u[0] - 4 * n[0], b[1] + 5 * u[1] - 4 * n[1]], ' stroke-width="1.3"'); };
+  const granules = (x, y, r, k) => { let g = ""; for (let i = 0; i < k; i++) { const a = i * 2.4, d = r * (0.35 + 0.5 * ((i * 37) % 10) / 10); g += '<circle cx="' + f(x + d * Math.cos(a)) + '" cy="' + f(y + d * Math.sin(a)) + '" r="2.6" fill="currentColor" stroke="none"/>'; } return g; };
+  const masto = (x, y, igE) => { let g = '<circle cx="' + x + '" cy="' + y + '" r="32"/>' + noyau(x, y, 10, 8) + granules(x, y, 28, 16);
+    if (igE) for (let a = -150; a <= 150; a += 50) { const r = a * Math.PI / 180; g += ige(x + 32 * Math.cos(r), y + 32 * Math.sin(r), a); } return g; };
+  const allergene = (x, y) => '<ellipse cx="' + x + '" cy="' + y + '" rx="4" ry="5.5" stroke-width="1.2"/>';
+  const macro = (x, y) => '<path d="M' + (x - 26) + " " + y + "c0-14 8-26 20-24c6-10 22-8 26 2c12 2 14 18 6 26c4 12-8 22-20 18c-8 8-24 6-26-6c-10-2-12-12-6-16z" + '"/>' + noyau(x + 2, y + 4, 8, 7) +
+    '<circle cx="' + (x - 12) + '" cy="' + (y - 6) + '" r="3.5" stroke-width="1.1"/><circle cx="' + (x + 16) + '" cy="' + (y - 8) + '" r="3.5" stroke-width="1.1"/>';
+  let g = "";
+  // cadres
+  g += '<rect x="6" y="6" width="848" height="408" stroke-width="1"/>' + '<rect x="16" y="16" width="190" height="24" stroke-width="1"/>' + T([24, 33], "1<tspan baseline-shift=\"super\" font-size=\"8\">er</tspan> contact avec l'antigène", ' font-size="13" font-weight="700"');
+  g += '<rect x="646" y="16" width="200" height="24" stroke-width="1"/>' + T([654, 33], "2<tspan baseline-shift=\"super\" font-size=\"8\">ème</tspan> contact avec l'antigène", ' font-size="13" font-weight="700"');
+  // 1 : entrée de l'allergène (silhouette)
+  g += '<circle cx="70" cy="226" r="16"/><path d="M38 286c0-26 14-40 32-40s32 14 32 40z"/>' + allergene(64, 206) + allergene(78, 202);
+  g += num(30, 318, "1") + lignes(46, 314, ["Entrée de l'allergène", "dans l'organisme"]);
+  g += fl([70, 196], [96, 132]);
+  // 2 : captation par les macrophages
+  g += macro(130, 90) + num(104, 150, "2") + lignes(120, 146, ["Captation de", "l'allergène par les", "macrophages"]);
+  g += fl([176, 70], [232, 80]);
+  // 3 : présentation aux lymphocytes
+  g += macro(262, 90) + lympho(318, 66, "LB", 344, 52) + lympho(306, 118, "LTh", 296, 148);
+  g += num(250, 168, "3") + lignes(266, 164, ["Présentation de", "l'allergène aux", "lymphocytes"]);
+  g += fl([346, 100], [400, 128]);
+  // 4 : production des IgE par le LB
+  g += lympho(432, 140, "LB", 424, 118);
+  for (const [dx, dy, a] of [[34, -6, -20], [42, 10, 10], [30, 22, 50], [50, -18, -60], [56, 24, 30]]) g += ige(432 + dx, 140 + dy, a);
+  g += num(396, 200, "4") + lignes(412, 196, ["Production des anticorps", "(IgE) dirigés contre", "l'allergène"]);
+  g += fl([432, 246], [362, 262]);
+  // 5 : fixation des IgE sur les mastocytes
+  g += masto(318, 268, true) + num(386, 296, "5") + lignes(402, 292, ["Fixation des IgE à la", "surface des mastocytes"]);
+  g += fl([300, 312], [290, 344]);
+  g += lignes(206, 362, ["Sensibilisation des mastocytes", "à une activation au prochain", "contact avec l'allergène"], ' font-weight="700"');
+  // séparation des deux contacts
+  g += L([560, 60], [560, 400], ' stroke-width="1" stroke-dasharray="4 4"');
+  // 2e contact : 1 captation des allergènes par les IgE fixés
+  g += masto(640, 150, true);
+  for (const [x, y] of [[592, 104], [624, 92], [668, 98], [694, 128], [700, 176], [586, 198], [672, 206], [604, 140]]) g += allergene(x, y);
+  g += T([566, 80], "Allergène", ' font-size="12" font-weight="700"') + P([[588, 86], [588, 96]], ' stroke-width="1"');
+  g += num(578, 246, "1") + lignes(594, 242, ["Captation des", "allergènes par les", "IgE fixés sur les", "mastocytes"], ' font-weight="700"');
+  g += fl([706, 150], [740, 150]);
+  // 2 : libération des médiateurs (dégranulation)
+  g += '<path d="M790 118c-22 0-34 16-32 34c2 14 10 22 22 24l-4 10 10-6 4 12 6-12 10 6-2-12c14-6 22-18 20-32c-2-14-14-24-34-24z"/>' + noyau(792, 140, 10, 8) + granules(788, 150, 14, 6);
+  for (const [x, y] of [[776, 196], [786, 204], [798, 198], [782, 214], [794, 216], [806, 208]]) g += '<circle cx="' + x + '" cy="' + y + '" r="2.6" fill="currentColor" stroke="none"/>';
+  for (const [x, y] of [[752, 104], [830, 108], [840, 150], [760, 176]]) g += allergene(x, y);
+  g += num(712, 246, "2") + lignes(728, 242, ["Libération des", "médiateurs de", "l'inflammation par", "les mastocytes"], ' font-weight="700"');
+  g += fl([790, 310], [790, 352]);
+  g += T([690, 384], "Réactions allergiques", ' font-size="15" font-weight="700"');
+  return svg(860, 420, g, "Mécanisme des réactions allergiques. Premier contact avec l'antigène : 1 entrée de l'allergène dans l'organisme ; 2 captation de l'allergène par les macrophages ; 3 présentation de l'allergène aux lymphocytes (LTh, LB) ; 4 production des anticorps (IgE) dirigés contre l'allergène ; 5 fixation des IgE à la surface des mastocytes, d'où la sensibilisation des mastocytes à une activation au prochain contact avec l'allergène. Deuxième contact : 1 captation des allergènes par les IgE fixés sur les mastocytes ; 2 libération des médiateurs de l'inflammation par les mastocytes, d'où les réactions allergiques.");
+};
+// >>> proba-2026-svt-d
+// Probatoire 2026 SVT D, document 1 : brise de mer (le jour) et brise de terre (la nuit).
+const brise26 = (nuit) => {
+  const fs = ' font-size="11"', lig = (x, y, t, a = "") => t.map((l, i) => T([x, y + i * 13], l, fs + a)).join("");
+  const large = (pts, fin) => P(pts, ' stroke-width="7" stroke-linecap="butt" opacity=".45"') + fleche(fin[1], fin[0], 14);
+  const herbe = (x, y) => { let h = ""; for (let i = 0; i < 9; i++) h += L([x + i * 7, y], [x + i * 7 + 8, y - 12 - (i % 3) * 4], ' stroke-width="1.6"'); return h + L([x - 4, y], [x + 66, y], ' stroke-width="2"'); };
+  const vagues = (x, y, n) => { let v = ""; for (let i = 0; i < n; i++) v += '<path d="M' + (x + i * 24) + " " + y + " q12 12 24 0" + '" stroke-width="1.4"/>'; return v; };
+  let g = "";
+  if (!nuit) {
+    // gauche = continent (A, l'air chaud monte), droite = mer (B, l'air froid descend) ; brise de mer : mer → continent au sol
+    g += large([[92, 180], [92, 70], [110, 46], [200, 40]], [[180, 40], [212, 42]]) + lig(10, 124, ["L'air chaud", "monte"]);
+    g += lig(124, 22, ["L'air qui monte se déplace", "vers la mer où il refroidit"]);
+    g += large([[240, 52], [262, 70], [262, 176]], [[262, 160], [262, 186]]) + lig(272, 120, ["Air froid condense", "et tombe"]);
+    g += L([226, 120], [150, 120], ' stroke-width="5" opacity=".6"') + fleche([140, 120], [152, 120], 12) + T([150, 108], "BRISE DE MER", ' font-size="11" font-weight="700"');
+    g += P([[250, 200], [200, 214], [130, 206]], ' stroke-width="7" stroke-linecap="butt" opacity=".45"') + fleche([116, 198], [132, 207], 14) + lig(150, 168, ["L'air froid se déplace", "rapidement"], ' font-size="10"');
+    g += T([70, 196], "A", ' font-size="15" font-weight="700"') + T([274, 196], "B", ' font-size="15" font-weight="700"');
+    g += herbe(80, 222) + T([10, 236], "Continent", ' font-size="13" font-weight="700"') + vagues(200, 228, 5) + T([300, 222], "Mer", ' font-size="13" font-weight="700"');
+    g += T([150, 262], "Le jour", ' font-size="13" font-weight="700"');
+    g += '<circle cx="340" cy="40" r="14" stroke-width="1.4"/>';
+    for (let a = 0; a < 360; a += 45) { const t = a * Math.PI / 180; g += L([340 + 19 * Math.cos(t), 40 + 19 * Math.sin(t)], [340 + 26 * Math.cos(t), 40 + 26 * Math.sin(t)], ' stroke-width="1.4"'); }
+    return svg(380, 272, g, "Le jour : sur le continent (A), l'air chaud monte, puis se déplace vers la mer où il refroidit ; au-dessus de la mer (B), l'air froid condense et tombe, puis se déplace rapidement vers le continent : c'est la brise de mer.");
+  }
+  // la nuit : gauche = continent (C, l'air froid descend), droite = mer (D, l'air chaud monte) ; brise de terre : continent → mer au sol
+  g += large([[300, 180], [300, 70], [282, 46], [192, 40]], [[212, 40], [180, 42]]) + lig(312, 124, ["L'air chaud", "monte"]);
+  g += lig(160, 22, ["L'air qui monte se déplace", "vers la terre où il refroidit"]);
+  g += large([[152, 52], [130, 70], [130, 176]], [[130, 160], [130, 186]]) + lig(30, 112, ["L'air froid", "se condense", "et tombe"]);
+  g += L([160, 120], [236, 120], ' stroke-width="5" opacity=".6"') + fleche([246, 120], [234, 120], 12) + T([164, 108], "BRISE DE TERRE", ' font-size="11" font-weight="700"');
+  g += P([[146, 196], [196, 212], [256, 206]], ' stroke-width="7" stroke-linecap="butt" opacity=".45"') + fleche([270, 202], [254, 207], 14) + lig(178, 186, ["L'air froid se déplace", "rapidement"], ' font-size="10"');
+  g += T([116, 200], "C", ' font-size="15" font-weight="700"') + T([276, 200], "D", ' font-size="15" font-weight="700"');
+  g += herbe(100, 226) + T([20, 252], "Continent", ' font-size="13" font-weight="700"') + vagues(204, 232, 5) + T([318, 228], "Mer", ' font-size="13" font-weight="700"');
+  g += T([196, 266], "La nuit", ' font-size="13" font-weight="700"');
+  g += '<path d="M46 26 a18 18 0 1 0 14 30 a14 14 0 1 1 -14 -30z" stroke-width="1.6"/>';
+  return svg(380, 272, g, "La nuit : au-dessus de la mer (D), l'air chaud monte, puis se déplace vers la terre où il refroidit ; sur le continent (C), l'air froid se condense et tombe, puis se déplace rapidement vers la mer : c'est la brise de terre.");
+};
+S["proba-2026-svt-d-brises"] = () => brise26(false) + brise26(true);
+
+// Bases azotées de la maquette d'ARN (symboles du sujet) : x = bord gauche du corps, y = milieu ; dir = 1 forme à droite (comme au sujet).
+const base26 = (x, y, b, w = 46, h = 26) => {
+  const t = y - h / 2, bas = y + h / 2, d = x + w;
+  if (b === "A") return '<path d="M' + x + " " + t + "H" + (d - 12) + "L" + d + " " + y + "L" + (d - 12) + " " + bas + "H" + x + 'Z"/>';
+  if (b === "G") return '<path d="M' + (d + 4) + " " + t + "H" + x + "V" + bas + "H" + (d + 4) + "A" + (h / 2 + 1) + " " + (h / 2) + " 0 0 1 " + (d + 4) + " " + t + 'Z"/>';
+  if (b === "U") return '<path d="M' + x + " " + t + "H" + d + "V" + bas + "H" + x + "L" + (x + 14) + " " + y + 'Z"/>';
+  return '<path d="M' + (x + h / 2) + " " + t + "H" + d + "V" + bas + "H" + (x + h / 2) + "A" + (h / 2) + " " + (h / 2) + " 0 0 1 " + (x + h / 2) + " " + t + 'Z"/>';
+};
+S["proba-2026-svt-d-symboles"] = () => {
+  const fs = ' font-size="13"';
+  let g = '<circle cx="24" cy="24" r="13" stroke-width="2"/>' + T([44, 29], "= Acide phosphorique", fs);
+  g += '<rect x="12" y="62" width="24" height="24" stroke-width="2"/>' + T([44, 79], "= Sucre (Ribose)", fs);
+  g += L([12, 116], [36, 116], ' stroke-width="4"') + T([44, 121], "= liaison covalente", fs);
+  [["A", 230], ["G", 320], ["U", 410], ["C", 500]].forEach(([b, x]) => { g += base26(x, 40, b, 56, 34) + T([x + 22, 84], b, ' font-size="16"'); });
+  g += T([12, 156], "A : Adénine ;  C : Cytosine ;  T : Thymine ;  U : Uracile ;  G : Guanine", ' font-size="13" font-weight="700"');
+  return svg(580, 168, g, "Symboles à utiliser pour la maquette : un cercle pour l'acide phosphorique, un carré pour le sucre (ribose), un trait pour la liaison covalente ; A : rectangle terminé en pointe ; G : rectangle échancré en arc de cercle ; U : rectangle à encoche en chevron ; C : rectangle arrondi d'un côté.");
+};
+
+// Document 5 : trois cellules immunitaires (échelles non respectées).
+S["proba-2026-svt-d-cellules"] = () => {
+  let g = "";
+  // A : lymphocyte, gros noyau rond occupant presque toute la cellule
+  g += '<circle cx="80" cy="90" r="56" stroke-width="1.8"/><circle cx="82" cy="92" r="46" fill="currentColor" stroke="none" opacity=".55"/>';
+  // B : macrophage, contour irrégulier à pseudopodes, noyau réniforme (en fer à cheval)
+  g += '<path d="M190 70c10-30 40-46 66-38c8-16 22-20 28-8c-6 4-8 10-2 16c26 6 40 30 34 52c14 2 20 14 10 20c-8-6-14-2-14 6c-4 30-30 46-58 44c-6 14-20 18-26 8c8-4 8-12 0-16c-30-6-46-34-38-60c-14-2-18-16-8-22c6 6 12 4 8-2z" stroke-width="1.8"/>';
+  g += '<path d="M226 104c-6-26 16-44 40-38c20 4 30 24 22 40c-6-10-18-14-28-8c-10 6-12 18-8 28c-12 0-22-8-26-22z" fill="currentColor" stroke="none" opacity=".55"/>';
+  // C : granulocyte (polynucléaire), noyau plurilobé et granulations
+  g += '<circle cx="420" cy="90" r="56" stroke-width="1.8"/>';
+  g += '<path d="M384 108c-6-18 6-30 18-26c-6-14 4-28 18-24c-2 14 8 16 16 10c12 8 8 22-2 24c14 4 20 20 10 30c-10 8-24 4-28-6c-6 12-22 14-30 4c-6-4-6-10-2-12z" fill="currentColor" stroke="none" opacity=".55"/>';
+  for (let i = 0; i < 26; i++) { const a = i * 2.39, d = 18 + (i * 13) % 32; const x = 420 + d * Math.cos(a), y = 90 + d * Math.sin(a); g += '<circle cx="' + f(x) + '" cy="' + f(y) + '" r="2" stroke-width="1"/>'; }
+  g += T([74, 176], "A", ' font-size="16" font-weight="700"') + T([248, 176], "B", ' font-size="16" font-weight="700"') + T([414, 176], "C", ' font-size="16" font-weight="700"');
+  return svg(500, 186, g, "Document 5 : trois cellules immunitaires. A : petite cellule ronde au gros noyau arrondi, sans granulations ; B : grande cellule au contour irrégulier, au noyau arqué en fer à cheval, sans granulations ; C : cellule ronde au noyau plurilobé, avec des granulations.");
+};
+
+// Document 6 : cycle du VIH dans une cellule immunitaire et points d'action des antiviraux (STOP).
+S["proba-2026-svt-d-vih"] = () => {
+  const fs = ' font-size="11"', fb = ' font-size="11" font-weight="700"';
+  const virus = (cx, cy, r) => { let v = '<circle cx="' + cx + '" cy="' + cy + '" r="' + r + '" stroke-width="1.4"/>' + L([cx - r * 0.35, cy], [cx + r * 0.35, cy], ' stroke-width="2.4"');
+    for (let a = 0; a < 360; a += 30) { const t = a * Math.PI / 180; v += L([cx + Math.cos(t) * r, cy + Math.sin(t) * r], [cx + Math.cos(t) * (r + 5), cy + Math.sin(t) * (r + 5)], ' stroke-width="1.2"') + '<circle cx="' + f(cx + Math.cos(t) * (r + 6.5)) + '" cy="' + f(cy + Math.sin(t) * (r + 6.5)) + '" r="1.6" fill="currentColor" stroke="none"/>'; }
+    return v; };
+  const stop = (x, y) => '<rect x="' + (x - 16) + '" y="' + (y - 9) + '" width="32" height="18" rx="9" fill="currentColor" stroke="none" opacity=".8"/>' + '<text x="' + x + '" y="' + (y + 4) + '" text-anchor="middle" font-size="9" font-weight="700" fill="#fff" stroke="none">STOP</text>';
+  const fl = (a, b) => L(a, b, ' stroke-width="1.2"') + fleche(b, a, 6);
+  let g = "";
+  // cellule immunitaire et son noyau
+  g += '<path d="M90 230 Q100 120 260 112 Q420 106 470 200 Q520 320 360 360 Q200 392 120 330 Q76 290 90 230Z" stroke-width="1.6"/>';
+  g += '<ellipse cx="270" cy="270" rx="78" ry="62" stroke-width="1.6" fill="currentColor" fill-opacity=".08"/>';
+  g += T([280, 30], "Cellule immunitaire", fb) + L([330, 36], [330, 110], ' stroke-width="0.9"');
+  // virus libre et sa légende
+  g += virus(190, 40, 22);
+  g += T([42, 22], "Enveloppe", fs) + L([96, 18], [168, 30], ' stroke-width="0.8"') + T([42, 46], "Matériel génétique", fs) + T([42, 59], "(molécule proche", fs) + T([42, 72], "de l'ADN, nommée ARN)", fs) + L([138, 42], [182, 40], ' stroke-width="0.8"');
+  g += P([[38, 12], [34, 12], [34, 78], [38, 78]], ' stroke-width="1"') + L([26, 45], [34, 45], ' stroke-width="1"') + T([2, 49], "VIH", fb);
+  g += fl([186, 66], [150, 118]);
+  g += stop(136, 96);
+  // entrée : virus fixé, ARN libéré puis copié en ADN
+  g += virus(132, 146, 20) + T([158, 150], "ARN", fb) + fl([150, 160], [196, 178]) + stop(130, 186);
+  g += L([200, 180], [222, 180], ' stroke-width="2.4"') + T([228, 176], "ADN", fb) + fl([240, 182], [256, 222]);
+  // dans le noyau : intégration puis transcription
+  g += stop(226, 246) + L([246, 262], [296, 262], ' stroke-width="2.4"') + '<rect x="234" y="257" width="74" height="10" stroke-width="1"/>' + stop(226, 290) + fl([272, 270], [272, 292]) + L([262, 300], [290, 300], ' stroke-width="2.4"') + T([294, 304], "ARNm", fb);
+  g += '<path d="M310 290 Q340 230 380 196" stroke-width="1.2"/>' + fleche([384, 192], [376, 200], 6);
+  // cytoplasme : brins d'ARN viral, protéines, assemblage
+  g += L([392, 180], [416, 180], ' stroke-width="2.4"') + L([402, 192], [426, 192], ' stroke-width="2.4"') + L([392, 204], [416, 204], ' stroke-width="2.4"') + stop(446, 192);
+  g += virus(388, 262, 18) + virus(438, 236, 18) + virus(462, 290, 18);
+  g += '<rect x="372" y="322" width="150" height="40" stroke-width="1"/>' + T([380, 337], "3. Production de matériel", fb) + T([380, 351], "génétique viral et d'enveloppes", fb);
+  // maturation et sortie
+  g += virus(480, 150, 18) + virus(536, 130, 18) + virus(486, 68, 16);
+  g += '<rect x="560" y="146" width="84" height="22" stroke-width="1"/>' + T([570, 161], "4. Maturation", fb) + fl([560, 156], [556, 140]);
+  g += '<rect x="526" y="14" width="128" height="50" stroke-width="1"/>' + T([532, 29], "5. Sortie des", fb) + T([532, 43], "nouveaux virus et", fb) + T([532, 57], "mort de la cellule", fb) + fl([536, 110], [556, 70]);
+  // légende STOP
+  g += stop(40, 392) + T([62, 388], "Action des anti-virus", fs) + T([62, 401], "(tri-thérapie)", fs);
+  return svg(660, 412, g, "Document 6 : multiplication du VIH dans une cellule immunitaire. Le virus (enveloppe et matériel génétique, une molécule proche de l'ADN nommée ARN) entre dans la cellule ; son ARN est copié en ADN, qui gagne le noyau et s'intègre à l'ADN de la cellule, puis est transcrit en ARNm ; 3 : production de matériel génétique viral et d'enveloppes ; 4 : maturation ; 5 : sortie des nouveaux virus et mort de la cellule. Les pastilles STOP marquent les étapes bloquées par les anti-virus (trithérapie) : entrée du virus, copie de l'ARN en ADN, intégration, transcription et maturation.");
+};
+
+// Corrigé : maquette de l'ARNm UAC CAU (six premiers nucléotides).
+S["proba-2026-svt-d-maquette"] = () => {
+  const bases = "UACCAU".split(""); let g = "";
+  bases.forEach((b, i) => { const y = 30 + i * 56, P0 = [40, y], S0 = [64, y + 24];
+    g += '<circle cx="' + P0[0] + '" cy="' + P0[1] + '" r="11" stroke-width="1.6"/>' + T([P0[0] - 4, P0[1] + 4], "P", ' font-size="11" font-weight="700"');
+    g += L([P0[0] + 6, P0[1] + 9], [S0[0] - 4, S0[1] - 10], ' stroke-width="2.2"');
+    g += '<rect x="' + (S0[0] - 10) + '" y="' + (S0[1] - 10) + '" width="20" height="20" stroke-width="1.6"/>' + T([S0[0] - 4, S0[1] + 4], "S", ' font-size="11" font-weight="700"');
+    g += L([S0[0] + 10, S0[1]], [S0[0] + 34, S0[1]], ' stroke-width="2.2"') + (b === "U" || b === "C" ? '<g transform="matrix(-1 0 0 1 ' + (2 * (S0[0] + 56)) + ' 0)">' + base26(S0[0] + 34, S0[1], b, 44, 22) + "</g>" : base26(S0[0] + 34, S0[1], b, 44, 22)) + T([S0[0] + (b === "U" ? 46 : 52), S0[1] + 5], b, ' font-size="13" font-weight="700"');
+    if (i < bases.length - 1) g += L([S0[0] - 4, S0[1] + 10], [44, y + 46], ' stroke-width="2.2"'); });
+  return svg(170, 366, g, "Maquette de l'ARNm UAC CAU : une seule chaîne où chaque acide phosphorique (P) est lié au ribose (S) du nucléotide suivant ; chaque ribose porte une base : U, A, C, C, A, U ; la forme propre à chaque base est tournée vers l'extérieur.");
+};
+// <<< proba-2026-svt-d
+// >>> proba-2026-chimie
+// Noyau benzénique (hexagone à sommets haut et bas) ; renvoie [tracé, sommets 0..5 depuis le haut, sens horaire].
+const benzene26 = (cx, cy, r) => { const v = []; for (let k = 0; k < 6; k++) { const a = -Math.PI / 2 + k * Math.PI / 3; v.push([cx + r * Math.cos(a), cy + r * Math.sin(a)]); }
+  return [P(v.concat([v[0]])) + '<circle cx="' + cx + '" cy="' + cy + '" r="' + f(r * 0.58) + '"/>', v]; };
+// Exercice 2, question 4 : hydratation du 2-méthylpropène.
+S["proba-2026-chimie-hydratation"] = () => {
+  const fs = ' font-size="14"';
+  let g = F([10, 22], "H3C", fs) + L([36, 28], [50, 44], ' stroke-width="1.2"') + F([10, 86], "H3C", fs) + L([36, 72], [50, 56], ' stroke-width="1.2"');
+  g += F([50, 55], "C=CH2", fs) + T([140, 55], "+", fs) + F([166, 55], "H2O", fs);
+  g += L([214, 50], [290, 50], ' stroke-width="1.2"') + fleche([296, 50], [288, 50], 7) + F([232, 40], "H2SO4", ' font-size="12"') + T([314, 55], "A", fs);
+  return svg(340, 96, g, "(CH3)2C=CH2 + H2O → A, en présence d'acide sulfurique : hydratation du 2-méthylpropène.");
+};
+// Exercice 3 : formule semi-développée de l'éthylbenzène.
+S["proba-2026-chimie-ethylbenzene"] = () => { const [b, v] = benzene26(40, 40, 28);
+  return svg(170, 80, b + L([v[1][0], v[1][1]], [v[1][0] + 18, v[1][1] - 6]) + F([v[1][0] + 20, v[1][1] - 2], "CH2−CH3", ' font-size="14"'), "Éthylbenzène : noyau benzénique portant un groupe éthyle –CH2–CH3."); };
+// Corrigé : 2,4-dichloro-1-éthylbenzène (Cl en ortho et en para du groupe éthyle).
+S["proba-2026-chimie-dichloro"] = () => { const [b, v] = benzene26(70, 70, 30), fs = ' font-size="14"';
+  let g = b + L(v[0], [v[0][0], v[0][1] - 16]) + F([v[0][0] - 12, v[0][1] - 20], "CH2−CH3", fs);
+  g += L(v[1], [v[1][0] + 16, v[1][1] - 9]) + T([v[1][0] + 18, v[1][1] - 6], "Cl", fs);
+  g += L(v[3], [v[3][0], v[3][1] + 16]) + T([v[3][0] - 8, v[3][1] + 32], "Cl", fs);
+  return svg(170, 140, g, "Composé B : noyau benzénique portant le groupe éthyle en position 1, un atome de chlore en position 2 (ortho) et un en position 4 (para) : 2,4-dichloro-1-éthylbenzène."); };
+// Corrigé partie B : dispositif du dosage de l'eau oxygénée par le permanganate de potassium.
+S["proba-2026-chimie-dosage"] = () => {
+  const fs = ' font-size="12"';
+  let g = L([40, 20], [40, 290], ' stroke-width="2"') + '<rect x="14" y="288" width="160" height="8" stroke-width="1.4"/>' + L([40, 70], [96, 70], ' stroke-width="1.6"');
+  g += '<rect x="96" y="20" width="14" height="170" stroke-width="1.4"/>' + '<rect x="97" y="40" width="12" height="149" fill="currentColor" fill-opacity="0.35" stroke="none"/>';
+  for (let y = 40; y <= 180; y += 10) g += L([110, y], [y % 50 === 0 ? 102 : 105, y], ' stroke-width="0.7"');
+  g += P([[96, 190], [101, 205], [101, 214]], ' stroke-width="1.4"') + P([[110, 190], [105, 205], [105, 214]], ' stroke-width="1.4"') + '<rect x="96" y="196" width="18" height="6" stroke-width="1"/>';
+  g += P([[70, 222], [70, 282], [136, 282], [136, 222]], ' stroke-width="1.6"') + '<rect x="71" y="252" width="64" height="29" fill="currentColor" fill-opacity="0.12" stroke="none"/>' + '<rect x="94" y="276" width="18" height="4" fill="currentColor" stroke="none"/>';
+  g += '<rect x="58" y="284" width="90" height="4" stroke-width="1"/>';
+  g += L([122, 30], [168, 30], ' stroke-width="0.9"') + T([172, 26], "burette graduée : solution violette de permanganate", fs) + T([172, 42], "de potassium, C₂ = 0,2 mol/L", fs);
+  g += L([132, 199], [168, 178], ' stroke-width="0.9"') + T([172, 182], "robinet", fs);
+  g += L([136, 262], [168, 246], ' stroke-width="0.9"') + T([172, 242], "bécher : V₁ = 10 mL d'eau oxygénée (pipette jaugée)", fs) + T([172, 258], "+ quelques gouttes d'acide sulfurique", fs);
+  g += L([112, 279], [168, 274], ' stroke-width="0.9"') + T([172, 278], "barreau aimanté", fs) + L([148, 286], [168, 300], ' stroke-width="0.9"') + T([172, 306], "agitateur magnétique", fs);
+  return svg(490, 318, g, "Dispositif de dosage : une burette graduée, fixée à un support, contient la solution de permanganate de potassium (0,2 mol/L) ; en dessous, un bécher contient 10 mL d'eau oxygénée acidifiée, agitée par un barreau aimanté posé sur un agitateur magnétique.");
+};
+// <<< proba-2026-chimie
+// >>> proba-2026-svt-c
+// Document 1 : deux phénomènes producteurs d'énergie (énergie potentielle du glucose et des produits).
+S["proba-2026-svt-c-energie"] = () => {
+  const fs = ' font-size="12"', fb = ' font-size="12" font-weight="700"', mid = ' text-anchor="middle"';
+  const boite = (x, y, w, l) => '<rect x="' + x + '" y="' + y + '" width="' + w + '" height="56" stroke-width="1.4"/>' + l.map((t, i) => T([x + w / 2, y + 17 + i * 16], t, (i ? fs : fb) + mid)).join("");
+  const grosse = (x, y1, y2) => '<path d="M' + (x - 12) + " " + y1 + "V" + (y2 - 26) + "H" + (x - 30) + "L" + x + " " + y2 + "L" + (x + 30) + " " + (y2 - 26) + "H" + (x + 12) + "V" + y1 + '" stroke-width="1.4"/>';
+  const num = (x, y, n) => '<circle cx="' + x + '" cy="' + y + '" r="10" stroke-width="1.3" fill="var(--bg, #fff)"/>' + T([x, y + 4], n, ' font-size="12" font-weight="700"' + mid);
+  const glu = "Glucose (C<tspan dy=\"3\" font-size=\"9\">6</tspan><tspan dy=\"-3\">H</tspan><tspan dy=\"3\" font-size=\"9\">12</tspan><tspan dy=\"-3\">O</tspan><tspan dy=\"3\" font-size=\"9\">6</tspan><tspan dy=\"-3\">)</tspan>";
+  let g = boite(10, 10, 170, [glu, "Énergie potentielle", "2840 kJ/mole"]) + boite(220, 10, 170, [glu, "Énergie potentielle", "2840 kJ/mole"]);
+  g += grosse(95, 66, 120) + num(95, 92, "1") + grosse(305, 66, 196) + num(305, 100, "2");
+  g += boite(4, 122, 182, ["2 CO<tspan dy=\"3\" font-size=\"9\">2</tspan><tspan dy=\"-3\"> + 2 C</tspan><tspan dy=\"3\" font-size=\"9\">2</tspan><tspan dy=\"-3\">H</tspan><tspan dy=\"3\" font-size=\"9\">5</tspan><tspan dy=\"-3\">OH</tspan>", "Énergie potentielle", "1360 kJ/mole d'éthanol"]);
+  g += boite(220, 198, 170, ["6 CO<tspan dy=\"3\" font-size=\"9\">2</tspan><tspan dy=\"-3\"> + 6 H</tspan><tspan dy=\"3\" font-size=\"9\">2</tspan><tspan dy=\"-3\">O</tspan>", "Énergie potentielle", "0 kJ/mole"]);
+  return svg(400, 262, g, "Document 1. Phénomène 1 : glucose (énergie potentielle 2840 kJ par mole) → 2 CO2 + 2 C2H5OH (1360 kJ par mole d'éthanol). Phénomène 2 : glucose (2840 kJ par mole) → 6 CO2 + 6 H2O (0 kJ par mole).");
+};
+// Document 2 : conditions de fusion des péridotites sèches (solidus sec, liquidus).
+S["proba-2026-svt-c-solidus"] = () => {
+  const fs = ' font-size="11"', fb = ' font-size="12" font-weight="700"';
+  const X = t => 60 + (t - 0) * 0.16, Y = p => 40 + p * 3.2; // 1000 °C → x 220 ; 75 kbar → y 280
+  let g = L([60, 40], [440, 40], ' stroke-width="1.6"') + fleche([450, 40], [440, 40], 8) + T([456, 36], "température", fs) + T([466, 50], "(°C)", fs);
+  g += L([60, 40], [60, 316], ' stroke-width="1.6"') + fleche([60, 326], [60, 316], 8) + T([30, 342], "Pression", fs) + T([36, 355], "(kbar)", fs);
+  for (const t of [1000, 2000]) g += L([X(t), 36], [X(t), 44]) + T([X(t) - 14, 30], String(t), fs);
+  for (const p of [25, 50, 75]) g += L([56, Y(p)], [64, Y(p)]) + T([34, Y(p) + 4], String(p), fs);
+  g += L([X(1100), 40], [X(1500), Y(85)], ' stroke-width="1.6"') + L([X(2050), 40], [X(2400), Y(85)], ' stroke-width="1.6"');
+  g += T([230, 130], "SOLIDUS SEC", fb) + T([350, 158], "LIQUIDUS", fb);
+  g += T([140, 218], "Solide", fs) + T([292, 222], "Partiellement", fs) + T([302, 236], "fondu", fs) + T([400, 204], "Fondu", fs);
+  g += L([248, 200], [248, 150], ' stroke-width="4"') + fleche([248, 140], [248, 152], 12) + L([248, 200], [306, 200], ' stroke-width="4"') + fleche([316, 200], [304, 200], 12);
+  g += L([40, 382], [40, 362], ' stroke-width="3"') + fleche([40, 356], [40, 366], 9) + L([30, 392], [52, 392], ' stroke-width="3"') + fleche([60, 392], [50, 392], 9);
+  g += '<path d="M74 356 q6 0 6 8 v10 q0 4 5 4 q-5 0 -5 4 v10 q0 8 -6 8" stroke-width="1.2"/>' + T([98, 376], "Mouvements probables des péridotites", fb) + T([98, 392], "sèches (solides) en profondeur", fb);
+  return svg(520, 404, g, "Document 2 : diagramme température (axe horizontal, 1000 et 2000 °C) – pression (axe vertical descendant, 25, 50, 75 kbar). Deux droites inclinées, le solidus sec puis le liquidus, séparent les domaines solide, partiellement fondu et fondu. Une flèche verticale (montée, la pression diminue) et une flèche horizontale (réchauffement) figurent les mouvements probables des péridotites sèches en profondeur.");
+};
+// Document 3 : lames minces des roches A (microlitique) et B (grenue).
+S["proba-2026-svt-c-lames"] = () => {
+  const fs = ' font-size="12" font-weight="700"';
+  const poly = pts => '<polygon points="' + pts.map(p => p.join(",")).join(" ") + '" stroke-width="1.3"/>';
+  let g = '<rect x="110" y="10" width="200" height="190" stroke-width="1.4"/>';
+  // A : phénocristaux d'olivine, microlites de feldspath (baguettes), pâte amorphe (fond)
+  g += poly([[150, 60], [176, 52], [192, 70], [180, 96], [154, 92]]) + '<circle cx="170" cy="74" r="2"/>' + poly([[230, 120], [262, 112], [276, 140], [256, 164], [228, 154]]) + poly([[134, 150], [156, 146], [162, 168], [140, 174]]);
+  for (const [x, y, a] of [[210, 40, 20], [244, 60, -30], [270, 80, 60], [214, 90, -10], [196, 130, 40], [286, 160, -50], [168, 120, 70], [250, 186, 10], [140, 30, -40], [290, 30, 30]]) {
+    const r = a * Math.PI / 180, dx = 12 * Math.cos(r), dy = 12 * Math.sin(r); g += L([x - dx, y - dy], [x + dx, y + dy], ' stroke-width="3"'); }
+  g += T([20, 80], "Olivine", fs) + L([70, 76], [148, 76], ' stroke-width="1"') + fleche([150, 76], [140, 76], 6);
+  g += T([20, 160], "Pâte", fs) + T([20, 175], "amorphe", fs) + L([76, 164], [126, 132], ' stroke-width="1"') + fleche([128, 131], [120, 136], 6);
+  g += T([330, 70], "Microlites de", fs) + T([330, 85], "Feldspaths", fs) + L([326, 78], [282, 80], ' stroke-width="1"') + fleche([280, 80], [290, 80], 6) + L([326, 82], [222, 92], ' stroke-width="1"') + fleche([220, 92], [230, 91], 6);
+  g += T([194, 222], "Figure A", ' font-size="13" font-weight="700" text-decoration="underline"');
+  // B : cristaux jointifs, pas de pâte
+  g += '<rect x="470" y="10" width="200" height="190" stroke-width="1.4"/>';
+  g += '<path d="M470 10 L560 10 L556 60 L520 88 L470 80 Z" stroke-width="1.3" fill="currentColor" fill-opacity=".12"/>';
+  g += '<path d="M560 10 L670 10 L670 70 L620 96 L556 60 Z" stroke-width="1.3" fill="currentColor" fill-opacity=".28"/>';
+  g += '<path d="M520 88 L556 60 L620 96 L670 70 L670 140 L600 150 L540 130 Z" stroke-width="1.3" fill="currentColor" fill-opacity=".12"/>';
+  g += '<path d="M470 80 L520 88 L540 130 L600 150 L670 140 L670 200 L470 200 Z" stroke-width="1.3" fill="currentColor" fill-opacity=".6"/>';
+  g += T([340, 30], "Olivine", fs) + L([396, 26], [596, 36], ' stroke-width="1"') + fleche([598, 36], [588, 36], 6);
+  g += T([340, 120], "Feldspath", fs) + L([406, 116], [600, 116], ' stroke-width="1"') + fleche([602, 116], [592, 116], 6);
+  g += T([340, 186], "Pyroxène", fs) + L([406, 182], [520, 182], ' stroke-width="1"');
+  g += T([544, 222], "Figure B", ' font-size="13" font-weight="700" text-decoration="underline"');
+  return svg(680, 232, g, "Document 3 : lames minces. Figure A : quelques grands cristaux d'olivine et de petites baguettes de feldspath (microlites) dispersés dans une pâte amorphe. Figure B : grands cristaux jointifs d'olivine, de feldspath et de pyroxène, sans pâte.");
+};
+// <<< proba-2026-svt-c
 module.exports = S;

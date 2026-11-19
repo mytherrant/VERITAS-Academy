@@ -160,7 +160,8 @@ if ($acc === null) appr_refus('connexion');
 
 $droits = vrt_droits_compte($acc, $db);
 $role = strtolower((string) ($acc['role'] ?? ''));
-if (in_array($role, ['admin', 'superadmin', 'enseignant'], true)) $droits['classes'] = -1;
+/* Rôle « enseignant » déclaré à l'inscription ou né dans l'Atelier : plus de passe-droit (vrt_compte_equipe). */
+if (vrt_compte_equipe($acc)) $droits['classes'] = -1;
 
 /* Ce que la formule ouvre : lu par les pages pour afficher les bons verrous. */
 if (($in['action'] ?? '') === 'droits') {
@@ -175,7 +176,7 @@ if (($in['action'] ?? '') === 'droits') {
 if (($in['action'] ?? '') === 'labo') {
     $labos = require __DIR__ . '/_labos_premium.php';
     if (!is_array($labos) || !isset($labos[$id])) appr_rep(['ok' => false, 'raison' => 'introuvable']);
-    $admin = in_array($role, ['admin', 'superadmin', 'enseignant'], true);
+    $admin = vrt_compte_equipe($acc);
     if (!$admin && empty($droits['labos']) && !vrt_labo_essai($acc, $id, (int) ($droits['labosEssai'] ?? 0))) {
         appr_refus((int) ($droits['labosEssai'] ?? 0) > 0 ? 'essais' : 'abonnement', $nouveau);
     }
@@ -209,7 +210,27 @@ if ($etat !== 'ok') {
     appr_rep($r);
 }
 
-if (isset($in['pdf'])) appr_servir_pdf($id, (string) $in['pdf'], $nouveau);
+/* PDF d'un abonné : compté avec les fiches (vrt_quota_fiches, fenêtres 24 h / 7 j / 30 j).
+   Énoncé et corrigé d'une même épreuve font UN document. Une épreuve achetée à
+   l'unité n'est pas comptée : elle est payée pour elle-même. */
+if (isset($in['pdf'])) {
+    /* Relecture du 19/11/2026 : un PDF absent ou une nature invalide ne coûte pas de place
+       (appr_servir_pdf refuse, le quota n'est pas touché). */
+    $natQ = (string) $in['pdf'];
+    $fQ = dirname(__DIR__) . '/uploads/protected/apprendre/' . $id . '-' . $natQ . '.pdf';
+    if (!in_array($natQ, ['enonce', 'corrige'], true) || !is_file($fQ) || (int) @filesize($fQ) === 0) appr_servir_pdf($id, $natQ, $nouveau);
+    if (!$achetee && !vrt_compte_equipe($acc)) {
+        $refusQ = vrt_quota_fiches('a:' . (string) ($acc['id'] ?? $acc['user'] ?? ''), 'appr:' . $id,
+            (int) $droits['fichesJour'], (int) $droits['fichesSemaine'], (int) ($droits['fichesMois'] ?? -1));
+        if ($refusQ !== null) {
+            @file_put_contents(__DIR__ . '/data/_security_log.txt', date('c') . ' [APPRENDRE_PDF_QUOTA] user=' . substr((string) ($acc['user'] ?? ''), 0, 40) . ' id=' . $id . "\n", FILE_APPEND);
+            $r = ['ok' => false, 'raison' => 'quota', 'message' => $refusQ];
+            if ($nouveau !== '') $r['token'] = $nouveau;
+            appr_rep($r);
+        }
+    }
+    appr_servir_pdf($id, (string) $in['pdf'], $nouveau);
+}
 
 $fichier = dirname(__DIR__) . '/uploads/protected/apprendre/' . $id . '.json';
 $suite = is_file($fichier) ? json_decode((string) file_get_contents($fichier), true) : null;

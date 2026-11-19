@@ -13,6 +13,7 @@
 <link rel="stylesheet" href="planches.css?v=20261116b">
 <link rel="stylesheet" href="lecon-modele.css?v=20261118u">
 <link rel="stylesheet" href="modele.css?v=20261118v">
+<link rel="stylesheet" href="lecon-epure.css?v=20261119i">
 <style>
 /* ── Vue Enseignant, français : évaluer la leçon dans l'Atelier (10/11/2026) ── */
 .atelier-prof{display:none}
@@ -20,6 +21,16 @@
 .atelier-prof .pic{flex:none;color:#1E499B}
 .atelier-prof div{flex:1 1 240px;min-width:0;font-size:13.5px;color:#4D5163;line-height:1.5}
 .atelier-prof b{display:block;font-weight:600;color:#001136;font-size:14.5px}
+/* Vue Enseignant réservée aux formules Prof (19/11/2026) */
+.mur-vue{max-width:1100px;margin:14px auto;padding:16px 18px;border:1px solid #F3D9A4;border-radius:14px;background:#FFF8E8;color:#001136;font:14.5px/1.5 var(--sans)}
+.mur-vue p{margin:0 0 10px}.mur-vue p b{display:block;font-size:15.5px;margin-bottom:2px}
+.mur-vue .mv-or{display:inline-block;padding:8px 14px;border-radius:10px;background:#FFC93C;color:#001136;font-weight:600;text-decoration:none}
+.mur-vue summary{cursor:pointer;font-weight:600;color:#1E499B}
+.mur-vue form{display:flex;flex-wrap:wrap;gap:10px;align-items:flex-end;margin-top:10px}
+.mur-vue label{display:flex;flex-direction:column;gap:4px;font-size:13px;flex:1 1 180px}
+.mur-vue input{border:1px solid #E6EAF2;border-radius:10px;padding:8px 10px;font:14px var(--sans)}
+.mur-vue button{padding:9px 16px;border:0;border-radius:10px;background:#1E499B;color:#fff;font:600 14px var(--sans);cursor:pointer}
+.mur-vue [data-mv-m]{flex-basis:100%;font-size:13px;color:#5E2600}
 .atelier-prof a{flex:none;padding:8px 14px;border-radius:10px;background:#FFC93C;color:#001136;font-weight:600;font-size:13.5px;text-decoration:none}
 </style>
 </head>
@@ -52,10 +63,10 @@
 <script src="/api/apprendre_config.php"></script>
 <script src="scenes.js?v=20261112a"></script>
 <script src="progressions.js?v=20261110g"></script>
-<script src="lecons.js?v=20261118P1"></script>
-<script src="ressources.js?v=20261117a"></script>
+<script src="lecons.js?v=20261119cm"></script>
+<script src="ressources.js?v=20261119a"></script>
 <script src="atelier.js?v=20261110a"></script>
-<script src="charge.js?v=10e2f0c4"></script>
+<script src="charge.js?v=c18863d7"></script>
 <script src="commun.js?v=20261118p"></script>
 <script src="jeu.js?v=20261110g"></script>
 <script src="labo.js?v=20261118ch"></script>
@@ -231,9 +242,51 @@
     $('[data-a=lien]',d).addEventListener("click",function(){ var u=location.href.split("#")[0]+"#"+p.id; try{navigator.clipboard.writeText(u)}catch(e){} this.title="Lien copié"; });
     $('[data-a=pdf]',d).addEventListener("click",function(){print()});
   });
-  $$(".vue button").forEach(function(b){b.addEventListener("click",function(){
-    var v=b.getAttribute("data-vue"); $$(".vue button").forEach(function(x){x.setAttribute("aria-pressed",x===b?"true":"false")}); document.body.className=v;
+  /* 19/11/2026 — « en vue enseignant, on peut tout faire sans être inscrit ni abonné » :
+     la vue Enseignant (manuel de classe, impression par partie, Atelier) est réservée
+     aux formules Prof. Le serveur le garantit déjà (api/manuels.php refuse la création) ;
+     ici, on ne bascule plus pour un visiteur, on lui dit pourquoi et comment l'obtenir.
+     Accord mémorisé pour la session seulement : une formule qui expire se revoit. */
+  function jetonVue(){ try{ return localStorage.getItem("vrt_app_jeton")||sessionStorage.getItem("_vrtCT")||""; }catch(e){ return ""; } }
+  function estProf(j){ var d=(j&&j.droits)||{}; return (d.groupes||[]).some(function(g){return /^prof/.test(g)}) || d.classes===-1; }
+  function droitsVue(corps){
+    return fetch("/api/apprendre.php",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(corps)})
+      .then(function(r){return r.json()}).then(function(j){ if(j&&j.token){ try{localStorage.setItem("vrt_app_jeton",j.token)}catch(e){} } return j; });
+  }
+  function basculer(v){
+    $$(".vue button").forEach(function(x){x.setAttribute("aria-pressed",x.getAttribute("data-vue")===v?"true":"false")}); document.body.className=v;
+    var m=$(".mur-vue"); if(m&&v==="prof") m.remove();
     if(v==="prof"&&!A.lire("visite_prof",0)){ouvrir();A.ecrire("visite_prof",1)}
+  }
+  function murVue(msg){
+    var ancien=$(".mur-vue"); if(ancien) ancien.remove();
+    var d=document.createElement("div"); d.className="mur-vue"; d.setAttribute("role","status");
+    d.innerHTML='<p><b>Vue Enseignant</b>'+esc(msg)+'</p><p><a class="mv-or" href="/app.html#tarifs">Voir les formules enseignant</a></p>'+
+      '<details'+(jetonVue()?'':' open')+'><summary>Déjà abonné ? Je me connecte</summary><form data-mv><label>Identifiant<input name="login" autocomplete="username" required></label><label>Mot de passe<input name="password" type="password" autocomplete="current-password" required></label><button type="submit">Me connecter</button><span data-mv-m></span></form></details>';
+    var f=$("[data-mv]",d);
+    f.addEventListener("submit",function(e){
+      e.preventDefault(); var bt=$("button",f), m=$("[data-mv-m]",f); if(bt.disabled) return; bt.disabled=true; m.textContent="Connexion…";
+      droitsVue({action:"droits",id:"vue-prof",login:f.login.value.trim(),password:f.password.value}).then(function(j){
+        bt.disabled=false;
+        if(j&&j.ok&&estProf(j)){ try{sessionStorage.setItem("vrt_vue_prof","1")}catch(x){} basculer("prof"); return; }
+        m.textContent=(j&&j.ok)?"Connecté, mais ce compte n'a pas de formule enseignant active.":(j&&j.raison==="identifiants")?"Identifiant ou mot de passe incorrect.":(j&&j.raison==="debit")?"Trop d'essais : réessayez dans une minute.":"La connexion a échoué.";
+      }).catch(function(){ bt.disabled=false; m.textContent="Le serveur ne répond pas."; });
+    });
+    boite.parentNode.insertBefore(d,boite); d.scrollIntoView({block:"nearest"});
+  }
+  $$(".vue button").forEach(function(b){b.addEventListener("click",function(){
+    var v=b.getAttribute("data-vue");
+    if(v!=="prof"){ basculer(v); return; }
+    try{ if(sessionStorage.getItem("vrt_vue_prof")==="1"){ basculer("prof"); return; } }catch(e){}
+    var t=jetonVue();
+    if(!t){ murVue("La vue Enseignant (ajouter une partie au manuel de votre classe, imprimer une partie, évaluer la leçon dans l'Atelier) est réservée aux formules enseignant : Prof 3 classes, 6 classes ou toutes classes."); return; }
+    b.disabled=true;
+    droitsVue({action:"droits",id:"vue-prof",token:t}).then(function(j){
+      b.disabled=false;
+      if(j&&j.ok&&estProf(j)){ try{sessionStorage.setItem("vrt_vue_prof","1")}catch(e){} basculer("prof"); return; }
+      murVue(j&&j.ok?"Votre compte n'a pas de formule enseignant active. La vue Enseignant s'ouvre avec Prof 3 classes, 6 classes ou toutes classes."
+        :"La vue Enseignant est réservée aux formules enseignant. Connectez-vous avec votre compte Prof.");
+    }).catch(function(){ b.disabled=false; murVue("Le serveur ne répond pas : la vue Enseignant demande une connexion pour vérifier votre formule."); });
   })});
 
   /* Français, vue Enseignant : évaluer la leçon dans l'Atelier — la séquence

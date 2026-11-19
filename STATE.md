@@ -1,3 +1,21 @@
+## Carte mentale des leçons enrichie, icônes au trait, déploiement débloqué (19/11/2026, branche carte-lecon-deploiement)
+
+Demandes de Jacques (captures téléphone) : « Carte mentale mal sortie. Finalise la suppression des cadres, tableau dans les tableaux », puis « Améliore la qualité des icônes, puces ».
+
+- **Pourquoi les cadres étaient encore là** : la PR #393 (leçons sans encadrés) n'a JAMAIS été mise en ligne : les déploiements de #395 et #396 ont échoué au contrôle GEO (« llms.txt est périmé »). `python3 tools/build_llms.py` relancé : le déploiement repart et emporte #393.
+- **Carte mentale de la leçon** (`VRT_CM_LECON`, `_src/00-carte-mentale.js`) : une branche ne gardait souvent qu'un mot en gras. Fonction `idees(p)` : 2 à 4 idées par partie, dans l'ordre formules (`.formule`), définitions « Terme : sens » (seulement si le mot en gras ouvre la phrase et qu'elle le définit), « à retenir », puis phrases du cours raccourcies à la virgule ; intertitres en gras, renvois aux documents et réponses (`details`) écartés ; `E_c` → `Ec` ; titres de branche coupés au mot. Exemple Tle D effet photoélectrique : 3 branches, 5 idées (au lieu de 3 mots). `lecons.js?v=20261119cm` partout ; `chunks/carte-mentale.js` régénéré (`oeuvres_statiques.js`).
+- **Icônes et puces** (`lecon-epure.css` § 19/11 (6), `?v=20261119i`) : définition, propriété, méthode, exemple = tuile douce de la couleur de la famille + pictogramme au trait (livre, sceau, engrenage régulier, crayon), plus d'illustrations multicolores ni d'ombre floue ; rail pointillé → filet plein dégradé ; « à retenir » : punaise au trait ; notes collées : ampoule, triangle, signet, « i » au trait ; indices : loupe en tuile ; puces : chevron dans une pastille de la couleur du bloc (plus de `hue-rotate`).
+- Bancs gabarits 54, verrou 18, réglages 29 au vert ; contrôles GEO, œuvres, habillage au vert ; Chromium (Pixel 5) : aucune erreur JS.
+
+## Accès enseignant : rôle déclaré sans passe-droit, équipe marquée par l'admin (19/11/2026, branche acces-enseignant-pdf)
+
+- **Serveur** : `vrt_compte_equipe` (api/_auth_lib.php) remplace le test `role === 'enseignant'` dans content.php, apprendre.php (classes, labos, PDF), direct.php, manuels.php et désormais **student_data.php (forum des classes)** : un rôle « enseignant » coché à l'inscription n'ouvre plus le forum de toutes les classes, les annonces, ni le badge « Enseignant ». Seuls l'admin et les enseignants marqués `equipe: true` gardent l'accès complet ; les autres passent par une formule Prof.
+- **Admin** : Comptes visiteurs → bouton 🏫 sur chaque compte enseignant (`_mgrEquipe`), badge « ÉQUIPE VÉRITAS » ou « formule Prof requise ». Le champ ne voyage que par la synchro admin (db.php).
+- **À faire après déploiement, chez Jacques** : marquer « équipe » les enseignants du centre (sinon ils perdent l'accès complet).
+- Manuels collaboratifs réservés aux formules Prof ; plafond de 30 jours sur les documents (fichesMois), commun à content.php et aux PDF d'Apprendre.
+- Habillage des pages réaligné sur la version d'assets **1.20.85** (habiller_pages, 22 pages) ; sw.js en `veritas-v1.20.85`.
+- Bancs : `banc_forum_classes` 17/17 (rouge 2 sur l'ancien code), compte_serveur 41, atelier_enseignant 36, partenaires 16, apprendre_verrou 18, entree_libre 61, tunnel 57, synchro_admin 15 ; `banc_empreintes` rouge sur le poste seulement (livrets philo locaux, préexistant).
+
 ## Apprendre : classes d'examen — leçons nouvelles RÉSERVÉES AUX ABONNÉS (18/11/2026)
 
 Décision de Jacques (question posée) : les nouvelles leçons des classes d'examen (3e, 1re, Tle) sont **réservées aux abonnés**, comme les 2 000 leçons existantes : début public, suite servie par `api/apprendre.php`.

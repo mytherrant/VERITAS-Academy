@@ -759,7 +759,8 @@ if (!defined('VRT_AUTH_LIB')) {
        app.js en garde un miroir (_DROITS_FORMULES), à modifier ensemble.
          classes   : classes dont les leçons sont ouvertes (-1 = toutes)
          iaJour    : questions par jour au tuteur IA
-         fichesJour / fichesSemaine : documents DISTINCTS ouverts (content.php)
+         fichesJour / fichesSemaine / fichesMois : documents DISTINCTS ouverts
+                     (content.php, PDF des épreuves d'apprendre.php — vrt_quota_fiches)
          labos      : labos premium ouverts (protocole + quiz servis par apprendre.php)
          labosEssai : labos premium DISTINCTS ouverts à l'essai sur 7 jours, sans labos
          bulletins  : copies d'examen blanc notées par le tuteur, bulletin blanc (api/examens.php)
@@ -781,6 +782,15 @@ if (!defined('VRT_AUTH_LIB')) {
             'prof6'      => ['classes' => 6,  'iaJour' => 80,  'fichesJour' => 15, 'fichesSemaine' => 60,  'labos' => true,  'labosEssai' => 0, 'bulletins' => false, 'direct' => false, 'orientation' => false],
             'proftout'   => ['classes' => -1, 'iaJour' => 150, 'fichesJour' => 25, 'fichesSemaine' => 120, 'labos' => true,  'labosEssai' => 0, 'bulletins' => false, 'direct' => false, 'orientation' => false],
         ];
+        /* fichesMois (19/11/2026) : documents DISTINCTS sur 30 jours glissants. Les seuls plafonds
+           jour/semaine laissaient, en un mois payé, ~4 semaines pleines de PDF (80 en Pro, 480 en
+           Prof toutes classes) : de quoi archiver le catalogue et ne plus se réabonner. Le plafond
+           mensuel vaut deux semaines : lire et réviser, oui ; aspirer, non. */
+        $mois = ['decouverte' => 0, 'starter' => 20, 'pro' => 40, 'elite' => 80, 'famille' => 80, 'prof3' => 80, 'prof6' => 120, 'proftout' => 200];
+        foreach ($d as $g => $v) {
+            $pos = array_search('fichesSemaine', array_keys($v), true) + 1;
+            $d[$g] = array_slice($v, 0, $pos, true) + ['fichesMois' => $mois[$g]] + array_slice($v, $pos, null, true);
+        }
         $sur = $db['elearning']['droitsFormules'] ?? null;
         if (is_array($sur)) {
             foreach ($d as $g => $v) {
@@ -823,6 +833,72 @@ if (!defined('VRT_AUTH_LIB')) {
         $p = 'free';
         foreach ($d['groupes'] as $g) if (($rang[$g] ?? -1) > $rang[$p]) $p = $g;
         return ['palier' => $p, 'iaJour' => (int) $d['iaJour'], 'groupes' => $d['groupes']];
+    }
+
+    /**
+     * ÉQUIPE VÉRITAS (19/11/2026). Le rôle « enseignant » se DÉCLARE : l'inscription
+     * (compte.php) le laisse choisir, l'Atelier (plateforme.php) le pose sur chaque compte
+     * qu'il crée sans mot de passe. Il valait pourtant passe-droit dans content.php,
+     * apprendre.php (labos, toutes les classes) et direct.php : cocher « enseignant »
+     * ouvrait tout, sans formule. N'ouvrent plus tout que l'administration et les
+     * enseignants du centre que l'admin a marqués `equipe: true` (champ écrit par la
+     * seule synchro admin, db.php). Les autres enseignants passent par une formule Prof.
+     */
+    function vrt_compte_equipe(array $acc): bool {
+        $role = strtolower((string) ($acc['role'] ?? ''));
+        if (in_array($role, ['admin', 'superadmin'], true)) return true;
+        return $role === 'enseignant' && ($acc['equipe'] ?? false) === true;
+    }
+
+    /** Formule enseignant active (Prof 3, 6 ou toutes classes), ou membre de l'équipe. */
+    function vrt_formule_enseignant(array $acc, array $db): bool {
+        if (vrt_compte_equipe($acc)) return true;
+        return (bool) array_intersect(vrt_droits_compte($acc, $db)['groupes'] ?? [], ['prof3', 'prof6', 'proftout']);
+    }
+
+    /**
+     * QUOTA DE DOCUMENTS (12/11/2026, fenêtre mensuelle et PDF d'Apprendre 19/11/2026).
+     * Empêche de payer un seul mois, aspirer tous les PDF puis ne plus se réabonner.
+     * On compte les DOCUMENTS DISTINCTS par compte sur trois fenêtres glissantes :
+     * 24 h, 7 jours, 30 jours. Rouvrir un document déjà compté dans les 30 jours ne
+     * coûte rien (ni les requêtes Range d'un même fichier). Un seul compteur pour
+     * content.php et les PDF d'apprendre.php : changer de porte ne remet pas à zéro.
+     * -1 = sans limite. Renvoie null si autorisé (et enregistre l'ouverture), sinon
+     * la phrase de refus à montrer.
+     */
+    function vrt_quota_fiches(string $who, string $docId, int $maxJour, int $maxSemaine, int $maxMois): ?string {
+        if ($maxJour === -1 && $maxSemaine === -1 && $maxMois === -1) return null;
+        if ($maxJour === 0 || $maxSemaine === 0 || $maxMois === 0) return 'Ta formule ne comprend pas le téléchargement de documents. Ils sont inclus dès la formule Starter.';
+        $dir = (defined('VRT_RATE_DIR') ? (string) VRT_RATE_DIR : __DIR__ . '/data/_rate') . '/';
+        if (!is_dir($dir)) @mkdir($dir, 0750, true);
+        $f = $dir . 'fiches_' . substr(hash('sha256', $who), 0, 24) . '.json';
+        $now = time();
+        $fh = @fopen($f, 'c+');
+        if ($fh === false) return null;             // stockage indisponible : on ne bloque pas un abonné
+        @flock($fh, LOCK_EX);
+        $vus = json_decode((string) stream_get_contents($fh), true);
+        if (!is_array($vus)) $vus = [];
+        // Par document, la date de sa PREMIÈRE ouverture encore dans les 30 jours.
+        foreach ($vus as $k => $ts) { if (!is_int($ts) || ($now - $ts) >= 30 * 86400) unset($vus[$k]); }
+        $msg = null;
+        if (!isset($vus[$docId])) {
+            $jour = 0; $sem = [];
+            foreach ($vus as $ts) { if (($now - $ts) < 86400) $jour++; if (($now - $ts) < 7 * 86400) $sem[] = $ts; }
+            $attente = function (array $l, int $fen) use ($now): int { return max(1, (int) ceil(($fen - ($now - min($l))) / 3600)); };
+            if ($maxJour > 0 && $jour >= $maxJour) {
+                $msg = 'Tu as déjà ouvert ' . $maxJour . ' documents différents aujourd’hui. Ceux déjà ouverts restent disponibles ; les nouveaux se débloquent dans les prochaines 24 h.';
+            } elseif ($maxSemaine > 0 && count($sem) >= $maxSemaine) {
+                $msg = 'Tu as atteint ' . $maxSemaine . ' documents différents cette semaine. Ceux déjà ouverts restent disponibles ; un nouveau se débloque dans environ ' . $attente($sem, 7 * 86400) . ' h.';
+            } elseif ($maxMois > 0 && count($vus) >= $maxMois) {
+                $j = (int) ceil($attente($vus, 30 * 86400) / 24);
+                $msg = 'Tu as atteint ' . $maxMois . ' documents différents sur 30 jours, le plafond de ta formule. Ceux déjà ouverts restent disponibles ; un nouveau se débloque dans environ ' . $j . ' jour' . ($j > 1 ? 's' : '') . '.';
+            } else {
+                $vus[$docId] = $now;
+            }
+        }
+        if ($msg === null) { ftruncate($fh, 0); rewind($fh); fwrite($fh, json_encode($vus)); }
+        @flock($fh, LOCK_UN); fclose($fh);
+        return $msg;
     }
 
     /** Droits effectifs d'un compte : le MEILLEUR de chaque droit parmi ses formules actives. */

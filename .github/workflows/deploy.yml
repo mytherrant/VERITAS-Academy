@@ -615,6 +615,14 @@ jobs:
       - name: 🎓 L'enseignant atteint-il son Atelier ?
         run: node tests/banc_atelier_enseignant.cjs
 
+      # ── 🛡️ LES RÔLES D'ÉQUIPE SONT-ILS TENUS PAR LE SERVEUR ? Ils ne
+      #    vivaient que dans le navigateur : par un appel direct, un simple
+      #    membre passait une épreuve à « validé » ou la publiait pour toute
+      #    l'équipe. ?action=etat fusionne désormais par objet et refuse
+      #    décision, validation, publication et suppression hors rôle.
+      - name: 🛡️ Rôles d'équipe de l'Atelier tenus au serveur
+        run: node tests/banc_atelier_roles.cjs
+
       # ── 🧹 LE NOUVEL INSCRIT TROUVE-T-IL UNE PAGE VIERGE ? L'Atelier est
       #    livré avec un décor — six profils, trois épreuves, deux cours, des
       #    propositions, des messages — qui sert la visite guidée. Mais

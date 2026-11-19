@@ -1649,13 +1649,25 @@ if ($action === 'etat') {
                écrase encore l'état de toute l'équipe. */
             $g2 = plat_groupe_par_id($db2, $gid);
             if (!$g2 || !plat_est_membre($g2, $accId)) return null;
+            /* Ce qu'il n'a pas le droit de décider est ramené à l'état connu,
+               avec les rôles relus SOUS VERROU (contre-expertise du 28/10, X2). */
+            $avant = $db2['plateforme']['etats'][$gid]['contenu'] ?? null;
+            [$contenu, $corriges, $fusionnes, $suppRefusees] = plat_garder_statuts($in['etat'], is_array($avant) ? $avant : null, $accId,
+                                                       plat_peut_valider($g2, $accId), plat_peut_publier($g2, $accId));
+            // Journal à part : le journal des paiements se tronque, il ne doit pas perdre une trace de paiement pour ceci.
+            if ($corriges > 0 && function_exists('vrt_log_borne')) {
+                vrt_log_borne($GLOBALS['DATA_DIR'] . '/_atelier_log.txt', date('c') . ' [STATUT_CORRIGE] groupe=' . $gid
+                    . ' acc=' . $accId . ' objets=' . $corriges, 262144);
+            }
             $db2['plateforme']['etats'][$gid] = [
-                'contenu'  => $in['etat'],
+                'contenu'  => $contenu,
                 'majPar'   => $accId,
                 'majLe'    => time(),
                 'revision' => (int) ($db2['plateforme']['etats'][$gid]['revision'] ?? 0) + 1,
             ];
-            return [$db2, ['revision' => $db2['plateforme']['etats'][$gid]['revision']]];
+            return [$db2, ['revision' => $db2['plateforme']['etats'][$gid]['revision'], 'corriges' => $corriges, 'fusionnes' => $fusionnes,
+                          // Le navigateur retire ces entrées de son registre : sinon il les renverrait à chaque envoi.
+                          'suppRefusees' => $suppRefusees]];
         }, false);
         if ($res === null) {
             jsonResponse(['ok' => false, 'error' => 'Vous n’êtes plus membre de cette équipe.',
@@ -1758,7 +1770,317 @@ function plat_groupe_public(?array $g): ?array
         'membres'      => array_values(array_map('strval', (array) ($g['membres'] ?? []))),
         'cree'         => (int) ($g['cree'] ?? 0),
         'places'       => (int) ($g['places'] ?? 1),
+        // Le rôle de chacun, tel que le serveur l'applique (voir plat_role_de).
+        'roles'        => (object) plat_roles_publics($g),
     ];
+}
+
+/* ─────────────────────────────────────────────────────────────────────────
+   RÔLES D'ÉQUIPE — tenus ICI, attribués par le responsable (28/10/2026)
+
+   Contre-expertise du 28/10 (X2) : le statut d'une épreuve voyageait dans
+   l'instantané que chaque membre renvoie, et le serveur l'enregistrait tel
+   quel. Les rôles ne vivaient que dans le navigateur : un enseignant pouvait
+   passer une épreuve à « validé » ou la publier en bibliothèque, et toute
+   l'équipe la recevait ainsi. Le rôle se fixe désormais par ?action=groupe&
+   op=role (le responsable seul) et ?action=etat corrige ce qu'un membre n'a
+   pas le droit de décider. Miroir de ROLES dans plateforme/index.html.
+   ───────────────────────────────────────────────────────────────────────── */
+function plat_roles_equipe(): array
+{
+    return ['enseignant', 'chef', 'inspecteur', 'relecteur', 'admin', 'eleve'];
+}
+
+/** Rôle appliqué : le responsable est chef (ou inspecteur s'il l'a choisi) ; les autres, enseignant par défaut. */
+function plat_role_de(?array $g, string $accId): string
+{
+    if (!$g || $accId === '' || !plat_est_membre($g, $accId)) return '';
+    $r = (string) (((array) ($g['roles'] ?? []))[$accId] ?? '');
+    if ((string) ($g['proprietaire'] ?? '') === $accId) return $r === 'inspecteur' ? 'inspecteur' : 'chef';
+    return in_array($r, plat_roles_equipe(), true) ? $r : 'enseignant';
+}
+
+function plat_roles_publics(array $g): array
+{
+    $out = [];
+    foreach ((array) ($g['membres'] ?? []) as $m) {
+        $m = (string) $m;
+        if ($m !== '') $out[$m] = plat_role_de($g, $m);
+    }
+    return $out;
+}
+
+function plat_peut_valider(?array $g, string $accId): bool
+{
+    return in_array(plat_role_de($g, $accId), ['chef', 'inspecteur', 'relecteur'], true);
+}
+
+function plat_peut_publier(?array $g, string $accId): bool
+{
+    return in_array(plat_role_de($g, $accId), ['chef', 'inspecteur'], true);
+}
+
+/**
+ * Valeur « vraie » au sens de JavaScript : le navigateur teste `e.inLibrary`
+ * tel quel. "0", [] et {} sont faux pour empty() mais vrais pour lui.
+ */
+function plat_vrai_js($v): bool
+{
+    return !($v === null || $v === false || $v === 0 || $v === 0.0 || $v === '');
+}
+
+function plat_est_liste($a): bool
+{
+    return is_array($a) && ($a === [] || array_keys($a) === range(0, count($a) - 1));
+}
+
+/** Le circuit de relecture d'un objet, normalisé comme _revueDe() du navigateur. */
+function plat_revue(?array $o): array
+{
+    $r = (isset($o['revue']) && is_array($o['revue'])) ? $o['revue'] : [];
+    $dec = [];
+    foreach ((array) ($r['decisions'] ?? []) as $d) {
+        if (!is_array($d) || !is_scalar($d['uid'] ?? null) || !is_scalar($d['verdict'] ?? null)) continue;
+        $d['uid'] = (string) $d['uid'];
+        $d['verdict'] = (string) $d['verdict'];
+        $d['tour'] = max(1, (int) ($d['tour'] ?? 1));
+        $d['ts'] = is_numeric($d['ts'] ?? null) ? (int) $d['ts'] : 0;
+        $dec[] = $d;
+    }
+    return array_merge($r, ['tour' => max(1, (int) ($r['tour'] ?? 1)),
+        'requis' => max(1, (int) ($r['requis'] ?? 1)), 'decisions' => $dec]);
+}
+
+/** Miroir de _statutRevue() (plateforme/index.html). */
+function plat_statut_revue(array $r): string
+{
+    $cur = array_filter($r['decisions'], static function ($d) use ($r) { return $d['tour'] === $r['tour']; });
+    $v = array_column($cur, 'verdict');
+    if (in_array('rejete', $v, true)) return 'rejete';
+    if (in_array('ajustement', $v, true)) return 'ajustement';
+    return (count(array_keys($v, 'valide', true)) >= $r['requis']) ? 'valide' : 'relecture';
+}
+
+/**
+ * Deux versions d'un même objet diffèrent-elles par leur CONTENU ?
+ * Toute clé de l'ancienne version doit se retrouver, à l'identique, dans la
+ * nouvelle — vider un champ est une retouche. Une clé seulement AJOUTÉE (un
+ * navigateur plus récent) ne compte pas, sinon chaque envoi d'un poste à
+ * jour déclasserait les épreuves validées de toute l'équipe.
+ */
+function plat_contenu_change(array $avant, array $apres): bool
+{
+    $hors = ['status' => 1, 'inLibrary' => 1, 'updatedAt' => 1, 'activity' => 1, 'comments' => 1,
+             'history' => 1, 'revue' => 1, 'solo' => 1, 'editorIds' => 1];
+    foreach ($avant as $k => $v) {
+        if (isset($hors[$k])) continue;
+        if (!array_key_exists($k, $apres) || json_encode($v) !== json_encode($apres[$k])) return true;
+    }
+    return false;
+}
+
+/**
+ * L'instantané d'un membre, FUSIONNÉ avec celui du serveur et ramené à ce
+ * qu'il a le droit de décider.
+ *
+ * ⚠️ Le serveur écrasait l'instantané entier : un poste en retard effaçait la
+ * décision d'un relecteur, un objet omis disparaissait. Il fusionne désormais
+ * par objet, comme _fusionner() du navigateur (le plus récent gagne, les
+ * décisions de relecture s'additionnent), puis applique les droits :
+ *
+ *   · une décision NOUVELLE n'entre que si son auteur peut valider et la
+ *     signe de son propre identifiant — le navigateur RECALCULE le statut à
+ *     partir des décisions, du `tour` et du `requis` ;
+ *   · un non-valideur garde le tour ou passe au suivant (une soumission),
+ *     jamais un autre ; `requis` se fige à la première décision du tour ;
+ *   · une épreuve qu'il retouche alors qu'elle est validée, publiée, ou
+ *     qu'un relecteur a dit « valide » au tour courant passe au tour
+ *     suivant : ces décisions portaient sur un autre texte ;
+ *   · il ne pose pas « valide », et ne retire pas le statut d'une épreuve
+ *     d'autrui ; l'auteur peut retirer la sienne ;
+ *   · publier (`inLibrary`, jugé comme en JavaScript) : chef ou inspecteur ;
+ *   · supprimer (`epSuppr`) une épreuve validée ou publiée : chef ou
+ *     inspecteur ; un brouillon : son auteur ou un valideur.
+ * Un objet corrigé prend la date juste au-dessus des dates connues (jamais
+ * l'heure du serveur) : la fusion des navigateurs reprend la version du
+ * serveur, et une édition faite pendant l'aller-retour gagne encore. Les
+ * dates sont écrêtées à un jour dans le futur.
+ *
+ * Renvoie [contenu, REFUS, FUSIONS, suppressions refusées] : un refus est ce
+ * que ce rôle n'avait pas le droit de décider (le navigateur le signale) ; une
+ * fusion, un rattrapage ou une conséquence (poste en retard, statut dérivé
+ * des décisions, nouveau tour après une retouche).
+ */
+function plat_garder_statuts(array $contenu, ?array $avant, string $accId, bool $valider, bool $publier): array
+{
+    $n = 0; $fusions = 0; $suppRefusees = [];
+    $maintenant = (int) round(microtime(true) * 1000);
+    /* Une date au-delà d'un jour est une horloge fausse ou une date forgée :
+       à 9e15, plus aucune édition normale n'aurait jamais « gagné ». */
+    $plafond = $maintenant + 86400000;
+    $date = static function ($o) use ($plafond) { return min((int) ($o['updatedAt'] ?? 0), $plafond); };
+    $avant = is_array($avant) ? $avant : [];
+    $connus = [];
+    foreach ((array) ($avant['epreuves'] ?? []) as $p) {
+        if (is_array($p) && isset($p['id']) && is_scalar($p['id']) && (string) $p['id'] !== '') $connus[(string) $p['id']] = $p;
+    }
+
+    /* SUPPRESSIONS d'abord : elles décident aussi de ce qui reste dans l'état.
+       Seule une épreuve que le serveur CONNAÎT se supprime (un identifiant
+       inconnu n'a rien à effacer chez personne) ; le registre est plafonné. */
+    $reg = [];
+    foreach ((array) ($avant['epSuppr'] ?? []) as $id => $t) if (is_numeric($t)) $reg[(string) $id] = (int) $t;
+    $recuSuppr = (isset($contenu['epSuppr']) && is_array($contenu['epSuppr'])) ? $contenu['epSuppr'] : [];
+    $vusSuppr = 0;
+    foreach ($recuSuppr as $id => $t) {
+        $id = (string) $id;
+        if (!is_numeric($t) || !preg_match('/^[A-Za-z0-9_-]{1,64}$/', $id) || !isset($connus[$id])) continue;
+        if (++$vusSuppr > 200) break;
+        $t = min((int) $t, $plafond);
+        if (isset($reg[$id]) && $reg[$id] >= $t) continue;
+        $e = $connus[$id];
+        $verrouille = (string) ($e['status'] ?? '') === 'valide' || plat_vrai_js($e['inLibrary'] ?? false);
+        if ($publier || (!$verrouille && ($valider || (string) ($e['ownerId'] ?? '') === $accId))) {
+            $reg[$id] = $t;
+        } else {
+            $suppRefusees[] = $id;
+            $n++;
+        }
+    }
+    if (count($reg) > 3000) { arsort($reg); $reg = array_slice($reg, 0, 3000, true); }
+
+    foreach (['epreuves', 'cours'] as $coll) {
+        if (!array_key_exists($coll, $contenu) && !isset($avant[$coll])) continue;
+        $prec = [];
+        foreach ((array) ($avant[$coll] ?? []) as $p) {
+            if (is_array($p) && isset($p['id']) && is_scalar($p['id']) && (string) $p['id'] !== '') $prec[(string) $p['id']] = $p;
+        }
+        $recu = is_array($contenu[$coll] ?? null) ? array_values($contenu[$coll]) : [];
+        if (!plat_est_liste($contenu[$coll] ?? [])) $n++;
+        $sortie = []; $vus = [];
+
+        foreach ($recu as $o) {
+            if (!is_array($o) || !isset($o['id']) || !is_scalar($o['id']) || (string) $o['id'] === '') { $n++; continue; }
+            $id = (string) $o['id'];
+            if (isset($vus[$id])) { $n++; continue; }
+            $vus[$id] = 1;
+            $o['id'] = $id;
+            $original = $o;
+            if (array_key_exists('updatedAt', $o)) $o['updatedAt'] = $date($o);
+            $p = $prec[$id] ?? null;
+            $refus = false;
+            $rp = $p !== null ? plat_revue($p) : null;
+            $ri = plat_revue($o);
+
+            /* Décisions : union ; une décision nouvelle n'entre que signée par
+               un valideur. Sur un objet NEUF (une copie qui a gardé celles de
+               l'original), on les retire sans le compter comme un refus. */
+            $dec = [];
+            foreach (($rp['decisions'] ?? []) as $d) $dec[$d['uid'] . '|' . $d['tour']] = $d;
+            foreach ($ri['decisions'] as $d) {
+                $k = $d['uid'] . '|' . $d['tour'];
+                if (isset($dec[$k]) && $d['ts'] <= $dec[$k]['ts']) continue;
+                if ($valider && $d['uid'] === $accId) $dec[$k] = $d;
+                elseif ($p !== null) $refus = true;
+            }
+            $dec = array_values($dec);
+            usort($dec, static function ($a, $b) { return $a['ts'] <=> $b['ts']; });
+
+            // Le plus récent gagne, comme dans le navigateur ; un envoi en retard garde la version du serveur.
+            if ($p !== null && $date($p) > $date($o)) {
+                $o = $p;
+                if (json_encode($dec) !== json_encode($rp['decisions'])) {
+                    $o['revue'] = array_merge($rp, ['decisions' => $dec]);
+                    if ((string) ($o['status'] ?? '') !== 'brouillon') $o['status'] = plat_statut_revue($o['revue']);
+                    $o['updatedAt'] = $date($p) + 1;
+                }
+                if ($refus) $n++; else $fusions++;   // le poste en retard relit la version du serveur
+                $sortie[] = $o;
+                continue;
+            }
+
+            $tour = $ri['tour']; $requis = $ri['requis'];
+            $statut = is_string($o['status'] ?? null) ? $o['status'] : 'brouillon';
+            $statutDemande = $statut;
+            $garde = false;   // statut d'autrui laissé tel quel : rien à recalculer
+            $change = $p !== null && plat_contenu_change($p, $o);
+            if (!$valider && $rp !== null) {
+                if ($tour !== $rp['tour'] && $tour !== $rp['tour'] + 1) { $tour = $rp['tour']; $refus = true; }
+                /* `requis` se fixe à la soumission : libre tant que le tour n'a
+                   reçu aucune décision (_soumettreRelecture garde alors le même
+                   tour), figé dès la première — l'abaisser ensuite validerait. */
+                $tourDecide = false; $tourValide = false;
+                foreach ($rp['decisions'] as $d) {
+                    if ($d['tour'] !== $rp['tour']) continue;
+                    $tourDecide = true;
+                    if ($d['verdict'] === 'valide') $tourValide = true;
+                }
+                if ($tour === $rp['tour'] && $tourDecide && $requis !== $rp['requis']) { $requis = $rp['requis']; $refus = true; }
+
+                $avantStatut = is_string($p['status'] ?? null) ? $p['status'] : null;
+                $avantPublie = plat_vrai_js($p['inLibrary'] ?? false);
+                if ($change && ($avantStatut === 'valide' || $avantPublie || $tourValide)) {
+                    /* Retouché après qu'un relecteur a dit « valide » — que le
+                       statut l'affiche encore ou que l'auteur l'ait retiré entre-
+                       temps : ces décisions portaient sur un AUTRE texte. Tour
+                       suivant, et la relecture recommence. */
+                    $tour = $rp['tour'] + 1;
+                    $requis = $ri['requis'];
+                    if ($statut !== 'brouillon') $statut = 'relecture';
+                } elseif ($avantStatut === 'valide' || $avantPublie) {
+                    $auteur = (string) ($p['ownerId'] ?? '') === $accId;
+                    if (!($auteur && in_array($statut, ['brouillon', 'relecture'], true))) {
+                        if ($statut !== $avantStatut || $tour !== $rp['tour'] || $requis !== $rp['requis']) $refus = true;
+                        $statut = $avantStatut;   // le statut d'autrui ne se retire pas
+                        $tour = $rp['tour']; $requis = $rp['requis'];
+                        $garde = true;
+                    }
+                } elseif (!in_array($statut, ['brouillon', 'relecture'], true)) {
+                    $statut = ($avantStatut !== null && $avantStatut !== 'valide') ? $avantStatut : 'relecture';
+                }
+            } elseif (!$valider && !in_array($statut, ['brouillon', 'relecture'], true)) {
+                $statut = 'relecture';   // objet neuf : un non-valideur n'y pose ni avis ni validation
+            }
+            if (isset($original['revue']) || $dec || $tour !== 1 || $requis !== 1) {
+                $o['revue'] = array_merge($ri, ['tour' => $tour, 'requis' => $requis, 'decisions' => $dec]);
+            }
+            if (!$valider && !$garde && $dec && $statut !== 'brouillon') $statut = plat_statut_revue($o['revue']);
+            if (!$valider && $statutDemande === 'valide' && $statut !== 'valide') $refus = true;
+            // On n'ajoute pas une clé que l'objet ne portait pas : ce serait une « correction » à chaque envoi.
+            if (array_key_exists('status', $original) || $statut !== 'brouillon') $o['status'] = $statut;
+
+            $publieDemande = plat_vrai_js($original['inLibrary'] ?? false);
+            $publie = $publieDemande;
+            if (!$publier) {
+                $publie = $p !== null && plat_vrai_js($p['inLibrary'] ?? false) && !$change && $statut === 'valide';
+                if ($publie !== $publieDemande && !$change) $refus = true;
+            }
+            if (array_key_exists('inLibrary', $original) || $publie) $o['inLibrary'] = $publie;
+
+            if (json_encode($o) !== json_encode($original)) {
+                /* Juste au-dessus des dates connues, jamais l'heure du serveur :
+                   une édition faite pendant l'aller-retour doit encore gagner. */
+                $o['updatedAt'] = max($date($o), $p !== null ? $date($p) : 0) + 1;
+                if ($refus) $n++; else $fusions++;
+            } elseif ($refus) {
+                $n++;
+            }
+            $sortie[] = $o;
+        }
+        // Un objet que l'envoi ne porte pas n'est pas effacé : les navigateurs ne suppriment que par `epSuppr`.
+        foreach ($prec as $id => $p) if (!isset($vus[$id])) $sortie[] = $p;
+        // Ce que le registre a supprimé quitte l'état — même règle que _sansSupprimees().
+        if ($coll === 'epreuves' && $reg) {
+            $sortie = array_values(array_filter($sortie, static function ($e) use ($reg, $date) {
+                $id = (string) ($e['id'] ?? '');
+                return !(isset($reg[$id]) && $reg[$id] >= $date($e));
+            }));
+        }
+        $contenu[$coll] = $sortie;
+    }
+    if ($reg || array_key_exists('epSuppr', $contenu)) $contenu['epSuppr'] = (object) $reg;
+
+    return [$contenu, $n, $fusions, $suppRefusees];
 }
 
 /** Nom affichable d'un compte, sans jamais rendre son adresse de connexion. */
@@ -2015,6 +2337,41 @@ if ($action === 'groupe') {
         jsonResponse(['ok' => true, 'nom' => $nom]);
     }
 
+    /* RÔLE D'UN MEMBRE — le responsable seul l'attribue, et le serveur
+       l'applique à ?action=etat (contre-expertise du 28/10, X2). Le
+       responsable lui-même ne peut être que chef ou inspecteur. */
+    if ($op === 'role') {
+        $gid   = plat_gid((string) ($in['groupe'] ?? ''));
+        $cible = is_scalar($in['membre'] ?? null) ? (string) $in['membre'] : '';
+        $role  = is_scalar($in['role'] ?? null) ? strtolower(trim((string) $in['role'])) : '';
+        $g     = plat_groupe_par_id($db, $gid);
+        if (!$g) jsonResponse(['ok' => false, 'error' => 'Équipe inconnue.', 'code' => 'groupe_inconnu'], 404);
+        if ((string) ($g['proprietaire'] ?? '') !== $accId) {
+            jsonResponse(['ok' => false, 'error' => 'Seul le responsable de l’équipe attribue les rôles.',
+                          'code' => 'non_proprietaire'], 403);
+        }
+        if (!plat_est_membre($g, $cible)) jsonResponse(['ok' => false, 'error' => 'Ce compte n’est pas membre de l’équipe.'], 400);
+        if (!in_array($role, plat_roles_equipe(), true)) jsonResponse(['ok' => false, 'error' => 'Rôle inconnu.'], 400);
+        if ($cible === $accId && !in_array($role, ['chef', 'inspecteur'], true)) {
+            jsonResponse(['ok' => false, 'error' => 'Le responsable garde un rôle qui dirige l’équipe (chef ou inspecteur).',
+                          'code' => 'proprietaire'], 400);
+        }
+        $res = plat_muter(function (array $db2) use ($gid, $cible, $role, $accId) {
+            foreach (($db2['plateforme']['groupes'] ?? []) as $i => $g2) {
+                if (!is_array($g2) || (string) ($g2['id'] ?? '') !== $gid) continue;
+                // Relu sous verrou : l'équipe a pu changer de main ou perdre ce membre.
+                if ((string) ($g2['proprietaire'] ?? '') !== $accId || !plat_est_membre($g2, $cible)) return null;
+                $roles = (array) ($g2['roles'] ?? []);
+                $roles[$cible] = $role;
+                $db2['plateforme']['groupes'][$i]['roles'] = $roles;
+                return [$db2, ['roles' => plat_roles_publics($db2['plateforme']['groupes'][$i])]];
+            }
+            return null;
+        }, false);
+        if (!is_array($res)) jsonResponse(['ok' => false, 'error' => 'Rôle non enregistré : actualisez l’équipe puis réessayez.'], 409);
+        jsonResponse(['ok' => true, 'membre' => $cible, 'role' => $role, 'roles' => (object) ($res['roles'] ?? [])]);
+    }
+
     if ($op === 'retirer') {
         /* Quitter soi-même, ou retirer quelqu'un quand on est responsable.
            Un seul verbe pour les deux : c'est la même écriture, et deux
@@ -2040,6 +2397,11 @@ if ($action === 'groupe') {
                     array_map('strval', (array) ($g2['membres'] ?? [])),
                     static function ($m) use ($cible) { return $m !== $cible; }
                 ));
+                // Le rôle part avec le membre : revenu plus tard, il repart enseignant.
+                if (isset($g2['roles']) && is_array($g2['roles'])) {
+                    unset($g2['roles'][$cible]);
+                    $db2['plateforme']['groupes'][$i]['roles'] = $g2['roles'];
+                }
                 return [$db2, ['ok' => true]];
             }
             return null;

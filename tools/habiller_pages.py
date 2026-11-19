@@ -799,6 +799,19 @@ def retirer_blocs(s):
 REV_HABILLAGE = '.34'   # 30/10/2026 (sombre par inversion, traducteur, jeton IA) — à changer quand veritas-habillage.css, veritas-harmonie.js ou vitrine.js changent
 
 
+def _empreinte(chemin):
+    import hashlib
+    try:
+        # Jeton purement NUMÉRIQUE : la CI réécrit les « .css?v=[0-9.]+ » et
+        # mangerait le début d'une empreinte hexadécimale (voir deploy.yml).
+        return str(int(hashlib.sha1(open(chemin, 'rb').read().replace(b'\r', b'')).hexdigest()[:8], 16))
+    except OSError:
+        return '0'
+
+
+PONT_V = _empreinte(os.path.join(RACINE, 'assets', 'veritas-apprendre-pont.css'))
+
+
 def version(s):
     m = re.search(r'/assets/veritas-(?:pages|refonte)\.css\?v=([0-9.]+)', s)
     return m.group(1) if m else BP.VER
@@ -842,6 +855,12 @@ def habiller(s, donnees, rel=''):
         tete += '\n' + CSS_CORPS_FLEX
     elif re.search(r'body\s*\{[^}]*max-width\s*:', s):
         tete += '\n' + CSS_CORPS_ETROIT
+    # 19/11/2026 — « harmonise /corriges/ avec la nouvelle mise en page d'Apprendre » :
+    # fond blanc, titre à gauche, cartes à filet fin, puces rondes, interligne 1,5.
+    # Feuille posée APRÈS l'habillage pour gagner à spécificité égale ; son jeton ?v=
+    # suit son contenu (feuilles servies immutable un an).
+    if rel.startswith('corriges/'):
+        tete += '\n<link rel="stylesheet" href="/assets/veritas-apprendre-pont.css?v=%s">' % PONT_V
     s = s.replace('</head>', bloc('tete', tete) + '\n</head>', 1)
     if atelier:
         s = PONT_ATELIER.sub('', s, count=1)
