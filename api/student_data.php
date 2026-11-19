@@ -419,8 +419,12 @@ if (in_array($action, ['forum_fetch', 'forum_post', 'forum_like', 'forum_delete'
         return function_exists('mb_substr') ? mb_substr($t, 0, $n) : substr($t, 0, $n);
     };
     $accId   = (string) ($acc['id'] ?? $eid);
-    $role    = strtolower((string) ($acc['role'] ?? ''));
-    $isProf  = ($role === 'enseignant') || !empty($acc['isTeacher']);
+    /* 19/11/2026 : le rôle « enseignant » se DÉCLARE à l'inscription (compte.php) et
+       l'Atelier le pose sur ses comptes. Il ouvrait ici le forum de TOUTES les classes,
+       les canaux réservés aux enseignants, les annonces et devoirs, et le badge
+       « Enseignant » face aux élèves. N'y ont plus droit que l'administration et les
+       enseignants du centre marqués « équipe » par l'admin (vrt_compte_equipe). */
+    $isProf  = vrt_compte_equipe($acc);
     // Classe de l'élève : sa fiche d'abord, le compte ensuite.
     // Le NOM aussi : un compte élève ne porte souvent que son identifiant de
     // connexion — c'est la fiche qui porte « Awa Ngono ».

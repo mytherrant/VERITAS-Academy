@@ -1,3 +1,12 @@
+## Accès enseignant : rôle déclaré sans passe-droit, équipe marquée par l'admin (19/11/2026, branche acces-enseignant-pdf)
+
+- **Serveur** : `vrt_compte_equipe` (api/_auth_lib.php) remplace le test `role === 'enseignant'` dans content.php, apprendre.php (classes, labos, PDF), direct.php, manuels.php et désormais **student_data.php (forum des classes)** : un rôle « enseignant » coché à l'inscription n'ouvre plus le forum de toutes les classes, les annonces, ni le badge « Enseignant ». Seuls l'admin et les enseignants marqués `equipe: true` gardent l'accès complet ; les autres passent par une formule Prof.
+- **Admin** : Comptes visiteurs → bouton 🏫 sur chaque compte enseignant (`_mgrEquipe`), badge « ÉQUIPE VÉRITAS » ou « formule Prof requise ». Le champ ne voyage que par la synchro admin (db.php).
+- **À faire après déploiement, chez Jacques** : marquer « équipe » les enseignants du centre (sinon ils perdent l'accès complet).
+- Manuels collaboratifs réservés aux formules Prof ; plafond de 30 jours sur les documents (fichesMois), commun à content.php et aux PDF d'Apprendre.
+- Habillage des pages réaligné sur la version d'assets **1.20.85** (habiller_pages, 22 pages) ; sw.js en `veritas-v1.20.85`.
+- Bancs : `banc_forum_classes` 17/17 (rouge 2 sur l'ancien code), compte_serveur 41, atelier_enseignant 36, partenaires 16, apprendre_verrou 18, entree_libre 61, tunnel 57, synchro_admin 15 ; `banc_empreintes` rouge sur le poste seulement (livrets philo locaux, préexistant).
+
 ## Apprendre : classes d'examen — leçons nouvelles RÉSERVÉES AUX ABONNÉS (18/11/2026)
 
 Décision de Jacques (question posée) : les nouvelles leçons des classes d'examen (3e, 1re, Tle) sont **réservées aux abonnés**, comme les 2 000 leçons existantes : début public, suite servie par `api/apprendre.php`.

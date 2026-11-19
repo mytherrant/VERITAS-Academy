@@ -83,6 +83,7 @@
 dialog .dlg{padding:22px;max-width:640px}
 dialog .dlg h3{margin:0 0 10px;font:600 19px var(--sans);color:#001136}
 .aj-info{margin:0 0 16px;padding:12px 16px;border-radius:12px;background:#EEF3FB;color:#001136;font:14px/1.5 var(--sans)}.aj-info.err{background:#FDEBDD;color:#5E2600}
+.mur-prof{margin:14px 0;padding:16px 18px;border:1px solid #F3D9A4;border-radius:14px;background:#FFF8E8;color:#001136;font:14.5px/1.5 var(--sans)}.mur-prof p{margin:0 0 10px}.mur-prof summary{cursor:pointer;font-weight:600;color:#1E499B}.mur-prof .form{margin-top:10px}
 .lien{display:flex;gap:6px;margin:6px 0 14px}.lien input{flex:1;border:1px solid #E6EAF2;border-radius:10px;padding:8px 10px;font:13px var(--sans)}
 .choix-l{max-height:340px;overflow:auto;border:1px solid #E6EAF2;border-radius:10px}
 .choix-l label{display:flex;gap:10px;padding:10px 12px;border-top:1px solid #E6EAF2;cursor:pointer;font-size:14px}
@@ -136,8 +137,28 @@ dialog .dlg h3{margin:0 0 10px;font:600 19px var(--sans);color:#001136}
     return t.innerHTML;
   }
 
+  /* 19/11/2026 : créer et modifier un manuel demandent une formule enseignant (api/manuels.php).
+     Le jeton est celui du compte connecté dans Apprendre (verrou.js) ou dans l'application. */
+  function jeton(){ try{ return localStorage.getItem("vrt_app_jeton")||sessionStorage.getItem("_vrtCT")||""; }catch(e){ return ""; } }
+  function murProf(msg,apres){
+    var d=document.createElement("div"); d.className="mur-prof";
+    d.innerHTML='<p>'+esc(msg)+'</p><p><a class="btn-or" href="/app.html#tarifs">Voir les formules enseignant</a></p>'+
+      '<details'+(jeton()?'':' open')+'><summary>Déjà abonné ? Je me connecte</summary><form class="form" data-cx><label>Identifiant<input name="login" autocomplete="username" required></label><label>Mot de passe<input name="password" type="password" autocomplete="current-password" required></label><button class="btn-bl" type="submit">Me connecter</button><span class="lu" data-cx-m></span></form></details>';
+    var f=d.querySelector("[data-cx]");
+    f.addEventListener("submit",async function(e){
+      e.preventDefault(); var b=f.querySelector("button"), m=f.querySelector("[data-cx-m]"); if(b.disabled) return; b.disabled=true; m.textContent="Connexion…";
+      try{ var r=await fetch("/api/apprendre.php",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({action:"droits",id:"manuel",login:f.login.value.trim(),password:f.password.value})}); var j=await r.json();
+        if(j&&j.token){ try{localStorage.setItem("vrt_app_jeton",j.token)}catch(x){} }
+        if(j&&j.ok){ m.textContent="Connecté."; d.remove(); if(apres) apres(); return; }
+        m.textContent=(j&&j.raison==="identifiants")?"Identifiant ou mot de passe incorrect.":(j&&j.raison==="debit")?"Trop d'essais : réessayez dans une minute.":"La connexion a échoué.";
+      }catch(x){ m.textContent="Le serveur ne répond pas."; }
+      b.disabled=false;
+    });
+    return d;
+  }
   async function api(methode,params,corps,cle){
     var h={"Content-Type":"application/json"}; if(cle) h["X-Manuel-Cle"]=cle;
+    var t=jeton(); if(t) h["X-Vrt-Token"]=t;
     var r=await fetch(API+"?"+new URLSearchParams(params),{method:methode,headers:h,body:corps?JSON.stringify(corps):undefined,cache:"no-store"});
     var j={}; try{j=await r.json()}catch(e){}
     return {statut:r.status,j:j};
@@ -155,8 +176,10 @@ dialog .dlg h3{margin:0 0 10px;font:600 19px var(--sans);color:#001136}
       '<h2 style="font:600 20px var(--sans);color:#001136">Créer un manuel</h2><form class="form" id="fCreer"><label>Titre<input name="titre" required maxlength="120" placeholder="Ex. : Histoire 3ᵉ — Lycée de Mokolo"></label><label>Classe<select name="classe">'+A.CLASSES.map(function(c){return '<option>'+c+'</option>'}).join("")+'</select></label><label>Matière<select name="matiere">'+opts+'</select></label><button class="btn-or" type="submit">Créer</button></form><p id="fMsg" class="lu"></p></div>';
     if(AJ){ var fc=$("#fCreer"); if(fc.classe) fc.classe.value=AJ.L.c; if(fc.matiere) fc.matiere.value=AJ.L.m; } /* la leçon donne classe et matière */
     $("#fCreer").addEventListener("submit",async function(e){
-      e.preventDefault(); var f=new FormData(this), msg=$("#fMsg"); msg.textContent="Création…";
+      e.preventDefault(); var form=this, f=new FormData(this), msg=$("#fMsg"); msg.textContent="Création…";
       try{ var r=await api("POST",{action:"creer"},{titre:f.get("titre"),classe:f.get("classe"),matiere:f.get("matiere")});
+        if(r.j&&(r.j.raison==="connexion"||r.j.raison==="formule")){ msg.textContent=""; var ancien=$(".mur-prof"); if(ancien) ancien.remove();
+          msg.parentNode.insertBefore(murProf(r.j.erreur,function(){ form.requestSubmit?form.requestSubmit():form.dispatchEvent(new Event("submit")); }),msg.nextSibling); return; }
         if(r.statut!==201){ msg.textContent=r.j.erreur||"Création impossible."; return; }
         garder(r.j.id,{cle:r.j.cle,titre:r.j.titre,classe:r.j.classe,matiere:r.j.matiere}); location.href="manuel.html?id="+r.j.id+(AJ?AJ.q:"");
       }catch(err){ msg.textContent="Le serveur ne répond pas : les manuels collaboratifs demandent une connexion."; }
@@ -196,6 +219,7 @@ dialog .dlg h3{margin:0 0 10px;font:600 19px var(--sans);color:#001136}
       }
     }
     rendre();
+    if(M.fige){ var zf=murProf("La formule enseignant de l'auteur de ce manuel a pris fin : il reste lisible, mais ne se modifie plus. Renouvelez-la pour reprendre l'édition.",function(){ location.reload(); }); app.insertBefore(zf,app.firstChild); }
     if(msgAj) annoncer(msgAj[0],msgAj[1]);
   }
   function annoncer(t,cl){ var n=document.createElement("p"); n.className="aj-info "+(cl||""); n.setAttribute("role","status"); n.textContent=t; app.insertBefore(n,app.firstChild); setTimeout(function(){ if(n.parentNode) n.remove(); },9000); }
@@ -301,7 +325,8 @@ dialog .dlg h3{margin:0 0 10px;font:600 19px var(--sans);color:#001136}
     if(enCours){ aRefaire=true; return; } enCours=true; etat("Enregistrement…","att");
     try{
       var r=await api("POST",{action:"enregistrer",id:M.id},{version:M.version,titre:M.titre,doc:M.doc},cle);
-      if(r.statut===200){ M.version=r.j.version; etat("Enregistré · version "+M.version,"ok"); }
+      if(r.statut===200&&r.j.ok===false){ etat("Non enregistré","ko"); if(!$(".mur-prof")){ var z=murProf(r.j.erreur||"Enregistrement refusé.",function(){ envoyer(); }); app.insertBefore(z,app.firstChild); z.scrollIntoView({block:"center"}); } }
+      else if(r.statut===200){ M.version=r.j.version; etat("Enregistré · version "+M.version,"ok"); }
       else if(r.statut===409){ etat("Conflit : un collègue a enregistré","ko"); conflit(r.j); }
       else etat(r.j.erreur||"Échec de l'enregistrement","ko");
     }catch(e){ etat("Hors ligne : modifications non envoyées","ko"); }

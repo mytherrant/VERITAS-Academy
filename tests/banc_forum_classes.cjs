@@ -11,6 +11,9 @@
    la Tle C, la 1ère A1 et la 3ème écrivent dans leur classe ; la Tle C
    publiée seulement côté client reste utilisable ; personne n'écrit dans une
    classe sœur (Tle D ≠ Tle C, Tle C ≠ Tle A) ; l'annonce reste aux enseignants.
+   19/11/2026 : un rôle « enseignant » DÉCLARÉ à l'inscription n'ouvre plus le
+   forum des autres classes ni les annonces ; seul l'enseignant marqué
+   « équipe » par l'admin les garde (vrt_compte_equipe).
 
    Lancer :  node tests/banc_forum_classes.cjs
    ========================================================================== */
@@ -55,7 +58,9 @@ const DBJ = {
     { id: 'va_tc', user: 'tle.c', pwd: s256('motdepasse', 'tle.c'), cls: 'Terminale', serie: 'C' },
     { id: 'va_td', user: 'tle.d', pwd: s256('motdepasse', 'tle.d'), cls: 'Terminale', serie: 'D' },
     { id: 'va_pa', user: 'pre.a1', pwd: s256('motdepasse', 'pre.a1'), cls: '1ère', serie: 'A1' },
-    { id: 'va_3e', user: 'troisieme', pwd: s256('motdepasse', 'troisieme'), cls: '3ème' }
+    { id: 'va_3e', user: 'troisieme', pwd: s256('motdepasse', 'troisieme'), cls: '3ème' },
+    { id: 'va_pd', user: 'prof.declare', pwd: s256('motdepasse', 'prof.declare'), role: 'enseignant', isTeacher: true },
+    { id: 'va_pe', user: 'prof.equipe', pwd: s256('motdepasse', 'prof.equipe'), role: 'enseignant', isTeacher: true, equipe: true }
   ],
   elearning: { contenus: [] }
 };
@@ -103,6 +108,18 @@ const classes = async (token) => { const r = await post({ action: 'forum_fetch',
     t(r.code === 200 && r.j && r.j.ok, 'la 3ème écrit dans la 3ème');
     r = await ecrire(e3, 'cls_4me', 'ch_gen_4me');
     t(r.code === 403, '… et pas dans la 4ème');
+
+    console.log('\n5. Enseignants : déclaré ≠ équipe du centre');
+    const pd = await jeton('prof.declare'), pe = await jeton('prof.equipe');
+    t(!!(pd && pe), 'les deux enseignants se connectent');
+    r = await ecrire(pd, 'cls_3me', 'ch_gen_3me');
+    t(r.code === 403, 'un rôle « enseignant » déclaré n’écrit pas dans la 3ème');
+    r = await ecrire(pd, 'cls_3me', 'ch_ann_3me');
+    t(r.code === 403, '… ni dans ses annonces');
+    r = await ecrire(pe, 'cls_3me', 'ch_ann_3me');
+    t(r.code === 200 && r.j && r.j.ok, 'l’enseignant de l’équipe publie une annonce en 3ème');
+    r = await ecrire(pe, 'cls_tlea', 'ch_gen_tlea');
+    t(r.code === 200 && r.j && r.j.ok, '… et écrit dans la Tle A');
   } finally {
     srv.kill();
     fs.rmSync(dir, { recursive: true, force: true });
