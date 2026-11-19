@@ -532,6 +532,20 @@
   "u": "/ressources/annales/probatoire-physique-dti-2024.html"
  },
  {
+  "id": "probatoire-chimie-cde-2026",
+  "examen": "probatoire",
+  "m": "chimie",
+  "serie": "séries C, D et E",
+  "nomExamen": "Probatoire",
+  "fiche": "ressources/examen-physique-chimie-probatoire.html",
+  "matiere": "Chimie (séries C, D et E)",
+  "mat": "chimie",
+  "classes": "1re C,1re D",
+  "annee": 2026,
+  "national": false,
+  "u": "/ressources/annales/probatoire-chimie-cde-2026.html"
+ },
+ {
   "id": "bac-chimie-cde-2025",
   "examen": "bac",
   "m": "chimie",

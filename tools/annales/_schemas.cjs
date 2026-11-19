@@ -1313,4 +1313,41 @@ S["proba-2026-svt-d-maquette"] = () => {
   return svg(170, 366, g, "Maquette de l'ARNm UAC CAU : une seule chaîne où chaque acide phosphorique (P) est lié au ribose (S) du nucléotide suivant ; chaque ribose porte une base : U, A, C, C, A, U ; la forme propre à chaque base est tournée vers l'extérieur.");
 };
 // <<< proba-2026-svt-d
+// >>> proba-2026-chimie
+// Noyau benzénique (hexagone à sommets haut et bas) ; renvoie [tracé, sommets 0..5 depuis le haut, sens horaire].
+const benzene26 = (cx, cy, r) => { const v = []; for (let k = 0; k < 6; k++) { const a = -Math.PI / 2 + k * Math.PI / 3; v.push([cx + r * Math.cos(a), cy + r * Math.sin(a)]); }
+  return [P(v.concat([v[0]])) + '<circle cx="' + cx + '" cy="' + cy + '" r="' + f(r * 0.58) + '"/>', v]; };
+// Exercice 2, question 4 : hydratation du 2-méthylpropène.
+S["proba-2026-chimie-hydratation"] = () => {
+  const fs = ' font-size="14"';
+  let g = F([10, 22], "H3C", fs) + L([36, 28], [50, 44], ' stroke-width="1.2"') + F([10, 86], "H3C", fs) + L([36, 72], [50, 56], ' stroke-width="1.2"');
+  g += F([50, 55], "C=CH2", fs) + T([140, 55], "+", fs) + F([166, 55], "H2O", fs);
+  g += L([214, 50], [290, 50], ' stroke-width="1.2"') + fleche([296, 50], [288, 50], 7) + F([232, 40], "H2SO4", ' font-size="12"') + T([314, 55], "A", fs);
+  return svg(340, 96, g, "(CH3)2C=CH2 + H2O → A, en présence d'acide sulfurique : hydratation du 2-méthylpropène.");
+};
+// Exercice 3 : formule semi-développée de l'éthylbenzène.
+S["proba-2026-chimie-ethylbenzene"] = () => { const [b, v] = benzene26(40, 40, 28);
+  return svg(170, 80, b + L([v[1][0], v[1][1]], [v[1][0] + 18, v[1][1] - 6]) + F([v[1][0] + 20, v[1][1] - 2], "CH2−CH3", ' font-size="14"'), "Éthylbenzène : noyau benzénique portant un groupe éthyle –CH2–CH3."); };
+// Corrigé : 2,4-dichloro-1-éthylbenzène (Cl en ortho et en para du groupe éthyle).
+S["proba-2026-chimie-dichloro"] = () => { const [b, v] = benzene26(70, 70, 30), fs = ' font-size="14"';
+  let g = b + L(v[0], [v[0][0], v[0][1] - 16]) + F([v[0][0] - 12, v[0][1] - 20], "CH2−CH3", fs);
+  g += L(v[1], [v[1][0] + 16, v[1][1] - 9]) + T([v[1][0] + 18, v[1][1] - 6], "Cl", fs);
+  g += L(v[3], [v[3][0], v[3][1] + 16]) + T([v[3][0] - 8, v[3][1] + 32], "Cl", fs);
+  return svg(170, 140, g, "Composé B : noyau benzénique portant le groupe éthyle en position 1, un atome de chlore en position 2 (ortho) et un en position 4 (para) : 2,4-dichloro-1-éthylbenzène."); };
+// Corrigé partie B : dispositif du dosage de l'eau oxygénée par le permanganate de potassium.
+S["proba-2026-chimie-dosage"] = () => {
+  const fs = ' font-size="12"';
+  let g = L([40, 20], [40, 290], ' stroke-width="2"') + '<rect x="14" y="288" width="160" height="8" stroke-width="1.4"/>' + L([40, 70], [96, 70], ' stroke-width="1.6"');
+  g += '<rect x="96" y="20" width="14" height="170" stroke-width="1.4"/>' + '<rect x="97" y="40" width="12" height="149" fill="currentColor" fill-opacity="0.35" stroke="none"/>';
+  for (let y = 40; y <= 180; y += 10) g += L([110, y], [y % 50 === 0 ? 102 : 105, y], ' stroke-width="0.7"');
+  g += P([[96, 190], [101, 205], [101, 214]], ' stroke-width="1.4"') + P([[110, 190], [105, 205], [105, 214]], ' stroke-width="1.4"') + '<rect x="96" y="196" width="18" height="6" stroke-width="1"/>';
+  g += P([[70, 222], [70, 282], [136, 282], [136, 222]], ' stroke-width="1.6"') + '<rect x="71" y="252" width="64" height="29" fill="currentColor" fill-opacity="0.12" stroke="none"/>' + '<rect x="94" y="276" width="18" height="4" fill="currentColor" stroke="none"/>';
+  g += '<rect x="58" y="284" width="90" height="4" stroke-width="1"/>';
+  g += L([122, 30], [168, 30], ' stroke-width="0.9"') + T([172, 26], "burette graduée : solution violette de permanganate", fs) + T([172, 42], "de potassium, C₂ = 0,2 mol/L", fs);
+  g += L([132, 199], [168, 178], ' stroke-width="0.9"') + T([172, 182], "robinet", fs);
+  g += L([136, 262], [168, 246], ' stroke-width="0.9"') + T([172, 242], "bécher : V₁ = 10 mL d'eau oxygénée (pipette jaugée)", fs) + T([172, 258], "+ quelques gouttes d'acide sulfurique", fs);
+  g += L([112, 279], [168, 274], ' stroke-width="0.9"') + T([172, 278], "barreau aimanté", fs) + L([148, 286], [168, 300], ' stroke-width="0.9"') + T([172, 306], "agitateur magnétique", fs);
+  return svg(490, 318, g, "Dispositif de dosage : une burette graduée, fixée à un support, contient la solution de permanganate de potassium (0,2 mol/L) ; en dessous, un bécher contient 10 mL d'eau oxygénée acidifiée, agitée par un barreau aimanté posé sur un agitateur magnétique.");
+};
+// <<< proba-2026-chimie
 module.exports = S;
