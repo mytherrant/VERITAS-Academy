@@ -98,6 +98,20 @@
   "u": "/ressources/annales/bac-litterature-cdeti-2025.html"
  },
  {
+  "id": "probatoire-litterature-cdeti-2024",
+  "examen": "probatoire",
+  "m": "litterature",
+  "serie": "séries C, D, E et TI",
+  "nomExamen": "Probatoire",
+  "fiche": "ressources/probatoire-francais.html",
+  "matiere": "Littérature (séries C, D, E et TI)",
+  "mat": "francais",
+  "classes": "1re C,1re D",
+  "annee": 2024,
+  "national": false,
+  "u": "/ressources/annales/probatoire-litterature-cdeti-2024.html"
+ },
+ {
   "id": "bac-langue-francaise-aabi-2025",
   "examen": "bac",
   "m": "langue-francaise",
@@ -686,6 +700,20 @@
   "u": "/ressources/annales/probatoire-histoire-cdti-2025.html"
  },
  {
+  "id": "probatoire-histoire-cdti-2024",
+  "examen": "probatoire",
+  "m": "histoire",
+  "serie": "séries C, D et TI",
+  "nomExamen": "Probatoire",
+  "fiche": "ressources/examen-histoire-geographie-probatoire.html",
+  "matiere": "Histoire (séries C, D et TI)",
+  "mat": "histoire",
+  "classes": "1re C,1re D",
+  "annee": 2024,
+  "national": true,
+  "u": "/ressources/annales/probatoire-histoire-cdti-2024.html"
+ },
+ {
   "id": "bepc-geographie-2026",
   "examen": "bepc",
   "m": "geographie",
@@ -1104,5 +1132,19 @@
   "annee": 2025,
   "national": true,
   "u": "/ressources/annales/probatoire-informatique-cde-2025.html"
+ },
+ {
+  "id": "probatoire-informatique-cde-2024",
+  "examen": "probatoire",
+  "m": "informatique",
+  "serie": "séries C, D et E",
+  "nomExamen": "Probatoire",
+  "fiche": "ressources/examen-informatique-probatoire.html",
+  "matiere": "Informatique (séries C, D et E)",
+  "mat": "info",
+  "classes": "1re C,1re D",
+  "annee": 2024,
+  "national": true,
+  "u": "/ressources/annales/probatoire-informatique-cde-2024.html"
  }
 ]

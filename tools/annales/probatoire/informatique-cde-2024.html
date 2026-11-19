@@ -1,0 +1,129 @@
+<!--meta {"examen":"probatoire","matiere":"informatique","serie":"cde","classes":"1re C,1re D","annee":2024,"duree":"2 h","coef":"2","sujet_source":"https://sujetexa.com/index.php/2024/06/12/informatique-theorique-probatoire-cde-session-2024/","corrige":"national","corrige_source":"https://www.camerecole.org/examens/2519-correction-epreuve-theorique-d-informatique-au-probatoire-c-d-et-e-2024.html"} -->
+<!--sujet-->
+<p style="text-align:center"><strong>ÉPREUVE THÉORIQUE D'INFORMATIQUE</strong><br>
+<em>Aucun document ou matériel en dehors de ceux remis aux candidats par les examinateurs n'est autorisé.</em></p>
+<p><strong>Exercice I : ENVIRONNEMENT NUMÉRIQUE, SÉCURITÉ INFORMATIQUE ET MULTIMÉDIA (6 PTS)</strong><br>
+1. Définir les termes et expressions suivants : <strong>intégrité, définition d'une image, commande DOS</strong>. <strong>0,5 × 3 = 1,5 pt</strong><br>
+2. Citer deux techniques de protection à utiliser pour protéger les données d'un ordinateur. <strong>1 pt</strong><br>
+3. Écrire la commande DOS permettant de :<br>
+3.1. Afficher l'aide de la commande « <strong>DIR</strong> » ; <strong>0,5 pt</strong><br>
+3.2. Renommer le répertoire « <strong>Mathématiques</strong> » en « <strong>Informatique</strong> » ; <strong>0,5 pt</strong><br>
+3.3. Créer le répertoire nommé « <strong>COURS</strong> ». <strong>0,5 pt</strong><br>
+4. Donner une procédure permettant de créer un point de restauration. <strong>1 pt</strong><br>
+5. Soit une caméra qui capture une image de définition 3840 x 2160 pixels. Calculer la taille en Méga-octets de cette image sachant qu'un pixel utilise 24 bits et que 1 Ko = 1024 octets. <strong>1 pt</strong></p>
+<p><strong>Exercice II : SYSTÈMES D'INFORMATION (6 PTS)</strong><br>
+La conception et modélisation du Système d'Information d'une boutique a donné lieu à création d'une base de données dont l'extrait de la table ARTICLES se présente comme suit :</p>
+<table><tr><th>Reference</th><th>Designation</th><th>PrixUnitaire</th><th>Quantite</th><th>Categorie</th></tr><tr><td>102E78</td><td>Riz</td><td>12000</td><td>55</td><td>Alimentaire</td></tr><tr><td>205R12</td><td>Plat</td><td>1500</td><td>102</td><td>Cuisine</td></tr><tr><td>780G08</td><td>Savon</td><td>500</td><td>455</td><td>Entretien</td></tr></table>
+<p>1. Définir les termes suivants : information, table. <strong>0,5 × 2 = 1 pt</strong><br>
+2. Citer deux méthodes de conception d'un système d'information. <strong>0,5 × 2 = 1 pt</strong><br>
+3. Décrire deux intérêts d'un système d'information. <strong>0,5 × 2 = 1 pt</strong><br>
+4. Déterminer pour l'extrait de la table <strong>ARTICLES</strong> :<br>
+4.1. Le nombre d'enregistrements. <strong>0,5 pt</strong><br>
+4.2. Le nombre de champs. <strong>0,5 pt</strong><br>
+5. Proposer :<br>
+5.2. Une contrainte d'intégrité appropriée à la colonne <strong>Reference</strong>. <strong>0,5 pt</strong><br>
+5.2. Un format de valeur pour la colonne <strong>Quantite</strong>. <strong>0,5 pt</strong><br>
+6. Représenter la table <strong>ARTICLES</strong> obtenue après avoir supprimé tous les articles qui coûtent plus de 1000. <strong>1 pt</strong></p>
+<p><strong>Exercice III : ALGORITHMIQUE ET PROGRAMMATION (8 PTS)</strong></p>
+<p><strong>Partie 1 : Algorithmique et programmation en C (4 pts)</strong><br>
+L'algorithme suivant permet de gérer les notes des élèves lors d'un devoir :</p>
+<pre>1.  Algorithme somme_produit_moyenne ;
+2.  Var Note : tableau [1..N] de réels ;
+3.      N, i : entiers ;
+4.      S, P, M : réels;
+5.  Début
+6.    Si (N=0) alors
+7.      Ecrire ("pas de notes à gérer ") ;
+8.    Sinon
+9.      S ← 0; P ← 1;
+10.     Pour i allant de 1 à N faire
+11.       Ecrire ("Entrez la note n° ", i) ;
+12.       Lire (Note[i]);
+13.       S ← S+Note[i] ;
+14.       P ← P * Note[i] ;
+15.     Finpour
+16.     M ← S/N ;
+17.     Ecrire ("la somme des Notes est : ",S);
+18.     Ecrire ("le produit des Notes est : ", P);
+19.     Ecrire ("la moyenne des Notes est : ",M);
+20.   Finsi
+21. Fin.</pre>
+<p>À l'aide de cet algorithme et de vos connaissances, répondre aux questions suivantes :<br>
+1. Nommer dans cet algorithme :<br>
+1.1. Deux structures de contrôle ; <strong>0,5 pt</strong><br>
+1.2. Une structure de donnes ; <strong>0,25 pt</strong><br>
+1.3. Une condition. <strong>0,25 pt</strong><br>
+2. Expliquer le rôle de la ligne 12 de cet algorithme. <strong>0,5 pt</strong><br>
+3. On souhaite à présent traduire l'algorithme ci-dessus en langage C.<br>
+3.1. Donner le rôle de <strong>#includio &lt;stdio.h&gt;</strong> dans un programme C. <strong>0,5 pt</strong><br>
+3.2. Traduire la ligne 2 de cet algorithme en langage C. <strong>0,5 pt</strong><br>
+3.3. Traduire les lignes 10 à 15 de cet algorithme en langage C. <strong>1,5 pt</strong></p>
+<p><strong>Partie 2 : Programmation HTML et JavaScript (4 pts)</strong><br>
+1. La portion de code HTML ci-dessous permet de créer un tableau.</p>
+<pre>&lt;table BORDER="1"&gt;
+    &lt;tr&gt;&lt;td colspan="2"&gt;&lt;b&gt;Noms et classes&lt;/b&gt;&lt;/td&gt;
+        &lt;td&gt;&lt;b&gt;Niveau&lt;/b&gt;&lt;/td&gt; &lt;/tr&gt;
+    &lt;tr&gt;&lt;td&gt;HAMIDOU&lt;/td&gt;&lt;td&gt;PD&lt;/td&gt;
+        &lt;td rowspan="2"&gt;Second Cycle&lt;/td&gt;&lt;/tr&gt;
+    &lt;tr&gt;&lt;td&gt;TAMO&lt;/td&gt;&lt;td&gt;PC&lt;/td&gt;&lt;/tr&gt;
+&lt;/table&gt;</pre>
+<p>1.1. Donner le rôle de l'attribut : <strong>colspan="2"</strong>. <strong>0,5 pt</strong><br>
+1.2. Dessiner le résultat qui s'affichera après exécution de ce code. <strong>1 pt</strong><br>
+2. Votre camarade a rédigé le script suivant qu'il voudrait l'exécuter :</p>
+<pre>&lt;script language="Javascript"&gt;
+    var s=0;
+    n=parseInt(prompt("saisir un nombre"));
+    for(i=0;i&lt;=n; i++){
+        nb=parseInt(prompt("saisir un entier:"));
+        s+=nb; }
+    alert("Le résultat est:"+ " "+s);
+&lt;/script&gt;</pre>
+<p>2.1. Relever dans ce script une variable déclarée implicitement et une autre déclarée explicitement. <strong>0,25 × 2 = 0,5 pt</strong><br>
+2.2. Donner la différence entre les fonctions <strong>alert()</strong> et <strong>document.write()</strong>. <strong>0,5 pt</strong><br>
+2.3. Dessiner la boite de dialogue qui permet le résultat pour la valeur de <strong>n=2</strong> et les valeurs de <strong>nb</strong> suivantes : <strong>1, 2 et 4</strong>. <strong>1,5 pt</strong></p>
+<!--/sujet-->
+<!--corrige-->
+<p><strong>Exercice I</strong><br>
+1. <strong>Intégrité</strong> : principe de sécurité informatique qui garantit qu'une donnée n'a pas été modifiée ou altérée, volontairement ou accidentellement, par une personne non autorisée.<br>
+<strong>Définition d'une image</strong> : nombre total de pixels qui composent l'image (largeur × hauteur en pixels).<br>
+<strong>Commande DOS</strong> : instruction saisie au clavier dans l'invite de commandes pour faire exécuter une tâche précise au système.<br>
+2. Deux parmi : le mot de passe ; l'antivirus ; le pare-feu ; la sauvegarde régulière ; le chiffrement des données ; les mises à jour du système.<br>
+3.1. <code>HELP DIR</code> ou <code>DIR /?</code><br>
+3.2. <code>REN Mathématiques Informatique</code> (ou <code>RENAME Mathématiques Informatique</code>)<br>
+3.3. <code>MD COURS</code> (ou <code>MKDIR COURS</code>)<br>
+4. Sous Windows : dans la zone de recherche du menu Démarrer, saisir « Créer un point de restauration » ; dans l'onglet « Protection du système », cliquer sur « Créer… » ; saisir une description, puis cliquer sur « Créer ».<br>
+5. Taille = définition × profondeur = 3840 × 2160 × 24 bits = 199 065 600 bits, soit 24 883 200 octets.<br>
+En Mo : \(\frac{24 883 200}{1024 \times 1024}\) ≈ <strong>23,73 Mo</strong>.</p>
+<p><strong>Exercice II</strong><br>
+1. <strong>Information</strong> : élément de connaissance, représenté selon des conventions, qui peut être collecté, traité, conservé et communiqué.<br>
+<strong>Table</strong> : dans une base de données, structure à deux dimensions (lignes et colonnes) qui regroupe les données relatives à un même objet.<br>
+2. Deux parmi : MERISE, UML, OMT, SADT, AXIAL.<br>
+3. Deux parmi : il aide à la prise de décision ; il améliore la circulation de l'information et le fonctionnement de l'entreprise ; il réduit les erreurs de traitement ; il assure la cohérence et la conservation des données.<br>
+4.1. <strong>3</strong> enregistrements. 4.2. <strong>5</strong> champs.<br>
+5. Contrainte pour <strong>Reference</strong> : <strong>clé primaire</strong> (PRIMARY KEY : valeur unique et non nulle). Format de <strong>Quantite</strong> : <strong>entier</strong> (INTEGER).<br>
+6. Le riz (12 000) et le plat (1 500) coûtent plus de 1 000 : il ne reste que le savon.</p>
+<table><tr><th>Reference</th><th>Designation</th><th>PrixUnitaire</th><th>Quantite</th><th>Categorie</th></tr><tr><td>780G08</td><td>Savon</td><td>500</td><td>455</td><td>Entretien</td></tr></table>
+<p><strong>Exercice III — Partie 1</strong><br>
+1.1. La structure <strong>alternative</strong> (Si… alors… Sinon… Finsi) et la structure <strong>itérative</strong> (Pour… Finpour).<br>
+1.2. Le <strong>tableau</strong> (Note).<br>
+1.3. <code>N = 0</code>.<br>
+2. La ligne 12 lit la note saisie au clavier par l'utilisateur et la range dans la case d'indice i du tableau Note.<br>
+3.1. La directive correcte est <code>#include &lt;stdio.h&gt;</code> (« includio » est une coquille du sujet) : elle inclut la bibliothèque standard d'entrées-sorties, qui fournit notamment <code>printf</code> et <code>scanf</code>.<br>
+3.2. <code>float Note[N];</code> (N étant connu, par exemple défini par <code>#define N 30</code>).<br>
+3.3. En C, les indices commencent à 0 :</p>
+<pre>for (i = 0; i &lt; N; i++) {
+    printf("Entrez la note n° %d ", i + 1);
+    scanf("%f", &amp;Note[i]);
+    S = S + Note[i];
+    P = P * Note[i];
+}</pre>
+<p><strong>Partie 2</strong><br>
+1.1. <code>colspan="2"</code> fusionne deux cellules adjacentes d'une même ligne : la cellule s'étend sur deux colonnes.<br>
+1.2. Résultat affiché :</p>
+<table><tr><td colspan="2"><strong>Noms et classes</strong></td><td><strong>Niveau</strong></td></tr><tr><td>HAMIDOU</td><td>PD</td><td rowspan="2">Second Cycle</td></tr><tr><td>TAMO</td><td>PC</td></tr></table>
+<p>2.1. Déclarée <strong>explicitement</strong> (avec <code>var</code>) : <code>s</code>. Déclarées <strong>implicitement</strong> : <code>n</code>, <code>i</code> ou <code>nb</code>.<br>
+2.2. <code>alert()</code> affiche un message dans une boîte de dialogue (fenêtre surgissante) ; <code>document.write()</code> écrit directement dans la page web.<br>
+2.3. Avec n = 2, la boucle tourne pour i = 0, 1 et 2, soit trois saisies : s = 0 + 1 + 2 + 4 = 7. La boîte de dialogue affiche :</p>
+<table><tr><td>Le résultat est: 7<br><span style="float:right">[ OK ]</span></td></tr></table>
+<p><em>Remarques : la transcription en ligne du corrigé national définit l'intégrité comme le fait qu'une information « est modifiable », ce qui est le contraire : rétabli ici. Elle ne dessine pas la boîte de dialogue de 2.3 ; le résultat est calculé (trois saisies, car la boucle va de 0 à n inclus).</em></p>
+<!--/corrige-->
