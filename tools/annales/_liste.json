@@ -42,6 +42,20 @@
   "u": "/ressources/annales/bepc-etude-de-texte-2024.html"
  },
  {
+  "id": "bepc-etude-de-texte-2023",
+  "examen": "bepc",
+  "m": "etude-de-texte",
+  "serie": "",
+  "nomExamen": "BEPC",
+  "fiche": "ressources/bepc-francais.html",
+  "matiere": "Étude de texte",
+  "mat": "francais",
+  "classes": "3e",
+  "annee": 2023,
+  "national": false,
+  "u": "/ressources/annales/bepc-etude-de-texte-2023.html"
+ },
+ {
   "id": "bepc-expression-ecrite-2026",
   "examen": "bepc",
   "m": "expression-ecrite",
