@@ -105,6 +105,23 @@
   "u": "/ressources/sequentielles/3e-seq6-etudetexte.html"
  },
  {
+  "id": "3e-blanc-etudetexte",
+  "classe": "3e",
+  "m": "etudetexte",
+  "mat": "francais",
+  "matiere": "Français : étude de texte",
+  "seq": "blanc",
+  "rangs": [
+   0,
+   0,
+   0,
+   0,
+   0,
+   0
+  ],
+  "u": "/ressources/sequentielles/3e-blanc-etudetexte.html"
+ },
+ {
   "id": "3e-seq1-orthographe",
   "classe": "3e",
   "m": "orthographe",
@@ -265,6 +282,23 @@
    109
   ],
   "u": "/ressources/sequentielles/3e-seq6-expression.html"
+ },
+ {
+  "id": "3e-blanc-expression",
+  "classe": "3e",
+  "m": "expression",
+  "mat": "francais",
+  "matiere": "Français : expression écrite",
+  "seq": "blanc",
+  "rangs": [
+   0,
+   0,
+   0,
+   0,
+   0,
+   0
+  ],
+  "u": "/ressources/sequentielles/3e-blanc-expression.html"
  },
  {
   "id": "3e-seq1-mathematiques",
@@ -515,6 +549,37 @@
   "u": "/ressources/sequentielles/3e-seq6-pct.html"
  },
  {
+  "id": "3e-blanc-pct",
+  "classe": "3e",
+  "m": "pct",
+  "mat": "pct",
+  "matiere": "Physique, chimie et technologie",
+  "seq": "blanc",
+  "rangs": [
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0
+  ],
+  "u": "/ressources/sequentielles/3e-blanc-pct.html"
+ },
+ {
   "id": "3e-seq1-svt",
   "classe": "3e",
   "m": "svt",
@@ -634,6 +699,31 @@
    55
   ],
   "u": "/ressources/sequentielles/3e-seq6-svt.html"
+ },
+ {
+  "id": "3e-blanc-svt",
+  "classe": "3e",
+  "m": "svt",
+  "mat": "svt",
+  "matiere": "SVTEEHB",
+  "seq": "blanc",
+  "rangs": [
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0
+  ],
+  "u": "/ressources/sequentielles/3e-blanc-svt.html"
  },
  {
   "id": "3e-seq1-anglais",
@@ -832,6 +922,22 @@
   "u": "/ressources/sequentielles/3e-seq6-anglais.html"
  },
  {
+  "id": "3e-blanc-anglais",
+  "classe": "3e",
+  "m": "anglais",
+  "mat": "anglais",
+  "matiere": "Anglais",
+  "seq": "blanc",
+  "rangs": [
+   0,
+   0,
+   0,
+   0,
+   0
+  ],
+  "u": "/ressources/sequentielles/3e-blanc-anglais.html"
+ },
+ {
   "id": "3e-seq1-histoire",
   "classe": "3e",
   "m": "histoire",
@@ -918,6 +1024,22 @@
    22
   ],
   "u": "/ressources/sequentielles/3e-seq6-histoire.html"
+ },
+ {
+  "id": "3e-blanc-histoire",
+  "classe": "3e",
+  "m": "histoire",
+  "mat": "histoire",
+  "matiere": "Histoire",
+  "seq": "blanc",
+  "rangs": [
+   0,
+   0,
+   0,
+   0,
+   0
+  ],
+  "u": "/ressources/sequentielles/3e-blanc-histoire.html"
  },
  {
   "id": "3e-seq1-geographie",
@@ -1011,6 +1133,21 @@
   "u": "/ressources/sequentielles/3e-seq6-geographie.html"
  },
  {
+  "id": "3e-blanc-geographie",
+  "classe": "3e",
+  "m": "geographie",
+  "mat": "geo",
+  "matiere": "Géographie",
+  "seq": "blanc",
+  "rangs": [
+   0,
+   0,
+   0,
+   0
+  ],
+  "u": "/ressources/sequentielles/3e-blanc-geographie.html"
+ },
+ {
   "id": "3e-seq1-ecm",
   "classe": "3e",
   "m": "ecm",
@@ -1096,6 +1233,22 @@
    21
   ],
   "u": "/ressources/sequentielles/3e-seq6-ecm.html"
+ },
+ {
+  "id": "3e-blanc-ecm",
+  "classe": "3e",
+  "m": "ecm",
+  "mat": "ecm",
+  "matiere": "Éducation à la citoyenneté et à la morale",
+  "seq": "blanc",
+  "rangs": [
+   0,
+   0,
+   0,
+   0,
+   0
+  ],
+  "u": "/ressources/sequentielles/3e-blanc-ecm.html"
  },
  {
   "id": "3e-seq1-informatique",
@@ -1193,6 +1346,33 @@
   "u": "/ressources/sequentielles/3e-seq6-informatique.html"
  },
  {
+  "id": "3e-blanc-informatique",
+  "classe": "3e",
+  "m": "informatique",
+  "mat": "info",
+  "matiere": "Informatique",
+  "seq": "blanc",
+  "rangs": [
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0
+  ],
+  "u": "/ressources/sequentielles/3e-blanc-informatique.html"
+ },
+ {
   "id": "3e-seq1-espagnol",
   "classe": "3e",
   "m": "espagnol",
@@ -1273,6 +1453,22 @@
    16
   ],
   "u": "/ressources/sequentielles/3e-seq6-espagnol.html"
+ },
+ {
+  "id": "3e-blanc-espagnol",
+  "classe": "3e",
+  "m": "espagnol",
+  "mat": "espagnol",
+  "matiere": "Espagnol",
+  "seq": "blanc",
+  "rangs": [
+   0,
+   0,
+   0,
+   0,
+   0
+  ],
+  "u": "/ressources/sequentielles/3e-blanc-espagnol.html"
  },
  {
   "id": "3e-seq1-allemand",
@@ -1393,5 +1589,22 @@
    54
   ],
   "u": "/ressources/sequentielles/3e-seq6-allemand.html"
+ },
+ {
+  "id": "3e-blanc-allemand",
+  "classe": "3e",
+  "m": "allemand",
+  "mat": "allemand",
+  "matiere": "Allemand",
+  "seq": "blanc",
+  "rangs": [
+   0,
+   0,
+   0,
+   0,
+   0,
+   0
+  ],
+  "u": "/ressources/sequentielles/3e-blanc-allemand.html"
  }
 ]
