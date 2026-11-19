@@ -462,6 +462,20 @@
   "u": "/ressources/annales/bac-physique-c-2025.html"
  },
  {
+  "id": "probatoire-physique-ce-2026",
+  "examen": "probatoire",
+  "m": "physique",
+  "serie": "séries C et E",
+  "nomExamen": "Probatoire",
+  "fiche": "ressources/examen-physique-chimie-probatoire.html",
+  "matiere": "Physique (séries C et E)",
+  "mat": "physique",
+  "classes": "1re C",
+  "annee": 2026,
+  "national": false,
+  "u": "/ressources/annales/probatoire-physique-ce-2026.html"
+ },
+ {
   "id": "probatoire-physique-ce-2025",
   "examen": "probatoire",
   "m": "physique",
@@ -530,6 +544,20 @@
   "annee": 2024,
   "national": false,
   "u": "/ressources/annales/probatoire-physique-dti-2024.html"
+ },
+ {
+  "id": "probatoire-chimie-cde-2026",
+  "examen": "probatoire",
+  "m": "chimie",
+  "serie": "séries C, D et E",
+  "nomExamen": "Probatoire",
+  "fiche": "ressources/examen-physique-chimie-probatoire.html",
+  "matiere": "Chimie (séries C, D et E)",
+  "mat": "chimie",
+  "classes": "1re C,1re D",
+  "annee": 2026,
+  "national": false,
+  "u": "/ressources/annales/probatoire-chimie-cde-2026.html"
  },
  {
   "id": "bac-chimie-cde-2025",
@@ -630,6 +658,20 @@
   "u": "/ressources/annales/bepc-svt-2023.html"
  },
  {
+  "id": "probatoire-svt-cti-2026",
+  "examen": "probatoire",
+  "m": "svt",
+  "serie": "séries C et TI",
+  "nomExamen": "Probatoire",
+  "fiche": "ressources/examen-svt-probatoire.html",
+  "matiere": "SVTEEHB (séries C et TI)",
+  "mat": "svt",
+  "classes": "1re C",
+  "annee": 2026,
+  "national": false,
+  "u": "/ressources/annales/probatoire-svt-cti-2026.html"
+ },
+ {
   "id": "bac-svt-cti-2025",
   "examen": "bac",
   "m": "svt",
@@ -672,6 +714,20 @@
   "u": "/ressources/annales/probatoire-svt-cti-2024.html"
  },
  {
+  "id": "probatoire-svt-d-2026",
+  "examen": "probatoire",
+  "m": "svt",
+  "serie": "série D",
+  "nomExamen": "Probatoire",
+  "fiche": "ressources/examen-svt-probatoire.html",
+  "matiere": "SVTEEHB (série D)",
+  "mat": "svt",
+  "classes": "1re D",
+  "annee": 2026,
+  "national": true,
+  "u": "/ressources/annales/probatoire-svt-d-2026.html"
+ },
+ {
   "id": "bac-svt-d-2025",
   "examen": "bac",
   "m": "svt",
@@ -712,6 +768,20 @@
   "annee": 2024,
   "national": false,
   "u": "/ressources/annales/probatoire-svt-d-2024.html"
+ },
+ {
+  "id": "probatoire-sciences-aabi-2026",
+  "examen": "probatoire",
+  "m": "sciences",
+  "serie": "séries A et ABI",
+  "nomExamen": "Probatoire",
+  "fiche": "ressources/examen-svt-probatoire.html",
+  "matiere": "Sciences (séries A et ABI)",
+  "mat": "svt",
+  "classes": "1re A",
+  "annee": 2026,
+  "national": true,
+  "u": "/ressources/annales/probatoire-sciences-aabi-2026.html"
  },
  {
   "id": "probatoire-sciences-aabi-2025",
