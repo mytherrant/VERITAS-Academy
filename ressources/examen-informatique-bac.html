@@ -259,7 +259,24 @@ ul.mx-check li::before{border-color:var(--vm-mag)}
 #mx .mx-tbl th,.mx-tbl th{background:#F4F7FC!important;color:#001136;font-weight:700;border:1px solid #E3E8F1!important}
 .mx-tbl td{border:1px solid #E3E8F1!important;color:#3B4456}
 .mx-tbl tbody td:first-child{background:#F4F7FC;color:#001136;font-weight:700}
-.mx-tbl tfoot td{background:#F4F7FC}</style><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap"><link rel="stylesheet" href="/assets/veritas-tokens.css?v=1.19.25">
+.mx-tbl tfoot td{background:#F4F7FC}
+
+/* 19/11/2026 « harmonise avec Apprendre, change le style de puce, réduis l'interligne » :
+   le site posait une coche verte (masque) sur toute liste sans classe, y compris sous « Les erreurs fréquentes ».
+   Puces : point bleu discret comme les leçons d'Apprendre ; erreurs et pièges : petite croix rouge. */
+#mx .card.mx p,#mx .card.mx li{line-height:1.5}
+#mx .card.mx p{margin:0 0 10px}
+#mx .card.mx ul:not([class]){list-style:none!important;padding-left:0!important;margin:6px 0 14px!important}
+#mx .card.mx ul:not([class])>li{position:relative!important;padding:0 0 0 22px!important;margin:0 0 5px!important;color:#33384A!important;font-size:16.5px!important}
+#mx .card.mx ul:not([class])>li:last-child{margin-bottom:0!important}
+#mx .card.mx ul:not([class])>li::before{content:""!important;position:absolute!important;left:5px!important;top:.62em!important;width:7px!important;height:7px!important;border-radius:50%!important;background:#1E499B!important;box-shadow:none!important;-webkit-mask:none!important;mask:none!important;transform:none!important;border:0!important}
+#mx .card.mx ul:not([class]) ul:not([class])>li::before{background:#fff!important;border:1.5px solid #1E499B!important;width:6px!important;height:6px!important}
+#mx .card.mx section#erreurs ul:not([class])>li::before,#mx .card.mx .mx-piege ul:not([class])>li::before{
+  width:12px!important;height:12px!important;left:2px!important;top:.4em!important;border-radius:0!important;
+  background:linear-gradient(45deg,transparent 42%,#C62828 42% 58%,transparent 58%),linear-gradient(-45deg,transparent 42%,#C62828 42% 58%,transparent 58%)!important}
+#mx .card.mx ol:not([class])>li{margin:0 0 5px!important;padding-left:2px}
+#mx .card.mx ol:not([class])>li::marker{color:#1E499B;font-weight:700}
+#mx .card.mx .partie{margin-top:36px}</style><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap"><link rel="stylesheet" href="/assets/veritas-tokens.css?v=1.19.25">
 <link rel="stylesheet" href="/assets/veritas-refonte.css?v=1.19.25"><!-- seo-tete -->
 <meta property="og:image" content="https://veritas-school.com/og-image.jpg">
 <meta name="twitter:card" content="summary_large_image">
