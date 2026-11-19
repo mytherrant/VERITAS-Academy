@@ -1,3 +1,11 @@
+## Cartes mentales des leçons : finitions (19/11/2026, branche cartes-finitions)
+
+Demande de Jacques : « Continue, ne supprime rien, rassure-toi que c'est illustré et que les situations-problèmes sont résolues, les étapes, cartes mentales ».
+
+- **Contrôle des 80 leçons complètes de lecons.js** : toutes ont situation-problème, étapes, formules, réponse rédigée, ≥ 2 planches 2D, ≥ 1 planche 3D et une carte mentale non vide (0 à compléter).
+- **Carte mentale** (`VRT_CM_LECON`, ajouts seulement) : plus de guillemets orphelins après coupe des phrases, plus de titre ou d'idée terminés par un petit mot (« …diviseurs et »), pas de parenthèse laissée ouverte, coupe aussi devant une phrase qui commence par un nombre (« 3 et 9 : … »). `lecons.js?v=20261119cm2`.
+- **Doublons évités** : la PR #399 (autre session) couvre déjà la philosophie, le français et l'anglais des classes d'examen (lots 3 à 9). Les trois leçons Towa écrites ici (rangs 3, 4, 5) ne sont PAS intégrées : la leçon unique `tle-a-philo-towa` de #399 couvre le même module ; source et JSON gardés hors dépôt en attendant la décision de Jacques. Deux sessions sœurs lancées pour Njoh-Mouelle, art et travail, espace et temps, histoire, logique : arrêtées (doublons de #399), aucune branche poussée.
+
 ## Carte mentale des leçons enrichie, icônes au trait, déploiement débloqué (19/11/2026, branche carte-lecon-deploiement)
 
 Demandes de Jacques (captures téléphone) : « Carte mentale mal sortie. Finalise la suppression des cadres, tableau dans les tableaux », puis « Améliore la qualité des icônes, puces ».
