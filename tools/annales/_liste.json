@@ -1104,5 +1104,19 @@
   "annee": 2025,
   "national": true,
   "u": "/ressources/annales/probatoire-informatique-cde-2025.html"
+ },
+ {
+  "id": "probatoire-informatique-cde-2024",
+  "examen": "probatoire",
+  "m": "informatique",
+  "serie": "séries C, D et E",
+  "nomExamen": "Probatoire",
+  "fiche": "ressources/examen-informatique-probatoire.html",
+  "matiere": "Informatique (séries C, D et E)",
+  "mat": "info",
+  "classes": "1re C,1re D",
+  "annee": 2024,
+  "national": true,
+  "u": "/ressources/annales/probatoire-informatique-cde-2024.html"
  }
 ]
