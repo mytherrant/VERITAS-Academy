@@ -1350,4 +1350,60 @@ S["proba-2026-chimie-dosage"] = () => {
   return svg(490, 318, g, "Dispositif de dosage : une burette graduée, fixée à un support, contient la solution de permanganate de potassium (0,2 mol/L) ; en dessous, un bécher contient 10 mL d'eau oxygénée acidifiée, agitée par un barreau aimanté posé sur un agitateur magnétique.");
 };
 // <<< proba-2026-chimie
+// >>> proba-2026-svt-c
+// Document 1 : deux phénomènes producteurs d'énergie (énergie potentielle du glucose et des produits).
+S["proba-2026-svt-c-energie"] = () => {
+  const fs = ' font-size="12"', fb = ' font-size="12" font-weight="700"', mid = ' text-anchor="middle"';
+  const boite = (x, y, w, l) => '<rect x="' + x + '" y="' + y + '" width="' + w + '" height="56" stroke-width="1.4"/>' + l.map((t, i) => T([x + w / 2, y + 17 + i * 16], t, (i ? fs : fb) + mid)).join("");
+  const grosse = (x, y1, y2) => '<path d="M' + (x - 12) + " " + y1 + "V" + (y2 - 26) + "H" + (x - 30) + "L" + x + " " + y2 + "L" + (x + 30) + " " + (y2 - 26) + "H" + (x + 12) + "V" + y1 + '" stroke-width="1.4"/>';
+  const num = (x, y, n) => '<circle cx="' + x + '" cy="' + y + '" r="10" stroke-width="1.3" fill="var(--bg, #fff)"/>' + T([x, y + 4], n, ' font-size="12" font-weight="700"' + mid);
+  const glu = "Glucose (C<tspan dy=\"3\" font-size=\"9\">6</tspan><tspan dy=\"-3\">H</tspan><tspan dy=\"3\" font-size=\"9\">12</tspan><tspan dy=\"-3\">O</tspan><tspan dy=\"3\" font-size=\"9\">6</tspan><tspan dy=\"-3\">)</tspan>";
+  let g = boite(10, 10, 170, [glu, "Énergie potentielle", "2840 kJ/mole"]) + boite(220, 10, 170, [glu, "Énergie potentielle", "2840 kJ/mole"]);
+  g += grosse(95, 66, 120) + num(95, 92, "1") + grosse(305, 66, 196) + num(305, 100, "2");
+  g += boite(4, 122, 182, ["2 CO<tspan dy=\"3\" font-size=\"9\">2</tspan><tspan dy=\"-3\"> + 2 C</tspan><tspan dy=\"3\" font-size=\"9\">2</tspan><tspan dy=\"-3\">H</tspan><tspan dy=\"3\" font-size=\"9\">5</tspan><tspan dy=\"-3\">OH</tspan>", "Énergie potentielle", "1360 kJ/mole d'éthanol"]);
+  g += boite(220, 198, 170, ["6 CO<tspan dy=\"3\" font-size=\"9\">2</tspan><tspan dy=\"-3\"> + 6 H</tspan><tspan dy=\"3\" font-size=\"9\">2</tspan><tspan dy=\"-3\">O</tspan>", "Énergie potentielle", "0 kJ/mole"]);
+  return svg(400, 262, g, "Document 1. Phénomène 1 : glucose (énergie potentielle 2840 kJ par mole) → 2 CO2 + 2 C2H5OH (1360 kJ par mole d'éthanol). Phénomène 2 : glucose (2840 kJ par mole) → 6 CO2 + 6 H2O (0 kJ par mole).");
+};
+// Document 2 : conditions de fusion des péridotites sèches (solidus sec, liquidus).
+S["proba-2026-svt-c-solidus"] = () => {
+  const fs = ' font-size="11"', fb = ' font-size="12" font-weight="700"';
+  const X = t => 60 + (t - 0) * 0.16, Y = p => 40 + p * 3.2; // 1000 °C → x 220 ; 75 kbar → y 280
+  let g = L([60, 40], [440, 40], ' stroke-width="1.6"') + fleche([450, 40], [440, 40], 8) + T([456, 36], "température", fs) + T([466, 50], "(°C)", fs);
+  g += L([60, 40], [60, 316], ' stroke-width="1.6"') + fleche([60, 326], [60, 316], 8) + T([30, 342], "Pression", fs) + T([36, 355], "(kbar)", fs);
+  for (const t of [1000, 2000]) g += L([X(t), 36], [X(t), 44]) + T([X(t) - 14, 30], String(t), fs);
+  for (const p of [25, 50, 75]) g += L([56, Y(p)], [64, Y(p)]) + T([34, Y(p) + 4], String(p), fs);
+  g += L([X(1100), 40], [X(1500), Y(85)], ' stroke-width="1.6"') + L([X(2050), 40], [X(2400), Y(85)], ' stroke-width="1.6"');
+  g += T([230, 130], "SOLIDUS SEC", fb) + T([350, 158], "LIQUIDUS", fb);
+  g += T([140, 218], "Solide", fs) + T([292, 222], "Partiellement", fs) + T([302, 236], "fondu", fs) + T([400, 204], "Fondu", fs);
+  g += L([248, 200], [248, 150], ' stroke-width="4"') + fleche([248, 140], [248, 152], 12) + L([248, 200], [306, 200], ' stroke-width="4"') + fleche([316, 200], [304, 200], 12);
+  g += L([40, 382], [40, 362], ' stroke-width="3"') + fleche([40, 356], [40, 366], 9) + L([30, 392], [52, 392], ' stroke-width="3"') + fleche([60, 392], [50, 392], 9);
+  g += '<path d="M74 356 q6 0 6 8 v10 q0 4 5 4 q-5 0 -5 4 v10 q0 8 -6 8" stroke-width="1.2"/>' + T([98, 376], "Mouvements probables des péridotites", fb) + T([98, 392], "sèches (solides) en profondeur", fb);
+  return svg(520, 404, g, "Document 2 : diagramme température (axe horizontal, 1000 et 2000 °C) – pression (axe vertical descendant, 25, 50, 75 kbar). Deux droites inclinées, le solidus sec puis le liquidus, séparent les domaines solide, partiellement fondu et fondu. Une flèche verticale (montée, la pression diminue) et une flèche horizontale (réchauffement) figurent les mouvements probables des péridotites sèches en profondeur.");
+};
+// Document 3 : lames minces des roches A (microlitique) et B (grenue).
+S["proba-2026-svt-c-lames"] = () => {
+  const fs = ' font-size="12" font-weight="700"';
+  const poly = pts => '<polygon points="' + pts.map(p => p.join(",")).join(" ") + '" stroke-width="1.3"/>';
+  let g = '<rect x="110" y="10" width="200" height="190" stroke-width="1.4"/>';
+  // A : phénocristaux d'olivine, microlites de feldspath (baguettes), pâte amorphe (fond)
+  g += poly([[150, 60], [176, 52], [192, 70], [180, 96], [154, 92]]) + '<circle cx="170" cy="74" r="2"/>' + poly([[230, 120], [262, 112], [276, 140], [256, 164], [228, 154]]) + poly([[134, 150], [156, 146], [162, 168], [140, 174]]);
+  for (const [x, y, a] of [[210, 40, 20], [244, 60, -30], [270, 80, 60], [214, 90, -10], [196, 130, 40], [286, 160, -50], [168, 120, 70], [250, 186, 10], [140, 30, -40], [290, 30, 30]]) {
+    const r = a * Math.PI / 180, dx = 12 * Math.cos(r), dy = 12 * Math.sin(r); g += L([x - dx, y - dy], [x + dx, y + dy], ' stroke-width="3"'); }
+  g += T([20, 80], "Olivine", fs) + L([70, 76], [148, 76], ' stroke-width="1"') + fleche([150, 76], [140, 76], 6);
+  g += T([20, 160], "Pâte", fs) + T([20, 175], "amorphe", fs) + L([76, 164], [126, 132], ' stroke-width="1"') + fleche([128, 131], [120, 136], 6);
+  g += T([330, 70], "Microlites de", fs) + T([330, 85], "Feldspaths", fs) + L([326, 78], [282, 80], ' stroke-width="1"') + fleche([280, 80], [290, 80], 6) + L([326, 82], [222, 92], ' stroke-width="1"') + fleche([220, 92], [230, 91], 6);
+  g += T([194, 222], "Figure A", ' font-size="13" font-weight="700" text-decoration="underline"');
+  // B : cristaux jointifs, pas de pâte
+  g += '<rect x="470" y="10" width="200" height="190" stroke-width="1.4"/>';
+  g += '<path d="M470 10 L560 10 L556 60 L520 88 L470 80 Z" stroke-width="1.3" fill="currentColor" fill-opacity=".12"/>';
+  g += '<path d="M560 10 L670 10 L670 70 L620 96 L556 60 Z" stroke-width="1.3" fill="currentColor" fill-opacity=".28"/>';
+  g += '<path d="M520 88 L556 60 L620 96 L670 70 L670 140 L600 150 L540 130 Z" stroke-width="1.3" fill="currentColor" fill-opacity=".12"/>';
+  g += '<path d="M470 80 L520 88 L540 130 L600 150 L670 140 L670 200 L470 200 Z" stroke-width="1.3" fill="currentColor" fill-opacity=".6"/>';
+  g += T([340, 30], "Olivine", fs) + L([396, 26], [596, 36], ' stroke-width="1"') + fleche([598, 36], [588, 36], 6);
+  g += T([340, 120], "Feldspath", fs) + L([406, 116], [600, 116], ' stroke-width="1"') + fleche([602, 116], [592, 116], 6);
+  g += T([340, 186], "Pyroxène", fs) + L([406, 182], [520, 182], ' stroke-width="1"');
+  g += T([544, 222], "Figure B", ' font-size="13" font-weight="700" text-decoration="underline"');
+  return svg(680, 232, g, "Document 3 : lames minces. Figure A : quelques grands cristaux d'olivine et de petites baguettes de feldspath (microlites) dispersés dans une pâte amorphe. Figure B : grands cristaux jointifs d'olivine, de feldspath et de pyroxène, sans pâte.");
+};
+// <<< proba-2026-svt-c
 module.exports = S;

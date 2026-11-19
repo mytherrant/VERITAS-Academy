@@ -658,6 +658,20 @@
   "u": "/ressources/annales/bepc-svt-2023.html"
  },
  {
+  "id": "probatoire-svt-cti-2026",
+  "examen": "probatoire",
+  "m": "svt",
+  "serie": "séries C et TI",
+  "nomExamen": "Probatoire",
+  "fiche": "ressources/examen-svt-probatoire.html",
+  "matiere": "SVTEEHB (séries C et TI)",
+  "mat": "svt",
+  "classes": "1re C",
+  "annee": 2026,
+  "national": false,
+  "u": "/ressources/annales/probatoire-svt-cti-2026.html"
+ },
+ {
   "id": "bac-svt-cti-2025",
   "examen": "bac",
   "m": "svt",
