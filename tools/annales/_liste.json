@@ -588,6 +588,20 @@
   "u": "/ressources/annales/bepc-svt-2024.html"
  },
  {
+  "id": "bepc-svt-2023",
+  "examen": "bepc",
+  "m": "svt",
+  "serie": "",
+  "nomExamen": "BEPC",
+  "fiche": "ressources/examen-svt-bepc.html",
+  "matiere": "SVTEEHB",
+  "mat": "svt",
+  "classes": "3e",
+  "annee": 2023,
+  "national": false,
+  "u": "/ressources/annales/bepc-svt-2023.html"
+ },
+ {
   "id": "bac-svt-cti-2025",
   "examen": "bac",
   "m": "svt",
