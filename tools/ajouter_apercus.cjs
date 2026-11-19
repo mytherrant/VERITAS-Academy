@@ -1,9 +1,11 @@
 #!/usr/bin/env node
 /* Ajoute aux apercus-<classe>.js du DÉPÔT le début public des leçons produites par build_apprendre_payant.cjs dans une copie,
    dans un bloc balisé (remplacé à chaque passage), puis met à jour les empreintes de charge.js. Les 2 000 leçons existantes
-   ne sont pas touchées. Usage : node integrer.cjs <copie/apprendre> <depot/apprendre> <nom du lot> */
+   ne sont pas touchées. Usage : node integrer.cjs <copie/apprendre> <depot/apprendre> <nom du lot> [--remplace]
+   --remplace (19/11/2026, leçons RÉÉCRITES par VRT_LR) : une leçon déjà présente dans le build principal est
+   retirée de celui-ci (sa ligne VRT_L) et sa nouvelle version prend place dans le bloc du lot. */
 const fs = require("fs"), path = require("path"), crypto = require("crypto");
-const [copie, depot, lot] = process.argv.slice(2);
+const args = process.argv.slice(2), REMPLACE = args.includes("--remplace"), [copie, depot, lot] = args.filter(a => a !== "--remplace");
 const DEB = `/* ═══ AJOUT ${lot} (hors build principal : source à verser dans le dossier des sources) ═══ */`, FIN = `/* ═══ FIN ${lot} ═══ */`;
 const touchees = [];
 for (const f of fs.readdirSync(copie).filter(f => /^apercus-.*\.js$/.test(f))) {
@@ -14,7 +16,12 @@ for (const f of fs.readdirSync(copie).filter(f => /^apercus-.*\.js$/.test(f))) {
   const re = new RegExp("\\n?" + DEB.replace(/[.*+?^${}()|[\]\\]/g, "\\$&") + "[\\s\\S]*?" + FIN.replace(/[.*+?^${}()|[\]\\]/g, "\\$&") + "\\n?");
   t = t.replace(re, "\n");
   const ids = new Set(L.map(x => x[0]));
-  for (const id of ids) if (t.includes(`VRT_L(${JSON.stringify(id)},`)) { console.error("déjà présent dans le build principal :", id); process.exit(1); }
+  for (const id of ids) if (t.includes(`VRT_L(${JSON.stringify(id)},`)) {
+    if (!REMPLACE) { console.error("déjà présent dans le build principal :", id, "(leçon réécrite : ajouter --remplace)"); process.exit(1); }
+    const avant = t.split("\n"), apres = avant.filter(l => !l.startsWith(`VRT_L(${JSON.stringify(id)},`));
+    if (avant.length - apres.length !== 1) { console.error("ligne introuvable ou multiple pour", id); process.exit(1); }
+    t = apres.join("\n"); console.log("remplacée :", id);
+  }
   t = t.replace(/\n*$/, "\n") + DEB + "\n" + L.map(([id, o]) => `VRT_L(${JSON.stringify(id)},${JSON.stringify(o)});`).join("\n") + "\n" + FIN + "\n";
   fs.writeFileSync(cible, t); touchees.push(f); console.log(f, "+", L.length, "leçons");
 }

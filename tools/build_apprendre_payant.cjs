@@ -49,6 +49,11 @@ global.VRT_QCM = (ids, liste) => { for (const id of [].concat(ids)) { if (QCM[id
    seul schéma ; fichier lu dans n'importe quel ordre (appliqué après la lecture de toutes les sources). */
 const ILLUS = [];
 global.VRT_ILLUS = (ids, partie, legende, svg) => { for (const id of [].concat(ids)) ILLUS.push([id, partie, legende, svg]); };
+/* Leçon réécrite (19/11/2026) : sa banque de QCM et son exercice d'examen REMPLACENT ceux des sources
+   d'origine (VRT_QCMR, VRT_EXAMR), quel que soit l'ordre de lecture des fichiers. */
+const QCMR = {}, EXAMR = {};
+global.VRT_QCMR = (ids, liste) => { for (const id of [].concat(ids)) { if (QCMR[id]) err.push(`${id} : QCM de remplacement en double`); QCMR[id] = liste; } };
+global.VRT_EXAMR = (ids, o) => { for (const id of [].concat(ids)) { if (EXAMR[id]) err.push(`${id} : exercice d'examen de remplacement en double`); EXAMR[id] = o; } };
 const crc = s => { let h = 0; for (const c of s) h = (h * 31 + c.charCodeAt(0)) >>> 0; return h; };
 function poserQcm(id, liste) {
   if (!Array.isArray(liste) || liste.length !== 10) { err.push(`${id} : il faut exactement 10 QCM (${liste && liste.length})`); return null; }
@@ -69,6 +74,8 @@ for (const f of fs.readdirSync(src).filter(x => x.endsWith(".js")).sort()) {
 }
 for (const [id, o] of Object.entries(REMPL)) { L[id] = o; if (o.quiz && QCM[id]) delete o.quiz; }
 for (const [id, liste] of Object.entries(QCM)) { if (!L[id]) { err.push(`${id} : QCM pour une leçon inconnue`); continue; } const q = poserQcm(id, liste); if (q) L[id].quiz = q; }
+for (const [id, liste] of Object.entries(QCMR)) { if (!L[id]) { err.push(`${id} : QCM de remplacement pour une leçon inconnue`); continue; } const q = poserQcm(id, liste); if (q) L[id].quiz = q; }
+Object.assign(EXAM, EXAMR);
 for (const [id, o] of Object.entries(SIT)) {
   if (!APC[id]) { err.push(`${id} : situation réécrite pour une leçon sans fiche APC`); continue; }
   for (const k of ["situation", "tache", "resolution"]) if (!o[k]) err.push(`${id} : situation réécrite sans ${k}`);
