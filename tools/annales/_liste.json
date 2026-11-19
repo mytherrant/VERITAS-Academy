@@ -686,6 +686,20 @@
   "u": "/ressources/annales/probatoire-histoire-cdti-2025.html"
  },
  {
+  "id": "probatoire-histoire-cdti-2024",
+  "examen": "probatoire",
+  "m": "histoire",
+  "serie": "séries C, D et TI",
+  "nomExamen": "Probatoire",
+  "fiche": "ressources/examen-histoire-geographie-probatoire.html",
+  "matiere": "Histoire (séries C, D et TI)",
+  "mat": "histoire",
+  "classes": "1re C,1re D",
+  "annee": 2024,
+  "national": true,
+  "u": "/ressources/annales/probatoire-histoire-cdti-2024.html"
+ },
+ {
   "id": "bepc-geographie-2026",
   "examen": "bepc",
   "m": "geographie",
