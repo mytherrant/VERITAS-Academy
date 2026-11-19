@@ -224,6 +224,20 @@
   "u": "/ressources/annales/bepc-mathematiques-2024.html"
  },
  {
+  "id": "bepc-mathematiques-2023",
+  "examen": "bepc",
+  "m": "mathematiques",
+  "serie": "",
+  "nomExamen": "BEPC",
+  "fiche": "ressources/examen-mathematiques-bepc.html",
+  "matiere": "Mathématiques",
+  "mat": "maths",
+  "classes": "3e",
+  "annee": 2023,
+  "national": true,
+  "u": "/ressources/annales/bepc-mathematiques-2023.html"
+ },
+ {
   "id": "bac-mathematiques-aabi-2025",
   "examen": "bac",
   "m": "mathematiques",
