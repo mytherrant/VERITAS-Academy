@@ -1078,6 +1078,20 @@
   "u": "/ressources/annales/bepc-espagnol-2024.html"
  },
  {
+  "id": "bepc-espagnol-2023",
+  "examen": "bepc",
+  "m": "espagnol",
+  "serie": "",
+  "nomExamen": "BEPC",
+  "fiche": "ressources/examen-langues-vivantes-bepc.html",
+  "matiere": "Espagnol",
+  "mat": "espagnol",
+  "classes": "3e",
+  "annee": 2023,
+  "national": false,
+  "u": "/ressources/annales/bepc-espagnol-2023.html"
+ },
+ {
   "id": "probatoire-espagnol-aabi-2025",
   "examen": "probatoire",
   "m": "espagnol",
