@@ -1093,4 +1093,48 @@ S["proba-2024-svt-c-coupe"] = () => {
   g += T([X(0), y2 + 36], "surface", fs) + T([X(6371) - 30, y2 + 36], "centre", fs);
   return svg(R.W, y2 + 44, g, "Le graphe des vitesses sismiques et, en dessous, une coupe du globe de la surface au centre : croûte jusqu'au Moho (vers 30 km), manteau supérieur avec la zone de faible vitesse (LVZ, asthénosphère) vers 100 à 250 km, manteau inférieur jusqu'à la discontinuité de Gutenberg (2 900 km), noyau externe liquide jusqu'à la discontinuité de Lehmann (5 150 km), noyau interne solide jusqu'au centre (6 371 km).");
 };
+// BEPC 2023 maths, exercice 3 : histogramme des âges (effectifs 2, 3, 7, 6, 7, 5 pour les classes de 8 à 14 ans).
+S["bepc-2023-maths-histogramme"] = () => {
+  const x0 = 34, y0 = 214, ux = 38, uy = 26, X = a => x0 + (a - 8) * ux, Y = n => y0 - n * uy, fs = ' font-size="11"';
+  let g = '<defs><pattern id="ax-hach-b23" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><path d="M0 0V6" stroke="currentColor" stroke-width="1.6"/></pattern></defs>';
+  g += '<g stroke-width="0.6" stroke-dasharray="3 3" opacity="0.5">';
+  for (let n = 1; n <= 7; n++) g += L([x0, Y(n)], [X(14) + 6, Y(n)]);
+  g += "</g>";
+  [2, 3, 7, 6, 7, 5].forEach((n, i) => { g += '<rect x="' + X(8 + i) + '" y="' + Y(n) + '" width="' + ux + '" height="' + n * uy + '" fill="url(#ax-hach-b23)" stroke-width="1.4"/>'; });
+  g += L([x0, y0], [X(14) + 10, y0], ' stroke-width="1.4"') + L([x0, y0], [x0, Y(7.6)], ' stroke-width="1.4"');
+  for (let n = 0; n <= 7; n++) g += T([x0 - 12, Y(n) + 4], String(n), fs);
+  for (let a = 8; a <= 14; a++) g += T([X(a) - 6, y0 + 15], String(a), fs);
+  g += T([x0 + 4, Y(7.6) + 2], "Effectifs", fs) + T([X(10.4), y0 + 30], "Âge en années", fs);
+  return svg(X(14) + 22, y0 + 38, g, "Histogramme des âges des 30 enfants, classes d'amplitude 1 de 8 à 14 ans : effectifs 2 pour [8 ; 9[, 3 pour [9 ; 10[, 7 pour [10 ; 11[, 6 pour [11 ; 12[, 7 pour [12 ; 13[, 5 pour [13 ; 14[.");
+};
+// BEPC 2023 maths, géométrie exercice 2 : triangle EFG rectangle en E, M sur [EF], N sur [EG], (MN) // (FG).
+S["bepc-2023-maths-triangle"] = () => {
+  const k = 26, E = [40, 200], F = [40, 200 - 6 * k], G = [40 + 8 * k, 200], M = [40, 200 - 1.5 * k], N = [40 + 2 * k, 200], fs = ' font-size="13" font-style="italic"';
+  let g = L(E, F) + L(F, G) + L(G, E) + L(M, N) + droit(E, [0, -1], [1, 0]);
+  g += T([F[0] - 4, F[1] - 8], "F", fs) + T([E[0] - 16, E[1] + 6], "E", fs) + T([G[0] + 6, G[1] + 5], "G", fs) + T([M[0] - 18, M[1] + 4], "M", fs) + T([N[0] - 4, N[1] + 16], "N", fs);
+  return svg(270, 224, g, "Triangle EFG rectangle en E ; M sur [EF] et N sur [EG], avec EF = 6 cm, EG = 8 cm, EM = 1,5 cm, EN = 2 cm.");
+};
+// BEPC 2023 maths, géométrie exercice 3 : grand cône de sommet S coupé par un plan parallèle à la base (centre O', rayon O'B).
+S["bepc-2023-maths-cone"] = () => {
+  const S0 = [110, 20], O = [110, 200], O2 = [110, 80], R = 80, r = R / 3, fs = ' font-size="13" font-style="italic"';
+  let g = L(S0, [O[0] - R, O[1]]) + L(S0, [O[0] + R, O[1]]);
+  g += '<path d="M' + (O[0] - R) + " " + O[1] + " A " + R + " 20 0 0 0 " + (O[0] + R) + " " + O[1] + '"/>' + '<path d="M' + (O[0] - R) + " " + O[1] + " A " + R + " 20 0 0 1 " + (O[0] + R) + " " + O[1] + '"' + POINTILLE + "/>";
+  g += '<ellipse cx="' + O2[0] + '" cy="' + O2[1] + '" rx="' + r + '" ry="7" stroke-width="1.2"/>';
+  g += L(S0, O, POINTILLE + ' stroke-width="1"') + L(O, [O[0] + R, O[1]], POINTILLE + ' stroke-width="1"') + L(O2, [O2[0] + r, O2[1]], POINTILLE + ' stroke-width="1"');
+  for (const p of [S0, O, O2]) g += '<circle cx="' + p[0] + '" cy="' + p[1] + '" r="2.4" fill="currentColor" stroke="none"/>';
+  g += T([S0[0] - 4, S0[1] - 6], "S", fs) + T([O2[0] + r + 6, O2[1] + 4], "B", fs) + T([O2[0] - r - 22, O2[1] + 4], "O'", fs) + T([O[0] - 6, O[1] - 6], "O", fs) + T([O[0] + R + 6, O[1] + 4], "A", fs);
+  return svg(230, 232, g, "Grand cône de révolution de sommet S, de base le disque de centre O et de rayon [OA], coupé par un plan parallèle à la base passant par O' et B ; SO'/SO = 1/3.");
+};
+// BEPC 2023 PCT : sinusoïde de période 8 div et d'amplitude 3 div, partant de l'axe des tensions (10 V/div ; 5 ms/div).
+S["bepc-2023-pct-oscillogramme"] = () => oscillo(18, 8, 3, 8, 1, [1, 17], "Oscillogramme d'une tension alternative sinusoïdale : une période occupe 8 divisions horizontales et la tension maximale 3 divisions verticales.", 1);
+// Corrigé BEPC 2023 PCT : transmission par poulies et courroie, roue motrice E (120 mm) et roue réceptrice S (20 mm).
+S["bepc-2023-pct-poulies"] = () => {
+  const E = [90, 90], RE = 72, S0 = [300, 90], RS = 12, fs = ' font-size="13" font-weight="700"';
+  const a = Math.asin((RE - RS) / (S0[0] - E[0])), t = [Math.sin(a), Math.cos(a)];
+  let g = '<circle cx="' + E[0] + '" cy="' + E[1] + '" r="' + RE + '" stroke-width="1.8"/><circle cx="' + S0[0] + '" cy="' + S0[1] + '" r="' + RS + '" stroke-width="1.8"/>';
+  g += L([E[0] + RE * t[0], E[1] - RE * t[1]], [S0[0] + RS * t[0], S0[1] - RS * t[1]], ' stroke-width="2"') + L([E[0] + RE * t[0], E[1] + RE * t[1]], [S0[0] + RS * t[0], S0[1] + RS * t[1]], ' stroke-width="2"');
+  g += '<circle cx="' + E[0] + '" cy="' + E[1] + '" r="3" fill="currentColor" stroke="none"/><circle cx="' + S0[0] + '" cy="' + S0[1] + '" r="2.5" fill="currentColor" stroke="none"/>';
+  g += T([E[0] - 70, 186], "E : roue motrice, 120 mm", ' font-size="11"') + T([S0[0] - 120, 186], "S : roue réceptrice, 20 mm", ' font-size="11"') + T([E[0] - 5, E[1] - 8], "E", fs) + T([S0[0] - 5, S0[1] - 18], "S", fs);
+  return svg(380, 196, g, "Transmission par courroie : la grande roue motrice E (diamètre 120 mm), liée au moteur, entraîne la petite roue réceptrice S (diamètre 20 mm), qui tourne six fois plus vite.");
+};
 module.exports = S;
