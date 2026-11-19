@@ -1125,4 +1125,16 @@ S["bepc-2023-maths-cone"] = () => {
   g += T([S0[0] - 4, S0[1] - 6], "S", fs) + T([O2[0] + r + 6, O2[1] + 4], "B", fs) + T([O2[0] - r - 22, O2[1] + 4], "O'", fs) + T([O[0] - 6, O[1] - 6], "O", fs) + T([O[0] + R + 6, O[1] + 4], "A", fs);
   return svg(230, 232, g, "Grand cône de révolution de sommet S, de base le disque de centre O et de rayon [OA], coupé par un plan parallèle à la base passant par O' et B ; SO'/SO = 1/3.");
 };
+// BEPC 2023 PCT : sinusoïde de période 8 div et d'amplitude 3 div, partant de l'axe des tensions (10 V/div ; 5 ms/div).
+S["bepc-2023-pct-oscillogramme"] = () => oscillo(18, 8, 3, 8, 1, [1, 17], "Oscillogramme d'une tension alternative sinusoïdale : une période occupe 8 divisions horizontales et la tension maximale 3 divisions verticales.", 1);
+// Corrigé BEPC 2023 PCT : transmission par poulies et courroie, roue motrice E (120 mm) et roue réceptrice S (20 mm).
+S["bepc-2023-pct-poulies"] = () => {
+  const E = [90, 90], RE = 72, S0 = [300, 90], RS = 12, fs = ' font-size="13" font-weight="700"';
+  const a = Math.asin((RE - RS) / (S0[0] - E[0])), t = [Math.sin(a), Math.cos(a)];
+  let g = '<circle cx="' + E[0] + '" cy="' + E[1] + '" r="' + RE + '" stroke-width="1.8"/><circle cx="' + S0[0] + '" cy="' + S0[1] + '" r="' + RS + '" stroke-width="1.8"/>';
+  g += L([E[0] + RE * t[0], E[1] - RE * t[1]], [S0[0] + RS * t[0], S0[1] - RS * t[1]], ' stroke-width="2"') + L([E[0] + RE * t[0], E[1] + RE * t[1]], [S0[0] + RS * t[0], S0[1] + RS * t[1]], ' stroke-width="2"');
+  g += '<circle cx="' + E[0] + '" cy="' + E[1] + '" r="3" fill="currentColor" stroke="none"/><circle cx="' + S0[0] + '" cy="' + S0[1] + '" r="2.5" fill="currentColor" stroke="none"/>';
+  g += T([E[0] - 70, 186], "E : roue motrice, 120 mm", ' font-size="11"') + T([S0[0] - 120, 186], "S : roue réceptrice, 20 mm", ' font-size="11"') + T([E[0] - 5, E[1] - 8], "E", fs) + T([S0[0] - 5, S0[1] - 18], "S", fs);
+  return svg(380, 196, g, "Transmission par courroie : la grande roue motrice E (diamètre 120 mm), liée au moteur, entraîne la petite roue réceptrice S (diamètre 20 mm), qui tourne six fois plus vite.");
+};
 module.exports = S;
