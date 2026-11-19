@@ -980,6 +980,20 @@
   "u": "/ressources/annales/bepc-anglais-2025.html"
  },
  {
+  "id": "bepc-anglais-2023",
+  "examen": "bepc",
+  "m": "anglais",
+  "serie": "",
+  "nomExamen": "BEPC",
+  "fiche": "ressources/examen-anglais-bepc.html",
+  "matiere": "Anglais",
+  "mat": "anglais",
+  "classes": "3e",
+  "annee": 2023,
+  "national": false,
+  "u": "/ressources/annales/bepc-anglais-2023.html"
+ },
+ {
   "id": "probatoire-anglais-acdti-2025",
   "examen": "probatoire",
   "m": "anglais",
@@ -1064,6 +1078,20 @@
   "u": "/ressources/annales/bepc-espagnol-2024.html"
  },
  {
+  "id": "bepc-espagnol-2023",
+  "examen": "bepc",
+  "m": "espagnol",
+  "serie": "",
+  "nomExamen": "BEPC",
+  "fiche": "ressources/examen-langues-vivantes-bepc.html",
+  "matiere": "Espagnol",
+  "mat": "espagnol",
+  "classes": "3e",
+  "annee": 2023,
+  "national": false,
+  "u": "/ressources/annales/bepc-espagnol-2023.html"
+ },
+ {
   "id": "probatoire-espagnol-aabi-2025",
   "examen": "probatoire",
   "m": "espagnol",
@@ -1104,6 +1132,20 @@
   "annee": 2024,
   "national": false,
   "u": "/ressources/annales/bepc-allemand-2024.html"
+ },
+ {
+  "id": "bepc-allemand-2023",
+  "examen": "bepc",
+  "m": "allemand",
+  "serie": "",
+  "nomExamen": "BEPC",
+  "fiche": "ressources/examen-langues-vivantes-bepc.html",
+  "matiere": "Allemand",
+  "mat": "allemand",
+  "classes": "3e",
+  "annee": 2023,
+  "national": false,
+  "u": "/ressources/annales/bepc-allemand-2023.html"
  },
  {
   "id": "bac-allemand-aabi-2025",
