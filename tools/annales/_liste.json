@@ -672,6 +672,20 @@
   "u": "/ressources/annales/probatoire-svt-cti-2024.html"
  },
  {
+  "id": "probatoire-svt-d-2026",
+  "examen": "probatoire",
+  "m": "svt",
+  "serie": "série D",
+  "nomExamen": "Probatoire",
+  "fiche": "ressources/examen-svt-probatoire.html",
+  "matiere": "SVTEEHB (série D)",
+  "mat": "svt",
+  "classes": "1re D",
+  "annee": 2026,
+  "national": true,
+  "u": "/ressources/annales/probatoire-svt-d-2026.html"
+ },
+ {
   "id": "bac-svt-d-2025",
   "examen": "bac",
   "m": "svt",
