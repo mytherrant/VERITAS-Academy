@@ -524,7 +524,7 @@
      (coupé aux « ; » et aux phrases), à défaut des titres en gras de la partie. */
   function nu(h) { return String(h || "").replace(/<[^>]+>/g, " ").replace(/&nbsp;/g, " ").replace(/&amp;/g, "&").replace(/&lt;/g, "<").replace(/&gt;/g, ">").replace(/&#39;|&rsquo;/g, "’").replace(/&quot;/g, "\"").replace(/\s+/g, " ").trim(); }
   function morceaux(r) {
-    var t = nu(r).replace(/^Savoir-être[^:]*:\s*/i, ""), m = t.replace(/([.!?])\s+(?=[A-ZÀ-Ý«])/g, "$1\u0001").split(/\s*;\s*|\u0001/).map(function (x) { return x.replace(/[.]\s*$/, "").trim(); }).filter(function (x) { return x.length > 1; });
+    var t = nu(r).replace(/^Savoir-être[^:]*:\s*/i, ""), m = t.replace(/([.!?])\s+(?=[A-ZÀ-Ý«]|\d+ (?:et|ou|à) \d)/g, "$1\u0001").split(/\s*;\s*|\u0001/).map(function (x) { return x.replace(/[.]\s*$/, "").trim(); }).filter(function (x) { return x.length > 1; });
     return m.length ? m : (t ? [t] : []);
   }
   /* 19/11/2026 « carte mentale mal sortie » : une branche ne gardait qu'un mot en gras (« effet photoélectrique »).
@@ -533,9 +533,19 @@
   var ETIQ = /^(Définitions?|Propriétés?|Théorèmes?|Méthodes?|Exemples?|Remarques?|Retiens|Attention|Astuces?|Le savais-tu|À retenir|Règles?|Formules?|Vocabulaire|Rappels?|Conseils?)\b/i;
   function court(t, n) {
     t = t.replace(/([A-Za-zλν])_(?=[a-z0-9])/g, "$1").replace(/[.;:]\s*$/, "").replace(/\s+/g, " ").trim(); n = n || 92;
+    /* guillemets orphelins laissés par la coupe des phrases (« … ». « … ») */
+    t = t.replace(/^[»\s;,]+/, "").replace(/[«\s;,]+$/, "").trim();
+    if ((t.match(/«/g) || []).length > (t.match(/»/g) || []).length) t = t.replace(/«\s*(?!.*«)/, "");
+    if ((t.match(/»/g) || []).length > (t.match(/«/g) || []).length) t = t.replace(/\s*»(?!.*»)/, "");
     if (t.length <= n) return t;
     var v = t.lastIndexOf(", ", n); if (v >= 32) return t.slice(0, v);
-    var e = t.lastIndexOf(" ", n - 1); return t.slice(0, e > 20 ? e : n - 1) + "…";
+    var e = t.lastIndexOf(" ", n - 1), c = t.slice(0, e > 20 ? e : n - 1);
+    /* pas de coupe sur un petit mot (« …diviseurs et », « …vaincre la ») */
+    for (var k = 0; k < 3; k++) c = c.replace(/[\s,;:]+(et|ou|de|du|des|la|le|les|l['’]|d['’]|à|au|aux|en|par|pour|sur|un|une|que|qui)$/i, "");
+    /* parenthèse ouverte par la coupe : on coupe avant elle */
+    var po = c.lastIndexOf("(");
+    if (po > 20 && c.indexOf(")", po) < 0) c = c.slice(0, po).replace(/[\s,;:]+$/, "");
+    return c + "…";
   }
   function idees(p) {
     var h = String(p.html || "").replace(/<(details|table|svg|figure|script|style)\b[\s\S]*?<\/\1>/gi, " ")
@@ -549,7 +559,7 @@
       var tx = nu(bl);
       /* intertitre en gras collé au texte (« Raisonnement L'ovule… ») : c'est une étiquette, pas une idée */
       gras.forEach(function (x) { if (tx.indexOf(x) === 0 && /^\s+[A-ZÀ-Ý«0-9]/.test(tx.slice(x.length))) { tx = tx.slice(x.length).trim(); gras = gras.filter(function (y) { return y !== x; }); } });
-      tx.replace(/([.!?])\s+(?=[A-ZÀ-Ý«])/g, "$1\u0001").split("\u0001").forEach(function (ph) {
+      tx.replace(/([.!?])\s+(?=[A-ZÀ-Ý«]|\d+ (?:et|ou|à) \d)/g, "$1\u0001").split("\u0001").forEach(function (ph) {
         ph = ph.trim(); if (ph.length < 12 || /\?$/.test(ph) || /^(le |les )?(documents?|doc\.?|figure|tableau|planche|schéma)\s*\d/i.test(ph)) return;
         /* « terme : sens » seulement si le mot en gras ouvre la phrase et qu'elle le définit */
         var g = gras.filter(function (x) { var i = ph.indexOf(x); return i >= 0 && /^(l['’]|les?|la|une?|des|du)?$/i.test(ph.slice(0, i).trim()); })[0];
