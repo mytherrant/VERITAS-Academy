@@ -167,11 +167,15 @@
 \newcommand\sym[1]{{\VRTsym #1}}
 
 % ── Griffe VÉRITAS : nos offres et nos contacts, en bas de la dernière page ─
-\newcommand\griffe{%
-  \par\needspace{8\baselineskip}\nopagebreak\vspace{14pt plus 1fill}\nopagebreak
-  \noindent\begin{tcolorbox}[enhanced,colback=white,frame hidden,arc=0pt,
-      borderline north={.4pt}{0pt}{vrtcorps!35},left=0pt,right=0pt,top=6pt,bottom=0pt,boxsep=0pt,
-      fontupper=\footnotesize\color{vrtcorps}]
+% Deux formes : la complète si elle tient sous le texte, sinon la compacte (mêmes
+% offres, mêmes contacts, trois lignes). Une page ne s'ajoute que si même la
+% compacte ne tient pas : sans cela, un énoncé d'une page en devenait deux, la
+% seconde presque vide.
+\tcbset{vrtgriffe/.style={enhanced,colback=white,frame hidden,arc=0pt,
+  borderline north={.4pt}{0pt}{vrtcorps!35},left=0pt,right=0pt,top=6pt,bottom=0pt,boxsep=0pt,
+  fontupper=\footnotesize\color{vrtcorps}}}
+\newcommand\VRT@griffeComplete{%
+  \begin{tcolorbox}[vrtgriffe]
     \begin{tabularx}{\linewidth}{@{}X@{\hspace{10pt}}>{\raggedleft\arraybackslash}p{.36\linewidth}@{}}
       {\color{vrtencre}\normalsize\bfseries VÉRITAS EDUCATION}\newline
       {\color{vrtbleu}Centre d'Excellence Scolaire}\par\smallskip
@@ -184,7 +188,28 @@
       contact@veritas-school.com\newline
       {\color{vrtbleu}\bfseries veritas-school.com}
     \end{tabularx}
-  \end{tcolorbox}\par}
+  \end{tcolorbox}}
+\newcommand\VRT@griffeCompacte{%
+  \begin{tcolorbox}[vrtgriffe]
+    {\color{vrtencre}\bfseries VÉRITAS EDUCATION}~· {\color{vrtbleu}Centre d'Excellence Scolaire}\hfill
+    WhatsApp : 697~63~77~39~· contact@veritas-school.com~· {\color{vrtbleu}\bfseries veritas-school.com}\par
+    Préparation aux examens (BEPC, Probatoire, BAC, GCE)~· Préparation aux concours~· Cours à domicile
+    et au centre~· Cours en ligne, épreuves et annales corrigées~· Orientation scolaire
+  \end{tcolorbox}}
+\newsavebox\VRT@grBoite
+\newdimen\VRT@grReste
+\newcommand\griffe{%
+  \par\penalty0
+  \VRT@grReste=\pagegoal \advance\VRT@grReste by -\pagetotal
+  \sbox\VRT@grBoite{\parbox{\linewidth}{\VRT@griffeComplete}}%
+  \ifdim\dimexpr\ht\VRT@grBoite+\dp\VRT@grBoite+16pt\relax>\VRT@grReste
+    \sbox\VRT@grBoite{\parbox{\linewidth}{\VRT@griffeCompacte}}%
+    \ifdim\dimexpr\ht\VRT@grBoite+\dp\VRT@grBoite+10pt\relax>\VRT@grReste
+      \sbox\VRT@grBoite{\parbox{\linewidth}{\VRT@griffeComplete}}%
+    \fi
+  \fi
+  \nopagebreak\vspace{8pt plus 1fill}\nopagebreak
+  \noindent\usebox\VRT@grBoite\par}
 % Posée AVANT les crochets de fin (lastpage y range son étiquette) : sinon la
 % griffe se compte hors de « Page n / N ».
 \let\VRT@finDocument\enddocument
