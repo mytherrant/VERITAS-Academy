@@ -214,6 +214,11 @@ if ($etat !== 'ok') {
    Énoncé et corrigé d'une même épreuve font UN document. Une épreuve achetée à
    l'unité n'est pas comptée : elle est payée pour elle-même. */
 if (isset($in['pdf'])) {
+    /* Relecture du 19/11/2026 : un PDF absent ou une nature invalide ne coûte pas de place
+       (appr_servir_pdf refuse, le quota n'est pas touché). */
+    $natQ = (string) $in['pdf'];
+    $fQ = dirname(__DIR__) . '/uploads/protected/apprendre/' . $id . '-' . $natQ . '.pdf';
+    if (!in_array($natQ, ['enonce', 'corrige'], true) || !is_file($fQ) || (int) @filesize($fQ) === 0) appr_servir_pdf($id, $natQ, $nouveau);
     if (!$achetee && !vrt_compte_equipe($acc)) {
         $refusQ = vrt_quota_fiches('a:' . (string) ($acc['id'] ?? $acc['user'] ?? ''), 'appr:' . $id,
             (int) $droits['fichesJour'], (int) $droits['fichesSemaine'], (int) ($droits['fichesMois'] ?? -1));
