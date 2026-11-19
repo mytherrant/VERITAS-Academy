@@ -1822,6 +1822,29 @@ if (!defined('VRT_AUTH_LIB')) {
     }
 
     /**
+     * 🔐 TEXTE SAISI PAR UN ACHETEUR, AVANT QU'IL N'ENTRE DANS LA BASE (audit 19/11/2026).
+     *
+     * `clientNom`, `clientTel`, `label`, le mot d'une cagnotte : ces champs arrivent
+     * du navigateur de n'importe qui, à l'initialisation d'un paiement, et étaient
+     * recopiés tels quels dans `visitorOrders`, les contributions, le registre du
+     * Code ami. Le tableau de bord les affichait ensuite en HTML. Un nom comme
+     * `<img src=x onerror=…>` s'exécutait donc dans le navigateur de
+     * l'administrateur — celui qui détient la clé de synchronisation.
+     *
+     * On retire chevrons, guillemets doubles, accents graves et caractères de
+     * contrôle, et on borne la longueur. L'apostrophe reste (N'Diaye) : l'affichage
+     * l'échappe (`_esc` côté app.js). Ceci est une SECONDE barrière : elle protège
+     * aussi les lecteurs qu'on n'aurait pas encore recensés.
+     */
+    function vrt_txt_client($v, int $max = 120): string {
+        $s = is_scalar($v) ? (string) $v : '';
+        $s = preg_replace('/[\x00-\x1F\x7F<>"`]+/u', ' ', $s);
+        if ($s === null) return '';   // UTF-8 invalide : rien plutôt que des octets bruts
+        $s = trim((string) preg_replace('/\s{2,}/u', ' ', $s));
+        return mb_substr($s, 0, $max);
+    }
+
+    /**
      * Applique au $db (mutation en place) l'entitlement d'un paiement confirmé.
      * IDEMPOTENT par référence ($state['ref']) → rejouable sans double-octroi.
      * Renvoie ['changed'=>bool, 'msg'=>string]. Ne LÈVE jamais.
@@ -1832,9 +1855,10 @@ if (!defined('VRT_AUTH_LIB')) {
         $targetId  = (string) ($state['targetId'] ?? '');
         $accountId = (string) ($state['accountId'] ?? '');
         $montant   = (int) ($state['montant'] ?? 0);
-        $nom       = (string) ($state['clientNom'] ?? '');
-        $tel       = (string) ($state['clientTel'] ?? '');
-        $label     = (string) ($state['label'] ?? '');
+        // Saisis par l'acheteur → filtrés avant d'entrer dans la base (voir vrt_txt_client).
+        $nom       = vrt_txt_client($state['clientNom'] ?? '', 120);
+        $tel       = vrt_txt_client($state['clientTel'] ?? '', 30);
+        $label     = vrt_txt_client($state['label'] ?? '', 200);
         if ($intent === '' || $ref === '') return ['changed' => false, 'msg' => 'intent/ref manquant'];
 
         /* 🔐 LE MONTANT COUVRE-T-IL L'OBJET ? — contrôle unique, ici, parce que

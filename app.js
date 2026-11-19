@@ -10006,12 +10006,13 @@ function pgElearningMgmt(){
     cmds.slice(-15).reverse().forEach(function(cmd){
       var detail=cmd.contenu?((el.contenus.find(function(c){return c.id===cmd.contenu;})||{titre:cmd.contenu}).titre):(cmd.description||'Personnalisé').substring(0,40);
       h+='<tr>';
-      h+='<td class="xs2 mut">'+cmd.date+'</td>';
-      h+='<td class="semi">'+cmd.nom+'</td>';
+      // Saisie du client (commande e-learning) → échappée (audit 19/11/2026).
+      h+='<td class="xs2 mut">'+_esc(cmd.date)+'</td>';
+      h+='<td class="semi">'+_esc(cmd.nom)+'</td>';
       h+='<td><span class="bg '+(cmd.type==='personnalise'?'bgpu':'bgd')+'">'+(cmd.type==='personnalise'?'Sur mesure':'Catalogue')+'</span></td>';
-      h+='<td class="xs2">'+detail+'</td>';
-      h+='<td class="mono xs2">'+cmd.tel+'</td>';
-      h+='<td><span class="bg '+(cmd.statut==='Livré'?'bgg':'bgo')+'">'+cmd.statut+'</span></td>';
+      h+='<td class="xs2">'+_esc(detail)+'</td>';
+      h+='<td class="mono xs2">'+_esc(cmd.tel)+'</td>';
+      h+='<td><span class="bg '+(cmd.statut==='Livré'?'bgg':'bgo')+'">'+_esc(cmd.statut)+'</span></td>';
       h+='</tr>';
     });
     h+='</tbody></table></div></div>';
@@ -13970,10 +13971,11 @@ function printVisitorReceipt(oid){
   if(!o)return;
   printDoc('<div style="max-width:500px;margin:0 auto;font-family:Outfit,sans-serif">'+docHeader("Reçu — Commande en ligne")+
   '<div style="padding:16px 26px">'+
-  [["Client",o.nom],["Téléphone",o.tel||"—"],["Manuel/Produit",o.bookTitle],["Date",o.date],["Référence",o.id]].map(function(x){return '<div style="display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid #e8e4dc"><span style="color:#6b5e52;font-size:12px">'+x[0]+'</span><span style="font-weight:700;font-size:12px">'+x[1]+'</span></div>';}).join("")+
-  (o.promo?'<div style="display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid #e8e4dc"><span style="color:#6b5e52;font-size:12px">Code promo</span><span style="font-weight:700;font-size:13px;color:#1a6e40">'+o.promo+'</span></div>':"")+
+  // Valeurs saisies par l'acheteur → échappées (audit 19/11/2026).
+  [["Client",o.nom],["Téléphone",o.tel||"—"],["Manuel/Produit",o.bookTitle],["Date",o.date],["Référence",o.id]].map(function(x){return '<div style="display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid #e8e4dc"><span style="color:#6b5e52;font-size:12px">'+x[0]+'</span><span style="font-weight:700;font-size:12px">'+_esc(x[1])+'</span></div>';}).join("")+
+  (o.promo?'<div style="display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid #e8e4dc"><span style="color:#6b5e52;font-size:12px">Code promo</span><span style="font-weight:700;font-size:13px;color:#1a6e40">'+_esc(o.promo)+'</span></div>':"")+
   '<div style="background:#142554;color:#fff;padding:12px 16px;display:flex;justify-content:space-between;align-items:center;margin-top:12px;border-radius:7px"><span style="font-size:13px;font-weight:700">TOTAL PAYÉ</span><span style="font-family:Fira Code;font-size:20px;font-weight:700;color:#FFC93C">'+fmt(o.prix)+'</span></div>'+
-  '</div></div>',"Reçu commande — "+o.nom);
+  '</div></div>',"Reçu commande — "+_esc(o.nom));
 }
 
 // ═══════════════════════════════════════════════
@@ -16500,19 +16502,23 @@ function pgVisitorOrders(){
     <div class="fl2 fic fsb mb16"><div class="ct mb0">Commandes en ligne</div></div>
     ${orders.length===0?'<div class="empty"><div class="empty-ico">🛒</div>Aucune commande visiteur</div>':
     '<div class="tw"><table><thead><tr><th>Date</th><th>Client</th><th>Téléphone</th><th>Manuel</th><th>Classe</th><th>Montant</th><th>Statut</th><th>Actions</th></tr></thead><tbody>'+
+    /* 🔐 nom, téléphone, titre : saisis par l'ACHETEUR (init de paiement public),
+       recopiés par le serveur. Affichés bruts, un nom « <img onerror=…> » tournait
+       ici, dans le navigateur qui détient la clé de synchro (audit 19/11/2026).
+       L'id passe par _vrtId : il sert dans un onclick. */
     orders.map(o=>
-      '<tr><td class="xs2 mut">'+o.date+'</td>'+
-      '<td class="semi s">'+o.nom+'</td>'+
-      '<td class="mono xs2">'+o.tel+'</td>'+
-      '<td class="s">'+o.bookTitle+'</td>'+
-      '<td><span class="bg bgd">'+(o.cls||'—')+'</span></td>'+
+      '<tr><td class="xs2 mut">'+_esc(o.date)+'</td>'+
+      '<td class="semi s">'+_esc(o.nom)+'</td>'+
+      '<td class="mono xs2">'+_esc(o.tel)+'</td>'+
+      '<td class="s">'+_esc(o.bookTitle)+'</td>'+
+      '<td><span class="bg bgd">'+_esc(o.cls||'—')+'</span></td>'+
       '<td class="mono bold" style="color:var(--gold)">'+fmt(o.prix)+'</td>'+
-      '<td><span class="bg '+(o.statut==='Confirmé'?'bgg':o.statut==='Annulé'?'bgr':'bgo')+'">'+o.statut+'</span></td>'+
+      '<td><span class="bg '+(o.statut==='Confirmé'?'bgg':o.statut==='Annulé'?'bgr':'bgo')+'">'+_esc(o.statut)+'</span></td>'+
       '<td><div class="fl2 g4">'+
-      (o.statut==='En attente'?'<button class="btn bgr2 xs" onclick="confirmVOrder(\''+o.id+'\')">✓</button><button class="btn br2 xs" onclick="cancelVOrder(\''+o.id+'\')">✕</button>':'')+
-      (o.statut==='Confirmé'?'<button class="btn bgr2 xs" onclick="sendVisitorReceipt(&apos;'+o.id+'&apos;)"><svg class="vico bico" aria-hidden="true"><use href="#lc-doc"/></svg>Reçu WA</button><button class="btn bo xs" onclick="printVisitorReceipt(&apos;'+o.id+'&apos;)"><svg class="vico bico" aria-hidden="true"><use href="#lc-printer"/></svg>️</button>':'')+
-      '<button class="btn bgr2 xs" onclick="sendVisitorReceipt(\''+o.id+'\')"><svg class="vico bico" aria-hidden="true"><use href="#lc-doc"/></svg>Reçu</button>'+
-      '<a href="https://wa.me/'+o.tel.replace(/[^0-9]/g,'')+'" target="_blank" class="btn bo xs">📲</a>'+
+      (o.statut==='En attente'?'<button class="btn bgr2 xs" onclick="confirmVOrder(\''+_vrtId(o.id)+'\')">✓</button><button class="btn br2 xs" onclick="cancelVOrder(\''+_vrtId(o.id)+'\')">✕</button>':'')+
+      (o.statut==='Confirmé'?'<button class="btn bgr2 xs" onclick="sendVisitorReceipt(&apos;'+_vrtId(o.id)+'&apos;)"><svg class="vico bico" aria-hidden="true"><use href="#lc-doc"/></svg>Reçu WA</button><button class="btn bo xs" onclick="printVisitorReceipt(&apos;'+_vrtId(o.id)+'&apos;)"><svg class="vico bico" aria-hidden="true"><use href="#lc-printer"/></svg>️</button>':'')+
+      '<button class="btn bgr2 xs" onclick="sendVisitorReceipt(\''+_vrtId(o.id)+'\')"><svg class="vico bico" aria-hidden="true"><use href="#lc-doc"/></svg>Reçu</button>'+
+      '<a href="https://wa.me/'+String(o.tel||'').replace(/[^0-9]/g,'')+'" target="_blank" rel="noopener" class="btn bo xs">📲</a>'+
       '</div></td></tr>'
     ).join('')+
     '</tbody></table></div>'}</div>`;
@@ -17029,20 +17035,20 @@ function pgOrientationAdmin(){
     `<div class="tw"><table>
       <thead><tr><th>Date</th><th>Nom</th><th>Téléphone</th><th>Niveau</th><th>Service demandé</th><th>Disponibilité</th><th>Statut</th><th>Actions</th></tr></thead>
       <tbody>${demandes.map(d=>`<tr>
-        <td class="xs2 mut">${d.date||'—'}</td>
-        <td class="bold s">${d.nom}</td>
-        <td class="mono xs2"><a href="https://wa.me/237${(d.tel||'').replace(/[^0-9]/g,'')}" target="_blank" style="color:var(--gr)">📲 ${d.tel}</a></td>
-        <td><span class="bg bgd">${d.niveau||'—'}</span></td>
-        <td class="s">${d.type||'—'}</td>
-        <td class="xs2">${d.dispo||'—'}</td>
-        <td><select class="fi" style="padding:3px 6px;font-size:12px;width:110px" onchange="updateOrientStatut('${d.id}',this.value)">
+        <td class="xs2 mut">${_esc(d.date||'—')}</td>
+        <td class="bold s">${_esc(d.nom)}</td>
+        <td class="mono xs2"><a href="https://wa.me/237${String(d.tel||'').replace(/[^0-9]/g,'')}" target="_blank" rel="noopener" style="color:var(--gr)">📲 ${_esc(d.tel)}</a></td>
+        <td><span class="bg bgd">${_esc(d.niveau||'—')}</span></td>
+        <td class="s">${_esc(d.type||'—')}</td>
+        <td class="xs2">${_esc(d.dispo||'—')}</td>
+        <td><select class="fi" style="padding:3px 6px;font-size:12px;width:110px" onchange="updateOrientStatut('${_vrtId(d.id)}',this.value)">
           <option${d.statut==='En attente'?' selected':''}>En attente</option>
           <option${d.statut==='En cours'?' selected':''}>En cours</option>
           <option${d.statut==='Clôturé'?' selected':''}>Clôturé</option>
         </select></td>
         <td><div class="fl2 g4">
-          ${d.msg?`<button class="btn bo xs" onclick="viewOrientMsg('${d.id}')"><svg class="vico bico" aria-hidden="true"><use href="#lc-doc"/></svg>Msg</button>`:''}
-          <button class="btn br2 xs" onclick="delOrientDemande('${d.id}')">🗑</button>
+          ${d.msg?`<button class="btn bo xs" onclick="viewOrientMsg('${_vrtId(d.id)}')"><svg class="vico bico" aria-hidden="true"><use href="#lc-doc"/></svg>Msg</button>`:''}
+          <button class="btn br2 xs" onclick="delOrientDemande('${_vrtId(d.id)}')">🗑</button>
         </div></td>
       </tr>`).join('')}</tbody>
     </table></div>`}
@@ -22202,6 +22208,13 @@ function _showLittCarte_svg_unused(oeuvreKey){
     +'</div>'
     +'</div></div>');
 }
+
+/* Identifiant destiné à un onclick="f('…')" : on ne garde que les caractères
+   qu'émettent nos générateurs (gid(), 'ord_'+hex, références VT…). Un id
+   fabriqué ailleurs — base importée, saisie publique — ne peut donc plus
+   refermer la chaîne et ajouter du code (audit 19/11/2026). Déclaration de
+   fonction : hissée, disponible avant toute page. */
+function _vrtId(s){ return String(s==null?'':s).replace(/[^A-Za-z0-9_.:\-]/g,''); }
 
 // Helper d'échappement XML/HTML (si non défini ailleurs)
 if(typeof _esc !== 'function'){
