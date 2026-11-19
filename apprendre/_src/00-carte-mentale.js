@@ -527,17 +527,56 @@
     var t = nu(r).replace(/^Savoir-être[^:]*:\s*/i, ""), m = t.replace(/([.!?])\s+(?=[A-ZÀ-Ý«])/g, "$1\u0001").split(/\s*;\s*|\u0001/).map(function (x) { return x.replace(/[.]\s*$/, "").trim(); }).filter(function (x) { return x.length > 1; });
     return m.length ? m : (t ? [t] : []);
   }
+  /* 19/11/2026 « carte mentale mal sortie » : une branche ne gardait qu'un mot en gras (« effet photoélectrique »).
+     Chaque branche reçoit maintenant 2 à 4 idées tirées de la partie, dans cet ordre : formules encadrées,
+     définitions « terme : sens », « à retenir », puis les premières phrases du cours, raccourcies à la virgule. */
+  var ETIQ = /^(Définitions?|Propriétés?|Théorèmes?|Méthodes?|Exemples?|Remarques?|Retiens|Attention|Astuces?|Le savais-tu|À retenir|Règles?|Formules?|Vocabulaire|Rappels?|Conseils?)\b/i;
+  function court(t, n) {
+    t = t.replace(/([A-Za-zλν])_(?=[a-z0-9])/g, "$1").replace(/[.;:]\s*$/, "").replace(/\s+/g, " ").trim(); n = n || 92;
+    if (t.length <= n) return t;
+    var v = t.lastIndexOf(", ", n); if (v >= 32) return t.slice(0, v);
+    var e = t.lastIndexOf(" ", n - 1); return t.slice(0, e > 20 ? e : n - 1) + "…";
+  }
+  function idees(p) {
+    var h = String(p.html || "").replace(/<(details|table|svg|figure|script|style)\b[\s\S]*?<\/\1>/gi, " ")
+      .replace(/<(b|strong)>\s*([^<]{0,30})<\/\1>/gi, function (m, t, x) { return ETIQ.test(x.trim()) ? " " : m; });
+    var forms = [], defs = [], autres = [];
+    h = h.replace(/<(p|div|span)\b[^>]*class=['"][^'"]*\bformule\b[^'"]*['"][^>]*>([\s\S]*?)<\/\1>/gi, function (m, t, x) { var f = nu(x); if (f.length > 2 && f.length <= 70) forms.push(court(f)); return " \u0002 "; });
+    /* une phrase par bloc : on coupe aux fins de blocs et aux fins de phrases */
+    var blocs = h.replace(/<\/(p|li|div|h[1-6]|dd|dt)>|<br\s*\/?>/gi, "\u0002").split("\u0002");
+    blocs.forEach(function (bl) {
+      var gras = (bl.match(/<(?:strong|b)>([^<]{3,60})<\/(?:strong|b)>/g) || []).map(nu).filter(function (x) { return x.split(" ").length <= 5 && !ETIQ.test(x); });
+      var tx = nu(bl);
+      /* intertitre en gras collé au texte (« Raisonnement L'ovule… ») : c'est une étiquette, pas une idée */
+      gras.forEach(function (x) { if (tx.indexOf(x) === 0 && /^\s+[A-ZÀ-Ý«0-9]/.test(tx.slice(x.length))) { tx = tx.slice(x.length).trim(); gras = gras.filter(function (y) { return y !== x; }); } });
+      tx.replace(/([.!?])\s+(?=[A-ZÀ-Ý«])/g, "$1\u0001").split("\u0001").forEach(function (ph) {
+        ph = ph.trim(); if (ph.length < 12 || /\?$/.test(ph) || /^(le |les )?(documents?|doc\.?|figure|tableau|planche|schéma)\s*\d/i.test(ph)) return;
+        /* « terme : sens » seulement si le mot en gras ouvre la phrase et qu'elle le définit */
+        var g = gras.filter(function (x) { var i = ph.indexOf(x); return i >= 0 && /^(l['’]|les?|la|une?|des|du)?$/i.test(ph.slice(0, i).trim()); })[0];
+        var reste = g ? ph.slice(ph.indexOf(g) + g.length) : "", m = /^\s*(?:\([^)]*\)\s*|[^\s,:]{1,4}\s+(?=vérifie|est\b|vaut|mesure))?(?::|–|—|,?\s*(?:est|sont|désignent?|signifie|correspond à|consiste à|vérifie|vaut|permet de|sert à|mesure|représente)\b)\s*/i.exec(reste);
+        if (g && m && reste.length - m[0].length > 6) {
+          var verbe = /vérifie|vaut|permet|sert|mesure|représente/i.test(m[0]) ? m[0].trim().replace(/^[,:\s]+/, "") + " " : "";
+          defs.push(court(g.charAt(0).toUpperCase() + g.slice(1) + " : " + verbe + reste.slice(m[0].length), 110));
+        } else if (ph.split(" ").length >= 5 || /[=≈]/.test(ph)) autres.push({ t: court(ph), eq: /[=≈<>≤≥→]/.test(ph) });
+      });
+    });
+    var ret = p.retenir ? morceaux(p.retenir).map(function (x) { return court(x); }) : [];
+    autres.sort(function (x, y) { return (y.eq ? 1 : 0) - (x.eq ? 1 : 0); });
+    var tout = ret.length >= 3 ? ret : forms.concat(defs, ret, autres.slice(0, 3).map(function (o) { return o.t; })), it = [], vus = [];
+    tout.forEach(function (x) {
+      var k = x.toLowerCase().replace(/[^a-z0-9à-ÿ=]+/g, "");
+      if (!k || it.length >= 4 || vus.some(function (v) { return v.indexOf(k) >= 0 || k.indexOf(v) >= 0; })) return;
+      vus.push(k); it.push(x);
+    });
+    return it;
+  }
   function VRT_CM_LECON(L) {
     if (!L || !L.parties) return "";
     var B = [];
     L.parties.forEach(function (p) {
       if (p.verrou || /entraînement|entrainement|intégration|exercices?\b/i.test(p.t || "")) return;
-      var it = p.retenir ? morceaux(p.retenir) : [];
-      if (it.length < 2) {
-        var g = (String(p.html || "").match(/<(?:strong|b)>([^<]{3,60})<\/(?:strong|b)>/g) || []).map(nu).filter(function (x, i, a) { return a.indexOf(x) === i && x.split(" ").length <= 4 && it.indexOf(x) < 0 && !/^(Définition|Exemple|Attention|Astuce|Le savais-tu|Remarque|Méthode|Retiens|Comparer|À retenir)/i.test(x) && !/^(que|qui|dont|où|et|le|la|les|un|une|de|des)\s/i.test(x); });
-        it = it.concat(g.slice(0, 5 - it.length));
-      }
-      if (it.length) B.push({ label: nu(p.t).replace(/^\d+\.\s*/, "").slice(0, 42), items: it.slice(0, 6) });
+      var it = idees(p);
+      if (it.length) B.push({ label: court(nu(p.t).replace(/^\d+\.\s*/, ""), 60).replace(/…$/, ""), items: it });
     });
     if (B.length < 2) return "";
     /* forme selon le contenu : étapes → flux ; causes et conséquences → multi-flux ; sinon variée selon le titre */
