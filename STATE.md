@@ -1,3 +1,12 @@
+## Carte mentale des leçons enrichie, icônes au trait, déploiement débloqué (19/11/2026, branche carte-lecon-deploiement)
+
+Demandes de Jacques (captures téléphone) : « Carte mentale mal sortie. Finalise la suppression des cadres, tableau dans les tableaux », puis « Améliore la qualité des icônes, puces ».
+
+- **Pourquoi les cadres étaient encore là** : la PR #393 (leçons sans encadrés) n'a JAMAIS été mise en ligne : les déploiements de #395 et #396 ont échoué au contrôle GEO (« llms.txt est périmé »). `python3 tools/build_llms.py` relancé : le déploiement repart et emporte #393.
+- **Carte mentale de la leçon** (`VRT_CM_LECON`, `_src/00-carte-mentale.js`) : une branche ne gardait souvent qu'un mot en gras. Fonction `idees(p)` : 2 à 4 idées par partie, dans l'ordre formules (`.formule`), définitions « Terme : sens » (seulement si le mot en gras ouvre la phrase et qu'elle le définit), « à retenir », puis phrases du cours raccourcies à la virgule ; intertitres en gras, renvois aux documents et réponses (`details`) écartés ; `E_c` → `Ec` ; titres de branche coupés au mot. Exemple Tle D effet photoélectrique : 3 branches, 5 idées (au lieu de 3 mots). `lecons.js?v=20261119cm` partout ; `chunks/carte-mentale.js` régénéré (`oeuvres_statiques.js`).
+- **Icônes et puces** (`lecon-epure.css` § 19/11 (6), `?v=20261119i`) : définition, propriété, méthode, exemple = tuile douce de la couleur de la famille + pictogramme au trait (livre, sceau, engrenage régulier, crayon), plus d'illustrations multicolores ni d'ombre floue ; rail pointillé → filet plein dégradé ; « à retenir » : punaise au trait ; notes collées : ampoule, triangle, signet, « i » au trait ; indices : loupe en tuile ; puces : chevron dans une pastille de la couleur du bloc (plus de `hue-rotate`).
+- Bancs gabarits 54, verrou 18, réglages 29 au vert ; contrôles GEO, œuvres, habillage au vert ; Chromium (Pixel 5) : aucune erreur JS.
+
 ## Accès enseignant : rôle déclaré sans passe-droit, équipe marquée par l'admin (19/11/2026, branche acces-enseignant-pdf)
 
 - **Serveur** : `vrt_compte_equipe` (api/_auth_lib.php) remplace le test `role === 'enseignant'` dans content.php, apprendre.php (classes, labos, PDF), direct.php, manuels.php et désormais **student_data.php (forum des classes)** : un rôle « enseignant » coché à l'inscription n'ouvre plus le forum de toutes les classes, les annonces, ni le badge « Enseignant ». Seuls l'admin et les enseignants marqués `equipe: true` gardent l'accès complet ; les autres passent par une formule Prof.
