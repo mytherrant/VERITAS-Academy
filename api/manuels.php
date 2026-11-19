@@ -237,6 +237,7 @@ if ($methode === 'POST' && $action === 'creer') {
     if (!is_array($db)) man_echec('base illisible (creer)', 'Service momentanément indisponible.', 503);
     $acc = man_appelant($db);
     if ($acc === null) man_json(['ok' => false, 'raison' => 'connexion', 'erreur' => 'Connectez-vous avec votre compte enseignant pour créer un manuel. ' . MAN_MSG_FORMULE]);
+    if ((string) ($acc['id'] ?? '') === '') man_json(['ok' => false, 'raison' => 'connexion', 'erreur' => 'Ce compte ne peut pas posséder de manuel : reconnectez-vous avec votre compte enseignant.']);
     if (!vrt_formule_enseignant($acc, $db)) man_json(['ok' => false, 'raison' => 'formule', 'erreur' => MAN_MSG_FORMULE . ' Votre compte n\'en a pas d\'active.']);
     $in = man_corps();
     $titre = man_txt($in['titre'] ?? '', 120);
@@ -261,7 +262,13 @@ if ($methode === 'GET') {
     if ($m === null) man_echec("lire $id : fichier illisible", 'Manuel momentanément illisible.');
     $editeur = man_cle_ok($m);
     $fige = false;   // clé valide, mais la formule du proprio a pris fin : lecture complète, sans édition
-    if ($editeur && !empty($m['proprio'])) $fige = !man_proprio_actif($m, vrt_load_db());
+    if ($editeur && !empty($m['proprio'])) {
+        $dbL = vrt_load_db();
+        // Base illisible : une panne, pas une fin d'abonnement (relecture du 19/11/2026).
+        if (!is_array($dbL)) man_json(['erreur' => 'Service momentanément indisponible.'], 503);
+        // Proprio disparu de la base : le manuel se reprend à l'enregistrement, il n'est pas gelé.
+        $fige = man_compte_id($dbL, (string) $m['proprio']) !== null && !man_proprio_actif($m, $dbL);
+    }
     man_json(man_entete($m) + ['editeur' => $editeur && !$fige, 'fige' => $fige,
         'doc' => $editeur ? $m['doc'] : man_vue_publique($m['doc'])]);
 }
@@ -279,7 +286,8 @@ if ($methode === 'POST' && $action === 'enregistrer') {
     if (!man_cle_ok($m)) $fin(['erreur' => "Lien d'édition invalide."], 403);
     $db = vrt_load_db();
     if (!is_array($db)) $fin(['erreur' => 'Service momentanément indisponible.'], 503);
-    if (empty($m['proprio'])) {
+    // Sans proprio (manuel ancien) OU proprio supprimé de la base : repris par l'enseignant abonné qui enregistre.
+    if (empty($m['proprio']) || man_compte_id($db, (string) $m['proprio']) === null) {
         // Manuel créé avant le 19/11/2026 : l'enseignant abonné qui l'enregistre le reprend.
         $acc = man_appelant($db);
         if ($acc === null || !vrt_formule_enseignant($acc, $db))
