@@ -1,3 +1,8 @@
+## Correctif : habillage des 3 cours d'histoire de 6e (20/11/2026)
+
+- Le déploiement de #402 a échoué au contrôle « Chaque page porte-t-elle l'habillage de la vitrine ? » : les 3 pages `apprendre/cours/6e-histoire-*.html` n'étaient pas habillées.
+- **Piège** : `tools/habiller_pages.py` (et son `--controle`) ne voit que les fichiers SUIVIS par git. Une page neuve générée par `apprendre_statique.js` reste invisible tant qu'elle n'est pas ajoutée : le contrôle local passe, la CI échoue. **Toujours : générer → `git add` → `python3 tools/habiller_pages.py` → `--controle` → commit.**
+
 ## Apprendre : histoire de 6e, lot 1 — leçons gratuites (20/11/2026, branche histoire-6e)
 
 Demande de Jacques : « Continue l'enrichissement des leçons », « ne supprime rien, rassure-toi que c'est illustré et que les situations-problèmes sont résolues, les étapes, cartes mentales ».
