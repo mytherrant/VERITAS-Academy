@@ -1,3 +1,8 @@
+## Correctif : habillage des 3 cours d'histoire de 6e (20/11/2026)
+
+- Le déploiement de #402 a échoué au contrôle « Chaque page porte-t-elle l'habillage de la vitrine ? » : les 3 pages `apprendre/cours/6e-histoire-*.html` n'étaient pas habillées.
+- **Piège** : `tools/habiller_pages.py` (et son `--controle`) ne voit que les fichiers SUIVIS par git. Une page neuve générée par `apprendre_statique.js` reste invisible tant qu'elle n'est pas ajoutée : le contrôle local passe, la CI échoue. **Toujours : générer → `git add` → `python3 tools/habiller_pages.py` → `--controle` → commit.**
+
 ## Apprendre : lot 5 philosophie de Tle, leçons à verrou — espace, temps, histoire ; logique (20/11/2026, branche apprendre-philo-tle-lot5)
 
 Part de cette session dans le partage des leçons de Tle (Towa : lot 3 ; Njoh-Mouelle, art et travail : lot 4 ; sciences : autre session). Aucune autre leçon touchée.
