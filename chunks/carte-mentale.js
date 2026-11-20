@@ -524,8 +524,11 @@
   /* carte d'une leçon : une branche par partie (hors entraînement), les mots tirés de « à retenir »
      (coupé aux « ; » et aux phrases), à défaut des titres en gras de la partie. */
   function nu(h) { return String(h || "").replace(/<[^>]+>/g, " ").replace(/&nbsp;/g, " ").replace(/&amp;/g, "&").replace(/&lt;/g, "<").replace(/&gt;/g, ">").replace(/&#39;|&rsquo;/g, "’").replace(/&quot;/g, "\"").replace(/\s+/g, " ").trim(); }
+  /* « av. J.-C. », « apr. J.-C. », « env. », « ex. » : le point d'une abréviation n'est pas une fin de phrase */
+  function abrev(t) { return String(t).replace(/(^|[\s(])(av|apr|env|ex|cf|vol|chap|fig|doc|M)\.(?=\s)/g, "$1$2\u0002"); }
+  function rabrev(t) { return String(t).replace(/\u0002/g, "."); }
   function morceaux(r) {
-    var t = nu(r).replace(/^Savoir-être[^:]*:\s*/i, ""), m = t.replace(/([.!?])\s+(?=[A-ZÀ-Ý«]|\d+ (?:et|ou|à) \d)/g, "$1\u0001").split(/\s*;\s*|\u0001/).map(function (x) { return x.replace(/[.]\s*$/, "").trim(); }).filter(function (x) { return x.length > 1; });
+    var t = abrev(nu(r).replace(/^Savoir-être[^:]*:\s*/i, "")), m = t.replace(/([.!?])\s+(?=[A-ZÀ-Ý«]|\d+ (?:et|ou|à) \d)/g, "$1\u0001").split(/\s*;\s*|\u0001/).map(function (x) { return rabrev(x).replace(/([^C])[.]\s*$/, "$1").trim(); }).filter(function (x) { return x.length > 1; });
     return m.length ? m : (t ? [t] : []);
   }
   /* 19/11/2026 « carte mentale mal sortie » : une branche ne gardait qu'un mot en gras (« effet photoélectrique »).
@@ -533,7 +536,7 @@
      définitions « terme : sens », « à retenir », puis les premières phrases du cours, raccourcies à la virgule. */
   var ETIQ = /^(Définitions?|Propriétés?|Théorèmes?|Méthodes?|Exemples?|Remarques?|Retiens|Attention|Astuces?|Le savais-tu|À retenir|Règles?|Formules?|Vocabulaire|Rappels?|Conseils?)\b/i;
   function court(t, n) {
-    t = t.replace(/([A-Za-zλν])_(?=[a-z0-9])/g, "$1").replace(/[.;:]\s*$/, "").replace(/\s+/g, " ").trim(); n = n || 92;
+    t = t.replace(/([A-Za-zλν])_(?=[a-z0-9])/g, "$1").replace(/[.;:]\s*$/, function (m, i, ch) { return /J\.-C$/.test(ch.slice(0, i)) ? "." : ""; }).replace(/\s+/g, " ").trim(); n = n || 92;
     /* guillemets orphelins laissés par la coupe des phrases (« … ». « … ») */
     t = t.replace(/^[»\s;,]+/, "").replace(/[«\s;,]+$/, "").trim();
     if ((t.match(/«/g) || []).length > (t.match(/»/g) || []).length) t = t.replace(/«\s*(?!.*«)/, "");
@@ -560,7 +563,8 @@
       var tx = nu(bl);
       /* intertitre en gras collé au texte (« Raisonnement L'ovule… ») : c'est une étiquette, pas une idée */
       gras.forEach(function (x) { if (tx.indexOf(x) === 0 && /^\s+[A-ZÀ-Ý«0-9]/.test(tx.slice(x.length))) { tx = tx.slice(x.length).trim(); gras = gras.filter(function (y) { return y !== x; }); } });
-      tx.replace(/([.!?])\s+(?=[A-ZÀ-Ý«]|\d+ (?:et|ou|à) \d)/g, "$1\u0001").split("\u0001").forEach(function (ph) {
+      abrev(tx).replace(/([.!?])\s+(?=[A-ZÀ-Ý«]|\d+ (?:et|ou|à) \d)/g, "$1\u0001").split("\u0001").forEach(function (ph) {
+        ph = rabrev(ph);
         ph = ph.trim(); if (ph.length < 12 || /\?$/.test(ph) || /^(le |les )?(documents?|doc\.?|figure|tableau|planche|schéma)\s*\d/i.test(ph)) return;
         /* « terme : sens » seulement si le mot en gras ouvre la phrase et qu'elle le définit */
         var g = gras.filter(function (x) { var i = ph.indexOf(x); return i >= 0 && /^(l['’]|les?|la|une?|des|du)?$/i.test(ph.slice(0, i).trim()); })[0];
