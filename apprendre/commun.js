@@ -309,14 +309,14 @@
   function cahierDefaut(c, m) {
     c = c || ""; var col = { "6e": "6e", "5e": "5e", "4e": "4e", "3e": "3e" }[c];
     if (m === "francais") {
-      if (col) return { h: "/livrets/" + col + ".html", t: "Mon cahier de français " + c, d: "Le cahier interactif de l'année, leçon par leçon : 1 500 F l'année." };
+      if (col) return { h: "/livrets/" + col + ".html", t: "Mon cahier de français " + c, d: "Le cahier interactif de l'année, leçon par leçon : 1\u00a0500\u00a0F l'année." };
       var st = /C|D/.test(c.split(" ")[1] || "");
       var niv = /^2nde/.test(c) ? "2nde" : /^1re/.test(c) ? "1ere" : /^Tle/.test(c) ? "tle" : "";
-      if (niv) return { h: "/livrets/" + (st ? "est-" : "") + niv + ".html", t: "Mon cahier de français " + c, d: "Le cahier interactif de l'année, leçon par leçon : 1 500 F l'année." };
+      if (niv) return { h: "/livrets/" + (st ? "est-" : "") + niv + ".html", t: "Mon cahier de français " + c, d: "Le cahier interactif de l'année, leçon par leçon : 1\u00a0500\u00a0F l'année." };
     }
     if (m === "philo") {
-      if (/^Tle/.test(c)) return { h: "/livrets/cahier-philo-tle.html", t: "Mon livret de philosophie, Terminale", d: "Cours, textes et sujets de dissertation de l'année : 1 500 F l'année." };
-      if (/^1re/.test(c)) return { h: "/livrets/cahier-philo-1ere.html", t: "Mon livret de philosophie, Première", d: "Cours, textes et sujets de l'année : 1 500 F l'année." };
+      if (/^Tle/.test(c)) return { h: "/livrets/cahier-philo-tle.html", t: "Mon livret de philosophie, Terminale", d: "Cours, textes et sujets de dissertation de l'année : 1\u00a0500\u00a0F l'année." };
+      if (/^1re/.test(c)) return { h: "/livrets/cahier-philo-1ere.html", t: "Mon livret de philosophie, Première", d: "Cours, textes et sujets de l'année : 1\u00a0500\u00a0F l'année." };
     }
     return null;
   }
@@ -420,6 +420,45 @@
       '<a class="fo-btn fo-btn-h" href="https://wa.me/' + WA_VERITAS + '?text=' + encodeURIComponent(txt) + '" target="_blank" rel="noopener">' + esc(HUMAIN.bouton) + '</a>' +
       (HUMAIN.lien ? '<a class="fo-lien" href="' + esc(HUMAIN.lien) + '">' + esc(HUMAIN.lienT) + '</a>' : '') + '</div>';
   }
+  /* Une info sans cadre : titre facultatif, une phrase, un lien coloré en dessous. */
+  function infoLien(t, d, h, lien, cl) {
+    return '<div class="oi ' + (cl || "") + '">' + (t ? '<b class="oi-t">' + esc(t) + '</b>' : '') + '<p class="oi-d">' + esc(d) + '</p>' +
+      '<a class="oi-a" href="' + esc(h) + '"' + (/^https?:/.test(h) ? ' target="_blank" rel="noopener"' : '') + '>' + esc(lien) + ' <span aria-hidden="true">›</span></a></div>';
+  }
+  /* Livrets : les couvertures défilent (catalogue de /api/livret.php, vignettes du serveur), celui de la classe en tête.
+     Serveur muet ou sans couverture : la bande reste cachée, l'info et le lien suffisent. */
+  function blocLivrets(c, cah) {
+    setTimeout(poserLivrets, 0);
+    return '<div class="oi oi-livrets" data-vrt-livrets="' + esc(cah ? cah.h.replace(/^.*\//, "").replace(/\.html$/, "") : "") + '">' +
+      '<b class="oi-t">' + esc(cah ? cah.t : "Les livrets VÉRITAS") + '</b>' +
+      '<p class="oi-d">' + esc(cah ? cah.d : "Cahiers interactifs, œuvres au programme, philosophie : feuillette un extrait gratuit.") + '</p>' +
+      '<div class="oi-defile" hidden><div class="oi-piste"></div></div>' +
+      '<a class="oi-a" href="' + esc(cah ? cah.h : "/livrets/") + '">' + (cah ? "Feuilleter mon livret" : "Voir les livrets") + ' <span aria-hidden="true">›</span></a></div>';
+  }
+  var CATALOGUE_LIVRETS = null;
+  function poserLivrets() {
+    var blocs = [].filter.call(document.querySelectorAll("[data-vrt-livrets]"), function (b) { return !b.getAttribute("data-pose"); });
+    if (!blocs.length) return;
+    blocs.forEach(function (b) { b.setAttribute("data-pose", "1"); });
+    var p = CATALOGUE_LIVRETS || (CATALOGUE_LIVRETS = fetch("/api/livret.php", { method: "POST", headers: { "Content-Type": "application/json" }, body: '{"action":"catalogue"}' })
+      .then(function (r) { return r.ok ? r.json() : null; }).catch(function () { return null; }));
+    p.then(function (j) {
+      var ouv = (j && j.ok && Array.isArray(j.ouvrages) ? j.ouvrages : []).filter(function (o) { return o && o.slug && o.couverture && !o.retire; });
+      if (ouv.length < 2) return;
+      blocs.forEach(function (b) {
+        var mien = b.getAttribute("data-vrt-livrets"), l = ouv.slice().sort(function (a, z) { return (z.slug === mien) - (a.slug === mien); });
+        var une = l.map(function (o) {
+          var v = String(o.couverture).replace(/\.jpg(\?|$)/, "_v.webp$1");
+          return '<a class="oi-couv" href="' + esc(/^(\/|https?:)/.test(o.lien || "") ? o.lien : "/livrets/" + (o.lien || o.slug + ".html")) + '" title="' + esc(o.titre || o.slug) + '"><img src="' + esc(v) + '" alt="' + esc(o.titre || "") + '" width="90" height="120" loading="lazy" decoding="async" onerror="var a=this.parentNode;a.parentNode&&a.parentNode.removeChild(a)"></a>';
+        }).join("");
+        var d = b.querySelector(".oi-defile");
+        /* deux fois la même suite : la bande boucle sans à-coup (translateX -50 %) ; la copie est masquée aux lecteurs d'écran */
+        d.querySelector(".oi-piste").innerHTML = une + '<span class="oi-copie" aria-hidden="true">' + une.replace(/<a /g, '<a tabindex="-1" ') + '</span>';
+        d.style.setProperty("--oi-n", l.length);
+        d.hidden = false;
+      });
+    });
+  }
   function offre(c, m, ctx) {
     var oc = obj(CFG.offre);
     if (oc.actif === false) return "";
@@ -433,9 +472,13 @@
       '<h2 class="offre-h">' + esc(txt(oc.titre) || "Choisis ta formule") + '</h2>' +
       carteFormule(fc, true, c) +
       '<div class="offre-autres">' + FORMULES.filter(function (f) { return f !== fc; }).map(function (f) { return carteFormule(f, false, c, true); }).join("") + '</div>' +
-      '<p class="offre-n">Paiement Orange Money ou MTN MoMo, sans engagement. L\'année payée en une fois revient à un peu plus de huit mois. <a href="/app.html#abonnement?plan=abo_famille_m">Formule Famille</a> : jusqu\'à 4 enfants.</p>' +
-      (oc.humainActif === false ? "" : lienOffre("https://wa.me/" + WA_VERITAS + "?text=" + encodeURIComponent("Bonjour VÉRITAS, je souhaite un devis pour un accompagnement" + (c ? " en " + c : "") + " : suivi particulier en ligne / répétitions à domicile. Ville et quartier : "), "Besoin d'un professeur à côté de toi ?", HUMAIN.tarif + " Suivi en ligne ou répétitions à domicile.", PICTO_CLE, "or ol-prof")) +
-      (cah ? lienOffre(cah.h, cah.t, cah.d, PICTO_LIVRE, "ol-cahier") : "") + '</aside>';
+      /* 20/11/2026 « ici c'est touffu : mets juste les infos avec lien coloré en bas pour y accéder ;
+         pour les livrets, fais défiler les couvertures » : plus d'encadrés, une info = une ligne + un lien coloré. */
+      '<div class="offre-infos">' +
+      infoLien("", "Paiement Orange Money ou MTN MoMo, sans engagement. L'année payée en une fois revient à un peu plus de huit mois. Formule Famille : jusqu'à 4 enfants.", "/app.html#abonnement?plan=abo_famille_m", "Voir la formule Famille", "oi-pay") +
+      (oc.humainActif === false ? "" : infoLien("Besoin d'un professeur à côté de toi ?", HUMAIN.tarif + " Suivi en ligne ou répétitions à domicile.", "https://wa.me/" + WA_VERITAS + "?text=" + encodeURIComponent("Bonjour VÉRITAS, je souhaite un devis pour un accompagnement" + (c ? " en " + c : "") + " : suivi particulier en ligne / répétitions à domicile. Ville et quartier : "), "Demander un devis", "oi-prof")) +
+      (oc.cahiers === false ? "" : blocLivrets(c, cah)) +
+      '</div></aside>';
     return '<aside class="offre offre-' + ctx + '" aria-label="' + esc(titre) + '"><p class="offre-t">' + esc(titre) + '</p>' +
       '<h2 class="offre-h">' + esc(txt(oc.titre) || "Choisis ta formule") + '</h2>' +
       '<div class="offre-grille"><div class="offre-plans">' +

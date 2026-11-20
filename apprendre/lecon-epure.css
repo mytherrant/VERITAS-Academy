@@ -246,3 +246,56 @@ html body .carte .partie .prop ul:not([class])>li::before,html body .carte .part
 html body .carte .methode::before{background-size:25px!important}
 html body .carte .fil::before{width:40px!important;height:40px!important;border-radius:12px;background:#DCE6F8 var(--ep-t-loupe) center/22px no-repeat!important}
 @media (max-width:560px){html body .carte .fil::before{width:34px!important;height:34px!important;border-radius:11px;background-size:19px!important;top:-5px!important}}
+
+/* ── 20/11 « impossible de distinguer les parties : mets les mêmes icônes avec pointillés comme ailleurs ;
+   mets les corpus, situations de vie dans des encadrés » (capture « Pour commencer » / « Situation de vie ») ──
+   1. Un seul rail pointillé, de la couleur du bloc, sous chaque tuile : encadrés du cours, « Pour commencer », objectifs.
+   2. Les textes à lire (situation de vie, récit de la situation-problème, documents, corpus) : un encadré, un seul niveau. */
+/* 1. rail pointillé (remplace le filet plein des encadrés) */
+html body .carte .def::after,html body .carte .prop::after,html body .carte .methode::after,html body .carte .ex::after,
+html body .carte .info-b::after,html body .carte .objectifs::after{content:"";position:absolute;left:18px!important;top:50px!important;bottom:4px!important;width:4px!important;border:0!important;border-radius:0!important;
+  background:radial-gradient(circle,var(--ep3-rail,var(--ep2-c,#1E499B)) 1.6px,transparent 2px) 0 0/4px 10px repeat-y!important;
+  -webkit-mask:linear-gradient(#000 55%,transparent)!important;mask:linear-gradient(#000 55%,transparent)!important;opacity:.55}
+/* « Pour commencer » : tuile bleue, texte décalé à droite du rail */
+html body .carte .info-b{position:relative!important;margin:0 0 28px!important;padding:0!important}
+html body .carte .info-b h2{align-items:center;gap:12px!important;min-height:40px;font:700 19px/1.3 var(--vm-titre,var(--sans))!important;color:#1E499B!important}
+html body .carte .info-b p.info{padding-left:52px!important}
+html body .carte .info-b{--ep3-rail:#1E499B}
+/* objectifs : cible au trait sur tuile magenta, pastilles alignées à droite du rail */
+html body .carte .objectifs{position:relative!important;--ep3-rail:#B2316E;margin:0 0 30px!important}
+html body .carte .objectifs>b{display:flex!important;align-items:center;gap:12px!important;min-height:40px;margin:0 0 8px!important;font:700 19px/1.3 var(--vm-titre,var(--sans))!important;color:#8D1D52!important}
+html body .carte .objectifs ul{padding-left:52px!important}
+html body .carte .objectifs li{padding-left:24px!important}
+html body .carte .objectifs li::before{left:0!important}
+@media (max-width:560px){
+    html body .carte .info-b::after,html body .carte .objectifs::after,html body .carte .def::after,html body .carte .prop::after,html body .carte .methode::after,html body .carte .ex::after{left:16px!important;top:46px!important}
+  html body .carte .info-b p.info,html body .carte .objectifs ul{padding-left:46px!important}
+}
+
+/* 2. encadrés de lecture */
+/* situation de vie : carte chaude, la tâche reste une ligne à pastille (pas d'encadré dans l'encadré) */
+html body .carte .apc{position:relative!important;margin:0 0 28px!important;padding:16px 18px 18px!important;border:1.5px solid #F2D2AE!important;border-radius:18px!important;background:linear-gradient(180deg,#FFF7EC,#FFFDF9 70%)!important;box-shadow:0 6px 16px -12px rgba(194,78,0,.45)!important}
+html body .carte .apc h2{align-items:center;gap:12px!important;margin:0 0 10px!important;font:700 19px/1.3 var(--vm-titre,var(--sans))!important;color:#C24E00!important}
+html body .carte .apc .apc-t{background:none!important;border:0!important;border-top:1.5px dashed #EFC9A0!important;border-radius:0!important;padding:12px 0 0!important;margin:12px 0 0!important}
+@media (max-width:560px){html body .carte .apc{padding:14px 14px 16px!important}}
+/* corpus : feuille dorée (les documents de la situation-problème restent sans cadre : « pas trop d'encadrés ») */
+html body .carte blockquote{position:relative;margin:0;padding:14px 16px!important;border:1.5px solid #EBD9A8!important;border-radius:14px!important;background:#FFFCF2!important;box-sizing:border-box}
+html body .carte blockquote{margin:12px 0 18px!important;font-family:var(--ep-serif);font-size:16.5px;line-height:1.65;color:#2A2F3D}
+html body .carte blockquote em,html body .carte blockquote cite{color:#6B5A2A}
+/* « Corpus » annoncé juste avant la citation : libellé doré collé à l'encadré */
+html body .carte p:has(>strong:first-child)+blockquote{margin-top:4px!important}
+@media print{html body .carte .apc,html body .carte blockquote{box-shadow:none!important;break-inside:avoid}}
+/* 20/11 (2) « pas trop d'encadrés, utilise le même style d'icône qui était là avant » :
+   objectifs = cible illustrée d'origine (--vm-target), centrée au-dessus du rail */
+html body .carte .objectifs>b::before{flex:0 0 40px!important;height:30px!important;background:var(--vm-target) center/28px no-repeat!important}
+/* 20/11 (3) « mets tous les documents dans un tableau subtil en changeant juste les titres en couleurs » :
+   les documents forment un seul tableau à filets fins (cellules séparées d'un trait de 1 px), chaque titre prend sa couleur. */
+html body .carte .enq-docs{gap:1px!important;margin:20px 0 6px!important;background:#E3E7EF;border:1px solid #E3E7EF;border-radius:14px;overflow:hidden}
+html body .carte .enq-doc{background:#fff!important;padding:14px 16px!important}
+html body .carte .enq-doc:nth-child(4n+1){--ep4-c:#1E499B}
+html body .carte .enq-doc:nth-child(4n+2){--ep4-c:#B2316E}
+html body .carte .enq-doc:nth-child(4n+3){--ep4-c:#0B7A84}
+html body .carte .enq-doc:nth-child(4n+4){--ep4-c:#C2540A}
+html body .carte .enq-doc-t,html body .carte .enq-doc-t span{color:var(--ep4-c)!important}
+html body .carte .enq-doc table{margin-bottom:0}
+@media (max-width:560px){html body .carte .enq-doc{padding:12px 12px!important}}
