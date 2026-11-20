@@ -1,3 +1,15 @@
+## Apprendre : SVT de Tle D, leçons à verrou RÉÉCRITES, lots sciences 1 et 2 (19-20/11/2026, branche svt-tle-d-reecrites)
+
+Demande de Jacques : « J'ai identifié beaucoup d'autres leçons non enrichies (situation-problème, résolution par étapes, animations…), notamment en Tle D », puis « Oui, réécris-les entièrement », « Continue les autres leçons ».
+
+- **État des lieux** : l'audit ne voyait que les leçons gratuites. Les **299 leçons à verrou de Tle D** suivaient l'ancien gabarit (situation courte, 4 parties brèves, labo). Nouvel audit : `node tools/audit_lecons.cjs --payant <dossier des .json> [--classe "Tle D"] [--matiere svt]` (début public + suite payante fusionnée ; un labo compte comme simulation ; sans .json, une leçon n'est jugée que sur son début).
+- **Lot sciences 1 (rangs 2 à 8)** : osmose et dialyse, substances dissoutes (SRO), intégration perfusion, fibre musculaire, contraction, restauration de l'ATP, intégration crampes. **Lot sciences 2 (rangs 9 à 16)** : gonades des mammifères, organes reproducteurs des spermaphytes, méiose, gamétogenèse des mammifères, gamétogenèse des spermaphytes, fécondation des mammifères, pollinisation et double fécondation, intégration « 46 et non 92 chromosomes ».
+- Chaque leçon : situation-problème camerounaise (documents chiffrés, 3 hypothèses tranchées par 3 indices), ≥ 2 définitions/formules, ≥ 2 exemples, ≥ 2 astuces, 2 à 3 planches 2D, 1 planche 3D (vue éclatée ou animée par curseur), labo « choix », « etapes » ou « caryotype », situation résolue avec 4 formules étape par étape, transfert, 10 QCM, partie B d'examen. Audit SVT Tle D : **15/97 complètes**.
+- **Outils** : `VRT_QCMR` / `VRT_EXAMR` dans `build_apprendre_payant.cjs` ; `--remplace` dans `ajouter_apercus.cjs` ; `--payant` dans `audit_lecons.cjs`. Sources `40-tle-d-svt-*.js` HORS DÉPÔT ; livraisons `livraison-svt-tle-d-lot1.zip` (8 sources + 7 JSON) et `livraison-svt-tle-d-lot2.zip` (9 sources dont les aides à jour + 8 JSON) remises à Jacques. **Tant que les JSON ne sont pas déposés par FTP, un abonné voit l'ANCIENNE suite sous le nouveau début.**
+- Blocs d'aperçus « lot sciences 1 » et « lot sciences 2 » (noms distincts des « AJOUT lot N » de philosophie). La branche part de master à jour : les blocs ont été RÉGÉNÉRÉS par `ajouter_apercus.cjs`, jamais fusionnés à la main. (L'ancienne branche `svt-tle-d-reecrites-lot1` est remplacée par celle-ci.)
+- Vérifié : build officiel sur copie (fiches APC d'essai) sans erreur ; Chromium 1200 et 390 px, visiteur et abonné (suite servie par interception de `api/apprendre.php`) : aucune erreur JS, aucun débordement ; bancs Apprendre et empreintes au vert.
+- **Suite** : SVT Tle D rangs 17 à 31 (génétique), puis 32 à 98 ; ensuite physique, chimie, informatique, maths de Tle D.
+
 ## Correctif : habillage des 3 cours d'histoire de 6e (20/11/2026)
 
 - Le déploiement de #402 a échoué au contrôle « Chaque page porte-t-elle l'habillage de la vitrine ? » : les 3 pages `apprendre/cours/6e-histoire-*.html` n'étaient pas habillées.
