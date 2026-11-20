@@ -337,3 +337,16 @@ html body .carte .verdicts li{font-size:14.5px!important;line-height:1.4!importa
   html body .carte .enq-q{font-size:16px!important}
   html body .carte .info-b p.info,html body .carte .objectifs ul{padding-left:34px!important}
 }
+
+/* ── 20/11 (5) « fais l'encadré comme celui du bas » : le « à retenir » de fin de partie (punaise, bandeau dégradé)
+   devient une note collée rose, ruban blanc incliné « À retenir », comme « À l'hôpital » ── */
+html body article.carte .partie p.retenir{display:block!important;position:relative;max-width:640px;box-sizing:border-box;margin:40px auto 26px!important;width:auto!important;padding:30px 18px 14px!important;
+  border:1px solid #EFA9C8!important;border-radius:2px 2px 16px 2px!important;background:linear-gradient(#FFE2EF,#FFD3E6)!important;box-shadow:0 10px 16px -10px rgba(80,60,0,.5)!important;
+  transform:rotate(.9deg);font:600 16px/1.5 var(--vm-corps,var(--sans))!important;color:#4A2235!important;text-align:justify}
+html body article.carte .partie p.retenir::before{content:"À retenir"!important;position:relative;display:table!important;width:auto!important;height:auto!important;flex:none!important;min-height:0;
+  margin:-46px auto 12px!important;padding:5px 14px 5px 40px!important;transform:rotate(-2.5deg);
+  background:var(--ep2-pin) 11px 50%/22px no-repeat,rgba(255,255,255,.92)!important;border:1px solid rgba(0,0,0,.07);box-shadow:0 2px 4px rgba(0,0,0,.06);
+  font:800 17px/1.25 var(--vm-titre,var(--sans))!important;color:#8D1D52!important;text-align:center;filter:none!important}
+@media (max-width:560px){html body article.carte .partie p.retenir{padding:28px 14px 12px!important}html body article.carte .partie p.retenir::before{font-size:16px!important}}
+@media (prefers-reduced-motion:reduce){html body article.carte .partie p.retenir,html body article.carte .partie p.retenir::before{transform:none}}
+@media print{html body article.carte .partie p.retenir{transform:none;box-shadow:none!important}}
