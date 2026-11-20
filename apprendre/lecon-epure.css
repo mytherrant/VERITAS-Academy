@@ -350,3 +350,6 @@ html body article.carte .partie p.retenir::before{content:"À retenir"!important
 @media (max-width:560px){html body article.carte .partie p.retenir{padding:28px 14px 12px!important}html body article.carte .partie p.retenir::before{font-size:16px!important}}
 @media (prefers-reduced-motion:reduce){html body article.carte .partie p.retenir,html body article.carte .partie p.retenir::before{transform:none}}
 @media print{html body article.carte .partie p.retenir{transform:none;box-shadow:none!important}}
+
+/* ── 20/11 (6) l'accroche (« situation de départ ») ouvre « Pour commencer » : une question en italique, puis le fil rouge ── */
+html body .carte .info-b p.info-q{margin:0 0 6px!important;font:italic 500 16px/1.5 var(--ep-serif)!important;color:#0C1F55!important;text-align:left!important;hyphens:manual!important}
