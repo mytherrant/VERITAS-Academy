@@ -1,3 +1,13 @@
+## Apprendre : lot 4 de philosophie de Tle A réservé aux abonnés — Njoh-Mouelle, l'art et le travail (19/11/2026, branche apprendre-philo-tle-lot4)
+
+Part confiée par Jacques (partage entre sessions) : Tle A rangs 6, 7, 8 (De la médiocrité à l'excellence d'Ebénézer Njoh-Mouelle : éléments biobibliographiques ; thématiques et problématiques ; exposés, critique et valeur didactique) et 21, 22 (L'art et le travail : définitions ; raison d'être et finalité).
+
+- **5 leçons à verrou**, une par ligne de la progression : `tle-a-philo-njoh-mouelle-auteur`, `-thematiques`, `-critique`, `tle-a-philo-art-travail-definitions`, `-finalite`. Gabarit du lot 2 : situation camerounaise (Douala, Yaoundé, Garoua, Foumban, Ebolowa) avec hypothèses et indices, situation résolue avec étapes et formules, 3 parties + entraînement au format du bac (dissertation + texte), 18 planches (2 à 3 en 2D et 1 en 3D par leçon : bureau des œuvres, escalier du dépassement de soi, salle d'exposé, atelier du sculpteur, champ et scène), labo « choix », 10 QCM. Aucune citation de Njoh-Mouelle inventée (thèses reformulées) ; citations authentiques de Marx, Kant, Voltaire, Genèse.
+- Source `39-examens-philo-tle-4.js` (hors dépôt) et 5 JSON livrés à Jacques dans `livraison-payant-lot4.zip` (racine du dépôt, NON versionné) ; aperçus dans le bloc « AJOUT lot 4 philosophie Tle (abonnés) » ; `charge.js?v=a91c2f6b`.
+- **Doublon avec la PR #399 réglé** : `tle-a-philo-njoh-mouelle` (rang 7) et `tle-a-philo-art-travail` (rang 21) ont été retirés de la #399 avant sa fusion (20/11) ; ne pas déposer leurs JSON de la livraison cumulée.
+- **Doublons corrigés sur la branche de la PR #399 (20/11, demande de Jacques « Corrige les doublons et avance »)** : retrait de `tle-a-philo-njoh-mouelle` et `tle-a-philo-art-travail` ; `tle-a-philo-passions` déplacée au rang 16 ; aperçu `3e-francais-subordonnee-relative` retiré (la leçon gratuite `3e-fr-relative` reste) ; master fusionné dans la branche. Contrôle des rangs (master + #399 + #401, 2 214 leçons) : 0 doublon. Détail dans la note de la branche #399.
+- Vérifié : rendu abonné dans Chromium (JSON servi par interception de `api/apprendre.php`), 390 et 1200 px, aucun débordement, aucune erreur JS des leçons (seul `api/public_data.php` répond 403 en local, sans configuration) ; bancs verrou 18/18, gabarits 54 ; `build_llms.py --controle` et contrôles GEO, habillage, corrigés au vert ; aucun doublon de planche, de QCM, d'item de labo ou de situation.
+
 ## Apprendre : histoire de 6e, lot 2 — Néolithique et Égypte (20/11/2026, branche histoire-6e-lot2)
 
 Demande de Jacques : « Fusionne et déploie puis continue ».
