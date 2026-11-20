@@ -1,3 +1,17 @@
+## Apprendre : histoire de 6e, lot 2 — Néolithique et Égypte (20/11/2026, branche histoire-6e-lot2)
+
+Demande de Jacques : « Fusionne et déploie puis continue ».
+
+- **`apprendre/_src/37-histoire-6e-2.js`** : 3 leçons gratuites NOUVELLES, même gabarit que le lot 1 :
+  - rang 6 `6e-histoire-neolithique` : révolution néolithique, surplus, pierre polie et poterie, Sahara vert, mil, sorgho, igname, Shum Laka, Obobogo, expansion bantoue ; 3D : village néolithique ;
+  - rang 8 `6e-histoire-egypte-societe` : le Nil et la crue, unification (≈ 3100 av. J.-C.), pouvoirs et symboles du pharaon, pyramide sociale (peu d'esclaves) ; 3D : pyramide sociale à 5 étages ;
+  - rang 10 `6e-histoire-egypte-sciences` : hiéroglyphes, papyrus, calendrier de 365 jours, arpentage, papyrus Rhind, médecine, Khéops, chadouf ; 3D : chantier de la pyramide.
+- **Carte mentale** : les abréviations (« av. J.-C. », « apr. J.-C. », « env. », « ex. »…) ne coupent plus une idée en deux, et le point final de « J.-C. » est gardé.
+- **3D** : une maquette haute (pyramide sociale) sortait du cadre : `echelle` 0,6 et `rx` −26 pour voir le sommet et ses étiquettes.
+- **Signalé, non corrigé ici** : `tests/banc_apprendre_reglages.cjs` plante (« setTimeout is not defined » dans `commun.js:431`) depuis le commit `383d1ee` d'une autre session ; ce banc n'est pas joué par la CI.
+- Audit 86/86 ; `lecons.js?v=20261120h7` ; pages générées PUIS `git add` PUIS habillage (822 pages, contrôle au vert). Chromium (Pixel 5, 1200 px) : aucune erreur, aucun débordement.
+- **Suite possible** : histoire de 6e, rangs 3, 5, 7, 9, 11 à 21.
+
 ## Correctif : habillage des 3 cours d'histoire de 6e (20/11/2026)
 
 - Le déploiement de #402 a échoué au contrôle « Chaque page porte-t-elle l'habillage de la vitrine ? » : les 3 pages `apprendre/cours/6e-histoire-*.html` n'étaient pas habillées.
