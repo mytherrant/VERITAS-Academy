@@ -59,7 +59,7 @@
     return "";
   }
   function poser(el, k) {
-    el.style.setProperty("--vm-ill", url(k)); el.style.setProperty("--vm-c2", COUL[k]); el.style.setProperty("--ico-c", COUL[k]);
+    el.style.setProperty("--vm-ill", url(k)); el.style.setProperty("--vm-c2", COUL[k]); el.style.setProperty("--ico-c", COUL[k]); el.style.setProperty("--ep3-rail", COUL[k]); el.style.setProperty("--ep2-c", COUL[k]);
     el.setAttribute("data-ico", k);
   }
   function traiter() {

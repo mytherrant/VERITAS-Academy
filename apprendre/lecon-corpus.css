@@ -11,3 +11,4 @@ html body .carte figure.bd-corpus figcaption{font:italic 400 15px/1.55 var(--ep-
 html body .carte [data-ico]:not([data-ico="-"])>b:first-child{color:var(--ico-c)!important}
 html body .carte .partie .retenir{display:block!important;position:relative;width:fit-content;max-width:100%;box-sizing:border-box;background:linear-gradient(90deg,#FBE9F1,#FFF7E0)!important;border:1px solid #F3C6DA!important;border-radius:14px!important;padding:10px 18px 10px 44px!important;margin:22px 0 0!important;box-shadow:0 3px 10px rgba(178,49,110,.10)!important}
 html body .carte .partie .retenir::before{position:absolute;left:12px;top:10px;width:24px;height:24px}
+html body .carte [data-ico]:not([data-ico="-"])::before{background:var(--vm-ill) center/30px no-repeat!important;box-shadow:none!important;filter:none!important}
