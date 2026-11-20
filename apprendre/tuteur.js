@@ -128,14 +128,22 @@
     sec.setAttribute("aria-labelledby", "tuteurT");
     sec.innerHTML =
       '<div class="tuteur-t"><img src="../ambassa-avatar.png" alt="" width="44" height="44" loading="lazy">' +
-      '<div><h2 id="tuteurT">Une question sur la leçon ?</h2><p>Le Prof. Ambassa, ton tuteur IA, t\'explique autrement, avec un exemple ou un exercice corrigé.</p></div></div>' +
+      '<div><h2 id="tuteurT">Une question sur la leçon ?</h2><p>Le Prof. Ambassa, ton tuteur IA, t\'explique autrement, avec un exemple ou un exercice corrigé.</p>' +
+      /* 20/11/2026 « même pour l'IA mets l'icône et le message pour pousser les apprenants à consulter » : le formulaire se déplie au clic. */
+      '<button type="button" class="oi-a tuteur-ouvrir" aria-expanded="false" aria-controls="tuteurCorps">Poser ma question au Prof. Ambassa <span aria-hidden="true">›</span></button></div></div>' +
+      '<div id="tuteurCorps" class="tuteur-corps" hidden>' +
       '<div class="tuteur-idees">' + IDEES.map(function (i) { return '<button type="button" class="btn-l" data-idee>' + esc(i) + '</button>'; }).join("") + '</div>' +
       '<form class="tuteur-f" novalidate><label class="vsr" for="tuteurQ">Ta question</label>' +
       '<textarea id="tuteurQ" rows="3" maxlength="' + MAXQ + '" placeholder="Ex. : je ne comprends pas la deuxième partie, peux-tu me la réexpliquer ?"></textarea>' +
       '<div class="tuteur-b"><span class="tuteur-n" aria-live="polite">' + (connecte ? "" : "Sans compte : 2 questions par jour. Connecte-toi pour en avoir plus.") + '</span>' +
       '<button type="submit" class="tuteur-go">Demander</button></div></form>' +
-      '<div class="tuteur-r" aria-live="polite" hidden></div>';
+      '<div class="tuteur-r" aria-live="polite" hidden></div></div>';
     racine.appendChild(sec);
+    var ouvrir = sec.querySelector(".tuteur-ouvrir"), corps = sec.querySelector(".tuteur-corps");
+    ouvrir.addEventListener("click", function () {
+      corps.hidden = false; ouvrir.hidden = true; ouvrir.setAttribute("aria-expanded", "true");
+      var t = sec.querySelector("textarea"); if (t) t.focus();
+    });
 
     var f = sec.querySelector("form"), q = sec.querySelector("textarea"), go = sec.querySelector(".tuteur-go"),
         rep = sec.querySelector(".tuteur-r"), note = sec.querySelector(".tuteur-n"), bloque = false, dernier = null;
