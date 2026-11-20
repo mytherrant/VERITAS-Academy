@@ -288,3 +288,14 @@ html body .carte p:has(>strong:first-child)+blockquote{margin-top:4px!important}
 /* 20/11 (2) « pas trop d'encadrés, utilise le même style d'icône qui était là avant » :
    objectifs = cible illustrée d'origine (--vm-target), centrée au-dessus du rail */
 html body .carte .objectifs>b::before{flex:0 0 40px!important;height:30px!important;background:var(--vm-target) center/28px no-repeat!important}
+/* 20/11 (3) « mets tous les documents dans un tableau subtil en changeant juste les titres en couleurs » :
+   les documents forment un seul tableau à filets fins (cellules séparées d'un trait de 1 px), chaque titre prend sa couleur. */
+html body .carte .enq-docs{gap:1px!important;margin:20px 0 6px!important;background:#E3E7EF;border:1px solid #E3E7EF;border-radius:14px;overflow:hidden}
+html body .carte .enq-doc{background:#fff!important;padding:14px 16px!important}
+html body .carte .enq-doc:nth-child(4n+1){--ep4-c:#1E499B}
+html body .carte .enq-doc:nth-child(4n+2){--ep4-c:#B2316E}
+html body .carte .enq-doc:nth-child(4n+3){--ep4-c:#0B7A84}
+html body .carte .enq-doc:nth-child(4n+4){--ep4-c:#C2540A}
+html body .carte .enq-doc-t,html body .carte .enq-doc-t span{color:var(--ep4-c)!important}
+html body .carte .enq-doc table{margin-bottom:0}
+@media (max-width:560px){html body .carte .enq-doc{padding:12px 12px!important}}
