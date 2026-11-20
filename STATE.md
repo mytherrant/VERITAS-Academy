@@ -1,3 +1,16 @@
+## Apprendre : histoire de 6e, lot 1 — leçons gratuites (20/11/2026, branche histoire-6e)
+
+Demande de Jacques : « Continue l'enrichissement des leçons », « ne supprime rien, rassure-toi que c'est illustré et que les situations-problèmes sont résolues, les étapes, cartes mentales ».
+
+- **Choix sans doublon** : l'histoire de 6e n'avait AUCUNE leçon (ni gratuite ni à verrou) ; aucune branche ouverte n'y touche. Partage annoncé aux sessions actives : sciences de Tle D (SVT), sciences de 3e (sources privées), PR #399 et #401 (lettres des classes d'examen).
+- **`apprendre/_src/36-histoire-6e.js`** : 3 leçons NOUVELLES au gabarit complet (situation-problème camerounaise, hypothèses et indices, situation résolue en étapes + formules + réponse rédigée + transfert, 2 planches 2D, 1 planche 3D, simulation, entraînement au format de l'examen, quiz de 10) :
+  - rang 1 `6e-histoire-introduction` : l'Histoire, les quatre sources, le temps (siècle, durée, pas d'année zéro) ; 3D : la table de l'historien ;
+  - rang 2 `6e-histoire-vestiges` : vestiges, sites du Cameroun (Shum Laka, Obobogo, Bidzar, pays sao), stratigraphie et carbone 14, protection du patrimoine ; 3D : coupe du sol (objets sur la face avant, sinon cachés par les couches opaques) ;
+  - rang 4 `6e-histoire-premiers-hommes` : Afrique berceau de l'humanité (Toumaï, Lucy), étapes de l'évolution, Paléolithique ; 3D : campement de chasseurs-cueilleurs.
+- **Carte mentale** : le centre affiche désormais le titre de la leçon (`L.titre`), plus l'intitulé tronqué du programme (« Introduction à l »).
+- Audit 83/83 complètes ; `lecons.js?v=20261120h6` ; 3 pages `apprendre/cours/` créées ; Chromium (Pixel 5 et 1200 px) : aucune erreur, aucun débordement. Bancs gabarits 54, verrou 18, réglages 29 ; contrôles œuvres, llms, habillage, découverte, GEO au vert.
+- **Suite possible** : histoire de 6e, rangs 3, 5 à 21 (Néolithique, Égypte, Méroé, Grèce, Rome, Chine, religions).
+
 ## Cartes mentales des leçons : finitions (19/11/2026, branche cartes-finitions)
 
 Demande de Jacques : « Continue, ne supprime rien, rassure-toi que c'est illustré et que les situations-problèmes sont résolues, les étapes, cartes mentales ».
