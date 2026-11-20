@@ -1,3 +1,7 @@
+## Doublons de philosophie Tle A retirés de cette branche (20/11/2026, session du lot 4 de philosophie, demande de Jacques)
+
+Jacques : « Corrige les doublons ». La PR #401 (branche `apprendre-philo-tle-lot4`) traite Njoh-Mouelle en 3 leçons (rangs 6, 7, 8) et l'art et le travail en 2 (rangs 21, 22) ; Jacques garde ces 5 leçons. Retirés du bloc « AJOUT lot 3 philosophie Tle (abonnés) » de `apercus-tle-a.js` : `tle-a-philo-njoh-mouelle` (rang 7) et `tle-a-philo-art-travail` (rang 21) ; empreintes de `charge.js` recalculées. **Livraison cumulée** : ne pas déposer `tle-a-philo-njoh-mouelle.json` ni `tle-a-philo-art-travail.json` (sans aperçu, ils ne seraient jamais lus) et retirer ces deux leçons de la source du lot 3 avant tout build complet. Quand l'une des PR #399 et #401 sera fusionnée, l'autre aura un conflit sur `charge.js` et les `?v=` des pages : reprendre la version master puis relancer `ajouter_apercus.cjs` (ou recalculer les empreintes), ne pas fusionner à la main.
+
 ## Carte mentale des leçons enrichie, icônes au trait, déploiement débloqué (19/11/2026, branche carte-lecon-deploiement)
 
 Demandes de Jacques (captures téléphone) : « Carte mentale mal sortie. Finalise la suppression des cadres, tableau dans les tableaux », puis « Améliore la qualité des icônes, puces ».
