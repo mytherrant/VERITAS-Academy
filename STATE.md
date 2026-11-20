@@ -1,6 +1,26 @@
 ## Doublons de philosophie Tle A retirés de cette branche (20/11/2026, session du lot 4 de philosophie, demande de Jacques)
 
 Jacques : « Corrige les doublons ». La PR #401 (branche `apprendre-philo-tle-lot4`) traite Njoh-Mouelle en 3 leçons (rangs 6, 7, 8) et l'art et le travail en 2 (rangs 21, 22) ; Jacques garde ces 5 leçons. Retirés du bloc « AJOUT lot 3 philosophie Tle (abonnés) » de `apercus-tle-a.js` : `tle-a-philo-njoh-mouelle` (rang 7) et `tle-a-philo-art-travail` (rang 21) ; empreintes de `charge.js` recalculées. **Livraison cumulée** : ne pas déposer `tle-a-philo-njoh-mouelle.json` ni `tle-a-philo-art-travail.json` (sans aperçu, ils ne seraient jamais lus) et retirer ces deux leçons de la source du lot 3 avant tout build complet. **Contrôle complet des rangs** (master + cette branche + #401, 2 211 leçons, rattachement par `rang` ou par `cle` comme `commun.js`) : deux autres doublons, créés par cette branche contre des leçons GRATUITES déjà publiées (`lecons.js`), corrigés : (1) `tle-a-philo-passions` (lot 9, « Passion et raison : les passions et leur éducation ») passe du rang 15 au **rang 16** (« Éducation des passions », libre) ; le rang 15 reste à la leçon gratuite `tle-philo-passions` ; **à reporter dans la source `90-philo-lot9.js` (rang: 16)**, sinon un nouveau passage d'`ajouter_apercus.cjs` le remettrait au 15. (2) 3e français rang 2 (seule ligne sur la relative) : l'aperçu payant `3e-francais-subordonnee-relative` (lot 11) est retiré, la leçon gratuite enrichie `3e-fr-relative` est gardée ; **retirer cette leçon de `92-francais-lot11.js`** et ne pas déposer son JSON (ou, si Jacques préfère la version du lot 11, la remettre et retirer `3e-fr-relative` des sources gratuites). Résultat : 0 rang en double. Quand l'une des PR #399 et #401 sera fusionnée, l'autre aura un conflit sur `charge.js` et les `?v=` des pages : reprendre la version master puis relancer `ajouter_apercus.cjs` (ou recalculer les empreintes), ne pas fusionner à la main.
+## Apprendre : histoire de 6e, lot 1 — leçons gratuites (20/11/2026, branche histoire-6e)
+
+Demande de Jacques : « Continue l'enrichissement des leçons », « ne supprime rien, rassure-toi que c'est illustré et que les situations-problèmes sont résolues, les étapes, cartes mentales ».
+
+- **Choix sans doublon** : l'histoire de 6e n'avait AUCUNE leçon (ni gratuite ni à verrou) ; aucune branche ouverte n'y touche. Partage annoncé aux sessions actives : sciences de Tle D (SVT), sciences de 3e (sources privées), PR #399 et #401 (lettres des classes d'examen).
+- **`apprendre/_src/36-histoire-6e.js`** : 3 leçons NOUVELLES au gabarit complet (situation-problème camerounaise, hypothèses et indices, situation résolue en étapes + formules + réponse rédigée + transfert, 2 planches 2D, 1 planche 3D, simulation, entraînement au format de l'examen, quiz de 10) :
+  - rang 1 `6e-histoire-introduction` : l'Histoire, les quatre sources, le temps (siècle, durée, pas d'année zéro) ; 3D : la table de l'historien ;
+  - rang 2 `6e-histoire-vestiges` : vestiges, sites du Cameroun (Shum Laka, Obobogo, Bidzar, pays sao), stratigraphie et carbone 14, protection du patrimoine ; 3D : coupe du sol (objets sur la face avant, sinon cachés par les couches opaques) ;
+  - rang 4 `6e-histoire-premiers-hommes` : Afrique berceau de l'humanité (Toumaï, Lucy), étapes de l'évolution, Paléolithique ; 3D : campement de chasseurs-cueilleurs.
+- **Carte mentale** : le centre affiche désormais le titre de la leçon (`L.titre`), plus l'intitulé tronqué du programme (« Introduction à l »).
+- Audit 83/83 complètes ; `lecons.js?v=20261120h6` ; 3 pages `apprendre/cours/` créées ; Chromium (Pixel 5 et 1200 px) : aucune erreur, aucun débordement. Bancs gabarits 54, verrou 18, réglages 29 ; contrôles œuvres, llms, habillage, découverte, GEO au vert.
+- **Suite possible** : histoire de 6e, rangs 3, 5 à 21 (Néolithique, Égypte, Méroé, Grèce, Rome, Chine, religions).
+
+## Cartes mentales des leçons : finitions (19/11/2026, branche cartes-finitions)
+
+Demande de Jacques : « Continue, ne supprime rien, rassure-toi que c'est illustré et que les situations-problèmes sont résolues, les étapes, cartes mentales ».
+
+- **Contrôle des 80 leçons complètes de lecons.js** : toutes ont situation-problème, étapes, formules, réponse rédigée, ≥ 2 planches 2D, ≥ 1 planche 3D et une carte mentale non vide (0 à compléter).
+- **Carte mentale** (`VRT_CM_LECON`, ajouts seulement) : plus de guillemets orphelins après coupe des phrases, plus de titre ou d'idée terminés par un petit mot (« …diviseurs et »), pas de parenthèse laissée ouverte, coupe aussi devant une phrase qui commence par un nombre (« 3 et 9 : … »). `lecons.js?v=20261119cm2`.
+- **Doublons évités** : la PR #399 (autre session) couvre déjà la philosophie, le français et l'anglais des classes d'examen (lots 3 à 9). Les trois leçons Towa écrites ici (rangs 3, 4, 5) ne sont PAS intégrées : la leçon unique `tle-a-philo-towa` de #399 couvre le même module ; source et JSON gardés hors dépôt en attendant la décision de Jacques. Deux sessions sœurs lancées pour Njoh-Mouelle, art et travail, espace et temps, histoire, logique : arrêtées (doublons de #399), aucune branche poussée.
 
 ## Carte mentale des leçons enrichie, icônes au trait, déploiement débloqué (19/11/2026, branche carte-lecon-deploiement)
 
