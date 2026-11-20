@@ -97,6 +97,13 @@ jobs:
       - name: 🪪 L'acheteur est-il reconnu par son compte ?
         run: php tests/banc_identite_acheteur.php
 
+      # Audit sécurité du 19/11/2026 : le nom saisi par un acheteur était affiché
+      # en HTML brut au tableau de bord → script exécuté chez l'administrateur,
+      # qui détient la clé de synchro. Le banc rend les VRAIES fonctions d'app.js
+      # avec une base piégée (rouge sur l'ancien code, vérifié par mutation).
+      - name: 🛡️ La saisie d'un acheteur peut-elle s'exécuter chez l'admin ?
+        run: node tests/banc_xss_rendus_admin.cjs
+
       - name: 📕 Un livre amputé se vend-il quand même ?
         run: php tests/banc_livre_integre.php
 

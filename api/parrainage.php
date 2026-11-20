@@ -263,10 +263,11 @@ function parr_transactions(int $jours): array {
         $out[] = [
             'ref' => $ref, 't' => $t, 'source' => $prov === 'skysms' ? 'SkySMS' : 'CamerPay',
             'operateur' => $tel !== '' ? (vrt_parr_methode($tel) === 'mtn_momo' ? 'MTN' : 'Orange') : (string) ($p['operator'] ?? ''),
-            'tel' => $tel, 'nom' => (string) ($p['clientNom'] ?? ''),
+            // nom et libellé = saisie de l'acheteur, relue au tableau de bord : filtrés.
+            'tel' => $tel, 'nom' => vrt_txt_client($p['clientNom'] ?? '', 120),
             'montant' => (int) ($p['montant'] ?? 0), 'statut' => parr_statut_normal((string) ($p['status'] ?? '')),
             'statutBrut' => (string) ($p['status'] ?? ''), 'aRegler' => !empty($p['a_regler']),
-            'accorde' => !empty($p['granted']), 'quoi' => mb_substr((string) ($p['label'] ?? $p['intent'] ?? ''), 0, 80),
+            'accorde' => !empty($p['granted']), 'quoi' => vrt_txt_client($p['label'] ?? $p['intent'] ?? '', 80),
             'intent' => (string) ($p['intent'] ?? ''), 'code' => (string) ($p['parrainage']['code'] ?? ''),
             'commission' => is_array($op) ? (int) ($op['c'] ?? 0) - (int) ($op['annule'] ?? 0) : 0,
             'motif' => mb_substr((string) ($p['failure_reason'] ?? $p['reason'] ?? ''), 0, 160),
@@ -292,7 +293,7 @@ function parr_transactions(int $jours): array {
                 $out[] = [
                     'ref' => $ref, 't' => $t, 'source' => 'Code marchand',
                     'operateur' => $tel !== '' ? (vrt_parr_methode($tel) === 'mtn_momo' ? 'MTN' : 'Orange') : (string) ($s['moyen'] ?? ''),
-                    'tel' => $tel, 'nom' => (string) ($s['clientNom'] ?? ''), 'montant' => (int) ($s['montant'] ?? 0),
+                    'tel' => $tel, 'nom' => vrt_txt_client($s['clientNom'] ?? '', 120), 'montant' => (int) ($s['montant'] ?? 0),
                     'statut' => !empty($s['granted']) ? 'reussi' : ($st === 'declare' ? 'attente' : parr_statut_normal($st)),
                     'statutBrut' => $st === 'declare' ? 'déclaré, à vérifier' : $st, 'aRegler' => !empty($s['a_regler']),
                     'accorde' => !empty($s['granted']), 'quoi' => mb_substr((string) ($s['label'] ?? $s['intent'] ?? ''), 0, 80),
