@@ -299,3 +299,41 @@ html body .carte .enq-doc:nth-child(4n+4){--ep4-c:#C2540A}
 html body .carte .enq-doc-t,html body .carte .enq-doc-t span{color:var(--ep4-c)!important}
 html body .carte .enq-doc table{margin-bottom:0}
 @media (max-width:560px){html body .carte .enq-doc{padding:12px 12px!important}}
+
+/* ── 20/11 (4) « les icônes ci ne m'arrangent pas » + « diminue la taille du texte » + « réduis l'interligne »
+   (captures : tuiles bleue/pêche + rail pointillé, récit en Georgia 17,5 px, indices très aérés).
+   1. Icônes : pictogramme au trait posé nu (22 px), sans tuile colorée ni rail pointillé ; le texte s'aligne sur le titre.
+   2. Texte : 15,5 px pour le cours, 16 px pour le récit ; interligne ramené à 1,5 (1,55 pour le récit). ── */
+html body .carte .enq-t::before,html body .carte .fil::before,
+html body .carte .def::before,html body .carte .prop::before,html body .carte .methode::before,html body .carte .ex::before{
+  width:24px!important;height:24px!important;border-radius:0!important;background-color:transparent!important;background-size:22px!important;box-shadow:none!important}
+html body .carte .enq-t::before{top:1px!important}
+html body .carte .def::before,html body .carte .prop::before,html body .carte .methode::before,html body .carte .ex::before{top:7px!important}
+html body .carte .fil::before{top:0!important}
+html body .carte .def::after,html body .carte .prop::after,html body .carte .methode::after,html body .carte .ex::after,
+html body .carte .info-b::after,html body .carte .objectifs::after{content:none!important;display:none!important}
+html body .carte .enq-t{padding-left:34px!important;min-height:0!important}
+html body .carte .def,html body .carte .prop,html body .carte .methode,html body .carte .ex{padding-left:34px!important}
+html body .carte .def>b:first-child,html body .carte .prop>b:first-child,html body .carte .methode>b:first-child,html body .carte .ex>b:first-child{min-height:0!important;margin-bottom:4px!important}
+html body .carte .fil{padding-left:34px!important}
+html body .carte .info-b .apc-i{width:24px!important;height:24px!important;flex:0 0 24px!important;margin:0!important;border-radius:0!important;background:none!important}
+html body .carte .info-b .apc-i svg{width:22px!important;height:22px!important}
+html body .carte .info-b h2,html body .carte .objectifs>b{gap:10px!important;min-height:0!important}
+html body .carte .info-b p.info,html body .carte .objectifs ul{padding-left:34px!important}
+html body .carte .objectifs>b::before{flex:0 0 24px!important;height:24px!important;background-size:22px!important}
+
+/* taille et interligne */
+html body .carte{font-size:15.5px!important;line-height:1.5!important}
+html body .carte .partie p,html body .carte .partie li,html body .carte .info-b p.info,html body .carte .fil,html body .carte .fil p,
+html body .carte .def,html body .carte .prop,html body .carte .methode,html body .carte .ex{font-size:15.5px!important;line-height:1.5!important}
+html body .carte .enq-r,html body .carte .enq-r p,html body .apc .apc-s,html body .carte .denouement .reponse,html body .carte .denouement .reponse p,html body .carte blockquote{font-size:16px!important;line-height:1.55!important}
+html body .carte .enq-q{font-size:17px!important;line-height:1.4!important}
+html body .carte .hyp li{font-size:15px!important;line-height:1.4!important;padding:5px 0!important}
+html body .carte .enq-pistes{row-gap:4px!important}
+html body .carte .enq-pistes li{margin:0!important;padding:2px 0!important;line-height:1.3!important}
+html body .carte .verdicts li{font-size:14.5px!important;line-height:1.4!important}
+@media (max-width:560px){
+  html body .carte .enq-r,html body .carte .enq-r p,html body .apc .apc-s{font-size:15.5px!important}
+  html body .carte .enq-q{font-size:16px!important}
+  html body .carte .info-b p.info,html body .carte .objectifs ul{padding-left:34px!important}
+}
