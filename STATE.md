@@ -1,3 +1,13 @@
+## Apprendre : histoire de 6e, lot 5 — islam en Afrique, travail des métaux, TD Néolithique au Cameroun (24/11/2026, branche histoire-6e-lot5)
+
+Demande de Jacques : « continue les autres leçons ».
+
+- **`apprendre/_src/40-histoire-6e-5.js`** : 3 leçons gratuites NOUVELLES, même gabarit :
+  - rang 20 `6e-histoire-islam-afrique` : conquête de l'Afrique du Nord (642-711), commerce transsaharien (or contre sel), Ghana, Mali (Mansa Moussa 1324, Tombouctou), Kanem-Bornou, djihad peul (1804), Modibo Adama (1806), lamidats de Garoua, Maroua, Ngaoundéré ; 3D : mosquée de Djingareyber et caravane ;
+  - rang 13 `6e-histoire-metaux` : cuivre, bronze (≈ 90 % cuivre + 10 % étain), fer (minerai, charbon, fourneau, forge ; rendement), Nok, Méroé, Bénin, Foumban ; 3D : fourneau et forge ;
+  - rang 7 `6e-histoire-td-neolithique-cameroun` : méthode d'étude de documents (présenter, relever, classer, croiser, rédiger) sur la pierre polie, Obobogo et Shum Laka ; 3D : chantier de fouille quadrillé.
+- Histoire de 6e : 15 leçons. Restent les TD 1, 2, 4 (rangs 3, 5, 9) et les dossiers 3 et 4 (rangs 15, 21).
+- Audit 95/95 ; `lecons.js?v=20261124h11` ; habillage 831 pages au vert ; Chromium (Pixel 5, 1200 px) : aucune erreur ; planches 3D contrôlées (soufflets et charbon replacés).
 ## Apprendre : lot 7 philosophie de Tle C et D, leçons à verrou — autrui et finalité de la morale, origine du sentiment religieux (24/11/2026, branche apprendre-philo-tle-lot7)
 
 Demande de Jacques : « continue les autres leçons ». Partage annoncé aux sessions du lot 4 et « Structure » avant écriture. Aucune autre leçon touchée.
