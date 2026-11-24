@@ -5,8 +5,19 @@ Demande de Jacques : « adopte aussi les nouveaux styles de cartes mentales ».
 - Les leçons tournaient déjà sur les 31 formes (PR #415). Restaient sur l'ancien tirage (8 formes) : les **cartes des œuvres** (21 pages statiques et la page « Carte mentale » de l'application) et les cartes sans rang (schémas convertis des leçons à verrou).
 - `apprendre/_src/00-carte-mentale.js` : sans rang, la forme est tirée parmi `TOUTES` (31 formes).
 - Œuvres : `rang` = place de la clé dans `Object.keys(LITT_OEUVRES).sort()`, série `oeuvres`, à la fois dans `tools/oeuvres_statiques.js` et dans `_cmPage` (app.js) : la page web et l'application montrent la même carte, et les 21 œuvres ont 21 formes différentes.
-- Versions : app.js et sw.js en **1.20.87**, habillage réaligné (`habiller_pages.py`, 22 pages, contrôle au vert) ; `lecons.js?v=20261124h13`.
+- Versions : app.js et sw.js en **1.20.87**, habillage réaligné (`habiller_pages.py`, 22 pages, contrôle au vert) ; `lecons.js?v=20261124h14`.
 - Vérifié : Chromium 1200 et 390 px sur les 21 pages d'œuvres et les 95 leçons gratuites : aucune erreur, aucun débordement ; 0 répétition voisine ; bancs verrou 18/18, empreintes 22/22, cartes (profil, survol), clés des œuvres OK.
+## Apprendre : histoire de 6e, lot 7 — Rome, pèlerinages, religion de l'Égypte ; histoire de 6e COMPLÈTE (24/11/2026, branche histoire-6e-lot7)
+
+Demande de Jacques : « continue ».
+
+- **`apprendre/_src/42-histoire-6e-7.js`** : 3 leçons gratuites NOUVELLES, même gabarit :
+  - rang 15 `6e-histoire-rome` : royauté, République (509-27 av. J.-C.), Empire, Afrique romaine (Septime Sévère), routes, villes, aqueducs, droit, latin, calendrier julien, chiffres romains ; 3D : aqueduc et voie romaine ;
+  - rang 21 `6e-histoire-pelerinages` : pèlerinages chrétiens (Jérusalem, Rome, Compostelle, Lourdes) et hajj (5e pilier, Tabaski, avance de 11 jours par an), comparaison respectueuse ; 3D : deux chemins vers deux lieux saints ;
+  - rang 11 `6e-histoire-egypte-religion` (oublié dans les lots précédents) : polythéisme, temples et prêtres, momification (≈ 70 jours), pesée du cœur, Akhenaton ; 3D : pylône, obélisques et salle à colonnes.
+- **Histoire de 6e : 21 leçons pour les 21 rangs de la progression**, sans doublon (contrôle par rattachement `cle` → rang).
+- Audit 101/101 ; `lecons.js?v=20261124h14` ; habillage 837 pages au vert ; Chromium (Pixel 5, 1200 px) : aucune erreur ; planches 3D contrôlées (chemins des pèlerins ramenés au premier plan, minaret raccourci).
+
 ## Apprendre : histoire de 6e, lot 6 — les TD 1, 2 et 4 (24/11/2026, branche histoire-6e-lot6)
 
 Demande de Jacques : « continue ».
@@ -16,7 +27,7 @@ Demande de Jacques : « continue ».
   - rang 5 `6e-histoire-td-mythes-creation` : mythe, conte, science ; comparaison Égypte (Noun, Atoum), Genèse, Dogon (Amma) ; ce qu'un mythe apprend d'un peuple ; 3D : colline sortant des eaux ;
   - rang 9 `6e-histoire-td-symboles-pouvoir` : symboles du pouvoir (trône perlé de Foumban, léopard, chasse-mouches, bonnet, parasol du lamido, canne, tambour), comparaison avec le pharaon ; 3D : les attributs d'un roi.
 - Histoire de 6e : 18 leçons. Restent les dossiers 3 et 4 (rangs 15 et 21 : l'apport de Rome, les pèlerinages).
-- Audit 98/98 ; `lecons.js?v=20261124h13` ; habillage 834 pages au vert ; Chromium (Pixel 5, 1200 px) : aucune erreur ; planches 3D contrôlées (soleil ramené dans le cadre).
+- Audit 98/98 ; `lecons.js?v=20261124h14` ; habillage 834 pages au vert ; Chromium (Pixel 5, 1200 px) : aucune erreur ; planches 3D contrôlées (soleil ramené dans le cadre).
 
 ## Apprendre : histoire de 6e, lot 5 — islam en Afrique, travail des métaux, TD Néolithique au Cameroun (24/11/2026, branche histoire-6e-lot5)
 
@@ -122,13 +133,14 @@ Demande de Jacques : « continue ».
 - Histoire de 6e : rangs 1, 2, 4, 6, 8, 10, 12, 14, 16 couverts (9 leçons). Restent les TD et dossiers (3, 5, 7, 9, 13, 15, 21) et les religions (17 à 20).
 - Audit 89/89 ; `lecons.js?v=20261124h8` ; pages générées → `git add` → habillage (825 pages) → contrôle au vert. Chromium (Pixel 5, 1200 px) : aucune erreur, aucun débordement.
 - Capture des planches 3D : la fenêtre du badge « Premier pas » s'ouvre quand la page est lue jusqu'au bout et masque l'écran ; pour une capture, aller directement à la planche sans parcourir toute la page.
-## Apprendre : SVT de Tle D, leçons à verrou RÉÉCRITES, lots sciences 1, 2 et 3 (19-20/11/2026, branche svt-tle-d-reecrites)
+## Apprendre : SVT de Tle D, leçons à verrou RÉÉCRITES, lots sciences 1 à 4 (19-24/11/2026, branches svt-tle-d-reecrites puis svt-tle-d-lot4)
 
 Demande de Jacques : « J'ai identifié beaucoup d'autres leçons non enrichies (situation-problème, résolution par étapes, animations…), notamment en Tle D », puis « Oui, réécris-les entièrement », « Continue les autres leçons », « continue ».
 
 - **État des lieux** : l'audit ne voyait que les leçons gratuites. Les **299 leçons à verrou de Tle D** suivaient l'ancien gabarit (situation courte, 4 parties brèves, labo). Nouvel audit : `node tools/audit_lecons.cjs --payant <dossier des .json> [--classe "Tle D"] [--matiere svt]` (début public + suite payante fusionnée ; un labo compte comme simulation ; sans .json, une leçon n'est jugée que sur son début).
 - **Lot sciences 1 (rangs 2 à 8)** : osmose et dialyse, substances dissoutes (SRO), intégration perfusion, fibre musculaire, contraction, restauration de l'ATP, intégration crampes. **Lot sciences 2 (rangs 9 à 16)** : gonades des mammifères, organes reproducteurs des spermaphytes, méiose, gamétogenèse des mammifères, gamétogenèse des spermaphytes, fécondation des mammifères, pollinisation et double fécondation, intégration « 46 et non 92 chromosomes ». **Lot sciences 3 (rangs 17 à 23)** : monohybridisme avec dominance (porcs de Bafia), dominance intermédiaire et codominance (belles-de-nuit de Buea, groupes ABO), gène lié à X (drosophiles, croisements réciproques), dihybridisme (maïs 9-3-3-1), trihybridisme (2ⁿ gamètes, 27/64), gènes liés et crossing-over (17 cM), allèle létal / polygénie / épistasie.
 - Chaque leçon : situation-problème camerounaise (documents chiffrés, 3 hypothèses tranchées par 3 indices), ≥ 2 définitions/formules, ≥ 2 exemples, ≥ 2 astuces, 2 à 3 planches 2D, 1 planche 3D (vue éclatée ou animée par curseur), labo « choix », « etapes » ou « caryotype », situation résolue avec 4 formules étape par étape, transfert, 10 QCM, partie B d'examen. Audit SVT Tle D : **22/97 complètes**.
+- **Lot sciences 4 (rangs 24 à 31, génétique humaine)** : mutations et importance du brassage, intégration brassages et unicité génétique, arbre généalogique, transmissions autosomiques, transmissions gonosomiques (hémophilie, famille Ateba de Yaoundé), évaluer un risque génétique (couple Kamga de Bafoussam : 2/3 × 1 × 1/4 = 1/6), applications de la génétique humaine (électrophorèse et dépistage néonatal à Kumba, q ≈ 0,12), intégration causerie sur la drépanocytose (lycée de Mbalmayo, 19 juin). Rendu Chromium des 8 leçons à 1200 et 390 px : enquête, 3 hypothèses, 3 planches 2D, 1 planche 3D, labo, fil, dénouement à 4 formules, aucun débordement. Livraison `livraison-svt-tle-d-lot4.zip` (sources hors dépôt + 8 JSON).
 - **Outils** : `VRT_QCMR` / `VRT_EXAMR` dans `build_apprendre_payant.cjs` ; `--remplace` dans `ajouter_apercus.cjs` ; `--payant` dans `audit_lecons.cjs`. Sources `40-tle-d-svt-*.js` HORS DÉPÔT ; livraisons `livraison-svt-tle-d-lot1.zip` (8 sources + 7 JSON) `livraison-svt-tle-d-lot2.zip` (9 sources dont les aides à jour + 8 JSON) et `livraison-svt-tle-d-lot3.zip` (8 sources dont les aides à jour, avec l'échiquier de croisement + 7 JSON) remises à Jacques. **Tant que les JSON ne sont pas déposés par FTP, un abonné voit l'ANCIENNE suite sous le nouveau début.**
 - Blocs d'aperçus « lot sciences 1 », « 2 » et « 3 » (noms distincts des « AJOUT lot N » de philosophie). La branche part de master à jour : les blocs ont été RÉGÉNÉRÉS par `ajouter_apercus.cjs`, jamais fusionnés à la main. (L'ancienne branche `svt-tle-d-reecrites-lot1` est remplacée par celle-ci.)
 - Vérifié : build officiel sur copie (fiches APC d'essai) sans erreur ; Chromium 1200 et 390 px, visiteur et abonné (suite servie par interception de `api/apprendre.php`) : aucune erreur JS, aucun débordement ; bancs Apprendre et empreintes au vert.

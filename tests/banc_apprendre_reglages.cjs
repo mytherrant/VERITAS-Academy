@@ -37,7 +37,10 @@ const CFG = {
 
 function charger(cfg, avecCalendrier) {
   const W = { VRT_APP_CFG: cfg, localStorage: { getItem() { return null; }, setItem() {} }, sessionStorage: { getItem() { return null; }, setItem() {}, removeItem() {} },
-    location: { search: '' }, fetch: () => Promise.reject(new Error('hors ligne')) };
+    location: { search: '' }, fetch: () => Promise.reject(new Error('hors ligne')),
+    /* commun.js (blocLivrets) programme la pose des couvertures de livrets par setTimeout : travail du DOM
+       seulement, hors du sujet de ce banc. Minuteries neutres, sinon le contexte vm (sans setTimeout) plante. */
+    setTimeout() { return 0; }, clearTimeout() {} };
   W.window = W;
   const ctx = vm.createContext(W);
   const fichiers = ['progressions.js', 'lecons.js', 'ressources.js', 'apercus-3e.js', 'commun.js'].concat(avecCalendrier ? ['calendrier.js'] : []);
