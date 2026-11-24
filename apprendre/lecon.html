@@ -12,7 +12,9 @@
 <link rel="stylesheet" href="jeu.css?v=20261112v">
 <link rel="stylesheet" href="planches.css?v=20261116b">
 <link rel="stylesheet" href="lecon-modele.css?v=20261118u">
-<link rel="stylesheet" href="modele.css?v=20261118v">
+<link rel="stylesheet" href="modele.css?v=20261120a">
+<link rel="stylesheet" href="lecon-epure.css?v=20261121c">
+<link rel="stylesheet" href="lecon-corpus.css?v=20261120g">
 <style>
 /* ── Vue Enseignant, français : évaluer la leçon dans l'Atelier (10/11/2026) ── */
 .atelier-prof{display:none}
@@ -20,6 +22,29 @@
 .atelier-prof .pic{flex:none;color:#1E499B}
 .atelier-prof div{flex:1 1 240px;min-width:0;font-size:13.5px;color:#4D5163;line-height:1.5}
 .atelier-prof b{display:block;font-weight:600;color:#001136;font-size:14.5px}
+/* Vue Enseignant réservée aux formules Prof (19/11/2026) */
+/* 21/11 « rends plus subtil et esthétique » (Jacques) : carte blanche à filet fin, cadenas discret, lien au lieu du gros bouton or,
+   champs clairs de même hauteur que le bouton. */
+.mur-vue{position:relative;max-width:760px;margin:16px auto;padding:18px 20px 16px 58px;border:1px solid #E6EAF2;border-radius:14px;background:#fff;box-shadow:0 8px 22px -16px rgba(0,17,54,.35);color:#4D5163;font:14px/1.55 var(--sans)}
+.mur-vue::before{content:"";position:absolute;left:18px;top:18px;width:26px;height:26px;background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%231E499B' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='4.5' y='10.5' width='15' height='10' rx='2.5' fill='%23EDF2FB'/%3E%3Cpath d='M8 10.5V7.5a4 4 0 0 1 8 0v3'/%3E%3Ccircle cx='12' cy='15.5' r='1.3' fill='%231E499B' stroke='none'/%3E%3C/svg%3E") center/contain no-repeat}
+.mur-vue p{margin:0 0 8px}.mur-vue p b{display:block;font-size:15px;font-weight:600;color:#001136;margin-bottom:2px}
+.mur-vue .mv-or{display:inline-flex;align-items:center;gap:6px;color:#1E499B;font-weight:600;font-size:13.5px;text-decoration:none;border-bottom:1px solid #CFDAEE;padding-bottom:1px}
+.mur-vue .mv-or::after{content:"→";font-weight:400}
+.mur-vue .mv-or:hover{border-bottom-color:#1E499B}
+.mur-vue details{margin-top:4px;padding-top:10px;border-top:1px solid #F0F2F7}
+.mur-vue summary{cursor:pointer;font-size:13.5px;font-weight:500;color:#6B7287;list-style:none}
+.mur-vue summary::-webkit-details-marker{display:none}
+.mur-vue summary::before{content:"›";display:inline-block;margin-right:6px;color:#9AA3B5;transition:transform .2s}
+.mur-vue details[open] summary::before{transform:rotate(90deg)}
+.mur-vue form{display:flex;flex-wrap:wrap;gap:10px;align-items:flex-end;margin-top:10px}
+.mur-vue label{display:flex;flex-direction:column;gap:4px;font-size:12.5px;color:#6B7287;flex:1 1 170px}
+.mur-vue input{height:38px;box-sizing:border-box;border:1px solid #DCE2EC;border-radius:10px;padding:0 12px;background:#FAFBFD;color:#001136;font:14px var(--sans)}
+.mur-vue input:focus{outline:none;border-color:#1E499B;background:#fff;box-shadow:0 0 0 3px rgba(30,73,155,.12)}
+.mur-vue input:-webkit-autofill{-webkit-box-shadow:0 0 0 40px #FAFBFD inset}
+.mur-vue button{height:38px;padding:0 18px;border:0;border-radius:10px;background:#1E499B;color:#fff;font:600 14px var(--sans);cursor:pointer}
+.mur-vue button:hover{background:#163A7E}
+.mur-vue [data-mv-m]{flex-basis:100%;font-size:13px;color:#A33A12}
+@media (max-width:560px){.mur-vue{padding:16px 14px 14px 48px}.mur-vue::before{left:14px;top:16px;width:22px;height:22px}}
 .atelier-prof a{flex:none;padding:8px 14px;border-radius:10px;background:#FFC93C;color:#001136;font-weight:600;font-size:13.5px;text-decoration:none}
 </style>
 </head>
@@ -52,16 +77,16 @@
 <script src="/api/apprendre_config.php"></script>
 <script src="scenes.js?v=20261112a"></script>
 <script src="progressions.js?v=20261110g"></script>
-<script src="lecons.js?v=20261118P1"></script>
+<script src="lecons.js?v=20261120h7"></script>
 <script src="ressources.js?v=20261119a"></script>
 <script src="atelier.js?v=20261110a"></script>
-<script src="charge.js?v=b2be5ce0"></script>
-<script src="commun.js?v=20261118p"></script>
+<script src="charge.js?v=059ce4fb"></script>
+<script src="commun.js?v=20261120a"></script>
 <script src="jeu.js?v=20261110g"></script>
 <script src="labo.js?v=20261118ch"></script>
 <script src="planche3d.js?v=20261116e"></script>
 <script src="verrou.js?v=20261118cm"></script>
-<script src="tuteur.js?v=20261113b"></script>
+<script src="tuteur.js?v=20261120a"></script>
 <script>
 (function(){
   "use strict";
@@ -129,7 +154,6 @@
      '<h1>'+esc(L.titre)+'</h1>'+
      (L.chap?'<p class="ent-chap">'+A.pic("livre",16)+'<span>Chapitre : <b>'+esc(L.chap)+'</b></span></p>':'')+
      (soeurs.length>1?'<div class="ent-pos"><span>'+(L.n<900?'Leçon '+L.n+' du programme MINESEC':'Leçon '+(i+1))+'</span><span class="ent-barre" aria-hidden="true"><i style="width:'+Math.round((i+1)/soeurs.length*100)+'%"></i></span><span>'+(i+1)+' / '+soeurs.length+' leçons rédigées</span></div>':(L.n<900?'<p class="ent-pos"><span>Leçon '+L.n+' du programme MINESEC</span></p>':''))+
-     (L.accroche?'<div class="ent-situ"><span class="ent-situ-t">'+A.pic("cible",16)+'Situation de départ</span><p class="accroche">'+esc(L.accroche)+'</p></div>':'')+
      '<div class="puces"><span>'+A.pic("horloge",14)+' '+(L.duree||15)+' min</span><span>'+L.parties.length+' parties</span>'+(L.labo||L.parties.some(function(p){return p.anim||p.labo})?'<span>'+A.pic("lecture",14)+' labo interactif</span>':'')+'<span>'+A.pic("coche",14)+' quiz de '+(L.quiz.length||L.nq||0)+' questions</span>'+(A.scenesPour(L).length?'<span>'+A.pic("masques",16)+' scène vivante</span>':'')+'</div></header>'+
    '<div class="formats" role="tablist" aria-label="Formats de la leçon">'+
      '<button type="button" role="tab" aria-selected="true" data-f="cours"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 4h7a3 3 0 0 1 3 3v13a2 2 0 0 0-2-2H2zM22 4h-7a3 3 0 0 0-3 3v13a2 2 0 0 1 2-2h8z"/></svg>Cours</button>'+
@@ -139,7 +163,9 @@
    '<section class="grille" data-panneau="cours"><aside class="sommaire" aria-label="Sommaire"><p>Sommaire</p><ol>'+L.parties.map(function(p,k){return p.verrou?'<li class="ferme">'+VRT.verrou.CADENAS+esc(p.t)+'</li>':'<li><a href="#p'+(k+1)+'">'+(k+1)+'. '+esc(p.t)+'</a></li>'}).join("")+'</ol><div class="lu"><span id="luTxt">Lecture : 0 %</span><div class="barre-p"><i id="luBar" style="width:0"></i></div></div></aside>'+
      '<article class="carte"><div class="outils-pdf"><button type="button" class="btn-l" onclick="print()">⤓ PDF</button></div>'+
      '<div id="kalaoCours"></div>'+
-     (L.intro?'<aside class="info-b"><h2><span class="apc-i">'+A.pic("lecture",20)+'</span>Pour commencer</h2><p class="info">'+L.intro+'</p></aside>':'')+
+     /* 20/11 « situation de départ et pour commencer c'est la même chose : mets tout en bas à Pour commencer » (Jacques) :
+        l'accroche quitte l'en-tête et ouvre le bloc « Pour commencer ». */
+     (L.intro||L.accroche?'<aside class="info-b"><h2><span class="apc-i">'+A.pic("lecture",20)+'</span>Pour commencer</h2>'+(L.accroche?'<p class="info info-q">'+esc(L.accroche)+'</p>':'')+(L.intro?'<p class="info">'+L.intro+'</p>':'')+'</aside>':'')+
      (L.apc&&!L.enquete?'<aside class="apc"><h2><span class="apc-i">'+A.pic("boussole",20)+'</span>Situation de vie</h2><p class="apc-s">'+esc(L.apc.situation)+'</p><div class="apc-t"><span class="apc-i">'+A.pic("crayon",18)+'</span><p><b>Ta tâche</b>'+esc(L.apc.tache)+'</p></div></aside>':'')+
      enquete+(L.objectifs?'<div class="objectifs"><b>À la fin de la leçon, tu sauras :</b><ul>'+L.objectifs.map(function(o){return '<li>'+o+'</li>'}).join("")+'</ul></div>':'')+
      parties+denouement+plus+carteM+(mur?VRT.verrou.mur(L,mur,A):scenesHtml+appel+A.offre(L.c,L.m,'lecon'))+'<div id="tuteurLecon"></div>'+nav+'</article></section>'+
@@ -231,9 +257,51 @@
     $('[data-a=lien]',d).addEventListener("click",function(){ var u=location.href.split("#")[0]+"#"+p.id; try{navigator.clipboard.writeText(u)}catch(e){} this.title="Lien copié"; });
     $('[data-a=pdf]',d).addEventListener("click",function(){print()});
   });
-  $$(".vue button").forEach(function(b){b.addEventListener("click",function(){
-    var v=b.getAttribute("data-vue"); $$(".vue button").forEach(function(x){x.setAttribute("aria-pressed",x===b?"true":"false")}); document.body.className=v;
+  /* 19/11/2026 — « en vue enseignant, on peut tout faire sans être inscrit ni abonné » :
+     la vue Enseignant (manuel de classe, impression par partie, Atelier) est réservée
+     aux formules Prof. Le serveur le garantit déjà (api/manuels.php refuse la création) ;
+     ici, on ne bascule plus pour un visiteur, on lui dit pourquoi et comment l'obtenir.
+     Accord mémorisé pour la session seulement : une formule qui expire se revoit. */
+  function jetonVue(){ try{ return localStorage.getItem("vrt_app_jeton")||sessionStorage.getItem("_vrtCT")||""; }catch(e){ return ""; } }
+  function estProf(j){ var d=(j&&j.droits)||{}; return (d.groupes||[]).some(function(g){return /^prof/.test(g)}) || d.classes===-1; }
+  function droitsVue(corps){
+    return fetch("/api/apprendre.php",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(corps)})
+      .then(function(r){return r.json()}).then(function(j){ if(j&&j.token){ try{localStorage.setItem("vrt_app_jeton",j.token)}catch(e){} } return j; });
+  }
+  function basculer(v){
+    $$(".vue button").forEach(function(x){x.setAttribute("aria-pressed",x.getAttribute("data-vue")===v?"true":"false")}); document.body.className=v;
+    var m=$(".mur-vue"); if(m&&v==="prof") m.remove();
     if(v==="prof"&&!A.lire("visite_prof",0)){ouvrir();A.ecrire("visite_prof",1)}
+  }
+  function murVue(msg){
+    var ancien=$(".mur-vue"); if(ancien) ancien.remove();
+    var d=document.createElement("div"); d.className="mur-vue"; d.setAttribute("role","status");
+    d.innerHTML='<p><b>Vue Enseignant</b>'+esc(msg)+'</p><p><a class="mv-or" href="/app.html#tarifs">Voir les formules enseignant</a></p>'+
+      '<details'+(jetonVue()?'':' open')+'><summary>Déjà abonné ? Je me connecte</summary><form data-mv><label>Identifiant<input name="login" autocomplete="username" required></label><label>Mot de passe<input name="password" type="password" autocomplete="current-password" required></label><button type="submit">Me connecter</button><span data-mv-m></span></form></details>';
+    var f=$("[data-mv]",d);
+    f.addEventListener("submit",function(e){
+      e.preventDefault(); var bt=$("button",f), m=$("[data-mv-m]",f); if(bt.disabled) return; bt.disabled=true; m.textContent="Connexion…";
+      droitsVue({action:"droits",id:"vue-prof",login:f.login.value.trim(),password:f.password.value}).then(function(j){
+        bt.disabled=false;
+        if(j&&j.ok&&estProf(j)){ try{sessionStorage.setItem("vrt_vue_prof","1")}catch(x){} basculer("prof"); return; }
+        m.textContent=(j&&j.ok)?"Connecté, mais ce compte n'a pas de formule enseignant active.":(j&&j.raison==="identifiants")?"Identifiant ou mot de passe incorrect.":(j&&j.raison==="debit")?"Trop d'essais : réessayez dans une minute.":"La connexion a échoué.";
+      }).catch(function(){ bt.disabled=false; m.textContent="Le serveur ne répond pas."; });
+    });
+    boite.parentNode.insertBefore(d,boite); d.scrollIntoView({block:"nearest"});
+  }
+  $$(".vue button").forEach(function(b){b.addEventListener("click",function(){
+    var v=b.getAttribute("data-vue");
+    if(v!=="prof"){ basculer(v); return; }
+    try{ if(sessionStorage.getItem("vrt_vue_prof")==="1"){ basculer("prof"); return; } }catch(e){}
+    var t=jetonVue();
+    if(!t){ murVue("La vue Enseignant (ajouter une partie au manuel de votre classe, imprimer une partie, évaluer la leçon dans l'Atelier) est réservée aux formules enseignant : Prof 3 classes, 6 classes ou toutes classes."); return; }
+    b.disabled=true;
+    droitsVue({action:"droits",id:"vue-prof",token:t}).then(function(j){
+      b.disabled=false;
+      if(j&&j.ok&&estProf(j)){ try{sessionStorage.setItem("vrt_vue_prof","1")}catch(e){} basculer("prof"); return; }
+      murVue(j&&j.ok?"Votre compte n'a pas de formule enseignant active. La vue Enseignant s'ouvre avec Prof 3 classes, 6 classes ou toutes classes."
+        :"La vue Enseignant est réservée aux formules enseignant. Connectez-vous avec votre compte Prof.");
+    }).catch(function(){ b.disabled=false; murVue("Le serveur ne répond pas : la vue Enseignant demande une connexion pour vérifier votre formule."); });
   })});
 
   /* Français, vue Enseignant : évaluer la leçon dans l'Atelier — la séquence
@@ -264,5 +332,6 @@
 })();
 </script>
 <script src="zoom.js?v=20261113a" defer></script>
+<script src="lecon-icones.js?v=20261120c" defer></script>
 </body>
 </html>

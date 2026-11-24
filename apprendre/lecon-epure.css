@@ -1,0 +1,419 @@
+/* VÉRITAS · Apprendre — leçon « sans encadrés dans les encadrés » (19/11/2026)
+   Demande de Jacques : « supprime les encadrés, trop d'encadrés dans les encadrés, il faut que ça paraisse
+   plus naturel ; les cartes et ressources s'intègrent naturellement ; fais de vraies icônes, puces, polices
+   similaires mais bien lisibles pour varier ; les planches doivent fondre dans le décor ».
+   Chargée en DERNIER par lecon.html seulement. Principe : un bloc = une icône dans la marge + du texte,
+   jamais un cadre ; les couleurs restent sur les icônes, les libellés et les mots-clés.
+   Le récit (situation, problème, réponse rédigée) passe dans une police à empattements lisible, pour
+   distinguer l'histoire du cours. Post-it (Astuce, Attention…) conservés : ce sont des notes collées. */
+:root{
+  --ep-serif:Georgia,"Noto Serif","Droid Serif",Cambria,"Times New Roman",serif;
+  --ep-loupe:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ccircle cx='26' cy='26' r='17' fill='%23DCE8FB'/%3E%3Ccircle cx='26' cy='26' r='17' fill='none' stroke='%231E499B' stroke-width='5'/%3E%3Cpath d='M18 21a9 9 0 0 1 8-6' fill='none' stroke='%23fff' stroke-width='4' stroke-linecap='round'/%3E%3Cpath d='m39 39 15 15' stroke='%23C2540A' stroke-width='9' stroke-linecap='round'/%3E%3C/svg%3E");
+  --ep-doc:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cpath d='M14 6h26l12 12v40H14z' fill='%23fff' stroke='%23B07A00' stroke-width='4' stroke-linejoin='round'/%3E%3Cpath d='M40 6v12h12' fill='%23FFE7A3' stroke='%23B07A00' stroke-width='4' stroke-linejoin='round'/%3E%3Cpath d='M22 30h22M22 38h22M22 46h14' stroke='%23E0A100' stroke-width='4' stroke-linecap='round'/%3E%3C/svg%3E");
+  --ep-question:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cpath d='M8 30C8 16 19 7 32 7s24 9 24 23-11 23-24 23c-3 0-6-.4-8.6-1.3L11 57l3.4-10.6C10.4 42.3 8 36.4 8 30z' fill='%23FFC93C'/%3E%3Cpath d='M25 24a7 7 0 1 1 10 6.3c-2 1-3 2.5-3 4.7v2' fill='none' stroke='%23142554' stroke-width='5' stroke-linecap='round'/%3E%3Ccircle cx='32' cy='44' r='3.2' fill='%23142554'/%3E%3C/svg%3E");
+  --ep-ok:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Ccircle cx='12' cy='12' r='11' fill='%231F8A4C'/%3E%3Cpath d='m7 12.4 3.2 3.2L17 8.8' fill='none' stroke='%23fff' stroke-width='2.6' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  --ep-ko:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Ccircle cx='12' cy='12' r='11' fill='%23C0392B'/%3E%3Cpath d='m8 8 8 8M16 8l-8 8' stroke='%23fff' stroke-width='2.6' stroke-linecap='round'/%3E%3C/svg%3E");
+  --ep-plus:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Ccircle cx='12' cy='12' r='11' fill='%231E499B'/%3E%3Cpath d='M7 12h9m-3.5-4 4 4-4 4' fill='none' stroke='%23fff' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  --ep-attente:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Ccircle cx='12' cy='12' r='10' fill='%23fff' stroke='%23B4BCCB' stroke-width='2' stroke-dasharray='3 2.6'/%3E%3Ccircle cx='12' cy='12' r='2.2' fill='%23B4BCCB'/%3E%3C/svg%3E");
+  --ep-trophee:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cpath d='M20 8h24v14a12 12 0 0 1-24 0z' fill='%23FFC93C'/%3E%3Cpath d='M20 13H10c0 9 5 14 11 14M44 13h10c0 9-5 14-11 14' fill='none' stroke='%23E0A100' stroke-width='4'/%3E%3Cpath d='M28 34h8v10h-8z' fill='%23E0A100'/%3E%3Crect x='19' y='44' width='26' height='10' rx='3' fill='%231F8A4C'/%3E%3Cpath d='m25 19 4.5 4.5L39 14' fill='none' stroke='%23fff' stroke-width='4' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  --ep-plume:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cpath d='M54 8C34 10 20 24 16 46l-4 10 8-6c18-2 30-14 34-42z' fill='%23CFE8DA'/%3E%3Cpath d='M54 8C34 10 20 24 16 46l-4 10' fill='none' stroke='%231F7A45' stroke-width='4' stroke-linecap='round'/%3E%3Cpath d='M44 18 22 44' stroke='%231F7A45' stroke-width='3' stroke-linecap='round'/%3E%3C/svg%3E");
+  --ep-fleche:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ccircle cx='26' cy='38' r='20' fill='%23FFF0C2'/%3E%3Ccircle cx='26' cy='38' r='11' fill='none' stroke='%23E0A100' stroke-width='4'/%3E%3Ccircle cx='26' cy='38' r='3.5' fill='%23C2540A'/%3E%3Cpath d='M27 37 52 12' stroke='%23142554' stroke-width='4' stroke-linecap='round'/%3E%3Cpath d='M45 9h9v9' fill='none' stroke='%23142554' stroke-width='4' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  --ep-puce:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M3 2.6c0-1 1.1-1.6 2-1.1l8.4 5.4c.8.5.8 1.7 0 2.2L5 14.5c-.9.5-2-.1-2-1.1z' fill='%23B2316E'/%3E%3C/svg%3E");
+}
+
+/* ── la feuille de la leçon : plus de cadre autour de tout ── */
+html body article.carte{border:0!important;box-shadow:none!important}
+
+/* ── titres de bloc communs : icône illustrée dans la marge, libellé coloré, pas de pastille ── */
+html body .carte .pl-tag{display:flex!important;align-items:center;gap:8px;background:none!important;padding:0!important;border-radius:0!important;margin:0 0 4px!important;font:700 12.5px/1.2 var(--sans)!important;letter-spacing:.1em!important;color:#C2540A!important}
+html body .carte .pl-tag::before{content:"";flex:0 0 26px;height:26px;background:var(--ep-i,var(--ep-loupe)) center/contain no-repeat}
+
+/* ── situation-problème : un chapitre de récit, pas une carte ── */
+html body .carte .enquete{border:0!important;border-radius:0!important;box-shadow:none!important;background:none!important;padding:0!important;margin:8px 0 34px!important}
+html body .carte .enquete .enq-t h2{margin:2px 0 14px!important}
+html body .carte .enq-r,html body .carte .enq-r p{font-family:var(--ep-serif)!important;font-size:17.5px!important;line-height:1.72!important;color:#2A2F3D!important}
+/* documents : côte à côte, séparés par l'espace, un pictogramme de feuille pour titre */
+html body .carte .enq-docs{gap:22px 28px!important;margin:20px 0 6px!important}
+html body .carte .enq-doc{border:0!important;background:none!important;border-radius:0!important;padding:0!important}
+html body .carte .enq-doc-t{display:flex;align-items:flex-start;gap:10px;flex-wrap:wrap;margin:0 0 8px!important;font:700 15px/1.35 var(--sans)!important}
+html body .carte .enq-doc-t::before{content:"";flex:0 0 28px;height:28px;margin-top:-3px;background:var(--ep-doc) center/contain no-repeat}
+html body .carte .enq-doc-t span{background:none!important;padding:0!important;margin:0!important;color:#B07A00!important;font-size:11.5px!important;letter-spacing:.1em!important;align-self:center}
+/* le problème : une grande question, bulle jaune dans la marge */
+html body .carte .enq-q{position:relative;background:none!important;border-radius:0!important;padding:4px 0 4px 58px!important;margin:24px 0 18px!important;min-height:46px}
+html body .carte .enq-q::before{content:"";position:absolute;left:0;top:2px;width:44px;height:44px;background:var(--ep-question) center/contain no-repeat}
+html body .carte .enq-q{font:italic 500 19px/1.5 var(--ep-serif)!important;color:#0C1F55!important}
+html body .carte .enq-q b{font:700 12px/1.3 var(--sans)!important;font-style:normal!important;letter-spacing:.1em!important;color:#B07A00!important;margin-bottom:4px!important}
+html body .carte .enq-tache{margin-left:8px!important}
+/* hypothèses : une liste de voix, pas des cartes */
+html body .carte .hyp{margin:22px 0 0!important}
+html body .carte .hyp-t{font:700 16px/1.3 var(--vm-titre,var(--sans))!important;color:#0C1F55!important}
+html body .carte .hyp ol{gap:2px!important}
+html body .carte .hyp li{border:0!important;background:none!important;border-radius:0!important;padding:7px 0!important;align-items:flex-start!important;font-size:16px!important;line-height:1.5!important}
+html body .carte .hyp li+li{border-top:1px dotted #D5DCE8!important}
+html body .carte .hyp-l{width:28px!important;height:28px!important;margin-top:-1px;background:#fff!important;border:2px solid #1E499B;color:#1E499B!important;font:700 13px/1 var(--vm-titre,var(--sans))!important}
+html body .carte .hyp-e{background:none!important;padding:4px 0 0 22px!important;border-radius:0!important;font:700 12px/1.2 var(--sans)!important;color:#8A90A2!important;background:var(--ep-attente) 0 3px/16px no-repeat!important}
+html body .carte .hyp li.h-rejetee .hyp-x{color:#8B8F99!important}
+html body .carte .hyp li.h-rejetee .hyp-l{border-color:#C0392B;color:#C0392B!important}
+html body .carte .hyp li.h-rejetee .hyp-e{color:#C0392B!important;background:var(--ep-ko) 0 2px/16px no-repeat!important}
+html body .carte .hyp li.h-validee .hyp-x{color:#123B25!important;font-weight:500}
+html body .carte .hyp li.h-validee .hyp-l{border-color:#1F8A4C;background:#1F8A4C!important;color:#fff!important}
+html body .carte .hyp li.h-validee .hyp-e{color:#1F7A45!important;background:var(--ep-ok) 0 2px/16px no-repeat!important}
+html body .carte .hyp li.h-precisee .hyp-l{border-color:#1E499B;background:#1E499B!important;color:#fff!important}
+html body .carte .hyp li.h-precisee .hyp-e{color:#1E499B!important;background:var(--ep-plus) 0 2px/16px no-repeat!important}
+html body .carte .hyp-x,html body .carte .verdicts li{text-align:left!important;hyphens:manual!important;-webkit-hyphens:manual!important}
+@media (max-width:640px){html body .carte .hyp li{flex-wrap:wrap!important;row-gap:2px}html body .carte .hyp-x{flex:1 1 calc(100% - 40px)!important}html body .carte .hyp-e{margin-left:38px!important}}
+/* parcours des indices : un chemin pointillé, des étapes numérotées, sans pastilles encadrées */
+html body .carte .enq-pistes{gap:8px 22px!important;margin:18px 0 0!important;align-items:center}
+html body .carte .enq-pistes li{border:0!important;background:none!important;border-radius:0!important;padding:4px 0!important;font:500 14px/1.35 var(--sans)!important;color:#5B6274!important;text-align:left!important;hyphens:manual!important}
+html body .carte .enq-pistes li span{width:24px!important;height:24px!important;background:#fff!important;border:2px solid #C5CFDF;color:#7A8295!important;font-size:12px!important;flex:none}
+html body .carte .enq-pistes li.trouve{color:#14532D!important;background:none!important}
+html body .carte .enq-pistes li.trouve span{background:#1F8A4C!important;border-color:#1F8A4C;color:#fff!important}
+
+/* ── indices : loupe dans la marge, texte libre, verdicts en icônes ── */
+html body .carte .fil{position:relative;background:none!important;box-shadow:none!important;border:0!important;border-radius:0!important;padding:2px 0 2px 58px!important;margin:30px 0 8px!important;min-height:44px}
+html body .carte .fil::before{content:"";position:absolute;left:0;top:0;width:44px;height:44px;background:var(--ep-loupe) center/contain no-repeat}
+html body .carte .fil-t{gap:10px!important;margin:0 0 6px!important;font:700 17px/1.3 var(--vm-titre,var(--sans))!important;color:#0C1F55!important}
+html body .carte .fil-n{background:none!important;padding:0!important;border-radius:0!important;color:#C2540A!important;font:700 12px/1.2 var(--sans)!important;letter-spacing:.1em!important}
+html body .carte .verdicts{gap:4px!important;margin:10px 0 0!important}
+html body .carte .verdicts li{position:relative;background:none!important;border:0!important;border-radius:0!important;padding:2px 0 2px 28px!important;margin:0!important;font-size:15px!important;line-height:1.5!important}
+html body .carte .verdicts li::before{content:"";position:absolute;left:0;top:4px;width:19px;height:19px;background:var(--ep-attente) center/contain no-repeat}
+html body .carte .verdicts .v-rejetee::before{background-image:var(--ep-ko)}
+html body .carte .verdicts .v-validee::before{background-image:var(--ep-ok)}
+html body .carte .verdicts .v-precisee::before{background-image:var(--ep-plus)}
+
+/* ── méthode : étapes numérotées sans cartes ── */
+html body .carte .methode ol{gap:12px!important}
+html body .carte .methode li{background:none!important;border:0!important;border-radius:0!important;padding:3px 0 3px 46px!important;min-height:32px}
+html body .carte .methode li::before{left:0!important;top:0!important;width:32px!important;height:32px!important;border-radius:50%!important;background:#fff!important;border:2.5px solid #E07A1F;color:#C2540A!important;box-shadow:none!important;box-sizing:border-box;font:800 15px/1 var(--vm-titre,var(--sans))!important}
+
+/* ── vraies puces dans le cours : un petit triangle arrondi, pas un point ── */
+html body .carte .partie ul:not([class])>li,html body .carte .denouement ul:not([class])>li{list-style:none;position:relative;padding-left:22px}
+html body .carte .partie ul:not([class]),html body .carte .denouement ul:not([class]){padding-left:4px}
+html body .carte .partie ul:not([class])>li::before,html body .carte .denouement ul:not([class])>li::before{content:"";position:absolute;left:2px;top:.5em;width:11px;height:11px;background:var(--ep-puce) center/contain no-repeat}
+html body .carte .partie .prop ul:not([class])>li::before{filter:hue-rotate(-140deg) saturate(.9)}
+html body .carte .partie .methode ul:not([class])>li::before{filter:hue-rotate(60deg) saturate(1.3)}
+
+/* ── « À retenir » de fin de partie : une phrase marquée, pas un bandeau ── */
+html body .carte .partie .retenir{background:none!important;border:0!important;border-radius:0!important;padding:4px 0!important;margin:20px 0 0!important;color:#8D1D52!important;text-align:left!important;hyphens:manual!important}
+html body .carte .partie .retenir::before{flex:0 0 26px!important;height:26px!important;background:var(--vm-ill-retiens,var(--vm-pin)) center/contain no-repeat!important;filter:none!important}
+
+/* ── introduction, situation de vie, objectifs : titre à icône posé dans le texte ── */
+html body .carte .info-b,html body .carte .apc,html body .carte .objectifs{border:0!important;background:none!important;box-shadow:none!important;border-radius:0!important;padding:0!important;margin:0 0 26px!important}
+html body .carte .info-b h2,html body .apc h2{display:flex!important;margin:0 0 8px!important;padding:0!important;border:0!important;box-shadow:none!important;background:none!important;transform:none!important}
+html body .apc .apc-s{font-family:var(--ep-serif)!important;font-size:17.5px!important;line-height:1.7!important}
+html body .carte .objectifs>b{margin-bottom:8px!important}
+
+/* ── en-tête : la phrase de départ sans cadre pointillé ── */
+html body .bandeau.ent .ent-situ{background:none!important;border:0!important;border-radius:0!important;padding:0!important;margin:2px 0 14px!important}
+html body .bandeau.ent .accroche{font:italic 400 18px/1.5 var(--ep-serif)!important;color:#2A2F3D!important}
+html body .bandeau.ent .puces{gap:4px 18px!important}
+html body .bandeau.ent .puces span{background:none!important;border:0!important;padding:2px 0!important;border-radius:0!important;gap:6px}
+/* chiffres alignés dans la police à empattements (Georgia met « 0,28 » en bas de casse) */
+html body .carte,html body .bandeau.ent{font-variant-numeric:lining-nums}
+
+/* ── planches et schémas : ils se posent sur la page ── */
+html body .carte figure.planche,html body .carte figure.p3d,html body .carte figure.illus{border:0!important;box-shadow:none!important;background:none!important;padding:0!important;border-radius:0!important;margin:28px 0!important}
+html body .carte figure.illus>svg,html body .carte figure.planche>svg{border-radius:14px}
+/* sans marge intérieure, l'icône « Agrandir » tombait sur la légende : elle monte en haut, à côté de « Image » */
+html body .carte figure.illus::after{top:8px!important;bottom:auto!important;right:8px!important}
+html body .carte figure.illus .btn-img{right:46px!important}
+html body .carte .pl-t{gap:6px 10px!important;font:700 15px/1.3 var(--vm-titre,var(--sans))!important;letter-spacing:.02em!important;text-transform:none!important;color:#0C1F55!important;margin:0 0 8px!important}
+html body .carte .pl-t .pl-tag{display:inline!important;color:#C2540A!important;font:700 12px/1.2 var(--sans)!important;letter-spacing:.1em!important;text-transform:uppercase}
+html body .carte .pl-t .pl-tag::before{content:none!important}
+html body .carte .pl-t::after{content:none!important}
+html body .carte .p3d-svg{background:radial-gradient(ellipse 60% 26% at 50% 78%,rgba(19,48,122,.07),transparent 70%)!important;border-radius:0!important}
+html body .carte .p3d-cmd{gap:6px 8px!important;justify-content:center}
+html body .carte .p3d-cmd button{border:0!important;background:#F1F4FA!important;color:#1E499B!important;font:600 13px/1 var(--sans)!important;padding:8px 13px!important}
+html body .carte .p3d-cmd button[data-p3d=jouer]{background:#FBE9F1!important;color:#B2316E!important}
+html body .carte .p3d-cmd button[aria-pressed=true]{background:#FFC93C!important;color:#142554!important}
+html body .carte .p3d-aide{flex-basis:100%;text-align:center;margin:0!important}
+html body .carte .p3d-ecl{flex-basis:100%;justify-content:center}
+html body .carte figure.planche figcaption,html body .carte figure.p3d figcaption,html body .carte figure.illus figcaption{font:italic 400 15px/1.55 var(--ep-serif)!important;color:#555C6C!important;max-width:620px;margin:10px auto 0!important;text-align:center!important}
+/* animations : le titre en libellé, plus de cadre ni de bandeau */
+html body .carte .anim{border:0!important;background:none!important;border-radius:0!important;overflow:visible!important;margin:28px 0!important}
+html body .carte .anim-t{background:none!important;border:0!important;padding:0 0 8px!important;color:#0C1F55!important;font:700 15px/1.3 var(--vm-titre,var(--sans))!important}
+
+/* ── dénouement : la conclusion du récit, trophée dans la marge ── */
+html body .carte .denouement{border:0!important;border-radius:0!important;box-shadow:none!important;background:none!important;padding:0!important;margin:40px 0 12px!important}
+html body .carte .denouement .pl-tag{--ep-i:var(--ep-trophee);color:#1F7A45!important}
+html body .carte .den-formules{border:0!important;background:none!important;padding:0!important;margin:18px 0 6px!important}
+html body .carte .den-formules>b{color:#1F7A45!important}
+html body .carte .den-formules ol{counter-reset:df;gap:14px!important}
+html body .carte .den-formules li{counter-increment:df;position:relative;background:none!important;border:0!important;border-radius:0!important;padding:0 0 0 44px!important}
+html body .carte .den-formules li::before{content:counter(df);position:absolute;left:0;top:0;width:30px;height:30px;border-radius:50%;display:grid;place-items:center;background:#1F8A4C;color:#fff;font:700 14px/1 var(--vm-titre,var(--sans))}
+html body .carte .den-formules .df-f{background:#EEF4FC!important;border-radius:6px!important}
+html body .carte .denouement .reponse{position:relative;border:0!important;background:none!important;border-radius:0!important;padding:4px 0 4px 58px!important;margin:24px 0 0!important}
+html body .carte .denouement .reponse::before{content:"";position:absolute;left:0;top:2px;width:42px;height:42px;background:var(--ep-plume) center/contain no-repeat}
+html body .carte .denouement .reponse,html body .carte .denouement .reponse p{font-family:var(--ep-serif)!important;font-size:17px!important;line-height:1.75!important;color:#24302A!important}
+html body .carte .denouement .reponse b{font-family:var(--sans)!important;color:#1F7A45!important;letter-spacing:.1em!important}
+html body .carte .transfert{position:relative;background:none!important;border:0!important;border-radius:0!important;padding:4px 0 4px 58px!important;margin:26px 0 0!important}
+html body .carte .transfert::before{content:"";position:absolute;left:0;top:2px;width:42px;height:42px;background:var(--ep-fleche) center/contain no-repeat}
+html body .carte .transfert b{color:#B07A00!important;letter-spacing:.1em!important}
+
+/* ── téléphone : marges d'icônes resserrées ── */
+@media (max-width:560px){
+  /* au téléphone, l'icône reste à côté du titre et le texte reprend toute la largeur */
+  html body .carte .fil,html body .carte .enq-q,html body .carte .denouement .reponse,html body .carte .transfert{padding-left:0!important}
+  html body .carte .fil::before,html body .carte .enq-q::before,html body .carte .denouement .reponse::before,html body .carte .transfert::before{width:32px;height:32px;top:-4px}
+  html body .carte .fil-t,html body .carte .enq-q b,html body .carte .denouement .reponse b,html body .carte .transfert b{padding-left:42px;min-height:26px}
+  html body .carte .enq-q b{margin-bottom:10px!important}
+  html body .carte .enq-q{font-size:17.5px!important}
+  html body .carte .enq-r,html body .carte .enq-r p,html body .apc .apc-s{font-size:16.5px!important}
+}
+@media print{html body .carte .pl-tag::before,html body .carte .fil::before{print-color-adjust:exact;-webkit-print-color-adjust:exact}}
+
+/* ── 19/11 (2) « mets le grand titre comme ceci » (capture de « Pour commencer ») :
+   tuile d'icône douce à gauche, titre bleu ; le libellé reste au-dessus du titre ── */
+:root{
+  --ep-t-loupe:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%231E499B' stroke-width='2.2' stroke-linecap='round'%3E%3Ccircle cx='10.5' cy='10.5' r='6.5'/%3E%3Cpath d='m15.5 15.5 5 5'/%3E%3C/svg%3E");
+  --ep-t-coupe:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2317784D' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M7 4h10v5a5 5 0 0 1-10 0z'/%3E%3Cpath d='M7 6H4c0 3 1.5 5 4 5.3M17 6h3c0 3-1.5 5-4 5.3M12 14v3M8.5 20h7l-1-3h-5z'/%3E%3C/svg%3E");
+  /* engrenages redessinés : dents régulières (anneau en pointillé), moyeu net */
+  --vm-ill-methode:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cg transform='translate(24 25)'%3E%3Ccircle r='16' fill='none' stroke='%2313A3B0' stroke-width='7' stroke-dasharray='6.3 6.27'/%3E%3Ccircle r='13.5' fill='%231FB3C0'/%3E%3Ccircle r='9.5' fill='none' stroke='%23fff' stroke-opacity='.35' stroke-width='2'/%3E%3Ccircle r='5' fill='%23fff'/%3E%3C/g%3E%3Cg transform='translate(46 45)'%3E%3Ccircle r='11' fill='none' stroke='%23E8842C' stroke-width='6' stroke-dasharray='4.9 4.97' transform='rotate(12)'/%3E%3Ccircle r='9' fill='%23F39A45'/%3E%3Ccircle r='6' fill='none' stroke='%23fff' stroke-opacity='.35' stroke-width='1.6'/%3E%3Ccircle r='3.4' fill='%23fff'/%3E%3C/g%3E%3C/svg%3E");
+}
+html body .carte .enq-t{position:relative;padding-left:50px;min-height:40px}
+html body .carte .enq-t::before{content:"";position:absolute;left:0;top:2px;width:38px;height:38px;border-radius:12px;background:#DCE6F8 var(--ep-t-loupe) center/21px no-repeat}
+html body .carte .enq-t .pl-tag::before{content:none!important}
+html body .carte .enq-t .pl-tag{color:#5B6B8C!important;font-size:11.5px!important}
+html body .carte .enquete .enq-t h2,html body .carte .denouement .enq-t h2{margin:0 0 16px!important;font:700 21px/1.3 var(--vm-titre,var(--sans))!important;color:#1E499B!important}
+html body .carte .denouement .enq-t::before{background-color:#DCEFE2;background-image:var(--ep-t-coupe)}
+html body .carte .denouement .enq-t h2{color:#17784D!important}
+@media (max-width:560px){html body .carte .enquete .enq-t h2,html body .carte .denouement .enq-t h2{font-size:19px!important}}
+
+/* ── 19/11 (3) « mets aussi ceci en évidence » : « À ton tour » = le seul panneau du dénouement
+   (un seul niveau, rien d'imbriqué), titre à tuile comme « Pour commencer » ── */
+:root{--ep-t-cible:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23142554' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='11' cy='13' r='7.5'/%3E%3Ccircle cx='11' cy='13' r='3.2'/%3E%3Cpath d='m11 13 9-9M16 4h4v4'/%3E%3C/svg%3E")}
+html body .carte .transfert{padding:18px 20px 18px!important;margin:30px 0 4px!important;border-radius:18px!important;background:linear-gradient(135deg,#FFF3CC,#FFF9E8 70%)!important;border:1.5px solid #F2D27A!important;box-shadow:0 8px 22px -12px rgba(176,122,0,.45)!important}
+html body .carte .transfert::before{content:none!important}
+html body .carte .transfert b{display:flex!important;align-items:center;gap:12px;padding-left:0!important;margin:0 0 10px!important;font:700 19px/1.3 var(--vm-titre,var(--sans))!important;letter-spacing:0!important;text-transform:none!important;color:#8A5A00!important;text-align:left!important;hyphens:manual!important}
+html body .carte .transfert b::before{content:"";flex:0 0 38px;height:38px;border-radius:12px;background:#FFC93C var(--ep-t-cible) center/21px no-repeat;box-shadow:0 4px 10px rgba(176,122,0,.25)}
+html body .carte .transfert,html body .carte .transfert p{font-size:17px!important;line-height:1.65!important;color:#2A2F3D!important}
+@media (max-width:560px){html body .carte .transfert{padding:16px 14px!important}html body .carte .transfert b{font-size:17px!important}}
+
+/* ── 19/11 (4) « fais comme ceci [post-it « À l'hôpital »] en choisissant une autre couleur » :
+   « À ton tour » devient une note collée PÊCHE, titre dans le ruban blanc incliné, comme Astuce / Attention ── */
+html body .carte .transfert{position:relative;max-width:640px;margin:44px auto 26px!important;padding:30px 18px 14px!important;border:1.5px solid #F3B58C!important;border-radius:2px 2px 16px 2px!important;background:linear-gradient(#FFE9D6,#FFDCC2)!important;box-shadow:0 10px 16px -10px rgba(120,60,0,.5)!important;transform:rotate(-.7deg);color:#4A2A12!important}
+html body .carte .transfert b{position:relative;display:table!important;max-width:88%;box-sizing:border-box;min-height:32px;margin:-46px auto 12px!important;padding:5px 14px 5px 40px!important;transform:rotate(2deg);background:var(--ep-fleche) 10px 50%/24px no-repeat,rgba(255,255,255,.92)!important;border:1px solid rgba(0,0,0,.07);box-shadow:0 2px 4px rgba(0,0,0,.06);font:800 17px/1.25 var(--vm-titre,var(--sans))!important;letter-spacing:0!important;text-transform:none!important;color:#A0430A!important;text-align:center!important}
+html body .carte .transfert b::before{content:none!important}
+html body .carte .transfert,html body .carte .transfert p{font-size:16px!important;line-height:1.5!important;color:#4A2A12!important}
+@media (max-width:560px){html body .carte .transfert{padding:28px 14px 12px!important}html body .carte .transfert b{font-size:16px!important}}
+@media (prefers-reduced-motion:reduce){html body .carte .transfert,html body .carte .transfert b{transform:none}}
+@media print{html body .carte .transfert{transform:none;box-shadow:none}}
+
+/* ── 19/11 (5) « mets la police en gras » : texte des notes collées en gras (600), lisible sur le papier coloré ── */
+html body .carte .astuce,html body .carte .attention,html body .carte .retiens,html body .carte .savais,html body .carte .transfert,
+html body .carte .astuce p,html body .carte .attention p,html body .carte .retiens p,html body .carte .savais p,html body .carte .transfert p,
+html body .carte .astuce li,html body .carte .attention li,html body .carte .retiens li,html body .carte .savais li{font-weight:600!important}
+html body .carte .astuce strong,html body .carte .attention strong,html body .carte .retiens strong,html body .carte .savais strong,html body .carte .transfert strong{font-weight:800!important}
+
+/* ── 19/11 (6) « améliore la qualité des icônes, puces » : un seul jeu d'icônes, au trait, net à toute taille.
+   Encadrés (définition, propriété, méthode, exemple) : tuile douce de la couleur de la famille + pictogramme au trait,
+   comme « Pour commencer » ; plus d'illustrations multicolores ni d'ombre floue. Le rail pointillé devient un filet plein.
+   Puces : chevron dans une pastille, de la couleur du bloc (fini le filtre de teinte qui salissait les couleurs). ── */
+:root{
+  --ep2-def:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%231E499B' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M3 5.6c2.6-1.1 5.6-1 9 1 3.4-2 6.4-2.1 9-1v13c-2.6-1.1-5.6-1-9 1-3.4-2-6.4-2.1-9-1z'/%3E%3Cpath d='M12 6.6v13'/%3E%3C/svg%3E");
+  --ep2-prop:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%236A3DB8' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='12' cy='9.5' r='6'/%3E%3Cpath d='m9.4 9.6 1.8 1.8 3.5-3.5'/%3E%3Cpath d='M8.6 14.4 7.2 21l4.8-2.4 4.8 2.4-1.4-6.6'/%3E%3C/svg%3E");
+  --ep2-methode:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%230B7A84' stroke-width='1.9' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M18.88 10.24 L21.86 10.31 L21.86 13.69 L18.88 13.76 L18.11 15.62 L20.17 17.77 L17.77 20.17 L15.62 18.11 L13.76 18.88 L13.69 21.86 L10.31 21.86 L10.24 18.88 L8.38 18.11 L6.23 20.17 L3.83 17.77 L5.89 15.62 L5.12 13.76 L2.14 13.69 L2.14 10.31 L5.12 10.24 L5.89 8.38 L3.83 6.23 L6.23 3.83 L8.38 5.89 L10.24 5.12 L10.31 2.14 L13.69 2.14 L13.76 5.12 L15.62 5.89 L17.77 3.83 L20.17 6.23 L18.11 8.38Z'/%3E%3Ccircle cx='12' cy='12' r='3'/%3E%3C/svg%3E");
+  --ep2-ex:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23C2540A' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M4 20h4.2L19.4 8.8a2.4 2.4 0 0 0-3.4-3.4L4.8 16.6z'/%3E%3Cpath d='m14.2 7.2 3.4 3.4'/%3E%3C/svg%3E");
+  --ep2-pin:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23B2316E' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M9 3.5h6l-1 6 3.5 3.5v1.5h-11V13L10 9.5z'/%3E%3Cpath d='M12 14.5V21'/%3E%3C/svg%3E");
+  --ep2-astuce:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%239A6A00' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M9.2 17.5h5.6M10.2 20.5h3.6'/%3E%3Cpath d='M12 3.2a6 6 0 0 0-3.7 10.7c.8.7 1.1 1.5 1.1 2.4h5.2c0-.9.4-1.7 1.1-2.4A6 6 0 0 0 12 3.2z'/%3E%3C/svg%3E");
+  --ep2-attention:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23C0392B' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M10.3 4.3 2.8 17.6A2 2 0 0 0 4.5 20.6h15a2 2 0 0 0 1.7-3L13.7 4.3a2 2 0 0 0-3.4 0z'/%3E%3Cpath d='M12 9.5v4.5'/%3E%3Cpath d='M12 17.3h.01' stroke-width='2.8'/%3E%3C/svg%3E");
+  --ep2-retiens:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23B2316E' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M7 3.5h10v17l-5-3.6-5 3.6z'/%3E%3C/svg%3E");
+  --ep2-savais:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%231E499B' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='12' cy='12' r='9'/%3E%3Cpath d='M12 11v5.5'/%3E%3Cpath d='M12 7.6h.01' stroke-width='2.8'/%3E%3C/svg%3E");
+  --ep2-puce-mag:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Ccircle cx='8' cy='8' r='7.5' fill='%23FBE3EE'/%3E%3Cpath d='m6.6 4.9 3.1 3.1-3.1 3.1' fill='none' stroke='%23B2316E' stroke-width='1.9' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  --ep2-puce-def:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Ccircle cx='8' cy='8' r='7.5' fill='%23DCE6F8'/%3E%3Cpath d='m6.6 4.9 3.1 3.1-3.1 3.1' fill='none' stroke='%231E499B' stroke-width='1.9' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  --ep2-puce-prop:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Ccircle cx='8' cy='8' r='7.5' fill='%23ECE4FA'/%3E%3Cpath d='m6.6 4.9 3.1 3.1-3.1 3.1' fill='none' stroke='%236A3DB8' stroke-width='1.9' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  --ep2-puce-methode:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Ccircle cx='8' cy='8' r='7.5' fill='%23D6F0F1'/%3E%3Cpath d='m6.6 4.9 3.1 3.1-3.1 3.1' fill='none' stroke='%230B7A84' stroke-width='1.9' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  --ep2-puce-ex:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Ccircle cx='8' cy='8' r='7.5' fill='%23FDE6D3'/%3E%3Cpath d='m6.6 4.9 3.1 3.1-3.1 3.1' fill='none' stroke='%23C2540A' stroke-width='1.9' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+}
+html body .carte .def{--ep2-i:var(--ep2-def);--ep2-bg:#DCE6F8;--ep2-c:#1E499B;--ep2-puce:var(--ep2-puce-def)}
+html body .carte .prop{--ep2-i:var(--ep2-prop);--ep2-bg:#ECE4FA;--ep2-c:#6A3DB8;--ep2-puce:var(--ep2-puce-prop)}
+html body .carte .methode{--ep2-i:var(--ep2-methode);--ep2-bg:#D6F0F1;--ep2-c:#0B7A84;--ep2-puce:var(--ep2-puce-methode)}
+html body .carte .ex{--ep2-i:var(--ep2-ex);--ep2-bg:#FDE6D3;--ep2-c:#C2540A;--ep2-puce:var(--ep2-puce-ex)}
+html body .carte .def::before,html body .carte .prop::before,html body .carte .methode::before,html body .carte .ex::before{width:40px!important;height:40px!important;left:0!important;top:0!important;border-radius:12px!important;background:var(--ep2-bg) var(--ep2-i) center/22px no-repeat!important;box-shadow:none!important;filter:none!important}
+html body .carte .def::after,html body .carte .prop::after,html body .carte .methode::after,html body .carte .ex::after{left:19px!important;top:50px!important;width:2px!important;border-radius:2px;background:linear-gradient(var(--ep2-bg),rgba(255,255,255,0))!important;-webkit-mask:none!important;mask:none!important}
+html body .carte .def>b:first-child,html body .carte .prop>b:first-child,html body .carte .methode>b:first-child,html body .carte .ex>b:first-child{color:var(--ep2-c)!important;min-height:40px!important;display:flex!important;align-items:center}
+@media (max-width:560px){html body .carte .def::before,html body .carte .prop::before,html body .carte .methode::before,html body .carte .ex::before{width:36px!important;height:36px!important;border-radius:11px!important;background-size:20px!important}html body .carte .def::after,html body .carte .prop::after,html body .carte .methode::after,html body .carte .ex::after{left:17px!important;top:46px!important}html body .carte .def>b:first-child,html body .carte .prop>b:first-child,html body .carte .methode>b:first-child,html body .carte .ex>b:first-child{min-height:36px!important}}
+/* « à retenir » de fin de partie : punaise au trait, sans filtre de couleur */
+html body .carte .partie .retenir::before{flex:0 0 24px!important;height:24px!important;background:var(--ep2-pin) center/22px no-repeat!important;filter:none!important}
+/* notes collées : pictogramme au trait dans le ruban */
+html body .carte .astuce>b:first-child{--vm-i:var(--ep2-astuce)}html body .carte .attention>b:first-child{--vm-i:var(--ep2-attention)}html body .carte .retiens>b:first-child{--vm-i:var(--ep2-retiens)}html body .carte .savais>b:first-child{--vm-i:var(--ep2-savais)}
+/* puces du cours : chevron dans une pastille, couleur du bloc */
+html body .carte .partie ul:not([class])>li::before,html body .carte .denouement ul:not([class])>li::before{top:.3em!important;left:0!important;width:16px!important;height:16px!important;background:var(--ep2-puce,var(--ep2-puce-mag)) center/contain no-repeat!important;filter:none!important}
+html body .carte .partie ul:not([class])>li,html body .carte .denouement ul:not([class])>li{padding-left:26px!important}
+html body .carte .partie .prop ul:not([class])>li::before,html body .carte .partie .methode ul:not([class])>li::before{filter:none!important}
+
+/* indices : la loupe en tuile au trait, comme les encadrés et « Situation-problème » */
+html body .carte .methode::before{background-size:25px!important}
+html body .carte .fil::before{width:40px!important;height:40px!important;border-radius:12px;background:#DCE6F8 var(--ep-t-loupe) center/22px no-repeat!important}
+@media (max-width:560px){html body .carte .fil::before{width:34px!important;height:34px!important;border-radius:11px;background-size:19px!important;top:-5px!important}}
+
+/* ── 20/11 « impossible de distinguer les parties : mets les mêmes icônes avec pointillés comme ailleurs ;
+   mets les corpus, situations de vie dans des encadrés » (capture « Pour commencer » / « Situation de vie ») ──
+   1. Un seul rail pointillé, de la couleur du bloc, sous chaque tuile : encadrés du cours, « Pour commencer », objectifs.
+   2. Les textes à lire (situation de vie, récit de la situation-problème, documents, corpus) : un encadré, un seul niveau. */
+/* 1. rail pointillé (remplace le filet plein des encadrés) */
+html body .carte .def::after,html body .carte .prop::after,html body .carte .methode::after,html body .carte .ex::after,
+html body .carte .info-b::after,html body .carte .objectifs::after{content:"";position:absolute;left:18px!important;top:50px!important;bottom:4px!important;width:4px!important;border:0!important;border-radius:0!important;
+  background:radial-gradient(circle,var(--ep3-rail,var(--ep2-c,#1E499B)) 1.6px,transparent 2px) 0 0/4px 10px repeat-y!important;
+  -webkit-mask:linear-gradient(#000 55%,transparent)!important;mask:linear-gradient(#000 55%,transparent)!important;opacity:.55}
+/* « Pour commencer » : tuile bleue, texte décalé à droite du rail */
+html body .carte .info-b{position:relative!important;margin:0 0 28px!important;padding:0!important}
+html body .carte .info-b h2{align-items:center;gap:12px!important;min-height:40px;font:700 19px/1.3 var(--vm-titre,var(--sans))!important;color:#1E499B!important}
+html body .carte .info-b p.info{padding-left:52px!important}
+html body .carte .info-b{--ep3-rail:#1E499B}
+/* objectifs : cible au trait sur tuile magenta, pastilles alignées à droite du rail */
+html body .carte .objectifs{position:relative!important;--ep3-rail:#B2316E;margin:0 0 30px!important}
+html body .carte .objectifs>b{display:flex!important;align-items:center;gap:12px!important;min-height:40px;margin:0 0 8px!important;font:700 19px/1.3 var(--vm-titre,var(--sans))!important;color:#8D1D52!important}
+html body .carte .objectifs ul{padding-left:52px!important}
+html body .carte .objectifs li{padding-left:24px!important}
+html body .carte .objectifs li::before{left:0!important}
+@media (max-width:560px){
+    html body .carte .info-b::after,html body .carte .objectifs::after,html body .carte .def::after,html body .carte .prop::after,html body .carte .methode::after,html body .carte .ex::after{left:16px!important;top:46px!important}
+  html body .carte .info-b p.info,html body .carte .objectifs ul{padding-left:46px!important}
+}
+
+/* 2. encadrés de lecture */
+/* situation de vie : carte chaude, la tâche reste une ligne à pastille (pas d'encadré dans l'encadré) */
+html body .carte .apc{position:relative!important;margin:0 0 28px!important;padding:16px 18px 18px!important;border:1.5px solid #F2D2AE!important;border-radius:18px!important;background:linear-gradient(180deg,#FFF7EC,#FFFDF9 70%)!important;box-shadow:0 6px 16px -12px rgba(194,78,0,.45)!important}
+html body .carte .apc h2{align-items:center;gap:12px!important;margin:0 0 10px!important;font:700 19px/1.3 var(--vm-titre,var(--sans))!important;color:#C24E00!important}
+html body .carte .apc .apc-t{background:none!important;border:0!important;border-top:1.5px dashed #EFC9A0!important;border-radius:0!important;padding:12px 0 0!important;margin:12px 0 0!important}
+@media (max-width:560px){html body .carte .apc{padding:14px 14px 16px!important}}
+/* corpus : feuille dorée (les documents de la situation-problème restent sans cadre : « pas trop d'encadrés ») */
+html body .carte blockquote{position:relative;margin:0;padding:14px 16px!important;border:1.5px solid #EBD9A8!important;border-radius:14px!important;background:#FFFCF2!important;box-sizing:border-box}
+html body .carte blockquote{margin:12px 0 18px!important;font-family:var(--ep-serif);font-size:16.5px;line-height:1.65;color:#2A2F3D}
+html body .carte blockquote em,html body .carte blockquote cite{color:#6B5A2A}
+/* « Corpus » annoncé juste avant la citation : libellé doré collé à l'encadré */
+html body .carte p:has(>strong:first-child)+blockquote{margin-top:4px!important}
+@media print{html body .carte .apc,html body .carte blockquote{box-shadow:none!important;break-inside:avoid}}
+/* 20/11 (2) « pas trop d'encadrés, utilise le même style d'icône qui était là avant » :
+   objectifs = cible illustrée d'origine (--vm-target), centrée au-dessus du rail */
+html body .carte .objectifs>b::before{flex:0 0 40px!important;height:30px!important;background:var(--vm-target) center/28px no-repeat!important}
+/* 20/11 (3) « mets tous les documents dans un tableau subtil en changeant juste les titres en couleurs » :
+   les documents forment un seul tableau à filets fins (cellules séparées d'un trait de 1 px), chaque titre prend sa couleur. */
+html body .carte .enq-docs{gap:1px!important;margin:20px 0 6px!important;background:#E3E7EF;border:1px solid #E3E7EF;border-radius:14px;overflow:hidden}
+html body .carte .enq-doc{background:#fff!important;padding:14px 16px!important}
+html body .carte .enq-doc:nth-child(4n+1){--ep4-c:#1E499B}
+html body .carte .enq-doc:nth-child(4n+2){--ep4-c:#B2316E}
+html body .carte .enq-doc:nth-child(4n+3){--ep4-c:#0B7A84}
+html body .carte .enq-doc:nth-child(4n+4){--ep4-c:#C2540A}
+html body .carte .enq-doc-t,html body .carte .enq-doc-t span{color:var(--ep4-c)!important}
+html body .carte .enq-doc table{margin-bottom:0}
+@media (max-width:560px){html body .carte .enq-doc{padding:12px 12px!important}}
+
+/* ── 20/11 (4) « les icônes ci ne m'arrangent pas » + « diminue la taille du texte » + « réduis l'interligne »
+   (captures : tuiles bleue/pêche + rail pointillé, récit en Georgia 17,5 px, indices très aérés).
+   1. Icônes : pictogramme au trait posé nu (22 px), sans tuile colorée ni rail pointillé ; le texte s'aligne sur le titre.
+   2. Texte : 15,5 px pour le cours, 16 px pour le récit ; interligne ramené à 1,5 (1,55 pour le récit). ── */
+html body .carte .enq-t::before,html body .carte .fil::before,
+html body .carte .def::before,html body .carte .prop::before,html body .carte .methode::before,html body .carte .ex::before{
+  width:24px!important;height:24px!important;border-radius:0!important;background-color:transparent!important;background-size:22px!important;box-shadow:none!important}
+html body .carte .enq-t::before{top:1px!important}
+html body .carte .def::before,html body .carte .prop::before,html body .carte .methode::before,html body .carte .ex::before{top:7px!important}
+html body .carte .fil::before{top:0!important}
+html body .carte .def::after,html body .carte .prop::after,html body .carte .methode::after,html body .carte .ex::after,
+html body .carte .info-b::after,html body .carte .objectifs::after{content:none!important;display:none!important}
+html body .carte .enq-t{padding-left:34px!important;min-height:0!important}
+html body .carte .def,html body .carte .prop,html body .carte .methode,html body .carte .ex{padding-left:34px!important}
+html body .carte .def>b:first-child,html body .carte .prop>b:first-child,html body .carte .methode>b:first-child,html body .carte .ex>b:first-child{min-height:0!important;margin-bottom:4px!important}
+html body .carte .fil{padding-left:34px!important}
+html body .carte .info-b .apc-i{width:24px!important;height:24px!important;flex:0 0 24px!important;margin:0!important;border-radius:0!important;background:none!important}
+html body .carte .info-b .apc-i svg{width:22px!important;height:22px!important}
+html body .carte .info-b h2,html body .carte .objectifs>b{gap:10px!important;min-height:0!important}
+html body .carte .info-b p.info,html body .carte .objectifs ul{padding-left:34px!important}
+html body .carte .objectifs>b::before{flex:0 0 24px!important;height:24px!important;background-size:22px!important}
+
+/* taille et interligne */
+html body .carte{font-size:15.5px!important;line-height:1.5!important}
+html body .carte .partie p,html body .carte .partie li,html body .carte .info-b p.info,html body .carte .fil,html body .carte .fil p,
+html body .carte .def,html body .carte .prop,html body .carte .methode,html body .carte .ex{font-size:15.5px!important;line-height:1.5!important}
+html body .carte .enq-r,html body .carte .enq-r p,html body .apc .apc-s,html body .carte .denouement .reponse,html body .carte .denouement .reponse p,html body .carte blockquote{font-size:16px!important;line-height:1.55!important}
+html body .carte .enq-q{font-size:17px!important;line-height:1.4!important}
+html body .carte .hyp li{font-size:15px!important;line-height:1.4!important;padding:5px 0!important}
+html body .carte .enq-pistes{row-gap:4px!important}
+html body .carte .enq-pistes li{margin:0!important;padding:2px 0!important;line-height:1.3!important}
+html body .carte .verdicts li{font-size:14.5px!important;line-height:1.4!important}
+@media (max-width:560px){
+  html body .carte .enq-r,html body .carte .enq-r p,html body .apc .apc-s{font-size:15.5px!important}
+  html body .carte .enq-q{font-size:16px!important}
+  html body .carte .info-b p.info,html body .carte .objectifs ul{padding-left:34px!important}
+}
+
+/* ── 20/11 (5) « fais l'encadré comme celui du bas » : le « à retenir » de fin de partie (punaise, bandeau dégradé)
+   devient une note collée rose, ruban blanc incliné « À retenir », comme « À l'hôpital » ── */
+html body article.carte .partie p.retenir{display:block!important;position:relative;max-width:640px;box-sizing:border-box;margin:40px auto 26px!important;width:auto!important;padding:30px 18px 14px!important;
+  border:1px solid #EFA9C8!important;border-radius:2px 2px 16px 2px!important;background:linear-gradient(#FFE2EF,#FFD3E6)!important;box-shadow:0 10px 16px -10px rgba(80,60,0,.5)!important;
+  transform:rotate(.9deg);font:600 16px/1.5 var(--vm-corps,var(--sans))!important;color:#4A2235!important;text-align:justify}
+html body article.carte .partie p.retenir::before{content:"À retenir"!important;position:relative;display:table!important;width:auto!important;height:auto!important;flex:none!important;min-height:0;
+  margin:-46px auto 12px!important;padding:5px 14px 5px 40px!important;transform:rotate(-2.5deg);
+  background:var(--ep2-pin) 11px 50%/22px no-repeat,rgba(255,255,255,.92)!important;border:1px solid rgba(0,0,0,.07);box-shadow:0 2px 4px rgba(0,0,0,.06);
+  font:800 17px/1.25 var(--vm-titre,var(--sans))!important;color:#8D1D52!important;text-align:center;filter:none!important}
+@media (max-width:560px){html body article.carte .partie p.retenir{padding:28px 14px 12px!important}html body article.carte .partie p.retenir::before{font-size:16px!important}}
+@media (prefers-reduced-motion:reduce){html body article.carte .partie p.retenir,html body article.carte .partie p.retenir::before{transform:none}}
+@media print{html body article.carte .partie p.retenir{transform:none;box-shadow:none!important}}
+
+/* ── 20/11 (6) l'accroche (« situation de départ ») ouvre « Pour commencer » : une question en italique, puis le fil rouge ── */
+html body .carte .info-b p.info-q{margin:0 0 6px!important;font:italic 500 16px/1.5 var(--ep-serif)!important;color:#0C1F55!important;text-align:left!important;hyphens:manual!important}
+
+/* ── 20/11 (7) « change la couleur de À retenir, chaque type doit avoir sa couleur » :
+   jaune = astuce, rose = attention, menthe = retiens, lavande = le savais-tu, pêche = à ton tour → BLEU pour « À retenir » ── */
+html body article.carte .partie p.retenir{border-color:#A9C6F0!important;background:linear-gradient(#E6F0FF,#D5E5FD)!important;color:#10284F!important}
+html body article.carte .partie p.retenir::before{color:#1E499B!important;
+  background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%231E499B' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M9 3.5h6l-1 6 3.5 3.5v1.5h-11V13L10 9.5z'/%3E%3Cpath d='M12 14.5V21'/%3E%3C/svg%3E") 11px 50%/22px no-repeat,rgba(255,255,255,.92)!important}
+
+/* ── 20/11 (8) « fais des icônes réalistes et colorées avec petits pointillés comme les autres » :
+   icônes illustrées en couleur (30 px) comme la feuille des définitions, et un petit rail pointillé sous chaque bloc,
+   de la couleur de l'icône : Pour commencer (fusée), Situation-problème (loupe), indices (clé), encadrés du cours
+   sans icône thématique (livre, médaille, engrenages, crayon). Généré par icones.cjs. ── */
+html body article.carte {--ic-fusee:url("data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20viewBox%3D%270%200%2032%2032%27%3E%3Cpath%20d%3D%27M16%202c5%203%207.5%208.5%207%2015l-3%204h-8l-3-4c-.5-6.5%202-12%207-15z%27%20fill%3D%27%23EEF3FC%27%20stroke%3D%27%231E499B%27%20stroke-width%3D%271.6%27%20stroke-linejoin%3D%27round%27%2F%3E%3Ccircle%20cx%3D%2716%27%20cy%3D%2711.5%27%20r%3D%273%27%20fill%3D%27%234FA3E3%27%20stroke%3D%27%231E499B%27%20stroke-width%3D%271.4%27%2F%3E%3Cpath%20d%3D%27M9.2%2014.5%205%2019.8l1%203.2%205.2-2.2zM22.8%2014.5l4.2%205.3-1%203.2-5.2-2.2z%27%20fill%3D%27%23E5484D%27%2F%3E%3Cpath%20d%3D%27M12.6%2021h6.8l-1.4%204.6c-.6%202-3.4%202-4%200z%27%20fill%3D%27%23FFC93C%27%2F%3E%3Cpath%20d%3D%27M14.5%2023.2h3l-.7%203.3c-.3%201.1-1.3%201.1-1.6%200z%27%20fill%3D%27%23F07A1F%27%2F%3E%3C%2Fsvg%3E");--ic-loupe:url("data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20viewBox%3D%270%200%2032%2032%27%3E%3Ccircle%20cx%3D%2713%27%20cy%3D%2713%27%20r%3D%279%27%20fill%3D%27%23DCEBFF%27%2F%3E%3Cpath%20d%3D%27M8.5%2010.5a5.5%205.5%200%200%201%204.5-3%27%20stroke%3D%27%23fff%27%20stroke-width%3D%272.2%27%20stroke-linecap%3D%27round%27%20fill%3D%27none%27%2F%3E%3Ccircle%20cx%3D%2713%27%20cy%3D%2713%27%20r%3D%279%27%20fill%3D%27none%27%20stroke%3D%27%231E499B%27%20stroke-width%3D%272.6%27%2F%3E%3Cpath%20d%3D%27m19.6%2019.6%208%208%27%20stroke%3D%27%23C2540A%27%20stroke-width%3D%274.4%27%20stroke-linecap%3D%27round%27%2F%3E%3C%2Fsvg%3E");--ic-cle:url("data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20viewBox%3D%270%200%2032%2032%27%3E%3Ccircle%20cx%3D%2710.5%27%20cy%3D%2711.5%27%20r%3D%277.5%27%20fill%3D%27%23FFC93C%27%20stroke%3D%27%23A86A00%27%20stroke-width%3D%271.6%27%2F%3E%3Ccircle%20cx%3D%2710.5%27%20cy%3D%2711.5%27%20r%3D%272.8%27%20fill%3D%27%23fff%27%20stroke%3D%27%23A86A00%27%20stroke-width%3D%271.4%27%2F%3E%3Cpath%20d%3D%27M16%2017%2027%2028%27%20stroke%3D%27%23A86A00%27%20stroke-width%3D%274%27%20stroke-linecap%3D%27round%27%2F%3E%3Cpath%20d%3D%27M16%2017%2027%2028%27%20stroke%3D%27%23FFD866%27%20stroke-width%3D%271.8%27%20stroke-linecap%3D%27round%27%2F%3E%3Cpath%20d%3D%27M21.6%2022.6l2.8-2.8M24.6%2025.6l2.6-2.6%27%20stroke%3D%27%23A86A00%27%20stroke-width%3D%272.6%27%20stroke-linecap%3D%27round%27%2F%3E%3C%2Fsvg%3E");--ic-crayon:url("data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20viewBox%3D%270%200%2032%2032%27%3E%3Cpath%20d%3D%27M6%2026l1.6-6.2L21.5%205.9a2.6%202.6%200%200%201%203.7%200l.9.9a2.6%202.6%200%200%201%200%203.7L12.2%2024.4z%27%20fill%3D%27%23FFC93C%27%20stroke%3D%27%239A5B00%27%20stroke-width%3D%271.4%27%20stroke-linejoin%3D%27round%27%2F%3E%3Cpath%20d%3D%27M20.2%207.2l4.6%204.6%201.3-1.3a2.6%202.6%200%200%200%200-3.7l-.9-.9a2.6%202.6%200%200%200-3.7%200z%27%20fill%3D%27%23F28AA8%27%20stroke%3D%27%239A5B00%27%20stroke-width%3D%271.2%27%2F%3E%3Cpath%20d%3D%27M7.6%2019.8l4.6%204.6L6%2026z%27%20fill%3D%27%23F6D9B5%27%20stroke%3D%27%239A5B00%27%20stroke-width%3D%271.2%27%20stroke-linejoin%3D%27round%27%2F%3E%3Cpath%20d%3D%27M6%2026l2-.6-1.4-1.4z%27%20fill%3D%27%233B3B3B%27%2F%3E%3C%2Fsvg%3E");--ic-medaille:url("data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20viewBox%3D%270%200%2032%2032%27%3E%3Cpath%20d%3D%27M9%203h5l4%209h-5z%27%20fill%3D%27%236A3DB8%27%2F%3E%3Cpath%20d%3D%27M23%203h-5l-4%209h5z%27%20fill%3D%27%239B7BE0%27%2F%3E%3Ccircle%20cx%3D%2716%27%20cy%3D%2720%27%20r%3D%278.5%27%20fill%3D%27%23FFC93C%27%20stroke%3D%27%23B07A00%27%20stroke-width%3D%271.6%27%2F%3E%3Cpath%20d%3D%27M16%2015.3l1.5%203%203.2.5-2.3%202.2.6%203.2-3-1.6-3%201.6.6-3.2-2.3-2.2%203.2-.5z%27%20fill%3D%27%23fff%27%2F%3E%3C%2Fsvg%3E");--ic-livre:url("data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20viewBox%3D%270%200%2032%2032%27%3E%3Cpath%20d%3D%27M3%207c4-1.6%208.5-1.2%2013%201.6v18c-4.5-2.8-9-3.2-13-1.6z%27%20fill%3D%27%234F8BE8%27%2F%3E%3Cpath%20d%3D%27M29%207c-4-1.6-8.5-1.2-13%201.6v18c4.5-2.8%209-3.2%2013-1.6z%27%20fill%3D%27%231E499B%27%2F%3E%3Cpath%20d%3D%27M5%208.6c3.4-1%207-.6%2010%201.2v14.6c-3-1.6-6.6-2-10-1.2z%27%20fill%3D%27%23fff%27%2F%3E%3Cpath%20d%3D%27M27%208.6c-3.4-1-7-.6-10%201.2v14.6c3-1.6%206.6-2%2010-1.2z%27%20fill%3D%27%23F3F7FF%27%2F%3E%3Cpath%20d%3D%27M7.5%2013c1.9-.3%203.6%200%205%20.7M7.5%2016.5c1.9-.3%203.6%200%205%20.7M19.5%2013.7c1.4-.7%203.1-1%205-.7M19.5%2017.2c1.4-.7%203.1-1%205-.7%27%20stroke%3D%27%239FB6DD%27%20stroke-width%3D%271.3%27%20stroke-linecap%3D%27round%27%2F%3E%3C%2Fsvg%3E")}
+html body article.carte .def{--ic:var(--ic-livre);--rl:#1E499B}
+html body article.carte .prop{--ic:var(--ic-medaille);--rl:#6A3DB8}
+html body article.carte .methode{--ic:var(--vm-ill-methode);--rl:#0B7A84}
+html body article.carte .ex{--ic:var(--ic-crayon);--rl:#C2540A}
+html body article.carte [data-ico]:not([data-ico="-"]){--ic:var(--vm-ill);--rl:var(--ico-c,#1E499B)}
+html body article.carte .def::before,html body article.carte .prop::before,html body article.carte .methode::before,html body article.carte .ex::before{width:30px!important;height:30px!important;left:0!important;top:3px!important;border-radius:0!important;background:var(--ic) center/contain no-repeat!important;box-shadow:none!important;filter:none!important}
+html body article.carte .def,html body article.carte .prop,html body article.carte .methode,html body article.carte .ex{padding-left:42px!important}
+html body article.carte .def::after,html body article.carte .prop::after,html body article.carte .methode::after,html body article.carte .ex::after{content:""!important;display:block!important;position:absolute;left:14px!important;top:38px!important;bottom:4px!important;width:3px!important;border:0!important;border-radius:0!important;background:radial-gradient(circle,var(--rl) 1.1px,transparent 1.5px) 0 0/3px 7px repeat-y!important;-webkit-mask:linear-gradient(#000 60%,transparent)!important;mask:linear-gradient(#000 60%,transparent)!important;opacity:.7!important}
+/* Pour commencer : la fusée remplace le pictogramme au trait */
+html body article.carte .info-b{--rl:#1E499B;position:relative!important;padding-bottom:4px!important}
+html body article.carte .info-b .apc-i{width:30px!important;height:30px!important;flex:0 0 30px!important;background:var(--ic-fusee) center/contain no-repeat!important}
+html body article.carte .info-b .apc-i svg{display:none!important}
+html body article.carte .info-b p.info{padding-left:42px!important}
+html body article.carte .info-b::after{content:""!important;display:block!important;position:absolute;left:14px!important;top:38px!important;bottom:4px!important;width:3px!important;border:0!important;border-radius:0!important;background:radial-gradient(circle,var(--rl) 1.1px,transparent 1.5px) 0 0/3px 7px repeat-y!important;-webkit-mask:linear-gradient(#000 60%,transparent)!important;mask:linear-gradient(#000 60%,transparent)!important;opacity:.7!important}
+/* Situation-problème : loupe en couleur (le récit qui suit reste sans rail : images et documents) */
+html body article.carte .enq-t{padding-left:42px!important}
+html body article.carte .enq-t::before{width:30px!important;height:30px!important;top:2px!important;border-radius:0!important;background:var(--ic-loupe) center/contain no-repeat!important}
+/* indices : clé dorée et rail doré */
+html body article.carte .fil{--rl:#B07A00;position:relative;padding-left:42px!important}
+html body article.carte .fil::before{width:30px!important;height:30px!important;top:0!important;border-radius:0!important;background:var(--ic-cle) center/contain no-repeat!important}
+html body article.carte .fil::after{content:""!important;display:block!important;position:absolute;left:14px!important;top:38px!important;bottom:4px!important;width:3px!important;border:0!important;border-radius:0!important;background:radial-gradient(circle,var(--rl) 1.1px,transparent 1.5px) 0 0/3px 7px repeat-y!important;-webkit-mask:linear-gradient(#000 60%,transparent)!important;mask:linear-gradient(#000 60%,transparent)!important;opacity:.7!important}
+/* objectifs : la cible illustrée garde sa place, rail magenta */
+html body article.carte .objectifs{--rl:#B2316E;position:relative!important}
+html body article.carte .objectifs>b::before{flex:0 0 30px!important;height:30px!important;background-size:28px!important}
+html body article.carte .objectifs ul{padding-left:42px!important}
+html body article.carte .objectifs::after{content:""!important;display:block!important;position:absolute;left:14px!important;top:38px!important;bottom:4px!important;width:3px!important;border:0!important;border-radius:0!important;background:radial-gradient(circle,var(--rl) 1.1px,transparent 1.5px) 0 0/3px 7px repeat-y!important;-webkit-mask:linear-gradient(#000 60%,transparent)!important;mask:linear-gradient(#000 60%,transparent)!important;opacity:.7!important}
+@media (max-width:560px){html body article.carte .def,html body article.carte .prop,html body article.carte .methode,html body article.carte .ex,html body article.carte .fil,html body article.carte .enq-t{padding-left:38px!important}html body article.carte .info-b p.info,html body article.carte .objectifs ul{padding-left:38px!important}}
+
+/* ── 21/11 « icône réaliste et naturelle comme l'ancienne de définition, livre ouvert en couleur réaliste » :
+   le livre des définitions reprend le dessin d'origine ; fusée, loupe, clé, crayon et médaille redessinés dans le même style
+   (aplats, ombre d'un côté, reflet clair). Généré par icones2.cjs ; remplace les dessins du bloc 20/11 (8). ── */
+html body article.carte {--ic-fusee:url("data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20viewBox%3D%270%200%2064%2064%27%3E%3Cpath%20d%3D%27M32%204c10%206%2015%2017%2014%2030l-6%208H24l-6-8C17%2021%2022%2010%2032%204z%27%20fill%3D%27%23F4F7FD%27%2F%3E%3Cpath%20d%3D%27M32%204c10%206%2015%2017%2014%2030l-6%208h-8z%27%20fill%3D%27%23D9E3F5%27%2F%3E%3Ccircle%20cx%3D%2732%27%20cy%3D%2722%27%20r%3D%276.5%27%20fill%3D%27%232C55C4%27%2F%3E%3Ccircle%20cx%3D%2732%27%20cy%3D%2722%27%20r%3D%274.2%27%20fill%3D%27%236FB2F2%27%2F%3E%3Cpath%20d%3D%27M29.5%2019.8a3%203%200%200%201%203-1.6%27%20stroke%3D%27%23fff%27%20stroke-width%3D%271.6%27%20stroke-linecap%3D%27round%27%20fill%3D%27none%27%2F%3E%3Cpath%20d%3D%27M18%2029%209%2040l2%207%2011-5z%27%20fill%3D%27%23E8394B%27%2F%3E%3Cpath%20d%3D%27M46%2029l9%2011-2%207-11-5z%27%20fill%3D%27%23C42A3B%27%2F%3E%3Cpath%20d%3D%27M28%2032h8v12h-8z%27%20fill%3D%27%23E8394B%27%2F%3E%3Cpath%20d%3D%27M25%2044h14l-3%209c-1.3%204-6.7%204-8%200z%27%20fill%3D%27%23FFC93C%27%2F%3E%3Cpath%20d%3D%27M28.5%2046h7l-1.6%206c-.6%202-3.2%202-3.8%200z%27%20fill%3D%27%23F07A1F%27%2F%3E%3C%2Fsvg%3E");--ic-loupe:url("data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20viewBox%3D%270%200%2064%2064%27%3E%3Ccircle%20cx%3D%2726%27%20cy%3D%2726%27%20r%3D%2717%27%20fill%3D%27%23DCEBFF%27%2F%3E%3Cpath%20d%3D%27M14%2022a13%2013%200%200%201%2010-9%27%20stroke%3D%27%23fff%27%20stroke-width%3D%274%27%20stroke-linecap%3D%27round%27%20fill%3D%27none%27%2F%3E%3Ccircle%20cx%3D%2726%27%20cy%3D%2726%27%20r%3D%2717%27%20fill%3D%27none%27%20stroke%3D%27%232C55C4%27%20stroke-width%3D%275%27%2F%3E%3Cpath%20d%3D%27M38.5%2038.5%2042%2042%27%20stroke%3D%27%23163A8C%27%20stroke-width%3D%276%27%20stroke-linecap%3D%27round%27%2F%3E%3Cpath%20d%3D%27m42%2042%2013%2013%27%20stroke%3D%27%23B5651D%27%20stroke-width%3D%279%27%20stroke-linecap%3D%27round%27%2F%3E%3Cpath%20d%3D%27m44%2042.5%2011%2011%27%20stroke%3D%27%23D98A3D%27%20stroke-width%3D%273%27%20stroke-linecap%3D%27round%27%2F%3E%3C%2Fsvg%3E");--ic-cle:url("data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20viewBox%3D%270%200%2064%2064%27%3E%3Ccircle%20cx%3D%2720%27%20cy%3D%2722%27%20r%3D%2713%27%20fill%3D%27%23F2B92B%27%2F%3E%3Ccircle%20cx%3D%2720%27%20cy%3D%2722%27%20r%3D%2713%27%20fill%3D%27none%27%20stroke%3D%27%23B07A00%27%20stroke-width%3D%273%27%2F%3E%3Ccircle%20cx%3D%2720%27%20cy%3D%2722%27%20r%3D%275%27%20fill%3D%27%23fff%27%20stroke%3D%27%23B07A00%27%20stroke-width%3D%272.5%27%2F%3E%3Cpath%20d%3D%27M13%2014a9%209%200%200%201%206-3%27%20stroke%3D%27%23FFE69A%27%20stroke-width%3D%273%27%20stroke-linecap%3D%27round%27%20fill%3D%27none%27%2F%3E%3Cpath%20d%3D%27m29.5%2031.5%2022%2022%27%20stroke%3D%27%23B07A00%27%20stroke-width%3D%278%27%20stroke-linecap%3D%27round%27%2F%3E%3Cpath%20d%3D%27m30%2032%2021%2021%27%20stroke%3D%27%23F2B92B%27%20stroke-width%3D%274%27%20stroke-linecap%3D%27round%27%2F%3E%3Cpath%20d%3D%27m42%2044%205-5M48%2050l4.5-4.5%27%20stroke%3D%27%23B07A00%27%20stroke-width%3D%275%27%20stroke-linecap%3D%27round%27%2F%3E%3C%2Fsvg%3E");--ic-crayon:url("data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20viewBox%3D%270%200%2064%2064%27%3E%3Cpath%20d%3D%27M44%208l12%2012-28%2028-12-12z%27%20fill%3D%27%23F7C531%27%2F%3E%3Cpath%20d%3D%27M50%2014l6%206-28%2028-6-6z%27%20fill%3D%27%23E0A81B%27%2F%3E%3Cpath%20d%3D%27M44%208l6-6c2-2%205-2%207%200l5%205c2%202%202%205%200%207l-6%206z%27%20fill%3D%27%23F48FB1%27%2F%3E%3Cpath%20d%3D%27M41%2011l12%2012%204-4-12-12z%27%20fill%3D%27%23B8C2D3%27%2F%3E%3Cpath%20d%3D%27M43%209l12%2012%27%20stroke%3D%27%238C97AB%27%20stroke-width%3D%271.5%27%2F%3E%3Cpath%20d%3D%27M16%2036l12%2012-17%205z%27%20fill%3D%27%23F3D3A6%27%2F%3E%3Cpath%20d%3D%27M8.5%2048.5l5%205-8%202.5z%27%20fill%3D%27%233C3C46%27%2F%3E%3C%2Fsvg%3E");--ic-medaille:url("data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20viewBox%3D%270%200%2064%2064%27%3E%3Cpath%20d%3D%27M18%204h12l8%2020H26z%27%20fill%3D%27%236A3DB8%27%2F%3E%3Cpath%20d%3D%27M46%204H34l-8%2020h12z%27%20fill%3D%27%239B7BE0%27%2F%3E%3Ccircle%20cx%3D%2732%27%20cy%3D%2740%27%20r%3D%2718%27%20fill%3D%27%23E0A100%27%2F%3E%3Ccircle%20cx%3D%2732%27%20cy%3D%2740%27%20r%3D%2714.5%27%20fill%3D%27%23FFC93C%27%2F%3E%3Cpath%20d%3D%27M22%2033a12%2012%200%200%201%208-6%27%20stroke%3D%27%23FFE69A%27%20stroke-width%3D%273%27%20stroke-linecap%3D%27round%27%20fill%3D%27none%27%2F%3E%3Cpath%20d%3D%27M32%2030.5l3%206.2%206.8.9-5%204.7%201.3%206.7-6.1-3.3-6.1%203.3%201.3-6.7-5-4.7%206.8-.9z%27%20fill%3D%27%23fff%27%20stroke%3D%27%23E0A100%27%20stroke-width%3D%271.2%27%20stroke-linejoin%3D%27round%27%2F%3E%3C%2Fsvg%3E");--ic-livre:url("data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20viewBox%3D%270%200%2064%2064%27%3E%3Cpath%20d%3D%27M6%2018c8-5%2017-5%2026%201v34c-9-6-18-6-26-1z%27%20fill%3D%27%234F86E0%27%2F%3E%3Cpath%20d%3D%27M58%2018c-8-5-17-5-26%201v34c9-6%2018-6%2026-1z%27%20fill%3D%27%232C55C4%27%2F%3E%3Cpath%20d%3D%27M9%2020c7-3%2014-3%2020%201v28c-6-4-13-4-20-1z%27%20fill%3D%27%23fff%27%2F%3E%3Cpath%20d%3D%27M55%2020c-7-3-14-3-20%201v28c6-4%2013-4%2020-1z%27%20fill%3D%27%23EAF1FF%27%2F%3E%3Cpath%20d%3D%27M13%2027h11M13%2032h11M13%2037h9M40%2027h11M40%2032h11M40%2037h8%27%20stroke%3D%27%239CB4E0%27%20stroke-width%3D%272%27%20stroke-linecap%3D%27round%27%2F%3E%3Cpath%20d%3D%27M44%208h8v20l-4-3-4%203z%27%20fill%3D%27%23E8394B%27%2F%3E%3Cpath%20d%3D%27M32%2019v34%27%20stroke%3D%27%23163A8C%27%20stroke-width%3D%272%27%2F%3E%3C%2Fsvg%3E")}
+html body article.carte .def::before,html body article.carte .prop::before,html body article.carte .methode::before,html body article.carte .ex::before,html body article.carte .enq-t::before,html body article.carte .fil::before{width:32px!important;height:32px!important}
+html body article.carte .info-b .apc-i{width:32px!important;height:32px!important;flex:0 0 32px!important}
+
+/* ── 21/11 (2) « revoir le sens de la clé » : clé posée à plat, anneau à gauche, panneton vers le bas ── */
+html body article.carte {--ic-cle:url("data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20viewBox%3D%270%200%2064%2064%27%3E%3Ccircle%20cx%3D%2717%27%20cy%3D%2732%27%20r%3D%2713%27%20fill%3D%27%23F2B92B%27%2F%3E%3Ccircle%20cx%3D%2717%27%20cy%3D%2732%27%20r%3D%2713%27%20fill%3D%27none%27%20stroke%3D%27%23B07A00%27%20stroke-width%3D%273%27%2F%3E%3Ccircle%20cx%3D%2715%27%20cy%3D%2732%27%20r%3D%274.6%27%20fill%3D%27%23fff%27%20stroke%3D%27%23B07A00%27%20stroke-width%3D%272.5%27%2F%3E%3Cpath%20d%3D%27M9%2024a9%209%200%200%201%206-4%27%20stroke%3D%27%23FFE69A%27%20stroke-width%3D%273%27%20stroke-linecap%3D%27round%27%20fill%3D%27none%27%2F%3E%3Cpath%20d%3D%27M30%2032h28%27%20stroke%3D%27%23B07A00%27%20stroke-width%3D%278%27%20stroke-linecap%3D%27round%27%2F%3E%3Cpath%20d%3D%27M30.5%2031.6h27%27%20stroke%3D%27%23F2B92B%27%20stroke-width%3D%273.6%27%20stroke-linecap%3D%27round%27%2F%3E%3Cpath%20d%3D%27M48%2034v8M56%2034v6%27%20stroke%3D%27%23B07A00%27%20stroke-width%3D%275%27%20stroke-linecap%3D%27round%27%2F%3E%3C%2Fsvg%3E")}
+/* ── 21/11 (3) « enlève les tableaux ou encadrés sur les documents 1, document 2… » : plus de cadre ni de filets
+   autour des documents ; ils se suivent, séparés d'un simple espace (le tableau de données d'un document reste). ── */
+html body article.carte .enq-docs{display:block!important;background:none!important;border:0!important;border-radius:0!important;overflow:visible!important;margin:20px 0 6px!important}
+html body article.carte .enq-doc{background:none!important;border:0!important;border-radius:0!important;box-shadow:none!important;padding:0!important;margin:0 0 18px!important}
+html body article.carte .enq-doc:last-child{margin-bottom:0!important}
+
+/* ── 21/11 (4) « je ne veux pas les icônes colorées comme ceci, je veux de vraies icônes comme ceci [le livre ouvert],
+   le système d'engrenage qui était là avant » : retour au jeu d'illustrations d'origine (modele.css) pour les encadrés —
+   livre ouvert, médaille à rubans, DEUX ENGRENAGES d'origine, bloc-notes et crayon — recopié ici tel quel (lecon-epure
+   avait redessiné les engrenages). Documents : feuille à coin plié et trombone ; « Ta tâche » : le bloc-notes, sans pastille. ── */
+html body article.carte {--ic-livre:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cpath d='M6 18c8-5 17-5 26 1v34c-9-6-18-6-26-1z' fill='%234F86E0'/%3E%3Cpath d='M58 18c-8-5-17-5-26 1v34c9-6 18-6 26-1z' fill='%232C55C4'/%3E%3Cpath d='M9 20c7-3 14-3 20 1v28c-6-4-13-4-20-1z' fill='%23fff'/%3E%3Cpath d='M55 20c-7-3-14-3-20 1v28c6-4 13-4 20-1z' fill='%23EAF1FF'/%3E%3Cpath d='M13 27h11M13 32h11M13 37h9M40 27h11M40 32h11M40 37h8' stroke='%239CB4E0' stroke-width='2' stroke-linecap='round'/%3E%3Cpath d='M44 8h8v20l-4-3-4 3z' fill='%23E8394B'/%3E%3Cpath d='M32 19v34' stroke='%23163A8C' stroke-width='2'/%3E%3C/svg%3E");--ic-medaille:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cpath d='M20 34 12 58l9-4 5 8 7-22z' fill='%23E8394B'/%3E%3Cpath d='M44 34l8 24-9-4-5 8-7-22z' fill='%232C55C4'/%3E%3Ccircle cx='32' cy='26' r='19' fill='%23F2C540'/%3E%3Ccircle cx='32' cy='26' r='14' fill='%23FFE07A' stroke='%23C48A0C' stroke-width='2'/%3E%3Cpath d='m32 16 3 6.5 7 .8-5.2 4.8 1.5 7-6.3-3.6-6.3 3.6 1.5-7L22 23.3l7-.8z' fill='%23C48A0C'/%3E%3C/svg%3E");--ic-crayon:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect x='8' y='8' width='34' height='44' rx='4' fill='%23fff' stroke='%238A5AD0' stroke-width='3'/%3E%3Cpath d='M15 19h20M15 26h20M15 33h12' stroke='%23CDB8EA' stroke-width='3' stroke-linecap='round'/%3E%3Cpath d='m44 18 10 10-22 22-12 3 3-12z' fill='%23F2C540'/%3E%3Cpath d='m44 18 10 10 4-4a3 3 0 0 0 0-4l-6-6a3 3 0 0 0-4 0z' fill='%23E8394B'/%3E%3Cpath d='m23 41 9 9-12 3z' fill='%23F4D9B5'/%3E%3Cpath d='m20 53 3-3-3-1z' fill='%233B3520'/%3E%3C/svg%3E");--ic-engrenages:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cg transform='translate(24 26)'%3E%3Cpath d='M-3-18h6l1 5 4 2 4-3 4 4-3 4 2 4 5 1v6l-5 1-2 4 3 4-4 4-4-3-4 2-1 5h-6l-1-5-4-2-4 3-4-4 3-4-2-4-5-1v-6l5-1 2-4-3-4 4-4 4 3 4-2z' fill='%231FB3C0'/%3E%3Ccircle r='6' fill='%23fff'/%3E%3C/g%3E%3Cg transform='translate(45 44)'%3E%3Cpath d='M-2.5-14h5l.8 3.8 3 1.5 3.2-2.3 3.5 3.5-2.3 3.2 1.5 3 3.8.8v5l-3.8.8-1.5 3 2.3 3.2-3.5 3.5-3.2-2.3-3 1.5-.8 3.8h-5l-.8-3.8-3-1.5-3.2 2.3-3.5-3.5 2.3-3.2-1.5-3-3.8-.8v-5l3.8-.8 1.5-3-2.3-3.2 3.5-3.5 3.2 2.3 3-1.5z' fill='%23F39A45'/%3E%3Ccircle r='4.5' fill='%23fff'/%3E%3C/g%3E%3C/svg%3E");--ic-doc:url("data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20viewBox%3D%270%200%2064%2064%27%3E%3Cpath%20d%3D%27M14%206h26l12%2012v40a2%202%200%200%201-2%202H14a2%202%200%200%201-2-2V8a2%202%200%200%201%202-2z%27%20fill%3D%27%23fff%27%20stroke%3D%27%23C9A227%27%20stroke-width%3D%273%27%20stroke-linejoin%3D%27round%27%2F%3E%3Cpath%20d%3D%27M40%206v10a2%202%200%200%200%202%202h10%27%20fill%3D%27%23FFE7A3%27%20stroke%3D%27%23C9A227%27%20stroke-width%3D%273%27%20stroke-linejoin%3D%27round%27%2F%3E%3Cpath%20d%3D%27M20%2028h24M20%2035h24M20%2042h16%27%20stroke%3D%27%239CB4E0%27%20stroke-width%3D%273%27%20stroke-linecap%3D%27round%27%2F%3E%3Cpath%20d%3D%27M22%204v14a4%204%200%200%201-8%200V8%27%20fill%3D%27none%27%20stroke%3D%27%236B7287%27%20stroke-width%3D%272.5%27%20stroke-linecap%3D%27round%27%2F%3E%3C%2Fsvg%3E")}
+html body article.carte .methode{--ic:var(--ic-engrenages)}
+html body article.carte .enq-doc-t::before{background:var(--ic-doc) center/contain no-repeat!important;flex:0 0 28px!important;height:28px!important}
+html body article.carte .enq-tache::before,html body article.carte .apc .apc-t .apc-i{border-radius:0!important;background:var(--ic-crayon) center/contain no-repeat!important;box-shadow:none!important}
+html body article.carte .apc .apc-t .apc-i svg{display:none!important}
