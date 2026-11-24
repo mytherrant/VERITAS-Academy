@@ -1,3 +1,15 @@
+## Apprendre : histoire de 6e, lot 3 — royaumes du haut Nil, Grèce, Chine (24/11/2026, branche histoire-6e-lot3)
+
+Demande de Jacques : « continue ».
+
+- **`apprendre/_src/38-histoire-6e-3.js`** : 3 leçons gratuites NOUVELLES, même gabarit que les lots 1 et 2 :
+  - rang 12 `6e-histoire-meroe-axoum` : Kouch et la XXVe dynastie (≈ 747-656 av. J.-C.), Méroé (fer et scories, pyramides pointues, candaces, écriture méroïtique), Axoum (Adoulis, monnaie, stèles, Ezana vers 350) ; 3D : pyramides de Méroé et fourneau ;
+  - rang 14 `6e-histoire-grece` : cités, Athènes et Sparte, démocratie athénienne (Ecclésia, Boulè ; ≈ 14 % de citoyens), héritage grec ; 3D : Parthénon ;
+  - rang 16 `6e-histoire-chine` : 221 av. J.-C. et Qin Shi Huangdi, armée de terre cuite, Confucius, papier, soie, boussole, route de la soie ; 3D : Grande Muraille.
+- Histoire de 6e : rangs 1, 2, 4, 6, 8, 10, 12, 14, 16 couverts (9 leçons). Restent les TD et dossiers (3, 5, 7, 9, 13, 15, 21) et les religions (17 à 20).
+- Audit 89/89 ; `lecons.js?v=20261124h8` ; pages générées → `git add` → habillage (825 pages) → contrôle au vert. Chromium (Pixel 5, 1200 px) : aucune erreur, aucun débordement.
+- Capture des planches 3D : la fenêtre du badge « Premier pas » s'ouvre quand la page est lue jusqu'au bout et masque l'écran ; pour une capture, aller directement à la planche sans parcourir toute la page.
+
 ## Apprendre : philosophie de Tle A, méthode — 4 leçons réservées aux abonnés (20/11/2026, branche apprendre-philo-tle-a-methode)
 
 Suite de la part de la session du lot 4 (Njoh-Mouelle, art et travail) : les 4 lignes de philosophie de Tle A qui n'avaient AUCUNE leçon (vérifié sur master après la fusion de #399, sur #401 et sur les branches ouvertes).
