@@ -1,3 +1,14 @@
+## Apprendre : leçons approfondies de 3e, lot 3 + textes alternatifs des lots 1-2 (24/11/2026, branche apprendre-approfondies-3e-lot3)
+
+Demandes de Jacques : « continue les autres leçons » (leçons approfondies de 3e), puis « synchronise avec les autres agents ».
+
+- **Lot 3** (12 leçons, situation filée + planches 2D/3D, même gabarit que les lots 1-2) : maths r03 (PPCM), r09 (radicaux), r25 (section de pyramide), r49 (moyenne en classes) ; PCT r03 (Mendeleïev, club de Dschang, atome de sodium 3D), r17 (courant alternatif, Édéa → Bonabéri, alternateur 3D), r25 (moteurs, groupe électrogène de Sangmélima, cylindre 3D ; GRATUITE), r33 (risques électriques, atelier de Kumba, appareil relié à la terre 3D) ; SVT r04 (noyau, acétabulaire de Buea, greffe 3D), r29 (vaccination, carnet de Bertoua, anticorps en Y 3D), r35 (AVC, grand-père de Bafia, artère 3D), r45 (séismes, mont Cameroun, faille 3D, isoséistes ; GRATUITE).
+- **Textes alternatifs** : `svg()` des sources 70 à 78 échappe désormais l'apostrophe ; « d'un » refermait `aria-label='…'` (13 planches touchées dans les lots 1-2). Lots 1-2 ré-épissés : 15 leçons identiques, 9 ne diffèrent que par `&#39;` (contrôlé leçon par leçon).
+- **Sources** HORS DÉPÔT : `apprendre_prive/sources/76-…-maths-3.js`, `77-…-pct-3.js`, `78-…-svt-3.js` (+ correctif `svg()` dans 70 à 75).
+- **FTP** : 31 JSON (lots 1 à 3 ; 10 nouveaux pour le lot 3, 21 réécrits pour les lots 1-2) dans `livraison-payant-3e-approfondies-lots1-3.zip` (racine du dépôt, NON versionné, remis à Jacques). Gratuites, AUCUN JSON : maths r43, PCT r14, PCT r25, SVT r25, SVT r45. **Absent de `VERITAS_FTP_lots_payants.zip`** (zip unique de la session du lot 4) : à y ajouter ou à déposer à part, AVANT la fusion de cette PR.
+- **Build sur ce poste** : `build_apprendre_payant.cjs` échoue (342 erreurs, « rang N sans module APC ») tant que `apprendre_prive/sources` contient les sources de philosophie/français des autres sessions sans leurs modules ; construire dans une COPIE des sources sans ces fichiers, puis épisser seulement les id visés (`remplacer_lecons.cjs`).
+- **Banc** : galerie `?ids=` (suites) et `?pub=1` (parties publiques) via le routeur local ; anticorps redessiné (les boîtes ne s'inclinent pas : bras en chapelet de sphères) ; isoséistes recalés (Buea VI, Limbé IV, Kumba II dans leurs anneaux) ; leçon r45 à 375 px sans débordement.
+
 ## Apprendre : histoire de 6e, lot 6 — les TD 1, 2 et 4 (24/11/2026, branche histoire-6e-lot6)
 
 Demande de Jacques : « continue ».
