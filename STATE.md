@@ -7,6 +7,17 @@ Demande de Jacques : « adopte aussi les nouveaux styles de cartes mentales ».
 - Œuvres : `rang` = place de la clé dans `Object.keys(LITT_OEUVRES).sort()`, série `oeuvres`, à la fois dans `tools/oeuvres_statiques.js` et dans `_cmPage` (app.js) : la page web et l'application montrent la même carte, et les 21 œuvres ont 21 formes différentes.
 - Versions : app.js et sw.js en **1.20.87**, habillage réaligné (`habiller_pages.py`, 22 pages, contrôle au vert) ; `lecons.js?v=20261124h13`.
 - Vérifié : Chromium 1200 et 390 px sur les 21 pages d'œuvres et les 95 leçons gratuites : aucune erreur, aucun débordement ; 0 répétition voisine ; bancs verrou 18/18, empreintes 22/22, cartes (profil, survol), clés des œuvres OK.
+## Apprendre : histoire de 6e, lot 7 — Rome, pèlerinages, religion de l'Égypte ; histoire de 6e COMPLÈTE (24/11/2026, branche histoire-6e-lot7)
+
+Demande de Jacques : « continue ».
+
+- **`apprendre/_src/42-histoire-6e-7.js`** : 3 leçons gratuites NOUVELLES, même gabarit :
+  - rang 15 `6e-histoire-rome` : royauté, République (509-27 av. J.-C.), Empire, Afrique romaine (Septime Sévère), routes, villes, aqueducs, droit, latin, calendrier julien, chiffres romains ; 3D : aqueduc et voie romaine ;
+  - rang 21 `6e-histoire-pelerinages` : pèlerinages chrétiens (Jérusalem, Rome, Compostelle, Lourdes) et hajj (5e pilier, Tabaski, avance de 11 jours par an), comparaison respectueuse ; 3D : deux chemins vers deux lieux saints ;
+  - rang 11 `6e-histoire-egypte-religion` (oublié dans les lots précédents) : polythéisme, temples et prêtres, momification (≈ 70 jours), pesée du cœur, Akhenaton ; 3D : pylône, obélisques et salle à colonnes.
+- **Histoire de 6e : 21 leçons pour les 21 rangs de la progression**, sans doublon (contrôle par rattachement `cle` → rang).
+- Audit 101/101 ; `lecons.js?v=20261124h13` ; habillage 837 pages au vert ; Chromium (Pixel 5, 1200 px) : aucune erreur ; planches 3D contrôlées (chemins des pèlerins ramenés au premier plan, minaret raccourci).
+
 ## Apprendre : histoire de 6e, lot 6 — les TD 1, 2 et 4 (24/11/2026, branche histoire-6e-lot6)
 
 Demande de Jacques : « continue ».
