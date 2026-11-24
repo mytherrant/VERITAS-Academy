@@ -116,7 +116,70 @@ table.donnees td,table.donnees th,.tab-scroll td,.tab-scroll th{border:1px solid
 a{color:var(--b)}
 </style>`;
 
-function page({ url, titre, desc, h1, fil, corps, ld }) {
+/* Pages de cours : même habit que les leçons d'Apprendre (24/11/2026, « continue les autres leçons »).
+   Les icônes sont LUES dans les feuilles des leçons (une seule source) : illustrations d'origine de
+   modele.css (livre ouvert, médaille, deux engrenages, bloc-notes, ampoule…), puis les dernières
+   valeurs de lecon-epure.css (fusée, loupe, clé, feuille de document, bulle « ? »). */
+function icone(nom, ...fichiers) {
+  let v = '';
+  fichiers.forEach(f => {
+    const t = lire(path.join(A, f)), re = new RegExp('--' + nom + ':(url\\("data:image/svg\\+xml,[^"]*"\\))', 'g');
+    let m; while ((m = re.exec(t))) v = m[1];
+  });
+  if (!v) throw new Error('apprendre_statique : icône --' + nom + ' introuvable');
+  return v;
+}
+const ICO = {
+  def: icone('vm-ill-def', 'modele.css'), prop: icone('vm-ill-prop', 'modele.css'), methode: icone('vm-ill-methode', 'modele.css'),
+  ex: icone('vm-ill-ex', 'modele.css'), astuce: icone('vm-ill-astuce', 'modele.css'), attention: icone('vm-ill-attention', 'modele.css'),
+  savais: icone('vm-ill-savais', 'modele.css'), retiens: icone('vm-ill-retiens', 'modele.css'), cible: icone('vm-target', 'lecon-modele.css'),
+  fusee: icone('ic-fusee', 'lecon-epure.css'), loupe: icone('ic-loupe', 'lecon-epure.css'), cle: icone('ic-cle', 'lecon-epure.css'),
+  doc: icone('ic-doc', 'lecon-epure.css'), question: icone('ep-question', 'lecon-epure.css'), pin: icone('ep2-pin', 'lecon-epure.css'),
+};
+const STYLE_COURS = `<style>
+.ap-cours{font-size:15.5px;line-height:1.5}
+.ap-cours p,.ap-cours li{text-align:justify;hyphens:auto;-webkit-hyphens:auto}
+.ap-cours h2{font-size:21px;line-height:1.3;color:#B2316E;margin:30px 0 10px}
+/* bloc illustré : icône d'origine dans la marge + petit rail pointillé de sa couleur */
+.ap-cours .ap-b,.ap-cours .def,.ap-cours .prop,.ap-cours .methode,.ap-cours .ex{position:relative;background:none;border:0;border-radius:0;padding:2px 0 4px 44px;margin:20px 0}
+.ap-cours .ap-b::before,.ap-cours .def::before,.ap-cours .prop::before,.ap-cours .methode::before,.ap-cours .ex::before{content:"";position:absolute;left:0;top:0;width:32px;height:32px;background:var(--i) center/contain no-repeat}
+.ap-cours .ap-b::after,.ap-cours .def::after,.ap-cours .prop::after,.ap-cours .methode::after,.ap-cours .ex::after{content:"";position:absolute;left:15px;top:40px;bottom:4px;width:3px;background:radial-gradient(circle,var(--rl) 1.1px,transparent 1.5px) 0 0/3px 7px repeat-y;-webkit-mask:linear-gradient(#000 60%,transparent);mask:linear-gradient(#000 60%,transparent);opacity:.7}
+.ap-cours .ap-b>b:first-child,.ap-cours .def>b:first-child,.ap-cours .prop>b:first-child,.ap-cours .methode>b:first-child,.ap-cours .ex>b:first-child{display:block;font-size:17px;line-height:1.35;margin:4px 0 6px;color:var(--rl)}
+.ap-cours .def{--i:${ICO.def};--rl:#1E499B}.ap-cours .prop{--i:${ICO.prop};--rl:#6A3DB8}.ap-cours .methode{--i:${ICO.methode};--rl:#0B7A84}.ap-cours .ex{--i:${ICO.ex};--rl:#C2540A}
+.ap-cours .ap-commencer{--i:${ICO.fusee};--rl:#1E499B}.ap-cours .ap-commencer .ap-acc{font-style:italic;color:#0C1F55;margin:0 0 6px}
+.ap-cours .ap-obj{--i:${ICO.cible};--rl:#B2316E}.ap-cours .ap-obj ul{margin:4px 0 0;padding-left:18px}
+.ap-cours .ap-indice{--i:${ICO.cle};--rl:#B07A00;border-left:0;background:none;border-radius:0}
+.ap-cours .ap-indice ul{padding-left:18px}
+/* situation-problème : un chapitre de récit, sans cadre ; documents sans tableau ni cadre */
+.ap-cours .ap-sit{border:0;background:none;border-radius:0;padding:0;margin:26px 0}
+.ap-cours .ap-sit-t{position:relative;padding-left:44px;margin:0 0 12px}
+.ap-cours .ap-sit-t::before{content:"";position:absolute;left:0;top:2px;width:32px;height:32px;background:${ICO.loupe} center/contain no-repeat}
+.ap-cours .ap-sit-t small{display:block;font-size:12px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:#5B6B8C}
+.ap-cours .ap-sit-t h2{margin:0;color:#1E499B;font-size:21px}
+.ap-cours .ap-doc{margin:16px 0}.ap-cours .ap-doc>b{display:flex;align-items:center;gap:10px;color:#1E499B;margin:0 0 6px}
+.ap-cours .ap-doc>b::before{content:"";flex:0 0 26px;height:26px;background:${ICO.doc} center/contain no-repeat}
+.ap-cours .ap-doc:nth-of-type(2n)>b{color:#B2316E}
+.ap-cours .ap-doc small{display:block;font-size:12.5px;font-style:italic;color:#8A90A2}
+.ap-cours .ap-q{position:relative;padding-left:44px;font-style:italic;font-weight:500;color:#0C1F55;font-size:17px;line-height:1.45}
+.ap-cours .ap-q::before{content:"";position:absolute;left:0;top:0;width:32px;height:32px;background:${ICO.question} center/contain no-repeat}
+.ap-cours .ap-tache{position:relative;padding-left:44px;font-style:italic}
+.ap-cours .ap-tache::before{content:"";position:absolute;left:0;top:0;width:30px;height:30px;background:${ICO.ex} center/contain no-repeat}
+.ap-cours .ap-resolue{border:1px solid #CFE9D8;background:#F6FCF8;border-radius:16px}
+/* notes collées : une couleur par type (jaune astuce, rose attention, menthe retiens, lavande savais, bleu à retenir) */
+.ap-cours .astuce,.ap-cours .attention,.ap-cours .savais,.ap-cours .retiens,.ap-cours .ap-retenir{position:relative;max-width:640px;margin:40px auto 24px;padding:30px 18px 14px;border:1px solid #F0DC7A;border-radius:2px 2px 16px 2px;background:linear-gradient(#FFF7B8,#FFF1A0);box-shadow:0 10px 16px -10px rgba(80,60,0,.5);transform:rotate(-.8deg);font-weight:600;color:#3B3520}
+.ap-cours .astuce>b:first-child,.ap-cours .attention>b:first-child,.ap-cours .savais>b:first-child,.ap-cours .retiens>b:first-child,.ap-cours .ap-retenir>b:first-child{display:table;margin:-46px auto 12px;padding:5px 14px 5px 40px;transform:rotate(2deg);background:var(--i) 10px 50%/22px no-repeat,rgba(255,255,255,.92);border:1px solid rgba(0,0,0,.07);box-shadow:0 2px 4px rgba(0,0,0,.06);font-size:16px;font-weight:700;color:var(--tc,#6B5300)}
+.ap-cours .astuce{--i:${ICO.astuce}}
+.ap-cours .attention{--i:${ICO.attention};--tc:#8D1D52;border-color:#EFA9C8;background:linear-gradient(#FFE2EF,#FFD3E6);color:#4A2235}
+.ap-cours .retiens{--i:${ICO.retiens};--tc:#0B6A55;border-color:#A8DCCB;background:linear-gradient(#DFF5EF,#CDEEE5);color:#173B31}
+.ap-cours .savais{--i:${ICO.savais};--tc:#5B3FA0;border-color:#CDBDF0;background:linear-gradient(#EFE7FC,#E4D8FA);color:#2E2350}
+.ap-cours .ap-retenir{--i:${ICO.pin};--tc:#1E499B;border-color:#A9C6F0;background:linear-gradient(#E6F0FF,#D5E5FD);color:#10284F;transform:rotate(.8deg)}
+.ap-cours .ap-retenir>b:first-child{transform:rotate(-2.5deg)}
+@media (max-width:560px){.ap-cours .ap-b,.ap-cours .def,.ap-cours .prop,.ap-cours .methode,.ap-cours .ex,.ap-cours .ap-sit-t,.ap-cours .ap-q,.ap-cours .ap-tache{padding-left:38px}.ap-cours .ap-b::before,.ap-cours .def::before,.ap-cours .prop::before,.ap-cours .methode::before,.ap-cours .ex::before,.ap-cours .ap-sit-t::before,.ap-cours .ap-q::before{width:28px;height:28px}.ap-cours .ap-b::after,.ap-cours .def::after,.ap-cours .prop::after,.ap-cours .methode::after,.ap-cours .ex::after{left:13px;top:36px}}
+@media (prefers-reduced-motion:reduce){.ap-cours [class]{transform:none}}
+@media print{.ap-cours [class]{transform:none;box-shadow:none}}
+</style>`;
+
+function page({ url, titre, desc, h1, fil, corps, ld, style = '' }) {
   return `<!DOCTYPE html>
 <html lang="fr">
 <head>
@@ -137,7 +200,7 @@ function page({ url, titre, desc, h1, fil, corps, ld }) {
 <link rel="icon" href="/VERITAS_favicon_512.png">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap">
-${STYLE}
+${STYLE}${style}
 <link rel="stylesheet" href="/assets/veritas-refonte.css?v=1.19.25">
 ${ld.map(o => '<script type="application/ld+json">' + jsonLd(o) + '</script>').join('\n')}
 </head>
@@ -218,15 +281,16 @@ Object.keys(LECONS).forEach(id => {
   const u = `apprendre/cours/${id}.html`, url = BASE + u;
   const titre = `${L.titre} — ${m.nom} ${NOM_CLASSE(L.c)} : cours | VÉRITAS`;
   const desc = net(L.accroche || L.intro).slice(0, 155);
-  let corps = `<p class="ap-chapo">${esc(net(L.intro))}</p>`;
-  if ((L.objectifs || []).length) corps += `<div class="ap-encart"><b>Objectifs</b><ul>${L.objectifs.map(o => `<li>${esc(net(o))}</li>`).join('')}</ul></div>`;
+  // « Pour commencer » : l'accroche (ancienne « situation de départ ») puis le fil rouge, comme dans lecon.html
+  let corps = (L.intro || L.accroche) ? `<div class="ap-b ap-commencer"><b>Pour commencer</b>${L.accroche ? `<p class="ap-acc">${esc(net(L.accroche))}</p>` : ''}${L.intro ? `<p>${esc(net(L.intro))}</p>` : ''}</div>` : '';
+  if ((L.objectifs || []).length) corps += `<div class="ap-b ap-obj"><b>À la fin de la leçon, tu sauras :</b><ul>${L.objectifs.map(o => `<li>${esc(net(o))}</li>`).join('')}</ul></div>`;
   const E = L.enquete;
   const fig = (svg, leg, tag) => svg ? `<figure class="ap-fig">${tag ? `<span class="ap-tag">${esc(tag)}</span>` : ''}${svg}${leg ? `<figcaption>${leg}</figcaption>` : ''}</figure>\n` : '';
   if (E) {
-    corps += `<section class="ap-sit"><h2>Situation de départ : ${esc(net(E.titre || ''))}</h2>${fig(E.svg, E.legende)}${E.contexte || ''}`;
-    (E.documents || []).forEach((d, i) => { corps += `<div class="ap-encart"><b>Document ${i + 1} : ${esc(net(d.t || ''))}</b>${d.html || ''}${d.source ? `<small>${esc(d.source)}</small>` : ''}</div>`; });
+    corps += `<section class="ap-sit"><div class="ap-sit-t"><small>Situation-problème</small><h2>${esc(net(E.titre || ''))}</h2></div>${fig(E.svg, E.legende)}${E.contexte || ''}`;
+    (E.documents || []).forEach((d, i) => { corps += `<div class="ap-doc"><b>Document ${i + 1} · ${esc(net(d.t || ''))}</b>${d.html || ''}${d.source ? `<small>${esc(d.source)}</small>` : ''}</div>`; });
     if (E.question) corps += `<p class="ap-q">${E.question}</p>`;
-    if (E.tache) corps += `<p><b>Ta tâche</b> : ${E.tache}</p>`;
+    if (E.tache) corps += `<p class="ap-tache"><b>Ta tâche</b> : ${E.tache}</p>`;
     if ((E.hypotheses || []).length) corps += `<p><b>Les hypothèses à trancher</b></p><ol>${E.hypotheses.map(h => `<li>${h}</li>`).join('')}</ol>`;
     corps += `</section>\n`;
   }
@@ -240,9 +304,9 @@ Object.keys(LECONS).forEach(id => {
     if (p.anim || p.labo) corps += `<p><a href="/apprendre/lecon.html?id=${encodeURIComponent(id)}">${p.labo ? 'Laboratoire' : 'Simulation'} interactive${p.animT ? ' : ' + esc(p.animT) : ''} (dans Apprendre)</a></p>\n`;
     if (p.fil && p.fil.html) {
       const V = (p.fil.verdicts || []).map(v => `<li><span class="${v[1] === 'validee' ? 'ap-v-ok' : 'ap-v-ko'}">Hypothèse ${v[0] + 1} ${v[1] === 'validee' ? 'validée' : 'rejetée'}</span> : ${v[2] || ''}</li>`).join('');
-      corps += `<div class="ap-indice"><b>Indice ${ip + 1}</b>${p.fil.html}${V ? `<ul>${V}</ul>` : ''}</div>\n`;
+      corps += `<div class="ap-b ap-indice"><b>Indice ${ip + 1}</b>${p.fil.html}${V ? `<ul>${V}</ul>` : ''}</div>\n`;
     }
-    if (p.retenir) corps += `<div class="ap-encart"><b>À retenir</b> : ${typeof p.retenir === 'string' ? p.retenir : esc(net(p.retenir))}</div>\n`;
+    if (p.retenir) corps += `<div class="ap-retenir"><b>À retenir</b>${typeof p.retenir === 'string' ? p.retenir : esc(net(p.retenir))}</div>\n`;
   });
   const D = L.denouement;
   if (D) {
@@ -256,7 +320,7 @@ Object.keys(LECONS).forEach(id => {
   corps += `<p><a class="ap-cta" href="/apprendre/lecon.html?id=${encodeURIComponent(id)}">Faire cette leçon dans Apprendre (quiz, schémas animés)</a></p>`;
   corps += `<p><a href="/apprendre/programme/${csl(L.c)}/${m.id}.html">Tout le programme de ${esc(m.nom)} ${esc(NOM_CLASSE(L.c))}</a>${L.examen && L.examen.href ? ` · <a href="${esc(L.examen.href)}">${esc(L.examen.t)}</a>` : ''}</p>`;
   const filL = [...FIL0, [NOM_CLASSE(L.c), `/apprendre/programme/${csl(L.c)}/`], [m.nom, `/apprendre/programme/${csl(L.c)}/${m.id}.html`], [L.titre, null]];
-  sorties.set(u, page({ url, titre, desc, h1: L.titre, fil: filL, corps, ld: [
+  sorties.set(u, page({ url, titre, desc, h1: L.titre, fil: filL, corps: `<div class="ap-cours">${corps}</div>`, style: STYLE_COURS, ld: [
     { '@context': 'https://schema.org', '@type': 'LearningResource', name: L.titre, description: desc, url, inLanguage: 'fr',
       learningResourceType: 'Cours', educationalLevel: LONG_CLASSE(L.c), about: m.nom, teaches: (L.objectifs || []).map(net).join(' ; '),
       timeRequired: L.duree ? `PT${L.duree}M` : undefined, isAccessibleForFree: true, provider: ORG,
