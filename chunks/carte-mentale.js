@@ -1025,9 +1025,139 @@
     return svgDe(et ? "cm-etroit" : "cm-large", Wd, H, alt, B, tt.s + s + dessus);
   }
 
+  /* ════════ CINQ MODÈLES DE PLUS (24/11/2026) : diagonale montante, médaillons, pont en arc, bouquet de disques, serpentin de bulles ════════ */
+  function hUnite(b, w) { var NC = Math.floor((w - 24) / 7.8); return 14 + couper(b.label.toUpperCase(), Math.floor((w - 20) / 8.6)).length * 17 + 8 + hListe(b.items, NC) + 16 + 52; }
+  function unite(cx, top, w, b, i, cercleHaut) {
+    var NC = Math.floor((w - 24) / 7.8), Lt = couper(b.label.toUpperCase(), Math.floor((w - 20) / 8.6)), hb = 14 + Lt.length * 17 + 8 + hListe(b.items, NC) + 16, r = 30;
+    var yb = cercleHaut ? top + 2 * r - 8 : top, cy = cercleHaut ? top + r : top + hb + r - 8, x = cx - w / 2, g = "<g class='cm-h'>";
+    g += "<rect x='" + f1(x + 3) + "' y='" + f1(yb + 4) + "' width='" + f1(w) + "' height='" + f1(hb) + "' rx='6' fill='#000' opacity='.25'/><rect x='" + f1(x) + "' y='" + f1(yb) + "' width='" + f1(w) + "' height='" + f1(hb) + "' rx='6' fill='#fff'/>";
+    Lt.forEach(function (l, k) { g += "<text x='" + f1(cx) + "' y='" + f1(yb + (cercleHaut ? 30 : 22) + k * 17) + "' text-anchor='middle' font-size='13.5' font-weight='900' letter-spacing='.4' fill='" + fonce(b.color, .1) + "'>" + esc(l) + "</text>"; });
+    g += "<circle cx='" + f1(cx) + "' cy='" + f1(cy) + "' r='" + r + "' fill='" + b.color + "'/><path d='M" + f1(cx - r) + " " + f1(cy) + " A" + r + " " + r + " 0 0 1 " + f1(cx + r) + " " + f1(cy) + "Z' fill='#fff' opacity='.16'/><text x='" + f1(cx) + "' y='" + f1(cy + 8) + "' text-anchor='middle' font-size='22' font-weight='800' fill='#fff'>" + n2(i) + "</text></g>";
+    return { s: g + liste(b.items, x + 12, yb + (cercleHaut ? 30 : 22) + Lt.length * 17 + 14, NC, b.color), h: hb + 2 * r - 8 };
+  }
+  function diagonale(C, B, alt, Wd) {
+    var et = Wd < 600, n = B.length, s = "", dessus = "", tt = titresAmp(Wd / 2, 18, C, et ? Wd - 60 : 360), BG = "#2A2D34", top0 = 18 + tt.h + 24;
+    function fondN(H) { return "<rect width='" + Wd + "' height='" + Math.round(H) + "' fill='" + BG + "'/>"; }
+    if (et) {
+      var w = Wd - 92, y = top0, ys = [];
+      B.forEach(function (b, i) { var u = unite(66 + w / 2, y, w, b, i, true); dessus += u.s; ys.push(y + 30); s += "<path d='M30 " + f1(y + 30) + " H" + f1(66 + w / 2 - 30) + "' stroke='" + b.color + "' stroke-width='3'/>"; y += u.h + 22; });
+      s = "<path d='M30 " + f1(top0 - 6) + " V" + f1(y - 10) + "' stroke='#5C6270' stroke-width='4' stroke-linecap='round'/>" + s + ys.map(function (v, i) { return "<circle cx='30' cy='" + f1(v) + "' r='7' fill='#fff' stroke='" + B[i].color + "' stroke-width='3'/>"; }).join("");
+      return svgDe("cm-etroit", Wd, y, alt, B, fondN(y) + tt.s + s + dessus);
+    }
+    var D = 220, w = Math.min(190, 2 * (Wd - 80) / (n + 1) - 16), hs = B.map(function (b) { return hUnite(b, w); }), ts = B.map(function (b, i) { return (i + 1) / (n + 1); }), Y0 = 0, H = 0;
+    B.forEach(function (b, i) { if (i % 2 === 0) Y0 = Math.max(Y0, top0 + hs[i] + 26 + D * ts[i]); });
+    Y0 = Math.max(Y0, top0 + D + 20);
+    var P2 = ts.map(function (t) { return [40 + (Wd - 80) * t, Y0 - D * t]; }), pts = [[40, Y0]].concat(P2, [[Wd - 40, Y0 - D]]);
+    for (var k = 0; k < pts.length - 1; k++) s += "<path d='M" + f1(pts[k][0]) + " " + f1(pts[k][1]) + " L" + f1(pts[k + 1][0]) + " " + f1(pts[k + 1][1]) + "' stroke='" + B[Math.min(k, n - 1)].color + "' stroke-width='5' stroke-linecap='round'/>";
+    s += "<circle cx='40' cy='" + f1(Y0) + "' r='10' fill='#fff'/><circle cx='" + (Wd - 40) + "' cy='" + f1(Y0 - D) + "' r='8' fill='#fff'/>";
+    B.forEach(function (b, i) {
+      var p = P2[i], haut = i % 2 === 0, topU = haut ? p[1] - 26 - hs[i] : p[1] + 26;
+      s += "<path d='M" + f1(p[0]) + " " + f1(p[1]) + " V" + f1(haut ? p[1] - 26 : p[1] + 26) + "' stroke='" + b.color + "' stroke-width='3'/>";
+      dessus += "<circle cx='" + f1(p[0]) + "' cy='" + f1(p[1]) + "' r='7' fill='#fff' stroke='" + b.color + "' stroke-width='3'/>" + unite(Math.max(20 + w / 2, Math.min(Wd - 20 - w / 2, p[0])), topU, w, b, i, haut).s;
+      H = Math.max(H, haut ? Y0 + 30 : topU + hs[i] + 24);
+    });
+    return svgDe("cm-large", Wd, H, alt, B, fondN(H) + tt.s + s + dessus);
+  }
+  function anneau(cx, cy, b, i) { return "<g class='cm-h'><circle cx='" + f1(cx) + "' cy='" + f1(cy) + "' r='47' fill='#fff' stroke='" + clair(b.color, .6) + "' stroke-width='2'/><circle cx='" + f1(cx) + "' cy='" + f1(cy) + "' r='36' fill='#fff' stroke='" + b.color + "' stroke-width='9'/></g>" + icone(cx, cy, i % 6, b.color); }
+  function medaillons(C, B, alt, Wd) {
+    var et = Wd < 600, n = B.length, s = "", dessus = "", tt = titresAmp(Wd / 2, 18, C, et ? Wd - 60 : 360), top0 = 18 + tt.h + 24;
+    function pastille(cx, cy, b, i) { return "<circle cx='" + f1(cx) + "' cy='" + f1(cy) + "' r='15' fill='" + fonce(b.color, .15) + "' stroke='#fff' stroke-width='3'/><text x='" + f1(cx) + "' y='" + f1(cy + 5) + "' text-anchor='middle' font-size='13' font-weight='900' fill='#fff'>" + (i + 1) + "</text>"; }
+    if (et) {
+      var w = Wd - 176, y = top0, last = top0;
+      B.forEach(function (b, i) { var h = Math.max(104, hTxt(b, w) + 10); s += "<path d='M40 " + f1(y + 48) + " H74' stroke='" + b.color + "' stroke-width='3'/>"; dessus += pastille(40, y + 48, b, i) + anneau(110, y + 48, b, i) + blocTxt(166, y + 4, w, b, 0).s; last = y + 48; y += h + 18; });
+      return svgDe("cm-etroit", Wd, y, alt, B, tt.s + "<path d='M40 " + f1(top0) + " V" + f1(last) + "' stroke='#3A4256' stroke-width='4'/>" + s + dessus);
+    }
+    var step = (Wd - 60) / n, w = Math.min(2 * step - 24, 250), hs = B.map(function (b) { return hTxt(b, w); });
+    var hH = Math.max.apply(null, hs.filter(function (h, i) { return i % 2 === 0; })), hB = Math.max.apply(null, hs.filter(function (h, i) { return i % 2 === 1; }).concat([0]));
+    var ly = top0 + hH + 14 + 122, H = ly + 122 + 14 + hB + 20;
+    s += "<path d='M20 " + f1(ly) + " H" + (Wd - 20) + "' stroke='#3A4256' stroke-width='4' stroke-linecap='round'/>";
+    B.forEach(function (b, i) {
+      var cx = 30 + step * (i + .5), haut = i % 2 === 0, ry = haut ? ly - 70 : ly + 70, x = Math.max(16, Math.min(Wd - 16 - w, cx - w / 2)), ty = haut ? ry - 52 - hs[i] : ry + 52;
+      s += "<path d='M" + f1(cx) + " " + f1(ly) + " V" + f1(ry) + "' stroke='" + b.color + "' stroke-width='3'/><path d='M" + f1(30 + step * i) + " " + f1(ly) + " H" + f1(30 + step * (i + 1)) + "' stroke='" + b.color + "' stroke-width='4'/>";
+      dessus += anneau(cx, ry, b, i) + pastille(cx, ly, b, i) + blocTxt(x, ty, w, b, 0).s;
+    });
+    return svgDe("cm-large", Wd, H, alt, B, tt.s + s + dessus);
+  }
+  function pont(C, B, alt, Wd) {
+    var et = Wd < 600, n = B.length, s = "", dessus = "", tt = titresAmp(Wd / 2, 18, C, et ? Wd - 60 : 360), top0 = 18 + tt.h + 24;
+    var grad = "<defs><linearGradient id='" + P + "pt' x1='0' y1='0' x2='1' y2='0'>" + B.map(function (b, i) { return "<stop offset='" + (n > 1 ? i / (n - 1) : 0) + "' stop-color='" + b.color + "'/>"; }).join("") + "</linearGradient></defs>";
+    function onglet(x, y, w, b) { var L = couper(b.label, Math.floor((w - 16) / 8.4)), h = 10 + L.length * 17, g = "<g class='cm-h'><rect x='" + f1(x) + "' y='" + f1(y) + "' width='" + f1(w) + "' height='" + f1(h) + "' rx='8' fill='" + b.color + "'/>"; L.forEach(function (l, k) { g += "<text x='" + f1(x + w / 2) + "' y='" + f1(y + 18 + k * 17) + "' text-anchor='middle' font-size='14' font-weight='800' fill='#fff'>" + esc(l) + "</text>"; }); return { s: g + "</g>", h: h }; }
+    function hOng(b, w) { return 10 + couper(b.label, Math.floor((w - 16) / 8.4)).length * 17; }
+    function carre(x, y, w, b, i, fl) { var NC = Math.floor((w - 30) / 7.9), h = 52 + hListe(b.items, NC) + 14, g = "<g class='cm-h'><rect x='" + f1(x) + "' y='" + f1(y) + "' width='" + f1(w) + "' height='" + f1(h) + "' rx='10' fill='" + b.color + "'/>" + (fl === "h" ? "<path d='M" + f1(x + w / 2 - 12) + " " + f1(y + 1) + " L" + f1(x + w / 2) + " " + f1(y - 12) + " L" + f1(x + w / 2 + 12) + " " + f1(y + 1) + "Z' fill='" + b.color + "'/>" : "<path d='M" + f1(x + 1) + " " + f1(y + 18) + " L" + f1(x - 12) + " " + f1(y + 30) + " L" + f1(x + 1) + " " + f1(y + 42) + "Z' fill='" + b.color + "'/>") + "<circle cx='" + f1(x + w / 2) + "' cy='" + f1(y + 26) + "' r='19' fill='#fff' opacity='.95'/></g>" + icone(x + w / 2, y + 26, i % 6, b.color); return { s: g + blanc(liste(b.items, x + 12, y + 66, NC, "#fff")), h: h }; }
+    function hCar(b, w) { return 52 + hListe(b.items, Math.floor((w - 30) / 7.9)) + 14; }
+    function rond(cx, cy, b, i) { return "<circle cx='" + f1(cx) + "' cy='" + f1(cy) + "' r='25' fill='#fff' stroke='" + b.color + "' stroke-width='5'/><text x='" + f1(cx) + "' y='" + f1(cy + 6) + "' text-anchor='middle' font-size='16' font-weight='900' fill='" + b.color + "'>" + n2(i) + "</text>"; }
+    if (et) {
+      var w = Wd - 96, y = top0, ys = [];
+      B.forEach(function (b, i) { var o = onglet(76, y, w, b), c = carre(76, y + o.h + 8, w, b, i, "g"); dessus += o.s + c.s + rond(34, y + o.h + 8 + 30, b, i); ys.push(y + o.h + 38); y += o.h + 8 + c.h + 22; });
+      return svgDe("cm-etroit", Wd, y, alt, B, grad + tt.s + "<path d='M34 " + f1(top0) + " V" + f1(ys[ys.length - 1]) + "' stroke='url(#" + P + "pt)' stroke-width='6' stroke-linecap='round'/>" + dessus);
+    }
+    var step = (Wd - 40) / n, w = step - 14, f = function (t) { return (1 - t) * (1 - t) * 40 + 2 * t * (1 - t) * (-50) + t * t * 40; }, ay = 0, H = 0;
+    var ts = B.map(function (b, i) { return (20 + step * (i + .5) - 20) / (Wd - 40); });
+    B.forEach(function (b, i) { ay = Math.max(ay, top0 + hOng(b, w) + 40 - f(ts[i])); });
+    s += "<path d='M20 " + f1(ay + 40) + " Q" + f1(Wd / 2) + " " + f1(ay - 50) + " " + f1(Wd - 30) + " " + f1(ay + 40) + "' fill='none' stroke='url(#" + P + "pt)' stroke-width='6' stroke-linecap='round'/><circle cx='20' cy='" + f1(ay + 40) + "' r='6' fill='" + B[0].color + "'/><path d='M" + (Wd - 30) + " " + f1(ay + 32) + " l14 14 l-18 2Z' fill='" + B[n - 1].color + "'/>";
+    B.forEach(function (b, i) {
+      var cx = 20 + step * (i + .5), py = ay + f(ts[i]), o = onglet(cx - w / 2, py - 34 - hOng(b, w), w, b), c = carre(cx - w / 2, py + 44, w, b, i, "h");
+      dessus += o.s + c.s + rond(cx, py, b, i); H = Math.max(H, py + 44 + c.h + 24);
+    });
+    return svgDe("cm-large", Wd, H, alt, B, grad + tt.s + s + dessus);
+  }
+  function bouquet(C, B, alt, Wd) {
+    var et = Wd < 600, n = B.length, s = "", dessus = "", tt = titresAmp(Wd / 2, 18, C, et ? Wd - 60 : 300), top0 = 18 + tt.h + 30;
+    var G = ["#5D4037", "#1B5E20", "#2E7D32", "#388E3C", "#33691E", "#43A047", "#558B2F", "#2E7D32"];
+    function hT(b, tw) { return couper(b.label, Math.floor(tw / 9.4)).length * 19 + 8 + hListe(b.items, Math.floor(tw / 7.8)); }
+    function rayon(b, max) { var r = 100; for (var k = 0; k < 5; k++) r = Math.min(max, Math.max(96, hT(b, r * 1.4) * .62 + 30)); return r; }
+    function disque(cx, cy, r, b, i, col, sg) {
+      var tw = r * 1.4, Lt = couper(b.label, Math.floor(tw / 9.4)), ht = hT(b, tw), y = cy - ht / 2 + 14, g = "<g class='cm-h'><circle cx='" + f1(cx) + "' cy='" + f1(cy) + "' r='" + f1(r) + "' fill='" + col + "'/>";
+      var ix = cx + sg * r * .74, iy = cy - r * .74; g += "<circle cx='" + f1(ix) + "' cy='" + f1(iy) + "' r='22' fill='#fff' stroke='" + col + "' stroke-width='4'/></g>" + icone(ix, iy, i % 6, col);
+      Lt.forEach(function (l, k) { g += "<text x='" + f1(cx) + "' y='" + f1(y + k * 19) + "' text-anchor='middle' font-size='16' font-weight='900' fill='#fff'>" + esc(l) + "</text>"; });
+      return g + blanc(liste(b.items, cx, y + Lt.length * 19 + 10, Math.floor(tw / 7.8), "#fff", true));
+    }
+    var cols = B.map(function (b, i) { return G[(n - 1 - i) % G.length]; });
+    if (et) {
+      var y = top0, cs = [];
+      B.forEach(function (b, i) { var r = rayon(b, (Wd - 70) / 2), cx = Wd / 2 + 16, cy = y + r; s += "<path d='M24 " + f1(cy + r * .6) + " C24 " + f1(cy) + " 40 " + f1(cy) + " " + f1(cx - r + 4) + " " + f1(cy) + "' fill='none' stroke='" + cols[i] + "' stroke-width='10' stroke-linecap='round'/>"; dessus += disque(cx, cy, r, b, i, cols[i], 1); cs.push(cy); y += 2 * r + 16; });
+      return svgDe("cm-etroit", Wd, y + 10, alt, B, tt.s + "<path d='M24 " + f1(cs[0]) + " V" + f1(y) + "' stroke='#5D4037' stroke-width='12' stroke-linecap='round'/>" + s + dessus);
+    }
+    var ax = Wd / 2, rs = B.map(function (b) { return rayon(b, 175); });
+    B.forEach(function (b, i) { b.hh = 2 * rs[i]; });
+    var A = alterne(B, Wd, top0, 300, 10), H = A.H + 60;
+    s += "<path d='M" + f1(ax) + " " + f1(H - 26) + " V" + f1(A.pos[0].y + rs[0]) + "' stroke='#2E7D32' stroke-width='14' stroke-linecap='round'/><path d='M" + f1(ax) + " " + f1(H - 26) + " V" + f1(H - 160) + "' stroke='#5D4037' stroke-width='16' stroke-linecap='round'/><path d='M" + f1(ax - 140) + " " + f1(H - 24) + " H" + f1(ax + 140) + "' stroke='#5D4037' stroke-width='3'/>";
+    A.pos.forEach(function (p, i) {
+      var b = B[i], r = rs[i], sg = p.cote ? 1 : -1, cx = ax + sg * (46 + r), cy = p.y + r;
+      s += "<path d='M" + f1(ax) + " " + f1(Math.min(H - 40, cy + r * .9)) + " C" + f1(ax) + " " + f1(cy + 10) + " " + f1(ax + sg * 14) + " " + f1(cy) + " " + f1(cx - sg * r + sg * 6) + " " + f1(cy) + "' fill='none' stroke='" + cols[i] + "' stroke-width='12' stroke-linecap='round'/>";
+      dessus += disque(cx, cy, r, b, i, cols[i], sg);
+    });
+    return svgDe("cm-large", Wd, H, alt, B, tt.s + s + dessus);
+  }
+  function serpentin(C, B, alt, Wd) {
+    var et = Wd < 600, n = B.length, s = "", dessus = "", tt = titresAmp(Wd / 2, 18, C, et ? Wd - 60 : 300), top0 = 18 + tt.h + 34, V = "#5DAE3A", R = "#F2456E";
+    function bulle(x, y, w, h, b, i, cote) {
+      var g = "<g class='cm-h'><rect x='" + f1(x + 3) + "' y='" + f1(y + 5) + "' width='" + f1(w) + "' height='" + f1(h) + "' rx='18' fill='#000' opacity='.08'/><rect x='" + f1(x) + "' y='" + f1(y) + "' width='" + f1(w) + "' height='" + f1(h) + "' rx='18' fill='" + V + "'/>";
+      var ty = y + Math.min(h / 2, 46), tx = cote === "d" ? x + w : x;
+      g += "<path d='M" + f1(tx) + " " + f1(ty - 12) + " L" + f1(tx + (cote === "d" ? 16 : -16)) + " " + f1(ty) + " L" + f1(tx) + " " + f1(ty + 12) + "Z' fill='" + V + "'/>";
+      g += "<circle cx='" + f1(x + w / 2) + "' cy='" + f1(y) + "' r='15' fill='#fff' stroke='" + V + "' stroke-width='3'/><text x='" + f1(x + w / 2) + "' y='" + f1(y + 5) + "' text-anchor='middle' font-size='13' font-weight='900' fill='" + V + "'>" + (i + 1) + "</text></g>";
+      return g + blanc(blocTxt(x + 18, y + 18, w - 36, b, 0, { col: "#fff", puce: "#E8F8DC" }).s);
+    }
+    function rose(x, y, i) { return "<circle cx='" + f1(x) + "' cy='" + f1(y) + "' r='17' fill='" + R + "'/><path d='M" + f1(x - 6) + " " + f1(y + 14) + " L" + f1(x) + " " + f1(y + 24) + " L" + f1(x + 6) + " " + f1(y + 14) + "Z' fill='" + R + "'/><path d='M" + f1(x - 8) + " " + f1(y - 5) + " h16 M" + f1(x - 8) + " " + f1(y) + " h16 M" + f1(x - 8) + " " + f1(y + 5) + " h10' stroke='#fff' stroke-width='2' stroke-linecap='round'/>"; }
+    if (et) {
+      var w = Wd - 84, y = top0, ys = [];
+      B.forEach(function (b, i) { var h = hTxt(b, w - 36) + 30; dessus += bulle(64, y, w, h, b, i, "g") + rose(26, y + Math.min(h / 2, 46) - 4, i); ys.push(y); y += h + 30; });
+      return svgDe("cm-etroit", Wd, y, alt, B, tt.s + "<path d='M26 " + f1(top0 - 10) + " V" + f1(y - 20) + "' stroke='#B8C0CC' stroke-width='3' stroke-dasharray='6 5'/>" + dessus);
+    }
+    var cw = 300;
+    B.forEach(function (b) { b.hh = hTxt(b, cw - 36) + 30; });
+    var A = alterne(B, Wd, top0, cw, 26), H = A.H + 20, pts = [];
+    A.pos.forEach(function (p, i) { var x = p.cote ? Wd - 30 - cw : 30, ty = p.y + Math.min(p.h / 2, 46); pts.push([p.cote ? x - 16 : x + cw + 16, ty]); dessus += bulle(x, p.y, cw, p.h, B[i], i, p.cote ? "g" : "d"); });
+    var d = "M" + f1(Wd / 2) + " " + f1(top0 - 24) + " C" + f1(Wd / 2) + " " + f1(pts[0][1]) + " " + f1(Wd / 2) + " " + f1(pts[0][1]) + " " + f1(pts[0][0]) + " " + f1(pts[0][1]);
+    for (var k = 1; k < pts.length; k++) d += " C" + f1(Wd / 2 + (pts[k - 1][0] < Wd / 2 ? 120 : -120)) + " " + f1(pts[k - 1][1]) + " " + f1(Wd / 2 + (pts[k][0] < Wd / 2 ? 120 : -120)) + " " + f1(pts[k][1]) + " " + f1(pts[k][0]) + " " + f1(pts[k][1]);
+    s += "<path d='" + d + "' fill='none' stroke='#B8C0CC' stroke-width='3' stroke-dasharray='6 5'/>";
+    pts.forEach(function (q, i) { s += "<circle cx='" + f1(q[0]) + "' cy='" + f1(q[1]) + "' r='7' fill='#fff' stroke='#9AA4B6' stroke-width='3'/>"; if (i) { var my = (pts[i - 1][1] + q[1]) / 2; dessus += rose(Wd / 2, my - 6, i - 1 + 1 > 0 ? i : i); } });
+    return svgDe("cm-large", Wd, H, alt, B, tt.s + s + dessus);
+  }
+
   /* Tirage d'origine INCHANGÉ (8 formes) : les cartes existantes gardent leur forme. Les formes ajoutées le 24/11/2026
      (« diversifier et enrichir, sans changer ce qui a été fait ») ne remplacent que la radiale tirée au hasard, en alternance. */
-  var FORMES = ["radiale", "organigramme", "bulles", "accolade", "alveoles", "roue", "poisson", "arbre"], NOUVELLES = ["ampoule", "livre", "escalier", "fleur", "liege", "tige", "frisev", "arbreinfo", "route", "fourche", "doodle", "blobs", "arc", "onglets", "capsules", "zigzag", "gouttes", "rameaux"], TOUTES = FORMES.concat(NOUVELLES), STYLES = ["main", "colore", "postit"];
+  var FORMES = ["radiale", "organigramme", "bulles", "accolade", "alveoles", "roue", "poisson", "arbre"], NOUVELLES = ["ampoule", "livre", "escalier", "fleur", "liege", "tige", "frisev", "arbreinfo", "route", "fourche", "doodle", "blobs", "arc", "onglets", "capsules", "zigzag", "gouttes", "rameaux", "diagonale", "medaillons", "pont", "bouquet", "serpentin"], TOUTES = FORMES.concat(NOUVELLES), STYLES = ["main", "colore", "postit"];
   function hache(t) { var h = 7; for (var i = 0; i < t.length; i++) h = (h * 31 + t.charCodeAt(i)) % 100003; return h; }
 
   /* carte = { centre: "Titre\nSous-titre" | [lignes], branches: [{ label, color?, items: [] }] } */
@@ -1054,9 +1184,9 @@
     if (st === "ardoise" && !carte.garderCouleurs) B.forEach(function (b, i) { b.color = ["#FFD166", "#FF8FA3", "#8BE9FD", "#B9F18C", "#FFB86B", "#D0A9FF"][i % 6]; });
     STYLE = st;
     P = "cm" + n + "a";
-    h += forme === "organigramme" ? arbre(C, cp(), alt) : forme === "onglets" ? onglets(C, cp(), alt, 920) : forme === "capsules" ? capsules(C, cp(), alt, 920) : forme === "zigzag" ? zigzag(C, cp(), alt, 920) : forme === "gouttes" ? gouttes(C, cp(), alt, 920) : forme === "rameaux" ? rameaux(C, cp(), alt, 920) : forme === "tige" ? tige(C, cp(), alt, 920) : forme === "frisev" ? frisev(C, cp(), alt, 920) : forme === "arbreinfo" ? arbreInfo(C, cp(), alt, 920) : forme === "route" ? route(C, cp(), alt, 920) : forme === "fourche" ? fourche(C, cp(), alt, 920) : forme === "doodle" ? doodle(C, cp(), alt, 920) : forme === "blobs" ? blobs(C, cp(), alt, 920) : forme === "arc" ? arc(C, cp(), alt, 920) : forme === "livre" ? livre(C, cp(), alt, 920) : forme === "escalier" ? escalier(C, cp(), alt, 920) : forme === "fleur" ? fleur(C, cp(), alt, 920) : forme === "liege" ? liege(C, cp(), alt, 920) : forme === "ampoule" ? ampoule(C, cp(), alt, 920) : forme === "roue" ? roue(C, cp(), alt, 920) : forme === "poisson" ? poisson(C, cp(), alt, 920) : forme === "arbre" ? arbreDessin(C, cp(), alt, 920) : forme === "frise" ? frise(C, cp(), alt, 920) : forme === "bulles" ? bulles(C, cp(), alt) : forme === "accolade" ? accolade(C, cp(), alt) : forme === "alveoles" ? alveoles(C, cp(), alt, 920) : forme === "flux" ? flux(C, cp(), alt, 920) : forme === "causes" ? causes(C, cp(), alt, 920, gauche) : large(C, cp(), alt);
+    h += forme === "organigramme" ? arbre(C, cp(), alt) : forme === "diagonale" ? diagonale(C, cp(), alt, 920) : forme === "medaillons" ? medaillons(C, cp(), alt, 920) : forme === "pont" ? pont(C, cp(), alt, 920) : forme === "bouquet" ? bouquet(C, cp(), alt, 920) : forme === "serpentin" ? serpentin(C, cp(), alt, 920) : forme === "onglets" ? onglets(C, cp(), alt, 920) : forme === "capsules" ? capsules(C, cp(), alt, 920) : forme === "zigzag" ? zigzag(C, cp(), alt, 920) : forme === "gouttes" ? gouttes(C, cp(), alt, 920) : forme === "rameaux" ? rameaux(C, cp(), alt, 920) : forme === "tige" ? tige(C, cp(), alt, 920) : forme === "frisev" ? frisev(C, cp(), alt, 920) : forme === "arbreinfo" ? arbreInfo(C, cp(), alt, 920) : forme === "route" ? route(C, cp(), alt, 920) : forme === "fourche" ? fourche(C, cp(), alt, 920) : forme === "doodle" ? doodle(C, cp(), alt, 920) : forme === "blobs" ? blobs(C, cp(), alt, 920) : forme === "arc" ? arc(C, cp(), alt, 920) : forme === "livre" ? livre(C, cp(), alt, 920) : forme === "escalier" ? escalier(C, cp(), alt, 920) : forme === "fleur" ? fleur(C, cp(), alt, 920) : forme === "liege" ? liege(C, cp(), alt, 920) : forme === "ampoule" ? ampoule(C, cp(), alt, 920) : forme === "roue" ? roue(C, cp(), alt, 920) : forme === "poisson" ? poisson(C, cp(), alt, 920) : forme === "arbre" ? arbreDessin(C, cp(), alt, 920) : forme === "frise" ? frise(C, cp(), alt, 920) : forme === "bulles" ? bulles(C, cp(), alt) : forme === "accolade" ? accolade(C, cp(), alt) : forme === "alveoles" ? alveoles(C, cp(), alt, 920) : forme === "flux" ? flux(C, cp(), alt, 920) : forme === "causes" ? causes(C, cp(), alt, 920, gauche) : large(C, cp(), alt);
     P = "cm" + n + "b";
-    h += forme === "onglets" ? onglets(C, cp(), alt, 400) : forme === "capsules" ? capsules(C, cp(), alt, 400) : forme === "zigzag" ? zigzag(C, cp(), alt, 400) : forme === "gouttes" ? gouttes(C, cp(), alt, 400) : forme === "rameaux" ? rameaux(C, cp(), alt, 400) : forme === "tige" ? tige(C, cp(), alt, 400) : forme === "frisev" ? frisev(C, cp(), alt, 400) : forme === "arbreinfo" ? arbreInfo(C, cp(), alt, 400) : forme === "route" ? route(C, cp(), alt, 400) : forme === "fourche" ? fourche(C, cp(), alt, 400) : forme === "doodle" ? doodle(C, cp(), alt, 400) : forme === "blobs" ? blobs(C, cp(), alt, 400) : forme === "arc" ? arc(C, cp(), alt, 400) : forme === "livre" ? livre(C, cp(), alt, 400) : forme === "escalier" ? escalier(C, cp(), alt, 400) : forme === "fleur" ? fleur(C, cp(), alt, 400) : forme === "liege" ? liege(C, cp(), alt, 400) : forme === "ampoule" ? ampoule(C, cp(), alt, 400) : forme === "roue" ? roue(C, cp(), alt, 400) : forme === "poisson" ? poisson(C, cp(), alt, 400) : forme === "arbre" ? arbreDessin(C, cp(), alt, 400) : forme === "frise" ? frise(C, cp(), alt, 400) : forme === "bulles" ? bullesEtroit(C, cp(), alt) : forme === "accolade" ? accoladeEtroit(C, cp(), alt) : forme === "alveoles" ? alveoles(C, cp(), alt, 400) : forme === "flux" ? flux(C, cp(), alt, 400) : forme === "causes" ? causes(C, cp(), alt, 400, gauche) : etroit(C, cp(), alt);
+    h += forme === "diagonale" ? diagonale(C, cp(), alt, 400) : forme === "medaillons" ? medaillons(C, cp(), alt, 400) : forme === "pont" ? pont(C, cp(), alt, 400) : forme === "bouquet" ? bouquet(C, cp(), alt, 400) : forme === "serpentin" ? serpentin(C, cp(), alt, 400) : forme === "onglets" ? onglets(C, cp(), alt, 400) : forme === "capsules" ? capsules(C, cp(), alt, 400) : forme === "zigzag" ? zigzag(C, cp(), alt, 400) : forme === "gouttes" ? gouttes(C, cp(), alt, 400) : forme === "rameaux" ? rameaux(C, cp(), alt, 400) : forme === "tige" ? tige(C, cp(), alt, 400) : forme === "frisev" ? frisev(C, cp(), alt, 400) : forme === "arbreinfo" ? arbreInfo(C, cp(), alt, 400) : forme === "route" ? route(C, cp(), alt, 400) : forme === "fourche" ? fourche(C, cp(), alt, 400) : forme === "doodle" ? doodle(C, cp(), alt, 400) : forme === "blobs" ? blobs(C, cp(), alt, 400) : forme === "arc" ? arc(C, cp(), alt, 400) : forme === "livre" ? livre(C, cp(), alt, 400) : forme === "escalier" ? escalier(C, cp(), alt, 400) : forme === "fleur" ? fleur(C, cp(), alt, 400) : forme === "liege" ? liege(C, cp(), alt, 400) : forme === "ampoule" ? ampoule(C, cp(), alt, 400) : forme === "roue" ? roue(C, cp(), alt, 400) : forme === "poisson" ? poisson(C, cp(), alt, 400) : forme === "arbre" ? arbreDessin(C, cp(), alt, 400) : forme === "frise" ? frise(C, cp(), alt, 400) : forme === "bulles" ? bullesEtroit(C, cp(), alt) : forme === "accolade" ? accoladeEtroit(C, cp(), alt) : forme === "alveoles" ? alveoles(C, cp(), alt, 400) : forme === "flux" ? flux(C, cp(), alt, 400) : forme === "causes" ? causes(C, cp(), alt, 400, gauche) : etroit(C, cp(), alt);
     STYLE = "main";
     return "<div class='cm cm-" + forme + " cm-s-" + st + "' data-forme='" + forme + "'>" + h + "</div>";
   }
@@ -1137,6 +1267,9 @@
     /* forme selon le contenu : étapes → flux ; causes et conséquences → multi-flux ; sinon variée selon le titre */
     var lab = B.map(function (b) { return b.label; }).join(" | "), forme = /étape|méthode|démarche|procédure|phase/i.test(lab) ? "flux" : (B.some(function (b) { return /cause|origine/i.test(b.label) && !/conséquence|effet|impact/i.test(b.label); }) && B.some(function (b) { return /conséquence|effet|impact/i.test(b.label) && !/cause|origine/i.test(b.label); })) ? "causes" : /hist/i.test(L.m || "") || /\b1[0-9]{3}\b|siècle/.test(lab) ? "frise" : null;
     var rg = L.ordre != null ? L.ordre : L.rang;
+    /* rang = position de la leçon dans sa série (classe/matière) quand le catalogue est chargé : deux voisines ne tombent jamais sur la même forme, même si leurs numéros d'ordre sont éloignés */
+    var CAT = typeof window !== "undefined" && window.VRT_LECONS;
+    if (CAT && rg != null && isFinite(rg)) { var pos = 0; for (var k in CAT) { var Q = CAT[k]; if (Q && Q.c === L.c && Q.m === L.m) { var q = Q.ordre != null ? Q.ordre : Q.rang; if (q != null && isFinite(q) && (q < rg || (q === rg && k < (L.id || "")))) pos++; } } rg = pos; }
     /* histoire : la frise une leçon sur deux, la rotation sur les autres (« la diversité continue ») */
     if (forme === "frise" && rg != null && isFinite(rg) && Math.round(rg) % 2 === 1) forme = null;
     return VRT_CM({ centre: [nu(L.titre || L.cle)].concat(L.c ? [L.c] : []), branches: B.slice(0, 6), forme: forme, rang: rg, serie: (L.c || "") + "/" + (L.m || "") });
