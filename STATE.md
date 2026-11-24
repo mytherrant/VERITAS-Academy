@@ -1,3 +1,14 @@
+## Apprendre : histoire de 6e, lot 6 — les TD 1, 2 et 4 (24/11/2026, branche histoire-6e-lot6)
+
+Demande de Jacques : « continue ».
+
+- **`apprendre/_src/41-histoire-6e-6.js`** : 3 leçons gratuites NOUVELLES, même gabarit :
+  - rang 3 `6e-histoire-td-temps-localite` : repères traditionnels (soleil et ombre, semaine de marchés, lunes ≈ 29,5 j, saisons, générations ≈ 25-30 ans), du récit à la date grâce à une ancre écrite ; 3D : bâton et ombre ;
+  - rang 5 `6e-histoire-td-mythes-creation` : mythe, conte, science ; comparaison Égypte (Noun, Atoum), Genèse, Dogon (Amma) ; ce qu'un mythe apprend d'un peuple ; 3D : colline sortant des eaux ;
+  - rang 9 `6e-histoire-td-symboles-pouvoir` : symboles du pouvoir (trône perlé de Foumban, léopard, chasse-mouches, bonnet, parasol du lamido, canne, tambour), comparaison avec le pharaon ; 3D : les attributs d'un roi.
+- Histoire de 6e : 18 leçons. Restent les dossiers 3 et 4 (rangs 15 et 21 : l'apport de Rome, les pèlerinages).
+- Audit 98/98 ; `lecons.js?v=20261124h12` ; habillage 834 pages au vert ; Chromium (Pixel 5, 1200 px) : aucune erreur ; planches 3D contrôlées (soleil ramené dans le cadre).
+
 ## Apprendre : histoire de 6e, lot 5 — islam en Afrique, travail des métaux, TD Néolithique au Cameroun (24/11/2026, branche histoire-6e-lot5)
 
 Demande de Jacques : « continue les autres leçons ».
