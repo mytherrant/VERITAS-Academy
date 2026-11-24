@@ -1,3 +1,18 @@
+## Apprendre : lot 10 d'anglais de 3e à verrou (24/11/2026, branche apprendre-anglais-3e-lot10)
+
+Demande de Jacques : « continue les autres leçons en évitant les doublons ». Recensement (rang + cle, master + PR #430/#436) : toute la grammaire et les rédactions d'anglais de 3e sont couvertes ; restent les leçons de compétences (Speaking, Listening, Reading + vocabulaire). Les lignes répétées de la progression (2e occurrence d'un même intitulé) ne sont pas redoublées.
+
+- 6 leçons NOUVELLES à verrou (sources et JSON HORS dépôt, livrés en privé ; JSON à déposer dans `uploads/protected/apprendre/`) :
+  - rang 27 `3e-anglais-speaking-restaurant` (commander poliment, vérifier l'addition) ;
+  - rang 30 `3e-anglais-listening-accommodation` (écouter un bailleur, tableau, avance) ;
+  - rang 33 `3e-anglais-reading-best-buys` (skimming / scanning, prix unitaire) ;
+  - rang 53 `3e-anglais-speaking-environment` (inondations de Douala, opinions, suggestions) ;
+  - rang 56 `3e-anglais-listening-weather` (bulletin météo, harmattan, tableau par ville) ;
+  - rang 59 `3e-anglais-reading-climate-change` (lac Tchad, deviner le sens par le contexte).
+- Dépôt : seulement le début public (bloc « AJOUT lot 10 anglais 3e (abonnés) » de `apercus-3e.js`) + `charge.js?v=`.
+- Contrôles : build officiel sur copie (6 à verrou), bancs verrou et gabarits verts, `build_llms.py --controle`, 15 contrôles GEO ; Chromium 390/1200 px visiteur et abonné sans erreur ; 3D contrôlées (leçon pour les maquettes : un sol en `div: false` masque les objets minces placés au fond).
+- ⚠️ Ne pas fusionner avant le dépôt FTP. Conflit attendu avec #430/#436/#435 sur `apercus-3e.js`/`charge.js` : prendre master et relancer `ajouter_apercus`.
+
 ## Cartes mentales : les nouveaux styles adoptés partout (24/11/2026, branche cartes-partout)
 
 Demande de Jacques : « adopte aussi les nouveaux styles de cartes mentales ».
