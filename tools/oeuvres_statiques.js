@@ -152,7 +152,9 @@ function bloc(o, cle, nom) {
     out.push(h2('carte', 'compass', 'La carte mentale de l’œuvre'));
     /* 18/11/2026 « de vraies cartes mentales » : réseau en étoile (écran large) et en arbre (téléphone),
        dessiné par apprendre/_src/00-carte-mentale.js (même module que les leçons). */
-    out.push(VRT_CM({ centre: centre, branches: branches.map(b => ({ label: net(b.label), color: b.color, items: b.items.map(net) })) }));
+    /* 24/11/2026 « adopte aussi les nouveaux styles » : rang = place de l'œuvre dans l'ordre alphabétique des clés,
+       comme dans l'application (_cmPage) : les œuvres tournent sur toutes les formes et la page et l'appli montrent la même. */
+    out.push(VRT_CM({ centre: centre, branches: branches.map(b => ({ label: net(b.label), color: b.color, items: b.items.map(net) })), rang: Object.keys(OEUVRES).sort().indexOf(cle), serie: 'oeuvres' }));
   }
 
   const an = o.analyse || {};
