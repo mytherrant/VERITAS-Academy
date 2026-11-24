@@ -1,12 +1,14 @@
-## Cartes mentales : nouvelle forme « ampoule » (24/11/2026, branche cartes-mentales-variees)
+## Cartes mentales : deux formes ajoutées, « ampoule » et « livre » (24/11/2026, branche cartes-mentales-variees)
 
-Demande de Jacques : « Varie les cartes mentales », avec en modèle une carte « ampoule centrale, questions numérotées 01 à 06 soulignées, flèches courbes ».
+Demandes de Jacques : « Varie les cartes mentales » (modèle : ampoule centrale, questions numérotées 01 à 06 soulignées, flèches courbes), puis « enrichi et varie » (modèle : livre ouvert au centre, bandeaux en nuage en capitales, listes soulignées, icônes), et surtout : « il s'agit juste de diversifier et enrichir et non changer tout ce qui a été fait avant ».
 
-- `apprendre/_src/00-carte-mentale.js` : forme **ampoule** ajoutée (rien de retiré). Écran large : ampoule dessinée au centre, titre de la leçon dans un cartouche turquoise, classe dans une pastille violette ; branches en deux colonnes, pastille numérotée 01, 02…, titre souligné de la couleur de la branche, puis la liste ; flèches courbes épaisses qui virent dans l'espace libre et arrivent à l'horizontale sur la pastille (aucune ne traverse de texte). Téléphone : ampoule et titres en haut, branches empilées reliées par un pointillé.
-- `FORMES` passe de 8 à 9 : le tirage par titre change pour une partie des cartes (leçons, œuvres). Répartition sur les 86 leçons gratuites : 11 formes (roue 11, bulles 10, accolade 10, frise 9, ampoule 8, alvéoles 8, arbre 8, radiale 7, organigramme 6, poisson 6, flux 3).
-- **Piège** : l'animation CSS de `.cm-c` (cmGonfle) redéfinit `transform` ; un dessin positionné par l'attribut `transform` doit être placé sur un groupe EXTÉRIEUR à `.cm-c`, sinon il saute en haut à gauche.
-- Régénérés : `lecons.js` (`?v=20261124amp`), `chunks/carte-mentale.js`, 21 pages d'œuvres. Chromium 1200 et 390 px sur les 86 leçons : aucune erreur, aucun débordement. Bancs et contrôles GEO, habillage, découverte au vert.
-
+- `apprendre/_src/00-carte-mentale.js` : formes **ampoule** et **livre** AJOUTÉES (rien de retiré ni de modifié dans les 8 formes existantes).
+  - ampoule : ampoule dessinée au centre, cartouche turquoise du titre, pastille violette de la classe ; branches en deux colonnes, pastille 01, 02…, titre souligné, liste ; flèches courbes qui virent dans l'espace libre et arrivent à l'horizontale sur la pastille.
+  - livre : livre ouvert au centre (titre en capitales jaunes sur bandeau nuit, classe dans une pastille jaune) ; bandeaux en nuage colorés en capitales ; listes à puces soulignées ; une petite icône par branche (crayon, ampoule, loupe, document, cible, livre) ; flèches qui convergent vers le livre ; 5e branche éventuelle centrée en bas.
+  - Téléphone : dessin central en haut, branches empilées.
+- **Tirage d'origine conservé** : `FORMES` (8 formes) inchangé ; seule une carte qui tirait la **radiale** (forme la plus classique) reçoit à la place, en alternance, ampoule ou livre (`NOUVELLES`). Vérifié par comparaison avec master : 74 leçons sur 86 gardent exactement leur forme (les 12 autres étaient radiales) ; 19 pages d'œuvres sur 21 identiques (les 2 autres étaient radiales).
+- **Piège** : l'animation CSS de `.cm-c` (cmGonfle) redéfinit `transform` ; un dessin positionné par l'attribut `transform` doit l'être sur un groupe EXTÉRIEUR à `.cm-c`.
+- Régénérés : `lecons.js` (`?v=20261124amp`), `chunks/carte-mentale.js`, pages d'œuvres. Chromium 1200 et 390 px sur les 86 leçons : aucune erreur, aucun débordement. Bancs et contrôles œuvres, habillage, découverte, llms au vert.
 ## Apprendre : philosophie de Tle A, méthode — 4 leçons réservées aux abonnés (20/11/2026, branche apprendre-philo-tle-a-methode)
 
 Suite de la part de la session du lot 4 (Njoh-Mouelle, art et travail) : les 4 lignes de philosophie de Tle A qui n'avaient AUCUNE leçon (vérifié sur master après la fusion de #399, sur #401 et sur les branches ouvertes).

@@ -559,7 +559,90 @@
     return svgDe("cm-large", Wd, H, alt, B, s + dessus + titresAmp(cx, by + 120, C, 216).s);
   }
 
-  var FORMES = ["radiale", "organigramme", "bulles", "accolade", "alveoles", "roue", "poisson", "arbre", "ampoule"], STYLES = ["main", "colore", "postit"];
+  /* ════════ LIVRE (24/11/2026, « enrichis et varie », modèle de Jacques : un livre ouvert au centre portant le titre,
+     des bandeaux en forme de nuage en capitales, des listes soulignées, des flèches qui convergent vers le livre,
+     de petites icônes) ════════ */
+  function livreDessin(cx, cy, w, C) {
+    var h = w * 0.56, s = "<g transform='translate(" + f1(cx) + " " + f1(cy) + ")'><g class='cm-c'>", L = [];
+    couper((C[0] || "").toUpperCase(), Math.max(10, Math.floor(w / 15))).forEach(function (l) { L.push(l); });
+    s += "<path d='M" + f1(-w / 2 - 8) + " " + f1(-h / 2 + 10) + " L0 " + f1(-h / 2 + 22) + " L" + f1(w / 2 + 8) + " " + f1(-h / 2 + 10) + " V" + f1(h / 2 + 12) + " L0 " + f1(h / 2 + 24) + " L" + f1(-w / 2 - 8) + " " + f1(h / 2 + 12) + "Z' fill='#1D2B53'/>";
+    for (var k = 3; k >= 0; k--) s += "<path d='M" + f1(-w / 2 + k * 2) + " " + f1(-h / 2 + k * 3) + " Q" + f1(-w / 4) + " " + f1(-h / 2 - 12 + k * 3) + " 0 " + f1(-h / 2 + 6 + k * 3) + " Q" + f1(w / 4) + " " + f1(-h / 2 - 12 + k * 3) + " " + f1(w / 2 - k * 2) + " " + f1(-h / 2 + k * 3) + " V" + f1(h / 2 + k * 2) + " Q" + f1(w / 4) + " " + f1(h / 2 - 10 + k * 2) + " 0 " + f1(h / 2 + 8 + k * 2) + " Q" + f1(-w / 4) + " " + f1(h / 2 - 10 + k * 2) + " " + f1(-w / 2 + k * 2) + " " + f1(h / 2 + k * 2) + "Z' fill='" + (k ? "#EFE3C8" : "#FBF4E2") + "' stroke='#B89B67' stroke-width='1.2'/>";
+    s += "<path d='M0 " + f1(-h / 2 + 6) + " V" + f1(h / 2 + 8) + "' stroke='#B89B67' stroke-width='2'/>";
+    var bh = 18 + L.length * 24, bw = Math.min(w - 30, 40 + Math.max.apply(null, L.map(function (l) { return l.length; })) * 13.5);
+    s += "<rect x='" + f1(-bw / 2) + "' y='" + f1(-bh / 2) + "' width='" + f1(bw) + "' height='" + bh + "' rx='6' fill='#1D2B53'/>";
+    L.forEach(function (l, k) { s += "<text x='0' y='" + f1(-bh / 2 + 30 + k * 24) + "' text-anchor='middle' font-size='20' font-weight='900' fill='#FFD43B' letter-spacing='.5'>" + esc(l) + "</text>"; });
+    if (C[1]) s += "<rect x='-34' y='" + f1(h / 2 + 32) + "' width='68' height='24' rx='12' fill='#FFD43B' stroke='#1D2B53' stroke-width='2'/><text x='0' y='" + f1(h / 2 + 49) + "' text-anchor='middle' font-size='13' font-weight='800' fill='#1D2B53'>" + esc(C[1]) + "</text>";
+    return s + "</g></g>";
+  }
+  /* bandeau en nuage : rectangle arrondi et bosses de la même couleur */
+  function nuageTitre(cx, cy, w, t, col, NC) {
+    var L = couper(String(t).toUpperCase(), NC), h = 20 + L.length * 19, s = "<g class='cm-h'>", i;
+    for (i = 0; i < 5; i++) s += "<circle cx='" + f1(cx - w / 2 + 22 + i * (w - 44) / 4) + "' cy='" + f1(cy - h / 2 + 4 + (i % 2) * 3) + "' r='" + (14 + (i % 2) * 4) + "' fill='" + col + "'/>";
+    s += "<circle cx='" + f1(cx - w / 2 + 6) + "' cy='" + f1(cy) + "' r='" + f1(h / 2) + "' fill='" + col + "'/><circle cx='" + f1(cx + w / 2 - 6) + "' cy='" + f1(cy) + "' r='" + f1(h / 2) + "' fill='" + col + "'/>";
+    s += "<rect x='" + f1(cx - w / 2 + 4) + "' y='" + f1(cy - h / 2) + "' width='" + f1(w - 8) + "' height='" + h + "' rx='" + f1(h / 2) + "' fill='" + col + "'/>";
+    L.forEach(function (l, k) { s += "<text x='" + f1(cx) + "' y='" + f1(cy - (L.length - 1) * 9.5 + 6 + k * 19) + "' text-anchor='middle' font-size='16.5' font-weight='900' fill='#fff' stroke='" + col + "' stroke-width='.6' letter-spacing='.4'>" + esc(l) + "</text>"; });
+    return { s: s + "</g>", h: h + 12 };
+  }
+  /* petites icônes, une par branche, dans l'ordre : crayon, ampoule, loupe, document, cible, livre */
+  function icone(x, y, k, col) {
+    var s = "<g transform='translate(" + f1(x) + " " + f1(y) + ")' opacity='.95'>";
+    if (k === 0) s += "<path d='M-12 10 L8 -10 L13 -5 L-7 15 L-14 17Z' fill='#F7C948' stroke='#5A3A1E' stroke-width='1.5'/><path d='M8 -10 L13 -5' stroke='" + col + "' stroke-width='4'/>";
+    else if (k === 1) s += "<circle cx='0' cy='-4' r='10' fill='#FFE066' stroke='#C24E00' stroke-width='1.6'/><rect x='-5' y='6' width='10' height='7' rx='2' fill='#8A93A6'/><path d='M-16 -12l-5 -4M16 -12l5 -4M0 -19v-5' stroke='#F7C948' stroke-width='2.4' stroke-linecap='round'/>";
+    else if (k === 2) s += "<circle cx='-3' cy='-3' r='9' fill='#E8F1FB' stroke='" + col + "' stroke-width='3'/><path d='M4 4 L13 13' stroke='#5A3A1E' stroke-width='4' stroke-linecap='round'/>";
+    else if (k === 3) s += "<path d='M-10 -13 H5 L11 -7 V13 H-10Z' fill='#fff' stroke='#4D5163' stroke-width='1.6'/><path d='M-6 -5 H6 M-6 0 H6 M-6 5 H2' stroke='" + col + "' stroke-width='1.8'/>";
+    else if (k === 4) s += "<circle r='12' fill='#fff' stroke='" + col + "' stroke-width='2.4'/><circle r='7' fill='none' stroke='" + col + "' stroke-width='2.4'/><circle r='2.5' fill='" + col + "'/>";
+    else s += "<path d='M-14 -8 Q-7 -12 0 -8 Q7 -12 14 -8 V10 Q7 6 0 10 Q-7 6 -14 10Z' fill='#FBF4E2' stroke='" + col + "' stroke-width='1.8'/><path d='M0 -8 V10' stroke='" + col + "' stroke-width='1.4'/>";
+    return s + "</g>";
+  }
+  function listeSoulignee(items, x, y, w, col) {
+    var NC = Math.floor((w - 24) / 8.3), s = "", yy = y;
+    items.forEach(function (it) {
+      var L = couper(it, NC);
+      s += "<circle class='cm-p' cx='" + f1(x + 5) + "' cy='" + f1(yy - 5) + "' r='3.6' fill='" + col + "'/>" + texte(x + 16, yy, L, { t: 15, c: encre("#1D2330"), g: 600 });
+      yy += (L.length - 1) * LH2 + 9;
+      s += "<path class='cm-l' d='M" + f1(x) + " " + f1(yy) + " H" + f1(x + w) + "' stroke='" + col + "' stroke-width='1.6' opacity='.55'/>";
+      yy += 20;
+    });
+    return { s: s, h: yy - y };
+  }
+  function hLivre(b, w) { var NC = Math.floor((w - 24) / 8.3), n = couper(b.label, Math.floor(w / 12)).length; return 20 + n * 19 + 12 + 14 + b.items.reduce(function (a, it) { return a + (couper(it, NC).length - 1) * LH2 + 29; }, 0); }
+  function brancheLivre(x, y, w, b, k) {
+    var nt = nuageTitre(x + w / 2, y + (20 + couper(b.label, Math.floor(w / 12)).length * 19) / 2 + 6, w, b.label, b.color, Math.floor(w / 12));
+    var li = listeSoulignee(b.items, x + 8, y + nt.h + 24, w - 16, b.color);
+    return { s: nt.s + li.s + icone(x + w - 4, y + nt.h + 6 + li.h, k % 6, b.color), h: nt.h + li.h + 24 };
+  }
+  function livre(C, B, alt, Wd) {
+    var s = "", dessus = "";
+    if (Wd < 600) {
+      var w = Wd - 40, y = 24;
+      s += livreDessin(Wd / 2, y + 80, 300, C); y += 190;
+      B.forEach(function (b, i) { var br = brancheLivre(20, y, w, b, i); s += br.s; y += br.h + 26; });
+      return svgDe("cm-etroit", Wd, y, alt, B, s);
+    }
+    var bw = 262, n = B.length, bas = n % 2 === 1 && n > 2 ? B[n - 1] : null, cote = bas ? B.slice(0, n - 1) : B, cols = [[], []];
+    cote.forEach(function (b, i) { b.i = i; b.h = hLivre(b, bw); cols[i % 2].push(b); });
+    var hs = cols.map(function (c) { return c.reduce(function (a, b) { return a + b.h + 30; }, 0) - 30; }), Hc = Math.max(hs[0], hs[1], 260), cx = Wd / 2, cy = 30 + Hc / 2;
+    var bwBas = 420, hBas = bas ? hLivre(bas, bwBas) : 0, H = 30 + Hc + (bas ? 60 + hBas : 0) + 30;
+    var livreS = livreDessin(cx, cy, 232, C);
+    cols.forEach(function (c, ct) {
+      var x = ct ? Wd - 20 - bw : 20, y = 30 + (Hc - hs[ct]) / 2;
+      c.forEach(function (b) {
+        var br = brancheLivre(x, y, bw, b, b.i), ny = y + 22, sx = ct ? x - 6 : x + bw + 6, ex = cx + (ct ? 132 : -132), ey = cy + (ny - cy) * 0.3;
+        s += "<path class='cm-t' d='M" + f1(sx) + " " + f1(ny) + " C" + f1(sx + (ct ? -50 : 50)) + " " + f1(ny) + " " + f1(ex + (ct ? 40 : -40)) + " " + f1(ey) + " " + f1(ex) + " " + f1(ey) + "' fill='none' stroke='" + b.color + "' stroke-width='10' stroke-linecap='round' opacity='.85' marker-end='url(#" + P + "f" + b.i + ")'/>";
+        dessus += br.s; y += b.h + 30;
+      });
+    });
+    if (bas) {
+      bas.i = n - 1; var yb = 30 + Hc + 60, xb = cx - bwBas / 2, brb = brancheLivre(xb, yb, bwBas, bas, n - 1);
+      s += "<path class='cm-t' d='M" + f1(cx) + " " + f1(yb - 8) + " V" + f1(cy + 232 * 0.28 + 66) + "' stroke='" + bas.color + "' stroke-width='10' stroke-linecap='round' opacity='.85' marker-end='url(#" + P + "f" + (n - 1) + ")'/>";
+      dessus += brb.s;
+    }
+    return svgDe("cm-large", Wd, H, alt, B, s + livreS + dessus);
+  }
+
+  /* Tirage d'origine INCHANGÉ (8 formes) : les cartes existantes gardent leur forme. Les formes ajoutées le 24/11/2026
+     (« diversifier et enrichir, sans changer ce qui a été fait ») ne remplacent que la radiale tirée au hasard, en alternance. */
+  var FORMES = ["radiale", "organigramme", "bulles", "accolade", "alveoles", "roue", "poisson", "arbre"], NOUVELLES = ["ampoule", "livre"], STYLES = ["main", "colore", "postit"];
   function hache(t) { var h = 7; for (var i = 0; i < t.length; i++) h = (h * 31 + t.charCodeAt(i)) % 100003; return h; }
 
   /* carte = { centre: "Titre\nSous-titre" | [lignes], branches: [{ label, color?, items: [] }] } */
@@ -573,7 +656,9 @@
     /* forme et style : imposés par la carte, sinon tirés du titre (stables d'une génération à l'autre et variés d'une carte à l'autre) */
     var hh = hache(C.join(" ")), pal = PALETTES[Math.floor(hh / 13) % PALETTES.length];
     if (!carte.garderCouleurs) B.forEach(function (b, i) { b.color = pal[i % pal.length]; });
-    var forme = carte.forme || FORMES[hh % FORMES.length], st = carte.style || STYLES[Math.floor(hh / 7) % STYLES.length];
+    var forme = carte.forme || FORMES[hh % FORMES.length];
+    if (!carte.forme && forme === "radiale") forme = NOUVELLES[Math.floor(hh / 8) % NOUVELLES.length];
+    var st = carte.style || STYLES[Math.floor(hh / 7) % STYLES.length];
     var gauche = B.map(function (b) { return /cause|origine|facteur|pourquoi/i.test(b.label) && !/conséquence|effet|impact/i.test(b.label); });
     if (forme === "causes" && (gauche.indexOf(true) < 0 || gauche.indexOf(false) < 0)) forme = "radiale";
     if (forme === "organigramme" && B.length > 5) forme = "radiale";
@@ -581,9 +666,9 @@
     if (st === "ardoise" && !carte.garderCouleurs) B.forEach(function (b, i) { b.color = ["#FFD166", "#FF8FA3", "#8BE9FD", "#B9F18C", "#FFB86B", "#D0A9FF"][i % 6]; });
     STYLE = st;
     P = "cm" + n + "a";
-    h += forme === "organigramme" ? arbre(C, cp(), alt) : forme === "ampoule" ? ampoule(C, cp(), alt, 920) : forme === "roue" ? roue(C, cp(), alt, 920) : forme === "poisson" ? poisson(C, cp(), alt, 920) : forme === "arbre" ? arbreDessin(C, cp(), alt, 920) : forme === "frise" ? frise(C, cp(), alt, 920) : forme === "bulles" ? bulles(C, cp(), alt) : forme === "accolade" ? accolade(C, cp(), alt) : forme === "alveoles" ? alveoles(C, cp(), alt, 920) : forme === "flux" ? flux(C, cp(), alt, 920) : forme === "causes" ? causes(C, cp(), alt, 920, gauche) : large(C, cp(), alt);
+    h += forme === "organigramme" ? arbre(C, cp(), alt) : forme === "livre" ? livre(C, cp(), alt, 920) : forme === "ampoule" ? ampoule(C, cp(), alt, 920) : forme === "roue" ? roue(C, cp(), alt, 920) : forme === "poisson" ? poisson(C, cp(), alt, 920) : forme === "arbre" ? arbreDessin(C, cp(), alt, 920) : forme === "frise" ? frise(C, cp(), alt, 920) : forme === "bulles" ? bulles(C, cp(), alt) : forme === "accolade" ? accolade(C, cp(), alt) : forme === "alveoles" ? alveoles(C, cp(), alt, 920) : forme === "flux" ? flux(C, cp(), alt, 920) : forme === "causes" ? causes(C, cp(), alt, 920, gauche) : large(C, cp(), alt);
     P = "cm" + n + "b";
-    h += forme === "ampoule" ? ampoule(C, cp(), alt, 400) : forme === "roue" ? roue(C, cp(), alt, 400) : forme === "poisson" ? poisson(C, cp(), alt, 400) : forme === "arbre" ? arbreDessin(C, cp(), alt, 400) : forme === "frise" ? frise(C, cp(), alt, 400) : forme === "bulles" ? bullesEtroit(C, cp(), alt) : forme === "accolade" ? accoladeEtroit(C, cp(), alt) : forme === "alveoles" ? alveoles(C, cp(), alt, 400) : forme === "flux" ? flux(C, cp(), alt, 400) : forme === "causes" ? causes(C, cp(), alt, 400, gauche) : etroit(C, cp(), alt);
+    h += forme === "livre" ? livre(C, cp(), alt, 400) : forme === "ampoule" ? ampoule(C, cp(), alt, 400) : forme === "roue" ? roue(C, cp(), alt, 400) : forme === "poisson" ? poisson(C, cp(), alt, 400) : forme === "arbre" ? arbreDessin(C, cp(), alt, 400) : forme === "frise" ? frise(C, cp(), alt, 400) : forme === "bulles" ? bullesEtroit(C, cp(), alt) : forme === "accolade" ? accoladeEtroit(C, cp(), alt) : forme === "alveoles" ? alveoles(C, cp(), alt, 400) : forme === "flux" ? flux(C, cp(), alt, 400) : forme === "causes" ? causes(C, cp(), alt, 400, gauche) : etroit(C, cp(), alt);
     STYLE = "main";
     return "<div class='cm cm-" + forme + " cm-s-" + st + "' data-forme='" + forme + "'>" + h + "</div>";
   }
