@@ -1,3 +1,14 @@
+## Apprendre : lot 7 philosophie de Tle C et D, leçons à verrou — autrui et finalité de la morale, origine du sentiment religieux (24/11/2026, branche apprendre-philo-tle-lot7)
+
+Demande de Jacques : « continue les autres leçons ». Partage annoncé aux sessions du lot 4 et « Structure » avant écriture. Aucune autre leçon touchée.
+
+- **Recensement des lignes de philosophie sans leçon, par rang ET par `cle`** (master 2731012 + PR #421) : Tle A 20, 24, 26, 27, 29, 33, 35 ; Tle C/D 4, 6, 11, 21, 24, 25, 27 ; 1re A (16 lignes) ; 1re C/D (8 lignes). Mais presque toutes sont déjà TRAITÉES EN ENTIER par la leçon du chapitre (ex. C/D 21 panafricanisme dans la leçon du rang 20 ; A 26-27 dans « types de science » au rang 25 ; chaque chapitre de 1re A a une leçon qui couvre toutes ses lignes) : les écrire ferait doublon de contenu. Seules C/D 11 et 27 avaient un contenu non traité.
+- **4 leçons NOUVELLES réservées aux abonnés** : `tle-[cd]-philo-autrui-finalite-morale` (11 : formes des rapports avec autrui, Hegel, Sartre, Aristote, Mbiti ; dignité de la personne, Kant, Lévinas ; finalité de la morale) et `tle-[cd]-philo-origine-religion` (27 : sacré et profane, Otto ; Lucrèce, Feuerbach, Marx, Freud, Durkheim, Bergson, Pascal ; polythéisme, monothéisme, panthéisme, déisme, conception africaine). Situations : un élève réfugié moqué dans une Terminale de Bertoua ; l'exposé de trois élèves de Maroua. 3D : la salle de classe, le bois sacré.
+- Source `42-examens-philo-tle-7.js` (HORS DÉPÔT) et 4 JSON publiés en artifact privé pour la compilation FTP de la session du lot 4. Aperçus : bloc « AJOUT lot 7 philosophie Tle (abonnés) ».
+- Vérifié : build officiel sur copie ; Chromium 390 et 1200 px visiteur et abonné, aucune erreur ni débordement ; bancs verrou 18/18, gabarits 54/54 ; les 15 contrôles de deploy.yml au vert.
+- **Indépendante de la PR #421** (lot 6) : les deux touchent `apercus-tle-c/d.js` et `charge.js`. Si l'une est fusionnée avant l'autre, fusionner master dans la seconde, reprendre la version master des fichiers générés et relancer `ajouter_apercus.cjs` (blocs balisés indépendants).
+- **Philosophie des classes d'examen : il ne reste plus de ligne au contenu non traité.** Les lignes restantes ne demanderaient que des leçons d'approfondissement (décision de Jacques).
+
 ## Lots payants : compilation FTP, fusions #412, #413, #390 et banc de l'Atelier réparé (24/11/2026, session du lot 4 de philosophie)
 
 Demandes de Jacques : « compile moi tous les lots payants dans un seul zip FTP », « récupère tout pour les autres agents », puis « fusionne et déploie ».
