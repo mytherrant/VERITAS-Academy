@@ -9,6 +9,14 @@ Demande de Jacques : « continue ».
 - Histoire de 6e : rangs 1, 2, 4, 6, 8, 10, 12, 14, 16 couverts (9 leçons). Restent les TD et dossiers (3, 5, 7, 9, 13, 15, 21) et les religions (17 à 20).
 - Audit 89/89 ; `lecons.js?v=20261124h8` ; pages générées → `git add` → habillage (825 pages) → contrôle au vert. Chromium (Pixel 5, 1200 px) : aucune erreur, aucun débordement.
 - Capture des planches 3D : la fenêtre du badge « Premier pas » s'ouvre quand la page est lue jusqu'au bout et masque l'écran ; pour une capture, aller directement à la planche sans parcourir toute la page.
+## Apprendre : Towa en trois leçons à verrou (21/11/2026, branche towa-trois-lecons)
+
+Décision de Jacques (question posée) : « Remplacer » — les 3 leçons Towa de cette session (rangs 3, 4, 5 de Tle A) remplacent la leçon unique `tle-a-philo-towa` (rang 4, PR #399) qui couvrait les trois lignes du programme.
+
+- Bloc « AJOUT lot 3 philosophie Tle (abonnés) » de `apercus-tle-a.js` : il ne contenait QUE `tle-a-philo-towa` ; `ajouter_apercus.cjs` avec le MÊME nom de bloc l'a remplacé par `tle-a-philo-towa-auteur` (3), `-themes` (4), `-critique` (5). Les blocs « lot 3 » de Tle C et Tle D ne sont pas touchés (fichiers absents de la copie).
+- **FTP** : déposer `tle-a-philo-towa-auteur.json`, `-themes.json`, `-critique.json` dans `uploads/protected/apprendre/` ; **écarter** `tle-a-philo-towa.json` de la livraison cumulée (plus aucune leçon ne le charge). Source privée : `38-examens-philo-tle-3.js` (dossier des sources hors dépôt) ; le fichier `00-modules-essai.js` ne sert qu'aux essais.
+- ⚠ Si l'auteur de l'ancien lot 3 relance `ajouter_apercus.cjs … "lot 3 philosophie Tle (abonnés)"` avec son ancienne source, il remettra `tle-a-philo-towa` : retirer cette leçon de sa source.
+- Vérifié : 0 identifiant ni rang en double, empreintes de `charge.js` justes ; Chromium : visiteur = situation + 1re partie + mur ; abonné (API interceptée) = 4 parties + entraînement, résolution, 3D, labo, carte ; aucune erreur.
 
 ## Apprendre : philosophie de Tle A, méthode — 4 leçons réservées aux abonnés (20/11/2026, branche apprendre-philo-tle-a-methode)
 
