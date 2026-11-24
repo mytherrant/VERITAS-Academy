@@ -417,3 +417,12 @@ html body article.carte .methode{--ic:var(--ic-engrenages)}
 html body article.carte .enq-doc-t::before{background:var(--ic-doc) center/contain no-repeat!important;flex:0 0 28px!important;height:28px!important}
 html body article.carte .enq-tache::before,html body article.carte .apc .apc-t .apc-i{border-radius:0!important;background:var(--ic-crayon) center/contain no-repeat!important;box-shadow:none!important}
 html body article.carte .apc .apc-t .apc-i svg{display:none!important}
+
+/* ── 24/11 « applique aux autres leçons » : restes communs à toutes les leçons —
+   pas de tuile dégradée derrière les icônes de « Pour aller plus loin », pas d'anneau devant ce titre,
+   « Situation de vie » : la cible illustrée d'origine, sans pastille. ── */
+html body article.carte .res-c .res-p{background:none!important;box-shadow:none!important;border:0!important;border-radius:0!important;width:28px!important;height:28px!important;flex:0 0 28px!important;color:var(--sk,var(--k,#1E499B))!important}
+html body article.carte .res-c .res-p svg{width:24px!important;height:24px!important;color:inherit!important}
+html body article.carte .res-lecon>h2::before{content:none!important;display:none!important}
+html body article.carte .apc h2 .apc-i{width:30px!important;height:30px!important;border-radius:0!important;background:var(--vm-target) center/contain no-repeat!important;box-shadow:none!important}
+html body article.carte .apc h2 .apc-i svg{display:none!important}
