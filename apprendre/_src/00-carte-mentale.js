@@ -640,9 +640,85 @@
     return svgDe("cm-large", Wd, H, alt, B, s + livreS + dessus);
   }
 
+  /* ════════ ESCALIER, FLEUR, TABLEAU DE LIÈGE (24/11/2026, « la diversité continue en variant le plus possible
+     les types et formes de cartes mentales ») ════════ */
+  /* escalier : les branches descendent marche après marche, chacune posée sur sa contremarche colorée */
+  function escalier(C, B, alt, Wd) {
+    var pc = placerCentre(Wd / 2, C, largeurC(C, 240, Wd < 600 ? 340 : 560)), y = pc.y + pc.c.b + 30, s = "", dessus = "", n = B.length;
+    var w = Wd < 600 ? Wd - 64 : 340, dx = Wd < 600 ? 14 : (n > 1 ? (Wd - 40 - w) / (n - 1) : 0);
+    B.forEach(function (b, i) {
+      var x = Wd < 600 ? 20 + (i % 2) * dx : 20 + i * dx, h = hBoite(b, w), bx = boite(x, y, w, b, i + 1, false, h);
+      s += "<rect x='" + f1(x - 6) + "' y='" + f1(y + h + 6) + "' width='" + f1(w + 12) + "' height='10' rx='3' fill='" + b.color + "' opacity='.85'/>";
+      if (i < n - 1) { var nx = Wd < 600 ? 20 + ((i + 1) % 2) * dx : 20 + (i + 1) * dx; s += "<path class='cm-l' d='M" + f1(x + w + 6) + " " + f1(y + h + 16) + " V" + f1(y + h + 34) + " H" + f1(Math.max(nx + w + 6, x + w + 6)) + "' fill='none' stroke='#C9D0DC' stroke-width='3' stroke-linejoin='round'/>"; }
+      dessus += bx.s; y += h + 40;
+    });
+    return svgDe(Wd < 600 ? "cm-etroit" : "cm-large", Wd, y, alt, B, s + dessus + pc.s);
+  }
+  /* fleur : un pétale numéroté par branche autour du cœur, une tige courbe du pétale à la branche */
+  function fleurDessin(cx, cy, B, angles) {
+    var s = "<g transform='translate(" + f1(cx) + " " + f1(cy) + ")'><g class='cm-c'>";
+    B.forEach(function (b, i) {
+      var a = angles[i] * 180 / Math.PI;
+      s += "<g transform='rotate(" + f1(a) + ")'><ellipse cx='52' cy='0' rx='40' ry='20' fill='" + clair(b.color, .55) + "' stroke='" + b.color + "' stroke-width='2.5'/></g>";
+      s += "<text x='" + f1(56 * Math.cos(angles[i])) + "' y='" + f1(56 * Math.sin(angles[i]) + 5) + "' text-anchor='middle' font-size='15' font-weight='900' fill='" + b.color + "'>" + (i + 1) + "</text>";
+    });
+    return s + "<circle r='26' fill='#FFD43B' stroke='#C24E00' stroke-width='3'/><circle r='9' fill='#C24E00' opacity='.35'/></g></g>";
+  }
+  function fleur(C, B, alt, Wd) {
+    var s = "", dessus = "", n = B.length;
+    if (Wd < 600) {
+      var ang0 = B.map(function (b, i) { return -Math.PI / 2 + i * 2 * Math.PI / n; }), y0 = 110;
+      var tt = titresAmp(Wd / 2, y0 + 100, C, Wd - 80);
+      s += "<path d='M" + f1(Wd / 2) + " " + f1(y0 + 26) + " V" + f1(y0 + 100) + "' stroke='#5E8C31' stroke-width='5'/>" + fleurDessin(Wd / 2, y0, B, ang0) + tt.s;
+      var y = y0 + 100 + tt.h + 30, w = Wd - 40;
+      B.forEach(function (b, i) { var h = hBoite(b, w), bx = boite(20, y, w, b, i + 1, false, h); dessus += bx.s; y += h + 22; });
+      return svgDe("cm-etroit", Wd, y, alt, B, s + dessus);
+    }
+    var bw = 280, cotes = [[], []];
+    B.forEach(function (b, i) { b.i = i; b.h = hBoite(b, bw); cotes[i % 2].push(b); });
+    var hauts = cotes.map(function (c) { return c.reduce(function (a, b) { return a + b.h + 26; }, 0) - 26; }), tt0 = titresAmp(0, 0, C, 216);
+    var H = Math.max(hauts[0], hauts[1], 250 + tt0.h) + 50, cx = Wd / 2, cy = (H - tt0.h - 120) / 2 + 10, pos = [], angles = [];
+    cotes.forEach(function (liste0, ct) {
+      var x = ct ? Wd - 20 - bw : 20, y = (H - hauts[ct]) / 2;
+      liste0.forEach(function (b, k) { var ex = ct ? x - 8 : x + bw + 8, ey = y + 26, m = liste0.length, a = m > 1 ? -1 + k * 2 / (m - 1) : 0; pos[b.i] = { x: x, y: y, ex: ex, ey: ey }; angles[b.i] = ct ? a : Math.PI - a; y += b.h + 26; });
+    });
+    B.forEach(function (b, i) {
+      var p = pos[i], px = cx + 96 * Math.cos(angles[i]), py = cy + 96 * Math.sin(angles[i]), sg = p.ex > cx ? 1 : -1, d = Math.abs(p.ex - px) * .5;
+      s += "<path class='cm-t' d='M" + f1(px) + " " + f1(py) + " C" + f1(px + sg * d) + " " + f1(py) + " " + f1(p.ex - sg * d) + " " + f1(p.ey) + " " + f1(p.ex) + " " + f1(p.ey) + "' fill='none' stroke='#5E8C31' stroke-width='4' stroke-linecap='round' marker-end='url(#" + P + "f" + i + ")'/>";
+      dessus += boite(p.x, p.y, bw, b, i + 1, false, b.h).s;
+    });
+    return svgDe("cm-large", Wd, H, alt, B, s + "<path d='M" + f1(cx) + " " + f1(cy + 26) + " V" + f1(cy + 112) + "' stroke='#5E8C31' stroke-width='6' stroke-linecap='round'/>" + fleurDessin(cx, cy, B, angles) + dessus + titresAmp(cx, cy + 112, C, 216).s);
+  }
+  /* tableau de liège : la fiche-titre et les notes punaisées, légèrement de travers */
+  function hNote(b, w) { var NC = Math.floor((w - 40) / 8.2); return 50 + couper(b.label, Math.floor((w - 50) / 9.4)).length * 19 + hListe(b.items, NC) + 20; }
+  function note(x, y, w, h, b, n) {
+    var NC = Math.floor((w - 40) / 8.2), Lt = couper(b.label, Math.floor((w - 50) / 9.4)), r = (n % 3) - 1, s = "<g class='cm-h' transform='rotate(" + (r * 1.4) + " " + f1(x + w / 2) + " " + f1(y + h / 2) + ")'>";
+    s += "<rect x='" + f1(x + 4) + "' y='" + f1(y + 6) + "' width='" + w + "' height='" + h + "' fill='#000' opacity='.18'/><rect x='" + f1(x) + "' y='" + f1(y) + "' width='" + w + "' height='" + h + "' fill='" + clair(b.color, .8) + "'/>";
+    s += "<circle cx='" + f1(x + w / 2) + "' cy='" + f1(y + 10) + "' r='7' fill='" + b.color + "' stroke='#fff' stroke-width='2'/>";
+    s += "<text x='" + f1(x + 16) + "' y='" + f1(y + 40) + "' font-size='15' font-weight='900' fill='" + b.color + "'>" + n + ".</text>";
+    Lt.forEach(function (l, k) { s += "<text x='" + f1(x + 36) + "' y='" + f1(y + 40 + k * 19) + "' font-size='16' font-weight='800' fill='#1D2330'>" + esc(l) + "</text>"; });
+    return s + liste(b.items, x + 14, y + 40 + Lt.length * 19 + 16, NC, b.color) + "</g>";
+  }
+  function liege(C, B, alt, Wd) {
+    var cols = Wd < 600 ? 1 : 3, g = 26, w = (Wd - 60 - (cols - 1) * g) / cols, s = "", y, L = [];
+    C.forEach(function (l, k) { couper(l, k ? 34 : 30).forEach(function (x) { L.push([x, k]); }); });
+    var tw = Math.min(Wd - 80, 60 + Math.max.apply(null, L.map(function (x) { return x[0].length * (x[1] ? 8 : 11); }))), th = 26 + L.length * 22;
+    var titre = "<g class='cm-c'><rect x='" + f1(Wd / 2 - tw / 2 + 4) + "' y='34' width='" + f1(tw) + "' height='" + th + "' fill='#000' opacity='.2'/><rect x='" + f1(Wd / 2 - tw / 2) + "' y='30' width='" + f1(tw) + "' height='" + th + "' fill='#fff'/><rect x='" + f1(Wd / 2 - tw / 2) + "' y='30' width='" + f1(tw) + "' height='6' fill='#C62828'/><circle cx='" + f1(Wd / 2) + "' cy='33' r='8' fill='#C62828' stroke='#fff' stroke-width='2'/>";
+    L.forEach(function (x, k) { titre += "<text x='" + f1(Wd / 2) + "' y='" + f1(30 + 30 + k * 22) + "' text-anchor='middle' font-size='" + (x[1] ? 14 : 19) + "' font-weight='" + (x[1] ? 700 : 900) + "' fill='" + (x[1] ? "#8A5A2D" : "#142554") + "'>" + esc(x[0]) + "</text>"; });
+    titre += "</g>"; y = 30 + th + 40;
+    for (var r0 = 0; r0 < B.length; r0 += cols) {
+      var rang = B.slice(r0, r0 + cols), hr = Math.max.apply(null, rang.map(function (b) { return hNote(b, w); })), dec = (cols - rang.length) * (w + g) / 2;
+      rang.forEach(function (b, k) { s += note(30 + dec + k * (w + g), y, w, hr, b, r0 + k + 1); });
+      y += hr + 34;
+    }
+    var H = y + 6, fondL = "<rect x='4' y='4' width='" + (Wd - 8) + "' height='" + f1(H - 8) + "' rx='12' fill='#C79A62' stroke='#7A5230' stroke-width='8'/>";
+    for (var k = 0; k < 160; k++) { var px = 14 + (k * 97) % (Wd - 28), py = 14 + (k * 53) % Math.max(20, H - 28); fondL += "<circle cx='" + px + "' cy='" + f1(py) + "' r='" + (1 + k % 3) + "' fill='#A97B45' opacity='.5'/>"; }
+    return svgDe(Wd < 600 ? "cm-etroit" : "cm-large", Wd, H, alt, B, fondL + titre + s);
+  }
+
   /* Tirage d'origine INCHANGÉ (8 formes) : les cartes existantes gardent leur forme. Les formes ajoutées le 24/11/2026
      (« diversifier et enrichir, sans changer ce qui a été fait ») ne remplacent que la radiale tirée au hasard, en alternance. */
-  var FORMES = ["radiale", "organigramme", "bulles", "accolade", "alveoles", "roue", "poisson", "arbre"], NOUVELLES = ["ampoule", "livre"], STYLES = ["main", "colore", "postit"];
+  var FORMES = ["radiale", "organigramme", "bulles", "accolade", "alveoles", "roue", "poisson", "arbre"], NOUVELLES = ["ampoule", "livre", "escalier", "fleur", "liege"], TOUTES = FORMES.concat(NOUVELLES), STYLES = ["main", "colore", "postit"];
   function hache(t) { var h = 7; for (var i = 0; i < t.length; i++) h = (h * 31 + t.charCodeAt(i)) % 100003; return h; }
 
   /* carte = { centre: "Titre\nSous-titre" | [lignes], branches: [{ label, color?, items: [] }] } */
@@ -658,6 +734,9 @@
     if (!carte.garderCouleurs) B.forEach(function (b, i) { b.color = pal[i % pal.length]; });
     var forme = carte.forme || FORMES[hh % FORMES.length];
     if (!carte.forme && forme === "radiale") forme = NOUVELLES[Math.floor(hh / 8) % NOUVELLES.length];
+    /* « la diversité continue » (24/11/2026) : une carte qui donne son rang dans une suite (leçons d'une classe et
+       d'une matière) tourne sur TOUTES les formes : deux cartes voisines n'ont jamais la même. */
+    if (!carte.forme && carte.rang != null && isFinite(carte.rang)) forme = TOUTES[(hache(carte.serie || "") + Math.round(carte.rang)) % TOUTES.length];
     var st = carte.style || STYLES[Math.floor(hh / 7) % STYLES.length];
     var gauche = B.map(function (b) { return /cause|origine|facteur|pourquoi/i.test(b.label) && !/conséquence|effet|impact/i.test(b.label); });
     if (forme === "causes" && (gauche.indexOf(true) < 0 || gauche.indexOf(false) < 0)) forme = "radiale";
@@ -666,9 +745,9 @@
     if (st === "ardoise" && !carte.garderCouleurs) B.forEach(function (b, i) { b.color = ["#FFD166", "#FF8FA3", "#8BE9FD", "#B9F18C", "#FFB86B", "#D0A9FF"][i % 6]; });
     STYLE = st;
     P = "cm" + n + "a";
-    h += forme === "organigramme" ? arbre(C, cp(), alt) : forme === "livre" ? livre(C, cp(), alt, 920) : forme === "ampoule" ? ampoule(C, cp(), alt, 920) : forme === "roue" ? roue(C, cp(), alt, 920) : forme === "poisson" ? poisson(C, cp(), alt, 920) : forme === "arbre" ? arbreDessin(C, cp(), alt, 920) : forme === "frise" ? frise(C, cp(), alt, 920) : forme === "bulles" ? bulles(C, cp(), alt) : forme === "accolade" ? accolade(C, cp(), alt) : forme === "alveoles" ? alveoles(C, cp(), alt, 920) : forme === "flux" ? flux(C, cp(), alt, 920) : forme === "causes" ? causes(C, cp(), alt, 920, gauche) : large(C, cp(), alt);
+    h += forme === "organigramme" ? arbre(C, cp(), alt) : forme === "livre" ? livre(C, cp(), alt, 920) : forme === "escalier" ? escalier(C, cp(), alt, 920) : forme === "fleur" ? fleur(C, cp(), alt, 920) : forme === "liege" ? liege(C, cp(), alt, 920) : forme === "ampoule" ? ampoule(C, cp(), alt, 920) : forme === "roue" ? roue(C, cp(), alt, 920) : forme === "poisson" ? poisson(C, cp(), alt, 920) : forme === "arbre" ? arbreDessin(C, cp(), alt, 920) : forme === "frise" ? frise(C, cp(), alt, 920) : forme === "bulles" ? bulles(C, cp(), alt) : forme === "accolade" ? accolade(C, cp(), alt) : forme === "alveoles" ? alveoles(C, cp(), alt, 920) : forme === "flux" ? flux(C, cp(), alt, 920) : forme === "causes" ? causes(C, cp(), alt, 920, gauche) : large(C, cp(), alt);
     P = "cm" + n + "b";
-    h += forme === "livre" ? livre(C, cp(), alt, 400) : forme === "ampoule" ? ampoule(C, cp(), alt, 400) : forme === "roue" ? roue(C, cp(), alt, 400) : forme === "poisson" ? poisson(C, cp(), alt, 400) : forme === "arbre" ? arbreDessin(C, cp(), alt, 400) : forme === "frise" ? frise(C, cp(), alt, 400) : forme === "bulles" ? bullesEtroit(C, cp(), alt) : forme === "accolade" ? accoladeEtroit(C, cp(), alt) : forme === "alveoles" ? alveoles(C, cp(), alt, 400) : forme === "flux" ? flux(C, cp(), alt, 400) : forme === "causes" ? causes(C, cp(), alt, 400, gauche) : etroit(C, cp(), alt);
+    h += forme === "livre" ? livre(C, cp(), alt, 400) : forme === "escalier" ? escalier(C, cp(), alt, 400) : forme === "fleur" ? fleur(C, cp(), alt, 400) : forme === "liege" ? liege(C, cp(), alt, 400) : forme === "ampoule" ? ampoule(C, cp(), alt, 400) : forme === "roue" ? roue(C, cp(), alt, 400) : forme === "poisson" ? poisson(C, cp(), alt, 400) : forme === "arbre" ? arbreDessin(C, cp(), alt, 400) : forme === "frise" ? frise(C, cp(), alt, 400) : forme === "bulles" ? bullesEtroit(C, cp(), alt) : forme === "accolade" ? accoladeEtroit(C, cp(), alt) : forme === "alveoles" ? alveoles(C, cp(), alt, 400) : forme === "flux" ? flux(C, cp(), alt, 400) : forme === "causes" ? causes(C, cp(), alt, 400, gauche) : etroit(C, cp(), alt);
     STYLE = "main";
     return "<div class='cm cm-" + forme + " cm-s-" + st + "' data-forme='" + forme + "'>" + h + "</div>";
   }
@@ -748,7 +827,10 @@
     if (B.length < 2) return "";
     /* forme selon le contenu : étapes → flux ; causes et conséquences → multi-flux ; sinon variée selon le titre */
     var lab = B.map(function (b) { return b.label; }).join(" | "), forme = /étape|méthode|démarche|procédure|phase/i.test(lab) ? "flux" : (B.some(function (b) { return /cause|origine/i.test(b.label) && !/conséquence|effet|impact/i.test(b.label); }) && B.some(function (b) { return /conséquence|effet|impact/i.test(b.label) && !/cause|origine/i.test(b.label); })) ? "causes" : /hist/i.test(L.m || "") || /\b1[0-9]{3}\b|siècle/.test(lab) ? "frise" : null;
-    return VRT_CM({ centre: [nu(L.titre || L.cle)].concat(L.c ? [L.c] : []), branches: B.slice(0, 6), forme: forme });
+    var rg = L.ordre != null ? L.ordre : L.rang;
+    /* histoire : la frise une leçon sur deux, la rotation sur les autres (« la diversité continue ») */
+    if (forme === "frise" && rg != null && isFinite(rg) && Math.round(rg) % 2 === 1) forme = null;
+    return VRT_CM({ centre: [nu(L.titre || L.cle)].concat(L.c ? [L.c] : []), branches: B.slice(0, 6), forme: forme, rang: rg, serie: (L.c || "") + "/" + (L.m || "") });
   }
   VRT_CM.lecon = VRT_CM_LECON;
   /* ════════ SCHÉMAS EN CARTES MENTALES (18/11/2026, « change en vraies cartes mentales esthétiques ») ════════

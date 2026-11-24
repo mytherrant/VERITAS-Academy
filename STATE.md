@@ -1,12 +1,17 @@
-## Cartes mentales : deux formes ajoutées, « ampoule » et « livre » (24/11/2026, branche cartes-mentales-variees)
+## Cartes mentales : 5 formes ajoutées et rotation continue (24/11/2026, branche cartes-mentales-variees)
 
-Demandes de Jacques : « Varie les cartes mentales » (modèle : ampoule centrale, questions numérotées 01 à 06 soulignées, flèches courbes), puis « enrichi et varie » (modèle : livre ouvert au centre, bandeaux en nuage en capitales, listes soulignées, icônes), et surtout : « il s'agit juste de diversifier et enrichir et non changer tout ce qui a été fait avant ».
+Demandes de Jacques : « Varie les cartes mentales » (modèle ampoule), « enrichi et varie » (modèle livre), « il s'agit juste de diversifier et enrichir et non changer tout ce qui a été fait avant », puis « je veux la diversité continue en variant le plus possible les types et formes de cartes mentales ».
 
-- `apprendre/_src/00-carte-mentale.js` : formes **ampoule** et **livre** AJOUTÉES (rien de retiré ni de modifié dans les 8 formes existantes).
-  - ampoule : ampoule dessinée au centre, cartouche turquoise du titre, pastille violette de la classe ; branches en deux colonnes, pastille 01, 02…, titre souligné, liste ; flèches courbes qui virent dans l'espace libre et arrivent à l'horizontale sur la pastille.
-  - livre : livre ouvert au centre (titre en capitales jaunes sur bandeau nuit, classe dans une pastille jaune) ; bandeaux en nuage colorés en capitales ; listes à puces soulignées ; une petite icône par branche (crayon, ampoule, loupe, document, cible, livre) ; flèches qui convergent vers le livre ; 5e branche éventuelle centrée en bas.
-  - Téléphone : dessin central en haut, branches empilées.
-- **Tirage d'origine conservé** : `FORMES` (8 formes) inchangé ; seule une carte qui tirait la **radiale** (forme la plus classique) reçoit à la place, en alternance, ampoule ou livre (`NOUVELLES`). Vérifié par comparaison avec master : 74 leçons sur 86 gardent exactement leur forme (les 12 autres étaient radiales) ; 19 pages d'œuvres sur 21 identiques (les 2 autres étaient radiales).
+- `apprendre/_src/00-carte-mentale.js` : 5 formes AJOUTÉES, les 8 formes existantes inchangées dans leur dessin :
+  - **ampoule** : ampoule au centre, branches numérotées 01, 02… soulignées, flèches courbes vers les pastilles ;
+  - **livre** : livre ouvert au centre, bandeaux en nuage en capitales, listes soulignées, une icône par branche ;
+  - **escalier** : les branches descendent marche après marche ;
+  - **fleur** : un pétale numéroté par branche, des tiges vers les branches, titre sous la fleur ;
+  - **liege** : tableau de liège, fiche-titre et notes punaisées légèrement de travers.
+  Chaque forme a sa version téléphone.
+- **Rotation continue** : une carte qui donne son rang dans une suite (`VRT_CM({ rang, serie })` ; `VRT_CM.lecon` passe `L.ordre` ou `L.rang` et la série classe/matière) tourne sur les 13 formes générales (`TOUTES`) : deux leçons voisines d'une même série n'ont jamais la même carte. Les formes imposées par le contenu restent prioritaires (étapes → flux, causes/conséquences → causes) ; en histoire, la frise une leçon sur deux.
+- Les cartes sans rang (œuvres, schémas convertis) gardent l'ancien tirage par titre ; la radiale y est remplacée par une des formes ajoutées.
+- Résultat sur les 86 leçons gratuites : 15 formes utilisées, 0 répétition entre leçons voisines (`voisins` vérifié).
 - **Piège** : l'animation CSS de `.cm-c` (cmGonfle) redéfinit `transform` ; un dessin positionné par l'attribut `transform` doit l'être sur un groupe EXTÉRIEUR à `.cm-c`.
 - Régénérés : `lecons.js` (`?v=20261124amp`), `chunks/carte-mentale.js`, pages d'œuvres. Chromium 1200 et 390 px sur les 86 leçons : aucune erreur, aucun débordement. Bancs et contrôles œuvres, habillage, découverte, llms au vert.
 ## Apprendre : philosophie de Tle A, méthode — 4 leçons réservées aux abonnés (20/11/2026, branche apprendre-philo-tle-a-methode)
