@@ -1,3 +1,12 @@
+## Cartes mentales : nouvelle forme « ampoule » (24/11/2026, branche cartes-mentales-variees)
+
+Demande de Jacques : « Varie les cartes mentales », avec en modèle une carte « ampoule centrale, questions numérotées 01 à 06 soulignées, flèches courbes ».
+
+- `apprendre/_src/00-carte-mentale.js` : forme **ampoule** ajoutée (rien de retiré). Écran large : ampoule dessinée au centre, titre de la leçon dans un cartouche turquoise, classe dans une pastille violette ; branches en deux colonnes, pastille numérotée 01, 02…, titre souligné de la couleur de la branche, puis la liste ; flèches courbes épaisses qui virent dans l'espace libre et arrivent à l'horizontale sur la pastille (aucune ne traverse de texte). Téléphone : ampoule et titres en haut, branches empilées reliées par un pointillé.
+- `FORMES` passe de 8 à 9 : le tirage par titre change pour une partie des cartes (leçons, œuvres). Répartition sur les 86 leçons gratuites : 11 formes (roue 11, bulles 10, accolade 10, frise 9, ampoule 8, alvéoles 8, arbre 8, radiale 7, organigramme 6, poisson 6, flux 3).
+- **Piège** : l'animation CSS de `.cm-c` (cmGonfle) redéfinit `transform` ; un dessin positionné par l'attribut `transform` doit être placé sur un groupe EXTÉRIEUR à `.cm-c`, sinon il saute en haut à gauche.
+- Régénérés : `lecons.js` (`?v=20261124amp`), `chunks/carte-mentale.js`, 21 pages d'œuvres. Chromium 1200 et 390 px sur les 86 leçons : aucune erreur, aucun débordement. Bancs et contrôles GEO, habillage, découverte au vert.
+
 ## Apprendre : philosophie de Tle A, méthode — 4 leçons réservées aux abonnés (20/11/2026, branche apprendre-philo-tle-a-methode)
 
 Suite de la part de la session du lot 4 (Njoh-Mouelle, art et travail) : les 4 lignes de philosophie de Tle A qui n'avaient AUCUNE leçon (vérifié sur master après la fusion de #399, sur #401 et sur les branches ouvertes).
