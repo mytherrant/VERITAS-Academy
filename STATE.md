@@ -8,6 +8,37 @@ Demande de Jacques : « continue les autres leçons ».
   - rang 7 `6e-histoire-td-neolithique-cameroun` : méthode d'étude de documents (présenter, relever, classer, croiser, rédiger) sur la pierre polie, Obobogo et Shum Laka ; 3D : chantier de fouille quadrillé.
 - Histoire de 6e : 15 leçons. Restent les TD 1, 2, 4 (rangs 3, 5, 9) et les dossiers 3 et 4 (rangs 15, 21).
 - Audit 95/95 ; `lecons.js?v=20261124h11` ; habillage 831 pages au vert ; Chromium (Pixel 5, 1200 px) : aucune erreur ; planches 3D contrôlées (soufflets et charbon replacés).
+## Apprendre : lot 7 philosophie de Tle C et D, leçons à verrou — autrui et finalité de la morale, origine du sentiment religieux (24/11/2026, branche apprendre-philo-tle-lot7)
+
+Demande de Jacques : « continue les autres leçons ». Partage annoncé aux sessions du lot 4 et « Structure » avant écriture. Aucune autre leçon touchée.
+
+- **Recensement des lignes de philosophie sans leçon, par rang ET par `cle`** (master 2731012 + PR #421) : Tle A 20, 24, 26, 27, 29, 33, 35 ; Tle C/D 4, 6, 11, 21, 24, 25, 27 ; 1re A (16 lignes) ; 1re C/D (8 lignes). Mais presque toutes sont déjà TRAITÉES EN ENTIER par la leçon du chapitre (ex. C/D 21 panafricanisme dans la leçon du rang 20 ; A 26-27 dans « types de science » au rang 25 ; chaque chapitre de 1re A a une leçon qui couvre toutes ses lignes) : les écrire ferait doublon de contenu. Seules C/D 11 et 27 avaient un contenu non traité.
+- **4 leçons NOUVELLES réservées aux abonnés** : `tle-[cd]-philo-autrui-finalite-morale` (11 : formes des rapports avec autrui, Hegel, Sartre, Aristote, Mbiti ; dignité de la personne, Kant, Lévinas ; finalité de la morale) et `tle-[cd]-philo-origine-religion` (27 : sacré et profane, Otto ; Lucrèce, Feuerbach, Marx, Freud, Durkheim, Bergson, Pascal ; polythéisme, monothéisme, panthéisme, déisme, conception africaine). Situations : un élève réfugié moqué dans une Terminale de Bertoua ; l'exposé de trois élèves de Maroua. 3D : la salle de classe, le bois sacré.
+- Source `42-examens-philo-tle-7.js` (HORS DÉPÔT) et 4 JSON publiés en artifact privé pour la compilation FTP de la session du lot 4. Aperçus : bloc « AJOUT lot 7 philosophie Tle (abonnés) ».
+- Vérifié : build officiel sur copie ; Chromium 390 et 1200 px visiteur et abonné, aucune erreur ni débordement ; bancs verrou 18/18, gabarits 54/54 ; les 15 contrôles de deploy.yml au vert.
+- **Indépendante de la PR #421** (lot 6) : les deux touchent `apercus-tle-c/d.js` et `charge.js`. Si l'une est fusionnée avant l'autre, fusionner master dans la seconde, reprendre la version master des fichiers générés et relancer `ajouter_apercus.cjs` (blocs balisés indépendants).
+- **Philosophie des classes d'examen : il ne reste plus de ligne au contenu non traité.** Les lignes restantes ne demanderaient que des leçons d'approfondissement (décision de Jacques).
+
+## Apprendre : lot 6 philosophie de Tle, leçons à verrou — droit, justice, État, responsabilité (24/11/2026, branche apprendre-philo-tle-lot6)
+
+Suite de l'enrichissement des leçons (« continue ») ; partage annoncé aux sessions du lot 4 et « Structure » avant écriture. Aucune autre leçon touchée.
+
+- **8 leçons NOUVELLES réservées aux abonnés**, une par ligne de la progression (aucune leçon n'existait à ces rangs) : Tle C et Tle D — `tle-[cd]-philo-fondements-droit` (13), `-justice-valeur` (14), `-role-finalite-etat` (17), `-liberte-fondement-responsabilite` (19).
+- **Tle A rang 18 retiré** (signalé par la session du lot 4) : la ligne est déjà couverte par la leçon GRATUITE `tle-philo-liberte` de `lecons.js`, rattachée par `cle` et non par `rang`. Piège : pour recenser les lignes sans leçon, lire aussi `cle` (rattachement de `commun.js`), pas seulement `rang`.
+- **À trancher par Jacques** : les rangs 17 et 19 (C/D) ont chacun leur ligne au programme, mais les leçons voisines `tle-[cd]-philo-etat` (15) et `tle-[cd]-philo-liberte-responsabilite` (18) y consacrent déjà une partie. Les leçons du lot 6 approfondissent (État minimal / État-providence, critiques, Spinoza ; formes de responsabilité, mauvaise foi, Weber, Jonas) avec d'autres situations ; à retirer si Jacques préfère une seule leçon par chapitre.
+- Gabarit complet : situation-problème camerounaise à 3 hypothèses et indices (saisie de sachets au marché Mokolo, bourse d'une association de la Lékié, dispensaire d'Ebolowa, incendie d'un marché de Bafoussam), situation résolue avec étapes et calculs, 2 ou 3 planches 2D (dont la hiérarchie des normes de Kelsen), 1 planche 3D (pyramide des normes, balance égalité / équité, place du quartier et bâtiments publics, rangée du marché incendiée), labo « choix » (8 items), sujet de bac (dissertation + texte de Rousseau, Rawls, Spinoza, Sartre), 10 QCM.
+- Source `41-examens-philo-tle-6.js` (HORS DÉPÔT) et 8 JSON (`uploads/protected/apprendre/`, FTP) : livrés à Jacques (`livraison-payant-lot6.zip`) et publiés en artifact privé pour la compilation FTP unique tenue par la session du lot 4. Aperçus : bloc « AJOUT lot 6 philosophie Tle (abonnés) ».
+- Vérifié : build officiel sur copie sans erreur ; Chromium 390 et 1200 px, visiteur (mur, pas de résolution) et abonné (JSON servi par interception de `api/apprendre.php`) : aucune erreur JS, aucun débordement ; bancs verrou 18/18, gabarits 54/54 ; les 15 contrôles de deploy.yml (habillage, GEO, llms, bouclier…) au vert. Note : sur master actuel, attendre `load` plutôt que `networkidle` dans Playwright (une ressource ne se termine pas).
+- Restent sans leçon en philosophie (à revérifier avec `cle`) : Tle A 20, 24, 26, 27, 29, 33, 35 ; Tle C/D 4, 6, 11, 21, 24, 25, 27 ; 1re A (16 lignes), 1re C/D (8 lignes chacune).
+
+## Apprendre : Towa en trois leçons à verrou (21/11/2026, branche towa-trois-lecons)
+
+Décision de Jacques (question posée) : « Remplacer » — les 3 leçons Towa de cette session (rangs 3, 4, 5 de Tle A) remplacent la leçon unique `tle-a-philo-towa` (rang 4, PR #399) qui couvrait les trois lignes du programme.
+
+- Bloc « AJOUT lot 3 philosophie Tle (abonnés) » de `apercus-tle-a.js` : il ne contenait QUE `tle-a-philo-towa` ; `ajouter_apercus.cjs` avec le MÊME nom de bloc l'a remplacé par `tle-a-philo-towa-auteur` (3), `-themes` (4), `-critique` (5). Les blocs « lot 3 » de Tle C et Tle D ne sont pas touchés (fichiers absents de la copie).
+- **FTP** : déposer `tle-a-philo-towa-auteur.json`, `-themes.json`, `-critique.json` dans `uploads/protected/apprendre/` ; **écarter** `tle-a-philo-towa.json` de la livraison cumulée (plus aucune leçon ne le charge). Source privée : `38-examens-philo-tle-3.js` (dossier des sources hors dépôt) ; le fichier `00-modules-essai.js` ne sert qu'aux essais.
+- ⚠ Si l'auteur de l'ancien lot 3 relance `ajouter_apercus.cjs … "lot 3 philosophie Tle (abonnés)"` avec son ancienne source, il remettra `tle-a-philo-towa` : retirer cette leçon de sa source.
+- Vérifié : 0 identifiant ni rang en double, empreintes de `charge.js` justes ; Chromium : visiteur = situation + 1re partie + mur ; abonné (API interceptée) = 4 parties + entraînement, résolution, 3D, labo, carte ; aucune erreur.
 
 ## Lots payants : compilation FTP, fusions #412, #413, #390 et banc de l'Atelier réparé (24/11/2026, session du lot 4 de philosophie)
 
