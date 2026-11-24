@@ -1,3 +1,14 @@
+## Apprendre : histoire de 6e, lot 4 — judaïsme et christianisme, christianisme en Afrique, islam (24/11/2026, branche histoire-6e-lot4)
+
+Demande de Jacques : « continue ». Les cartes mentales (« Varie davantage », modèles en images) restent à la session des sciences (PR #415), à sa demande et à celle de Jacques (« l'autre session travaille dessus, synchronisez ») : description des modèles transmise, aucune modification de `00-carte-mentale.js` ici.
+
+- **`apprendre/_src/39-histoire-6e-4.js`** : 3 leçons gratuites NOUVELLES, traitement historique factuel et respectueux des croyances, situations de vivre-ensemble :
+  - rang 17 `6e-histoire-judaisme-christianisme` : monothéisme, Hébreux, Torah, synagogue, diaspora ; Jésus, apôtres, 313, 380 ; 3D : rouleau et codex ;
+  - rang 18 `6e-histoire-christianisme-afrique` : Église copte, saint Augustin, Ezana, Lalibela, Kongo (1491), Merrick à Bimbia, Saker (1845), Victoria (1858), Bâle (1886), pallottins (1890) ; 3D : église monolithe de Lalibela ;
+  - rang 19 `6e-histoire-islam` : Mahomet, Hégire (622), Coran, cinq piliers, calendrier lunaire (année ≈ (année − 622) × 33 ÷ 32) ; 3D : mosquée à minaret carré.
+- Histoire de 6e : 12 leçons (rangs 1, 2, 4, 6, 8, 10, 12, 14, 16, 17, 18, 19). Restent les TD et dossiers (3, 5, 7, 9, 13, 15, 21) et l'expansion de l'islam en Afrique (20).
+- Audit 92/92 ; `lecons.js?v=20261124h9` ; habillage 828 pages au vert ; Chromium (Pixel 5, 1200 px) : aucune erreur, aucun débordement.
+
 ## Apprendre : histoire de 6e, lot 3 — royaumes du haut Nil, Grèce, Chine (24/11/2026, branche histoire-6e-lot3)
 
 Demande de Jacques : « continue ».
