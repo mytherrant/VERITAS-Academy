@@ -1,3 +1,13 @@
+## Cartes mentales : les nouveaux styles adoptés partout (24/11/2026, branche cartes-partout)
+
+Demande de Jacques : « adopte aussi les nouveaux styles de cartes mentales ».
+
+- Les leçons tournaient déjà sur les 31 formes (PR #415). Restaient sur l'ancien tirage (8 formes) : les **cartes des œuvres** (21 pages statiques et la page « Carte mentale » de l'application) et les cartes sans rang (schémas convertis des leçons à verrou).
+- `apprendre/_src/00-carte-mentale.js` : sans rang, la forme est tirée parmi `TOUTES` (31 formes).
+- Œuvres : `rang` = place de la clé dans `Object.keys(LITT_OEUVRES).sort()`, série `oeuvres`, à la fois dans `tools/oeuvres_statiques.js` et dans `_cmPage` (app.js) : la page web et l'application montrent la même carte, et les 21 œuvres ont 21 formes différentes.
+- Versions : app.js et sw.js en **1.20.87**, habillage réaligné (`habiller_pages.py`, 22 pages, contrôle au vert) ; `lecons.js?v=20261124h12`.
+- Vérifié : Chromium 1200 et 390 px sur les 21 pages d'œuvres et les 95 leçons gratuites : aucune erreur, aucun débordement ; 0 répétition voisine ; bancs verrou 18/18, empreintes 22/22, cartes (profil, survol), clés des œuvres OK.
+
 ## Apprendre : histoire de 6e, lot 5 — islam en Afrique, travail des métaux, TD Néolithique au Cameroun (24/11/2026, branche histoire-6e-lot5)
 
 Demande de Jacques : « continue les autres leçons ».
