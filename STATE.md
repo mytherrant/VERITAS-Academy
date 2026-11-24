@@ -1,4 +1,4 @@
-## Cartes mentales : 5 formes ajoutées et rotation continue (24/11/2026, branche cartes-mentales-variees)
+## Cartes mentales : 18 formes ajoutées et rotation continue (24/11/2026, branche cartes-mentales-variees)
 
 Demandes de Jacques : « Varie les cartes mentales » (modèle ampoule), « enrichi et varie » (modèle livre), « il s'agit juste de diversifier et enrichir et non changer tout ce qui a été fait avant », puis « je veux la diversité continue en variant le plus possible les types et formes de cartes mentales ».
 
@@ -8,8 +8,16 @@ Demandes de Jacques : « Varie les cartes mentales » (modèle ampoule), « enri
   - **escalier** : les branches descendent marche après marche ;
   - **fleur** : un pétale numéroté par branche, des tiges vers les branches, titre sous la fleur ;
   - **liege** : tableau de liège, fiche-titre et notes punaisées légèrement de travers.
-  Chaque forme a sa version téléphone.
-- **Rotation continue** : une carte qui donne son rang dans une suite (`VRT_CM({ rang, serie })` ; `VRT_CM.lecon` passe `L.ordre` ou `L.rang` et la série classe/matière) tourne sur les 13 formes générales (`TOUTES`) : deux leçons voisines d'une même série n'ont jamais la même carte. Les formes imposées par le contenu restent prioritaires (étapes → flux, causes/conséquences → causes) ; en histoire, la frise une leçon sur deux.
+  - puis, d'après les modèles d'infographies envoyés par Jacques (« varie davantage », « rend plus professionnel ») :
+    **tige** (tige verte et cartes à cadre épais numérotées), **frisev** (frise verticale pointillée, bandeau titre et nœud hexagonal),
+    **arbreinfo** (tronc et bannières en feuille numérotées), **route** (route sinueuse et épingles), **fourche** (pilule centrale,
+    rubriques à fourches), **doodle** (style BD : papier quadrillé, bulle-étoile, cadres ombrés, flèches bouclées), **blobs**
+    (formes libres pastel avec onglet titre), **arc** (disque et arc de cercle, pilules), **onglets** (tube vertical et onglets
+    numérotés), **capsules** (capsules alternées de part et d'autre d'une ligne ondulée), **zigzag** (anneaux en zigzag),
+    **gouttes** (flèche à chevrons et gouttes en dégradé de verts), **rameaux** (tronc, rameaux colorés et pilules à numéro).
+  Chaque forme a sa version téléphone (400 px). 28 formes en tout ; relevé Chromium des 89 leçons gratuites à 1200 et 390 px :
+  aucune erreur, aucun débordement ; 0 répétition voisine.
+- **Rotation continue** : une carte qui donne son rang dans une suite (`VRT_CM({ rang, serie })` ; `VRT_CM.lecon` passe `L.ordre` ou `L.rang` et la série classe/matière) tourne sur les formes générales (`TOUTES`, 26) : deux leçons voisines d'une même série n'ont jamais la même carte. Les formes imposées par le contenu restent prioritaires (étapes → flux, causes/conséquences → causes) ; en histoire, la frise une leçon sur deux.
 - Les cartes sans rang (œuvres, schémas convertis) gardent l'ancien tirage par titre ; la radiale y est remplacée par une des formes ajoutées.
 - Résultat sur les 86 leçons gratuites : 15 formes utilisées, 0 répétition entre leçons voisines (`voisins` vérifié).
 - **Piège** : l'animation CSS de `.cm-c` (cmGonfle) redéfinit `transform` ; un dessin positionné par l'attribut `transform` doit l'être sur un groupe EXTÉRIEUR à `.cm-c`.

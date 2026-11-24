@@ -716,9 +716,317 @@
     return svgDe(Wd < 600 ? "cm-etroit" : "cm-large", Wd, H, alt, B, fondL + titre + s);
   }
 
+  /* ════════ HUIT MODÈLES DE JACQUES (24/11/2026, « varie davantage ») : arbre infographique, tige, frise verticale,
+     route sinueuse, pilule à fourches, doodle, formes libres (blobs), arc de cercle ════════ */
+  function hTxt(b, w) { var NC = Math.floor((w - 20) / 8.2); return couper(b.label, Math.floor(w / 9.6)).length * 20 + 10 + hListe(b.items, NC); }
+  function blanc(s) { return s.replace(/fill='(#2E3445|#3B4456|#F3EFE4|#2B2B2B)'/g, "fill='#fff'"); }
+  function fonce(hex, k) { var n = parseInt(hex.slice(1), 16); return "rgb(" + [n >> 16 & 255, n >> 8 & 255, n & 255].map(function (v) { return Math.round(v * (1 - k)); }).join(",") + ")"; }
+  function n2(i) { return (i < 9 ? "0" : "") + (i + 1); }
+  /* carte à cadre épais coloré, bandeau titre numéroté (modèle « timeline tige ») */
+  function hCarte(b, w) { return 16 + couper(b.label, Math.floor((w - 70) / 9.4)).length * 19 + 20 + hListe(b.items, Math.floor((w - 50) / 8.2)) + 24; }
+  function carteCadre(x, y, w, b, n, col) {
+    col = col || b.color; var Lt = couper(b.label, Math.floor((w - 70) / 9.4)), hb = 16 + Lt.length * 19, h = hCarte(b, w), s = "<g class='cm-h'>";
+    s += "<rect x='" + f1(x + 3) + "' y='" + f1(y + 5) + "' width='" + f1(w) + "' height='" + f1(h) + "' rx='14' fill='#0B1A33' opacity='.10'/>";
+    s += "<rect x='" + f1(x) + "' y='" + f1(y) + "' width='" + f1(w) + "' height='" + f1(h) + "' rx='14' fill='" + col + "'/>";
+    s += "<rect x='" + f1(x + 7) + "' y='" + f1(y + hb) + "' width='" + f1(w - 14) + "' height='" + f1(h - hb - 7) + "' rx='9' fill='#fff'/>";
+    s += "<rect x='" + f1(x + 10) + "' y='" + f1(y + 7) + "' width='40' height='" + f1(hb - 12) + "' rx='5' fill='" + fonce(col, .28) + "'/><text x='" + f1(x + 30) + "' y='" + f1(y + 7 + (hb - 12) / 2 + 5) + "' text-anchor='middle' font-size='14' font-weight='900' fill='#fff'>" + n + "</text>";
+    Lt.forEach(function (l, k) { s += "<text x='" + f1(x + 60) + "' y='" + f1(y + 22 + k * 19) + "' font-size='15.5' font-weight='800' fill='#fff'>" + esc(l) + "</text>"; });
+    return { s: s + "</g>" + liste(b.items, x + 20, y + hb + 24, Math.floor((w - 50) / 8.2), col), h: h };
+  }
+  function blocTxt(x, y, w, b, n, o) {
+    o = o || {}; var NC = Math.floor((w - 20) / 8.2), Lt = couper(b.label, Math.floor(w / 9.6)), s = "<g class='cm-h'>", col = o.col || b.color;
+    Lt.forEach(function (l, k) { s += "<text x='" + f1(x) + "' y='" + f1(y + 16 + k * 20) + "' font-size='16.5' font-weight='800' fill='" + col + "'>" + (k || !n ? "" : n + ". ") + esc(l) + "</text>"; });
+    if (o.vague) { var yy = y + 22 + (Lt.length - 1) * 20, d = "M" + f1(x) + " " + f1(yy); for (var k = 1; k <= 8; k++) d += " q" + 6 + " " + (k % 2 ? -4 : 4) + " 12 0"; s += "<path d='" + d + "' fill='none' stroke='" + col + "' stroke-width='2.2'/>"; }
+    return { s: s + "</g>" + liste(b.items, x, y + 16 + Lt.length * 20 + 14, NC, o.puce || b.color), h: hTxt(b, w) };
+  }
+  /* disposition alternée le long d'un axe vertical : renvoie les positions et la hauteur totale */
+  function alterne(B, Wd, y0, cw, gap) {
+    var etroit = Wd < 600, pos = [], cols = [y0, y0], yPrev = y0 - 60;
+    B.forEach(function (b, i) {
+      var cote = etroit ? 1 : i % 2, h = b.hh, y = etroit ? Math.max(cols[1], yPrev + 10) : Math.max(cols[cote], yPrev + 56);
+      pos.push({ cote: cote, y: y, h: h }); cols[cote] = y + h + gap; if (etroit) cols[1] = y + h + gap; yPrev = y;
+    });
+    return { pos: pos, H: Math.max(cols[0], cols[1]) };
+  }
+  function tige(C, B, alt, Wd) {
+    var et = Wd < 600, ax = et ? 30 : Wd / 2, cw = et ? Wd - 76 : Wd / 2 - 70, tt = titresAmp(Wd / 2, 18, C, et ? Wd - 60 : 300), s = "", dessus = "", V = "#4CAF50";
+    B.forEach(function (b) { b.hh = hCarte(b, cw); });
+    var A = alterne(B, Wd, 18 + tt.h + 40, cw, 26), H = A.H + 40, top = 18 + tt.h + 14;
+    s += "<path d='M" + f1(ax) + " " + f1(H - 14) + " C" + f1(ax - 8) + " " + f1(H * .7) + " " + f1(ax + 8) + " " + f1(H * .4) + " " + f1(ax) + " " + f1(top) + "' fill='none' stroke='" + V + "' stroke-width='9' stroke-linecap='round'/>";
+    s += "<ellipse cx='" + f1(ax) + "' cy='" + f1(H - 10) + "' rx='60' ry='6' fill='#000' opacity='.08'/>";
+    A.pos.forEach(function (p, i) {
+      var b = B[i], x = p.cote ? ax + 40 : ax - 40 - cw, cy = p.y + 22, sg = p.cote ? 1 : -1, ly = p.y + p.h + 8;
+      s += "<path d='M" + f1(ax) + " " + f1(cy + 30) + " Q" + f1(ax + sg * 20) + " " + f1(cy + 26) + " " + f1(ax + sg * 40) + " " + f1(cy) + "' fill='none' stroke='" + V + "' stroke-width='6' stroke-linecap='round'/>";
+      if (!et) s += "<path d='M" + f1(ax) + " " + f1(ly) + " q" + f1(-sg * 14) + " -18 " + f1(-sg * 40) + " -10 q" + f1(sg * 10) + " 18 " + f1(sg * 40) + " 10Z' fill='#7CC456' stroke='#3E8E2E' stroke-width='1.5'/>";
+      dessus += carteCadre(x, p.y, cw, b, n2(i), b.color).s;
+    });
+    return svgDe(et ? "cm-etroit" : "cm-large", Wd, H, alt, B, tt.s + s + dessus);
+  }
+  function frisev(C, B, alt, Wd) {
+    var et = Wd < 600, ax = et ? 30 : Wd / 2, cw = et ? Wd - 80 : Wd / 2 - 80, tt = titresAmp(Wd / 2, 18, C, et ? Wd - 60 : 300), s = "", dessus = "";
+    function hB(b) { return 14 + couper(b.label, Math.floor((cw - 70) / 9.2)).length * 19 + 16 + hListe(b.items, Math.floor((cw - 44) / 8.2)) + 20; }
+    B.forEach(function (b) { b.hh = hB(b); });
+    var A = alterne(B, Wd, 18 + tt.h + 40, cw, 28), H = A.H + 30, top = 18 + tt.h + 14;
+    s += "<path d='M" + f1(ax) + " " + f1(top) + " V" + f1(H - 14) + "' stroke='#1D2330' stroke-width='2' stroke-dasharray='5 6'/>";
+    for (var yy = top + 20; yy < H - 20; yy += 46) s += "<circle cx='" + f1(ax) + "' cy='" + f1(yy) + "' r='3.6' fill='#1D2330'/>";
+    A.pos.forEach(function (p, i) {
+      var b = B[i], x = p.cote ? ax + 44 : ax - 44 - cw, Lt = couper(b.label, Math.floor((cw - 70) / 9.2)), hb = 14 + Lt.length * 19, cy = p.y + hb / 2, h = b.hh;
+      s += "<path d='M" + f1(ax) + " " + f1(cy) + " H" + f1(p.cote ? x : x + cw) + "' stroke='" + b.color + "' stroke-width='2' stroke-dasharray='5 4'/>";
+      dessus += "<g class='cm-h'><rect x='" + f1(x + 3) + "' y='" + f1(p.y + 4) + "' width='" + f1(cw) + "' height='" + f1(h) + "' fill='#0B1A33' opacity='.08'/><rect x='" + f1(x) + "' y='" + f1(p.y) + "' width='" + f1(cw) + "' height='" + f1(h) + "' fill='#fff' stroke='#E1E6EE'/>";
+      dessus += "<rect x='" + f1(x) + "' y='" + f1(p.y) + "' width='" + f1(cw) + "' height='" + f1(hb) + "' fill='" + b.color + "'/><rect x='" + f1(x) + "' y='" + f1(p.y) + "' width='44' height='" + f1(hb) + "' fill='" + fonce(b.color, .22) + "'/><text x='" + f1(x + 22) + "' y='" + f1(p.y + hb / 2 + 5) + "' text-anchor='middle' font-size='14' font-weight='900' fill='#fff'>" + n2(i) + "</text>";
+      Lt.forEach(function (l, k) { dessus += "<text x='" + f1(x + 56) + "' y='" + f1(p.y + 21 + k * 19) + "' font-size='15' font-weight='800' fill='#fff' letter-spacing='.3'>" + esc(l.toUpperCase()) + "</text>"; });
+      dessus += "</g>" + liste(b.items, x + 16, p.y + hb + 22, Math.floor((cw - 44) / 8.2), b.color);
+      dessus += "<path d='" + hexa(ax, cy, 15) + "' fill='" + b.color + "' stroke='#fff' stroke-width='3'/><circle cx='" + f1(ax) + "' cy='" + f1(cy) + "' r='4.5' fill='#fff'/>";
+    });
+    return svgDe(et ? "cm-etroit" : "cm-large", Wd, H, alt, B, tt.s + s + dessus);
+  }
+  function arbreInfo(C, B, alt, Wd) {
+    var et = Wd < 600, ax = et ? 34 : Wd / 2, cw = et ? Wd - 84 : Wd / 2 - 74, tt = titresAmp(Wd / 2, 18, C, et ? Wd - 60 : 300), s = "", dessus = "", bois = "#6D4424";
+    var VERTS = ["#1B5E20", "#2E7D32", "#388E3C", "#00695C", "#33691E", "#00796B", "#2E7D32"];
+    function hL(b) { return 18 + couper(b.label, Math.floor((cw - 80) / 9.4)).length * 19 + 8 + hListe(b.items, Math.floor((cw - 80) / 8.2)) + 22; }
+    B.forEach(function (b) { b.hh = hL(b); });
+    var A = alterne(B, Wd, 18 + tt.h + 40, cw, 24), H = A.H + 70, top = 18 + tt.h + 24;
+    s += "<path d='M" + f1(ax - 18) + " " + f1(H - 34) + " C" + f1(ax - 8) + " " + f1(H * .6) + " " + f1(ax - 5) + " " + f1(top + 60) + " " + f1(ax - 2) + " " + f1(top) + " H" + f1(ax + 2) + " C" + f1(ax + 5) + " " + f1(top + 60) + " " + f1(ax + 8) + " " + f1(H * .6) + " " + f1(ax + 18) + " " + f1(H - 34) + "Z' fill='" + bois + "'/>";
+    s += "<path d='M" + f1(ax - 120) + " " + f1(H - 32) + " H" + f1(ax + 120) + "' stroke='" + bois + "' stroke-width='3' stroke-linecap='round'/>";
+    A.pos.forEach(function (p, i) {
+      var b = B[i], sg = p.cote ? 1 : -1, x = p.cote ? ax + 44 : ax - 44 - cw, h = p.h, v = VERTS[i % VERTS.length], cy = p.y + h / 2, xi = p.cote ? x : x + cw, xo = p.cote ? x + cw : x;
+      s += "<path d='M" + f1(ax) + " " + f1(cy + 40) + " Q" + f1(ax + sg * 10) + " " + f1(cy + 6) + " " + f1(xi) + " " + f1(cy) + "' stroke='" + bois + "' stroke-width='6' fill='none' stroke-linecap='round'/>";
+      var d = "M" + f1(xi) + " " + f1(p.y + 12) + " Q" + f1(xi) + " " + f1(p.y) + " " + f1(xi + sg * 12) + " " + f1(p.y) + " H" + f1(xo) + " C" + f1(xo) + " " + f1(p.y + h * .75) + " " + f1(xo - sg * 24) + " " + f1(p.y + h) + " " + f1(xo - sg * 70) + " " + f1(p.y + h) + " H" + f1(xi + sg * 12) + " Q" + f1(xi) + " " + f1(p.y + h) + " " + f1(xi) + " " + f1(p.y + h - 12) + "Z";
+      var tx = p.cote ? x + 50 : x + 18;
+      dessus += "<g class='cm-h'><path d='" + d + "' fill='" + v + "'/><path d='M" + f1(xo - sg * 70) + " " + f1(p.y + h - 4) + " Q" + f1(xo - sg * 10) + " " + f1(p.y + h * .5) + " " + f1(xo - sg * 4) + " " + f1(p.y + 6) + "' fill='none' stroke='#fff' stroke-opacity='.35' stroke-width='2'/>";
+      dessus += "<circle cx='" + f1(xi) + "' cy='" + f1(cy) + "' r='22' fill='#fff' stroke='" + v + "' stroke-width='4'/><text x='" + f1(xi) + "' y='" + f1(cy + 6) + "' text-anchor='middle' font-size='16' font-weight='900' fill='" + v + "'>" + n2(i) + "</text></g>";
+      dessus += blanc(blocTxt(tx, p.y + 6, cw - 80, b, 0, { col: "#fff", puce: "#C8F0B0" }).s);
+    });
+    return svgDe(et ? "cm-etroit" : "cm-large", Wd, H, alt, B, tt.s + s + dessus);
+  }
+  function route(C, B, alt, Wd) {
+    var n = B.length, s = "", dessus = "", tt = titresAmp(Wd / 2, 18, C, Wd < 600 ? Wd - 60 : 360);
+    if (Wd < 600) {
+      var y = 18 + tt.h + 40, w = Wd - 110, pts = [];
+      B.forEach(function (b) { var h = hTxt(b, w); pts.push({ y: y, h: h }); y += Math.max(h, 50) + 30; });
+      var d = "M40 " + f1(18 + tt.h + 20); pts.forEach(function (p, i) { d += " Q" + (i % 2 ? 10 : 70) + " " + f1(p.y - 10) + " 40 " + f1(p.y + 18); });
+      d += " V" + f1(y - 10);
+      s += "<path d='" + d + "' fill='none' stroke='#5A6378' stroke-width='22' stroke-linecap='round'/><path d='" + d + "' fill='none' stroke='#fff' stroke-width='2.5' stroke-dasharray='10 9'/>";
+      pts.forEach(function (p, i) { var b = B[i]; dessus += epingle(40, p.y + 18, b.color, i + 1) + blocTxt(84, p.y, w, b, 0).s; });
+      return svgDe("cm-etroit", Wd, y, alt, B, tt.s + s + dessus);
+    }
+    var step = n > 1 ? (Wd - 160) / (n - 1) : 0, cw = Math.min(250, step * 1.75), hs = B.map(function (b) { return hTxt(b, cw); });
+    var hHaut = Math.max.apply(null, hs.filter(function (h, i) { return i % 2 === 0; }).concat([40])), hBas = Math.max.apply(null, hs.filter(function (h, i) { return i % 2 === 1; }).concat([40]));
+    var ry = 18 + tt.h + 40 + hHaut + 70, H = ry + 70 + hBas + 30, P2 = B.map(function (b, i) { return [80 + i * step, ry + (i % 2 ? 28 : -28)]; });
+    var d = "M20 " + f1(ry); P2.forEach(function (p, i) { var q = i ? P2[i - 1] : [20, ry]; d += " C" + f1(q[0] + step * .45) + " " + f1(q[1]) + " " + f1(p[0] - step * .45) + " " + f1(p[1]) + " " + f1(p[0]) + " " + f1(p[1]); });
+    d += " C" + f1(P2[n - 1][0] + 40) + " " + f1(P2[n - 1][1]) + " " + (Wd - 60) + " " + f1(ry) + " " + (Wd - 20) + " " + f1(ry);
+    s += "<path d='" + d + "' fill='none' stroke='#5A6378' stroke-width='30' stroke-linecap='round'/><path d='" + d + "' fill='none' stroke='#fff' stroke-width='3' stroke-dasharray='12 10'/>";
+    P2.forEach(function (p, i) {
+      var b = B[i], haut = i % 2 === 0, x = Math.max(16, Math.min(Wd - 16 - cw, p[0] - cw / 2)), y = haut ? p[1] - 60 - hs[i] : p[1] + 46;
+      s += "<path d='M" + f1(p[0]) + " " + f1(haut ? p[1] - 40 : p[1] + 26) + " V" + f1(haut ? y + hs[i] + 6 : y - 6) + "' stroke='" + b.color + "' stroke-width='2.5' stroke-dasharray='3 4'/>";
+      dessus += epingle(p[0], p[1], b.color, i + 1) + blocTxt(x, y, cw, b, 0).s;
+    });
+    return svgDe("cm-large", Wd, H, alt, B, tt.s + s + dessus);
+  }
+  function epingle(x, y, col, n) { return "<g class='cm-h'><path d='M" + f1(x) + " " + f1(y) + " C" + f1(x - 4) + " " + f1(y - 10) + " " + f1(x - 18) + " " + f1(y - 18) + " " + f1(x - 18) + " " + f1(y - 32) + " A18 18 0 1 1 " + f1(x + 18) + " " + f1(y - 32) + " C" + f1(x + 18) + " " + f1(y - 18) + " " + f1(x + 4) + " " + f1(y - 10) + " " + f1(x) + " " + f1(y) + "Z' fill='" + col + "' stroke='#fff' stroke-width='2.5'/><text x='" + f1(x) + "' y='" + f1(y - 27) + "' text-anchor='middle' font-size='15' font-weight='900' fill='#fff'>" + n + "</text></g>"; }
+  function fourche(C, B, alt, Wd) {
+    var et = Wd < 600, s = "", dessus = "", L = [];
+    C.forEach(function (l, k) { couper(l, k ? 22 : 18).forEach(function (x) { L.push([x, k]); }); });
+    var pw = Math.min(et ? Wd - 60 : 240, 50 + Math.max.apply(null, L.map(function (x) { return x[0].length * (x[1] ? 8 : 10.6); }))), ph = 26 + L.length * 21;
+    function pilule(cx, cy) { var p = "<g class='cm-c'><rect x='" + f1(cx - pw / 2) + "' y='" + f1(cy - ph / 2) + "' width='" + f1(pw) + "' height='" + f1(ph) + "' rx='" + f1(ph / 2) + "' fill='#1D2B53'/>"; L.forEach(function (x, k) { p += "<text x='" + f1(cx) + "' y='" + f1(cy - ph / 2 + 30 + k * 21) + "' text-anchor='middle' font-size='" + (x[1] ? 13.5 : 18) + "' font-weight='" + (x[1] ? 700 : 900) + "' fill='" + (x[1] ? "#9FC5E8" : "#fff") + "'>" + esc(x[0]) + "</text>"; }); return p + "</g>"; }
+    function hF(b, w) { var NC = Math.floor(w / 8.4); return Math.max(54, couper(b.label.toUpperCase(), Math.floor(w / 9)).length * 18 + 8 + b.items.reduce(function (a, it) { return a + couper(it, NC).length * 18 + 10; }, 0)) + 26; }
+    function branche(dx, dy, x0, y0, b, sg, w) {
+      var NC = Math.floor(w / 8.4), hh = hF(b, w) - 26, r = "", Ll = couper(b.label.toUpperCase(), Math.floor(w / 9)), yt = dy - hh / 2, yi = yt + Ll.length * 18 + 8, tx = dx + sg * 40, an = sg > 0 ? "start" : "end";
+      r += "<path class='cm-t' d='M" + f1(x0) + " " + f1(y0) + " C" + f1(x0 + sg * 50) + " " + f1(y0) + " " + f1(dx - sg * 50) + " " + f1(dy) + " " + f1(dx) + " " + f1(dy) + "' fill='none' stroke='" + b.color + "' stroke-width='5' stroke-linecap='round'/>";
+      Ll.forEach(function (l, k) { r += "<text x='" + f1(tx) + "' y='" + f1(yt + 13 + k * 18) + "' text-anchor='" + an + "' font-size='14' font-weight='900' letter-spacing='.4' fill='" + b.color + "'>" + esc(l) + "</text>"; });
+      b.items.forEach(function (it) { var Li = couper(it, NC), ty = yi + Li.length * 9 - 4; r += "<path class='cm-l' d='M" + f1(dx) + " " + f1(dy) + " C" + f1(dx + sg * 18) + " " + f1(dy) + " " + f1(dx + sg * 14) + " " + f1(ty) + " " + f1(dx + sg * 32) + " " + f1(ty) + "' fill='none' stroke='" + b.color + "' stroke-width='2.2'/>"; r += texte(tx, yi + 13, Li, { t: 14.5, a: an, c: "#2E3445" }); yi += Li.length * 18 + 10; });
+      return r + "<circle cx='" + f1(dx) + "' cy='" + f1(dy) + "' r='9' fill='" + b.color + "' stroke='#fff' stroke-width='2.5'/>";
+    }
+    if (et) {
+      var y = 30 + ph + 30, w = Wd - 110;
+      s += pilule(Wd / 2, 30 + ph / 2);
+      var y0 = y; B.forEach(function (b) { var h = hF(b, w); s += branche(44, y + h / 2, 20, y + h / 2 - 20, b, 1, w); b.yl = y + h / 2 - 20; y += h + 16; });
+      s = "<path d='M" + f1(Wd / 2) + " " + f1(30 + ph) + " V" + f1(y0 - 14) + " H20 V" + f1(B[B.length - 1].yl) + "' fill='none' stroke='#1D2B53' stroke-width='4' stroke-linecap='round' stroke-linejoin='round'/>" + s;
+      return svgDe("cm-etroit", Wd, y, alt, B, s);
+    }
+    var cw = 210, cols = [[], []]; B.forEach(function (b, i) { b.i = i; b.hf = hF(b, cw); cols[i % 2].push(b); });
+    var hs = cols.map(function (c) { return c.reduce(function (a, b) { return a + b.hf + 18; }, 0); }), H = Math.max(hs[0], hs[1], ph + 60) + 30, cy = H / 2;
+    cols.forEach(function (c, ct) { var y = (H - hs[ct]) / 2 + 9, sg = ct ? 1 : -1, dx = ct ? Wd - 24 - cw - 40 : 24 + cw + 40; c.forEach(function (b) { s += branche(dx, y + b.hf / 2, Wd / 2 + sg * pw / 2, cy + (y + b.hf / 2 - cy) * .2, b, sg, cw); y += b.hf + 18; }); });
+    return svgDe("cm-large", Wd, H, alt, B, s + pilule(Wd / 2, cy));
+  }
+  function mainLevee(x1, y1, x2, y2, k) { var mx = (x1 + x2) / 2 + (k % 2 ? 30 : -30), my = (y1 + y2) / 2 + (k % 2 ? -20 : 20); return "M" + f1(x1) + " " + f1(y1) + " Q" + f1(mx) + " " + f1(my) + " " + f1(x2) + " " + f1(y2); }
+  function etoileBD(cx, cy, rx, ry) { var d = ""; for (var i = 0; i < 28; i++) { var a = i / 28 * 2 * Math.PI, k = i % 2 ? .78 : 1.08; d += (i ? "L" : "M") + f1(cx + rx * k * Math.cos(a)) + " " + f1(cy + ry * k * Math.sin(a)); } return d + "Z"; }
+  function bouclee(x1, y1, x2, y2, sg) { var mx = (x1 + x2) / 2, my = (y1 + y2) / 2; return "M" + f1(x1) + " " + f1(y1) + " C" + f1(mx + sg * 10) + " " + f1(y1) + " " + f1(mx + sg * 34) + " " + f1(my - 30) + " " + f1(mx) + " " + f1(my - 18) + " C" + f1(mx - sg * 22) + " " + f1(my - 8) + " " + f1(mx - sg * 6) + " " + f1(my + 22) + " " + f1(mx + sg * 14) + " " + f1(my + 8) + " S" + f1(x2 - sg * 20) + " " + f1(y2) + " " + f1(x2) + " " + f1(y2); }
+  function doodle(C, B, alt, Wd) {
+    var et = Wd < 600, s = "", dessus = "", cw = et ? Wd - 70 : 280, L = [];
+    C.forEach(function (l, k) { couper(k ? l : l.toUpperCase(), k ? 16 : 13).forEach(function (x) { L.push([x, k]); }); });
+    function hD(b) { return 20 + couper(b.label, Math.floor((cw - 30) / 9.4)).length * 20 + 10 + hListe(b.items, Math.floor((cw - 40) / 8.2)) + 18; }
+    function boiteBD(x, y, b, i) {
+      var Lt = couper(b.label, Math.floor((cw - 30) / 9.4)), h = hD(b), r = "<g class='cm-h'><rect x='" + f1(x + 6) + "' y='" + f1(y + 6) + "' width='" + f1(cw) + "' height='" + f1(h) + "' rx='14' fill='#1B1B1B'/><rect x='" + f1(x) + "' y='" + f1(y) + "' width='" + f1(cw) + "' height='" + f1(h) + "' rx='14' fill='" + clair(b.color, .62) + "' stroke='#1B1B1B' stroke-width='2.5'/>";
+      Lt.forEach(function (l, k) { r += "<text x='" + f1(x + cw / 2) + "' y='" + f1(y + 26 + k * 20) + "' text-anchor='middle' font-size='16.5' font-weight='900' fill='#1B1B1B'>" + esc(l) + "</text>"; });
+      return r + "</g>" + liste(b.items, x + 14, y + 26 + Lt.length * 20 + 14, Math.floor((cw - 40) / 8.2), "#1B1B1B").replace(/fill='(#2E3445|#3B4456)'/g, "fill='#1B1B1B'");
+    }
+    function grille(W, H) { var g = "<g stroke='#E9E3CF' stroke-width='1'>"; for (var x = 20; x < W; x += 22) g += "<path d='M" + x + " 0V" + Math.round(H) + "'/>"; for (var y = 20; y < H; y += 22) g += "<path d='M0 " + y + "H" + W + "'/>"; return "<rect width='" + W + "' height='" + Math.round(H) + "' fill='#FFFBEF'/>" + g + "</g>"; }
+    function centreD(cx, cy) { var w = Math.min(et ? Wd - 20 : 280, Math.max.apply(null, L.map(function (x) { return x[0].length; })) * 15 + 110), h = L.length * 25 + 90, r = "<g class='cm-c'><path d='" + etoileBD(cx, cy, w / 2, h / 2) + "' fill='#F48FC6' stroke='#1B1B1B' stroke-width='3' stroke-linejoin='round'/>"; L.forEach(function (x, k) { r += "<text x='" + f1(cx) + "' y='" + f1(cy - (L.length - 1) * 12.5 + 7 + k * 25) + "' text-anchor='middle' font-size='" + (x[1] ? 14 : 18) + "' font-weight='900' letter-spacing='.6' fill='#1B1B1B'>" + esc(x[0]) + "</text>"; }); return { s: r + "</g>", w: w, h: h }; }
+    var noir = B.map(function (b) { return Object.assign({}, b, { color: "#1B1B1B" }); });
+    if (et) {
+      var hc = L.length * 25 + 90, cd = centreD(Wd / 2, hc * .55 + 8), y = hc * 1.1 + 40;
+      B.forEach(function (b, i) { var h = hD(b); s += "<path d='M" + f1(Wd / 2 + (i % 2 ? 30 : -30)) + " " + f1(y - 34) + " q" + (i % 2 ? 14 : -14) + " 12 0 24' fill='none' stroke='#1B1B1B' stroke-width='2.6' stroke-linecap='round' marker-end='url(#" + P + "f" + i + ")'/>"; dessus += boiteBD(28, y, b, i); y += h + 46; });
+      return svgDe("cm-etroit", Wd, y, alt, noir, grille(Wd, y) + cd.s + s + dessus);
+    }
+    var cols = [[], []]; B.forEach(function (b, i) { b.i = i; b.hd = hD(b); cols[i % 2].push(b); });
+    var hs = cols.map(function (c) { return c.reduce(function (a, b) { return a + b.hd + 40; }, 0); }), H = Math.max(hs[0], hs[1], 320) + 40, cx = Wd / 2, cy = H / 2, cd2 = centreD(cx, cy);
+    cols.forEach(function (c, ct) { var y = (H - hs[ct]) / 2 + 20, x = ct ? Wd - 34 - cw : 28, sg = ct ? 1 : -1; c.forEach(function (b) {
+      var ty = y + b.hd / 2, sx = cx + sg * cd2.w * .42, sy = cy + (ty - cy) * .3;
+      s += "<path d='" + bouclee(sx, sy, ct ? x - 12 : x + cw + 14, ty, sg) + "' fill='none' stroke='#1B1B1B' stroke-width='2.6' stroke-linecap='round' marker-end='url(#" + P + "f" + b.i + ")'/>";
+      dessus += boiteBD(x, y, b, b.i); y += b.hd + 40; }); });
+    return svgDe("cm-large", Wd, H, alt, noir, grille(Wd, H) + s + dessus + cd2.s + icone(Wd / 2, 30, 1, "#1B1B1B") + icone(Wd / 2, H - 24, 2, "#1B1B1B"));
+  }
+  function blob(x, y, w, h, col, k) {
+    var x0 = x - 16, y0 = y - 14, x1 = x + w + 16, y1 = y + h + 14, r = 30, b1 = 7 + 4 * Math.sin(k * 1.7), b2 = 7 + 4 * Math.cos(k * 2.3), mx = (x0 + x1) / 2, my = (y0 + y1) / 2;
+    var d = "M" + f1(x0 + r) + " " + f1(y0) + " Q" + f1(mx) + " " + f1(y0 - b1) + " " + f1(x1 - r) + " " + f1(y0) + " Q" + f1(x1) + " " + f1(y0) + " " + f1(x1) + " " + f1(y0 + r) + " Q" + f1(x1 + b2) + " " + f1(my) + " " + f1(x1) + " " + f1(y1 - r) + " Q" + f1(x1) + " " + f1(y1) + " " + f1(x1 - r) + " " + f1(y1) + " Q" + f1(mx) + " " + f1(y1 + b2) + " " + f1(x0 + r) + " " + f1(y1) + " Q" + f1(x0) + " " + f1(y1) + " " + f1(x0) + " " + f1(y1 - r) + " Q" + f1(x0 - b1) + " " + f1(my) + " " + f1(x0) + " " + f1(y0 + r) + " Q" + f1(x0) + " " + f1(y0) + " " + f1(x0 + r) + " " + f1(y0) + "Z";
+    return "<path d='" + d + "' fill='" + col + "'/>";
+  }
+  function blobs(C, B, alt, Wd) {
+    var et = Wd < 600, s = "", dessus = "", cw = et ? Wd - 80 : 270;
+    function tab(b) { return couper(b.label, Math.floor((cw - 60) / 9)); }
+    B.forEach(function (b) { b.hb = 24 + tab(b).length * 19 + 14 + hListe(b.items, Math.floor((cw - 30) / 8.2)) + 16; });
+    function blocB(x, y, b, i) {
+      var L = tab(b), th = 12 + L.length * 19, tw = Math.min(cw - 20, 60 + Math.max.apply(null, L.map(function (l) { return l.length; })) * 8.8), r = "<g class='cm-h'>" + blob(x, y + th / 2, cw, b.hb - th / 2, clair(b.color, .84), i);
+      r += "<rect x='" + f1(x + cw / 2 - tw / 2) + "' y='" + f1(y - 6) + "' width='" + f1(tw) + "' height='" + f1(th) + "' rx='9' fill='" + b.color + "'/>";
+      L.forEach(function (l, k) { r += "<text x='" + f1(x + cw / 2) + "' y='" + f1(y + 13 + k * 19) + "' text-anchor='middle' font-size='15.5' font-weight='800' fill='#fff'>" + esc(l) + "</text>"; });
+      return r + "</g>" + liste(b.items, x + 4, y + th + 26, Math.floor((cw - 30) / 8.2), fonce(b.color, .2)).replace(/fill='(#2E3445|#3B4456)'/g, "fill='" + fonce(b.color, .38) + "'");
+    }
+    function centreB(cx, cy, w) { var L = []; C.forEach(function (l, k) { couper(k ? l : l.toUpperCase(), k ? 22 : 18).forEach(function (x) { L.push([x, k]); }); }); var h = 26 + L.length * 22, r = "<g class='cm-c'>" + blob(cx - w / 2 + 16, cy - h / 2 + 14, w - 32, h - 28, "#E4E6EA", 3); L.forEach(function (x, k) { r += "<text x='" + f1(cx) + "' y='" + f1(cy - h / 2 + 30 + k * 22) + "' text-anchor='middle' font-size='" + (x[1] ? 14 : 18.5) + "' font-weight='" + (x[1] ? 700 : 900) + "' letter-spacing='.6' fill='" + (x[1] ? "#5B6275" : "#111") + "'>" + esc(x[0]) + "</text>"; }); return { s: r + "</g>", h: h }; }
+    if (et) {
+      var c0 = centreB(Wd / 2, 0, Wd - 80), y = c0.h + 40;
+      s += "<g transform='translate(0 " + f1(c0.h / 2 + 20) + ")'>" + c0.s + "</g>";
+      B.forEach(function (b, i) { dessus += blocB(40, y, b, i); y += b.hb + 44; });
+      return svgDe("cm-etroit", Wd, y, alt, B, s + dessus);
+    }
+    var cols = [[], []]; B.forEach(function (b, i) { b.i = i; cols[i % 2].push(b); });
+    var hs = cols.map(function (c) { return c.reduce(function (a, b) { return a + b.hb + 50; }, 0); }), H = Math.max(hs[0], hs[1], 260) + 30, cx = Wd / 2, cy = H / 2, c1 = centreB(cx, cy, 250);
+    cols.forEach(function (c, ct) { var y = (H - hs[ct]) / 2 + 34, x = ct ? Wd - 40 - cw : 40, sg = ct ? 1 : -1; c.forEach(function (b) {
+      var ty = y + b.hb / 2, ay = cy + Math.max(-1, Math.min(1, (ty - cy) / 140)) * (c1.h / 2 + 10), ax = cx + sg * (Math.abs(ty - cy) > 90 ? 70 : 140);
+      if (Math.abs(ty - cy) <= 90) ay = cy;
+      var ex = ax + sg * 42, ey = ay + (ty > cy + 90 ? 30 : ty < cy - 90 ? -30 : 0);
+      s += "<path d='M" + f1(ax) + " " + f1(ay) + " Q" + f1(ax + sg * 30) + " " + f1(ay) + " " + f1(ex) + " " + f1(ey) + "' fill='none' stroke='" + b.color + "' stroke-width='3.2' stroke-linecap='round' marker-end='url(#" + P + "f" + b.i + ")'/>";
+      dessus += blocB(x, y, b, b.i); y += b.hb + 50; }); });
+    return svgDe("cm-large", Wd, H, alt, B, s + dessus + c1.s);
+  }
+  function arc(C, B, alt, Wd) {
+    var et = Wd < 600, s = "", dessus = "", L = [];
+    C.forEach(function (l, k) { couper(l, k ? 18 : 14).forEach(function (x) { L.push([x, k]); }); });
+    function rond(cx, cy, r) { var p = "<g class='cm-c'><circle cx='" + f1(cx) + "' cy='" + f1(cy) + "' r='" + r + "' fill='url(#" + P + "g)' stroke='#FFC93C' stroke-width='4'/>"; L.forEach(function (x, k) { p += "<text x='" + f1(cx) + "' y='" + f1(cy - (L.length - 1) * 10.5 + 6 + k * 21) + "' text-anchor='middle' font-size='" + (x[1] ? 13.5 : 18) + "' font-weight='" + (x[1] ? 700 : 900) + "' fill='" + (x[1] ? "#FFE08A" : "#fff") + "'>" + esc(x[0]) + "</text>"; }); return p + "</g>"; }
+    function hP(b, w) { var NC = Math.floor((w - 40) / 8); return couper(b.label, Math.floor((w - 40) / 9.4)).length * 19 + couper(b.items.join(" · "), NC).length * 18 + 30; }
+    function pil(x, y, w, h, b, n) { var NC = Math.floor((w - 40) / 8), Lt = couper(b.label, Math.floor((w - 40) / 9.4)), Li = couper(b.items.join(" · "), NC), p = "<g class='cm-h'><rect x='" + f1(x) + "' y='" + f1(y) + "' width='" + f1(w) + "' height='" + f1(h) + "' rx='" + f1(Math.min(h / 2, 30)) + "' fill='" + clair(b.color, .88) + "' stroke='" + b.color + "' stroke-width='2'/>"; Lt.forEach(function (l, k) { p += "<text x='" + f1(x + 24) + "' y='" + f1(y + 24 + k * 19) + "' font-size='16' font-weight='800' fill='" + b.color + "'>" + esc(l) + "</text>"; }); return p + "</g>" + texte(x + 24, y + 24 + Lt.length * 19 + 2, Li, { t: 14, c: encre("#2E3445") }); }
+    if (et) {
+      var rr = 84, y = 30 + 2 * rr + 30, w = Wd - 90;
+      s += rond(Wd / 2, 30 + rr, rr);
+      B.forEach(function (b, i) { var h = hP(b, w); dessus += "<circle cx='34' cy='" + f1(y + h / 2) + "' r='16' fill='" + b.color + "'/><text x='34' y='" + f1(y + h / 2 + 5) + "' text-anchor='middle' font-size='14' font-weight='900' fill='#fff'>" + (i + 1) + "</text>" + pil(60, y, w, h, b, i + 1); y += h + 16; });
+      return svgDe("cm-etroit", Wd, y, alt, B, s + dessus);
+    }
+    var cw = 480, x0 = Wd - 20 - cw, hs = B.map(function (b) { return hP(b, cw); }), tot = hs.reduce(function (a, h) { return a + h + 16; }, -16), H = Math.max(tot + 40, 340), cy = H / 2, R = 150, rc = 120, cx0 = 40 + rc, R2 = Math.max(R + 40, tot / 2 + 10);
+    s += "<path d='M" + f1(cx0 + R * Math.cos(-1.2)) + " " + f1(cy + R * Math.sin(-1.2)) + " A" + R + " " + R + " 0 0 1 " + f1(cx0 + R * Math.cos(1.2)) + " " + f1(cy + R * Math.sin(1.2)) + "' fill='none' stroke='#E3E7EF' stroke-width='16' stroke-linecap='round'/>";
+    var y = (H - tot) / 2;
+    B.forEach(function (b, i) {
+      var ym = y + hs[i] / 2, a = B.length > 1 ? -1.15 + 2.3 * i / (B.length - 1) : 0, dx = cx0 + R * Math.cos(a), dy = cy + R * Math.sin(a);
+      s += "<path d='M" + f1(dx) + " " + f1(dy) + " C" + f1(dx + 60) + " " + f1(dy) + " " + f1(x0 - 60) + " " + f1(ym) + " " + f1(x0) + " " + f1(ym) + "' fill='none' stroke='" + b.color + "' stroke-width='3'/>";
+      dessus += "<circle cx='" + f1(dx) + "' cy='" + f1(dy) + "' r='17' fill='" + b.color + "' stroke='#fff' stroke-width='3'/><text x='" + f1(dx) + "' y='" + f1(dy + 5) + "' text-anchor='middle' font-size='14' font-weight='900' fill='#fff'>" + (i + 1) + "</text>" + pil(x0, y, cw, hs[i], b, i + 1);
+      y += hs[i] + 16;
+    });
+    return svgDe("cm-large", Wd, H, alt, B, s + rond(cx0, cy, rc) + dessus);
+  }
+
+  /* ════════ MODÈLES « TIMELINE » ENVOYÉS PAR JACQUES (24/11/2026) : onglets sur tube, capsules, zigzag, gouttes, rameaux ════════ */
+  function onglets(C, B, alt, Wd) {
+    var et = Wd < 600, ax = et ? 26 : Wd / 2, tw = 96, cw = et ? Wd - 64 - tw : Wd / 2 - 40 - tw, tt = titresAmp(Wd / 2, 18, C, et ? Wd - 60 : 300), s = "", dessus = "";
+    B.forEach(function (b) { b.hh = Math.max(76, hTxt(b, cw) + 10); });
+    var A = alterne(B, Wd, 18 + tt.h + 40, cw, 22), H = A.H + 30, top = 18 + tt.h + 16;
+    s += "<rect x='" + f1(ax - 11) + "' y='" + f1(top) + "' width='22' height='" + f1(H - top - 12) + "' rx='11' fill='#EEF1F6' stroke='#C9D0DC' stroke-width='2'/><rect x='" + f1(ax - 5) + "' y='" + f1(top + 8) + "' width='4' height='" + f1(H - top - 28) + "' rx='2' fill='#fff'/>";
+    A.pos.forEach(function (p, i) {
+      var b = B[i], sg = p.cote ? 1 : -1, x0 = p.cote ? ax + 18 : ax - 18 - tw, y = p.y, ix = p.cote ? x0 : x0 + tw, tx = p.cote ? x0 + tw + 16 : x0 - 16 - cw;
+      dessus += "<g class='cm-h'><path d='M" + f1(ix) + " " + f1(y + 44) + " L" + f1(ix - sg * 12) + " " + f1(y + 76) + " L" + f1(ix + sg * 30) + " " + f1(y + 56) + "Z' fill='" + fonce(b.color, .25) + "'/><rect x='" + f1(x0) + "' y='" + f1(y) + "' width='" + tw + "' height='58' rx='18' fill='" + b.color + "'/><rect x='" + f1(x0 + 4) + "' y='" + f1(y + 4) + "' width='" + (tw - 8) + "' height='22' rx='12' fill='#fff' opacity='.18'/><text x='" + f1(x0 + tw / 2) + "' y='" + f1(y + 39) + "' text-anchor='middle' font-size='26' font-weight='900' fill='#fff'>" + n2(i) + "</text></g>";
+      dessus += "<circle cx='" + f1(ax) + "' cy='" + f1(y + 66) + "' r='6' fill='" + b.color + "' stroke='#fff' stroke-width='2'/>";
+      dessus += blocTxt(tx, y + 2, cw, b, 0).s + "<path d='M" + f1(tx) + " " + f1(y + 4 + couper(b.label, Math.floor(cw / 9.6)).length * 20) + " h" + f1(Math.min(cw, 220)) + "' stroke='#C9D0DC' stroke-width='1.5'/>";
+    });
+    return svgDe(et ? "cm-etroit" : "cm-large", Wd, H, alt, B, tt.s + s + dessus);
+  }
+  function capsules(C, B, alt, Wd) {
+    var n = B.length, s = "", dessus = "", tt = titresAmp(Wd / 2, 18, C, Wd < 600 ? Wd - 60 : 360);
+    function hC(b, w) { var NC = Math.floor((w - 36) / 8); return 70 + couper(b.label, Math.floor((w - 30) / 9.2)).length * 19 + 10 + hListe(b.items, NC) + 26; }
+    function caps(x, y, w, h, b, i, bas) {
+      var NC = Math.floor((w - 36) / 8), Lt = couper(b.label, Math.floor((w - 30) / 9.2)), r = Math.min(w / 2, 60), cy0 = bas ? y + h - 34 : y + 34, ty = bas ? y + 26 : y + 72, g = "<g class='cm-h'>";
+      g += "<rect x='" + f1(x) + "' y='" + f1(y) + "' width='" + f1(w) + "' height='" + f1(h) + "' rx='" + f1(r) + "' fill='" + b.color + "'/><rect x='" + f1(x + 6) + "' y='" + f1(y + 6) + "' width='" + f1(w - 12) + "' height='" + f1(h - 12) + "' rx='" + f1(r - 6) + "' fill='#fff'/>";
+      g += "<circle cx='" + f1(x + w / 2) + "' cy='" + f1(cy0) + "' r='22' fill='" + b.color + "'/><text x='" + f1(x + w / 2) + "' y='" + f1(cy0 + 6) + "' text-anchor='middle' font-size='17' font-weight='900' fill='#fff'>" + n2(i) + "</text>";
+      Lt.forEach(function (l, k) { g += "<text x='" + f1(x + w / 2) + "' y='" + f1(ty + k * 19) + "' text-anchor='middle' font-size='15' font-weight='800' fill='" + b.color + "'>" + esc(l) + "</text>"; });
+      return g + "</g>" + liste(b.items, x + w / 2, ty + Lt.length * 19 + 12, NC, b.color, true);
+    }
+    if (Wd < 600) {
+      var y = 18 + tt.h + 30, w = Wd - 60;
+      B.forEach(function (b, i) { var h = hC(b, w); dessus += caps(30, y, w, h, b, i, false); y += h + 18; });
+      return svgDe("cm-etroit", Wd, y, alt, B, tt.s + dessus);
+    }
+    var step = (Wd - 60) / n, w = Math.min(2 * step - 18, 250), hs = B.map(function (b) { return hC(b, w); });
+    var hH = Math.max.apply(null, hs.filter(function (h, i) { return i % 2 === 0; })), hB = Math.max.apply(null, hs.filter(function (h, i) { return i % 2 === 1; }).concat([0]));
+    var ly = 18 + tt.h + 30 + hH + 40, H = ly + 40 + hB + 20, d = "M20 " + f1(ly);
+    for (var k = 0; k < n; k++) d += " Q" + f1(30 + step * k + step / 2) + " " + f1(ly + (k % 2 ? 16 : -16)) + " " + f1(30 + step * (k + 1)) + " " + f1(ly);
+    s += "<path d='" + d + "' fill='none' stroke='#DDE2EA' stroke-width='8' stroke-linecap='round'/>";
+    B.forEach(function (b, i) {
+      var cx = 30 + step * (i + .5), x = Math.max(14, Math.min(Wd - 14 - w, cx - w / 2)), haut = i % 2 === 0, y = haut ? ly - 40 - hs[i] : ly + 40;
+      s += "<path d='M" + f1(cx) + " " + f1(haut ? ly - 40 : ly + 40) + " V" + f1(ly) + "' stroke='" + b.color + "' stroke-width='2.5'/>";
+      dessus += "<circle cx='" + f1(cx) + "' cy='" + f1(ly) + "' r='7' fill='#fff' stroke='" + b.color + "' stroke-width='4'/>" + caps(x, y, w, hs[i], b, i, haut);
+    });
+    return svgDe("cm-large", Wd, H, alt, B, tt.s + s + dessus);
+  }
+  function zigzag(C, B, alt, Wd) {
+    var et = Wd < 600, ax = et ? 46 : Wd / 2, dz = et ? 16 : 44, cw = et ? Wd - 110 : Wd / 2 - 110, tt = titresAmp(Wd / 2, 18, C, et ? Wd - 60 : 300), s = "", dessus = "", pts = [];
+    B.forEach(function (b) { b.hh = Math.max(84, hTxt(b, cw - 40)); });
+    var A = alterne(B, Wd, 18 + tt.h + 40, cw, 18), H = A.H + 30;
+    A.pos.forEach(function (p, i) { pts.push([ax + (i % 2 ? dz : -dz), p.y + 20]); });
+    s += "<path d='M" + pts.map(function (q) { return f1(q[0]) + " " + f1(q[1]); }).join(" L") + "' fill='none' stroke='#7A8296' stroke-width='3.5' stroke-linejoin='round'/>";
+    A.pos.forEach(function (p, i) {
+      var b = B[i], q = pts[i], tx = et ? ax + 50 : p.cote ? ax + 80 : ax - 80 - cw + 40;
+      if (i) { var r = pts[i - 1], mx = (q[0] + r[0]) / 2, my = (q[1] + r[1]) / 2, ang = Math.atan2(q[1] - r[1], q[0] - r[0]) * 180 / Math.PI; if (ang > 90) ang -= 180; if (ang < -90) ang += 180; s += "<text x='" + f1(mx) + "' y='" + f1(my - 6) + "' text-anchor='middle' font-size='12.5' font-weight='900' fill='" + b.color + "' transform='rotate(" + f1(ang) + " " + f1(mx) + " " + f1(my) + ")'>ÉTAPE " + (i + 1) + "</text>"; }
+      dessus += "<circle cx='" + f1(q[0]) + "' cy='" + f1(q[1]) + "' r='17' fill='#fff' stroke='" + b.color + "' stroke-width='6'/><text x='" + f1(q[0]) + "' y='" + f1(q[1] + 5) + "' text-anchor='middle' font-size='13' font-weight='900' fill='" + b.color + "'>" + (i + 1) + "</text>";
+      dessus += icone(et ? tx - 0 : p.cote ? tx + 14 : ax - 96, p.y + 22, i % 6, b.color) + blocTxt(et ? tx + 30 : p.cote ? tx + 40 : tx - 40 + 0, p.y + 4, cw - 40, b, 0).s;
+    });
+    return svgDe(et ? "cm-etroit" : "cm-large", Wd, H, alt, B, tt.s + s + dessus);
+  }
+  function gouttes(C, B, alt, Wd) {
+    var et = Wd < 600, ax = et ? 26 : Wd / 2, cw = et ? Wd - 64 : Wd / 2 - 54, tt = titresAmp(Wd / 2, 18, C, et ? Wd - 60 : 300), s = "", dessus = "";
+    var G = ["#C9D86B", "#A5CF5E", "#74BF63", "#45A866", "#228C63", "#0F6E58", "#0B5A4A"];
+    B.forEach(function (b) { b.hh = hTxt(b, cw - 50) + 30; });
+    var A = alterne(B, Wd, 18 + tt.h + 40, cw, 20), H = A.H + 40, top = 18 + tt.h + 14;
+    for (var y = top, k = 0; y < H - 30; y += 30, k++) s += "<path d='M" + f1(ax - 13) + " " + f1(y) + " L" + f1(ax) + " " + f1(y + 10) + " L" + f1(ax + 13) + " " + f1(y) + " V" + f1(y + 24) + " L" + f1(ax) + " " + f1(y + 34) + " L" + f1(ax - 13) + " " + f1(y + 24) + "Z' fill='" + G[Math.min(G.length - 1, Math.floor(k / Math.max(1, (H - top) / 30 / G.length)))] + "'/>";
+    A.pos.forEach(function (p, i) {
+      var b = B[i], v = G[Math.min(G.length - 1, i)], x = et ? ax + 22 : p.cote ? ax + 26 : ax - 26 - cw, y = p.y, h = p.h, r = Math.min(h / 2, 46), clairT = i < 2;
+      var d = p.cote || et ? "M" + f1(x) + " " + f1(y + h) + " V" + f1(y + r) + " Q" + f1(x) + " " + f1(y) + " " + f1(x + r) + " " + f1(y) + " H" + f1(x + cw - r) + " Q" + f1(x + cw) + " " + f1(y) + " " + f1(x + cw) + " " + f1(y + r) + " V" + f1(y + h - r) + " Q" + f1(x + cw) + " " + f1(y + h) + " " + f1(x + cw - r) + " " + f1(y + h) + "Z"
+        : "M" + f1(x + cw) + " " + f1(y + h) + " V" + f1(y + r) + " Q" + f1(x + cw) + " " + f1(y) + " " + f1(x + cw - r) + " " + f1(y) + " H" + f1(x + r) + " Q" + f1(x) + " " + f1(y) + " " + f1(x) + " " + f1(y + r) + " V" + f1(y + h - r) + " Q" + f1(x) + " " + f1(y + h) + " " + f1(x + r) + " " + f1(y + h) + "Z";
+      var bx = p.cote || et ? x : x + cw;
+      s += "<path d='M" + f1(ax) + " " + f1(y + h - 4) + " q" + f1((p.cote || et ? 1 : -1) * 6) + " -14 " + f1(bx - ax) + " -6' fill='none' stroke='" + v + "' stroke-width='3'/><path d='M" + f1(ax) + " " + f1(y + h) + " q" + f1((p.cote || et ? 1 : -1) * 16) + " -16 " + f1((p.cote || et ? 1 : -1) * 28) + " -4 q" + f1((p.cote || et ? -1 : 1) * 12) + " 10 " + f1((p.cote || et ? -1 : 1) * 28) + " 4Z' fill='#8CC152'/>";
+      var bl = blocTxt(x + 26, y + 14, cw - 50, b, i + 1, { col: clairT ? "#22361A" : "#fff", puce: clairT ? "#3E6B1F" : "#E4F6D2" }).s;
+      dessus += "<g class='cm-h'><path d='" + d + "' fill='" + v + "'/></g>" + (clairT ? bl.replace(/fill='(#2E3445|#3B4456)'/g, "fill='#22361A'") : blanc(bl));
+    });
+    return svgDe(et ? "cm-etroit" : "cm-large", Wd, H, alt, B, tt.s + s + dessus);
+  }
+  function rameaux(C, B, alt, Wd) {
+    var et = Wd < 600, ax = et ? 24 : Wd / 2, cw = et ? Wd - 54 : Wd / 2 - 60, tt = titresAmp(Wd / 2, 18, C, et ? Wd - 60 : 300), s = "", dessus = "", T = "#8A94A6";
+    B.forEach(function (b) { b.hh = Math.max(86, hTxt(b, cw - 110) + 24); });
+    var A = alterne(B, Wd, 18 + tt.h + 50, cw, 20), H = A.H + 60, top = 18 + tt.h + 18;
+    s += "<path d='M" + f1(ax) + " " + f1(top) + " V" + f1(H - 30) + "' stroke='" + T + "' stroke-width='5' stroke-linecap='round'/>";
+    if (!et) [-1, -.5, .5, 1].forEach(function (k) { s += "<path d='M" + f1(ax) + " " + f1(H - 30) + " q" + f1(k * 40) + " 0 " + f1(k * 70) + " 22' fill='none' stroke='" + T + "' stroke-width='3'/><circle cx='" + f1(ax + k * 70) + "' cy='" + f1(H - 6) + "' r='5' fill='#fff' stroke='" + T + "' stroke-width='3'/>"; });
+    A.pos.forEach(function (p, i) {
+      var b = B[i], sg = et || p.cote ? 1 : -1, x = et ? ax + 18 : p.cote ? ax + 40 : ax - 40 - cw, y = p.y, h = p.h, r = Math.min(h / 2, 46), cy = y + h / 2, ix = sg > 0 ? x : x + cw;
+      s += "<path d='M" + f1(ax) + " " + f1(cy + 40) + " C" + f1(ax) + " " + f1(cy) + " " + f1(ix - sg * 20) + " " + f1(cy) + " " + f1(ix) + " " + f1(cy) + "' fill='none' stroke='" + b.color + "' stroke-width='4.5'/>";
+      if (!et) s += "<path d='M" + f1(ax) + " " + f1(cy + 10) + " C" + f1(ax) + " " + f1(cy - 20) + " " + f1(ax - sg * 30) + " " + f1(y - 6) + " " + f1(ax - sg * 46) + " " + f1(y - 6) + "' fill='none' stroke='" + b.color + "' stroke-width='3' opacity='.7'/><circle cx='" + f1(ax - sg * 52) + "' cy='" + f1(y - 6) + "' r='6' fill='#fff' stroke='" + b.color + "' stroke-width='3'/>";
+      var wc = 76, xw = sg > 0 ? x + wc : x;
+      dessus += "<g class='cm-h'><rect x='" + f1(x + 4) + "' y='" + f1(y + 6) + "' width='" + f1(cw) + "' height='" + f1(h) + "' rx='" + f1(r) + "' fill='#0B1A33' opacity='.09'/><rect x='" + f1(x) + "' y='" + f1(y) + "' width='" + f1(cw) + "' height='" + f1(h) + "' rx='" + f1(r) + "' fill='" + b.color + "'/>";
+      dessus += sg > 0 ? "<path d='M" + f1(xw) + " " + f1(y) + " H" + f1(x + cw - r) + " A" + f1(r) + " " + f1(r) + " 0 0 1 " + f1(x + cw) + " " + f1(y + r) + " V" + f1(y + h - r) + " A" + f1(r) + " " + f1(r) + " 0 0 1 " + f1(x + cw - r) + " " + f1(y + h) + " H" + f1(xw) + "Z' fill='#fff'/>" : "<path d='M" + f1(x + cw - wc) + " " + f1(y) + " H" + f1(x + r) + " A" + f1(r) + " " + f1(r) + " 0 0 0 " + f1(x) + " " + f1(y + r) + " V" + f1(y + h - r) + " A" + f1(r) + " " + f1(r) + " 0 0 0 " + f1(x + r) + " " + f1(y + h) + " H" + f1(x + cw - wc) + "Z' fill='#fff'/>";
+      dessus += "<circle cx='" + f1(sg > 0 ? x + wc : x + cw - wc) + "' cy='" + f1(cy) + "' r='9' fill='" + b.color + "'/><text x='" + f1(sg > 0 ? x + wc / 2 - 4 : x + cw - wc / 2 + 4) + "' y='" + f1(cy + 10) + "' text-anchor='middle' font-size='28' font-weight='800' fill='#fff'>" + n2(i) + "</text></g>";
+      dessus += blocTxt(sg > 0 ? x + wc + 18 : x + 26, y + 12, cw - wc - 44, b, 0).s;
+    });
+    return svgDe(et ? "cm-etroit" : "cm-large", Wd, H, alt, B, tt.s + s + dessus);
+  }
+
   /* Tirage d'origine INCHANGÉ (8 formes) : les cartes existantes gardent leur forme. Les formes ajoutées le 24/11/2026
      (« diversifier et enrichir, sans changer ce qui a été fait ») ne remplacent que la radiale tirée au hasard, en alternance. */
-  var FORMES = ["radiale", "organigramme", "bulles", "accolade", "alveoles", "roue", "poisson", "arbre"], NOUVELLES = ["ampoule", "livre", "escalier", "fleur", "liege"], TOUTES = FORMES.concat(NOUVELLES), STYLES = ["main", "colore", "postit"];
+  var FORMES = ["radiale", "organigramme", "bulles", "accolade", "alveoles", "roue", "poisson", "arbre"], NOUVELLES = ["ampoule", "livre", "escalier", "fleur", "liege", "tige", "frisev", "arbreinfo", "route", "fourche", "doodle", "blobs", "arc", "onglets", "capsules", "zigzag", "gouttes", "rameaux"], TOUTES = FORMES.concat(NOUVELLES), STYLES = ["main", "colore", "postit"];
   function hache(t) { var h = 7; for (var i = 0; i < t.length; i++) h = (h * 31 + t.charCodeAt(i)) % 100003; return h; }
 
   /* carte = { centre: "Titre\nSous-titre" | [lignes], branches: [{ label, color?, items: [] }] } */
@@ -745,9 +1053,9 @@
     if (st === "ardoise" && !carte.garderCouleurs) B.forEach(function (b, i) { b.color = ["#FFD166", "#FF8FA3", "#8BE9FD", "#B9F18C", "#FFB86B", "#D0A9FF"][i % 6]; });
     STYLE = st;
     P = "cm" + n + "a";
-    h += forme === "organigramme" ? arbre(C, cp(), alt) : forme === "livre" ? livre(C, cp(), alt, 920) : forme === "escalier" ? escalier(C, cp(), alt, 920) : forme === "fleur" ? fleur(C, cp(), alt, 920) : forme === "liege" ? liege(C, cp(), alt, 920) : forme === "ampoule" ? ampoule(C, cp(), alt, 920) : forme === "roue" ? roue(C, cp(), alt, 920) : forme === "poisson" ? poisson(C, cp(), alt, 920) : forme === "arbre" ? arbreDessin(C, cp(), alt, 920) : forme === "frise" ? frise(C, cp(), alt, 920) : forme === "bulles" ? bulles(C, cp(), alt) : forme === "accolade" ? accolade(C, cp(), alt) : forme === "alveoles" ? alveoles(C, cp(), alt, 920) : forme === "flux" ? flux(C, cp(), alt, 920) : forme === "causes" ? causes(C, cp(), alt, 920, gauche) : large(C, cp(), alt);
+    h += forme === "organigramme" ? arbre(C, cp(), alt) : forme === "onglets" ? onglets(C, cp(), alt, 920) : forme === "capsules" ? capsules(C, cp(), alt, 920) : forme === "zigzag" ? zigzag(C, cp(), alt, 920) : forme === "gouttes" ? gouttes(C, cp(), alt, 920) : forme === "rameaux" ? rameaux(C, cp(), alt, 920) : forme === "tige" ? tige(C, cp(), alt, 920) : forme === "frisev" ? frisev(C, cp(), alt, 920) : forme === "arbreinfo" ? arbreInfo(C, cp(), alt, 920) : forme === "route" ? route(C, cp(), alt, 920) : forme === "fourche" ? fourche(C, cp(), alt, 920) : forme === "doodle" ? doodle(C, cp(), alt, 920) : forme === "blobs" ? blobs(C, cp(), alt, 920) : forme === "arc" ? arc(C, cp(), alt, 920) : forme === "livre" ? livre(C, cp(), alt, 920) : forme === "escalier" ? escalier(C, cp(), alt, 920) : forme === "fleur" ? fleur(C, cp(), alt, 920) : forme === "liege" ? liege(C, cp(), alt, 920) : forme === "ampoule" ? ampoule(C, cp(), alt, 920) : forme === "roue" ? roue(C, cp(), alt, 920) : forme === "poisson" ? poisson(C, cp(), alt, 920) : forme === "arbre" ? arbreDessin(C, cp(), alt, 920) : forme === "frise" ? frise(C, cp(), alt, 920) : forme === "bulles" ? bulles(C, cp(), alt) : forme === "accolade" ? accolade(C, cp(), alt) : forme === "alveoles" ? alveoles(C, cp(), alt, 920) : forme === "flux" ? flux(C, cp(), alt, 920) : forme === "causes" ? causes(C, cp(), alt, 920, gauche) : large(C, cp(), alt);
     P = "cm" + n + "b";
-    h += forme === "livre" ? livre(C, cp(), alt, 400) : forme === "escalier" ? escalier(C, cp(), alt, 400) : forme === "fleur" ? fleur(C, cp(), alt, 400) : forme === "liege" ? liege(C, cp(), alt, 400) : forme === "ampoule" ? ampoule(C, cp(), alt, 400) : forme === "roue" ? roue(C, cp(), alt, 400) : forme === "poisson" ? poisson(C, cp(), alt, 400) : forme === "arbre" ? arbreDessin(C, cp(), alt, 400) : forme === "frise" ? frise(C, cp(), alt, 400) : forme === "bulles" ? bullesEtroit(C, cp(), alt) : forme === "accolade" ? accoladeEtroit(C, cp(), alt) : forme === "alveoles" ? alveoles(C, cp(), alt, 400) : forme === "flux" ? flux(C, cp(), alt, 400) : forme === "causes" ? causes(C, cp(), alt, 400, gauche) : etroit(C, cp(), alt);
+    h += forme === "onglets" ? onglets(C, cp(), alt, 400) : forme === "capsules" ? capsules(C, cp(), alt, 400) : forme === "zigzag" ? zigzag(C, cp(), alt, 400) : forme === "gouttes" ? gouttes(C, cp(), alt, 400) : forme === "rameaux" ? rameaux(C, cp(), alt, 400) : forme === "tige" ? tige(C, cp(), alt, 400) : forme === "frisev" ? frisev(C, cp(), alt, 400) : forme === "arbreinfo" ? arbreInfo(C, cp(), alt, 400) : forme === "route" ? route(C, cp(), alt, 400) : forme === "fourche" ? fourche(C, cp(), alt, 400) : forme === "doodle" ? doodle(C, cp(), alt, 400) : forme === "blobs" ? blobs(C, cp(), alt, 400) : forme === "arc" ? arc(C, cp(), alt, 400) : forme === "livre" ? livre(C, cp(), alt, 400) : forme === "escalier" ? escalier(C, cp(), alt, 400) : forme === "fleur" ? fleur(C, cp(), alt, 400) : forme === "liege" ? liege(C, cp(), alt, 400) : forme === "ampoule" ? ampoule(C, cp(), alt, 400) : forme === "roue" ? roue(C, cp(), alt, 400) : forme === "poisson" ? poisson(C, cp(), alt, 400) : forme === "arbre" ? arbreDessin(C, cp(), alt, 400) : forme === "frise" ? frise(C, cp(), alt, 400) : forme === "bulles" ? bullesEtroit(C, cp(), alt) : forme === "accolade" ? accoladeEtroit(C, cp(), alt) : forme === "alveoles" ? alveoles(C, cp(), alt, 400) : forme === "flux" ? flux(C, cp(), alt, 400) : forme === "causes" ? causes(C, cp(), alt, 400, gauche) : etroit(C, cp(), alt);
     STYLE = "main";
     return "<div class='cm cm-" + forme + " cm-s-" + st + "' data-forme='" + forme + "'>" + h + "</div>";
   }
