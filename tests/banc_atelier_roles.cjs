@@ -220,7 +220,7 @@ function statutNavigateur(e) {
     r = await pousse(B.jeton, [], { epSuppr: { e9: Date.now() } });
     dire(!((etatServeur(gid).epSuppr || {}).e9), 'B n’efface pas chez tous une épreuve validée', JSON.stringify(etatServeur(gid).epSuppr));
     await pousse(B.jeton, [epreuve('brB', { ownerId: B.id, updatedAt: tic() })]);
-    await pousse(B.jeton, [], { epSuppr: { brB: Date.now() } });
+    await pousse(B.jeton, [], { epSuppr: { brB: tic() } });  // tic() et non Date.now() : l'horloge du banc peut avoir pris de l'avance sur updatedAt (échecs intermittents des déploiements 935 et 937)
     dire(!!((etatServeur(gid).epSuppr || {}).brB), 'B supprime son propre brouillon');
     dire(!ep(gid, 'brB').id, 'et le brouillon supprimé quitte l’état du serveur (il n’est plus renvoyé à chaque tirage)');
     await pousse(B.jeton, [epreuve('brL', { ownerId: B.id, updatedAt: tic() })]);
