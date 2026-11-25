@@ -1,3 +1,7 @@
+## Apprendre : géographie de 6e, lot 2 gratuit (25/11/2026, branche geo-6e-lot2)
+
+Suite du lot 1 (#446). Fichier `apprendre/_src/44-geo-6e-2.js`, 3 leçons GRATUITES : rang 4 `6e-geo-terre-mouvement` (rotation, révolution, année bissextile), rang 5 `6e-geo-tp-calcul-heure` (15° = 1 h, 1° = 4 min, fuseaux, Cameroun UTC + 1), rang 6 `6e-geo-tp-representations-terre` (globe, planisphère, Mercator, Afrique ≈ 14 × Groenland, échelles). Suite prévue : rangs 7 à 12 (environnement, milieux bioclimatiques du Cameroun…).
+
 ## Apprendre : lot 14 d'anglais de 1re (A, C, D) à verrou — compétences et grammaire (25/11/2026, branche apprendre-anglais-1re-lot14)
 
 Demande de Jacques : « fusionne, déploie et continue avec les autres leçons » (#448 fusionnée). Lignes sans leçon vérifiées (rang + `cle`) sur master.
