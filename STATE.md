@@ -1,3 +1,16 @@
+## Apprendre : lot 14 d'anglais de 1re (A, C, D) à verrou — compétences et grammaire (25/11/2026, branche apprendre-anglais-1re-lot14)
+
+Demande de Jacques : « fusionne, déploie et continue avec les autres leçons » (#448 fusionnée). Lignes sans leçon vérifiées (rang + `cle`) sur master.
+
+- 6 leçons NOUVELLES à verrou, chacune posée en 1re A, 1re C et 1re D, soit 18 JSON hors dépôt :
+  - rang 20 `1re-x-anglais-reading-personal-finances` (règle 50/30/20, « pay yourself first ») ;
+  - rang 33 `1re-x-anglais-reading-communicable-diseases` (dépliant sur le choléra, faits et croyances) ;
+  - rang 54 `1re-x-anglais-used-for-with` (used for / in / with, trois sens de used to) ;
+  - rang 56 `1re-x-anglais-listening-icts` (exposé sur les TIC, tableau usage / avantage / risque) ;
+  - rang 57 `1re-x-anglais-how-questions` (how much / many / long / often / far, questions indirectes) ;
+  - rang 59 `1re-x-anglais-preferences-punctuation` (prefer… to, would rather, ponctuation, it's / its).
+- Contrôles : build officiel sur copie (18 à verrou), bancs verrou et gabarits verts, `build_llms.py --controle`, 15 contrôles GEO ; Chromium 390/1200 px visiteur et abonné sans erreur.
+
 ## Apprendre : géographie de 6e, lot 1 gratuit (25/11/2026, branche geo-6e-lot1)
 
 Demande de Jacques : « continue l'enrichissement des leçons ». Aucune leçon de géographie de 6e n'existait (vérifié sur master et dans les PR ouvertes).
