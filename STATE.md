@@ -1,3 +1,100 @@
+## Apprendre : géographie de 6e, lot 2 gratuit (25/11/2026, branche geo-6e-lot2)
+
+Suite du lot 1 (#446). Fichier `apprendre/_src/44-geo-6e-2.js`, 3 leçons GRATUITES : rang 4 `6e-geo-terre-mouvement` (rotation, révolution, année bissextile), rang 5 `6e-geo-tp-calcul-heure` (15° = 1 h, 1° = 4 min, fuseaux, Cameroun UTC + 1), rang 6 `6e-geo-tp-representations-terre` (globe, planisphère, Mercator, Afrique ≈ 14 × Groenland, échelles). Suite prévue : rangs 7 à 12 (environnement, milieux bioclimatiques du Cameroun…).
+
+## Apprendre : lot 14 d'anglais de 1re (A, C, D) à verrou — compétences et grammaire (25/11/2026, branche apprendre-anglais-1re-lot14)
+
+Demande de Jacques : « fusionne, déploie et continue avec les autres leçons » (#448 fusionnée). Lignes sans leçon vérifiées (rang + `cle`) sur master.
+
+- 6 leçons NOUVELLES à verrou, chacune posée en 1re A, 1re C et 1re D, soit 18 JSON hors dépôt :
+  - rang 20 `1re-x-anglais-reading-personal-finances` (règle 50/30/20, « pay yourself first ») ;
+  - rang 33 `1re-x-anglais-reading-communicable-diseases` (dépliant sur le choléra, faits et croyances) ;
+  - rang 54 `1re-x-anglais-used-for-with` (used for / in / with, trois sens de used to) ;
+  - rang 56 `1re-x-anglais-listening-icts` (exposé sur les TIC, tableau usage / avantage / risque) ;
+  - rang 57 `1re-x-anglais-how-questions` (how much / many / long / often / far, questions indirectes) ;
+  - rang 59 `1re-x-anglais-preferences-punctuation` (prefer… to, would rather, ponctuation, it's / its).
+- Contrôles : build officiel sur copie (18 à verrou), bancs verrou et gabarits verts, `build_llms.py --controle`, 15 contrôles GEO ; Chromium 390/1200 px visiteur et abonné sans erreur.
+
+## Apprendre : géographie de 6e, lot 1 gratuit (25/11/2026, branche geo-6e-lot1)
+
+Demande de Jacques : « continue l'enrichissement des leçons ». Aucune leçon de géographie de 6e n'existait (vérifié sur master et dans les PR ouvertes).
+
+- Fichier `apprendre/_src/43-geo-6e.js`, 3 leçons GRATUITES : rang 1 `6e-geo-la-geographie` (plan d'un quartier de Yaoundé, échelle), rang 2 `6e-geo-notre-planete-terre` (Garoua, rondeur, circonférence 2πR, 71 % de mers), rang 3 `6e-geo-tp-localiser-lieu` (jeu radio, latitude/longitude, 1° ≈ 111 km).
+- Suite prévue : rangs 4 à 6 (mouvements de la Terre, TP calcul de l'heure, représentations de la Terre).
+## Apprendre : lot 13 d'anglais de 1re (A, C, D) à verrou — grammaire (25/11/2026, branche apprendre-anglais-1re-lot13)
+
+Demande de Jacques : « oui fusionne et continue les autres leçons ». Anglais de 3e terminé (lots 8 à 12 fusionnés). Recensement de l'anglais de 1re et de Tle (rang + `cle`) : 11 lignes couvertes en 1re, 15 en Tle ; aucune PR ouverte sur l'anglais.
+
+- 6 leçons de grammaire NOUVELLES à verrou, chacune posée en 1re A, 1re C et 1re D (même rang dans les trois progressions), soit 18 JSON hors dépôt :
+  - rang 21 `1re-x-anglais-so-neither` (So do I / Neither did I / too / either) ;
+  - rang 23 `1re-x-anglais-partitives` (a bag of rice, a piece of advice, loaves) ;
+  - rang 36 `1re-x-anglais-compound-nouns` (mosquito nets, mothers-in-law, a ten-day campaign) ;
+  - rang 41 `1re-x-anglais-conjunctions` (although / despite / however / since / for) ;
+  - rang 44 `1re-x-anglais-each-other` (each, every, each of, each other, one another) ;
+  - rang 47 `1re-x-anglais-negative-adverbs` (hardly, seldom, never ; inversion ; hardly… when).
+- Contrôles : build officiel sur copie (18 à verrou), bancs verrou et gabarits verts, `build_llms.py --controle`, 15 contrôles GEO ; Chromium 390/1200 px visiteur et abonné sans erreur ; 3D contrôlées.
+- Suite prévue : anglais de 1re (compétences et grammaire restante : 54, 57, 59…), puis anglais de Tle.
+
+## Apprendre : lot 12 d'anglais de 3e à verrou — l'anglais de 3e est couvert (25/11/2026, branche apprendre-anglais-3e-lot12, PR #445)
+
+Demande de Jacques : « continue ». Dernières lignes d'anglais de 3e sans leçon (rang + `cle`, master + #430/#436/#438/#440).
+
+- 3 leçons NOUVELLES à verrou (sources et JSON HORS dépôt, livrés en privé ; JSON à déposer dans `uploads/protected/apprendre/`) :
+  - rang 1 `3e-anglais-speaking-other-cultures` (camp national des jeunes, cultures et stéréotypes) ;
+  - rang 82 `3e-anglais-listening-democracy-course` (formation à la démocratie à Buea, prise de notes) ;
+  - rang 111 `3e-anglais-reading-smartphones` (guide de dépannage d'un téléphone Android, stockage).
+- Avec les lots 8 à 12, chaque intitulé distinct de la progression d'anglais de 3e a sa leçon ; les lignes qui répètent un intitulé (2e passage du module) ne sont pas redoublées.
+- Contrôles : build officiel sur copie (3 à verrou), bancs verrou et gabarits verts, `build_llms.py --controle`, 15 contrôles GEO ; Chromium 390/1200 px visiteur et abonné sans erreur ; 3D contrôlées.
+- ⚠️ Ne pas fusionner avant le dépôt FTP. Conflit attendu avec les autres PR d'aperçus de 3e : prendre master et relancer `ajouter_apercus`.
+
+## Apprendre : lot 11 d'anglais de 3e à verrou (25/11/2026, branche apprendre-anglais-3e-lot11)
+
+Demande de Jacques : « continue les autres leçons en évitant les doublons ». Suite des leçons de compétences d'anglais de 3e (modules 1, 4 et 5), sans recouvrement avec master ni avec #430/#436/#438 (rang + `cle` vérifiés).
+
+- 6 leçons NOUVELLES à verrou (sources et JSON HORS dépôt, livrés en privé ; JSON à déposer dans `uploads/protected/apprendre/`) :
+  - rang 4 `3e-anglais-listening-neighbours-religions` (voisins chrétiens et musulmans à Ngaoundéré) ;
+  - rang 7 `3e-anglais-reading-tolerance` (texte « Different, but equal », inclusion d'un élève en fauteuil) ;
+  - rang 79 `3e-anglais-speaking-gender-equality` (club de jeunes près de Bertoua, décrochage des filles) ;
+  - rang 85 `3e-anglais-reading-polls-surveys` (sondage sur la cantine à Limbe, pourcentages) ;
+  - rang 105 `3e-anglais-speaking-service-packages` (forfaits internet à Bamenda, prix par Go) ;
+  - rang 108 `3e-anglais-listening-complaints` (réclamation polie au service client, dédommagement).
+- Restent en anglais de 3e (lot 12 possible) : rangs 1 (Speaking, cultures), 82 (Listening, formation à la démocratie), 111 (Reading, smartphones).
+- Contrôles : build officiel sur copie (6 à verrou), bancs verrou et gabarits verts, `build_llms.py --controle`, 15 contrôles GEO ; Chromium 390/1200 px visiteur et abonné sans erreur ; 3D contrôlées.
+- ⚠️ Ne pas fusionner avant le dépôt FTP. Conflit attendu avec les autres PR d'aperçus de 3e : prendre master et relancer `ajouter_apercus`.
+## Apprendre : lot 10 d'anglais de 3e à verrou (24/11/2026, branche apprendre-anglais-3e-lot10)
+
+Demande de Jacques : « continue les autres leçons en évitant les doublons ». Recensement (rang + cle, master + PR #430/#436) : toute la grammaire et les rédactions d'anglais de 3e sont couvertes ; restent les leçons de compétences (Speaking, Listening, Reading + vocabulaire). Les lignes répétées de la progression (2e occurrence d'un même intitulé) ne sont pas redoublées.
+
+- 6 leçons NOUVELLES à verrou (sources et JSON HORS dépôt, livrés en privé ; JSON à déposer dans `uploads/protected/apprendre/`) :
+  - rang 27 `3e-anglais-speaking-restaurant` (commander poliment, vérifier l'addition) ;
+  - rang 30 `3e-anglais-listening-accommodation` (écouter un bailleur, tableau, avance) ;
+  - rang 33 `3e-anglais-reading-best-buys` (skimming / scanning, prix unitaire) ;
+  - rang 53 `3e-anglais-speaking-environment` (inondations de Douala, opinions, suggestions) ;
+  - rang 56 `3e-anglais-listening-weather` (bulletin météo, harmattan, tableau par ville) ;
+  - rang 59 `3e-anglais-reading-climate-change` (lac Tchad, deviner le sens par le contexte).
+- Dépôt : seulement le début public (bloc « AJOUT lot 10 anglais 3e (abonnés) » de `apercus-3e.js`) + `charge.js?v=`.
+- Contrôles : build officiel sur copie (6 à verrou), bancs verrou et gabarits verts, `build_llms.py --controle`, 15 contrôles GEO ; Chromium 390/1200 px visiteur et abonné sans erreur ; 3D contrôlées (leçon pour les maquettes : un sol en `div: false` masque les objets minces placés au fond).
+- ⚠️ Ne pas fusionner avant le dépôt FTP. Conflit attendu avec #430/#436/#435 sur `apercus-3e.js`/`charge.js` : prendre master et relancer `ajouter_apercus`.
+## Apprendre : lot 9 d'anglais de 3e à verrou (24/11/2026, branche apprendre-anglais-3e-lot9)
+
+Demande de Jacques : « continue les autres leçons » (partage convenu : anglais de 3e = cette session, français de 3e = session lot 4).
+
+- 6 leçons NOUVELLES à verrou (sources et JSON HORS dépôt, livrés en privé ; JSON à déposer par FTP dans `uploads/protected/apprendre/`) :
+  - rang 62 `3e-anglais-adjective-structures` (too… to, enough, so/such, How/What) ;
+  - Writing (Section D du BEPC), une rédaction par module : rang 12 `3e-anglais-writing-informal-letter` (lettre à un correspondant sur la fin du Ramadan), 38 `3e-anglais-writing-leisure` (composition sur les loisirs), 64 `3e-anglais-writing-formal-letter` (lettre au maire : ramassage des ordures, recyclage), 90 `3e-anglais-writing-speech` (discours de campagne de préfet), 116 `3e-anglais-writing-argumentative` (essai : se détendre avec les jeux vidéo et les téléphones).
+- Dépôt : seulement le début public (bloc « AJOUT lot 9 anglais 3e (abonnés) » de `apercus-3e.js`) + `charge.js?v=` recalculé.
+- Contrôles : construction officielle sur copie (6 à verrou), bancs verrou et gabarits au vert, `build_llms.py --controle`, 15 contrôles GEO de deploy.yml ; Chromium 390/1200 px visiteur et abonné : aucune erreur, mur visiteur, 3D contrôlées.
+- ⚠️ Ne pas fusionner avant le dépôt FTP des 6 JSON. Conflit attendu avec #430 sur `apercus-3e.js` / `charge.js` : prendre la version de master et relancer `ajouter_apercus`.
+## Apprendre : lot 8 anglais de 3e, leçons à verrou — purpose, word order in questions, sequence markers (24/11/2026, branche apprendre-anglais-3e-lot8)
+
+Demande de Jacques : « continue » après le déploiement des lots 6 et 7 de philosophie (n° 944). Aucune autre leçon touchée.
+
+- **Collision évitée** : ce lot visait 8 points de grammaire, mais la PR #426 (session du lot 4), fusionnée pendant l'écriture, a publié 5 d'entre eux sous les MÊMES identifiants (`3e-anglais-comparatives` 28, `-complex-sentences` 34, `-gerunds` 36, `-question-tags` 83, `-phrasal-verbs` 88). Ces 5 bases restent dans la source mais ne sont pas posées ; seuls 3 rangs non couverts sont publiés. Leçon à retenir : refaire le contrôle des identifiants sur master JUSTE avant de pousser, et annoncer le partage AVANT d'écrire (les annonces se sont croisées).
+- **3 leçons NOUVELLES réservées aux abonnés, rédigées en anglais** : `3e-anglais-purpose` (31 : to / in order to / so as to / so that, apprentie couturière d'Ebolowa), `3e-anglais-word-order-questions` (86 : Wh- + auxiliary + subject + verb, questionnaire du conseil des jeunes de Mamfe), `3e-anglais-sequence-markers` (114 : first, then, after that, finally / at last, voyage Douala-Kribi). Gabarit complet : 3 hypothèses, situation résolue, 2 planches 2D, 1 planche 3D, labo « choix », Section D: Composition writing, 10 QCM.
+- Source `43-examens-anglais-3e-8.js` (HORS DÉPÔT) et 3 JSON publiés en artifact privé pour la compilation FTP de la session du lot 4. Aperçus : bloc « AJOUT lot 8 anglais 3e (abonnés) » dans `apercus-3e.js`.
+- Vérifié : build officiel sur copie ; aucun identifiant ni rang en double sur master 22a1798 ; Chromium 390 et 1200 px visiteur et abonné, aucune erreur ni débordement ; bancs verrou 18/18, gabarits 54/54 ; les 15 contrôles de deploy.yml au vert.
+- **Recensement des lettres des classes d'examen (rang et `cle`)** : la philosophie n'a plus de ligne au contenu non traité ; les plus gros manques sont le français de 1re A, Tle A et 3e, l'anglais (3e : vocabulaire, listening, reading, writing ; 1re et Tle), les langues rares, l'orientation, les arts et les cultures nationales. Se partager ces matières avec la session du lot 4 avant d'écrire.
+
 ## Cartes mentales : les nouveaux styles adoptés partout (24/11/2026, branche cartes-partout)
 
 Demande de Jacques : « adopte aussi les nouveaux styles de cartes mentales ».
@@ -133,7 +230,7 @@ Demande de Jacques : « continue ».
 - Histoire de 6e : rangs 1, 2, 4, 6, 8, 10, 12, 14, 16 couverts (9 leçons). Restent les TD et dossiers (3, 5, 7, 9, 13, 15, 21) et les religions (17 à 20).
 - Audit 89/89 ; `lecons.js?v=20261124h8` ; pages générées → `git add` → habillage (825 pages) → contrôle au vert. Chromium (Pixel 5, 1200 px) : aucune erreur, aucun débordement.
 - Capture des planches 3D : la fenêtre du badge « Premier pas » s'ouvre quand la page est lue jusqu'au bout et masque l'écran ; pour une capture, aller directement à la planche sans parcourir toute la page.
-## Apprendre : SVT de Tle D, leçons à verrou RÉÉCRITES, lots sciences 1 à 4 (19-24/11/2026, branches svt-tle-d-reecrites puis svt-tle-d-lot4)
+## Apprendre : SVT de Tle D, leçons à verrou RÉÉCRITES, lots sciences 1 à 6 (19-25/11/2026, branches svt-tle-d-reecrites, svt-tle-d-lot4, svt-tle-d-lot5)
 
 Demande de Jacques : « J'ai identifié beaucoup d'autres leçons non enrichies (situation-problème, résolution par étapes, animations…), notamment en Tle D », puis « Oui, réécris-les entièrement », « Continue les autres leçons », « continue ».
 
@@ -141,6 +238,8 @@ Demande de Jacques : « J'ai identifié beaucoup d'autres leçons non enrichies 
 - **Lot sciences 1 (rangs 2 à 8)** : osmose et dialyse, substances dissoutes (SRO), intégration perfusion, fibre musculaire, contraction, restauration de l'ATP, intégration crampes. **Lot sciences 2 (rangs 9 à 16)** : gonades des mammifères, organes reproducteurs des spermaphytes, méiose, gamétogenèse des mammifères, gamétogenèse des spermaphytes, fécondation des mammifères, pollinisation et double fécondation, intégration « 46 et non 92 chromosomes ». **Lot sciences 3 (rangs 17 à 23)** : monohybridisme avec dominance (porcs de Bafia), dominance intermédiaire et codominance (belles-de-nuit de Buea, groupes ABO), gène lié à X (drosophiles, croisements réciproques), dihybridisme (maïs 9-3-3-1), trihybridisme (2ⁿ gamètes, 27/64), gènes liés et crossing-over (17 cM), allèle létal / polygénie / épistasie.
 - Chaque leçon : situation-problème camerounaise (documents chiffrés, 3 hypothèses tranchées par 3 indices), ≥ 2 définitions/formules, ≥ 2 exemples, ≥ 2 astuces, 2 à 3 planches 2D, 1 planche 3D (vue éclatée ou animée par curseur), labo « choix », « etapes » ou « caryotype », situation résolue avec 4 formules étape par étape, transfert, 10 QCM, partie B d'examen. Audit SVT Tle D : **22/97 complètes**.
 - **Lot sciences 4 (rangs 24 à 31, génétique humaine)** : mutations et importance du brassage, intégration brassages et unicité génétique, arbre généalogique, transmissions autosomiques, transmissions gonosomiques (hémophilie, famille Ateba de Yaoundé), évaluer un risque génétique (couple Kamga de Bafoussam : 2/3 × 1 × 1/4 = 1/6), applications de la génétique humaine (électrophorèse et dépistage néonatal à Kumba, q ≈ 0,12), intégration causerie sur la drépanocytose (lycée de Mbalmayo, 19 juin). Rendu Chromium des 8 leçons à 1200 et 390 px : enquête, 3 hypothèses, 3 planches 2D, 1 planche 3D, labo, fil, dénouement à 4 formules, aucun débordement. Livraison `livraison-svt-tle-d-lot4.zip` (sources hors dépôt + 8 JSON).
+- **Lot sciences 5 (rangs 32 à 36, tissu nerveux et réflexes)** : structure du tissu nerveux (dissection à Bamenda, t = d ÷ v, myéline), arc réflexe médullaire (marmite d'Ebolowa, grenouille spinale, temps du réflexe ≈ 32 ms), réflexe myotatique (dispensaire de Sangmélima, délai central 21 − 20 = 1 ms → monosynaptique, neuropathie diabétique), réflexes conditionnels (poules de Foumban, Pavlov, acquisition et extinction), intégration sécurité routière (moto-taxi de Bafoussam : distance d'arrêt 24,2 m sobre, 30,5 m après 0,5 g/L). Rendu Chromium des 5 leçons à 1200 et 390 px complet, aucun débordement. Livraison `livraison-svt-tle-d-lot5.zip`.
+- **Lot sciences 6 (rangs 37 à 41, message nerveux)**, sur la même branche et la même PR que le lot 5 : potentiel de repos (axone de calmar à Buea, E(K⁺) = 58 log(20/400) ≈ −75 mV, pompe Na⁺/K⁺ et cyanure), potentiel d'action (Dschang : seuil, tout ou rien, codage en fréquence), naissance du PA (poisson-globe à Kribi : Na⁺ entre, K⁺ sort, TTX et TEA), propagation (canal carpien à Douala : v = 0,25 ÷ 0,004 = 62,5 m/s, saltation), intégration (fer chaud à Garoua : Aβ 24 ms, Aδ 80 ms, C 1,2 s ; lidocaïne, glace). Notation E(K⁺)/E(Na⁺) (pas de balise sub dans les QCM et labos). La 1re partie (gratuite) doit porter un `def(…)` : la chaîne le vérifie. Livraison `livraison-svt-tle-d-lot6.zip`.
 - **Outils** : `VRT_QCMR` / `VRT_EXAMR` dans `build_apprendre_payant.cjs` ; `--remplace` dans `ajouter_apercus.cjs` ; `--payant` dans `audit_lecons.cjs`. Sources `40-tle-d-svt-*.js` HORS DÉPÔT ; livraisons `livraison-svt-tle-d-lot1.zip` (8 sources + 7 JSON) `livraison-svt-tle-d-lot2.zip` (9 sources dont les aides à jour + 8 JSON) et `livraison-svt-tle-d-lot3.zip` (8 sources dont les aides à jour, avec l'échiquier de croisement + 7 JSON) remises à Jacques. **Tant que les JSON ne sont pas déposés par FTP, un abonné voit l'ANCIENNE suite sous le nouveau début.**
 - Blocs d'aperçus « lot sciences 1 », « 2 » et « 3 » (noms distincts des « AJOUT lot N » de philosophie). La branche part de master à jour : les blocs ont été RÉGÉNÉRÉS par `ajouter_apercus.cjs`, jamais fusionnés à la main. (L'ancienne branche `svt-tle-d-reecrites-lot1` est remplacée par celle-ci.)
 - Vérifié : build officiel sur copie (fiches APC d'essai) sans erreur ; Chromium 1200 et 390 px, visiteur et abonné (suite servie par interception de `api/apprendre.php`) : aucune erreur JS, aucun débordement ; bancs Apprendre et empreintes au vert.
