@@ -1,3 +1,17 @@
+## Apprendre : lot 11 d'anglais de 3e à verrou (25/11/2026, branche apprendre-anglais-3e-lot11)
+
+Demande de Jacques : « continue les autres leçons en évitant les doublons ». Suite des leçons de compétences d'anglais de 3e (modules 1, 4 et 5), sans recouvrement avec master ni avec #430/#436/#438 (rang + `cle` vérifiés).
+
+- 6 leçons NOUVELLES à verrou (sources et JSON HORS dépôt, livrés en privé ; JSON à déposer dans `uploads/protected/apprendre/`) :
+  - rang 4 `3e-anglais-listening-neighbours-religions` (voisins chrétiens et musulmans à Ngaoundéré) ;
+  - rang 7 `3e-anglais-reading-tolerance` (texte « Different, but equal », inclusion d'un élève en fauteuil) ;
+  - rang 79 `3e-anglais-speaking-gender-equality` (club de jeunes près de Bertoua, décrochage des filles) ;
+  - rang 85 `3e-anglais-reading-polls-surveys` (sondage sur la cantine à Limbe, pourcentages) ;
+  - rang 105 `3e-anglais-speaking-service-packages` (forfaits internet à Bamenda, prix par Go) ;
+  - rang 108 `3e-anglais-listening-complaints` (réclamation polie au service client, dédommagement).
+- Restent en anglais de 3e (lot 12 possible) : rangs 1 (Speaking, cultures), 82 (Listening, formation à la démocratie), 111 (Reading, smartphones).
+- Contrôles : build officiel sur copie (6 à verrou), bancs verrou et gabarits verts, `build_llms.py --controle`, 15 contrôles GEO ; Chromium 390/1200 px visiteur et abonné sans erreur ; 3D contrôlées.
+- ⚠️ Ne pas fusionner avant le dépôt FTP. Conflit attendu avec les autres PR d'aperçus de 3e : prendre master et relancer `ajouter_apercus`.
 ## Apprendre : lot 10 d'anglais de 3e à verrou (24/11/2026, branche apprendre-anglais-3e-lot10)
 
 Demande de Jacques : « continue les autres leçons en évitant les doublons ». Recensement (rang + cle, master + PR #430/#436) : toute la grammaire et les rédactions d'anglais de 3e sont couvertes ; restent les leçons de compétences (Speaking, Listening, Reading + vocabulaire). Les lignes répétées de la progression (2e occurrence d'un même intitulé) ne sont pas redoublées.
