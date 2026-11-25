@@ -476,6 +476,20 @@
   "u": "/ressources/annales/bepc-pct-2023.html"
  },
  {
+  "id": "bac-physique-c-2026",
+  "examen": "bac",
+  "m": "physique",
+  "serie": "série C",
+  "nomExamen": "Baccalauréat",
+  "fiche": "ressources/examen-physique-chimie-bac.html",
+  "matiere": "Physique (série C)",
+  "mat": "physique",
+  "classes": "Tle C",
+  "annee": 2026,
+  "national": false,
+  "u": "/ressources/annales/bac-physique-c-2026.html"
+ },
+ {
   "id": "bac-physique-c-2025",
   "examen": "bac",
   "m": "physique",

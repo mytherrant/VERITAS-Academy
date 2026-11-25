@@ -1434,4 +1434,25 @@ S["bac-2026-maths-dti-courbe"] = () => {
   g += point(X, Y, 0, 2, "", 0, 0) + point(X, Y, -2, 0, "", 0, 0) + T([X(-4.6), Y(-4.6)], "(C", ' font-size="13" font-style="italic"') + T([X(-4.6) + 18, Y(-4.6) + 4], "f", ' font-size="10" font-style="italic"') + T([X(-4.6) + 24, Y(-4.6)], ")", ' font-size="13" font-style="italic"');
   return svg(R.W, R.H, g, "Courbe de f sur ]−∞ ; 0] : elle monte depuis −∞, coupe l'axe des abscisses en x = −2 et atteint son maximum 2 en x = 0, où la tangente est horizontale.");
 };
+// BAC 2026 physique C, exercice 3B : balancier (tige de longueur L, disque de rayon R soudé à l'extrémité), axe (Δ) en O.
+S["bac-2026-physique-c-balancier"] = () => {
+  const fs = ' font-size="13" font-weight="700"';
+  let g = L([40, 22], [110, 22], ' stroke-width="2.2"') + L([75, 22], [75, 30], ' stroke-width="1.6"');
+  g += '<circle cx="75" cy="34" r="4" stroke-width="1.4"/>' + L([75, 38], [75, 128], ' stroke-width="2.4"') + '<circle cx="75" cy="160" r="32" stroke-width="2.2"/>';
+  g += T([10, 30], "(Δ)", fs) + T([84, 38], "O", ' font-size="12" font-style="italic"');
+  return svg(130, 200, g, "Balancier : une tige rigide de longueur L, suspendue à l'axe (Δ) en O, porte à son extrémité un disque de rayon R.");
+};
+// BAC 2026 physique C, situation 1 : lanceur à ressort, piste HO, chute de O vers le plan des trous E, F, G.
+S["bac-2026-physique-c-lanceur"] = () => {
+  const fs = ' font-size="13" font-weight="700"', fi = ' font-size="12" font-style="italic"';
+  let g = L([20, 60], [210, 60], ' stroke-width="1.8"') + L([210, 60], [380, 60], ' stroke-width="1" stroke-dasharray="4 3"') + fleche([388, 60], [378, 60], 6) + T([392, 64], "x", fi);
+  g += '<circle cx="34" cy="52" r="4" stroke-width="1.4"/>' + L([38, 52], [56, 52], ' stroke-width="1.6"');
+  let z = "M56 52"; for (let i = 0; i < 8; i++) z += " L" + (60 + i * 7) + " " + (i % 2 ? 58 : 46); z += " L116 52";
+  g += '<path d="' + z + '" stroke-width="1.4"/>' + L([116, 44], [116, 60], ' stroke-width="2"') + '<circle cx="126" cy="51" r="8" fill="currentColor" fill-opacity="0.25" stroke-width="1.4"/>';
+  g += L([210, 60], [210, 200], ' stroke-width="1.8"') + fleche([210, 214], [210, 204], 6) + T([196, 216], "y", fi);
+  g += L([210, 160], [380, 160], ' stroke-width="1.8"');
+  for (const [x, n] of [[260, "E"], [310, "F"], [360, "G"]]) g += '<path d="M' + (x - 10) + ' 160 Q' + x + ' 178 ' + (x + 10) + ' 160" stroke-width="1.8"/>' + T([x - 4, 194], n, fs);
+  g += T([28, 44], "A", fs) + T([120, 40], "(S)", fs) + T([122, 80], "H", fs) + T([214, 52], "O", fs) + T([196, 156], "B", fs);
+  return svg(410, 226, g, "Document 1 : la poignée A comprime un ressort qui pousse la boule (S) placée en H ; la boule parcourt le plan horizontal jusqu'en O, puis tombe vers le plan situé 10 cm plus bas, où se trouvent les trous E, F et G, régulièrement espacés à partir de B, à la verticale de O.");
+};
 module.exports = S;
