@@ -1,3 +1,12 @@
+## Apprendre : cultures nationales de 3e, lot 3 à verrou — la matière est couverte en 3e (25/11/2026, branche apprendre-cultures-3e-lot3)
+
+Suite des lots 1 et 2 (#456, fusionnée et déployée avant le FTP, à la demande de Jacques). Rangs vérifiés libres sur master juste avant d'écrire.
+
+- 6 leçons NOUVELLES à verrou, source `46-examens-cultures-3e-3.js` HORS dépôt : rang 16 `3e-cultures-code-moral` (portefeuille trouvé à Obala, veillée et conte de la tortue ; 3D : veillée autour du feu), rang 17 `3e-cultures-code-penal` (vol de chèvre à Mbouda, palabre, réparation, ordalies interdites, justice populaire = crime ; 3D : arbre à palabres), rang 18 `3e-cultures-proverbes-devinettes` (réunion de famille à Bafia ; sens littéral / figuré ; 3D : jeu de devinettes sous la lune), rang 20 `3e-cultures-signes-symboles` (tam-tam, feuilles nouées, arbre de paix ; schéma de la communication ; 3D : entrée de chefferie), rang 21 `3e-cultures-symboles-oraux` (tambour à fente béti, langues à tons, noms de tambour, chants moqueurs ; 3D : tambour à fente), rang 22 `3e-cultures-symboles-visuels` (chefferie de l'Ouest : kaolin, ndop, panthère, araignée, masques ; 3D : case de chefferie).
+- Avec les lots 1 et 2 : **18 leçons pour les 18 rangs de contenu** des cultures nationales de 3e (les 5 lignes « Intégration » ne sont pas traitées).
+- Contrôles : build officiel sur copie (6 à verrou) ; audit payant 6/6 ; bancs verrou 18/18, gabarits 54/54 ; 12 contrôles GEO au vert ; Chromium 390/1200 px visiteur et abonné sans débordement ni erreur ; 3D contrôlées (lunes ramenées dans le cadre, feuillage de l'arbre à palabres réduit, tambours à fente recentrés sur leurs supports : un cylindre `axe: "x"` part de `c`, il ne y est pas centré).
+- Fusion demandée par Jacques avant le dépôt FTP. Suite : cultures nationales de 1re A puis de Tle A ; arts ; EPS de 3e ; Citizenship Education de 3e (rangs 1, 5, 22 à 24).
+
 ## Apprendre : cultures nationales de 3e, lot 1 à verrou (25/11/2026, branche apprendre-cultures-3e-lot1)
 
 Annonce pour éviter les doublons : cette session prend les **cultures nationales** (3e, puis 1re A et Tle A), puis les **arts** et l'**EPS** des classes d'examen, et la **Citizenship Education** de 3e (rangs 1, 5, 22 à 24). Recensement sur master (rang + `cle`, leçons gratuites `lecons.js` comprises) : histoire, géographie et ECM des classes d'examen sont déjà couvertes à 100 % ; l'orientation de 3e est traitée par une autre session (lots 1 à 3), je n'y touche pas.
