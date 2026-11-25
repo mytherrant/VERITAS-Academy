@@ -22228,7 +22228,7 @@ if(typeof _esc !== 'function'){
 /* Carte mentale VÉRITAS (chunks/carte-mentale.js) : page, téléchargement PNG filigrané, impression. */
 function _cmPage(oeuvreKey,oe,c){
   if(!document.getElementById('cmCss')){ var st=document.createElement('style'); st.id='cmCss'; st.textContent=window.VRT_CM.css; document.head.appendChild(st); }
-  var carte={ centre:(c.centre||((oe.titre||'')+'\n'+(oe.auteur||''))), branches:(c.branches||[]) };
+  var carte={ centre:(c.centre||((oe.titre||'')+'\n'+(oe.auteur||''))), branches:(c.branches||[]), rang:Object.keys(LITT_OEUVRES).sort().indexOf(oeuvreKey), serie:'oeuvres' }; /* même forme que la page statique de l'œuvre (oeuvres_statiques.js) */
   _vc('<div class="vsec"><button class="back-btn" onclick="_showLittMenu(\''+oeuvreKey+'\',\''+oeuvreKey+'\')">← Retour</button>'
     +'<div class="vsec-title"><span class="vsec-ico"><svg class="vico vico-21" aria-hidden="true"><use href="#lc-map"/></svg></span>Carte Mentale — '+_esc(oe.titre)+'</div>'
     +'<div class="vsec-sub" style="font-style:italic">'+_esc(oe.auteur)+' — '+_esc(oe.classe)+'</div>'
