@@ -1,3 +1,13 @@
+## Apprendre : lot 9 d'anglais de 3e à verrou (24/11/2026, branche apprendre-anglais-3e-lot9)
+
+Demande de Jacques : « continue les autres leçons » (partage convenu : anglais de 3e = cette session, français de 3e = session lot 4).
+
+- 6 leçons NOUVELLES à verrou (sources et JSON HORS dépôt, livrés en privé ; JSON à déposer par FTP dans `uploads/protected/apprendre/`) :
+  - rang 62 `3e-anglais-adjective-structures` (too… to, enough, so/such, How/What) ;
+  - Writing (Section D du BEPC), une rédaction par module : rang 12 `3e-anglais-writing-informal-letter` (lettre à un correspondant sur la fin du Ramadan), 38 `3e-anglais-writing-leisure` (composition sur les loisirs), 64 `3e-anglais-writing-formal-letter` (lettre au maire : ramassage des ordures, recyclage), 90 `3e-anglais-writing-speech` (discours de campagne de préfet), 116 `3e-anglais-writing-argumentative` (essai : se détendre avec les jeux vidéo et les téléphones).
+- Dépôt : seulement le début public (bloc « AJOUT lot 9 anglais 3e (abonnés) » de `apercus-3e.js`) + `charge.js?v=` recalculé.
+- Contrôles : construction officielle sur copie (6 à verrou), bancs verrou et gabarits au vert, `build_llms.py --controle`, 15 contrôles GEO de deploy.yml ; Chromium 390/1200 px visiteur et abonné : aucune erreur, mur visiteur, 3D contrôlées.
+- ⚠️ Ne pas fusionner avant le dépôt FTP des 6 JSON. Conflit attendu avec #430 sur `apercus-3e.js` / `charge.js` : prendre la version de master et relancer `ajouter_apercus`.
 ## Apprendre : lot 8 anglais de 3e, leçons à verrou — purpose, word order in questions, sequence markers (24/11/2026, branche apprendre-anglais-3e-lot8)
 
 Demande de Jacques : « continue » après le déploiement des lots 6 et 7 de philosophie (n° 944). Aucune autre leçon touchée.
