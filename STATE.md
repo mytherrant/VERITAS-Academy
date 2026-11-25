@@ -1,3 +1,15 @@
+## Apprendre : lot 12 d'anglais de 3e à verrou — l'anglais de 3e est couvert (25/11/2026, branche apprendre-anglais-3e-lot12, PR #445)
+
+Demande de Jacques : « continue ». Dernières lignes d'anglais de 3e sans leçon (rang + `cle`, master + #430/#436/#438/#440).
+
+- 3 leçons NOUVELLES à verrou (sources et JSON HORS dépôt, livrés en privé ; JSON à déposer dans `uploads/protected/apprendre/`) :
+  - rang 1 `3e-anglais-speaking-other-cultures` (camp national des jeunes, cultures et stéréotypes) ;
+  - rang 82 `3e-anglais-listening-democracy-course` (formation à la démocratie à Buea, prise de notes) ;
+  - rang 111 `3e-anglais-reading-smartphones` (guide de dépannage d'un téléphone Android, stockage).
+- Avec les lots 8 à 12, chaque intitulé distinct de la progression d'anglais de 3e a sa leçon ; les lignes qui répètent un intitulé (2e passage du module) ne sont pas redoublées.
+- Contrôles : build officiel sur copie (3 à verrou), bancs verrou et gabarits verts, `build_llms.py --controle`, 15 contrôles GEO ; Chromium 390/1200 px visiteur et abonné sans erreur ; 3D contrôlées.
+- ⚠️ Ne pas fusionner avant le dépôt FTP. Conflit attendu avec les autres PR d'aperçus de 3e : prendre master et relancer `ajouter_apercus`.
+
 ## Apprendre : lot 11 d'anglais de 3e à verrou (25/11/2026, branche apprendre-anglais-3e-lot11)
 
 Demande de Jacques : « continue les autres leçons en évitant les doublons ». Suite des leçons de compétences d'anglais de 3e (modules 1, 4 et 5), sans recouvrement avec master ni avec #430/#436/#438 (rang + `cle` vérifiés).
