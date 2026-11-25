@@ -308,6 +308,20 @@
   "u": "/ressources/annales/probatoire-mathematiques-aabi-2024.html"
  },
  {
+  "id": "bac-mathematiques-ce-2026",
+  "examen": "bac",
+  "m": "mathematiques",
+  "serie": "séries C et E",
+  "nomExamen": "Baccalauréat",
+  "fiche": "ressources/examen-mathematiques-bac.html",
+  "matiere": "Mathématiques (séries C et E)",
+  "mat": "maths",
+  "classes": "Tle C",
+  "annee": 2026,
+  "national": false,
+  "u": "/ressources/annales/bac-mathematiques-ce-2026.html"
+ },
+ {
   "id": "bac-mathematiques-ce-2025",
   "examen": "bac",
   "m": "mathematiques",
