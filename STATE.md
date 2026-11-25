@@ -1,8 +1,17 @@
-## Apprendre : cultures nationales de 3e, lot 1 à verrou — EN COURS (25/11/2026, branche apprendre-cultures-3e-lot1)
+## Apprendre : cultures nationales de 3e, lot 1 à verrou (25/11/2026, branche apprendre-cultures-3e-lot1)
 
 Annonce pour éviter les doublons : cette session prend les **cultures nationales** (3e, puis 1re A et Tle A), puis les **arts** et l'**EPS** des classes d'examen, et la **Citizenship Education** de 3e (rangs 1, 5, 22 à 24). Recensement sur master (rang + `cle`, leçons gratuites `lecons.js` comprises) : histoire, géographie et ECM des classes d'examen sont déjà couvertes à 100 % ; l'orientation de 3e est traitée par une autre session (lots 1 à 3), je n'y touche pas.
 
-- Lot 1 prévu (6 leçons, `m: "cultures"`) : rangs 1 (symbolique des mets), 2 (interdits alimentaires), 3 (mariage), 5 (funérailles : activités et intervenants), 6 (rites et rituels funéraires), 7 (jeux traditionnels).
+- **6 leçons NOUVELLES à verrou** (`m: "cultures"`, `cle` = intitulé officiel), source `44-examens-cultures-3e.js` HORS dépôt, 6 JSON livrés en privé à Jacques :
+  - rang 1 `3e-cultures-mets-traditionnels` (menu d'un mariage à Bafang ; ndolè, taro sauce jaune, sanga, boule de mil ; cola, libation ; 3D : table de fête) ;
+  - rang 2 `3e-cultures-interdits-alimentaires` (enfant anémiée à Bertoua, œufs refusés ; totémique / âge / état / religieux ; discerner et dialoguer ; 3D : plateau des groupes d'aliments) ;
+  - rang 3 `3e-cultures-mariage` (dot à Mbalmayo ; étapes, vin de palme = consentement, dot excessive ; coutumier / civil / religieux ; 3D : dot exposée sur la natte) ;
+  - rang 5 `3e-cultures-funerailles-activites` (obsèques à Douala ; annonce → levée de deuil ; intervenants ; dépenses excessives ; 3D : veillée sous la bâche) ;
+  - rang 6 `3e-cultures-rites-funeraires` (veuvage à Édéa ; Van Gennep ; culte des crânes ; dignité et droits des veuves ; 3D : case des ancêtres) ;
+  - rang 7 `3e-cultures-jeux-traditionnels` (songo à Ebolowa, 2 × 7 trous, 70 graines ; lutte, pirogues du Ngondo ; 3D : plateau de songo).
+- Gabarit des leçons d'histoire-géographie récentes : documents multiples, frise, épreuve BEPC en deux parties (ressources / compétences), labo « choix », 3 hypothèses, situation résolue (étapes, formules, réponse, transfert).
+- Contrôles : build officiel sur copie (6 à verrou) ; `audit_lecons.cjs --payant … --classe 3e --matiere cultures` : 6/6 complètes ; bancs verrou 18/18, gabarits 54/54 ; 12 contrôles GEO au vert ; Chromium 390/1200 px visiteur et abonné : aucun débordement, aucune erreur ; 3D contrôlées (plateau d'aliments refait en boîte quadrillée, une grande assiette plate masquait les zones).
+- ⚠️ Ne pas fusionner avant le dépôt FTP. Suite prévue : cultures nationales de 3e (rangs 8 à 22), puis 1re A et Tle A.
 
 ## Apprendre : géographie de 6e, lot 2 gratuit (25/11/2026, branche geo-6e-lot2)
 
