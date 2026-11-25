@@ -1,3 +1,13 @@
+## Apprendre : lot 8 anglais de 3e, leçons à verrou — purpose, word order in questions, sequence markers (24/11/2026, branche apprendre-anglais-3e-lot8)
+
+Demande de Jacques : « continue » après le déploiement des lots 6 et 7 de philosophie (n° 944). Aucune autre leçon touchée.
+
+- **Collision évitée** : ce lot visait 8 points de grammaire, mais la PR #426 (session du lot 4), fusionnée pendant l'écriture, a publié 5 d'entre eux sous les MÊMES identifiants (`3e-anglais-comparatives` 28, `-complex-sentences` 34, `-gerunds` 36, `-question-tags` 83, `-phrasal-verbs` 88). Ces 5 bases restent dans la source mais ne sont pas posées ; seuls 3 rangs non couverts sont publiés. Leçon à retenir : refaire le contrôle des identifiants sur master JUSTE avant de pousser, et annoncer le partage AVANT d'écrire (les annonces se sont croisées).
+- **3 leçons NOUVELLES réservées aux abonnés, rédigées en anglais** : `3e-anglais-purpose` (31 : to / in order to / so as to / so that, apprentie couturière d'Ebolowa), `3e-anglais-word-order-questions` (86 : Wh- + auxiliary + subject + verb, questionnaire du conseil des jeunes de Mamfe), `3e-anglais-sequence-markers` (114 : first, then, after that, finally / at last, voyage Douala-Kribi). Gabarit complet : 3 hypothèses, situation résolue, 2 planches 2D, 1 planche 3D, labo « choix », Section D: Composition writing, 10 QCM.
+- Source `43-examens-anglais-3e-8.js` (HORS DÉPÔT) et 3 JSON publiés en artifact privé pour la compilation FTP de la session du lot 4. Aperçus : bloc « AJOUT lot 8 anglais 3e (abonnés) » dans `apercus-3e.js`.
+- Vérifié : build officiel sur copie ; aucun identifiant ni rang en double sur master 22a1798 ; Chromium 390 et 1200 px visiteur et abonné, aucune erreur ni débordement ; bancs verrou 18/18, gabarits 54/54 ; les 15 contrôles de deploy.yml au vert.
+- **Recensement des lettres des classes d'examen (rang et `cle`)** : la philosophie n'a plus de ligne au contenu non traité ; les plus gros manques sont le français de 1re A, Tle A et 3e, l'anglais (3e : vocabulaire, listening, reading, writing ; 1re et Tle), les langues rares, l'orientation, les arts et les cultures nationales. Se partager ces matières avec la session du lot 4 avant d'écrire.
+
 ## Cartes mentales : les nouveaux styles adoptés partout (24/11/2026, branche cartes-partout)
 
 Demande de Jacques : « adopte aussi les nouveaux styles de cartes mentales ».
