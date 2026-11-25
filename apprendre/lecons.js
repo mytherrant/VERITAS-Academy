@@ -1170,8 +1170,9 @@
     /* forme et style : imposés par la carte, sinon tirés du titre (stables d'une génération à l'autre et variés d'une carte à l'autre) */
     var hh = hache(C.join(" ")), pal = PALETTES[Math.floor(hh / 13) % PALETTES.length];
     if (!carte.garderCouleurs) B.forEach(function (b, i) { b.color = pal[i % pal.length]; });
-    var forme = carte.forme || FORMES[hh % FORMES.length];
-    if (!carte.forme && forme === "radiale") forme = NOUVELLES[Math.floor(hh / 8) % NOUVELLES.length];
+    /* « adopte aussi les nouveaux styles » (24/11/2026) : une carte sans rang (schéma converti, carte libre) tire sa forme
+       parmi TOUTES les formes, plus seulement les 8 d'origine. */
+    var forme = carte.forme || TOUTES[hh % TOUTES.length];
     /* « la diversité continue » (24/11/2026) : une carte qui donne son rang dans une suite (leçons d'une classe et
        d'une matière) tourne sur TOUTES les formes : deux cartes voisines n'ont jamais la même. */
     if (!carte.forme && carte.rang != null && isFinite(carte.rang)) forme = TOUTES[(hache(carte.serie || "") + Math.round(carte.rang)) % TOUTES.length];
@@ -16975,6 +16976,992 @@ VRT_PLUS("3e-en-articles", [
   });
   VRT_A("6e-histoire-td-symboles-pouvoir", 1, "Que signifie ce symbole ? Retrouve son sens", function (el) {
     exercice(el, [["La peau de léopard, réservée au chef, signifie ___.", ["la force", "la pauvreté", "la pluie"], "Le léopard est le « roi de la forêt »."], ["Le trône perlé montre ___.", ["la place du roi au-dessus des autres", "le prix des perles", "le marché"], "Seul le roi s'y assoit."], ["Le chasse-mouches signifie ___.", ["l'autorité", "la chasse", "le jeu"], "Le pouvoir de commander."], ["Le parasol du lamido signifie ___.", ["la dignité et la protection", "le soleil", "le commerce"], "Au Nord-Cameroun."], ["Le grand tambour d'appel sert à ___.", ["rassembler le peuple sur ordre du chef", "danser seulement", "faire pleuvoir"], "Il porte la voix du chef."], ["La double couronne est un symbole du ___.", ["pharaon", "lamido", "fon"], "Union de la Haute et de la Basse-Égypte."]], "Symbole suivant", "Symbole");
+  });
+})();
+
+/* Leçons GRATUITES — Histoire de 6e, lot 7 (24/11/2026) : les dossiers 3 et 4, rangs 15 (l'apport de Rome) et 21
+   (les pèlerinages dans les religions chrétiennes et musulmanes). Ajoute aussi le rang 11 (la religion de l'Égypte ancienne), oublié jusque-là : termine l'histoire de 6e (21 rangs sur 21). Même gabarit que 36- à 41-histoire-6e. */
+(function () {
+  "use strict";
+  var NUIT = "#001136", BLEU = "#1E499B", GRIS = "#4D5163", VERT = "#17784D", ROUGE = "#C62828", TERRE = "#C46A2B";
+  function txt(x, y, t, o) {
+    o = o || {};
+    return "<text x='" + x + "' y='" + y + "' text-anchor='" + (o.a || "middle") + "' font-size='" + (o.s || 12) + "' font-weight='" + (o.w || 700) + "' fill='" + (o.c || NUIT) + "'" + (o.i ? " font-style='italic'" : "") + (o.halo ? " stroke='#fff' stroke-width='3' paint-order='stroke'" : "") + ">" + t + "</text>";
+  }
+  function lin(id, cs, vertical) {
+    var s = "<linearGradient id='" + id + "'" + (vertical ? " x1='0' y1='0' x2='0' y2='1'" : "") + ">";
+    cs.forEach(function (c, i) { s += "<stop offset='" + (i / (cs.length - 1)).toFixed(2) + "' stop-color='" + c + "'/>"; });
+    return s + "</linearGradient>";
+  }
+  function rad(id, cs) {
+    var s = "<radialGradient id='" + id + "' cx='35%' cy='30%' r='75%'>";
+    cs.forEach(function (c, i) { s += "<stop offset='" + (i / (cs.length - 1)).toFixed(2) + "' stop-color='" + c + "'/>"; });
+    return s + "</radialGradient>";
+  }
+  function fleche(id, c) { return "<marker id='" + id + "' markerWidth='10' markerHeight='10' refX='7' refY='5' orient='auto'><path d='M0 1L8 5L0 9Z' fill='" + c + "'/></marker>"; }
+  function svg(w, h, alt, defs, corps) {
+    return "<svg viewBox='0 0 " + w + " " + h + "' role='img' aria-label='" + alt + "' font-family='Inter,Arial,sans-serif'><rect width='" + w + "' height='" + h + "' fill='#fff'/><defs>" + defs + "</defs>" + corps +
+      "<text x='" + (w - 6) + "' y='" + (h - 5) + "' font-size='8' text-anchor='end' fill='#8A93A6'>Planche VÉRITAS</text></svg>";
+  }
+  function q(qq, bonne, f1, f2, e) { return { q: qq, r: [bonne, f1, f2], b: 0, e: e }; }
+  function bulle(x, y, w, t, c) { return "<rect x='" + x + "' y='" + y + "' width='" + w + "' height='30' rx='12' fill='#fff' stroke='" + (c || "#C9D2E3") + "'/>" + txt(x + w / 2, y + 20, t, { s: 11.5 }); }
+  function perso(x, y, peau, habit, bas) {
+    bas = bas || "#2E3445";
+    return "<g transform='translate(" + x + " " + y + ")'><ellipse cx='0' cy='84' rx='18' ry='4' fill='#001136' opacity='.18'/>" +
+      "<rect x='-9' y='44' width='8' height='36' rx='3' fill='" + bas + "'/><rect x='1' y='44' width='8' height='36' rx='3' fill='" + bas + "'/>" +
+      "<ellipse cx='-6' cy='81' rx='7' ry='3.5' fill='#1F2328'/><ellipse cx='6' cy='81' rx='7' ry='3.5' fill='#1F2328'/>" +
+      "<path d='M-13 46L-16 18C-16 13 -12 11 -6 10H6C12 11 16 13 16 18L13 46Z' fill='" + habit + "'/>" +
+      "<path d='M-15 16L-20 40' stroke='" + habit + "' stroke-width='7' stroke-linecap='round'/><path d='M15 16L20 40' stroke='" + habit + "' stroke-width='7' stroke-linecap='round'/>" +
+      "<circle cx='-20' cy='42' r='3.6' fill='" + peau + "'/><circle cx='20' cy='42' r='3.6' fill='" + peau + "'/>" +
+      "<rect x='-3.5' y='5' width='7' height='7' fill='" + peau + "'/><ellipse cx='0' cy='-2' rx='9' ry='10.5' fill='" + peau + "'/>" +
+      "<path d='M-9 -4C-10 -14 -4 -13.5 0 -13.5S10 -14 9 -4C7 -9 -7 -9 -9 -4Z' fill='#1B1410'/><ellipse cx='-9' cy='-1' rx='1.8' ry='3' fill='" + peau + "'/><ellipse cx='9' cy='-1' rx='1.8' ry='3' fill='" + peau + "'/></g>";
+  }
+  function def(t, h) { return "<div class='def'><b>" + t + "</b>" + h + "</div>"; }
+  function formule(h) { return "<p class='formule'>" + h + "</p>"; }
+  function ex(h, t) { return "<div class='ex'><b>" + (t || "Exemple") + "</b>" + h + "</div>"; }
+  function astuce(h, t) { return "<div class='astuce'><b>" + (t || "Astuce") + "</b>" + h + "</div>"; }
+  function attention(h, t) { return "<div class='attention'><b>" + (t || "Attention") + "</b>" + h + "</div>"; }
+  function savais(h) { return "<div class='savais'><b>Le savais-tu ?</b>" + h + "</div>"; }
+  function F(nom, f, calcul) { return { nom: nom, f: f, calcul: calcul }; }
+  function colonnes(titre, cols, h, alt) {
+    var W = 640, n = cols.length, w = (W - 30 - (n - 1) * 12) / n, s = "<rect width='640' height='" + h + "' fill='#FBF8F2'/>" + txt(320, 28, titre, { s: 15 });
+    cols.forEach(function (c, i) {
+      var x = 15 + i * (w + 12);
+      s += "<rect x='" + x + "' y='44' width='" + w + "' height='" + (h - 58) + "' rx='12' fill='#fff' stroke='" + c.c + "' stroke-width='2'/><rect x='" + x + "' y='44' width='" + w + "' height='34' rx='11' fill='" + c.c + "'/>" + txt(x + w / 2, 66, c.t, { s: 13.5, c: "#fff" });
+      c.l.forEach(function (l, k) { s += txt(x + 10, 100 + k * 23, l, { s: 11.5, a: "start", w: l.charAt(0) === "→" ? 800 : 550, c: l.charAt(0) === "→" ? c.c : NUIT }); });
+    });
+    return svg(640, h, alt || titre, "", s);
+  }
+  function P2(titre, legende, s) { return { type: "2D", titre: titre, legende: legende, svg: s }; }
+  function exercice(el, C, suivant, lib) {
+    var i = 0, ok = 0;
+    el.innerHTML = "<p class='labo-r' data-q style='font-size:16px'></p><div style='display:flex;gap:8px;flex-wrap:wrap' data-c></div><p class='an-note' data-e></p><p class='labo-r' data-s></p>";
+    function $(s) { return el.querySelector(s); }
+    function poser() {
+      var c = C[i];
+      $("[data-q]").innerHTML = (i + 1) + ". " + c[0].replace("___", "<b style='border-bottom:2px dashed #1E499B;padding:0 14px'>?</b>");
+      $("[data-e]").textContent = ""; $("[data-s]").innerHTML = lib + " " + (i + 1) + " / " + C.length + " · score : <b>" + ok + "</b>";
+      $("[data-c]").innerHTML = c[1].slice().sort().map(function (x) { return "<button type='button' class='btn-l' data-v='" + x + "'>" + x + "</button>"; }).join("");
+      el.querySelectorAll("[data-v]").forEach(function (b) {
+        b.addEventListener("click", function () {
+          var bon = b.dataset.v === c[1][0]; if (bon) ok++;
+          $("[data-q]").innerHTML = (i + 1) + ". " + c[0].replace("___", "<b style='color:" + (bon ? VERT : ROUGE) + "'>" + c[1][0] + "</b>");
+          $("[data-e]").innerHTML = (bon ? "✔ " : "✘ ") + c[2];
+          el.querySelectorAll("[data-v]").forEach(function (x) { x.disabled = true; });
+          var nx = document.createElement("button"); nx.type = "button"; nx.className = "btn-l"; nx.textContent = i + 1 < C.length ? suivant : "↺";
+          nx.addEventListener("click", function () { i = (i + 1) % C.length; if (!i) ok = 0; poser(); });
+          $("[data-c]").appendChild(nx);
+          $("[data-s]").innerHTML = lib + " " + (i + 1) + " / " + C.length + " · score : <b>" + ok + "</b>";
+        });
+      });
+    }
+    poser();
+  }
+  function apc(situation, tache) { return { module: "Histoire de 6e", famille: "Vie sociale et culturelle", agir: "Connaître le passé de l'Afrique et du Cameroun pour mieux comprendre le présent", situation: situation, tache: tache }; }
+  function integ(qc, opts, bonne, rep, exo, exoRep, sit, tache, attendu) {
+    return "<div class='integ'><h3>Partie A : évaluation des ressources</h3><p><strong>Question de cours.</strong> " + qc + "</p><ol type='a'>" + opts.map(function (o) { return "<li>" + o + "</li>"; }).join("") + "</ol><details><summary>Voir la réponse</summary><p><strong>" + bonne + "</strong>. " + rep + "</p></details>" +
+      "<p><strong>Exercice.</strong> " + exo + "</p><details><summary>Voir la réponse</summary><p>" + exoRep + "</p></details>" +
+      "<h3>Partie B : évaluation des compétences</h3><p><strong>Situation.</strong> " + sit + "</p><p><strong>Tâche.</strong> " + tache + "</p><details><summary>Voir une réponse attendue</summary><p>" + attendu + "</p></details></div>";
+  }
+  function frise(titre, pts, h, alt) {
+    var s = "<rect width='640' height='" + h + "' fill='#FBF8F2'/>" + txt(320, 28, titre, { s: 15 }) + "<line x1='30' y1='" + (h / 2 + 6) + "' x2='610' y2='" + (h / 2 + 6) + "' stroke='#1E499B' stroke-width='4' stroke-linecap='round'/>";
+    var n = pts.length, pas = 580 / (n - 1);
+    pts.forEach(function (p, i) {
+      var x = 30 + i * pas, haut = i % 2 === 0, y0 = h / 2 + 6;
+      s += "<circle cx='" + x + "' cy='" + y0 + "' r='8' fill='" + (p.c || "#C2540A") + "' stroke='#fff' stroke-width='3'/>" + txt(x, haut ? y0 - 20 : y0 + 30, p.a, { s: 12.5, c: p.c || "#C2540A" });
+      (p.l || []).forEach(function (l, k) { s += txt(x, haut ? y0 - 38 - k * 15 : y0 + 48 + k * 15, l, { s: 10.5, w: 550 }); });
+    });
+    return svg(640, h, alt || titre, "", s);
+  }
+
+
+
+
+
+
+
+  /* ═══════════════ RANG 15 : DOSSIER 3, L'APPORT DE ROME ═══════════════ */
+  function aqueduc3D() {
+    var o = [{ f: "boite", c: [0, -6, 0], d: [500, 6, 240], coul: "#8AA05A", dessus: "#9AB06A" }];
+    o.push({ f: "boite", c: [0, 2, -90], d: [500, 4, 30], coul: "#4A8AC8", dessus: "#6FA8DC" });
+    for (var i = 0; i < 6; i++) {
+      var x = -200 + i * 80;
+      o.push({ f: "boite", c: [x, 50, 0], d: [22, 100, 30], coul: "#C9B890", dessus: "#D8C8A0" });
+      if (i < 5) o.push({ f: "boite", c: [x + 40, 112, 0], d: [80, 24, 30], coul: "#C2B080", dessus: "#D4C49A" });
+    }
+    o.push({ f: "boite", c: [0, 134, 0], d: [440, 20, 30], coul: "#B8A478", dessus: "#C9B890" });
+    o.push({ f: "boite", c: [0, 145, 0], d: [440, 2, 14], coul: "#4A8AC8", dessus: "#6FA8DC", div: false });
+    o.push({ f: "boite", c: [120, 3, 80], d: [260, 4, 34], coul: "#8A8A8A", dessus: "#A0A0A0" });
+    [0, 1, 2, 3, 4].forEach(function (k) { o.push({ f: "boite", c: [10 + k * 50, 6, 80], d: [40, 2, 26], coul: "#9A9A9A", dessus: "#B4B4B4", div: false }); });
+    return o;
+  }
+  VRT_L("6e-histoire-rome", {
+    c: "6e", m: "histoire", cle: "Dossier 3 : L’apport de Rome", titre: "Dossier 3 : L'apport de Rome, un héritage dans notre vie", duree: 30,
+    accroche: "Sur la couverture d'un livre, une élève lit « Chapitre XIV » et sur sa montre « IV » et « IX ». « Ce sont des chiffres de qui ? » Et pourquoi le mois de juillet porte-t-il le nom d'un homme ?",
+    intro: "Un exposé préparé au CDI d'un lycée de Bafoussam te sert de fil rouge : à chaque partie, un indice t'aide à trancher entre trois idées sur ce que nous devons à Rome.",
+    objectifs: ["situer Rome dans le temps : royauté, République, Empire", "décrire l'Empire romain et l'Afrique romaine", "présenter les apports de Rome : droit, langue, routes, villes, calendrier", "lire et écrire les chiffres romains"],
+    enquete: {
+      titre: "L'exposé du CDI",
+      svg: svg(640, 220, "CDI d'un lycée : une montre au cadran en chiffres romains, un livre ouvert au chapitre XIV, un calendrier ; deux élèves discutent", lin("roC", ["#E6EEF8", "#F4F1EA"], true),
+        "<rect width='640' height='220' fill='url(#roC)'/><rect y='186' width='640' height='34' fill='#8B6B4A'/><circle cx='320' cy='90' r='50' fill='#FBF8F2' stroke='#B07A00' stroke-width='5'/>" + txt(320, 52, "XII", { s: 13 }) + txt(362, 95, "III", { s: 13 }) + txt(320, 136, "VI", { s: 13 }) + txt(278, 95, "IX", { s: 13 }) + "<path d='M320 90V60M320 90L344 102' stroke='#142554' stroke-width='3' stroke-linecap='round'/>" +
+        "<rect x='420' y='140' width='90' height='46' fill='#F4F1EA' stroke='#9AA3AF'/>" + txt(465, 168, "Chapitre XIV", { s: 11 }) + "<rect x='140' y='130' width='70' height='56' fill='#fff' stroke='#C62828' stroke-width='2'/>" + txt(175, 150, "JUILLET", { s: 10, c: "#C62828" }) + txt(175, 172, "AOÛT", { s: 10, c: "#C62828" }) +
+        perso(80, 98, "#5A3A1E", "#C2540A", "#2E3445") + perso(570, 98, "#6B4423", "#1E499B", "#2E3445") +
+        bulle(380, 20, 240, "Des chiffres de qui ?", "#F7C948")),
+      legende: "Au CDI d'un lycée de Bafoussam, deux élèves préparent un exposé sur Rome.",
+      contexte: "<p>Pour leur dossier, Gaëlle et Ulrich doivent montrer « ce que nous devons à Rome ». Ulrich pense que « Rome, c'est de l'histoire ancienne, ça n'a plus rien à voir avec notre vie ». Gaëlle croit au contraire que « les Romains ont tout inventé, même l'écriture et les mathématiques ». La documentaliste leur montre une montre au cadran en chiffres romains, un livre et un calendrier : « Cherchez Rome autour de vous. »</p>",
+      documents: [{ t: "Le calendrier de Jules César", html: "<p>En 46 av. J.-C., Jules César fait adopter un calendrier de 365 jours, avec une année de 366 jours tous les quatre ans. Le mois de juillet porte son nom (Julius) ; plus tard, août prend celui de l'empereur Auguste (Augustus).</p>" },
+        { t: "Un empereur africain", html: "<p>Septime Sévère, né à Leptis Magna, en Afrique (actuelle Libye), devient empereur de Rome en 193 et règne jusqu'en 211.</p>" }],
+      question: "Que nous a apporté Rome, et cet héritage est-il encore présent dans notre vie ?",
+      tache: "Situe Rome dans le temps, décris son empire, puis présente ses apports encore visibles aujourd'hui.",
+      hypotheses: ["Rome n'a plus rien à voir avec notre vie d'aujourd'hui.", "Les Romains ont tout inventé, même l'écriture et les mathématiques.", "Rome a hérité des Grecs, des Égyptiens et d'autres peuples, et nous a transmis un droit, une langue, des routes, des villes, un calendrier et des chiffres encore utilisés."]
+    },
+    parties: [
+      { t: "De la petite ville à l'immense empire", html: def("Empire romain", "Ensemble des territoires gouvernés par Rome, qui entouraient toute la mer Méditerranée, appelée par les Romains mare nostrum, « notre mer ».") +
+          "<ul><li><strong>753 av. J.-C.</strong> : selon la légende, fondation de Rome par Romulus.</li><li><strong>509 av. J.-C.</strong> : début de la <strong>République</strong> ; Rome est gouvernée par des magistrats élus et le Sénat.</li><li><strong>27 av. J.-C.</strong> : Auguste devient le premier <strong>empereur</strong>.</li><li><strong>L'Afrique romaine</strong> : après la destruction de Carthage (146 av. J.-C.), l'Afrique du Nord devient une province riche en blé et en huile ; Septime Sévère, né en Afrique, devient empereur en 193.</li></ul>" +
+          formule("durée av. J.-C. = date de début − date de fin") +
+          ex("La République romaine dure de 509 à 27 av. J.-C. : 509 − 27 = 482 ans.", "Calculer la durée de la République") +
+          attention("Rome n'est pas partie de rien : elle a beaucoup emprunté aux Étrusques, aux Grecs et aux peuples de la Méditerranée, dont l'Égypte."),
+        planches: [P2("Les trois âges de Rome", "Rome passe d'une petite ville gouvernée par des rois à une république, puis à un empire qui entoure la Méditerranée.",
+          frise("Rome : royauté, République, Empire", [{ a: "753 av. J.-C.", l: ["fondation", "(légende)"], c: "#7B3F99" }, { a: "509 av. J.-C.", l: ["début de la", "République"], c: "#1E499B" }, { a: "146 av. J.-C.", l: ["Carthage détruite,", "province d'Afrique"], c: "#C2540A" }, { a: "27 av. J.-C.", l: ["Auguste,", "premier empereur"], c: "#B07A00" }, { a: "193", l: ["Septime Sévère,", "empereur africain"], c: "#17784D" }], 230, "Frise de l'histoire de Rome"))],
+        fil: { html: "<p>Gaëlle exagère : les Romains n'ont pas tout inventé. L'écriture et les mathématiques existaient bien avant eux, en Égypte et en Mésopotamie ; les Grecs leur ont transmis la philosophie et les sciences. Rome a <strong>hérité</strong> beaucoup, puis a diffusé ces savoirs dans tout son empire.</p>", verdicts: [[1, "rejetee", "Rome a hérité des Égyptiens, des Grecs et d'autres peuples : elle n'a pas tout inventé."]] },
+        retenir: "753 av. J.-C. (légende) ; République 509 ; Empire 27 av. J.-C. ; Afrique romaine ; Septime Sévère (193)." },
+      { t: "Routes, villes et aqueducs", html: "<ul><li><strong>Les voies romaines</strong> : des dizaines de milliers de kilomètres de routes pavées relient les villes ; on dit que « tous les chemins mènent à Rome ».</li><li><strong>Les villes</strong> : un forum (la grande place), des temples, des thermes (bains publics), un amphithéâtre pour les jeux, comme le Colisée de Rome (inauguré en 80 apr. J.-C.).</li><li><strong>Les aqueducs</strong> : des canaux, parfois portés par des ponts à arches, amènent l'eau des sources jusqu'aux villes grâce à une pente très douce.</li><li><strong>Les techniques</strong> : l'arc, la voûte et le béton romain.</li></ul>" +
+          formule("dénivelé = longueur × pente (pente en mètres par kilomètre)") +
+          ex("Un aqueduc de 50 km avec une pente de 0,3 m par kilomètre descend de 50 × 0,3 = 15 m entre la source et la ville : assez pour que l'eau coule seule.", "Calculer la pente d'un aqueduc") +
+          astuce("Pour retenir la ville romaine, pense à « FTTA » : Forum, Temples, Thermes, Amphithéâtre."),
+        planches: [{ type: "3d", titre: "Un aqueduc et une voie romaine", legende: "Tourne le paysage : un aqueduc à arches porte l'eau, dans un canal couvert, de la colline jusqu'à la ville ; au pied, une voie romaine pavée ; au fond, une rivière. L'eau coule seule grâce à une pente de quelques dizaines de centimètres par kilomètre.", modele: { h: 340, rx: -14, ry: 30, echelle: 0.72, alt: "Aqueduc à arches en pierre claire portant un canal d'eau, une route pavée au pied et une rivière", objets: aqueduc3D(), etiquettes: [{ p: [0, 146, 0], t: "canal d'eau", cote: "d" }, { p: [-160, 100, -16], t: "arches", cote: "g" }, { p: [140, 8, 80], t: "voie romaine pavée", cote: "d" }, { p: [-200, 4, -90], t: "rivière", cote: "g" }] } }],
+        fil: { html: "<p>Ulrich se trompe : les routes pavées, les aqueducs, l'arc et la voûte des ponts et des bâtiments viennent des techniques romaines. En Afrique du Nord, on voit encore des villes romaines entières, comme Leptis Magna ou Timgad.</p>", verdicts: [[0, "rejetee", "Routes, aqueducs, arcs et villes : l'héritage romain est encore visible."]] },
+        retenir: "Voies pavées ; forum, temples, thermes, amphithéâtre ; aqueducs ; arc, voûte, béton." },
+      { t: "Le droit, la langue, le calendrier, les chiffres", html: "<ul><li><strong>Le droit romain</strong> : des lois écrites, valables pour tous les citoyens ; notre droit, au Cameroun comme en France, en a gardé des principes et des mots (juge, tribunal, citoyen).</li><li><strong>Le latin</strong> : la langue de Rome a donné naissance au français, à l'espagnol, à l'italien, au portugais et au roumain (langues romanes).</li><li><strong>Le calendrier julien</strong> (46 av. J.-C.) : 365 jours, et 366 tous les quatre ans ; il est l'ancêtre du calendrier grégorien.</li><li><strong>Les chiffres romains</strong> : I = 1, V = 5, X = 10, L = 50, C = 100, D = 500, M = 1 000.</li></ul>" +
+          formule("chiffres romains : on additionne de gauche à droite ; un symbole plus petit placé avant un plus grand se retranche (IV = 4, IX = 9)") +
+          ex("MMXXVI = 1 000 + 1 000 + 10 + 10 + 5 + 1 = 2026 ; XIV = 10 + (5 − 1) = 14 ; XIX = 10 + (10 − 1) = 19.", "Lire des chiffres romains") +
+          savais("Juillet vient de Julius (Jules César) et août d'Augustus (l'empereur Auguste) : chaque été, ton calendrier te rappelle deux Romains."),
+        planches: [P2("L'héritage romain autour de toi", "Quatre apports de Rome que l'on retrouve encore dans la vie de tous les jours.",
+          colonnes("Ce que nous devons à Rome", [{ t: "Le droit", c: "#1E499B", l: ["lois écrites", "juge, tribunal", "citoyen"] }, { t: "La langue", c: "#C2540A", l: ["latin → français", "espagnol, italien", "portugais, roumain"] }, { t: "Le calendrier", c: "#17784D", l: ["365 jours", "année bissextile", "juillet, août"] }, { t: "Les chiffres", c: "#7B3F99", l: ["I V X L", "C D M", "siècles, chapitres"] }], 210, "Le droit, la langue, le calendrier et les chiffres hérités de Rome"))],
+        fil: { html: "<p>Les élèves ont trouvé Rome autour d'eux : les chiffres de la montre et du chapitre XIV, les mois de juillet et d'août, les mots du français venus du latin, le droit et ses tribunaux. Rome a <strong>hérité</strong> des autres peuples et nous a <strong>transmis</strong> un héritage bien vivant.</p>", verdicts: [[2, "validee", "Héritière des Grecs et des Égyptiens, Rome nous a transmis un droit, une langue, des routes, un calendrier et des chiffres."]] },
+        retenir: "Droit romain ; latin → langues romanes ; calendrier julien (46 av. J.-C.) ; I V X L C D M." },
+      { t: "Entraînement au format de l'examen", html: integ("Le premier empereur romain est…", ["Jules César", "Auguste", "Romulus", "Septime Sévère"], "Auguste", "Il devient empereur en 27 av. J.-C.", "Écris en chiffres romains 2026, 14 et 49.", "2026 = MMXXVI ; 14 = XIV ; 49 = XLIX (40 = XL et 9 = IX).", "Ton petit frère dit que « Rome n'a rien laissé, ce sont des ruines ».", "En t'appuyant sur ta leçon, rédige quelques lignes pour lui montrer l'héritage romain dans sa vie.", "Rome nous a laissé beaucoup plus que des ruines. Les chiffres romains servent encore à numéroter les siècles et les chapitres ; les mois de juillet et d'août portent les noms de Jules César et d'Auguste ; notre calendrier de 365 jours vient du calendrier de Jules César ; le français vient du latin ; notre droit a gardé des principes et des mots du droit romain ; et les routes pavées et les ponts à arches reprennent des techniques romaines."), retenir: "Savoir-être : curiosité pour le patrimoine du monde et pour ses liens avec notre vie." }
+    ],
+    denouement: { titre: "L'exposé de Gaëlle et Ulrich", etapes: ["Situer Rome : royauté, République, Empire, Afrique romaine (indice 1).", "Montrer les traces matérielles : routes, villes, aqueducs (indice 2).", "Montrer l'héritage vivant : droit, langue, calendrier, chiffres (indice 3)."],
+      formules: [F("Durée av. J.-C.", "durée = date de début − date de fin", "509 − 27 = 482 ans"), F("Pente d'un aqueduc", "dénivelé = longueur × pente", "50 × 0,3 = 15 m"), F("Chiffres romains", "additionner ; soustraire le petit placé avant le grand", "MMXXVI = 2026 ; XIV = 14")],
+      reponse: "<p>Rome n'est pas une histoire morte. Petite ville fondée, selon la légende, en 753 av. J.-C., elle devient une République en 509 av. J.-C., puis un empire à partir de 27 av. J.-C., qui entoure toute la Méditerranée, y compris l'Afrique du Nord, d'où est venu l'empereur Septime Sévère. Rome n'a pas tout inventé : elle a hérité des Égyptiens, des Grecs et d'autres peuples. Mais elle a diffusé et nous a transmis un riche héritage : des routes pavées, des villes avec forum, thermes et amphithéâtre, des aqueducs à arches, un droit écrit dont notre droit garde des principes et des mots, le latin d'où vient le français, le calendrier de Jules César avec ses mois de juillet et d'août, et les chiffres romains, encore utilisés pour les siècles et les chapitres, comme le chapitre XIV du livre de Gaëlle.</p>",
+      transfert: "<p>Cherche dans ta maison, ton école ou ta ville trois traces de l'héritage romain (chiffres, mots, monuments, dates). Pour chacune, explique d'où elle vient.</p>" },
+    revision: ["<strong>Rome</strong> : 753 av. J.-C. (légende) ; République 509 av. J.-C. ; Empire 27 av. J.-C. (Auguste).", "Mare nostrum : l'Empire autour de la Méditerranée ; Afrique romaine, Carthage, Leptis Magna.", "Voies pavées, forum, thermes, amphithéâtre (Colisée), aqueducs, arc et voûte.", "Droit romain ; latin → français, espagnol, italien, portugais, roumain.", "Calendrier julien (46 av. J.-C.) : 365 jours, 366 tous les 4 ans ; juillet, août.", "Chiffres romains : I = 1, V = 5, X = 10, L = 50, C = 100, D = 500, M = 1 000."],
+    exo: "<p>Écris en chiffres arabes : XXI, XLVI, MCMLX. <em>(21 ; 46 ; 1960.)</em></p>",
+    quiz: [q("Selon la légende, Rome est fondée en…", "753 av. J.-C.", "1960", "27 av. J.-C.", "Par Romulus."), q("Le premier empereur romain est…", "Auguste", "Romulus", "Périclès", "En 27 av. J.-C."), q("Les Romains appelaient la Méditerranée…", "mare nostrum", "Noun", "Pnyx", "« Notre mer »."), q("Septime Sévère, empereur de Rome, est né…", "en Afrique, à Leptis Magna", "à Rome", "en Grèce", "Il règne de 193 à 211."), q("Un aqueduc sert à…", "amener l'eau jusqu'aux villes", "construire des bateaux", "écrire les lois", "Grâce à une pente douce."), q("Le mois de juillet doit son nom à…", "Jules César", "Auguste", "Romulus", "Julius."), q("Le français vient surtout du…", "latin", "grec", "arabe", "C'est une langue romane."), q("En chiffres romains, 2026 s'écrit…", "MMXXVI", "MMXVI", "MMCXXVI", "1000 + 1000 + 10 + 10 + 5 + 1."), q("IX vaut…", "9", "11", "4", "10 − 1."), q("La République romaine dure environ…", "482 ans", "48 ans", "1 000 ans", "509 − 27.")],
+    apc: apc("Des élèves pensent que Rome n'a plus aucun lien avec leur vie quotidienne.", "Présenter l'histoire de Rome et son héritage encore visible aujourd'hui.")
+  });
+  VRT_A("6e-histoire-rome", 2, "Lis et écris les chiffres romains", function (el) {
+    exercice(el, [["XIV vaut ___.", ["14", "16", "9"], "10 + (5 − 1)."], ["XIX vaut ___.", ["19", "21", "11"], "10 + (10 − 1)."], ["2026 s'écrit ___.", ["MMXXVI", "MMXVI", "MMXXIV"], "1000 + 1000 + 10 + 10 + 5 + 1."], ["Le XXIe siècle s'écrit aussi le siècle numéro ___.", ["21", "19", "12"], "10 + 10 + 1."], ["XL vaut ___.", ["40", "60", "15"], "50 − 10."], ["MCMLX vaut ___.", ["1960", "2160", "1940"], "1000 + (1000 − 100) + 50 + 10."]], "Nombre suivant", "Nombre");
+  });
+
+  /* ═══════════════ RANG 21 : DOSSIER 4, LES PÈLERINAGES ═══════════════ */
+  function chemins3D() {
+    var o = [{ f: "boite", c: [0, -6, 0], d: [520, 6, 280], coul: "#D8C49A", dessus: "#E6D4AA" }];
+    var p1 = [[-230, -120], [-170, -90], [-130, -110], [-110, -20]], p2 = [[230, -120], [170, -90], [130, -110], [110, -20]];
+    [p1, p2].forEach(function (pts, s) { for (var i = 0; i < pts.length - 1; i++) { var a = pts[i], b = pts[i + 1], cx = (a[0] + b[0]) / 2, cz = (a[1] + b[1]) / 2, l = Math.hypot(b[0] - a[0], b[1] - a[1]); o.push({ f: "boite", c: [cx, 1, cz], d: [l, 2, 10], coul: s ? "#17784D" : "#1E499B", div: false }); } pts.forEach(function (p) { o.push({ f: "cylindre", c: [p[0], 0, p[1]], r: 8, h: 14, n: 10, coul: s ? "#2E9A5B" : "#3F68B8" }); }); });
+    /* destination 1 : un sanctuaire à clocher */
+    o.push({ f: "boite", c: [-110, 30, 60], d: [90, 60, 60], coul: "#E8DFC9", dessus: "#C9B890" });
+    o.push({ f: "boite", c: [-160, 60, 60], d: [26, 120, 26], coul: "#E0D4B8", dessus: "#C9B890" });
+    o.push({ f: "poly", pts: [[-173, 120, 47], [-147, 120, 47], [-160, 150, 60]], coul: "#8B3A2A" });
+    o.push({ f: "poly", pts: [[-147, 120, 47], [-147, 120, 73], [-160, 150, 60]], coul: "#6B2A1E" });
+    /* destination 2 : une mosquée à coupole et minaret */
+    o.push({ f: "boite", c: [110, 30, 60], d: [90, 60, 60], coul: "#E8DFC9", dessus: "#C9B890" });
+    o.push({ f: "sphere", c: [110, 64, 60], r: 22, coul: "#2E9A5B" });
+    o.push({ f: "cylindre", c: [170, 0, 60], r: 10, h: 100, n: 12, coul: "#E0D4B8" });
+    o.push({ f: "cylindre", c: [170, 100, 60], r: 13, h: 6, n: 12, coul: "#C9B890" });
+    return o;
+  }
+  VRT_L("6e-histoire-pelerinages", {
+    c: "6e", m: "histoire", cle: "Dossier 4 : Les pèlerinages", titre: "Dossier 4 : Les pèlerinages chrétiens et musulmans", duree: 30,
+    accroche: "Le père de Halima part en pèlerinage à La Mecque ; la tante de Marc part pour Jérusalem et Rome. « Pourquoi faire un si long voyage pour prier, alors qu'on peut prier chez soi ? »",
+    intro: "Deux départs en pèlerinage dans un quartier de Douala te servent de fil rouge : à chaque partie, un indice t'aide à trancher entre trois idées sur les pèlerinages.",
+    objectifs: ["définir un pèlerinage", "présenter les principaux lieux de pèlerinage chrétiens", "présenter le pèlerinage musulman à La Mecque (hajj)", "comparer les pèlerinages chrétiens et musulmans et calculer leurs dates"],
+    enquete: {
+      titre: "Deux départs dans le quartier",
+      svg: svg(640, 220, "Rue d'un quartier de Douala : deux familles accompagnent un voyageur en tenue blanche et une voyageuse avec une valise ; un avion dans le ciel", lin("peC", ["#DDEBF5", "#F4EDE1"], true),
+        "<rect width='640' height='220' fill='url(#peC)'/><rect y='186' width='640' height='34' fill='#8A8A8A'/><path d='M440 40l40 6l18 -14h8l-6 16l24 4l6 -6h6l-4 10l4 10h-6l-6 -6l-24 4l6 16h-8l-18 -14l-40 6Z' fill='#9AA3AF'/>" +
+        perso(120, 96, "#4A2E18", "#F4F1EA", "#F4F1EA") + perso(60, 104, "#5A3A1E", "#17784D", "#2E3445") + perso(380, 96, "#6B4423", "#7B3F99", "#4D5163") + "<rect x='398' y='150' width='26' height='34' rx='3' fill='#1E499B'/>" + perso(450, 104, "#5A3A1E", "#C2540A", "#2E3445") +
+        bulle(170, 30, 240, "Pourquoi partir si loin pour prier ?", "#F7C948")),
+      legende: "À Douala, deux familles voisines accompagnent leurs pèlerins.",
+      contexte: "<p>Dans le quartier, le père de Halima s'apprête à partir pour le pèlerinage à La Mecque, et la tante de Marc pour Jérusalem et Rome. Marc demande : « Pourquoi faire un si long voyage pour prier ? » Halima pense que « les pèlerinages existent seulement dans l'islam ». Marc, lui, croit que « chrétiens et musulmans font exactement le même pèlerinage, au même endroit ». Leur professeur leur propose de comparer les deux pèlerinages pour le dossier 4.</p>",
+      documents: [{ t: "Doc. 1 : le hajj", html: "<p>Le pèlerinage à La Mecque, ou hajj, est le cinquième pilier de l'islam : tout musulman qui en a les moyens et la santé doit l'accomplir une fois dans sa vie. Il a lieu pendant le dernier mois du calendrier musulman.</p>" },
+        { t: "Doc. 2 : les pèlerinages chrétiens", html: "<p>Depuis l'Antiquité, des chrétiens se rendent à Jérusalem, sur les lieux de la vie de Jésus, et à Rome, près des tombeaux des apôtres Pierre et Paul. D'autres lieux attirent aussi des pèlerins, comme Saint-Jacques-de-Compostelle en Espagne ou Lourdes en France.</p>" }],
+      question: "Qu'est-ce qu'un pèlerinage, et quels sont les points communs et les différences entre les pèlerinages chrétiens et musulmans ?",
+      tache: "Définis le pèlerinage, présente les pèlerinages chrétiens et le hajj, puis compare-les dans un tableau.",
+      hypotheses: ["Le pèlerinage n'existe que dans l'islam.", "Chrétiens et musulmans font exactement le même pèlerinage, au même endroit.", "Le pèlerinage est un voyage religieux vers un lieu saint qui existe dans les deux religions : obligatoire une fois dans la vie pour les musulmans (La Mecque), libre pour les chrétiens (Jérusalem, Rome…)."]
+    },
+    parties: [
+      { t: "Qu'est-ce qu'un pèlerinage ?", html: def("Pèlerinage", "Voyage qu'un croyant fait vers un lieu saint de sa religion pour prier, demander pardon, remercier ou renforcer sa foi. Celui qui le fait est un pèlerin.") +
+          "<ul><li>Un <strong>lieu saint</strong> est lié à la vie d'un prophète, d'un saint, ou à un événement religieux important.</li><li>Le pèlerinage comprend souvent un <strong>voyage</strong>, des <strong>prières</strong>, des <strong>gestes</strong> (marcher, faire le tour d'un lieu, toucher, déposer une offrande) et une <strong>fête</strong>.</li><li>Il existe dans de nombreuses religions, dont le christianisme et l'islam.</li></ul>" +
+          formule("pèlerinage = voyage + lieu saint + prières et gestes + retour transformé") +
+          ex("Le voyage d'affaires d'un commerçant vers Lagos n'est pas un pèlerinage ; le voyage du père de Halima vers La Mecque pour prier en est un, car son but est religieux.", "Voyage ou pèlerinage ?") +
+          attention("Chacun est libre de sa religion : dans ce dossier, on décrit les pèlerinages tels que les croyants les vivent, sans juger leur foi."),
+        planches: [P2("Les quatre éléments d'un pèlerinage", "Ce que l'on retrouve dans presque tous les pèlerinages, quelle que soit la religion.",
+          colonnes("Un pèlerinage, c'est…", [{ t: "Un départ", c: "#1E499B", l: ["quitter sa maison", "se préparer"] }, { t: "Un lieu saint", c: "#7B3F99", l: ["lié à un prophète", "ou à un saint"] }, { t: "Des gestes", c: "#C2540A", l: ["prières, marche", "rites, offrandes"] }, { t: "Un retour", c: "#17784D", l: ["foi renforcée", "fête, partage"] }], 200, "Les quatre éléments d'un pèlerinage"))],
+        fil: { html: "<p>Halima se trompe : le pèlerinage n'existe pas seulement dans l'islam. La tante de Marc, chrétienne, part elle aussi pour un <strong>voyage religieux</strong> vers des lieux saints. Le pèlerinage existe dans de nombreuses religions.</p>", verdicts: [[0, "rejetee", "Le pèlerinage existe aussi dans le christianisme et dans bien d'autres religions."]] },
+        retenir: "Pèlerinage : voyage religieux vers un lieu saint ; pèlerin ; prières, gestes, fête." },
+      { t: "Les pèlerinages chrétiens et le hajj", html: "<ul><li><strong>Chez les chrétiens</strong> : Jérusalem (lieux de la vie, de la mort et de la résurrection de Jésus), Rome (tombeaux des apôtres Pierre et Paul), Saint-Jacques-de-Compostelle, Lourdes et d'autres sanctuaires. Le pèlerinage est un acte de piété <strong>libre</strong>, non obligatoire.</li><li><strong>Chez les musulmans</strong> : le <strong>hajj</strong> à La Mecque est <strong>obligatoire</strong> une fois dans la vie pour qui en a les moyens et la santé. Les pèlerins portent une tenue blanche simple, font sept fois le tour de la Kaaba, se rendent au mont Arafat et accomplissent d'autres rites.</li><li>Le hajj se termine avec la <strong>fête du sacrifice</strong> (Aïd al-Adha, appelée Tabaski en Afrique de l'Ouest et au Cameroun), célébrée par tous les musulmans du monde.</li></ul>" +
+          formule("le hajj avance d'environ 11 jours chaque année dans notre calendrier (365 − 354 = 11)") +
+          ex("Si le hajj commence vers le 25 mai une année, il commencera vers le 14 mai l'année suivante : 25 − 11 = 14.", "Calculer la date du hajj") +
+          savais("En 1324, le roi du Mali Mansa Moussa fit le pèlerinage à La Mecque avec une immense caravane ; aujourd'hui, les pèlerins camerounais partent en avion depuis Douala, Yaoundé ou Garoua."),
+        planches: [{ type: "3d", titre: "Deux chemins vers deux lieux saints", legende: "Tourne la maquette : deux chemins jalonnés d'étapes, l'un bleu vers un sanctuaire chrétien à clocher, l'autre vert vers une mosquée à coupole et minaret. Chaque étape représente un moment du voyage : départ, prière, marche, arrivée au lieu saint.", modele: { h: 340, rx: -24, ry: 28, echelle: 0.75, alt: "Deux chemins à étapes menant l'un à une église à clocher, l'autre à une mosquée à coupole et minaret", objets: chemins3D(), etiquettes: [{ p: [-160, 150, 60], t: "sanctuaire chrétien", cote: "g" }, { p: [170, 106, 60], t: "mosquée", cote: "d" }, { p: [-170, 16, -90], t: "étapes du pèlerin", cote: "g" }, { p: [170, 16, -90], t: "étapes du pèlerin", cote: "d" }] } }],
+        fil: { html: "<p>Marc se trompe : chrétiens et musulmans ne font pas le même pèlerinage au même endroit. Les chrétiens vont surtout à <strong>Jérusalem et à Rome</strong>, librement ; les musulmans accomplissent le <strong>hajj à La Mecque</strong>, obligatoire une fois dans la vie pour qui le peut.</p>", verdicts: [[1, "rejetee", "Les lieux, les règles et les rites sont différents dans les deux religions."]] },
+        retenir: "Chrétiens : Jérusalem, Rome, Compostelle, Lourdes (libre) ; musulmans : hajj à La Mecque (obligatoire si on le peut), Tabaski." },
+      { t: "Comparer les deux pèlerinages", html: "<ul><li><strong>Points communs</strong> : un voyage vers un lieu saint ; des prières et des gestes ; un temps de pardon et de renouvellement de la foi ; des pèlerins venus du monde entier, dont le Cameroun.</li><li><strong>Différences</strong> : les lieux (Jérusalem et Rome / La Mecque) ; le caractère obligatoire ou non ; les rites ; les dates (le hajj suit le calendrier lunaire, les pèlerinages chrétiens se font toute l'année et lors de grandes fêtes).</li><li><strong>Un héritage historique</strong> : les pèlerinages ont fait voyager les hommes, les idées et les marchandises depuis le Moyen Âge.</li></ul>" +
+          formule("comparer = un tableau (lieux, obligation, rites, dates) + points communs + différences") +
+          ex("Lieux : Jérusalem et Rome / La Mecque ; obligation : libre / une fois dans la vie si on le peut ; rites : messes, processions, marche / tenue blanche, tours de la Kaaba, Arafat ; dates : toute l'année / dernier mois du calendrier musulman.", "Le tableau du dossier") +
+          astuce("Pour comparer, commence toujours par les points communs, puis les différences : cela évite d'opposer les croyants les uns aux autres."),
+        planches: [P2("Le tableau du dossier 4", "Les pèlerinages chrétiens et le hajj comparés sur quatre points.",
+          colonnes("Comparer deux pèlerinages", [{ t: "Chrétiens", c: "#1E499B", l: ["Jérusalem, Rome", "Compostelle, Lourdes", "libre", "toute l'année"] }, { t: "Musulmans", c: "#17784D", l: ["La Mecque", "hajj, 5e pilier", "obligatoire si possible", "calendrier lunaire"] }], 230, "Tableau comparant les pèlerinages chrétiens et musulmans"))],
+        fil: { html: "<p>Les deux voisins ont la réponse : le pèlerinage est un <strong>voyage religieux</strong> qui existe dans les deux religions. Il a des points communs (lieu saint, prière, foi renouvelée) et des différences (lieux, obligation, rites, dates). Le père de Halima et la tante de Marc partent tous les deux pour prier, chacun selon sa foi.</p>", verdicts: [[2, "validee", "Un voyage religieux présent dans les deux religions, avec des points communs et des différences."]] },
+        retenir: "Points communs : lieu saint, prière, foi renouvelée ; différences : lieux, obligation, rites, dates." },
+      { t: "Entraînement au format de l'examen", html: integ("Le hajj est…", ["une fête chrétienne", "le pèlerinage musulman à La Mecque", "un marché", "une prière du soir"], "Le pèlerinage musulman à La Mecque", "Cinquième pilier de l'islam.", "Cite deux lieux de pèlerinage chrétiens et dis ce qui les rend saints.", "Jérusalem, lieux de la vie, de la mort et de la résurrection de Jésus ; Rome, tombeaux des apôtres Pierre et Paul (aussi Compostelle, Lourdes).", "Dans ta classe, un élève se moque d'un camarade dont le père revient du hajj.", "Rédige quelques lignes pour expliquer le sens du pèlerinage et inviter au respect.", "Le hajj est le pèlerinage à La Mecque, l'un des cinq piliers de l'islam : le père de ce camarade a accompli un devoir religieux important, souvent après des années d'économies. Les chrétiens font aussi des pèlerinages, à Jérusalem ou à Rome. Chacun est libre de sa religion, et le respect des croyances des autres permet de bien vivre ensemble au Cameroun."), retenir: "Savoir-être : respect des croyances et des pratiques religieuses de chacun." }
+    ],
+    denouement: { titre: "Le dossier des deux voisins", etapes: ["Définir le pèlerinage : un voyage religieux vers un lieu saint (indice 1).", "Présenter les pèlerinages chrétiens et le hajj (indice 2).", "Comparer : points communs et différences (indice 3)."],
+      formules: [F("Définir", "pèlerinage = voyage + lieu saint + prières et gestes", "La Mecque, Jérusalem, Rome"), F("Dater le hajj", "date de l'année suivante ≈ date − 11 jours", "25 mai → 14 mai"), F("Comparer", "tableau + points communs + différences", "lieux, obligation, rites, dates")],
+      reponse: "<p>Un pèlerinage est un voyage religieux vers un lieu saint pour prier, demander pardon ou renforcer sa foi. Il n'existe pas seulement dans l'islam : les chrétiens se rendent depuis l'Antiquité à Jérusalem, sur les lieux de la vie de Jésus, et à Rome, près des tombeaux des apôtres Pierre et Paul, ainsi qu'à Compostelle ou à Lourdes ; ce pèlerinage est libre. Pour les musulmans, le hajj à La Mecque est le cinquième pilier de l'islam : il est obligatoire une fois dans la vie pour qui en a les moyens et la santé, se déroule pendant le dernier mois du calendrier lunaire (et avance donc d'environ 11 jours chaque année) et se termine par la Tabaski. Les deux pèlerinages ont des points communs (lieu saint, prière, foi renouvelée) et des différences (lieux, obligation, rites, dates). Le père de Halima et la tante de Marc partent ainsi, chacun selon sa foi, pour un même type de voyage.</p>",
+      transfert: "<p>Interroge une personne de ton entourage qui a fait un pèlerinage (ou qui en connaît un). Note le lieu, la durée du voyage, les gestes accomplis et ce que ce voyage a représenté pour elle.</p>" },
+    revision: ["<strong>Pèlerinage</strong> : voyage religieux vers un lieu saint ; le pèlerin.", "Chrétiens : Jérusalem, Rome, Saint-Jacques-de-Compostelle, Lourdes ; pèlerinage libre.", "Musulmans : hajj à La Mecque, 5e pilier, obligatoire une fois si on le peut.", "Hajj : tenue blanche, tours de la Kaaba, mont Arafat ; fin : Tabaski (Aïd al-Adha).", "Le hajj avance d'environ 11 jours par an (calendrier lunaire).", "Points communs : lieu saint, prière, foi ; différences : lieux, obligation, rites, dates."],
+    exo: "<p>Si le hajj commence vers le 26 mai une année, vers quelle date commencera-t-il l'année suivante ? <em>(26 − 11 = 15 : vers le 15 mai.)</em></p>",
+    quiz: [q("Un pèlerinage est…", "un voyage religieux vers un lieu saint", "un voyage d'affaires", "une fête de mariage", "Pour prier et renforcer sa foi."), q("Le pèlerinage à La Mecque s'appelle…", "le hajj", "le sabbat", "la diaspora", "Cinquième pilier de l'islam."), q("Pour un musulman, le hajj est…", "obligatoire une fois dans la vie s'il le peut", "interdit", "obligatoire chaque année", "Si on en a les moyens et la santé."), q("Les chrétiens vont en pèlerinage notamment à…", "Jérusalem et Rome", "La Mecque", "Tombouctou", "Lieux de Jésus et des apôtres."), q("À Rome se trouvent les tombeaux des apôtres…", "Pierre et Paul", "Moïse et Abraham", "Romulus et Rémus", "Selon la tradition chrétienne."), q("La fête qui termine le hajj s'appelle au Cameroun…", "la Tabaski", "le Ngondo", "Noël", "Aïd al-Adha, fête du sacrifice."), q("Pendant le hajj, les pèlerins portent…", "une tenue blanche simple", "un uniforme militaire", "un costume coloré", "Signe d'égalité entre tous."), q("Chaque année, le hajj avance d'environ…", "11 jours", "1 mois", "1 jour", "365 − 354 = 11."), q("Un pèlerinage chrétien est en général…", "libre, non obligatoire", "obligatoire chaque mois", "interdit", "Un acte de piété personnel."), q("Pour comparer deux pèlerinages, on commence par…", "les points communs", "les moqueries", "le prix du billet", "Puis on présente les différences.")],
+    apc: apc("Des voisins de religions différentes se demandent pourquoi leurs proches partent en pèlerinage.", "Définir le pèlerinage et comparer les pèlerinages chrétiens et musulmans.")
+  });
+  VRT_A("6e-histoire-pelerinages", 1, "Chrétien ou musulman ? Retrouve le bon pèlerinage", function (el) {
+    exercice(el, [["Le hajj à La Mecque est un pèlerinage ___.", ["musulman", "chrétien", "grec"], "Cinquième pilier de l'islam."], ["Le pèlerinage à Rome, près des tombeaux de Pierre et Paul, est ___.", ["chrétien", "musulman", "égyptien"], "Les apôtres de Jésus."], ["La tenue blanche simple et les tours de la Kaaba appartiennent au ___.", ["hajj", "pèlerinage de Lourdes", "Ngondo"], "Rites du pèlerinage musulman."], ["Saint-Jacques-de-Compostelle est un lieu de pèlerinage ___.", ["chrétien", "musulman", "dogon"], "En Espagne."], ["La Tabaski termine le ___.", ["hajj", "carême", "sabbat"], "Fête du sacrifice."], ["Si le hajj commence le 20 juin, l'année suivante il commence vers le ___.", ["9 juin", "1er juillet", "20 juin"], "20 − 11 = 9."]], "Question suivante", "Question");
+  });
+
+  /* ═══════════════ RANG 11 : LA RELIGION DE L'ÉGYPTE ANCIENNE ═══════════════ */
+  function temple3D() {
+    var o = [{ f: "boite", c: [0, -6, 0], d: [500, 6, 300], coul: "#D8C49A", dessus: "#E8D8B0" }];
+    [-1, 1].forEach(function (s) { o.push({ f: "poly", pts: [[s * 30, 0, -100], [s * 130, 0, -100], [s * 116, 130, -92], [s * 40, 130, -92]], coul: "#E0CDA4" }); o.push({ f: "poly", pts: [[s * 130, 0, -100], [s * 130, 0, -70], [s * 116, 130, -76], [s * 116, 130, -92]], coul: "#C9B890" }); o.push({ f: "boite", c: [s * 78, 132, -86], d: [80, 6, 14], coul: "#C9B890", dessus: "#D8C49A" }); });
+    o.push({ f: "boite", c: [0, 40, -96], d: [50, 80, 4], coul: "#5A3A1E" });
+    for (var i = 0; i < 4; i++) { [-50, 50].forEach(function (x) { o.push({ f: "cylindre", c: [x, 0, -30 + i * 40], r: 12, h: 90, n: 12, coul: "#E8DFC9" }); }); }
+    o.push({ f: "boite", c: [0, 94, 30], d: [130, 8, 170], coul: "#C9B890", dessus: "#D8C49A" });
+    [-160, 160].forEach(function (x) { o.push({ f: "poly", pts: [[x - 8, 0, -120], [x + 8, 0, -120], [x + 4, 150, -116], [x - 4, 150, -116]], coul: "#D4B370" }); o.push({ f: "poly", pts: [[x - 4, 150, -116], [x + 4, 150, -116], [x, 162, -116]], coul: "#F7C948" }); });
+    return o;
+  }
+  VRT_L("6e-histoire-egypte-religion", {
+    c: "6e", m: "histoire", cle: "La religion de l", titre: "La religion de l'Égypte ancienne : des dieux et la vie après la mort", duree: 30,
+    accroche: "Au musée, devant une momie, un élève de Kribi frissonne : « Pourquoi les Égyptiens conservaient-ils leurs morts ? » Que croyaient-ils sur les dieux et sur la vie après la mort ?",
+    intro: "Une exposition itinérante sur l'Égypte, installée à Kribi, te sert de fil rouge : à chaque partie, un indice t'aide à trancher entre trois idées sur la religion égyptienne.",
+    objectifs: ["décrire le polythéisme égyptien et ses principaux dieux", "présenter le rôle des temples et des prêtres", "expliquer les croyances sur la vie après la mort : momification, jugement d'Osiris", "situer la tentative d'Akhenaton"],
+    enquete: {
+      titre: "L'exposition de Kribi",
+      svg: svg(640, 220, "Salle d'exposition : un sarcophage peint debout, une statue à tête de chacal, une fresque avec une balance ; trois élèves regardent", lin("erC", ["#F4E2B8", "#E8DFC9"], true),
+        "<rect width='640' height='220' fill='url(#erC)'/><rect y='186' width='640' height='34' fill='#8B6B4A'/><path d='M280 186V60q40 -40 80 0v126Z' fill='#C9962A' stroke='#7A4A1E' stroke-width='3'/><ellipse cx='320' cy='70' rx='22' ry='24' fill='#E8C070'/><rect x='300' y='100' width='40' height='60' fill='#1E499B' opacity='.7'/>" +
+        "<rect x='420' y='40' width='160' height='90' fill='#F4EDE1' stroke='#C9A06E'/><path d='M500 56v40M470 66h60M470 66l-8 18h16ZM530 66l-8 18h16Z' stroke='#4D5163' stroke-width='2' fill='#F7C948'/>" + perso(90, 98, "#5A3A1E", "#C2540A", "#2E3445") + perso(170, 104, "#6B4423", "#17784D", "#2E3445") + perso(220, 104, "#4A2E18", "#7B3F99", "#2E3445") +
+        bulle(10, 30, 260, "Pourquoi conserver les morts ?", "#F7C948")),
+      legende: "À Kribi, une exposition sur l'Égypte ancienne montre un sarcophage et la scène de la pesée du cœur.",
+      contexte: "<p>Pendant la visite, Ateba pense que « les Égyptiens adoraient un seul dieu, comme dans les religions d'aujourd'hui ». Nadia croit que « la momification était seulement une façon d'éviter les mauvaises odeurs ». Le guide montre une fresque où un dieu à tête de chacal pèse le cœur d'un mort face à une plume, et explique que tout cela avait un sens religieux précis.</p>",
+      documents: [{ t: "Doc. 1 : la pesée du cœur (Livre des morts)", html: "<p>Le cœur du défunt est posé sur une balance face à la plume de Maât, déesse de la justice et de la vérité. S'il est léger, le mort entre dans le royaume d'Osiris ; s'il est lourd de fautes, il est dévoré par un monstre.</p>" },
+        { t: "Doc. 2 : la momification", html: "<p>Les embaumeurs retirent les organes, dessèchent le corps avec du natron (un sel) pendant environ 40 jours, puis l'enveloppent de bandelettes : l'opération complète dure environ 70 jours.</p>" }],
+      question: "Que croyaient les Égyptiens sur les dieux et sur la vie après la mort, et pourquoi momifiaient-ils leurs morts ?",
+      tache: "Présente les dieux et les temples égyptiens, puis explique les croyances sur la mort et le sens de la momification.",
+      hypotheses: ["Les Égyptiens adoraient un seul dieu.", "La momification servait seulement à éviter les mauvaises odeurs.", "Les Égyptiens étaient polythéistes ; ils croyaient à une vie après la mort, jugée par Osiris, et conservaient le corps par la momification pour que le défunt puisse y vivre."]
+    },
+    parties: [
+      { t: "De nombreux dieux", html: def("Polythéisme égyptien", "Croyance des Égyptiens en de nombreux dieux, souvent représentés avec un corps humain et une tête d'animal, chacun protégeant un domaine de la vie.") +
+          "<ul><li><strong>Rê</strong> : le dieu soleil, le plus important.</li><li><strong>Osiris</strong> : le dieu des morts et de la renaissance ; <strong>Isis</strong>, son épouse, déesse protectrice ; <strong>Horus</strong>, leur fils, à tête de faucon, protecteur du pharaon.</li><li><strong>Anubis</strong> : à tête de chacal, dieu des embaumeurs et gardien des tombes.</li><li><strong>Thot</strong> : à tête d'ibis, dieu de l'écriture et du savoir ; <strong>Maât</strong> : déesse de la justice et de l'ordre du monde.</li></ul>" +
+          ex("Un scribe priait Thot, le dieu de l'écriture ; une mère priait Isis pour protéger son enfant ; tous honoraient Rê, le soleil qui fait vivre l'Égypte.", "Chacun ses dieux protecteurs") +
+          astuce("Pour reconnaître un dieu, regarde sa tête : faucon = Horus, chacal = Anubis, ibis = Thot, disque solaire = Rê."),
+        planches: [P2("Les grands dieux de l'Égypte", "Quelques dieux égyptiens, leur apparence et leur domaine.",
+          colonnes("Qui est qui ?", [{ t: "Rê", c: "#B07A00", l: ["disque solaire", "→ le soleil"] }, { t: "Osiris", c: "#17784D", l: ["roi momifié", "→ les morts"] }, { t: "Horus", c: "#1E499B", l: ["tête de faucon", "→ le pharaon"] }, { t: "Anubis", c: "#4D5163", l: ["tête de chacal", "→ les tombes"] }, { t: "Thot", c: "#7B3F99", l: ["tête d'ibis", "→ l'écriture"] }], 190, "Cinq grands dieux égyptiens et leur domaine"))],
+        fil: { html: "<p>Ateba se trompe : les Égyptiens n'adoraient pas un seul dieu, mais <strong>de nombreux dieux</strong>, chacun avec son domaine : c'est le polythéisme. Seul le pharaon Akhenaton tenta un jour d'imposer un culte presque unique, sans succès durable.</p>", verdicts: [[0, "rejetee", "Les Égyptiens étaient polythéistes : Rê, Osiris, Isis, Horus, Anubis, Thot…"]] },
+        retenir: "Polythéisme : Rê (soleil), Osiris (morts), Isis, Horus (faucon), Anubis (chacal), Thot (ibis), Maât (justice)." },
+      { t: "Les temples et les prêtres", html: "<ul><li><strong>Le temple</strong> est la maison du dieu : une grande porte (le <strong>pylône</strong>), des cours, une salle à colonnes, puis le sanctuaire où se trouve la statue du dieu.</li><li>Seuls les <strong>prêtres</strong> et le pharaon entrent dans le sanctuaire ; ils lavent, habillent et « nourrissent » chaque jour la statue.</li><li>Le peuple prie surtout lors des <strong>fêtes</strong>, quand la statue du dieu sort en procession.</li><li>Les temples possèdent des terres, des greniers et des ateliers : ils sont aussi très riches.</li></ul>" +
+          formule("nombre de rites par an = rites par jour × 365") +
+          ex("Si les prêtres accomplissent 3 rites par jour devant la statue, cela fait 3 × 365 = 1 095 rites par an pour un seul dieu.", "Calculer le travail des prêtres") +
+          savais("Le temple de Karnak, à Thèbes, fut agrandi pendant près de 2 000 ans ; sa grande salle compte 134 colonnes."),
+        planches: [{ type: "3d", titre: "L'entrée d'un temple égyptien", legende: "Tourne le temple : deux grands massifs inclinés forment le pylône, encadrant la porte ; devant, deux obélisques à pointe dorée ; derrière, une salle à colonnes qui mène au sanctuaire du dieu, où seuls les prêtres entrent.", modele: { h: 340, rx: -16, ry: 30, echelle: 0.7, alt: "Pylône égyptien à deux massifs inclinés, deux obélisques et une salle à colonnes", objets: temple3D(), etiquettes: [{ p: [-78, 136, -86], t: "pylône", cote: "g" }, { p: [160, 162, -116], t: "obélisque", cote: "d" }, { p: [50, 60, 50], t: "salle à colonnes", cote: "d" }, { p: [0, 50, -98], t: "porte du temple", cote: "g" }] } }],
+        fil: { html: "<p>Les temples montrent que la religion organise toute la société : les prêtres servent les dieux chaque jour, le pharaon est leur représentant, et le peuple participe aux grandes fêtes. Rien n'y est laissé au hasard : chaque geste a un sens religieux.</p>", verdicts: [] },
+        retenir: "Temple : pylône, cours, salle à colonnes, sanctuaire ; prêtres ; fêtes et processions ; Karnak." },
+      { t: "La vie après la mort", html: "<ul><li>Les Égyptiens croient que le mort continue de vivre dans l'au-delà, à condition que son <strong>corps soit conservé</strong> et qu'il réussisse le <strong>jugement d'Osiris</strong>.</li><li><strong>La momification</strong> : les embaumeurs retirent les organes, dessèchent le corps avec du natron pendant environ 40 jours, l'enveloppent de bandelettes et d'amulettes : environ 70 jours en tout.</li><li><strong>La pesée du cœur</strong> : devant Osiris, Anubis pèse le cœur du mort face à la plume de Maât ; un cœur juste est aussi léger que la plume.</li><li><strong>Le tombeau</strong> (pyramide, tombe creusée dans la roche) contient des objets, de la nourriture et des textes (le Livre des morts) pour la vie dans l'au-delà.</li><li>Vers 1350 av. J.-C., le pharaon <strong>Akhenaton</strong> tente d'imposer le culte d'un dieu unique, Aton (le disque solaire) ; après sa mort, les anciens dieux reviennent.</li></ul>" +
+          formule("durée totale = séchage + préparation des bandelettes et des rites") +
+          ex("Momification : environ 40 jours de séchage dans le natron + environ 30 jours de bandelettes et de rites = 40 + 30 = 70 jours.", "Calculer la durée de la momification") +
+          attention("La momification n'était pas une simple mesure d'hygiène : c'était un acte religieux, pour que l'âme du mort retrouve son corps."),
+        planches: [P2("Le voyage du défunt", "Les étapes qui, selon les Égyptiens, mènent le mort à la vie éternelle.",
+          colonnes("Du décès à l'au-delà", [{ t: "1. Momifier", c: "#B07A00", l: ["natron, bandelettes", "≈ 70 jours"] }, { t: "2. Enterrer", c: "#7B3F99", l: ["tombeau, objets", "Livre des morts"] }, { t: "3. Être jugé", c: "#1E499B", l: ["pesée du cœur", "plume de Maât"] }, { t: "4. Vivre", c: "#17784D", l: ["royaume", "d'Osiris"] }], 200, "Les étapes du voyage du défunt dans la religion égyptienne"))],
+        fil: { html: "<p>Nadia se trompe : la momification n'avait pas pour but d'éviter les odeurs, mais de <strong>conserver le corps</strong> pour que le défunt puisse vivre dans l'au-delà, après avoir réussi la pesée du cœur devant Osiris. C'est le cœur de la religion égyptienne.</p>", verdicts: [[1, "rejetee", "La momification est un acte religieux : conserver le corps pour la vie éternelle."], [2, "validee", "Polythéisme, temples et prêtres, vie après la mort jugée par Osiris et préparée par la momification."]] },
+        retenir: "Vie après la mort ; momification (≈ 70 jours) ; pesée du cœur face à la plume de Maât ; tombeaux ; Akhenaton et Aton (≈ 1350 av. J.-C.)." },
+      { t: "Entraînement au format de l'examen", html: integ("Le dieu égyptien des morts est…", ["Rê", "Osiris", "Thot", "Zeus"], "Osiris", "Il juge les morts lors de la pesée du cœur.", "Explique en trois lignes ce qu'est la pesée du cœur.", "Après la mort, le cœur du défunt est posé sur une balance face à la plume de Maât, déesse de la justice. S'il est aussi léger que la plume, le mort entre dans le royaume d'Osiris ; s'il est lourd de fautes, il est dévoré.", "Un camarade dit que « les momies, c'était juste pour faire peur ».", "Rédige quelques lignes pour lui expliquer le sens de la momification.", "Les Égyptiens croyaient que le mort continuait de vivre dans l'au-delà si son corps était conservé. Les embaumeurs le desséchaient avec du natron et l'enveloppaient de bandelettes, pendant environ 70 jours. Le défunt devait ensuite réussir la pesée du cœur devant Osiris. La momie n'était donc pas faite pour effrayer : c'était un acte religieux, plein de respect pour les morts."), retenir: "Savoir-être : respect des croyances des peuples anciens et des rites funéraires." }
+    ],
+    denouement: { titre: "Ce que la visite a appris", etapes: ["Les Égyptiens étaient polythéistes : Rê, Osiris, Isis, Horus, Anubis, Thot (indice 1).", "Les temples et les prêtres servaient les dieux chaque jour (indice 2).", "La momification préparait la vie après la mort, jugée par Osiris (indice 3)."],
+      formules: [F("Durée de la momification", "séchage + bandelettes et rites", "40 + 30 = 70 jours"), F("Travail des prêtres", "rites par an = rites par jour × 365", "3 × 365 = 1 095"), F("Situer Akhenaton", "≈ 1350 av. J.-C. → âge = 1350 + 2026 − 1", "environ 3 375 ans")],
+      reponse: "<p>Les Égyptiens étaient polythéistes : ils adoraient de nombreux dieux, souvent à tête d'animal, comme Rê, le soleil, Osiris, dieu des morts, Isis, Horus à tête de faucon, Anubis à tête de chacal ou Thot à tête d'ibis. Chaque dieu avait son temple, sa maison, où les prêtres servaient chaque jour sa statue ; le peuple le priait surtout lors des fêtes. Ils croyaient aussi à une vie après la mort : le défunt devait réussir la pesée du cœur devant Osiris, son cœur étant comparé à la plume de Maât. Pour qu'il puisse vivre dans l'au-delà, son corps devait être conservé : c'est le sens religieux de la momification, qui durait environ 70 jours. Seul le pharaon Akhenaton tenta, vers 1350 av. J.-C., d'imposer le culte d'un dieu unique, Aton, sans succès durable.</p>",
+      transfert: "<p>Compare la religion de l'Égypte ancienne avec les religions monothéistes étudiées cette année : un ou plusieurs dieux ? quels lieux de prière ? quelles croyances sur la mort ?</p>" },
+    revision: ["<strong>Polythéisme égyptien</strong> : de nombreux dieux, souvent à tête d'animal.", "Rê (soleil), Osiris (morts), Isis, Horus (faucon), Anubis (chacal), Thot (ibis), Maât (justice).", "Temple : pylône, salle à colonnes, sanctuaire ; prêtres ; fêtes et processions.", "Vie après la mort : momification (≈ 70 jours), tombeau, Livre des morts.", "Pesée du cœur face à la plume de Maât, devant Osiris.", "Akhenaton (≈ 1350 av. J.-C.) : culte d'Aton, sans succès durable."],
+    exo: "<p>Associe chaque dieu à son apparence : Horus, Anubis, Thot. <em>(Tête de faucon ; tête de chacal ; tête d'ibis.)</em></p>",
+    quiz: [q("La religion égyptienne était…", "polythéiste", "monothéiste", "sans dieux", "De nombreux dieux."), q("Le dieu soleil s'appelle…", "Rê", "Osiris", "Anubis", "Le plus important des dieux."), q("Le dieu à tête de chacal est…", "Anubis", "Horus", "Thot", "Dieu des embaumeurs."), q("Le dieu qui juge les morts est…", "Osiris", "Rê", "Amma", "Lors de la pesée du cœur."), q("Lors de la pesée, le cœur est comparé à…", "la plume de Maât", "une pierre", "un pain", "La justice et la vérité."), q("La momification dure environ…", "70 jours", "7 jours", "7 ans", "40 jours de séchage, puis bandelettes."), q("Le natron est…", "un sel qui dessèche le corps", "un dieu", "un temple", "Utilisé par les embaumeurs."), q("Dans le sanctuaire du temple entrent…", "les prêtres et le pharaon", "tous les habitants", "les étrangers", "Le peuple prie lors des fêtes."), q("Akhenaton voulut imposer le culte de…", "Aton", "Zeus", "Amma", "Le disque solaire, vers 1350 av. J.-C."), q("La grande porte d'un temple égyptien s'appelle…", "le pylône", "le minaret", "le forum", "Deux massifs inclinés.")],
+    apc: apc("Des élèves ne comprennent pas pourquoi les Égyptiens momifiaient leurs morts.", "Présenter les dieux, les temples et les croyances des Égyptiens sur la vie après la mort.")
+  });
+  VRT_A("6e-histoire-egypte-religion", 0, "Reconnais le dieu égyptien", function (el) {
+    exercice(el, [["Le dieu à tête de faucon, protecteur du pharaon, est ___.", ["Horus", "Anubis", "Thot"], "Fils d'Osiris et d'Isis."], ["Le dieu à tête de chacal, gardien des tombes, est ___.", ["Anubis", "Horus", "Rê"], "Dieu des embaumeurs."], ["Le dieu à tête d'ibis, dieu de l'écriture, est ___.", ["Thot", "Osiris", "Rê"], "Protecteur des scribes."], ["Le dieu soleil est ___.", ["Rê", "Thot", "Osiris"], "Le plus important des dieux."], ["La déesse de la justice, dont la plume sert à peser les cœurs, est ___.", ["Maât", "Isis", "Aton"], "Elle représente l'ordre du monde."], ["Le dieu des morts, qui juge les défunts, est ___.", ["Osiris", "Horus", "Anubis"], "Roi du royaume des morts."]], "Dieu suivant", "Dieu");
+  });
+
+})();
+
+/* Leçons GRATUITES — Géographie de 6e, lot 1 (24/11/2026) : rangs 1 (la géographie), 2 (notre planète la Terre),
+   3 (TP 1 : localiser un lieu sur la carte). Aucune leçon n'existait en géographie de 6e. Même gabarit que les leçons
+   d'histoire de 6e : situation-problème résolue en étapes et formules, 2 planches 2D, 1 planche 3D, simulation,
+   entraînement au format de l'examen, quiz de 10. */
+(function () {
+  "use strict";
+  var NUIT = "#001136", BLEU = "#1E499B", GRIS = "#4D5163", VERT = "#17784D", ROUGE = "#C62828", TERRE = "#C46A2B";
+  function txt(x, y, t, o) {
+    o = o || {};
+    return "<text x='" + x + "' y='" + y + "' text-anchor='" + (o.a || "middle") + "' font-size='" + (o.s || 12) + "' font-weight='" + (o.w || 700) + "' fill='" + (o.c || NUIT) + "'" + (o.i ? " font-style='italic'" : "") + (o.halo ? " stroke='#fff' stroke-width='3' paint-order='stroke'" : "") + ">" + t + "</text>";
+  }
+  function lin(id, cs, vertical) {
+    var s = "<linearGradient id='" + id + "'" + (vertical ? " x1='0' y1='0' x2='0' y2='1'" : "") + ">";
+    cs.forEach(function (c, i) { s += "<stop offset='" + (i / (cs.length - 1)).toFixed(2) + "' stop-color='" + c + "'/>"; });
+    return s + "</linearGradient>";
+  }
+  function rad(id, cs) {
+    var s = "<radialGradient id='" + id + "' cx='35%' cy='30%' r='75%'>";
+    cs.forEach(function (c, i) { s += "<stop offset='" + (i / (cs.length - 1)).toFixed(2) + "' stop-color='" + c + "'/>"; });
+    return s + "</radialGradient>";
+  }
+  function fleche(id, c) { return "<marker id='" + id + "' markerWidth='10' markerHeight='10' refX='7' refY='5' orient='auto'><path d='M0 1L8 5L0 9Z' fill='" + c + "'/></marker>"; }
+  function svg(w, h, alt, defs, corps) {
+    return "<svg viewBox='0 0 " + w + " " + h + "' role='img' aria-label='" + alt + "' font-family='Inter,Arial,sans-serif'><rect width='" + w + "' height='" + h + "' fill='#fff'/><defs>" + defs + "</defs>" + corps +
+      "<text x='" + (w - 6) + "' y='" + (h - 5) + "' font-size='8' text-anchor='end' fill='#8A93A6'>Planche VÉRITAS</text></svg>";
+  }
+  function q(qq, bonne, f1, f2, e) { return { q: qq, r: [bonne, f1, f2], b: 0, e: e }; }
+  function bulle(x, y, w, t, c) { return "<rect x='" + x + "' y='" + y + "' width='" + w + "' height='30' rx='12' fill='#fff' stroke='" + (c || "#C9D2E3") + "'/>" + txt(x + w / 2, y + 20, t, { s: 11.5 }); }
+  function perso(x, y, peau, habit, bas) {
+    bas = bas || "#2E3445";
+    return "<g transform='translate(" + x + " " + y + ")'><ellipse cx='0' cy='84' rx='18' ry='4' fill='#001136' opacity='.18'/>" +
+      "<rect x='-9' y='44' width='8' height='36' rx='3' fill='" + bas + "'/><rect x='1' y='44' width='8' height='36' rx='3' fill='" + bas + "'/>" +
+      "<ellipse cx='-6' cy='81' rx='7' ry='3.5' fill='#1F2328'/><ellipse cx='6' cy='81' rx='7' ry='3.5' fill='#1F2328'/>" +
+      "<path d='M-13 46L-16 18C-16 13 -12 11 -6 10H6C12 11 16 13 16 18L13 46Z' fill='" + habit + "'/>" +
+      "<path d='M-15 16L-20 40' stroke='" + habit + "' stroke-width='7' stroke-linecap='round'/><path d='M15 16L20 40' stroke='" + habit + "' stroke-width='7' stroke-linecap='round'/>" +
+      "<circle cx='-20' cy='42' r='3.6' fill='" + peau + "'/><circle cx='20' cy='42' r='3.6' fill='" + peau + "'/>" +
+      "<rect x='-3.5' y='5' width='7' height='7' fill='" + peau + "'/><ellipse cx='0' cy='-2' rx='9' ry='10.5' fill='" + peau + "'/>" +
+      "<path d='M-9 -4C-10 -14 -4 -13.5 0 -13.5S10 -14 9 -4C7 -9 -7 -9 -9 -4Z' fill='#1B1410'/><ellipse cx='-9' cy='-1' rx='1.8' ry='3' fill='" + peau + "'/><ellipse cx='9' cy='-1' rx='1.8' ry='3' fill='" + peau + "'/></g>";
+  }
+  function def(t, h) { return "<div class='def'><b>" + t + "</b>" + h + "</div>"; }
+  function formule(h) { return "<p class='formule'>" + h + "</p>"; }
+  function ex(h, t) { return "<div class='ex'><b>" + (t || "Exemple") + "</b>" + h + "</div>"; }
+  function astuce(h, t) { return "<div class='astuce'><b>" + (t || "Astuce") + "</b>" + h + "</div>"; }
+  function attention(h, t) { return "<div class='attention'><b>" + (t || "Attention") + "</b>" + h + "</div>"; }
+  function savais(h) { return "<div class='savais'><b>Le savais-tu ?</b>" + h + "</div>"; }
+  function F(nom, f, calcul) { return { nom: nom, f: f, calcul: calcul }; }
+  function colonnes(titre, cols, h, alt) {
+    var W = 640, n = cols.length, w = (W - 30 - (n - 1) * 12) / n, s = "<rect width='640' height='" + h + "' fill='#FBF8F2'/>" + txt(320, 28, titre, { s: 15 });
+    cols.forEach(function (c, i) {
+      var x = 15 + i * (w + 12);
+      s += "<rect x='" + x + "' y='44' width='" + w + "' height='" + (h - 58) + "' rx='12' fill='#fff' stroke='" + c.c + "' stroke-width='2'/><rect x='" + x + "' y='44' width='" + w + "' height='34' rx='11' fill='" + c.c + "'/>" + txt(x + w / 2, 66, c.t, { s: 13.5, c: "#fff" });
+      c.l.forEach(function (l, k) { s += txt(x + 10, 100 + k * 23, l, { s: 11.5, a: "start", w: l.charAt(0) === "→" ? 800 : 550, c: l.charAt(0) === "→" ? c.c : NUIT }); });
+    });
+    return svg(640, h, alt || titre, "", s);
+  }
+  function P2(titre, legende, s) { return { type: "2D", titre: titre, legende: legende, svg: s }; }
+  function exercice(el, C, suivant, lib) {
+    var i = 0, ok = 0;
+    el.innerHTML = "<p class='labo-r' data-q style='font-size:16px'></p><div style='display:flex;gap:8px;flex-wrap:wrap' data-c></div><p class='an-note' data-e></p><p class='labo-r' data-s></p>";
+    function $(s) { return el.querySelector(s); }
+    function poser() {
+      var c = C[i];
+      $("[data-q]").innerHTML = (i + 1) + ". " + c[0].replace("___", "<b style='border-bottom:2px dashed #1E499B;padding:0 14px'>?</b>");
+      $("[data-e]").textContent = ""; $("[data-s]").innerHTML = lib + " " + (i + 1) + " / " + C.length + " · score : <b>" + ok + "</b>";
+      $("[data-c]").innerHTML = c[1].slice().sort().map(function (x) { return "<button type='button' class='btn-l' data-v='" + x + "'>" + x + "</button>"; }).join("");
+      el.querySelectorAll("[data-v]").forEach(function (b) {
+        b.addEventListener("click", function () {
+          var bon = b.dataset.v === c[1][0]; if (bon) ok++;
+          $("[data-q]").innerHTML = (i + 1) + ". " + c[0].replace("___", "<b style='color:" + (bon ? VERT : ROUGE) + "'>" + c[1][0] + "</b>");
+          $("[data-e]").innerHTML = (bon ? "✔ " : "✘ ") + c[2];
+          el.querySelectorAll("[data-v]").forEach(function (x) { x.disabled = true; });
+          var nx = document.createElement("button"); nx.type = "button"; nx.className = "btn-l"; nx.textContent = i + 1 < C.length ? suivant : "↺";
+          nx.addEventListener("click", function () { i = (i + 1) % C.length; if (!i) ok = 0; poser(); });
+          $("[data-c]").appendChild(nx);
+          $("[data-s]").innerHTML = lib + " " + (i + 1) + " / " + C.length + " · score : <b>" + ok + "</b>";
+        });
+      });
+    }
+    poser();
+  }
+  function apc(situation, tache) { return { module: "Géographie de 6e", famille: "Vie sociale et culturelle", agir: "Se situer dans l'espace et comprendre son milieu pour mieux l'habiter et le protéger", situation: situation, tache: tache }; }
+  function integ(qc, opts, bonne, rep, exo, exoRep, sit, tache, attendu) {
+    return "<div class='integ'><h3>Partie A : évaluation des ressources</h3><p><strong>Question de cours.</strong> " + qc + "</p><ol type='a'>" + opts.map(function (o) { return "<li>" + o + "</li>"; }).join("") + "</ol><details><summary>Voir la réponse</summary><p><strong>" + bonne + "</strong>. " + rep + "</p></details>" +
+      "<p><strong>Exercice.</strong> " + exo + "</p><details><summary>Voir la réponse</summary><p>" + exoRep + "</p></details>" +
+      "<h3>Partie B : évaluation des compétences</h3><p><strong>Situation.</strong> " + sit + "</p><p><strong>Tâche.</strong> " + tache + "</p><details><summary>Voir une réponse attendue</summary><p>" + attendu + "</p></details></div>";
+  }
+  function frise(titre, pts, h, alt) {
+    var s = "<rect width='640' height='" + h + "' fill='#FBF8F2'/>" + txt(320, 28, titre, { s: 15 }) + "<line x1='30' y1='" + (h / 2 + 6) + "' x2='610' y2='" + (h / 2 + 6) + "' stroke='#1E499B' stroke-width='4' stroke-linecap='round'/>";
+    var n = pts.length, pas = 580 / (n - 1);
+    pts.forEach(function (p, i) {
+      var x = 30 + i * pas, haut = i % 2 === 0, y0 = h / 2 + 6;
+      s += "<circle cx='" + x + "' cy='" + y0 + "' r='8' fill='" + (p.c || "#C2540A") + "' stroke='#fff' stroke-width='3'/>" + txt(x, haut ? y0 - 20 : y0 + 30, p.a, { s: 12.5, c: p.c || "#C2540A" });
+      (p.l || []).forEach(function (l, k) { s += txt(x, haut ? y0 - 38 - k * 15 : y0 + 48 + k * 15, l, { s: 10.5, w: 550 }); });
+    });
+    return svg(640, h, alt || titre, "", s);
+  }
+  /* ═══════════════ RANG 1 : LA GÉOGRAPHIE ═══════════════ */
+  function bureauGeo3D() {
+    var o = [{ f: "boite", c: [0, -6, 0], d: [460, 6, 240], coul: "#8B6B4A", dessus: "#A68A5E" }];
+    o.push({ f: "boite", c: [0, 60, 0], d: [380, 10, 170], coul: "#6B4423", dessus: "#8A5A33" });
+    [[-180, -75], [180, -75], [-180, 75], [180, 75]].forEach(function (p) { o.push({ f: "boite", c: [p[0], 28, p[1]], d: [10, 56, 10], coul: "#5A3A1E" }); });
+    o.push({ f: "cylindre", c: [-120, 65, 10], r: 20, h: 6, n: 14, coul: "#3B4252" });
+    o.push({ f: "boite", c: [-120, 80, 10], d: [4, 24, 4], coul: "#3B4252" });
+    o.push({ f: "sphere", c: [-120, 118, 10], r: 32, coul: "#2E86AB" });
+    o.push({ f: "sphere", c: [-128, 126, -20], r: 12, coul: "#5A9A3A" });
+    o.push({ f: "boite", c: [40, 66, -10], d: [150, 2, 100], coul: "#F4EDD8", dessus: "#F4EDD8" });
+    o.push({ f: "boite", c: [20, 68, -20], d: [60, 1, 40], coul: "#9AC48A", dessus: "#9AC48A", div: false });
+    o.push({ f: "boite", c: [70, 68, 10], d: [40, 1, 2], coul: "#2E86AB", dessus: "#2E86AB", div: false });
+    o.push({ f: "cylindre", c: [140, 65, 50], r: 18, h: 8, n: 16, coul: "#B07A00" });
+    o.push({ f: "boite", c: [140, 74, 50], d: [2, 1, 26], coul: "#C62828", div: false });
+    return o;
+  }
+  VRT_L("6e-geo-la-geographie", {
+    c: "6e", m: "geo", cle: "La géographie", titre: "La géographie : décrire et comprendre les espaces", duree: 30,
+    accroche: "Pour la fête de l'école, la classe doit dessiner le plan du quartier de Mvog-Mbi, à Yaoundé. « Dessiner un plan, c'est de la géographie ? » À quoi sert cette science ?",
+    intro: "La réalisation du plan d'un quartier de Yaoundé te sert de fil rouge : à chaque partie, un indice t'aide à trancher entre trois idées sur la géographie.",
+    objectifs: ["définir la géographie et son objet", "distinguer géographie physique et géographie humaine", "citer les outils du géographe : carte, plan, croquis, photographie, statistiques", "utiliser l'échelle pour calculer une distance réelle"],
+    enquete: {
+      titre: "Le plan du quartier de Mvog-Mbi",
+      svg: svg(640, 220, "Rue d'un quartier de Yaoundé avec un carrefour, un marché et une école ; deux élèves dessinent un plan sur un cahier", lin("ggC", ["#DDEBF5", "#F4EDE1"], true),
+        "<rect width='640' height='220' fill='url(#ggC)'/><rect y='150' width='640' height='70' fill='#B5834E'/><rect x='0' y='168' width='640' height='18' fill='#6B6B6B'/><rect x='300' y='150' width='18' height='70' fill='#6B6B6B'/>" +
+        "<rect x='60' y='86' width='120' height='64' fill='#E8DFC9'/><path d='M50 90l70 -34l70 34Z' fill='#C62828'/>" + txt(120, 124, "ÉCOLE", { s: 11 }) + "<rect x='420' y='100' width='150' height='50' fill='#F7C948'/><path d='M410 104h170l-14 -20H424Z' fill='#17784D'/>" + txt(495, 132, "MARCHÉ", { s: 11 }) +
+        perso(260, 66, "#5A3A1E", "#7B3F99", "#2E3445") + perso(360, 66, "#6B4423", "#1E499B", "#2E3445") + "<rect x='272' y='92' width='26' height='20' fill='#fff' stroke='#9AA3AF'/>" +
+        bulle(190, 14, 260, "C'est de la géographie, ça ?", "#F7C948")),
+      legende: "À Yaoundé, deux élèves de 6e dessinent le plan de leur quartier pour la fête de l'école.",
+      contexte: "<p>Pour la fête de l'école, Joëlle et Bertrand doivent dessiner le plan du quartier de Mvog-Mbi, avec l'école, le marché et le carrefour. Bertrand pense que « la géographie, c'est seulement apprendre par cœur les capitales et les fleuves ». Joëlle croit que « la géographie étudie seulement la nature : les montagnes, les rivières, le climat ». Leur professeur leur explique que dessiner et comprendre leur quartier, c'est déjà faire de la géographie.</p>",
+      documents: [{ t: "Une définition", html: "<p>Le mot géographie vient du grec gê, « la Terre », et graphein, « écrire, décrire » : c'est la description de la Terre et des espaces où vivent les hommes.</p>" },
+        { t: "L'échelle du plan", html: "<p>Le professeur donne une carte du quartier à l'échelle 1/10 000 : 1 cm sur la carte représente 10 000 cm, soit 100 m, sur le terrain.</p>" }],
+      question: "Qu'est-ce que la géographie, que étudie-t-elle et avec quels outils ?",
+      tache: "Définis la géographie, distingue ses branches, présente ses outils, puis calcule des distances réelles avec l'échelle du plan.",
+      hypotheses: ["La géographie, c'est seulement apprendre par cœur des noms de capitales et de fleuves.", "La géographie étudie seulement la nature, sans les hommes.", "La géographie décrit et explique les espaces où vivent les hommes, la nature comme les activités humaines, avec des outils comme la carte, le plan et l'échelle."]
+    },
+    parties: [
+      { t: "Qu'est-ce que la géographie ?", html: def("Géographie", "Science qui décrit et explique les espaces de la Terre et la façon dont les hommes les occupent, les aménagent et les transforment.") +
+          "<ul><li>Elle répond à trois questions : <strong>Où ?</strong> (localiser), <strong>Comment ?</strong> (décrire), <strong>Pourquoi ?</strong> (expliquer).</li><li>Elle étudie les relations entre les hommes et leur <strong>milieu</strong> : le relief, le climat, l'eau, la végétation, mais aussi les villes, les routes, les champs, les marchés.</li><li>Elle travaille à toutes les échelles : le quartier, la région, le Cameroun, l'Afrique, le monde.</li></ul>" +
+          formule("géographie = localiser (où ?) + décrire (comment ?) + expliquer (pourquoi ?)") +
+          ex("Le marché de Mvog-Mbi est au bord de la route principale (où ?), il est très animé le matin (comment ?), parce que les camions de vivres y arrivent des villages (pourquoi ?).", "Les trois questions du géographe") +
+          savais("On surnomme le Cameroun « l'Afrique en miniature », car on y trouve presque tous les paysages du continent : mer, montagnes, forêt, savane, sahel."),
+        planches: [P2("Les trois questions du géographe", "Toute étude de géographie part de trois questions, de la plus simple à la plus profonde.",
+          colonnes("Où ? Comment ? Pourquoi ?", [{ t: "Où ?", c: "#1E499B", l: ["localiser", "carte, plan", "coordonnées"] }, { t: "Comment ?", c: "#17784D", l: ["décrire", "paysage, activités", "chiffres"] }, { t: "Pourquoi ?", c: "#C2540A", l: ["expliquer", "liens homme-milieu", "causes"] }], 210, "Les trois questions du géographe"))],
+        fil: { html: "<p>Bertrand se trompe : la géographie ne se réduit pas à des listes de noms. Elle cherche à <strong>localiser, décrire et expliquer</strong> : pourquoi le marché est-il là ? pourquoi le quartier s'étend-il le long de la route ?</p>", verdicts: [[0, "rejetee", "La géographie localise, décrit et explique ; elle ne se réduit pas à des listes."]] },
+        retenir: "Géographie : gê (Terre) + graphein (décrire) ; où ? comment ? pourquoi ?" },
+      { t: "Géographie physique et géographie humaine", html: "<ul><li><strong>La géographie physique</strong> étudie le milieu naturel : le relief (montagnes, plaines, plateaux), le climat, les cours d'eau, la végétation, les sols.</li><li><strong>La géographie humaine</strong> étudie les hommes dans l'espace : la population, les villes et les villages, les activités (agriculture, commerce, industrie), les transports.</li><li>Les deux sont liées : les hommes s'installent près de l'eau, cultivent selon le climat, aménagent le relief.</li></ul>" +
+          def("Milieu", "Ensemble des conditions naturelles (relief, climat, eau, végétation, sols) dans lesquelles vivent les hommes.") +
+          ex("À l'Ouest, les hauts plateaux fertiles et frais (géographie physique) expliquent les nombreuses cultures et la forte densité de population (géographie humaine).", "Des liens entre milieu et hommes") +
+          attention("La géographie n'étudie pas « la nature » seule ni « les hommes » seuls : elle étudie les relations entre les deux."),
+        planches: [{ type: "3d", titre: "La table du géographe", legende: "Tourne la table : un globe terrestre pour voir la Terre entière, une carte dépliée pour une région, et une boussole pour s'orienter. Ce sont les outils de base du géographe, avec le plan, la photographie aérienne et les statistiques.", modele: { h: 340, rx: -20, ry: 28, echelle: 0.82, alt: "Table en bois avec un globe terrestre, une carte dépliée et une boussole", objets: bureauGeo3D(), etiquettes: [{ p: [-120, 150, 10], t: "globe terrestre", cote: "g" }, { p: [40, 70, -10], t: "carte", cote: "d" }, { p: [140, 76, 50], t: "boussole", cote: "d" }] } }],
+        fil: { html: "<p>Joëlle se trompe aussi : la géographie n'étudie pas seulement la nature. Le marché, l'école, la route, les maisons du plan de Mvog-Mbi relèvent de la <strong>géographie humaine</strong> ; les collines et le ruisseau du quartier, de la géographie physique.</p>", verdicts: [[1, "rejetee", "La géographie étudie aussi les hommes, leurs villes, leurs activités."]] },
+        retenir: "Géographie physique : relief, climat, eaux, végétation ; humaine : population, villes, activités, transports." },
+      { t: "Les outils du géographe et l'échelle", html: "<ul><li><strong>La carte</strong> : représentation réduite d'un espace, vue de dessus, avec un titre, une légende, une orientation (le nord) et une échelle.</li><li><strong>Le plan</strong> : une carte d'un petit espace (quartier, ville).</li><li><strong>Le croquis</strong> : un dessin simplifié qui montre l'essentiel.</li><li><strong>La photographie aérienne</strong> et l'image satellite, les <strong>statistiques</strong> et les graphiques, le <strong>GPS</strong>.</li></ul>" +
+          def("Échelle", "Rapport entre une distance mesurée sur la carte et la distance réelle sur le terrain. À 1/10 000, 1 cm sur la carte représente 10 000 cm, soit 100 m.") +
+          formule("distance réelle = distance sur la carte × dénominateur de l'échelle") +
+          ex("Sur le plan au 1/10 000, l'école et le marché sont à 6 cm : 6 × 10 000 = 60 000 cm = 600 m.", "Calculer une distance réelle") +
+          astuce("Pour convertir : 100 cm = 1 m ; 100 000 cm = 1 km. À 1/100 000, 1 cm = 1 km."),
+        planches: [P2("Les éléments d'une carte", "Une carte sans ces cinq éléments ne peut pas être lue correctement.",
+          colonnes("Les cinq éléments d'une carte", [{ t: "Titre", c: "#1E499B", l: ["de quoi", "parle la carte"] }, { t: "Légende", c: "#17784D", l: ["sens des", "couleurs, signes"] }, { t: "Orientation", c: "#C62828", l: ["flèche", "du nord"] }, { t: "Échelle", c: "#B07A00", l: ["1 cm =", "… sur le terrain"] }, { t: "Source", c: "#4D5163", l: ["qui l'a", "faite, quand"] }], 190, "Les cinq éléments d'une carte"))],
+        fil: { html: "<p>Avec le plan au 1/10 000, Joëlle et Bertrand calculent que l'école est à 600 m du marché. Ils comprennent que la géographie <strong>localise, décrit et explique</strong> leur quartier, la nature comme les activités, avec des outils précis : le plan, la légende et l'échelle.</p>", verdicts: [[2, "validee", "Localiser, décrire, expliquer la nature et les activités humaines, avec la carte et l'échelle."]] },
+        retenir: "Carte : titre, légende, orientation, échelle, source ; distance réelle = distance carte × dénominateur." },
+      { t: "Entraînement au format de l'examen", html: integ("Le mot « géographie » signifie…", ["l'étude du passé", "la description de la Terre", "la science des nombres", "l'étude des êtres vivants"], "La description de la Terre", "Gê = Terre, graphein = décrire.", "Sur une carte au 1/50 000, deux villages sont à 4 cm. Calcule la distance réelle.", "4 × 50 000 = 200 000 cm = 2 000 m = 2 km.", "Ton cousin dit : « La géographie ne sert à rien dans la vie. »", "En t'appuyant sur ta leçon, rédige quelques lignes pour lui montrer son utilité.", "La géographie sert tous les jours : elle permet de lire une carte ou un plan pour trouver son chemin, de calculer une distance avec l'échelle, de comprendre pourquoi un marché, une école ou une route se trouvent à un endroit, et de connaître les paysages et les risques de son pays. Elle aide aussi à aménager et à protéger son milieu de vie."), retenir: "Savoir-être : curiosité pour son milieu de vie et sens de l'observation." }
+    ],
+    denouement: { titre: "Le plan est prêt", etapes: ["La géographie localise, décrit et explique (indice 1).", "Elle étudie le milieu naturel et les activités humaines (indice 2).", "Elle utilise la carte, le plan et l'échelle : 6 cm → 600 m (indice 3)."],
+      formules: [F("Les trois questions", "où ? comment ? pourquoi ?", "le marché au bord de la route"), F("Lire l'échelle", "1/10 000 : 1 cm = 10 000 cm = 100 m", "1 cm sur le plan = 100 m"), F("Calculer une distance", "distance réelle = distance carte × dénominateur", "6 × 10 000 = 60 000 cm = 600 m")],
+      reponse: "<p>La géographie est la science qui décrit et explique les espaces de la Terre et la façon dont les hommes les occupent. Elle ne se réduit ni à des listes de capitales ni à l'étude de la nature : elle répond aux questions « où ? », « comment ? » et « pourquoi ? », et étudie à la fois le milieu naturel (géographie physique) et les activités humaines (géographie humaine). Ses outils sont la carte, le plan, le croquis, la photographie aérienne et les statistiques. Une carte doit avoir un titre, une légende, une orientation, une échelle et une source. Sur le plan de Mvog-Mbi au 1/10 000, l'école et le marché sont à 6 cm, soit 6 × 10 000 = 60 000 cm, donc 600 m sur le terrain.</p>",
+      transfert: "<p>Dessine le plan du trajet entre ta maison et ton école, avec une légende, la flèche du nord et une échelle approximative. Calcule la longueur réelle du trajet.</p>" },
+    revision: ["<strong>Géographie</strong> : gê (Terre) + graphein (décrire) ; décrire et expliquer les espaces.", "Trois questions : où ? comment ? pourquoi ?", "Géographie physique (relief, climat, eaux, végétation) et humaine (population, villes, activités).", "Outils : carte, plan, croquis, photographie aérienne, statistiques, GPS.", "Carte : titre, légende, orientation, échelle, source.", "Distance réelle = distance sur la carte × dénominateur de l'échelle."],
+    exo: "<p>Sur un plan au 1/5 000, ta maison est à 8 cm de l'école. Quelle est la distance réelle ? <em>(8 × 5 000 = 40 000 cm = 400 m.)</em></p>",
+    quiz: [q("Le mot géographie vient du grec et signifie…", "décrire la Terre", "compter les étoiles", "étudier le passé", "Gê + graphein."), q("Les trois questions du géographe sont…", "où ? comment ? pourquoi ?", "qui ? quand ? combien ?", "quoi ? qui ? quand ?", "Localiser, décrire, expliquer."), q("Le relief et le climat relèvent de la géographie…", "physique", "humaine", "historique", "Le milieu naturel."), q("Les villes et les marchés relèvent de la géographie…", "humaine", "physique", "astronomique", "Les activités des hommes."), q("La légende d'une carte sert à…", "expliquer les couleurs et les signes", "dire qui a gagné", "donner l'heure", "Elle permet de lire la carte."), q("À l'échelle 1/10 000, 1 cm représente…", "100 m", "10 m", "1 km", "10 000 cm = 100 m."), q("6 cm au 1/10 000 représentent…", "600 m", "60 m", "6 km", "6 × 10 000 = 60 000 cm."), q("À l'échelle 1/100 000, 1 cm représente…", "1 km", "100 m", "10 km", "100 000 cm = 1 km."), q("Le Cameroun est surnommé…", "l'Afrique en miniature", "le pays du soleil levant", "le toit du monde", "Presque tous les paysages d'Afrique."), q("Un plan est…", "une carte d'un petit espace", "une photo du ciel", "un graphique", "Quartier, ville.")],
+    apc: apc("Des élèves doivent dessiner le plan de leur quartier sans savoir ce qu'est la géographie.", "Définir la géographie, ses branches et ses outils, et utiliser l'échelle.")
+  });
+  VRT_A("6e-geo-la-geographie", 2, "Calcule les distances avec l'échelle", function (el) {
+    exercice(el, [["À 1/10 000, 3 cm sur la carte représentent ___.", ["300 m", "30 m", "3 km"], "3 × 10 000 = 30 000 cm = 300 m."], ["À 1/50 000, 2 cm représentent ___.", ["1 km", "100 m", "10 km"], "2 × 50 000 = 100 000 cm = 1 km."], ["À 1/100 000, 7 cm représentent ___.", ["7 km", "700 m", "70 km"], "1 cm = 1 km."], ["À 1/25 000, 4 cm représentent ___.", ["1 km", "250 m", "4 km"], "4 × 25 000 = 100 000 cm = 1 km."], ["Le relief est un sujet de géographie ___.", ["physique", "humaine", "économique"], "Le milieu naturel."], ["Le commerce au marché est un sujet de géographie ___.", ["humaine", "physique", "climatique"], "Les activités des hommes."]], "Calcul suivant", "Calcul");
+  });
+  /* ═══════════════ RANG 2 : NOTRE PLANÈTE LA TERRE ═══════════════ */
+  function terreSoleil3D() {
+    var o = [];
+    o.push({ f: "sphere", c: [-190, 0, 30], r: 54, coul: "#F7C948" });
+    o.push({ f: "sphere", c: [60, 0, 0], r: 46, coul: "#2E86AB" });
+    [[38, 18, -32], [78, -20, -32], [52, -10, -40], [96, 14, -14], [30, 38, -10]].forEach(function (p, i) {
+      o.push({ f: "sphere", c: p, r: i === 2 ? 14 : 12, coul: "#5A9A3A" });
+    });
+    o.push({ f: "sphere", c: [60, 48, -4], r: 10, coul: "#F4F6F8" });
+    o.push({ f: "sphere", c: [60, -48, -4], r: 10, coul: "#F4F6F8" });
+    o.push({ f: "sphere", c: [170, 30, -30], r: 13, coul: "#B0B6BE" });
+    return o;
+  }
+  VRT_L("6e-geo-notre-planete-terre", {
+    c: "6e", m: "geo", cle: "Notre planète la terre", titre: "Notre planète la Terre : forme, dimensions, terres et mers", duree: 30,
+    accroche: "À Garoua, le petit frère de Moussa affirme que « la Terre est plate comme une galette » : sinon, dit-il, l'eau du Bénoué tomberait. Comment lui prouver qu'il se trompe ?",
+    intro: "Un débat entre deux frères de Garoua te sert de fil rouge : à chaque partie, un indice t'aide à trancher entre trois idées sur la Terre.",
+    objectifs: ["décrire la forme et les dimensions de la Terre", "situer la Terre dans le système solaire", "nommer les continents et les océans", "calculer des grandeurs simples : circonférence, part des mers, temps de trajet de la lumière"],
+    enquete: {
+      titre: "La Terre est-elle plate ?",
+      svg: svg(640, 220, "Deux frères au bord d'un fleuve à Garoua ; au loin, une pirogue dont on ne voit plus que le haut de la voile", lin("gpC", ["#CFE6F5", "#F6E7C8"], true),
+        "<rect width='640' height='220' fill='url(#gpC)'/><circle cx='560' cy='48' r='26' fill='#F7C948'/><rect y='140' width='640' height='80' fill='#5B9BD5'/><path d='M0 140 Q320 128 640 140' fill='#4A88C2'/>" +
+        "<path d='M430 138 l40 0 l-6 6 h-28Z' fill='#6B4423'/><path d='M450 138 V104 L470 132Z' fill='#fff' stroke='#9AA3AF'/>" +
+        "<rect y='170' width='300' height='50' fill='#D9B77A'/>" + perso(120, 118, "#5A3A1E", "#17784D", "#2E3445") + perso(200, 128, "#6B4423", "#C62828", "#2E3445") +
+        bulle(20, 20, 270, "La Terre est plate comme une galette !", "#F7C948") + bulle(330, 64, 250, "Alors pourquoi la voile disparaît ?", "#9FC5E8")),
+      legende: "Au bord de la Bénoué, Moussa montre à son frère une pirogue qui s'éloigne : sa coque disparaît avant sa voile.",
+      contexte: "<p>Le petit frère de Moussa pense que la Terre est plate. Leur cousine Aïssatou, elle, croit que la Terre est ronde mais « recouverte surtout de terres, avec un peu d'eau ». Moussa, élève de 6e, veut leur répondre avec des preuves et des chiffres tirés de sa leçon.</p>",
+      documents: [{ t: "Une observation", html: "<p>Quand une pirogue s'éloigne sur un grand plan d'eau, on voit d'abord disparaître sa coque, puis le bas de la voile, et enfin le haut de la voile : la surface de l'eau est courbe.</p>" },
+        { t: "Quelques chiffres", html: "<p>Rayon de la Terre : environ 6 370 km. Surface totale : environ 510 millions de km², dont 71 % couverts par les mers et les océans. Distance Terre-Soleil : environ 150 millions de km.</p>" }],
+      question: "Quelle est la forme de la Terre, quelle est sa taille et comment se partagent les terres et les mers ?",
+      tache: "Prouve que la Terre est ronde, calcule sa circonférence, situe-la dans le système solaire, puis nomme et compare les continents et les océans.",
+      hypotheses: ["La Terre est plate comme une galette.", "La Terre est ronde, mais elle est couverte surtout de terres.", "La Terre est une sphère légèrement aplatie aux pôles, la troisième planète du Soleil, couverte surtout par les mers et les océans."]
+    },
+    parties: [
+      { t: "La forme et les dimensions de la Terre", html: def("Planète", "Astre de forme presque sphérique qui tourne autour d'une étoile (le Soleil) et qui ne produit pas sa propre lumière.") +
+          "<ul><li>La Terre est une <strong>sphère</strong> (une boule), légèrement aplatie aux pôles et renflée à l'équateur.</li><li>Preuves : les navires disparaissent à l'horizon par la coque ; les photographies prises de l'espace ; l'ombre ronde de la Terre sur la Lune pendant une éclipse ; des voyageurs ont fait le tour du monde.</li><li>Son rayon mesure environ <strong>6 370 km</strong> ; sa circonférence à l'équateur, environ <strong>40 000 km</strong>.</li></ul>" +
+          formule("circonférence = 2 × π × rayon ≈ 2 × 3,14 × 6 370 ≈ 40 000 km") +
+          ex("À 800 km par jour en voiture, il faudrait 40 000 ÷ 800 = 50 jours, sans s'arrêter, pour faire le tour de la Terre par l'équateur.", "Mesurer le tour de la Terre") +
+          savais("Vers 240 avant J.-C., le savant grec Ératosthène a calculé la circonférence de la Terre en mesurant l'ombre d'un bâton dans deux villes d'Égypte. Il a trouvé une valeur proche de 40 000 km."),
+        planches: [P2("Trois preuves que la Terre est ronde", "On n'a pas besoin d'aller dans l'espace pour savoir que la Terre est ronde : des observations simples le montrent.",
+          colonnes("Trois preuves de la rondeur de la Terre", [{ t: "L'horizon", c: BLEU, l: ["la coque d'un bateau", "disparaît avant", "la voile"] }, { t: "Les éclipses", c: VERT, l: ["l'ombre de la Terre", "sur la Lune", "est ronde"] }, { t: "L'espace", c: TERRE, l: ["les photos", "des satellites", "montrent une boule"] }], 210, "Trois preuves de la rondeur de la Terre"))],
+        fil: { html: "<p>Le petit frère se trompe : la pirogue qui disparaît par la coque montre que la surface de l'eau est <strong>courbe</strong>. L'eau du fleuve ne « tombe » pas, car la pesanteur attire tout vers le centre de la Terre.</p>", verdicts: [[0, "rejetee", "La Terre n'est pas plate : bateaux à l'horizon, éclipses et photos de l'espace le prouvent."]] },
+        retenir: "Terre : sphère aplatie aux pôles ; rayon ≈ 6 370 km ; circonférence ≈ 2 × 3,14 × 6 370 ≈ 40 000 km." },
+      { t: "La Terre dans le système solaire", html: "<ul><li>Le <strong>système solaire</strong> est formé du Soleil, une étoile, et de huit planètes qui tournent autour de lui : Mercure, Vénus, <strong>la Terre</strong>, Mars, Jupiter, Saturne, Uranus et Neptune.</li><li>La Terre est la <strong>troisième planète</strong> à partir du Soleil, à environ <strong>150 millions de km</strong>.</li><li>Elle a un satellite naturel, la <strong>Lune</strong>.</li><li>C'est la seule planète connue où il y a de l'eau liquide, de l'air respirable et la vie.</li></ul>" +
+          def("Satellite", "Astre qui tourne autour d'une planète. La Lune est le satellite naturel de la Terre ; les hommes ont aussi lancé des satellites artificiels.") +
+          formule("temps de trajet de la lumière du Soleil = distance ÷ vitesse = 150 000 000 ÷ 300 000 = 500 s ≈ 8 min 20 s") +
+          ex("La lumière qui éclaire Garoua ce matin a quitté le Soleil environ 8 minutes plus tôt.", "La lumière du Soleil voyage") +
+          astuce("Pour retenir l'ordre des planètes : « Me Voici Toute Mignonne, Je Suis Une Nébuleuse » (Mercure, Vénus, Terre, Mars, Jupiter, Saturne, Uranus, Neptune)."),
+        planches: [{ type: "3d", titre: "Le Soleil, la Terre et la Lune", legende: "Tourne la scène : à gauche, le Soleil, une étoile qui produit sa lumière ; au centre, la Terre, bleue des océans, avec ses continents verts et ses calottes glaciaires blanches aux pôles ; à droite, la Lune, son satellite. Les distances ne sont pas respectées : en réalité, le Soleil est à 150 millions de km.", modele: { h: 330, rx: -12, ry: 20, echelle: 1, alt: "Une grosse boule jaune, une boule bleue avec des taches vertes et blanches, et une petite boule grise", objets: terreSoleil3D(), etiquettes: [{ p: [-190, 60, 30], t: "le Soleil (étoile)", cote: "g" }, { p: [60, 55, -4], t: "pôle Nord (glace)", cote: "d" }, { p: [78, -20, -46], t: "un continent", cote: "d" }, { p: [170, 45, -30], t: "la Lune (satellite)", cote: "d" }] } }],
+        fil: { html: "<p>Moussa ajoute un argument : vue de l'espace, la Terre est une <strong>planète</strong> ronde comme les sept autres qui tournent autour du Soleil. Elle est la troisième, à 150 millions de km.</p>", verdicts: [] },
+        retenir: "Système solaire : le Soleil et 8 planètes ; la Terre est la 3e, à 150 millions de km ; la Lune est son satellite." },
+      { t: "Les continents et les océans", html: "<ul><li>La surface de la Terre mesure environ <strong>510 millions de km²</strong>.</li><li>Les <strong>mers et océans</strong> en couvrent environ <strong>71 %</strong> : on surnomme la Terre « la planète bleue ».</li><li>Cinq océans : Pacifique (le plus grand), Atlantique (il borde le Cameroun), Indien, Arctique, Antarctique (ou Austral).</li><li>Six continents : Asie (le plus grand), Afrique, Amérique, Europe, Océanie, Antarctique.</li></ul>" +
+          def("Continent", "Très grande étendue de terre entourée d'océans. Le Cameroun se trouve sur le continent africain, au fond du golfe de Guinée.") +
+          formule("surface des mers ≈ 71 % × 510 = 0,71 × 510 ≈ 362 millions de km² ; terres ≈ 510 − 362 = 148 millions de km²") +
+          ex("Les mers couvrent environ 362 millions de km² et les terres 148 millions : il y a environ 362 ÷ 148 ≈ 2,4 fois plus d'eau que de terre à la surface du globe.", "Comparer les terres et les mers") +
+          attention("L'Afrique n'est pas un pays : c'est un continent de 54 pays, dont le Cameroun. Ne confonds pas pays et continent."),
+        planches: [P2("La part des terres et des mers", "Sur 100 km² de la surface de la Terre, 71 sont couverts par l'eau et 29 seulement par les terres émergées.",
+          colonnes("Terres et mers à la surface du globe", [{ t: "Mers et océans", c: BLEU, l: ["71 %", "≈ 362 millions de km²", "5 océans"] }, { t: "Terres émergées", c: TERRE, l: ["29 %", "≈ 148 millions de km²", "6 continents"] }], 200, "Terres et mers à la surface du globe"))],
+        fil: { html: "<p>Aïssatou se trompe : la Terre est ronde, mais elle est couverte <strong>surtout d'eau</strong>, à 71 %. Moussa conclut : la Terre est une sphère, la troisième planète du Soleil, et c'est une planète bleue.</p>", verdicts: [[1, "rejetee", "Les mers et les océans couvrent 71 % de la surface de la Terre."], [2, "validee", "Sphère aplatie aux pôles, 3e planète du Soleil, couverte à 71 % par les mers."]] },
+        retenir: "Surface : 510 millions de km², dont 71 % de mers ; 5 océans ; 6 continents ; le Cameroun est en Afrique, au bord de l'Atlantique." },
+      { t: "Entraînement au format de l'examen", html: integ("La Terre est…", ["la 1re planète à partir du Soleil", "la 3e planète à partir du Soleil", "une étoile", "le satellite de la Lune"], "La 3e planète à partir du Soleil", "Après Mercure et Vénus.", "Le rayon de la Terre mesure 6 370 km. Calcule sa circonférence avec π ≈ 3,14.", "2 × 3,14 × 6 370 = 40 003,6 km, soit environ 40 000 km.", "Pendant une veillée, un ancien de ton village affirme que « l'océan est une petite partie de la Terre ».", "Rédige quelques lignes pour lui répondre avec respect, en t'appuyant sur des chiffres.", "Avec tout mon respect, les mers et les océans couvrent environ 71 % de la surface de la Terre, soit à peu près 362 millions de km² sur 510. Les terres n'en couvrent que 29 %. C'est pour cela qu'on appelle la Terre « la planète bleue » ; l'océan Atlantique, qui borde le Cameroun, n'est que le deuxième plus grand des cinq océans."), retenir: "Savoir-être : respect de l'avis des anciens et goût de la preuve." }
+    ],
+    denouement: { titre: "Les deux frères sont convaincus", etapes: ["La pirogue disparaît par la coque : la Terre est ronde (indice 1).", "La Terre est la 3e planète du Soleil, avec la Lune pour satellite (indice 2).", "Les mers couvrent 71 % de sa surface (indice 3)."],
+      formules: [F("Circonférence", "2 × π × R", "2 × 3,14 × 6 370 ≈ 40 000 km"), F("Surface des mers", "71 % × 510 millions de km²", "≈ 362 millions de km²"), F("Lumière du Soleil", "150 000 000 ÷ 300 000", "500 s ≈ 8 min 20 s")],
+      reponse: "<p>La Terre n'est pas plate : c'est une sphère légèrement aplatie aux pôles. On le prouve par les bateaux qui disparaissent à l'horizon par la coque, par l'ombre ronde de la Terre sur la Lune pendant les éclipses et par les photographies prises de l'espace. Son rayon mesure environ 6 370 km et sa circonférence environ 2 × 3,14 × 6 370 ≈ 40 000 km. C'est la troisième des huit planètes du système solaire, à 150 millions de km du Soleil, et la Lune est son satellite. Sa surface, d'environ 510 millions de km², est couverte à 71 % par les mers et les océans (environ 362 millions de km²) : c'est la planète bleue, avec cinq océans et six continents. Le Cameroun se trouve en Afrique, au bord de l'océan Atlantique.</p>",
+      transfert: "<p>Sur un globe ou une carte du monde, repère l'Afrique, le Cameroun et l'océan Atlantique. Cite le continent et l'océan les plus grands.</p>" },
+    revision: ["<strong>La Terre</strong> : sphère aplatie aux pôles.", "Rayon ≈ 6 370 km ; circonférence ≈ 40 000 km.", "3e planète du système solaire, à 150 millions de km du Soleil ; la Lune est son satellite.", "Surface ≈ 510 millions de km², dont 71 % de mers et d'océans.", "5 océans (Pacifique le plus grand) et 6 continents (Asie le plus grand).", "Le Cameroun est en Afrique, au bord de l'océan Atlantique."],
+    exo: "<p>Les terres émergées couvrent 29 % des 510 millions de km² de la surface terrestre. Calcule leur superficie. <em>(0,29 × 510 ≈ 148 millions de km².)</em></p>",
+    quiz: [q("La forme de la Terre est…", "une sphère aplatie aux pôles", "un disque plat", "un cube", "Une boule légèrement aplatie."), q("Une preuve de la rondeur de la Terre est…", "la coque d'un bateau disparaît avant sa voile", "le soleil se lève", "il pleut en été", "La surface de l'eau est courbe."), q("La circonférence de la Terre mesure environ…", "40 000 km", "4 000 km", "400 000 km", "2 × 3,14 × 6 370."), q("La Terre est la … planète à partir du Soleil.", "troisième", "première", "huitième", "Après Mercure et Vénus."), q("La distance Terre-Soleil est d'environ…", "150 millions de km", "150 000 km", "15 km", "La lumière met 8 minutes."), q("La Lune est…", "le satellite de la Terre", "une étoile", "une planète du Soleil", "Elle tourne autour de la Terre."), q("Les mers et océans couvrent environ … de la Terre.", "71 %", "29 %", "50 %", "La planète bleue."), q("Le plus grand océan est…", "le Pacifique", "l'Atlantique", "l'Indien", "Il couvre un tiers du globe."), q("Le Cameroun se trouve sur le continent…", "africain", "asiatique", "américain", "Au fond du golfe de Guinée."), q("L'océan qui borde le Cameroun est…", "l'Atlantique", "l'Indien", "le Pacifique", "Par le golfe de Guinée.")],
+    apc: apc("Un enfant affirme que la Terre est plate ; un autre pense qu'elle est couverte surtout de terres.", "Prouver la forme de la Terre, la situer dans le système solaire et comparer terres et mers avec des chiffres.")
+  });
+  VRT_A("6e-geo-notre-planete-terre", 2, "Teste tes connaissances sur la Terre", function (el) {
+    exercice(el, [["La Terre est la ___ planète à partir du Soleil.", ["3e", "1re", "5e"], "Mercure, Vénus, puis la Terre."], ["2 × 3,14 × 6 370 km ≈ ___.", ["40 000 km", "20 000 km", "6 370 km"], "C'est la circonférence de la Terre."], ["71 % de 510 millions de km² ≈ ___.", ["362 millions de km²", "148 millions de km²", "71 millions de km²"], "0,71 × 510 ≈ 362."], ["Le plus grand continent est ___.", ["l'Asie", "l'Afrique", "l'Europe"], "Environ 44 millions de km²."], ["Le satellite naturel de la Terre est ___.", ["la Lune", "le Soleil", "Mars"], "Il tourne autour de la Terre."], ["150 000 000 km ÷ 300 000 km/s = ___.", ["500 s", "50 s", "5 000 s"], "Soit environ 8 min 20 s."]], "Question suivante", "Question");
+  });
+
+  /* ═══════════════ RANG 3 : TP 1, LOCALISER UN LIEU SUR LA CARTE ═══════════════ */
+  function globeRepere3D() {
+    var R = 92, cy = 0, o = [{ f: "sphere", c: [0, cy, 0], r: R, coul: "#9FC5E8" }], k, a;
+    for (k = 0; k < 24; k++) {
+      a = k * Math.PI / 12;
+      o.push({ f: "sphere", c: [Math.round((R + 2) * Math.sin(a)), cy, Math.round(-(R + 2) * Math.cos(a))], r: 3.5, coul: ROUGE });
+    }
+    for (k = -5; k <= 5; k++) {
+      a = k * Math.PI / 12;
+      o.push({ f: "sphere", c: [0, Math.round(cy + (R + 2) * Math.sin(a)), Math.round(-(R + 2) * Math.cos(a))], r: 3.5, coul: VERT });
+    }
+    var la = 6 * Math.PI / 180, lo = 12 * Math.PI / 180;
+    o.push({ f: "sphere", c: [Math.round((R + 5) * Math.cos(la) * Math.sin(lo)), Math.round(cy + (R + 5) * Math.sin(la)), Math.round(-(R + 5) * Math.cos(la) * Math.cos(lo))], r: 8, coul: "#F7C948" });
+    o.push({ f: "sphere", c: [0, cy + R + 4, 0], r: 6, coul: NUIT });
+    o.push({ f: "sphere", c: [0, cy - R - 4, 0], r: 6, coul: NUIT });
+    return o;
+  }
+  function quadrillage(titre, h, alt) {
+    var x0 = 90, y0 = 46, w = 460, hh = h - 90, s = "<rect width='640' height='" + h + "' fill='#FBF8F2'/>" + txt(320, 26, titre, { s: 15 }), i, x, y;
+    s += "<rect x='" + x0 + "' y='" + y0 + "' width='" + w + "' height='" + hh + "' fill='#EAF3EA' stroke='#9AA3AF'/>";
+    for (i = 0; i <= 8; i++) { x = x0 + i * w / 8; s += "<line x1='" + x + "' y1='" + y0 + "' x2='" + x + "' y2='" + (y0 + hh) + "' stroke='#9AA3AF' stroke-width='1'/>" + txt(x, y0 + hh + 16, (8 + i) + "° E", { s: 10, w: 600, c: GRIS }); }
+    for (i = 0; i <= 6; i++) { y = y0 + hh - i * hh / 6; s += "<line x1='" + x0 + "' y1='" + y + "' x2='" + (x0 + w) + "' y2='" + y + "' stroke='#9AA3AF' stroke-width='1'/>" + txt(x0 - 8, y + 4, (2 + 2 * i) + "° N", { s: 10, w: 600, c: GRIS, a: "end" }); }
+    function pt(lat, lon, nom, c, d) {
+      var px = x0 + (lon - 8) * w / 8, py = y0 + hh - (lat - 2) * hh / 12;
+      return "<circle cx='" + px + "' cy='" + py + "' r='6' fill='" + c + "' stroke='#fff' stroke-width='2'/>" + txt(px + (d || 10), py + 4, nom, { s: 11, a: d < 0 ? "end" : "start", c: c, halo: true });
+    }
+    s += pt(3.87, 11.52, "Yaoundé", BLEU, 10) + pt(4.05, 9.7, "Douala", ROUGE, -10) + pt(9.3, 13.4, "Garoua", VERT, 10) + pt(10.6, 14.3, "Maroua", TERRE, 10);
+    s += "<path d='M600 70 v-26 m-7 10 l7 -10 l7 10' stroke='" + NUIT + "' stroke-width='3' fill='none'/>" + txt(600, 88, "N", { s: 13 });
+    return svg(640, h, alt || titre, "", s);
+  }
+  VRT_L("6e-geo-tp-localiser-lieu", {
+    c: "6e", m: "geo", cle: "TP 1 : Localiser un lieu sur la carte", titre: "TP 1 : localiser un lieu sur la carte avec les coordonnées géographiques", duree: 35,
+    accroche: "À la radio scolaire de Garoua, le jeu du jour demande : « Quelle ville se trouve à 9° 18′ de latitude Nord et 13° 24′ de longitude Est ? » Comment trouver la réponse sur une carte ?",
+    intro: "Un jeu radio de Garoua te sert de fil rouge : à chaque partie, un indice t'aide à trancher entre trois manières de localiser un lieu.",
+    objectifs: ["nommer les points cardinaux et s'orienter sur une carte", "distinguer parallèles et méridiens, équateur et méridien de Greenwich", "lire et écrire les coordonnées géographiques d'un lieu", "calculer une distance nord-sud à partir des latitudes"],
+    enquete: {
+      titre: "Le jeu radio des coordonnées",
+      svg: svg(640, 220, "Studio de radio scolaire : deux élèves au micro, une carte du Cameroun quadrillée au mur", lin("grC", ["#EDE7F6", "#F6F1E7"], true),
+        "<rect width='640' height='220' fill='url(#grC)'/><rect y='170' width='640' height='50' fill='#B5834E'/><rect x='360' y='30' width='230' height='130' fill='#EAF3EA' stroke='#6B6B6B' stroke-width='3'/>" +
+        "<path d='M440 140 L430 110 L452 92 L470 60 L486 40 L496 64 L486 96 L500 124 L476 146Z' fill='#9AC48A' stroke='#17784D' stroke-width='2'/>" +
+        "<line x1='360' y1='75' x2='590' y2='75' stroke='#C62828' stroke-dasharray='4 3'/><line x1='475' y1='30' x2='475' y2='160' stroke='#1E499B' stroke-dasharray='4 3'/><circle cx='475' cy='75' r='5' fill='#F7C948' stroke='#001136'/>" +
+        "<rect x='150' y='120' width='120' height='50' fill='#4D5163'/><rect x='205' y='84' width='6' height='36' fill='#2E3445'/><circle cx='208' cy='80' r='9' fill='#2E3445'/>" +
+        perso(130, 66, "#5A3A1E", "#C62828", "#2E3445") + perso(290, 66, "#6B4423", "#1E499B", "#2E3445") +
+        bulle(20, 16, 300, "9° 18′ N et 13° 24′ E : quelle ville ?", "#F7C948")),
+      legende: "À la radio du lycée de Garoua, Fadimatou pose la question du jeu ; une carte quadrillée du Cameroun est accrochée au mur.",
+      contexte: "<p>Pour gagner le jeu, Ibrahim propose de localiser la ville « en disant qu'elle est en haut de la carte, près de Maroua ». Haoua veut seulement « suivre le fleuve Bénoué jusqu'à une grande ville ». Leur professeur leur montre qu'il existe une méthode précise, valable partout sur la Terre : les coordonnées géographiques.</p>",
+      documents: [{ t: "Le quadrillage du globe", html: "<p>Le globe est quadrillé par des lignes imaginaires : les parallèles, qui font le tour de la Terre d'ouest en est, et les méridiens, qui vont d'un pôle à l'autre. Leur croisement donne l'adresse exacte d'un lieu.</p>" },
+        { t: "Une donnée utile", html: "<p>Entre deux parallèles séparés de 1° de latitude, il y a environ 111 km sur le terrain.</p>" }],
+      question: "Comment localiser avec précision un lieu sur une carte ou sur le globe ?",
+      tache: "Oriente-toi avec les points cardinaux, lis les parallèles et les méridiens, trouve la ville du jeu, puis calcule sa distance nord-sud à Yaoundé.",
+      hypotheses: ["Il suffit de dire « en haut » ou « en bas » de la carte.", "Il suffit de suivre un fleuve ou une route jusqu'à la ville.", "On localise un lieu par ses coordonnées géographiques : sa latitude, lue sur les parallèles, et sa longitude, lue sur les méridiens."]
+    },
+    parties: [
+      { t: "S'orienter : les points cardinaux", html: "<ul><li>Les quatre <strong>points cardinaux</strong> sont le Nord, le Sud, l'Est et l'Ouest. Entre eux, on trouve le Nord-Est, le Nord-Ouest, le Sud-Est et le Sud-Ouest.</li><li>Sur la plupart des cartes, le <strong>Nord est en haut</strong> ; une flèche marquée N l'indique.</li><li>Le Soleil se lève à l'<strong>Est</strong> et se couche à l'<strong>Ouest</strong> ; une <strong>boussole</strong> indique le Nord.</li></ul>" +
+          def("S'orienter", "Trouver la direction des points cardinaux, sur le terrain ou sur une carte, pour savoir où l'on est et où l'on va.") +
+          ex("Sur la carte du Cameroun, Garoua est au nord de Yaoundé, et Douala à l'ouest de Yaoundé.", "Situer des villes les unes par rapport aux autres") +
+          attention("« En haut » et « en bas » ne sont pas des directions géographiques : sur une carte dont le nord n'est pas en haut, ils ne veulent plus rien dire. Dis « au nord », « au sud »."),
+        planches: [P2("La rose des vents", "Les points cardinaux et intermédiaires permettent de décrire une direction partout sur la Terre.",
+          svg(640, 230, "Rose des vents à huit branches avec N, S, E, O et les directions intermédiaires", "", "<rect width='640' height='230' fill='#FBF8F2'/>" + txt(320, 26, "La rose des vents", { s: 15 }) +
+            "<path d='M320 44 L334 116 L320 130 L306 116Z' fill='" + ROUGE + "'/><path d='M320 216 L334 144 L320 130 L306 144Z' fill='" + NUIT + "'/><path d='M410 130 L338 144 L320 130 L338 116Z' fill='" + NUIT + "'/><path d='M230 130 L302 144 L320 130 L302 116Z' fill='" + NUIT + "'/>" +
+            "<path d='M384 66 L330 124 L320 130 Z M256 66 L310 124 L320 130 Z M384 194 L330 136 L320 130 Z M256 194 L310 136 L320 130 Z' fill='#9AA3AF'/>" +
+            txt(320, 40, "N", { s: 15, c: ROUGE }) + txt(320, 228, "S", { s: 15 }) + txt(426, 135, "E", { s: 15 }) + txt(214, 135, "O", { s: 15 }) + txt(398, 60, "NE", { s: 11 }) + txt(242, 60, "NO", { s: 11 }) + txt(398, 210, "SE", { s: 11 }) + txt(242, 210, "SO", { s: 11 }) +
+            txt(520, 110, "lever du Soleil", { s: 11, c: TERRE }) + txt(520, 126, "→ Est", { s: 11, c: TERRE }) + txt(120, 110, "coucher du Soleil", { s: 11, c: BLEU }) + txt(120, 126, "→ Ouest", { s: 11, c: BLEU })))],
+        fil: { html: "<p>Ibrahim se trompe : « en haut de la carte » est trop vague, et cela ne vaut que si le nord est en haut. Les points cardinaux aident à s'orienter, mais ils ne donnent pas l'adresse exacte de la ville.</p>", verdicts: [[0, "rejetee", "« En haut, en bas » est trop vague : il faut une méthode précise."]] },
+        retenir: "Points cardinaux : N, S, E, O ; le Nord est en haut des cartes ; le Soleil se lève à l'Est." },
+      { t: "Parallèles, méridiens et coordonnées", html: "<ul><li>Les <strong>parallèles</strong> sont des cercles qui font le tour de la Terre d'ouest en est. Le plus grand est l'<strong>équateur</strong> (0°), qui partage la Terre en hémisphère Nord et hémisphère Sud.</li><li>Les <strong>méridiens</strong> sont des demi-cercles qui vont du pôle Nord au pôle Sud. Le méridien de départ est celui de <strong>Greenwich</strong> (0°), près de Londres.</li><li>La <strong>latitude</strong> d'un lieu est sa distance à l'équateur, en degrés Nord ou Sud (de 0° à 90°). La <strong>longitude</strong> est sa distance au méridien de Greenwich, en degrés Est ou Ouest (de 0° à 180°).</li></ul>" +
+          def("Coordonnées géographiques", "La latitude et la longitude d'un lieu, qui donnent son « adresse » sur le globe. On écrit d'abord la latitude, puis la longitude : Yaoundé, 3° 52′ N et 11° 31′ E.") +
+          formule("coordonnées = latitude (N ou S, lue sur les parallèles) + longitude (E ou O, lue sur les méridiens)") +
+          ex("Le Cameroun s'étend environ de 2° à 13° de latitude Nord et de 8° à 16° de longitude Est : il est entièrement dans l'hémisphère Nord et à l'est du méridien de Greenwich.", "Situer le Cameroun") +
+          astuce("Latitude : pense à une échelle (« l'échelle des latitudes ») que l'on monte vers le nord ou descend vers le sud. Longitude : pense à une longue route vers l'est ou l'ouest."),
+        planches: [{ type: "3d", titre: "Le globe et son quadrillage", legende: "Tourne le globe : les points rouges dessinent l'équateur (latitude 0°), les points verts le méridien de Greenwich (longitude 0°), et les deux pôles sont marqués en bleu nuit. La boule jaune marque le Cameroun, à environ 6° N et 12° E : un peu au nord de l'équateur, un peu à l'est de Greenwich.", modele: { h: 340, rx: -14, ry: 18, echelle: 1, alt: "Globe bleu clair parcouru par une ligne de points rouges horizontale et une ligne de points verts verticale, avec un point jaune", objets: globeRepere3D(), etiquettes: [{ p: [94, 0, 0], t: "équateur (0°)", cote: "d" }, { p: [0, 75, -50], t: "méridien de Greenwich (0°)", cote: "g" }, { p: [20, 10, -95], t: "le Cameroun ≈ 6° N, 12° E", cote: "d" }, { p: [0, 96, 0], t: "pôle Nord", cote: "g" }] } }],
+        fil: { html: "<p>Haoua se trompe aussi : suivre la Bénoué peut aider, mais beaucoup de lieux ne sont pas au bord d'un fleuve. Les <strong>parallèles et les méridiens</strong> donnent à chaque lieu une adresse unique.</p>", verdicts: [[1, "rejetee", "Suivre un fleuve ne marche pas pour tous les lieux ; les coordonnées si."]] },
+        retenir: "Équateur = latitude 0° ; Greenwich = longitude 0° ; latitude N ou S, longitude E ou O ; on écrit la latitude d'abord." },
+      { t: "Lire une carte quadrillée et calculer une distance", html: "<div class='methode'><b>Localiser un lieu à partir de ses coordonnées</b><ol><li>Repère le <strong>parallèle</strong> de la latitude donnée (sur le bord gauche ou droit de la carte).</li><li>Repère le <strong>méridien</strong> de la longitude donnée (sur le bord haut ou bas).</li><li>Suis les deux lignes jusqu'à leur <strong>croisement</strong> : c'est le lieu cherché.</li><li>Inversement, pour donner les coordonnées d'un lieu, lis le parallèle puis le méridien qui passent par lui.</li></ol></div>" +
+          formule("distance nord-sud ≈ différence de latitude (en degrés) × 111 km") +
+          ex("Garoua (9° 18′ N) et Yaoundé (3° 52′ N) : 9° 18′ − 3° 52′ = 5° 26′, soit environ 5,4°. Distance nord-sud ≈ 5,4 × 111 ≈ 600 km.", "De Yaoundé à Garoua") +
+          savais("Le GPS d'un téléphone affiche les coordonnées du lieu où tu te trouves, calculées grâce à des satellites qui tournent autour de la Terre."),
+        planches: [P2("Carte quadrillée du Cameroun", "On lit la latitude sur le bord gauche (parallèles) et la longitude sur le bord bas (méridiens). Garoua est au croisement du parallèle 9° 18′ N et du méridien 13° 24′ E.", quadrillage("Quelques villes du Cameroun sur le quadrillage", 260, "Carte quadrillée de 2° à 14° N et de 8° à 16° E avec Yaoundé, Douala, Garoua et Maroua"))],
+        fil: { html: "<p>Au croisement du parallèle 9° 18′ N et du méridien 13° 24′ E, les élèves trouvent <strong>Garoua</strong>. Ils gagnent le jeu et ajoutent même que la ville est à environ 600 km au nord de Yaoundé.</p>", verdicts: [[2, "validee", "Latitude et longitude donnent l'adresse exacte : 9° 18′ N, 13° 24′ E, c'est Garoua."]] },
+        retenir: "Croisement parallèle × méridien = lieu ; 1° de latitude ≈ 111 km ; Yaoundé-Garoua ≈ 600 km nord-sud." },
+      { t: "Entraînement au format de l'examen", html: integ("La latitude d'un lieu se mesure à partir…", ["du méridien de Greenwich", "de l'équateur", "du pôle Nord", "de la capitale"], "De l'équateur", "Elle va de 0° à 90° Nord ou Sud.", "Maroua est à environ 10° 36′ N et Yaoundé à 3° 52′ N. Calcule la distance nord-sud approximative entre les deux villes.", "10° 36′ − 3° 52′ = 6° 44′ ≈ 6,7° ; 6,7 × 111 ≈ 744 km, soit environ 740 km.", "Ton oncle, pêcheur à Kribi, veut indiquer aux secours l'endroit exact où son moteur est tombé en panne en mer.", "Explique-lui comment donner sa position de façon précise.", "Il doit donner ses coordonnées géographiques : d'abord la latitude (par exemple 2° 50′ N), puis la longitude (par exemple 9° 40′ E). Il peut les lire sur le GPS de son téléphone. Dire « au large de Kribi » ou « en face de la plage » est trop vague : avec la latitude et la longitude, les secours trouvent le point exact sur leur carte."), retenir: "Savoir-être : précision et sens du service en cas de danger." }
+    ],
+    denouement: { titre: "La ville du jeu est trouvée", etapes: ["Les points cardinaux orientent, mais restent vagues (indice 1).", "Parallèles et méridiens donnent la latitude et la longitude (indice 2).", "Le croisement 9° 18′ N × 13° 24′ E est Garoua, à ≈ 600 km au nord de Yaoundé (indice 3)."],
+      formules: [F("Écrire des coordonnées", "latitude puis longitude", "Garoua : 9° 18′ N ; 13° 24′ E"), F("Différence de latitude", "9° 18′ − 3° 52′", "5° 26′ ≈ 5,4°"), F("Distance nord-sud", "différence × 111 km", "5,4 × 111 ≈ 600 km")],
+      reponse: "<p>Pour localiser un lieu avec précision, on utilise ses coordonnées géographiques. Le globe est quadrillé par les parallèles, qui font le tour de la Terre (l'équateur est le parallèle 0°), et par les méridiens, qui vont d'un pôle à l'autre (le méridien de Greenwich est le méridien 0°). La latitude d'un lieu est sa distance à l'équateur, en degrés Nord ou Sud ; sa longitude est sa distance au méridien de Greenwich, en degrés Est ou Ouest. Sur la carte, la ville située au croisement du parallèle 9° 18′ N et du méridien 13° 24′ E est Garoua. Comme 1° de latitude représente environ 111 km, Garoua est à environ (9° 18′ − 3° 52′) ≈ 5,4° × 111 ≈ 600 km au nord de Yaoundé.</p>",
+      transfert: "<p>Avec un atlas ou le GPS d'un téléphone, relève les coordonnées de ta ville et donne sa position par rapport à l'équateur et au méridien de Greenwich.</p>" },
+    revision: ["<strong>Points cardinaux</strong> : Nord, Sud, Est, Ouest ; le Soleil se lève à l'Est.", "Parallèles : tour de la Terre ; équateur = 0°.", "Méridiens : d'un pôle à l'autre ; Greenwich = 0°.", "Latitude : 0° à 90° N ou S ; longitude : 0° à 180° E ou O.", "On écrit la latitude, puis la longitude.", "1° de latitude ≈ 111 km."],
+    exo: "<p>Douala est à 4° 03′ N et Garoua à 9° 18′ N. Calcule la distance nord-sud approximative. <em>(9° 18′ − 4° 03′ = 5° 15′ = 5,25° ; 5,25 × 111 ≈ 583 km.)</em></p>",
+    quiz: [q("Le Soleil se lève à…", "l'Est", "l'Ouest", "le Nord", "Et se couche à l'Ouest."), q("Sur la plupart des cartes, le Nord est…", "en haut", "en bas", "à droite", "Indiqué par une flèche N."), q("L'équateur est…", "le parallèle 0°", "le méridien 0°", "le pôle Nord", "Il partage la Terre en deux hémisphères."), q("Le méridien de Greenwich est…", "le méridien 0°", "le parallèle 0°", "la ligne de changement de date", "Près de Londres."), q("Les méridiens vont…", "d'un pôle à l'autre", "d'est en ouest autour de la Terre", "du centre de la Terre", "Ce sont des demi-cercles."), q("La latitude se lit sur…", "les parallèles", "les méridiens", "la légende", "Distance à l'équateur."), q("On écrit les coordonnées dans l'ordre…", "latitude puis longitude", "longitude puis latitude", "n'importe lequel", "Ex. 3° 52′ N, 11° 31′ E."), q("Le Cameroun est dans l'hémisphère…", "Nord", "Sud", "Ouest", "De 2° à 13° de latitude Nord."), q("1° de latitude représente environ…", "111 km", "11 km", "1 111 km", "Sur le terrain."), q("La ville à 9° 18′ N et 13° 24′ E est…", "Garoua", "Douala", "Bertoua", "Dans le Nord du Cameroun.")],
+    apc: apc("Des élèves doivent trouver une ville à partir de sa latitude et de sa longitude pour un jeu radio.", "S'orienter, lire les coordonnées géographiques sur une carte quadrillée et calculer une distance nord-sud.")
+  });
+  VRT_A("6e-geo-tp-localiser-lieu", 2, "Trouve les coordonnées et les distances", function (el) {
+    exercice(el, [["La latitude de l'équateur est ___.", ["0°", "90°", "180°"], "C'est le parallèle de départ."], ["Yaoundé (3° 52′ N) est dans l'hémisphère ___.", ["Nord", "Sud", "Ouest"], "N = Nord."], ["Une ville à 13° E est à l'___ du méridien de Greenwich.", ["est", "ouest", "nord"], "E = Est."], ["Le méridien de Greenwich passe près de ___.", ["Londres", "Yaoundé", "Dakar"], "En Angleterre."], ["3° de latitude ≈ ___.", ["333 km", "33 km", "3 330 km"], "3 × 111 = 333 km."], ["Garoua est au ___ de Yaoundé.", ["nord", "sud", "ouest"], "Sa latitude est plus grande."]], "Question suivante", "Question");
+  });
+})();
+
+/* Leçons GRATUITES — Géographie de 6e, lot 2 (25/11/2026) : rangs 4 (la Terre en mouvement), 5 (TP 2 : le calcul
+   de l'heure), 6 (TP 3 : les formes de représentation de la Terre). Même gabarit que le lot 1 (43-geo-6e.js). */
+(function () {
+  "use strict";
+  var NUIT = "#001136", BLEU = "#1E499B", GRIS = "#4D5163", VERT = "#17784D", ROUGE = "#C62828", TERRE = "#C46A2B";
+  function txt(x, y, t, o) {
+    o = o || {};
+    return "<text x='" + x + "' y='" + y + "' text-anchor='" + (o.a || "middle") + "' font-size='" + (o.s || 12) + "' font-weight='" + (o.w || 700) + "' fill='" + (o.c || NUIT) + "'" + (o.i ? " font-style='italic'" : "") + (o.halo ? " stroke='#fff' stroke-width='3' paint-order='stroke'" : "") + ">" + t + "</text>";
+  }
+  function lin(id, cs, vertical) {
+    var s = "<linearGradient id='" + id + "'" + (vertical ? " x1='0' y1='0' x2='0' y2='1'" : "") + ">";
+    cs.forEach(function (c, i) { s += "<stop offset='" + (i / (cs.length - 1)).toFixed(2) + "' stop-color='" + c + "'/>"; });
+    return s + "</linearGradient>";
+  }
+  function rad(id, cs) {
+    var s = "<radialGradient id='" + id + "' cx='35%' cy='30%' r='75%'>";
+    cs.forEach(function (c, i) { s += "<stop offset='" + (i / (cs.length - 1)).toFixed(2) + "' stop-color='" + c + "'/>"; });
+    return s + "</radialGradient>";
+  }
+  function fleche(id, c) { return "<marker id='" + id + "' markerWidth='10' markerHeight='10' refX='7' refY='5' orient='auto'><path d='M0 1L8 5L0 9Z' fill='" + c + "'/></marker>"; }
+  function svg(w, h, alt, defs, corps) {
+    return "<svg viewBox='0 0 " + w + " " + h + "' role='img' aria-label='" + alt + "' font-family='Inter,Arial,sans-serif'><rect width='" + w + "' height='" + h + "' fill='#fff'/><defs>" + defs + "</defs>" + corps +
+      "<text x='" + (w - 6) + "' y='" + (h - 5) + "' font-size='8' text-anchor='end' fill='#8A93A6'>Planche VÉRITAS</text></svg>";
+  }
+  function q(qq, bonne, f1, f2, e) { return { q: qq, r: [bonne, f1, f2], b: 0, e: e }; }
+  function bulle(x, y, w, t, c) { return "<rect x='" + x + "' y='" + y + "' width='" + w + "' height='30' rx='12' fill='#fff' stroke='" + (c || "#C9D2E3") + "'/>" + txt(x + w / 2, y + 20, t, { s: 11.5 }); }
+  function perso(x, y, peau, habit, bas) {
+    bas = bas || "#2E3445";
+    return "<g transform='translate(" + x + " " + y + ")'><ellipse cx='0' cy='84' rx='18' ry='4' fill='#001136' opacity='.18'/>" +
+      "<rect x='-9' y='44' width='8' height='36' rx='3' fill='" + bas + "'/><rect x='1' y='44' width='8' height='36' rx='3' fill='" + bas + "'/>" +
+      "<ellipse cx='-6' cy='81' rx='7' ry='3.5' fill='#1F2328'/><ellipse cx='6' cy='81' rx='7' ry='3.5' fill='#1F2328'/>" +
+      "<path d='M-13 46L-16 18C-16 13 -12 11 -6 10H6C12 11 16 13 16 18L13 46Z' fill='" + habit + "'/>" +
+      "<path d='M-15 16L-20 40' stroke='" + habit + "' stroke-width='7' stroke-linecap='round'/><path d='M15 16L20 40' stroke='" + habit + "' stroke-width='7' stroke-linecap='round'/>" +
+      "<circle cx='-20' cy='42' r='3.6' fill='" + peau + "'/><circle cx='20' cy='42' r='3.6' fill='" + peau + "'/>" +
+      "<rect x='-3.5' y='5' width='7' height='7' fill='" + peau + "'/><ellipse cx='0' cy='-2' rx='9' ry='10.5' fill='" + peau + "'/>" +
+      "<path d='M-9 -4C-10 -14 -4 -13.5 0 -13.5S10 -14 9 -4C7 -9 -7 -9 -9 -4Z' fill='#1B1410'/><ellipse cx='-9' cy='-1' rx='1.8' ry='3' fill='" + peau + "'/><ellipse cx='9' cy='-1' rx='1.8' ry='3' fill='" + peau + "'/></g>";
+  }
+  function def(t, h) { return "<div class='def'><b>" + t + "</b>" + h + "</div>"; }
+  function formule(h) { return "<p class='formule'>" + h + "</p>"; }
+  function ex(h, t) { return "<div class='ex'><b>" + (t || "Exemple") + "</b>" + h + "</div>"; }
+  function astuce(h, t) { return "<div class='astuce'><b>" + (t || "Astuce") + "</b>" + h + "</div>"; }
+  function attention(h, t) { return "<div class='attention'><b>" + (t || "Attention") + "</b>" + h + "</div>"; }
+  function savais(h) { return "<div class='savais'><b>Le savais-tu ?</b>" + h + "</div>"; }
+  function F(nom, f, calcul) { return { nom: nom, f: f, calcul: calcul }; }
+  function colonnes(titre, cols, h, alt) {
+    var W = 640, n = cols.length, w = (W - 30 - (n - 1) * 12) / n, s = "<rect width='640' height='" + h + "' fill='#FBF8F2'/>" + txt(320, 28, titre, { s: 15 });
+    cols.forEach(function (c, i) {
+      var x = 15 + i * (w + 12);
+      s += "<rect x='" + x + "' y='44' width='" + w + "' height='" + (h - 58) + "' rx='12' fill='#fff' stroke='" + c.c + "' stroke-width='2'/><rect x='" + x + "' y='44' width='" + w + "' height='34' rx='11' fill='" + c.c + "'/>" + txt(x + w / 2, 66, c.t, { s: 13.5, c: "#fff" });
+      c.l.forEach(function (l, k) { s += txt(x + 10, 100 + k * 23, l, { s: 11.5, a: "start", w: l.charAt(0) === "→" ? 800 : 550, c: l.charAt(0) === "→" ? c.c : NUIT }); });
+    });
+    return svg(640, h, alt || titre, "", s);
+  }
+  function P2(titre, legende, s) { return { type: "2D", titre: titre, legende: legende, svg: s }; }
+  function exercice(el, C, suivant, lib) {
+    var i = 0, ok = 0;
+    el.innerHTML = "<p class='labo-r' data-q style='font-size:16px'></p><div style='display:flex;gap:8px;flex-wrap:wrap' data-c></div><p class='an-note' data-e></p><p class='labo-r' data-s></p>";
+    function $(s) { return el.querySelector(s); }
+    function poser() {
+      var c = C[i];
+      $("[data-q]").innerHTML = (i + 1) + ". " + c[0].replace("___", "<b style='border-bottom:2px dashed #1E499B;padding:0 14px'>?</b>");
+      $("[data-e]").textContent = ""; $("[data-s]").innerHTML = lib + " " + (i + 1) + " / " + C.length + " · score : <b>" + ok + "</b>";
+      $("[data-c]").innerHTML = c[1].slice().sort().map(function (x) { return "<button type='button' class='btn-l' data-v='" + x + "'>" + x + "</button>"; }).join("");
+      el.querySelectorAll("[data-v]").forEach(function (b) {
+        b.addEventListener("click", function () {
+          var bon = b.dataset.v === c[1][0]; if (bon) ok++;
+          $("[data-q]").innerHTML = (i + 1) + ". " + c[0].replace("___", "<b style='color:" + (bon ? VERT : ROUGE) + "'>" + c[1][0] + "</b>");
+          $("[data-e]").innerHTML = (bon ? "✔ " : "✘ ") + c[2];
+          el.querySelectorAll("[data-v]").forEach(function (x) { x.disabled = true; });
+          var nx = document.createElement("button"); nx.type = "button"; nx.className = "btn-l"; nx.textContent = i + 1 < C.length ? suivant : "↺";
+          nx.addEventListener("click", function () { i = (i + 1) % C.length; if (!i) ok = 0; poser(); });
+          $("[data-c]").appendChild(nx);
+          $("[data-s]").innerHTML = lib + " " + (i + 1) + " / " + C.length + " · score : <b>" + ok + "</b>";
+        });
+      });
+    }
+    poser();
+  }
+  function apc(situation, tache) { return { module: "Géographie de 6e", famille: "Vie sociale et culturelle", agir: "Se situer dans l'espace et comprendre son milieu pour mieux l'habiter et le protéger", situation: situation, tache: tache }; }
+  function integ(qc, opts, bonne, rep, exo, exoRep, sit, tache, attendu) {
+    return "<div class='integ'><h3>Partie A : évaluation des ressources</h3><p><strong>Question de cours.</strong> " + qc + "</p><ol type='a'>" + opts.map(function (o) { return "<li>" + o + "</li>"; }).join("") + "</ol><details><summary>Voir la réponse</summary><p><strong>" + bonne + "</strong>. " + rep + "</p></details>" +
+      "<p><strong>Exercice.</strong> " + exo + "</p><details><summary>Voir la réponse</summary><p>" + exoRep + "</p></details>" +
+      "<h3>Partie B : évaluation des compétences</h3><p><strong>Situation.</strong> " + sit + "</p><p><strong>Tâche.</strong> " + tache + "</p><details><summary>Voir une réponse attendue</summary><p>" + attendu + "</p></details></div>";
+  }
+  function frise(titre, pts, h, alt) {
+    var s = "<rect width='640' height='" + h + "' fill='#FBF8F2'/>" + txt(320, 28, titre, { s: 15 }) + "<line x1='30' y1='" + (h / 2 + 6) + "' x2='610' y2='" + (h / 2 + 6) + "' stroke='#1E499B' stroke-width='4' stroke-linecap='round'/>";
+    var n = pts.length, pas = 580 / (n - 1);
+    pts.forEach(function (p, i) {
+      var x = 30 + i * pas, haut = i % 2 === 0, y0 = h / 2 + 6;
+      s += "<circle cx='" + x + "' cy='" + y0 + "' r='8' fill='" + (p.c || "#C2540A") + "' stroke='#fff' stroke-width='3'/>" + txt(x, haut ? y0 - 20 : y0 + 30, p.a, { s: 12.5, c: p.c || "#C2540A" });
+      (p.l || []).forEach(function (l, k) { s += txt(x, haut ? y0 - 38 - k * 15 : y0 + 48 + k * 15, l, { s: 10.5, w: 550 }); });
+    });
+    return svg(640, h, alt || titre, "", s);
+  }
+
+  /* ═══════════════ RANG 4 : LA TERRE, UNE PLANÈTE EN MOUVEMENT ═══════════════ */
+  function orbite3D() {
+    var o = [{ f: "sphere", c: [0, 0, 0], r: 46, coul: "#F7C948" }], k, a, R = 190;
+    for (k = 0; k < 28; k++) {
+      a = k * 2 * Math.PI / 28;
+      o.push({ f: "sphere", c: [Math.round(R * Math.cos(a)), 0, Math.round(R * Math.sin(a))], r: 3, coul: "#9AA3AF" });
+    }
+    [[-R, 0], [R, 0]].forEach(function (p) {
+      o.push({ f: "sphere", c: [p[0], 0, p[1]], r: 24, coul: "#2E86AB" });
+      for (k = -4; k <= 4; k++) {
+        if (k === 0) continue;
+        o.push({ f: "sphere", c: [p[0] + Math.round(k * 9 * Math.sin(0.41)), Math.round(k * 9 * Math.cos(0.41)), p[1]], r: 2.6, coul: ROUGE });
+      }
+    });
+    return o;
+  }
+  VRT_L("6e-geo-terre-mouvement", {
+    c: "6e", m: "geo", cle: "La terre, une planète en mouvement dans l’espace", titre: "La Terre, une planète en mouvement : rotation et révolution", duree: 30,
+    accroche: "À Bafoussam, Ngoufo voit chaque matin le Soleil se lever à l'est et, le soir, se coucher derrière les monts Bamboutos, à l'ouest. Sa petite sœur demande, elle, pourquoi certaines années ont un 29 février. Qu'est-ce qui fait « bouger » le Soleil et le calendrier ?",
+    intro: "Les questions de deux enfants de Bafoussam te servent de fil rouge : à chaque partie, un indice t'aide à trancher entre trois idées sur les mouvements de la Terre.",
+    objectifs: ["décrire le mouvement de rotation de la Terre et ses conséquences", "décrire le mouvement de révolution et ses conséquences", "expliquer l'année bissextile", "calculer des vitesses et des durées liées aux mouvements de la Terre"],
+    enquete: {
+      titre: "Le Soleil tourne-t-il autour de nous ?",
+      svg: svg(640, 220, "Village des hauts plateaux de l'Ouest au lever du soleil ; un garçon montre le soleil, une fille tient un calendrier", lin("gmC", ["#FDE3B5", "#E8F0E0"], true),
+        "<rect width='640' height='220' fill='url(#gmC)'/><circle cx='560' cy='118' r='30' fill='#F7C948'/><path d='M0 150 Q120 96 240 140 Q360 108 480 146 Q560 128 640 140 V220 H0Z' fill='#7FA347'/><rect y='176' width='640' height='44' fill='#B5834E'/>" +
+        "<rect x='60' y='120' width='70' height='56' fill='#C9A27A'/><path d='M50 124l45 -34l45 34Z' fill='#6B6B6B'/>" + perso(260, 92, "#5A3A1E", "#17784D", "#2E3445") + perso(340, 102, "#6B4423", "#7B3F99", "#2E3445") +
+        "<rect x='352' y='126' width='30' height='26' fill='#fff' stroke='#9AA3AF'/>" + txt(367, 144, "29", { s: 12, c: ROUGE }) +
+        bulle(150, 18, 240, "Le Soleil tourne autour de nous !", "#F7C948") + bulle(360, 52, 250, "Pourquoi un 29 février ?", "#9FC5E8")),
+      legende: "Sur les hauts plateaux de l'Ouest, Ngoufo regarde le Soleil se lever ; sa sœur Mafo tient le calendrier ouvert au 29 février.",
+      contexte: "<p>Ngoufo pense que « c'est le Soleil qui tourne autour de la Terre en une journée, puisqu'on le voit bouger dans le ciel ». Mafo, elle, croit que « la Terre ne bouge pas : le jour et la nuit viennent du Soleil qui s'allume et s'éteint ». Leur grand frère, élève de 6e, veut leur expliquer, chiffres à l'appui, que c'est la Terre qui bouge.</p>",
+      documents: [{ t: "Deux mouvements", html: "<p>La Terre tourne sur elle-même autour d'un axe incliné qui passe par les pôles, en 24 heures environ. En même temps, elle tourne autour du Soleil en 365 jours et 6 heures environ.</p>" },
+        { t: "Quelques chiffres", html: "<p>Circonférence de la Terre à l'équateur : environ 40 000 km. Distance moyenne Terre-Soleil : environ 150 millions de km. Inclinaison de l'axe : environ 23° 27′.</p>" }],
+      question: "Quels sont les mouvements de la Terre et quelles sont leurs conséquences ?",
+      tache: "Décris la rotation et la révolution de la Terre, explique le jour et la nuit, l'année et le 29 février, puis calcule les vitesses de la Terre.",
+      hypotheses: ["C'est le Soleil qui tourne autour de la Terre en une journée.", "La Terre est immobile : le Soleil s'allume le jour et s'éteint la nuit.", "La Terre tourne sur elle-même en 24 heures (jour et nuit) et autour du Soleil en 365 jours et 6 heures (l'année)."]
+    },
+    parties: [
+      { t: "La rotation : le jour et la nuit", html: def("Rotation", "Mouvement de la Terre qui tourne sur elle-même, d'ouest en est, autour d'un axe imaginaire passant par les pôles. Un tour complet dure environ 24 heures.") +
+          "<ul><li>À chaque instant, la moitié de la Terre tournée vers le Soleil est éclairée : c'est le <strong>jour</strong> ; l'autre moitié est dans l'ombre : c'est la <strong>nuit</strong>.</li><li>Comme la Terre tourne d'ouest en est, le Soleil <strong>semble</strong> se lever à l'est et se coucher à l'ouest : c'est un mouvement apparent.</li><li>La rotation explique aussi les <strong>différences d'heure</strong> entre les pays.</li></ul>" +
+          formule("vitesse à l'équateur = circonférence ÷ durée = 40 000 km ÷ 24 h ≈ 1 670 km/h") +
+          ex("Un point de l'équateur parcourt environ 1 670 km chaque heure, soit environ 7 fois la distance Douala-Yaoundé par la route (environ 240 km : 1 670 ÷ 240 ≈ 7). Nous ne le sentons pas, car tout tourne avec nous : l'air, les maisons, les arbres.", "La Terre tourne vite") +
+          attention("Le Soleil ne « se lève » pas vraiment : c'est la Terre qui tourne. On dit qu'il s'agit d'un mouvement apparent du Soleil."),
+        planches: [P2("Jour et nuit sur la Terre", "La moitié de la Terre tournée vers le Soleil est éclairée ; en tournant d'ouest en est, chaque lieu passe du jour à la nuit.",
+          svg(640, 230, "Le Soleil à gauche éclaire la moitié gauche de la Terre ; la moitié droite est sombre ; une flèche montre la rotation d'ouest en est", "", "<rect width='640' height='230' fill='#0E1A3A'/>" + txt(320, 26, "Le jour et la nuit", { s: 15, c: "#fff" }) +
+            "<circle cx='70' cy='125' r='46' fill='#F7C948'/>" + [0, 1, 2, 3, 4].map(function (i) { return "<line x1='130' y1='" + (75 + i * 25) + "' x2='300' y2='" + (75 + i * 25) + "' stroke='#F7C948' stroke-width='2' stroke-dasharray='6 5'/>"; }).join("") +
+            "<circle cx='400' cy='125' r='78' fill='#1B2A4A'/><path d='M400 47 A78 78 0 0 0 400 203Z' fill='#2E86AB'/><path d='M372 80 q20 -10 30 10 q-6 22 -26 20Z M360 140 q22 -6 30 14 q-12 20 -30 8Z' fill='#5A9A3A'/>" +
+            "<path d='M320 66 Q400 18 480 66' stroke='#fff' stroke-width='2.5' fill='none' marker-end='url(#fl)'/>" + txt(565, 58, "rotation", { s: 11, c: "#fff" }) + txt(565, 74, "d'ouest en est", { s: 11, c: "#fff" }) +
+            txt(352, 220, "JOUR", { s: 13, c: "#F7C948" }) + txt(452, 220, "NUIT", { s: 13, c: "#9FC5E8" }) + txt(70, 194, "Soleil", { s: 12, c: "#F7C948" }) +
+            "<defs><marker id='fl' markerWidth='10' markerHeight='10' refX='7' refY='5' orient='auto'><path d='M0 1L8 5L0 9Z' fill='#fff'/></marker></defs>"))],
+        fil: { html: "<p>Ngoufo se trompe : le Soleil ne tourne pas autour de la Terre en une journée. C'est la Terre qui <strong>tourne sur elle-même</strong> d'ouest en est ; le Soleil semble donc se déplacer d'est en ouest.</p>", verdicts: [[0, "rejetee", "C'est la Terre qui tourne sur elle-même ; le mouvement du Soleil est apparent."]] },
+        retenir: "Rotation : 24 h, d'ouest en est ; jour et nuit ; vitesse à l'équateur ≈ 40 000 ÷ 24 ≈ 1 670 km/h." },
+      { t: "La révolution : l'année et le 29 février", html: def("Révolution", "Mouvement de la Terre qui tourne autour du Soleil en suivant une orbite presque circulaire. Un tour complet dure environ 365 jours et 6 heures.") +
+          "<ul><li>La durée de la révolution définit l'<strong>année</strong>.</li><li>Le calendrier compte 365 jours : il reste 6 heures chaque année. Tous les quatre ans, 4 × 6 h = 24 h : on ajoute un jour, le <strong>29 février</strong>. L'année a alors 366 jours : c'est une <strong>année bissextile</strong>.</li><li>L'axe de la Terre est incliné d'environ 23° 27′ : pendant la révolution, chaque hémisphère reçoit plus ou moins de lumière, ce qui crée les <strong>saisons</strong> et l'inégale durée des jours et des nuits loin de l'équateur.</li></ul>" +
+          formule("4 années × 6 h = 24 h = 1 jour → une année bissextile (366 jours) tous les 4 ans") +
+          formule("longueur de l'orbite ≈ 2 × 3,14 × 150 000 000 ≈ 942 millions de km ; vitesse ≈ 942 000 000 ÷ 8 766 h ≈ 107 000 km/h") +
+          ex("2024 et 2028 sont bissextiles : 2024 ÷ 4 = 506 et 2028 ÷ 4 = 507, sans reste. 2026 ÷ 4 = 506,5 : 2026 n'est pas bissextile.", "Reconnaître une année bissextile") +
+          savais("Au Cameroun, proche de l'équateur, les jours et les nuits durent presque 12 heures toute l'année ; on y parle surtout de saison des pluies et de saison sèche plutôt que d'été et d'hiver."),
+        planches: [{ type: "3d", titre: "La Terre autour du Soleil", legende: "Tourne la scène : au centre, le Soleil ; les points gris dessinent l'orbite de la Terre ; la Terre est montrée à deux moments de l'année, de part et d'autre du Soleil. Les points rouges dessinent son axe, toujours incliné dans la même direction : c'est l'origine des saisons. Les tailles et les distances ne sont pas à l'échelle.", modele: { h: 330, rx: -22, ry: 16, echelle: 0.95, alt: "Boule jaune au centre d'un cercle de points gris, avec deux boules bleues traversées par une ligne de points rouges inclinée", objets: orbite3D(), etiquettes: [{ p: [0, 48, 0], t: "le Soleil", cote: "g" }, { p: [190, 30, 0], t: "axe incliné (≈ 23° 27′)", cote: "d" }, { p: [-190, -26, 0], t: "la Terre six mois plus tôt", cote: "g" }, { p: [0, 0, -190], t: "orbite : 365 j 6 h", cote: "d" }] } }],
+        fil: { html: "<p>Mafo se trompe : le Soleil ne s'allume ni ne s'éteint. La Terre tourne sur elle-même et, en même temps, <strong>autour du Soleil</strong> en 365 jours et 6 heures : ces 6 heures, cumulées sur quatre ans, donnent le 29 février.</p>", verdicts: [[1, "rejetee", "La Terre n'est pas immobile : elle tourne sur elle-même et autour du Soleil."]] },
+        retenir: "Révolution : 365 j 6 h autour du Soleil ; année bissextile tous les 4 ans (4 × 6 h = 24 h) ; axe incliné → saisons." },
+      { t: "Comparer les deux mouvements", html: "<table class='donnees'><thead><tr><th></th><th>Rotation</th><th>Révolution</th></tr></thead><tbody><tr><td>Autour de quoi ?</td><td>de son axe</td><td>du Soleil</td></tr><tr><td>Durée</td><td>24 h (un jour)</td><td>365 j 6 h (une année)</td></tr><tr><td>Sens</td><td>d'ouest en est</td><td>d'ouest en est</td></tr><tr><td>Conséquences</td><td>jour et nuit, différences d'heure</td><td>année, saisons, année bissextile</td></tr><tr><td>Vitesse</td><td>≈ 1 670 km/h à l'équateur</td><td>≈ 107 000 km/h</td></tr></tbody></table>" +
+          def("Mouvement apparent", "Mouvement que l'on croit voir, mais qui vient en réalité de notre propre déplacement. Le Soleil qui « se lève » est un mouvement apparent dû à la rotation de la Terre.") +
+          ex("Dans un taxi qui roule, les arbres du bord de la route semblent reculer : c'est le taxi qui avance. De même, le Soleil semble traverser le ciel parce que la Terre tourne.", "Une image du mouvement apparent") +
+          astuce("Rotation = « rond sur soi », comme une toupie ; révolution = « tour autour », comme un coureur autour d'un stade."),
+        planches: [P2("Rotation et révolution", "Deux mouvements en même temps : la Terre tourne sur elle-même comme une toupie, et autour du Soleil comme un coureur autour d'un stade.",
+          colonnes("Les deux mouvements de la Terre", [{ t: "Rotation", c: BLEU, l: ["sur son axe", "24 heures", "jour et nuit", "≈ 1 670 km/h"] }, { t: "Révolution", c: TERRE, l: ["autour du Soleil", "365 j 6 h", "année, saisons", "≈ 107 000 km/h"] }], 220, "Les deux mouvements de la Terre"))],
+        fil: { html: "<p>Le grand frère conclut : la Terre a deux mouvements. La <strong>rotation</strong> en 24 heures donne le jour et la nuit ; la <strong>révolution</strong> en 365 jours et 6 heures donne l'année et le 29 février.</p>", verdicts: [[2, "validee", "Rotation en 24 h (jour et nuit) et révolution en 365 j 6 h (année, 29 février)."]] },
+        retenir: "Rotation : 24 h, jour et nuit ; révolution : 365 j 6 h, année et saisons ; le mouvement du Soleil est apparent." },
+      { t: "Entraînement au format de l'examen", html: integ("La rotation de la Terre dure environ…", ["365 jours", "24 heures", "30 jours", "une semaine"], "24 heures", "C'est la durée d'un jour.", "Explique pourquoi l'année 2028 aura un 29 février.", "La révolution dure 365 jours et 6 heures. Le calendrier ne compte que 365 jours : tous les 4 ans, les 4 × 6 h = 24 h forment un jour de plus, le 29 février. 2028 ÷ 4 = 507, sans reste : 2028 est bissextile.", "Un camarade affirme que « la nuit, le Soleil va dormir derrière les montagnes ».", "Rédige quelques lignes pour lui expliquer scientifiquement l'alternance du jour et de la nuit.", "Le Soleil ne dort pas et ne se cache pas derrière les montagnes. C'est la Terre qui tourne sur elle-même, d'ouest en est, en 24 heures. La moitié tournée vers le Soleil a le jour ; l'autre moitié, dans l'ombre, a la nuit. Quand notre région passe du côté de l'ombre, le Soleil semble se coucher à l'ouest : c'est un mouvement apparent."), retenir: "Savoir-être : esprit scientifique face aux croyances." }
+    ],
+    denouement: { titre: "Le mystère du 29 février résolu", etapes: ["La Terre tourne sur elle-même en 24 h : jour et nuit (indice 1).", "Elle tourne autour du Soleil en 365 j 6 h : l'année (indice 2).", "4 × 6 h = 24 h : un jour de plus tous les 4 ans (indice 3)."],
+      formules: [F("Vitesse de rotation à l'équateur", "40 000 km ÷ 24 h", "≈ 1 670 km/h"), F("Jour ajouté tous les 4 ans", "4 × 6 h", "24 h = 1 jour, le 29 février"), F("Vitesse sur l'orbite", "942 000 000 km ÷ 8 766 h", "≈ 107 000 km/h")],
+      reponse: "<p>La Terre a deux mouvements. Elle tourne sur elle-même, d'ouest en est, autour d'un axe incliné qui passe par les pôles, en 24 heures : c'est la rotation. Elle explique l'alternance du jour et de la nuit et le mouvement apparent du Soleil, qui semble se lever à l'est et se coucher à l'ouest ; à l'équateur, elle nous entraîne à environ 40 000 ÷ 24 ≈ 1 670 km/h. La Terre tourne aussi autour du Soleil en 365 jours et 6 heures : c'est la révolution, qui définit l'année et, avec l'inclinaison de l'axe, les saisons. Comme le calendrier ne compte que 365 jours, les 6 heures restantes s'additionnent : 4 × 6 h = 24 h, d'où un 29 février tous les quatre ans, dans les années bissextiles.</p>",
+      transfert: "<p>Les années 2032 et 2030 sont-elles bissextiles ? Justifie par un calcul. Combien de jours compte une période de 4 années consécutives ?</p>" },
+    revision: ["<strong>Rotation</strong> : la Terre tourne sur elle-même en 24 h, d'ouest en est.", "Conséquences : jour et nuit, mouvement apparent du Soleil, différences d'heure.", "<strong>Révolution</strong> : la Terre tourne autour du Soleil en 365 j 6 h.", "Conséquences : l'année, les saisons (axe incliné de 23° 27′).", "Année bissextile : 366 jours, tous les 4 ans (4 × 6 h = 24 h).", "Vitesses : ≈ 1 670 km/h (rotation à l'équateur), ≈ 107 000 km/h (révolution)."],
+    exo: "<p>Combien de jours compte la période du 1er janvier 2025 au 31 décembre 2028 ? <em>(3 × 365 + 366 = 1 461 jours, car 2028 est bissextile.)</em></p>",
+    quiz: [q("La rotation de la Terre se fait…", "sur elle-même", "autour du Soleil", "autour de la Lune", "Autour de son axe."), q("La rotation dure environ…", "24 heures", "365 jours", "un mois", "Un jour."), q("La rotation se fait…", "d'ouest en est", "d'est en ouest", "du nord au sud", "Le Soleil semble donc aller d'est en ouest."), q("L'alternance du jour et de la nuit est due…", "à la rotation", "à la révolution", "aux nuages", "La moitié éclairée change."), q("La révolution dure environ…", "365 jours et 6 heures", "24 heures", "30 jours", "C'est l'année."), q("Une année bissextile compte…", "366 jours", "365 jours", "360 jours", "On ajoute le 29 février."), q("On ajoute un 29 février tous les…", "4 ans", "2 ans", "10 ans", "4 × 6 h = 24 h."), q("Les saisons sont dues à la révolution et…", "à l'inclinaison de l'axe", "à la Lune", "aux vents", "Axe incliné de 23° 27′."), q("La vitesse de rotation à l'équateur est d'environ…", "1 670 km/h", "167 km/h", "16 700 km/h", "40 000 ÷ 24."), q("Le lever du Soleil est un mouvement…", "apparent", "réel du Soleil", "de la Lune", "C'est la Terre qui tourne.")],
+    apc: apc("Des enfants croient que le Soleil tourne autour de la Terre et ne comprennent pas le 29 février.", "Décrire la rotation et la révolution de la Terre et expliquer leurs conséquences avec des calculs.")
+  });
+  VRT_A("6e-geo-terre-mouvement", 2, "Rotation ou révolution ?", function (el) {
+    exercice(el, [["Le jour et la nuit sont dus à la ___.", ["rotation", "révolution", "pluie"], "La Terre tourne sur elle-même."], ["L'année est due à la ___.", ["révolution", "rotation", "Lune"], "Un tour autour du Soleil."], ["4 × 6 h = ___.", ["24 h", "12 h", "36 h"], "Un jour de plus tous les 4 ans."], ["2032 est-elle bissextile ? ___", ["oui", "non", "on ne peut pas savoir"], "2032 ÷ 4 = 508, sans reste."], ["40 000 km ÷ 24 h ≈ ___.", ["1 670 km/h", "167 km/h", "960 km/h"], "Vitesse de rotation à l'équateur."], ["Le Soleil semble se coucher à l'___.", ["ouest", "est", "nord"], "La Terre tourne d'ouest en est."]], "Question suivante", "Question");
+  });
+
+  /* ═══════════════ RANG 5 : TP 2, LE CALCUL DE L'HEURE ═══════════════ */
+  function fuseaux3D() {
+    var o = [{ f: "sphere", c: [0, 0, 0], r: 90, coul: "#9FC5E8" }], k, a, R = 104;
+    for (k = 0; k < 24; k++) {
+      a = k * Math.PI / 12;
+      o.push({ f: "boite", c: [Math.round(R * Math.sin(a)), 0, Math.round(-R * Math.cos(a))], d: [24, 16, 10], coul: k === 1 ? ROUGE : (k === 0 ? VERT : (k % 2 ? "#F7C948" : "#FFFFFF")) });
+    }
+    o.push({ f: "sphere", c: [0, 94, 0], r: 6, coul: NUIT });
+    o.push({ f: "sphere", c: [0, -94, 0], r: 6, coul: NUIT });
+    return o;
+  }
+  VRT_L("6e-geo-tp-calcul-heure", {
+    c: "6e", m: "geo", cle: "TP 2 : Le calcul de l’heure", titre: "TP 2 : le calcul de l'heure, des degrés aux fuseaux horaires", duree: 35,
+    accroche: "Les Lions indomptables jouent un match amical à New York à 20 h, heure de New York. Le père de Bello veut le regarder en direct à Ngaoundéré. À quelle heure doit-il allumer la télévision ?",
+    intro: "Un match des Lions indomptables te sert de fil rouge : à chaque partie, un indice t'aide à trancher entre trois manières de calculer l'heure.",
+    objectifs: ["expliquer pourquoi l'heure n'est pas la même partout", "utiliser la relation 360° = 24 h, 15° = 1 h, 1° = 4 min", "calculer l'heure solaire d'un lieu à partir de sa longitude", "utiliser les fuseaux horaires et le décalage avec l'heure de Greenwich (UTC)"],
+    enquete: {
+      titre: "À quelle heure le match ?",
+      svg: svg(640, 220, "Salon à Ngaoundéré avec une télévision éteinte, une horloge et un père et son fils qui regardent un calendrier des matchs", lin("ghC", ["#F3EDE2", "#E6EEF7"], true),
+        "<rect width='640' height='220' fill='url(#ghC)'/><rect y='176' width='640' height='44' fill='#B5834E'/><rect x='420' y='80' width='160' height='96' rx='6' fill='#2E3445'/><rect x='430' y='90' width='140' height='76' fill='#4D5163'/>" + txt(500, 134, "Lions ⚽ 20 h (NY)", { s: 11, c: "#F7C948" }) +
+        "<circle cx='330' cy='60' r='28' fill='#fff' stroke='#2E3445' stroke-width='3'/><line x1='330' y1='60' x2='330' y2='40' stroke='#2E3445' stroke-width='3'/><line x1='330' y1='60' x2='345' y2='66' stroke='#C62828' stroke-width='3'/>" +
+        perso(140, 94, "#5A3A1E", "#1E499B", "#2E3445") + perso(220, 112, "#6B4423", "#17784D", "#2E3445") + bulle(20, 18, 270, "20 h à New York… et ici ?", "#F7C948")),
+      legende: "À Ngaoundéré, Bello et son père préparent la soirée du match des Lions indomptables, joué à New York.",
+      contexte: "<p>Bello pense que « le match passera à 20 h ici aussi, puisque l'heure est la même partout ». Son père croit qu'« il faut retirer 5 heures, car New York est en avance sur le Cameroun ». Bello, élève de 6e, ressort son cours de géographie pour faire le calcul juste.</p>",
+      documents: [{ t: "Les fuseaux horaires", html: "<p>La Terre est découpée en 24 fuseaux horaires de 15° chacun. L'heure de référence est celle du méridien de Greenwich (heure UTC). Le Cameroun est à UTC + 1 ; New York, en hiver, à UTC − 5.</p>" },
+        { t: "Une relation", html: "<p>En 24 heures, la Terre fait un tour complet, soit 360°.</p>" }],
+      question: "Comment calculer l'heure d'un lieu à partir de celle d'un autre lieu ?",
+      tache: "Explique pourquoi l'heure change d'un lieu à l'autre, calcule des heures solaires avec la longitude, puis trouve l'heure du match au Cameroun avec les fuseaux horaires.",
+      hypotheses: ["L'heure est la même partout sur la Terre.", "New York est en avance : il faut retirer 5 heures.", "À l'est, l'heure est en avance ; le Cameroun (UTC + 1) a 6 heures d'avance sur New York (UTC − 5) : il faut ajouter 6 heures."]
+    },
+    parties: [
+      { t: "Pourquoi l'heure change selon le lieu", html: "<ul><li>À cause de la <strong>rotation</strong>, le Soleil n'est pas au plus haut dans le ciel au même moment partout : il est <strong>midi solaire</strong> quand le Soleil passe au méridien du lieu.</li><li>La Terre tourne de <strong>360° en 24 h</strong>, donc de <strong>15° en 1 h</strong> et de <strong>1° en 4 minutes</strong>.</li><li>Comme la Terre tourne d'ouest en est, les lieux situés à l'<strong>est</strong> voient le Soleil plus tôt : ils sont <strong>en avance</strong> ; ceux de l'ouest sont <strong>en retard</strong>.</li></ul>" +
+          def("Heure solaire", "Heure d'un lieu calculée d'après la position du Soleil : il est 12 h solaire quand le Soleil est au plus haut dans le ciel de ce lieu.") +
+          formule("360° ↔ 24 h ; 15° ↔ 1 h ; 1° ↔ 4 min (24 × 60 ÷ 360 = 4)") +
+          astuce("Phrase-clé : « À l'est, on est en avance ; à l'ouest, on est en retard. » Le Soleil se lève d'abord à l'est."),
+        planches: [P2("Des degrés aux heures", "En une heure, la Terre tourne de 15° ; en quatre minutes, de 1°. On convertit ainsi une différence de longitude en différence d'heure.",
+          colonnes("Convertir les degrés en temps", [{ t: "360°", c: BLEU, l: ["un tour", "= 24 h"] }, { t: "15°", c: VERT, l: ["un fuseau", "= 1 h"] }, { t: "1°", c: TERRE, l: ["= 4 min", "(1 440 min ÷ 360)"] }, { t: "Est / Ouest", c: ROUGE, l: ["est = avance", "ouest = retard"] }], 200, "Convertir les degrés en temps"))],
+        fil: { html: "<p>Bello se trompe : l'heure n'est pas la même partout. Quand il est midi à Ngaoundéré, le Soleil n'est pas encore levé à New York, qui est loin à l'ouest.</p>", verdicts: [[0, "rejetee", "La rotation crée des heures différentes : l'est est en avance."]] },
+        retenir: "360° = 24 h ; 15° = 1 h ; 1° = 4 min ; à l'est on est en avance, à l'ouest en retard." },
+      { t: "Calculer une heure solaire", html: "<div class='methode'><b>Calculer l'heure solaire d'un lieu B connaissant celle d'un lieu A</b><ol><li>Calcule la <strong>différence de longitude</strong> : si les deux lieux sont du même côté de Greenwich, on soustrait ; s'ils sont de part et d'autre, on additionne.</li><li>Convertis en temps : <strong>× 4 min</strong> par degré.</li><li><strong>Ajoute</strong> le décalage si B est à l'est de A, <strong>retire-le</strong> si B est à l'ouest.</li></ol></div>" +
+          formule("différence d'heure = différence de longitude × 4 min") +
+          ex("Douala (9° 42′ E ≈ 9,7° E) et Maroua (14° 19′ E ≈ 14,3° E) : 14,3 − 9,7 = 4,6° ; 4,6 × 4 ≈ 18 min. Quand il est 12 h solaire à Douala, il est environ 12 h 18 à Maroua, plus à l'est.", "Heure solaire de Douala à Maroua") +
+          ex("Greenwich (0°) et Yaoundé (11° 31′ E ≈ 11,5° E) : 11,5 × 4 = 46 min. Quand il est 12 h solaire à Greenwich, il est environ 12 h 46 à Yaoundé.", "De Greenwich à Yaoundé") +
+          attention("Lieux de part et d'autre de Greenwich (un à l'est, l'autre à l'ouest) : on additionne les longitudes. Ex. 30° O et 15° E : 30 + 15 = 45°, soit 3 h."),
+        planches: [{ type: "3d", titre: "Les 24 fuseaux horaires", legende: "Tourne le globe : la ceinture de 24 blocs représente les 24 fuseaux horaires de 15° chacun. Le bloc vert est le fuseau de Greenwich (UTC) ; le bloc rouge, juste à l'est, est celui du Cameroun (UTC + 1). Chaque bloc vers l'est ajoute une heure ; vers l'ouest, il en retire une.", modele: { h: 330, rx: -18, ry: 22, echelle: 1, alt: "Globe bleu clair entouré d'une ceinture de 24 blocs jaunes et blancs, avec un bloc vert et un bloc rouge", objets: fuseaux3D(), etiquettes: [{ p: [0, 10, -110], t: "Greenwich : UTC", cote: "g" }, { p: [27, 10, -101], t: "Cameroun : UTC + 1", cote: "d" }, { p: [0, 100, 0], t: "pôle Nord", cote: "g" }] } }],
+        fil: { html: "<p>Le père de Bello a raison de vouloir calculer un écart, mais il se trompe de sens : New York est à l'<strong>ouest</strong> du Cameroun, donc <strong>en retard</strong>, pas en avance. Il ne faut pas retirer d'heures, il faut en ajouter.</p>", verdicts: [[1, "rejetee", "New York est à l'ouest : il est en retard sur le Cameroun, pas en avance."]] },
+        retenir: "Différence d'heure = différence de longitude × 4 min ; on ajoute vers l'est, on retire vers l'ouest." },
+      { t: "Les fuseaux horaires et l'heure légale", html: def("Fuseau horaire", "Bande de la Terre, large de 15° de longitude, à l'intérieur de laquelle tous les lieux adoptent la même heure légale. Il y a 24 fuseaux.") +
+          "<ul><li>L'heure de référence est l'<strong>heure UTC</strong>, celle du méridien de Greenwich.</li><li>Chaque pays choisit son <strong>heure légale</strong> : le Cameroun est à <strong>UTC + 1</strong> (heure d'Afrique de l'Ouest et du Centre), comme le Nigeria, le Gabon ou le Tchad.</li><li>Les frontières des fuseaux suivent souvent celles des pays, pour qu'un pays garde une seule heure.</li></ul>" +
+          formule("heure de B = heure de A + (décalage de B − décalage de A)") +
+          ex("Match à 20 h à New York (UTC − 5). Décalage du Cameroun moins celui de New York : (+1) − (−5) = 6 h. 20 h + 6 h = 26 h, soit 2 h du matin le lendemain à Ngaoundéré.", "L'heure du match au Cameroun") +
+          savais("Près de l'antiméridien (180°), la ligne de changement de date sépare deux journées : en la franchissant vers l'ouest, on avance d'un jour."),
+        planches: [P2("Quelle heure est-il dans le monde ?", "Quand il est 12 h à Yaoundé (UTC + 1), l'heure légale change d'un pays à l'autre selon son décalage avec Greenwich.",
+          frise("Quand il est 12 h à Yaoundé", [{ a: "New York", l: ["UTC − 5", "6 h"], c: BLEU }, { a: "Dakar", l: ["UTC", "11 h"], c: VERT }, { a: "Yaoundé", l: ["UTC + 1", "12 h"], c: ROUGE }, { a: "Nairobi", l: ["UTC + 3", "14 h"], c: TERRE }, { a: "Pékin", l: ["UTC + 8", "19 h"], c: "#7B3F99" }, { a: "Tokyo", l: ["UTC + 9", "20 h"], c: GRIS }], 230, "Frise des heures légales de New York à Tokyo quand il est 12 h à Yaoundé"))],
+        fil: { html: "<p>Bello trouve la bonne réponse : le Cameroun (UTC + 1) a <strong>6 heures d'avance</strong> sur New York (UTC − 5). Le match commencera à 20 h + 6 h = <strong>2 h du matin</strong>, le lendemain, à Ngaoundéré.</p>", verdicts: [[2, "validee", "(+1) − (−5) = 6 h d'avance : 20 h + 6 h = 2 h du matin le lendemain."]] },
+        retenir: "24 fuseaux de 15° ; UTC = Greenwich ; Cameroun = UTC + 1 ; heure de B = heure de A + (décalage B − décalage A)." },
+      { t: "Entraînement au format de l'examen", html: integ("Un fuseau horaire mesure…", ["15° de longitude", "1° de longitude", "24° de longitude", "90° de longitude"], "15° de longitude", "360° ÷ 24 = 15°.", "Il est 10 h à Yaoundé (UTC + 1). Quelle heure est-il à Tokyo (UTC + 9) ?", "Décalage : 9 − 1 = 8 h d'avance pour Tokyo. 10 h + 8 h = 18 h à Tokyo.", "Ta tante, à Paris (UTC + 1 en hiver), veut appeler ton cousin étudiant à Montréal (UTC − 5) à 21 h, heure de Paris.", "Calcule l'heure qu'il sera à Montréal et dis si c'est un bon moment pour appeler.", "Décalage : (−5) − (+1) = −6 h. 21 h − 6 h = 15 h à Montréal. C'est l'après-midi : le cousin est peut-être en cours, mais l'heure n'est pas gênante ; il vaut mieux lui envoyer un message avant pour convenir d'un moment."), retenir: "Savoir-être : respect du temps des autres et ponctualité." }
+    ],
+    denouement: { titre: "Le réveil est réglé", etapes: ["L'heure change avec la longitude : l'est est en avance (indice 1).", "15° = 1 h, 1° = 4 min (indice 2).", "Cameroun UTC + 1, New York UTC − 5 : 6 h d'écart (indice 3)."],
+      formules: [F("Conversion", "360° = 24 h", "15° = 1 h ; 1° = 4 min"), F("Heure solaire Douala → Maroua", "(14,3 − 9,7) × 4 min", "≈ 18 min d'avance pour Maroua"), F("Heure du match", "20 h + [(+1) − (−5)] h", "20 h + 6 h = 2 h du matin le lendemain")],
+      reponse: "<p>L'heure n'est pas la même partout, car la Terre tourne de 360° en 24 heures, soit 15° par heure et 1° toutes les 4 minutes : les lieux situés à l'est voient le Soleil plus tôt et sont en avance, ceux de l'ouest sont en retard. Pour calculer une heure solaire, on multiplie la différence de longitude par 4 minutes : Maroua a environ 18 minutes d'avance sur Douala. Pour l'heure légale, la Terre est découpée en 24 fuseaux horaires de 15° ; la référence est l'heure UTC de Greenwich. Le Cameroun est à UTC + 1 et New York, en hiver, à UTC − 5 : le Cameroun a 6 heures d'avance. Le match joué à 20 h à New York commencera donc à 2 h du matin, le lendemain, à Ngaoundéré.</p>",
+      transfert: "<p>La finale d'une compétition se joue à Doha (UTC + 3) à 18 h. À quelle heure faut-il l'allumer au Cameroun ? Et à Rio de Janeiro (UTC − 3) ?</p>" },
+    revision: ["L'heure change selon la longitude, à cause de la <strong>rotation</strong>.", "360° = 24 h ; 15° = 1 h ; 1° = 4 min.", "À l'est, on est en avance ; à l'ouest, en retard.", "Différence d'heure = différence de longitude × 4 min.", "24 <strong>fuseaux horaires</strong> de 15° ; référence : UTC (Greenwich).", "Le Cameroun est à UTC + 1."],
+    exo: "<p>Il est 15 h à Yaoundé (UTC + 1). Quelle heure est-il à Dakar (UTC) et à Nairobi (UTC + 3) ? <em>(Dakar : 14 h ; Nairobi : 17 h.)</em></p>",
+    quiz: [q("En 24 heures, la Terre tourne de…", "360°", "180°", "24°", "Un tour complet."), q("En une heure, la Terre tourne de…", "15°", "1°", "60°", "360 ÷ 24."), q("1° de longitude correspond à…", "4 minutes", "1 heure", "15 minutes", "1 440 min ÷ 360."), q("Un lieu situé à l'est est…", "en avance", "en retard", "à la même heure", "Il voit le Soleil plus tôt."), q("L'heure de référence mondiale est celle…", "de Greenwich (UTC)", "de Yaoundé", "de New York", "Méridien 0°."), q("Le Cameroun est à…", "UTC + 1", "UTC − 1", "UTC + 3", "Comme le Nigeria et le Gabon."), q("La Terre compte … fuseaux horaires.", "24", "12", "360", "Un par heure."), q("Il est 12 h à Yaoundé ; à Dakar (UTC), il est…", "11 h", "13 h", "12 h", "Dakar est en retard d'une heure."), q("Différence de longitude de 30° = …", "2 h", "30 min", "30 h", "30 ÷ 15 = 2."), q("Match à 20 h à New York (UTC − 5) : au Cameroun, il est…", "2 h du matin le lendemain", "14 h", "15 h", "20 h + 6 h.")],
+    apc: apc("Une famille veut regarder en direct un match joué à New York sans connaître l'heure au Cameroun.", "Convertir les degrés de longitude en temps, calculer une heure solaire et une heure légale avec les fuseaux horaires.")
+  });
+  VRT_A("6e-geo-tp-calcul-heure", 2, "Calcule l'heure", function (el) {
+    exercice(el, [["45° de différence de longitude = ___.", ["3 h", "45 min", "4 h 30"], "45 ÷ 15 = 3."], ["10° de différence = ___.", ["40 min", "10 min", "1 h"], "10 × 4 min."], ["12 h à Yaoundé (UTC + 1) = ___ à Dakar (UTC).", ["11 h", "13 h", "12 h"], "Dakar est à l'ouest."], ["12 h à Yaoundé = ___ à Nairobi (UTC + 3).", ["14 h", "10 h", "15 h"], "Nairobi est à l'est : + 2 h."], ["8 h à New York (UTC − 5) = ___ au Cameroun.", ["14 h", "2 h", "13 h"], "+ 6 h."], ["Un lieu à l'ouest de Greenwich est ___.", ["en retard", "en avance", "à la même heure"], "Il voit le Soleil plus tard."]], "Calcul suivant", "Calcul");
+  });
+
+  /* ═══════════════ RANG 6 : TP 3, LES FORMES DE REPRÉSENTATION DE LA TERRE ═══════════════ */
+  function projection3D() {
+    var o = [{ f: "sphere", c: [-120, 0, 0], r: 70, coul: "#2E86AB" }];
+    [[-150, 20, -52], [-96, -18, -58], [-120, 44, -50], [-80, 30, -48]].forEach(function (p) { o.push({ f: "sphere", c: p, r: 16, coul: "#5A9A3A" }); });
+    o.push({ f: "cylindre", c: [-120, -90, 0], r: 74, h: 180, n: 24, coul: "#F7C948", op: 0.25 });
+    o.push({ f: "boite", c: [130, 0, 0], d: [200, 120, 6], coul: "#2E86AB" });
+    [[90, 20, -4, 36, 30], [150, -14, -4, 46, 44], [170, 36, -4, 30, 26], [96, -30, -4, 20, 22], [130, 52, -4, 80, 14]].forEach(function (p) { o.push({ f: "boite", c: [p[0], p[1], p[2]], d: [p[3], p[4], 2], coul: "#5A9A3A", div: false }); });
+    return o;
+  }
+  VRT_L("6e-geo-tp-representations-terre", {
+    c: "6e", m: "geo", cle: "TP 3 : Les formes de représentations de la terre", titre: "TP 3 : les formes de représentation de la Terre (globe, planisphère, cartes)", duree: 35,
+    accroche: "Sur le planisphère de la classe, à Ebolowa, le Groenland paraît presque aussi grand que l'Afrique. Pourtant, le globe du professeur montre le contraire. Quelle représentation dit vrai ?",
+    intro: "Un débat devant le planisphère de la classe te sert de fil rouge : à chaque partie, un indice t'aide à trancher entre trois idées sur les représentations de la Terre.",
+    objectifs: ["distinguer le globe, le planisphère et les cartes", "expliquer pourquoi tout planisphère déforme la Terre", "distinguer carte à petite échelle et carte à grande échelle", "comparer des superficies et des distances avec des calculs simples"],
+    enquete: {
+      titre: "Le Groenland est-il aussi grand que l'Afrique ?",
+      svg: svg(640, 220, "Salle de classe à Ebolowa avec un planisphère au mur et un globe sur le bureau", lin("grpC", ["#F5EFE3", "#E9F1F7"], true),
+        "<rect width='640' height='220' fill='url(#grpC)'/><rect y='176' width='640' height='44' fill='#B5834E'/><rect x='300' y='30' width='300' height='140' fill='#5B9BD5' stroke='#6B6B6B' stroke-width='3'/>" +
+        "<path d='M400 40 h70 v32 h-70Z' fill='#E8F0E0' stroke='#17784D'/><path d='M440 90 q30 -6 40 16 q6 34 -18 56 q-22 -20 -30 -44Z' fill='#9AC48A' stroke='#17784D'/>" + txt(435, 60, "Groenland", { s: 10 }) + txt(460, 125, "Afrique", { s: 10 }) +
+        "<rect x='150' y='140' width='110' height='36' fill='#8A5A33'/><circle cx='205' cy='112' r='26' fill='#2E86AB'/><path d='M195 104 q12 -6 18 6 q-4 14 -16 12Z' fill='#5A9A3A'/><rect x='202' y='136' width='6' height='6' fill='#3B4252'/>" +
+        perso(80, 92, "#5A3A1E", "#C62828", "#2E3445") + bulle(20, 16, 260, "Le Groenland est aussi grand ?", "#F7C948")),
+      legende: "Dans une salle de 6e à Ebolowa, le planisphère accroché au mur et le globe posé sur le bureau ne montrent pas les mêmes tailles.",
+      contexte: "<p>Essomba affirme que « le planisphère est juste, puisqu'il est imprimé par des spécialistes : le Groenland est presque aussi grand que l'Afrique ». Nkolo pense que « le globe et le planisphère sont faux tous les deux : on ne peut pas savoir la vraie taille ». Le professeur propose de comparer les représentations et de calculer.</p>",
+      documents: [{ t: "Deux superficies", html: "<p>Afrique : environ 30,3 millions de km². Groenland : environ 2,2 millions de km².</p>" },
+        { t: "Mettre à plat une sphère", html: "<p>Essaie d'aplatir la peau d'une orange sans la déchirer ni l'étirer : c'est impossible. Les cartographes rencontrent le même problème avec la Terre.</p>" }],
+      question: "Quelles sont les formes de représentation de la Terre et laquelle respecte les tailles réelles ?",
+      tache: "Compare le globe, le planisphère et les cartes, explique les déformations, puis calcule le rapport réel entre l'Afrique et le Groenland.",
+      hypotheses: ["Le planisphère est exact : le Groenland est presque aussi grand que l'Afrique.", "Toutes les représentations sont fausses : on ne peut pas connaître la vraie taille.", "Le globe respecte les formes et les surfaces ; le planisphère déforme toujours, surtout près des pôles : l'Afrique est en réalité environ 14 fois plus grande que le Groenland."]
+    },
+    parties: [
+      { t: "Le globe : la représentation la plus fidèle", html: def("Globe terrestre", "Représentation de la Terre sous la forme d'une sphère réduite. Il respecte les formes, les surfaces, les distances et les directions, mais il ne montre qu'une moitié de la Terre à la fois et ne peut pas être très détaillé.") +
+          "<ul><li>Le globe est un modèle réduit de la Terre : sur un globe de 30 cm de diamètre, l'échelle est d'environ 1/42 000 000.</li><li>Avantages : formes et surfaces <strong>exactes</strong>.</li><li>Inconvénients : on ne voit qu'une moitié de la Terre ; il est encombrant ; on ne peut pas y représenter un quartier ou une ville.</li></ul>" +
+          formule("échelle du globe ≈ diamètre du globe ÷ diamètre de la Terre = 30 cm ÷ 1 274 000 000 cm ≈ 1/42 000 000") +
+          ex("Sur ce globe, 1 cm représente 42 000 000 cm, soit 420 km : la distance Douala-Yaoundé (environ 200 km à vol d'oiseau) n'y mesure qu'un demi-centimètre.", "Un globe est peu détaillé") +
+          savais("Le plus ancien globe terrestre conservé, celui de Martin Behaim, date de 1492 : il ne montre pas encore l'Amérique."),
+        planches: [P2("Globe, planisphère, carte", "Chaque représentation a ses avantages et ses limites : on choisit selon ce que l'on veut montrer.",
+          colonnes("Trois façons de représenter la Terre", [{ t: "Globe", c: BLEU, l: ["sphère réduite", "formes exactes", "une moitié visible", "peu détaillé"] }, { t: "Planisphère", c: TERRE, l: ["toute la Terre", "à plat", "déformations", "surtout aux pôles"] }, { t: "Carte", c: VERT, l: ["une partie", "de la Terre", "détaillée", "selon l'échelle"] }], 230, "Trois façons de représenter la Terre"))],
+        fil: { html: "<p>Nkolo se trompe : toutes les représentations ne sont pas fausses. Le <strong>globe</strong> respecte les formes et les surfaces ; il permet de connaître les tailles réelles.</p>", verdicts: [[1, "rejetee", "Le globe respecte les formes et les surfaces : on peut connaître les tailles réelles."]] },
+        retenir: "Globe : sphère réduite, formes et surfaces exactes, mais une moitié visible et peu de détails." },
+      { t: "Le planisphère et ses déformations", html: def("Planisphère", "Carte qui représente toute la surface de la Terre à plat, sur une feuille. On l'obtient par une projection, qui déforme toujours une partie de la Terre.") +
+          "<ul><li>On ne peut pas mettre une sphère à plat sans la <strong>déformer</strong>, comme la peau d'une orange.</li><li>La <strong>projection</strong> la plus connue, celle de Mercator (1569), enroule une feuille en cylindre autour du globe : elle respecte les formes et les directions, utiles aux marins, mais <strong>agrandit énormément</strong> les régions proches des pôles.</li><li>D'autres projections respectent mieux les surfaces (comme celle de Peters), mais déforment les formes.</li></ul>" +
+          formule("rapport des superficies = 30,3 ÷ 2,2 ≈ 14 : l'Afrique est environ 14 fois plus grande que le Groenland") +
+          ex("Sur le planisphère de Mercator, le Groenland, proche du pôle Nord, paraît presque aussi grand que l'Afrique, qui est traversée par l'équateur. En réalité, on pourrait placer environ 14 Groenland dans l'Afrique.", "Le piège du Groenland") +
+          attention("Un planisphère n'est ni « vrai » ni « faux » : il fait un choix. Lis toujours le nom de la projection avant de comparer des surfaces."),
+        planches: [{ type: "3d", titre: "Du globe au planisphère", legende: "Tourne la scène : à gauche, le globe entouré d'un cylindre de papier transparent, comme dans la projection de Mercator ; à droite, le même papier déroulé à plat devient un planisphère rectangulaire. Les continents sont étirés, surtout vers le haut et le bas, près des pôles.", modele: { h: 320, rx: -14, ry: 22, echelle: 0.95, alt: "Globe bleu à taches vertes entouré d'un cylindre jaune transparent, et un rectangle bleu à taches vertes", objets: projection3D(), etiquettes: [{ p: [-120, 74, 0], t: "globe dans un cylindre", cote: "g" }, { p: [130, 62, -4], t: "planisphère (déroulé à plat)", cote: "d" }, { p: [130, 52, -6], t: "régions polaires étirées", cote: "d" }] } }],
+        fil: { html: "<p>Essomba se trompe : le planisphère de Mercator <strong>agrandit</strong> les régions proches des pôles. Le Groenland n'est pas presque aussi grand que l'Afrique : l'Afrique est environ 14 fois plus vaste.</p>", verdicts: [[0, "rejetee", "Le planisphère de Mercator agrandit les régions polaires : l'Afrique est 14 fois plus grande."]] },
+        retenir: "Planisphère = projection à plat ; toujours des déformations ; Mercator agrandit les pôles ; Afrique ≈ 14 × Groenland." },
+      { t: "Les cartes : petite et grande échelle", html: "<ul><li>Une <strong>carte</strong> représente une partie de la Terre : un continent, un pays, une région, une ville.</li><li>Une carte à <strong>petite échelle</strong> (1/10 000 000, par exemple) représente un <strong>grand espace avec peu de détails</strong> : l'Afrique, le Cameroun.</li><li>Une carte à <strong>grande échelle</strong> (1/10 000, par exemple) représente un <strong>petit espace avec beaucoup de détails</strong> : un quartier, une ville.</li></ul>" +
+          def("Petite et grande échelle", "Plus le dénominateur de l'échelle est grand, plus l'échelle est petite : 1/10 000 000 est une petite échelle (grand espace, peu de détails) ; 1/10 000 est une grande échelle (petit espace, beaucoup de détails).") +
+          formule("1/10 000 000 : 1 cm = 100 km ; 1/10 000 : 1 cm = 100 m") +
+          ex("Le Cameroun mesure environ 1 200 km du nord au sud. Sur une carte au 1/10 000 000, il mesure 1 200 ÷ 100 = 12 cm ; au 1/1 000 000, 120 cm : la carte ne tiendrait pas dans un cahier.", "Choisir l'échelle d'une carte") +
+          astuce("« Grande échelle = grands détails. Petite échelle = petits détails. » Le dénominateur et la taille de l'espace vont dans le même sens."),
+        planches: [P2("Petite échelle ou grande échelle ?", "Plus on veut voir de détails, plus l'échelle doit être grande et l'espace représenté petit.",
+          colonnes("Choisir l'échelle", [{ t: "1/10 000 000", c: BLEU, l: ["petite échelle", "1 cm = 100 km", "l'Afrique, le Cameroun"] }, { t: "1/200 000", c: VERT, l: ["échelle moyenne", "1 cm = 2 km", "une région"] }, { t: "1/10 000", c: TERRE, l: ["grande échelle", "1 cm = 100 m", "un quartier, une ville"] }], 210, "Choisir l'échelle"))],
+        fil: { html: "<p>Le professeur conclut : le <strong>globe</strong> donne les vraies proportions ; le <strong>planisphère</strong> montre toute la Terre mais la déforme ; les <strong>cartes</strong> montrent une partie plus ou moins détaillée selon l'échelle. L'Afrique est environ 14 fois plus grande que le Groenland.</p>", verdicts: [[2, "validee", "Globe fidèle, planisphère toujours déformé, cartes selon l'échelle ; Afrique ≈ 14 fois le Groenland."]] },
+        retenir: "Petite échelle : grand espace, peu de détails ; grande échelle : petit espace, beaucoup de détails." },
+      { t: "Entraînement au format de l'examen", html: integ("La représentation qui respecte le mieux les formes et les surfaces de la Terre est…", ["le planisphère de Mercator", "le globe terrestre", "le plan d'une ville", "le croquis"], "Le globe terrestre", "C'est une sphère réduite, comme la Terre.", "Le Cameroun (475 000 km²) et le Nigeria (924 000 km²) : combien de fois le Nigeria est-il plus grand ?", "924 000 ÷ 475 000 ≈ 1,9 : le Nigeria est presque 2 fois plus grand que le Cameroun.", "Ton club de géographie prépare une affiche « Notre continent » et hésite entre un planisphère de Mercator et une projection qui respecte les surfaces.", "Conseille-le en justifiant ton choix.", "Pour montrer la vraie taille de l'Afrique, il faut choisir une projection qui respecte les surfaces (comme celle de Peters) : sur le planisphère de Mercator, les régions proches des pôles, comme l'Europe ou le Groenland, sont agrandies, et l'Afrique paraît plus petite qu'elle n'est. On peut ajouter un encadré : « L'Afrique est environ 14 fois plus grande que le Groenland. »"), retenir: "Savoir-être : esprit critique devant les images et fierté de son continent." }
+    ],
+    denouement: { titre: "Le piège du planisphère déjoué", etapes: ["Le globe respecte les formes et les surfaces (indice 1).", "Le planisphère de Mercator agrandit les pôles : Afrique ≈ 14 × Groenland (indice 2).", "Les cartes changent de détail selon l'échelle (indice 3)."],
+      formules: [F("Rapport des superficies", "30,3 ÷ 2,2", "≈ 14"), F("Échelle d'un globe de 30 cm", "30 ÷ 1 274 000 000", "≈ 1/42 000 000"), F("Cameroun au 1/10 000 000", "1 200 km ÷ 100 km/cm", "12 cm")],
+      reponse: "<p>On représente la Terre de trois façons. Le globe terrestre est une sphère réduite : il respecte les formes et les surfaces, mais ne montre qu'une moitié de la Terre et peu de détails. Le planisphère montre toute la Terre à plat, grâce à une projection ; comme on ne peut pas aplatir une sphère sans la déformer, il déforme toujours une partie de la Terre : la projection de Mercator agrandit les régions proches des pôles. C'est pourquoi le Groenland y paraît presque aussi grand que l'Afrique, alors que l'Afrique (30,3 millions de km²) est environ 30,3 ÷ 2,2 ≈ 14 fois plus grande. Enfin, les cartes représentent une partie de la Terre : à petite échelle, un grand espace avec peu de détails ; à grande échelle, un petit espace avec beaucoup de détails.</p>",
+      transfert: "<p>Compare sur un globe et sur un planisphère la taille de l'Europe et celle de l'Afrique. Que remarques-tu ? Explique la différence.</p>" },
+    revision: ["<strong>Globe</strong> : sphère réduite ; formes et surfaces exactes.", "<strong>Planisphère</strong> : toute la Terre à plat, grâce à une projection.", "Toute projection déforme ; Mercator agrandit les régions polaires.", "L'Afrique est environ 14 fois plus grande que le Groenland.", "<strong>Carte</strong> : une partie de la Terre.", "Petite échelle (1/10 000 000) : grand espace, peu de détails ; grande échelle (1/10 000) : petit espace, beaucoup de détails."],
+    exo: "<p>L'Afrique mesure environ 30,3 millions de km² et l'Europe environ 10,2 millions de km². Combien de fois l'Afrique est-elle plus grande ? <em>(30,3 ÷ 10,2 ≈ 3 fois.)</em></p>",
+    quiz: [q("Le globe terrestre est…", "une sphère réduite représentant la Terre", "une carte plate", "un plan de ville", "Comme une petite Terre."), q("Le globe respecte…", "les formes et les surfaces", "seulement les noms", "rien", "C'est la représentation la plus fidèle."), q("Le planisphère représente…", "toute la Terre à plat", "une seule ville", "une moitié de la Terre", "Sur une feuille."), q("Une projection sert à…", "mettre la sphère terrestre à plat", "colorier une carte", "mesurer l'heure", "Elle déforme toujours."), q("La projection de Mercator agrandit…", "les régions proches des pôles", "l'Afrique", "l'équateur", "Le Groenland paraît énorme."), q("L'Afrique est environ … fois plus grande que le Groenland.", "14", "2", "1", "30,3 ÷ 2,2."), q("Une carte au 1/10 000 000 est à…", "petite échelle", "grande échelle", "échelle réelle", "Grand espace, peu de détails."), q("Pour représenter un quartier, on choisit une…", "grande échelle", "petite échelle", "projection de Mercator", "Beaucoup de détails."), q("Au 1/10 000 000, 1 cm représente…", "100 km", "10 km", "1 000 km", "10 000 000 cm = 100 km."), q("Le plus ancien globe conservé date de…", "1492", "1950", "300 av. J.-C.", "Globe de Martin Behaim.")],
+    apc: apc("Des élèves croient, en regardant le planisphère de la classe, que le Groenland est presque aussi grand que l'Afrique.", "Comparer globe, planisphère et cartes, expliquer les déformations et calculer le rapport réel des superficies.")
+  });
+  VRT_A("6e-geo-tp-representations-terre", 2, "Globe, planisphère ou carte ?", function (el) {
+    exercice(el, [["Pour voir toute la Terre d'un coup d'œil, on utilise ___.", ["un planisphère", "un globe", "un plan"], "Toute la Terre à plat."], ["Pour connaître les vraies formes des continents, on utilise ___.", ["un globe", "un planisphère de Mercator", "un croquis"], "Il ne déforme pas."], ["Pour trouver une rue de Douala, on utilise ___.", ["un plan à grande échelle", "un planisphère", "un globe"], "Beaucoup de détails."], ["30,3 ÷ 2,2 ≈ ___.", ["14", "3", "28"], "Afrique / Groenland."], ["1/10 000 000 est une ___ échelle.", ["petite", "grande", "moyenne"], "Grand dénominateur."], ["Au 1/10 000 000, 12 cm représentent ___.", ["1 200 km", "120 km", "12 km"], "12 × 100 km."]], "Question suivante", "Question");
   });
 })();
 

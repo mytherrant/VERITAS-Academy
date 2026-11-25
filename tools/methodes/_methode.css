@@ -250,3 +250,20 @@ ul.mx-check li::before{border-color:var(--vm-mag)}
 #mx .card.mx ol:not([class])>li{margin:0 0 5px!important;padding-left:2px}
 #mx .card.mx ol:not([class])>li::marker{color:#1E499B;font-weight:700}
 #mx .card.mx .partie{margin-top:36px}
+
+/* 24/11/2026 « synchronise les styles avec les leçons » (apprendre/lecon-modele.css) :
+   texte 15,5 px, interligne 1,5 ; Astuce et Piège deviennent des NOTES COLLÉES
+   (jaune pour l'astuce, rose pour l'attention), ruban adhésif en haut, légère inclinaison,
+   icône dans le titre — sans rail pointillé. Définition et Exemple gardent leur
+   illustration d'origine (livre ouvert, bloc-notes) et le petit rail. */
+#mx .card.mx p,#mx .card.mx li,#mx .card.mx ul:not([class])>li{font-size:15.5px!important;line-height:1.5!important}
+#mx .card.mx .mx-astuce,#mx .card.mx .mx-piege{position:relative;max-width:640px;box-sizing:border-box;margin:34px auto 26px!important;padding:22px 18px 14px!important;border:0;border-radius:2px 2px 16px 2px;background:linear-gradient(#FFF7B8,#FFF1A0);box-shadow:0 10px 16px -10px rgba(80,60,0,.5);transform:rotate(-1.1deg);color:#3B3520}
+#mx .card.mx .mx-piege{background:linear-gradient(#FFE2EF,#FFD3E6);transform:rotate(.9deg);color:#4A2235;box-shadow:0 10px 16px -10px rgba(90,20,50,.45)}
+#mx .card.mx .mx-astuce::before,#mx .card.mx .mx-piege::before{content:""!important;position:absolute!important;top:-10px!important;left:50%!important;width:84px!important;height:20px!important;margin-left:-42px;background:rgba(255,255,255,.7)!important;border:1px solid rgba(0,0,0,.06);filter:none!important;transform:rotate(-3deg)}
+#mx .card.mx .mx-astuce::after,#mx .card.mx .mx-piege::after{content:none!important;display:none!important}
+#mx .card.mx .mx-astuce>strong:first-child,#mx .card.mx .mx-piege>strong:first-child{display:block!important;min-height:26px;padding-left:34px;margin:0 0 6px!important;font:800 18px/26px var(--sans)!important;color:inherit!important;background:var(--ill) 0 50%/26px no-repeat}
+#mx .card.mx .mx-astuce,#mx .card.mx .mx-astuce p,#mx .card.mx .mx-astuce li,#mx .card.mx .mx-piege,#mx .card.mx .mx-piege p,#mx .card.mx .mx-piege li{font-weight:500;font-family:var(--sans)}
+#mx .card.mx .mx-piege ul:not([class])>li::before{left:2px!important}
+@media (max-width:560px){#mx .card.mx .mx-astuce,#mx .card.mx .mx-piege{padding:20px 14px 12px!important;transform:none}}
+@media (prefers-reduced-motion:reduce){#mx .card.mx .mx-astuce,#mx .card.mx .mx-piege{transform:none}}
+@media print{#mx .card.mx .mx-astuce,#mx .card.mx .mx-piege{transform:none;box-shadow:none;border:1px solid #ddd}}
