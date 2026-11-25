@@ -1,5 +1,5 @@
 /* Fichier GÉNÉRÉ par tools/build_apprendre_payant.cjs. Charge les leçons de la classe affichée. */
-(function(){var D={"1re A":"087d1df1","1re C":"481e9e26","1re D":"d0599a26","3e":"533a0d08","Tle A":"edb7ce50","Tle C":"aa064cc5","Tle D":"054822ed"},q=new URLSearchParams(location.search),c=q.get("c"),i=q.get("id")||"",m=/^(3e|1re-[acd]|tle-[acd])-/.exec(i);
+(function(){var D={"1re A":"087d1df1","1re C":"ec545995","1re D":"f930acde","3e":"24eb99c9","Tle A":"edb7ce50","Tle C":"aa064cc5","Tle D":"054822ed"},q=new URLSearchParams(location.search),c=q.get("c"),i=q.get("id")||"",m=/^(3e|1re-[acd]|tle-[acd])-/.exec(i);
 if(m&&!c){c=m[1].replace(/^(1re|tle)-(.)/,function(x,a,b){return (a==="tle"?"Tle":"1re")+" "+b.toUpperCase()})}
 if(!c){try{c=JSON.parse(localStorage.getItem("vrt_app_classe")||"null")}catch(e){}}
 if(!c&&!i)c="3e";
