@@ -1171,8 +1171,9 @@
     /* forme et style : imposés par la carte, sinon tirés du titre (stables d'une génération à l'autre et variés d'une carte à l'autre) */
     var hh = hache(C.join(" ")), pal = PALETTES[Math.floor(hh / 13) % PALETTES.length];
     if (!carte.garderCouleurs) B.forEach(function (b, i) { b.color = pal[i % pal.length]; });
-    var forme = carte.forme || FORMES[hh % FORMES.length];
-    if (!carte.forme && forme === "radiale") forme = NOUVELLES[Math.floor(hh / 8) % NOUVELLES.length];
+    /* « adopte aussi les nouveaux styles » (24/11/2026) : une carte sans rang (schéma converti, carte libre) tire sa forme
+       parmi TOUTES les formes, plus seulement les 8 d'origine. */
+    var forme = carte.forme || TOUTES[hh % TOUTES.length];
     /* « la diversité continue » (24/11/2026) : une carte qui donne son rang dans une suite (leçons d'une classe et
        d'une matière) tourne sur TOUTES les formes : deux cartes voisines n'ont jamais la même. */
     if (!carte.forme && carte.rang != null && isFinite(carte.rang)) forme = TOUTES[(hache(carte.serie || "") + Math.round(carte.rang)) % TOUTES.length];
