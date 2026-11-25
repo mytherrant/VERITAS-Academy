@@ -1,3 +1,17 @@
+## Apprendre : lot 13 d'anglais de 1re (A, C, D) à verrou — grammaire (25/11/2026, branche apprendre-anglais-1re-lot13)
+
+Demande de Jacques : « oui fusionne et continue les autres leçons ». Anglais de 3e terminé (lots 8 à 12 fusionnés). Recensement de l'anglais de 1re et de Tle (rang + `cle`) : 11 lignes couvertes en 1re, 15 en Tle ; aucune PR ouverte sur l'anglais.
+
+- 6 leçons de grammaire NOUVELLES à verrou, chacune posée en 1re A, 1re C et 1re D (même rang dans les trois progressions), soit 18 JSON hors dépôt :
+  - rang 21 `1re-x-anglais-so-neither` (So do I / Neither did I / too / either) ;
+  - rang 23 `1re-x-anglais-partitives` (a bag of rice, a piece of advice, loaves) ;
+  - rang 36 `1re-x-anglais-compound-nouns` (mosquito nets, mothers-in-law, a ten-day campaign) ;
+  - rang 41 `1re-x-anglais-conjunctions` (although / despite / however / since / for) ;
+  - rang 44 `1re-x-anglais-each-other` (each, every, each of, each other, one another) ;
+  - rang 47 `1re-x-anglais-negative-adverbs` (hardly, seldom, never ; inversion ; hardly… when).
+- Contrôles : build officiel sur copie (18 à verrou), bancs verrou et gabarits verts, `build_llms.py --controle`, 15 contrôles GEO ; Chromium 390/1200 px visiteur et abonné sans erreur ; 3D contrôlées.
+- Suite prévue : anglais de 1re (compétences et grammaire restante : 54, 57, 59…), puis anglais de Tle.
+
 ## Apprendre : lot 12 d'anglais de 3e à verrou — l'anglais de 3e est couvert (25/11/2026, branche apprendre-anglais-3e-lot12, PR #445)
 
 Demande de Jacques : « continue ». Dernières lignes d'anglais de 3e sans leçon (rang + `cle`, master + #430/#436/#438/#440).
