@@ -308,6 +308,20 @@
   "u": "/ressources/annales/probatoire-mathematiques-aabi-2024.html"
  },
  {
+  "id": "bac-mathematiques-ce-2026",
+  "examen": "bac",
+  "m": "mathematiques",
+  "serie": "séries C et E",
+  "nomExamen": "Baccalauréat",
+  "fiche": "ressources/examen-mathematiques-bac.html",
+  "matiere": "Mathématiques (séries C et E)",
+  "mat": "maths",
+  "classes": "Tle C",
+  "annee": 2026,
+  "national": false,
+  "u": "/ressources/annales/bac-mathematiques-ce-2026.html"
+ },
+ {
   "id": "bac-mathematiques-ce-2025",
   "examen": "bac",
   "m": "mathematiques",
@@ -378,6 +392,20 @@
   "u": "/ressources/annales/probatoire-mathematiques-d-2024.html"
  },
  {
+  "id": "bac-mathematiques-dti-2026",
+  "examen": "bac",
+  "m": "mathematiques",
+  "serie": "séries D et TI",
+  "nomExamen": "Baccalauréat",
+  "fiche": "ressources/examen-mathematiques-bac.html",
+  "matiere": "Mathématiques (séries D et TI)",
+  "mat": "maths",
+  "classes": "Tle D",
+  "annee": 2026,
+  "national": false,
+  "u": "/ressources/annales/bac-mathematiques-dti-2026.html"
+ },
+ {
   "id": "bac-mathematiques-dti-2025",
   "examen": "bac",
   "m": "mathematiques",
@@ -446,6 +474,20 @@
   "annee": 2023,
   "national": false,
   "u": "/ressources/annales/bepc-pct-2023.html"
+ },
+ {
+  "id": "bac-physique-c-2026",
+  "examen": "bac",
+  "m": "physique",
+  "serie": "série C",
+  "nomExamen": "Baccalauréat",
+  "fiche": "ressources/examen-physique-chimie-bac.html",
+  "matiere": "Physique (série C)",
+  "mat": "physique",
+  "classes": "Tle C",
+  "annee": 2026,
+  "national": false,
+  "u": "/ressources/annales/bac-physique-c-2026.html"
  },
  {
   "id": "bac-physique-c-2025",
