@@ -1,3 +1,10 @@
+## Apprendre : géographie de 6e, lot 1 gratuit (25/11/2026, branche geo-6e-lot1)
+
+Demande de Jacques : « continue l'enrichissement des leçons ». Aucune leçon de géographie de 6e n'existait (vérifié sur master et dans les PR ouvertes).
+
+- Fichier `apprendre/_src/43-geo-6e.js`, 3 leçons GRATUITES : rang 1 `6e-geo-la-geographie` (plan d'un quartier de Yaoundé, échelle), rang 2 `6e-geo-notre-planete-terre` (Garoua, rondeur, circonférence 2πR, 71 % de mers), rang 3 `6e-geo-tp-localiser-lieu` (jeu radio, latitude/longitude, 1° ≈ 111 km).
+- Suite prévue : rangs 4 à 6 (mouvements de la Terre, TP calcul de l'heure, représentations de la Terre).
+
 ## Apprendre : lot 11 d'anglais de 3e à verrou (25/11/2026, branche apprendre-anglais-3e-lot11)
 
 Demande de Jacques : « continue les autres leçons en évitant les doublons ». Suite des leçons de compétences d'anglais de 3e (modules 1, 4 et 5), sans recouvrement avec master ni avec #430/#436/#438 (rang + `cle` vérifiés).
