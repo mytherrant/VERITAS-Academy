@@ -1,3 +1,9 @@
+## Apprendre : cultures nationales de 3e, lot 1 à verrou — EN COURS (25/11/2026, branche apprendre-cultures-3e-lot1)
+
+Annonce pour éviter les doublons : cette session prend les **cultures nationales** (3e, puis 1re A et Tle A), puis les **arts** et l'**EPS** des classes d'examen, et la **Citizenship Education** de 3e (rangs 1, 5, 22 à 24). Recensement sur master (rang + `cle`, leçons gratuites `lecons.js` comprises) : histoire, géographie et ECM des classes d'examen sont déjà couvertes à 100 % ; l'orientation de 3e est traitée par une autre session (lots 1 à 3), je n'y touche pas.
+
+- Lot 1 prévu (6 leçons, `m: "cultures"`) : rangs 1 (symbolique des mets), 2 (interdits alimentaires), 3 (mariage), 5 (funérailles : activités et intervenants), 6 (rites et rituels funéraires), 7 (jeux traditionnels).
+
 ## Apprendre : géographie de 6e, lot 2 gratuit (25/11/2026, branche geo-6e-lot2)
 
 Suite du lot 1 (#446). Fichier `apprendre/_src/44-geo-6e-2.js`, 3 leçons GRATUITES : rang 4 `6e-geo-terre-mouvement` (rotation, révolution, année bissextile), rang 5 `6e-geo-tp-calcul-heure` (15° = 1 h, 1° = 4 min, fuseaux, Cameroun UTC + 1), rang 6 `6e-geo-tp-representations-terre` (globe, planisphère, Mercator, Afrique ≈ 14 × Groenland, échelles). Suite prévue : rangs 7 à 12 (environnement, milieux bioclimatiques du Cameroun…).
