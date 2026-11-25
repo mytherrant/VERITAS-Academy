@@ -392,6 +392,20 @@
   "u": "/ressources/annales/probatoire-mathematiques-d-2024.html"
  },
  {
+  "id": "bac-mathematiques-dti-2026",
+  "examen": "bac",
+  "m": "mathematiques",
+  "serie": "séries D et TI",
+  "nomExamen": "Baccalauréat",
+  "fiche": "ressources/examen-mathematiques-bac.html",
+  "matiere": "Mathématiques (séries D et TI)",
+  "mat": "maths",
+  "classes": "Tle D",
+  "annee": 2026,
+  "national": false,
+  "u": "/ressources/annales/bac-mathematiques-dti-2026.html"
+ },
+ {
   "id": "bac-mathematiques-dti-2025",
   "examen": "bac",
   "m": "mathematiques",

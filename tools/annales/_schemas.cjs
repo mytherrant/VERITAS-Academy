@@ -1406,4 +1406,32 @@ S["proba-2026-svt-c-lames"] = () => {
   return svg(680, 232, g, "Document 3 : lames minces. Figure A : quelques grands cristaux d'olivine et de petites baguettes de feldspath (microlites) dispersés dans une pâte amorphe. Figure B : grands cristaux jointifs d'olivine, de feldspath et de pyroxène, sans pâte.");
 };
 // <<< proba-2026-svt-c
+// BAC 2026 maths D-TI, partie B : graphe des trajets (km) entre l'agence A, les carrefours B à F et la gendarmerie G.
+S["bac-2026-maths-dti-graphe"] = () => {
+  const N = { A: [40, 110], C: [140, 40], D: [270, 110], B: [140, 180], F: [390, 40], E: [390, 180], G: [480, 110] };
+  const A = [["A","C",6],["C","F",7],["C","D",4],["A","D",8],["A","B",11],["B","D",7],["B","E",2],["D","F",5],["D","E",6],["F","G",7],["E","G",6]];
+  const fs = ' font-size="13" font-weight="700"';
+  let g = "";
+  for (const [a, b, w] of A) { const p = N[a], q = N[b], m = [(p[0] + q[0]) / 2, (p[1] + q[1]) / 2], dx = q[1] - p[1], dy = p[0] - q[0], k = 9 / Math.hypot(dx, dy);
+    g += L(p, q, ' stroke-width="1.8"') + T([m[0] + dx * k - 4, m[1] + dy * k + 5], String(w), ' font-size="12"'); }
+  for (const k in N) g += '<circle cx="' + N[k][0] + '" cy="' + N[k][1] + '" r="6" fill="currentColor" stroke="none"/>';
+  g += T([N.A[0] - 22, N.A[1] + 5], "A", fs) + T([N.C[0] - 4, N.C[1] - 12], "C", fs) + T([N.F[0] - 4, N.F[1] - 12], "F", fs) + T([N.D[0] - 4, N.D[1] - 12], "D", fs) + T([N.B[0] - 4, N.B[1] + 24], "B", fs) + T([N.E[0] - 4, N.E[1] + 24], "E", fs) + T([N.G[0] + 12, N.G[1] + 5], "G", fs);
+  return svg(510, 214, g, "Graphe des trajets en km : A–C 6, A–D 8, A–B 11, C–F 7, C–D 4, B–D 7, B–E 2, D–F 5, D–E 6, F–G 7, E–G 6.");
+};
+// Corrigé BAC 2026 maths D-TI, exercice 1 : cercle (C) de centre A(1 ; −1) et de rayon √5, passant par B(2 ; −3).
+S["bac-2026-maths-dti-cercle"] = () => {
+  const R = repere(40, -2.2, 4.2, -4.2, 1.8), { X, Y } = R, r = Math.sqrt(5);
+  let g = R.g + '<circle cx="' + f(X(1)) + '" cy="' + f(Y(-1)) + '" r="' + f(r * 40) + '" stroke-width="2.2"/>';
+  g += L([X(1), Y(-1)], [X(2), Y(-3)], ' stroke-width="1" stroke-dasharray="4 3"');
+  g += point(X, Y, 1, -1, "A", 6, -6) + point(X, Y, 2, -3, "B", 7, 4) + T([X(-1.9), Y(1.1)], "(C)", ' font-size="13" font-style="italic"');
+  return svg(R.W, R.H, g, "Cercle (C) de centre A(1 ; −1) et de rayon √5 ; il passe par le point B(2 ; −3).");
+};
+// Corrigé BAC 2026 maths D-TI, exercice 3 : courbe de f(x) = (x + 2)e^(−x/2) sur ]−∞ ; 0].
+S["bac-2026-maths-dti-courbe"] = () => {
+  const R = repere(38, -5.3, 1.4, -6.2, 2.8), { X, Y } = R;
+  const p = []; for (let x = -5.3; x <= 0.0001; x += 0.02) { const y = (x + 2) * Math.exp(-x / 2); if (y >= -6.2) p.push([X(x), Y(y)]); }
+  let g = R.g + P(p, ' stroke-width="2.2"') + L([X(-0.6), Y(2)], [X(0.6), Y(2)], ' stroke-width="1"');
+  g += point(X, Y, 0, 2, "", 0, 0) + point(X, Y, -2, 0, "", 0, 0) + T([X(-4.6), Y(-4.6)], "(C", ' font-size="13" font-style="italic"') + T([X(-4.6) + 18, Y(-4.6) + 4], "f", ' font-size="10" font-style="italic"') + T([X(-4.6) + 24, Y(-4.6)], ")", ' font-size="13" font-style="italic"');
+  return svg(R.W, R.H, g, "Courbe de f sur ]−∞ ; 0] : elle monte depuis −∞, coupe l'axe des abscisses en x = −2 et atteint son maximum 2 en x = 0, où la tangente est horizontale.");
+};
 module.exports = S;
