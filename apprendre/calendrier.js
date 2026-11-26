@@ -266,6 +266,378 @@
     if (cv) classeVirtuelle(cv, c);
   }
 
+  /* ---------- 4. LA SEMAINE DE LA PROGRESSION (26/11/2026) ----------
+     « L'apprenant voit ce qu'il va apprendre cette semaine, selon la
+     progression et la matière » (Jacques, sur le modèle d'une plateforme
+     d'établissement qui préremplit le cahier de textes d'après la progression).
+
+     Les fiches MINESEC (VRT_PROG) donnent le RANG des leçons, jamais leur
+     semaine. On la calcule donc, de façon déterministe :
+       · les semaines de cours sont celles des séquences 1 à 5 (la 6ᵉ porte les
+         compositions de fin d'année), vacances de Noël et de Pâques retirées ;
+       · la dernière semaine de chaque séquence est la semaine d'évaluation ;
+       · il reste 25 semaines de cours (5 par séquence) : les leçons de chaque
+         progression y sont réparties dans l'ordre, à parts égales.
+     Un écart réglable par l'admin (cfg.calendrier.decalage, en semaines) décale
+     tout le plan si les classes sont en avance ou en retard sur ce rythme.
+     C'est une ESTIMATION, et l'écran le dit : la semaine réelle d'une classe
+     dépend de son professeur. */
+  var JOUR = 86400000;
+  /* Lundis des semaines entièrement chômées (cf. echeances()). */
+  var VACANCES = [["Vacances de Noël", d("2026-12-21"), d("2027-01-04")], ["Vacances de Pâques", d("2027-03-29"), d("2027-04-12")]];
+  var NB_COURS = 0;
+  var SEMAINES = (function () {
+    var L = [];
+    TRIMESTRES.forEach(function (T) {
+      T.seq.forEach(function (s) {
+        if (s[0] > 5) return;
+        var fin = d(s[2], "23:59").getTime(), propres = [];
+        for (var t = d(s[1]).getTime(); t <= fin; t += 7 * JOUR) {
+          var de = new Date(t), v = VACANCES.filter(function (x) { return de >= x[1] && de < x[2]; })[0];
+          var w = { de: de, a: new Date(t + 5 * JOUR), seq: s[0], type: v ? "vac" : "cours", vac: v ? v[0] : "" };
+          L.push(w); if (!v) propres.push(w);
+        }
+        propres[propres.length - 1].type = "eval";
+        propres.forEach(function (w, i) { w.rang = i + 1; w.sur = propres.length - 1; if (w.type === "cours") w.k = NB_COURS++; });
+      });
+    });
+    return L;
+  })();
+  var DECALAGE = Math.round(Number(CC.decalage) || 0);
+
+  /* La semaine de `now` (heure du Cameroun), ou ce qui l'entoure. */
+  function semaineDe(now) {
+    now = now || new Date();
+    if (now < SEMAINES[0].de) return { etat: "avant", w: SEMAINES[0] };
+    for (var i = 0; i < SEMAINES.length; i++) {
+      var w = SEMAINES[i];
+      if (now >= w.de && now < new Date(w.de.getTime() + 7 * JOUR)) return { etat: w.type, w: w, i: i };
+    }
+    return { etat: "apres", w: SEMAINES[SEMAINES.length - 1] };
+  }
+  /* Première semaine de cours à partir de l'indice i (pour les vacances). */
+  function prochainCours(i) { for (var j = i; j < SEMAINES.length; j++) if (SEMAINES[j].type === "cours") return SEMAINES[j]; return null; }
+
+  /* Index des leçons rédigées : classe|matière|rang → identifiants. */
+  var REDIGEES = null;
+  function redigee(c, m, L) {
+    if (!REDIGEES) {
+      REDIGEES = {};
+      var LE = W.VRT_LECONS || {};
+      Object.keys(LE).forEach(function (k) { var x = LE[k]; if (x && x.n) (REDIGEES[x.c + "|" + x.m + "|" + x.n] = REDIGEES[x.c + "|" + x.m + "|" + x.n] || []).push(k); });
+    }
+    var ids = REDIGEES[c + "|" + m + "|" + L.n] || [];
+    if (ids.length > 1) {   // PCT, SVT… : deux progressions, deux rangs 1 ; on départage par l'intitulé
+      var LE2 = W.VRT_LECONS, juste = ids.filter(function (k) { return LE2[k].officiel === L.o; });
+      if (juste.length) return juste[0];
+    }
+    return ids[0] || "";
+  }
+
+  /* Plan d'une matière : un tableau de NB_COURS semaines, chacune portant ses leçons. */
+  var PLANS = {};
+  function plan(c, m) {
+    var cle = c + "|" + m;
+    if (PLANS[cle]) return PLANS[cle];
+    var M = A && A.PAR_ID[m], P = (W.VRT_PROG || {})[c] || {}, sem = [];
+    for (var i = 0; i < NB_COURS; i++) sem.push([]);
+    if (M) M.minesec.forEach(function (s) {
+      var lst = [];
+      (P[s] || []).forEach(function (ch) { ch[1].forEach(function (l) { var t = A.titreL(l[1]); if (t) lst.push({ n: l[0], t: t, o: l[1], chap: ch[0] }); }); });
+      lst.forEach(function (L, j) {
+        L.k = Math.min(NB_COURS - 1, Math.max(0, Math.floor(j * NB_COURS / lst.length) + DECALAGE));
+        L.id = redigee(c, m, L);
+        sem[L.k].push(L);
+      });
+    });
+    return (PLANS[cle] = sem);
+  }
+
+  /* Rang (k) de la première semaine de cours qui n'est pas encore passée. */
+  function kCourant(now) {
+    var s = semaineDe(now);
+    if (s.etat === "avant") return 0;
+    if (s.etat === "apres") return NB_COURS;
+    if (s.etat === "cours") return s.w.k;
+    var p = prochainCours(s.i); return p ? p.k : NB_COURS;
+  }
+  /* « Où j'en suis » : les leçons RÉDIGÉES des semaines passées, lues ou non. */
+  /* Le retard ne porte que sur les 3 dernières semaines, et seulement dans une
+     matière que l'élève a commencée : un nouveau venu lisait « 183 leçons à
+     rattraper » en 3ᵉ, de quoi décourager au lieu d'entraîner. */
+  var FENETRE = 3;
+  function bilan(c, m, now) {
+    var P = plan(c, m), k = kCourant(now), lus = A ? A.lire("lus", {}) : {}, dues = [], enRetard = [];
+    var commence = P.some(function (w) { return w.some(function (L) { return L.id && lus[L.id]; }); });
+    for (var i = 0; i < Math.min(k, NB_COURS); i++) P[i].forEach(function (L) {
+      if (!L.id) return;
+      dues.push(L);
+      if (commence && i >= k - FENETRE && !lus[L.id]) enRetard.push(L);
+    });
+    return { dues: dues, retard: enRetard, cette: k < NB_COURS ? P[k] : [], commence: commence };
+  }
+
+  /* Astuces vraies et générales — méthode de travail et technique d'épreuve.
+     Aucune statistique, aucun chiffre de réussite : la règle du produit. */
+  var ASTUCES = [
+    "Lis la leçon la veille du cours : en classe, tu comprends au lieu de découvrir.",
+    "Refais le quiz deux jours après la leçon : ce que tu retrouves sans aide, tu le garderas.",
+    "Après une leçon, écris en trois lignes ce que tu as retenu, sans regarder. Ce qui manque, relis-le.",
+    "Un exercice corrigé refait seul vaut mieux que trois corrigés simplement lus.",
+    "Travaille 25 minutes, fais 5 minutes de pause : ta concentration tient mieux que sur deux heures d'affilée.",
+    "Note tes erreurs dans un carnet : c'est ta meilleure liste de révision avant l'évaluation.",
+    "Explique la leçon à quelqu'un : là où tu bloques, c'est le point à revoir.",
+    "Le jour de l'épreuve, lis tout le sujet avant d'écrire, puis commence par ce que tu maîtrises le mieux.",
+    "Garde dix minutes à la fin de chaque épreuve pour te relire : accords, unités, signes.",
+    "Entraîne-toi sur des sujets des années passées, chronomètre en main, dans la durée réelle de l'épreuve.",
+    "Dissertation, commentaire : prépare l'introduction et la conclusion au brouillon avant de rédiger.",
+    "En maths et en sciences, encadre tes résultats et écris toujours l'unité.",
+    "Une copie aérée se corrige mieux : saute une ligne entre les parties, numérote les questions."
+  ];
+  var MOTIVE = {
+    cours: ["Une leçon par jour, et ta semaine est bouclée avant samedi.", "Ce que tu lis cette semaine, ton professeur l'expliquera : tu auras une longueur d'avance.", "Petit pas chaque jour, grande avance à l'évaluation."],
+    eval: ["Semaine d'évaluation : c'est maintenant que tes révisions paient.", "Relis tes fiches, refais les quiz ratés, et dors bien la veille."],
+    vac: ["Les vacances, c'est aussi le moment de rattraper sans pression.", "Repose-toi, puis jette un œil à ce qui t'attend à la reprise."],
+    avant: ["Prends de l'avance : découvre les premières leçons de l'année."],
+    apres: ["Le programme est bouclé : place aux révisions et aux sujets d'examen."]
+  };
+  function tirage(liste, graine) { var h = 0; for (var i = 0; i < graine.length; i++) h = (h * 31 + graine.charCodeAt(i)) >>> 0; return liste[h % liste.length]; }
+  function courtD(t) { var x = new Date(t.getTime() + 3600000); return x.getUTCDate() + (x.getUTCDate() === 1 ? "ᵉʳ" : "") + " " + MOIS[x.getUTCMonth()]; }
+
+  /* ---------- 5. « MA SEMAINE » (accueil d'Apprendre) ---------- */
+  function maSemaine(el, c) {
+    if (!el || !A || !NB_COURS) return;
+    var now = new Date(), s = semaineDe(now), lus = A.lire("lus", {}), qz = A.lire("quiz", {}), LE = W.VRT_LECONS || {};
+    var ex = examen(c), k = kCourant(now);
+    /* Les matières de la classe qui ont une progression. */
+    var mats = mesMatieres(c);
+    if (!mats.length) { el.hidden = true; return; }
+    var titre, sous;
+    if (s.etat === "cours") { titre = "Cette semaine"; sous = "Du " + courtD(s.w.de) + " au " + courtD(s.w.a) + " · séquence " + s.w.seq + " · semaine " + s.w.rang + " sur " + s.w.sur; }
+    else if (s.etat === "eval") { titre = "Semaine d'évaluation"; sous = "Du " + courtD(s.w.de) + " au " + courtD(s.w.a) + " · fin de la séquence " + s.w.seq + " : on révise"; }
+    else if (s.etat === "vac") { var r = prochainCours(s.i); titre = s.w.vac; sous = r ? "Reprise le lundi " + courtD(r.de) + " : voici ce qui t'attend" : ""; }
+    else if (s.etat === "avant") { titre = "La rentrée approche"; sous = "Rentrée le lundi " + courtD(SEMAINES[0].de) + " : voici les premières leçons"; }
+    else { titre = "Programme de l'année bouclé"; sous = "Place aux révisions et aux sujets d'examen"; }
+
+    var lignes = [], nbSem = 0, nbLues = 0, nbRetard = 0, verrous = 0;
+    mats.forEach(function (m) {
+      var b = bilan(c, m.id, now); nbRetard += b.retard.length;
+      var st = 'style="--c:' + m.t[0] + ';--cp:' + m.t[1] + '"', base = "matiere.html?c=" + encodeURIComponent(c) + "&m=" + m.id;
+      if (s.etat === "eval" || s.etat === "apres") {
+        /* Révision : les leçons rédigées de la séquence qui se termine (ou de toute l'année). */
+        var de = s.etat === "apres" ? 0 : NB_COURS, a = 0;
+        if (s.etat === "eval") SEMAINES.forEach(function (w) { if (w.seq === s.w.seq && w.type === "cours") { de = Math.min(de, w.k); a = Math.max(a, w.k + 1); } });
+        else a = NB_COURS;
+        var red = []; plan(c, m.id).slice(de, a).forEach(function (x) { x.forEach(function (L) { if (L.id) red.push(L); }); });
+        if (!red.length) return;
+        var lu = red.filter(function (L) { return lus[L.id]; }).length, ratee = red.filter(function (L) { var q = qz[L.id]; return q && q[0] < Math.ceil(q[1] * .6); })[0];
+        var cible = ratee || red.filter(function (L) { return !lus[L.id]; })[0] || red[0];
+        lignes.push('<a class="ms-l" ' + st + ' href="lecon.html?id=' + cible.id + '"><span class="ms-m">' + A.icoM(m, 26) + '</span><span class="ms-x"><small>' + esc(m.nom) + '</small><b>' +
+          (ratee ? 'Refais le quiz : ' + esc(ratee.t) : lu < red.length ? 'À revoir : ' + esc(cible.t) : 'Tout est lu : refais un quiz') + '</b><em>' + red.length + ' leçon' + (red.length > 1 ? 's' : '') + ' à réviser · ' + lu + ' lue' + (lu > 1 ? 's' : '') + '</em></span><span class="ms-e' + (lu === red.length ? ' ok' : '') + '">' + (lu === red.length ? 'Prêt' : 'Réviser') + '</span></a>');
+        return;
+      }
+      var kk = s.etat === "vac" ? (prochainCours(s.i) || {}).k : s.etat === "avant" ? 0 : k;
+      var L0 = plan(c, m.id)[kk] || [];
+      if (!L0.length) return;
+      nbSem += L0.length;
+      L0.forEach(function (L) { if (L.id && lus[L.id]) nbLues++; if (L.id && LE[L.id].verrou) verrous++; });
+      var L = L0.filter(function (x) { return x.id && !lus[x.id]; })[0] || L0.filter(function (x) { return x.id; })[0] || L0[0];
+      var href = L.id ? "lecon.html?id=" + L.id : base + "#l" + L.n;
+      var etat = !L.id ? '<span class="ms-e av">Au programme</span>'
+        : lus[L.id] ? '<span class="ms-e ok">' + (qz[L.id] ? 'Quiz ' + qz[L.id][0] + '/' + qz[L.id][1] : 'Lue') + '</span>'
+        : LE[L.id].verrou ? '<span class="ms-e red">Début offert</span>' : '<span class="ms-e">À lire</span>';
+      lignes.push('<a class="ms-l" ' + st + ' href="' + href + '"><span class="ms-m">' + A.icoM(m, 26) + '</span><span class="ms-x"><small>' + esc(m.nom) + '</small><b>' + esc(L.t) + '</b>' +
+        (L0.length > 1 ? '<em>et ' + (L0.length - 1) + ' autre' + (L0.length > 2 ? 's' : '') + ' leçon' + (L0.length > 2 ? 's' : '') + ' cette semaine</em>' : '') + '</span>' + etat + '</a>');
+    });
+
+    var puces = [];
+    if (nbSem) puces.push('<span class="ms-p"><b>' + nbSem + '</b> leçon' + (nbSem > 1 ? 's' : '') + (s.etat === "vac" ? ' à la reprise' : s.etat === "avant" ? ' pour commencer' : ' cette semaine') + '</span>');
+    if (nbLues) puces.push('<span class="ms-p ok"><b>' + nbLues + '</b> déjà lue' + (nbLues > 1 ? 's' : '') + '</span>');
+    if (nbRetard) puces.push('<span class="ms-p re"><b>' + nbRetard + '</b> leçon' + (nbRetard > 1 ? 's' : '') + ' à rattraper</span>');
+    if (ex) { var S = SESSION[ex.nom], j = jours(d(S.ecrit[0], "07:30") - now); if (j > 0) puces.push('<span class="ms-p ex">J-' + j + ' avant le ' + esc(ex.nom) + '</span>'); }
+
+    var graine = c + (s.w ? s.w.de.toISOString().slice(0, 10) : "");
+    var astuce = tirage(ASTUCES, graine), motive = tirage(MOTIVE[s.etat] || MOTIVE.cours, graine + "m");
+    /* L'abonnement, au moment où il sert : quand une leçon de CETTE semaine ne montre que son début. */
+    var cta = verrous
+      ? '<div class="ms-ab"><p><b>Cette semaine, ' + verrous + ' leçon' + (verrous > 1 ? 's ne montrent' : ' ne montre') + ' que ' + (verrous > 1 ? 'leur' : 'son') + ' début.</b> Avec l\'abonnement, tu lis chaque leçon en entier, toute l\'année, et tu ne prends jamais de retard.</p><a class="ms-go" href="/app.html#abonnement">Je débloque ma semaine</a></div>'
+      : '<div class="ms-ab doux"><p>Envie d\'aller plus loin que la leçon ? Découvre ce que l\'abonnement ajoute pour ta classe.</p><a class="ms-go" href="/#tarifs">Voir l\'abonnement</a></div>';
+
+    el.innerHTML = '<div class="ms-t"><div><small>Ma semaine</small><h2>' + esc(titre) + '</h2>' + (sous ? '<p>' + esc(sous) + '</p>' : '') + '</div>' +
+      (puces.length ? '<div class="ms-ps">' + puces.join("") + '</div>' : '') + '</div>' +
+      '<p class="ms-mot">' + esc(motive) + '</p>' +
+      (lignes.length ? '<div class="ms-g">' + lignes.join("") + '</div>' : '<p class="ms-vide">Rien de prévu pour ta classe cette semaine.</p>') +
+      '<div class="ms-pied"><div class="ms-as"><small>Astuce de la semaine</small><p>' + esc(astuce) + '</p></div>' + cta + '</div>' +
+      '<p class="ms-note">Semaine estimée d\'après la progression officielle du MINESEC et le calendrier 2026-2027 : ton professeur peut avoir un peu d\'avance ou de retard.</p>';
+    el.hidden = false;
+    if (A.replier) A.replier(el.querySelector(".ms-g"), 6, "matières");
+  }
+
+  /* ---------- 6. MON EMPLOI DU TEMPS DE RÉVISION (26/11/2026) ----------
+     « Fais-lui une proposition d'emploi du temps pour mieux réviser ; il peut
+     le régler selon ses cours à l'école » (Jacques).
+     Proposition calculée à partir de « Ma semaine » : chaque leçon de la
+     semaine donne une lecture (20 min) et, si elle est rédigée, un quiz
+     (10 min) ; les leçons en retard s'ajoutent (3 au plus). L'élève règle :
+       · ses créneaux, jour par jour (heure et durée, ou repos) ;
+       · les jours où chaque matière a cours à l'école : la lecture se place
+         alors LA VEILLE du cours, le quiz le lendemain.
+     Tout reste dans ce navigateur (A.lire / A.ecrire), comme la progression. */
+  var JOURS = ["Lun", "Mar", "Mer", "Jeu", "Ven", "Sam", "Dim"];
+  var JOURS_L = ["lundi", "mardi", "mercredi", "jeudi", "vendredi", "samedi", "dimanche"];
+  var EDT_DEFAUT = [{ h: "17:00", min: 60 }, { h: "17:00", min: 60 }, { h: "15:00", min: 60 }, { h: "17:00", min: 60 }, { h: "17:00", min: 45 }, { h: "09:00", min: 90 }, { h: "16:00", min: 45 }];
+  function reglages() {
+    var r = A.lire("edt", null);
+    if (!r || !Array.isArray(r.jours) || r.jours.length !== 7) r = { jours: EDT_DEFAUT.slice(), cours: {} };
+    r.cours = r.cours && typeof r.cours === "object" ? r.cours : {};
+    return r;
+  }
+  /* « Mes matières » : en 3ᵉ, la progression en compte 22 (latin, allemand,
+     chinois…) ; personne ne les suit toutes. Par défaut, le tronc commun ;
+     l'élève ajoute ses options dans les réglages. */
+  var TRONC = ["francais", "anglais", "maths", "pct", "physique", "chimie", "svt", "histoire", "geo", "ecm", "philo", "info", "sciences"];
+  function mesMatieres(c) {
+    var R = reglages(), sel = Array.isArray(R.mats) && R.mats.length ? R.mats : TRONC;
+    var dispo = A.MATIERES.filter(function (m) { return plan(c, m.id).some(function (x) { return x.length; }); });
+    var r = dispo.filter(function (m) { return sel.indexOf(m.id) >= 0; });
+    return r.length ? r : dispo;
+  }
+  function dureeL(m) { return m >= 60 ? Math.floor(m / 60) + " h" + (m % 60 ? " " + (m % 60) : "") : m + " min"; }
+  function heures() { var L = []; for (var h = 6; h <= 21; h++) { L.push(("0" + h).slice(-2) + ":00"); L.push(("0" + h).slice(-2) + ":30"); } return L; }
+
+  /* Les tâches de la semaine, dans l'ordre des matières. */
+  function taches(c, now) {
+    var s = semaineDe(now), LE = W.VRT_LECONS || {}, lus = A.lire("lus", {}), T = [];
+    var mats = mesMatieres(c);
+    var k = s.etat === "vac" ? (prochainCours(s.i) || {}).k : s.etat === "avant" ? 0 : kCourant(now);
+    var retard = [];
+    mats.forEach(function (m) {
+      var base = "matiere.html?c=" + encodeURIComponent(c) + "&m=" + m.id;
+      if (s.etat === "eval") {
+        var red = []; SEMAINES.forEach(function (w) { if (w.seq === s.w.seq && w.type === "cours") plan(c, m.id)[w.k].forEach(function (L) { if (L.id) red.push(L); }); });
+        red.filter(function (L) { return !lus[L.id]; }).concat(red.filter(function (L) { return lus[L.id]; })).slice(0, 1).forEach(function (L) {
+          T.push({ m: m, cle: "r" + L.id, t: "Réviser : " + L.t, h: "lecon.html?id=" + L.id, min: 20, type: "rev" });
+        });
+        return;
+      }
+      if (k === undefined || k >= NB_COURS) return;
+      plan(c, m.id)[k].slice(0, ["francais", "maths", "anglais"].indexOf(m.id) >= 0 ? 2 : 1).forEach(function (L) {
+        T.push({ m: m, cle: "l" + (L.id || m.id + L.n), t: (L.id ? "Lire : " : "Découvrir : ") + L.t, h: L.id ? "lecon.html?id=" + L.id : base + "#l" + L.n, min: 20, type: "lire" });
+        if (L.id && LE[L.id] && LE[L.id].quiz && LE[L.id].quiz.length) T.push({ m: m, cle: "q" + L.id, t: "Quiz : " + L.t, h: "lecon.html?id=" + L.id + "#quiz", min: 10, type: "quiz" });
+      });
+      bilan(c, m.id, now).retard.forEach(function (L) { retard.push({ m: m, cle: "t" + L.id, t: "Rattraper : " + L.t, h: "lecon.html?id=" + L.id, min: 20, type: "ratt" }); });
+    });
+    return T.concat(retard.slice(0, 3));
+  }
+
+  /* Placement : lecture la veille du cours, quiz le lendemain, le reste en tourniquet. */
+  function placer(T, R) {
+    var jours = R.jours.map(function (j) { return { cap: j && j.min ? j.min : 0, t: [] }; }), reste = [];
+    function poser(tache, ordre) {
+      for (var i = 0; i < ordre.length; i++) { var j = jours[ordre[i]]; if (j.cap >= tache.min) { j.cap -= tache.min; j.t.push(tache); tache.jour = ordre[i]; return true; } }
+      return false;
+    }
+    function autour(d0) { var o = [d0]; for (var e = 1; e < 7; e++) { o.push((d0 - e + 7) % 7); o.push((d0 + e) % 7); } return o.filter(function (x, i, a) { return a.indexOf(x) === i; }); }
+    var lecture = {};
+    T.forEach(function (x) {
+      var cours = R.cours[x.m.id];
+      if (x.type === "lire" && cours && cours.length) {
+        var veille = (Math.min.apply(null, cours) + 6) % 7;
+        if (poser(x, autour(veille))) { lecture[x.cle.slice(1)] = x.jour; return; }
+      }
+      if (x.type === "quiz" && lecture[x.cle.slice(1)] !== undefined) {
+        if (poser(x, autour((lecture[x.cle.slice(1)] + 2) % 7))) return;
+      }
+      x._libre = true;
+    });
+    /* Tourniquet : on alterne les matières, un jour après l'autre. */
+    var libres = T.filter(function (x) { return x._libre; }), d = 0;
+    libres.forEach(function (x) {
+      var ok = false;
+      for (var e = 0; e < 7 && !ok; e++) { var j = (d + e) % 7; if (jours[j].cap >= x.min) { ok = poser(x, [j]); d = (j + 1) % 7; } }
+      if (!ok) reste.push(x);
+      delete x._libre;
+    });
+    return { jours: jours, reste: reste };
+  }
+
+  function edtRevision(el, c) {
+    if (!el || !A || !NB_COURS) return;
+    var now = new Date(), s = semaineDe(now), R = reglages(), T = taches(c, now);
+    if (!T.length) { el.hidden = true; return; }
+    var P = placer(T, R), cleSem = (s.w ? s.w.de.toISOString().slice(0, 10) : "x") + "|" + c, fait = A.lire("edtFait", {});
+    var auj = (new Date(now.getTime() + 3600000).getUTCDay() + 6) % 7;
+    var lundi = s.etat === "vac" ? (prochainCours(s.i) || s.w).de : s.w.de;
+    var tot = T.length, nf = T.filter(function (x) { return fait[cleSem + "|" + x.cle]; }).length;
+    var cols = P.jours.map(function (j, i) {
+      var r = R.jours[i], dt = new Date(lundi.getTime() + i * JOUR);
+      var tete = '<div class="edt-h"><b>' + JOURS[i] + ' ' + new Date(dt.getTime() + 3600000).getUTCDate() + '</b><small>' + (r && r.min ? r.h.replace(":", " h ") + ' · ' + dureeL(r.min) : 'repos') + '</small></div>';
+      var corps = j.t.length ? j.t.map(function (x) {
+        var k = cleSem + "|" + x.cle, ok = !!fait[k];
+        return '<label class="edt-t' + (ok ? ' fait' : '') + '" style="--c:' + x.m.t[0] + ';--cp:' + x.m.t[1] + '"><input type="checkbox" data-edt="' + esc(k) + '"' + (ok ? ' checked' : '') + '>' +
+          '<span><small>' + esc(x.m.nom) + ' · ' + x.min + ' min</small><a href="' + x.h + '">' + esc(x.t) + '</a></span></label>';
+      }).join("") : '<p class="edt-v">' + (r && r.min ? 'Créneau libre : refais un quiz au choix.' : 'Repos. Profites-en.') + '</p>';
+      return '<div class="edt-j' + (i === auj && s.etat !== "vac" && s.etat !== "avant" ? ' auj' : '') + (r && r.min ? '' : ' off') + '">' + tete + corps + '</div>';
+    }).join("");
+
+    var M = mesMatieres(c), TOUTES = A.MATIERES.filter(function (m) { return plan(c, m.id).some(function (x) { return x.length; }); });
+    var H = heures();
+    var reg = '<details class="edt-reg"><summary>Régler mon emploi du temps</summary>' +
+      '<div class="edt-rg"><div><p class="edt-rt">Mes créneaux de révision</p>' + JOURS_L.map(function (n, i) {
+        var r = R.jours[i];
+        return '<div class="edt-rl"><span>' + n.charAt(0).toUpperCase() + n.slice(1) + '</span><select data-edt-h="' + i + '" aria-label="Heure du ' + n + '"><option value="">Pas de révision</option>' +
+          H.map(function (h) { return '<option' + (r && r.min && r.h === h ? ' selected' : '') + '>' + h + '</option>'; }).join("") + '</select>' +
+          '<select data-edt-m="' + i + '" aria-label="Durée du ' + n + '"' + (r && r.min ? '' : ' disabled') + '>' + [30, 45, 60, 90, 120].map(function (m) { return '<option value="' + m + '"' + (r && r.min === m ? ' selected' : '') + '>' + dureeL(m) + '</option>'; }).join("") + '</select></div>';
+      }).join("") + '</div>' +
+      '<div><p class="edt-rt">Mes matières</p><p class="edt-ri">Touche une matière pour l\'ajouter ou la retirer de ta semaine.</p><div class="edt-mats">' +
+      TOUTES.map(function (m) { return '<button type="button" data-edt-mat="' + m.id + '" style="--c:' + m.t[0] + ';--cp:' + m.t[1] + '" aria-pressed="' + M.some(function (x) { return x.id === m.id; }) + '">' + esc(m.nom) + '</button>'; }).join("") + '</div>' +
+      '<p class="edt-rt" style="margin-top:14px">Mes cours à l\'école</p><p class="edt-ri">Touche les jours où tu as chaque matière : tu liras la leçon la veille et feras le quiz après le cours.</p>' +
+      M.map(function (m) {
+        var cj = R.cours[m.id] || [];
+        return '<div class="edt-rm"><span style="--c:' + m.t[0] + '">' + esc(m.nom) + '</span><span class="edt-ch">' + JOURS.slice(0, 6).map(function (n, i) {
+          return '<button type="button" data-edt-c="' + m.id + '" data-j="' + i + '" aria-pressed="' + (cj.indexOf(i) >= 0) + '">' + n.charAt(0) + '</button>';
+        }).join("") + '</span></div>';
+      }).join("") + '</div></div>' +
+      '<button type="button" class="edt-raz" data-edt-raz>Revenir à la proposition</button></details>';
+
+    el.innerHTML = '<div class="ms-t"><div><small>Mon emploi du temps de révision</small><h2>' + (s.etat === "eval" ? "Ma semaine de révision" : "Ma semaine, heure par heure") + '</h2>' +
+      '<p>Une proposition faite d\'après tes leçons de la semaine. Règle-la selon tes cours à l\'école.</p></div>' +
+      '<div class="ms-ps"><span class="ms-p' + (nf === tot ? ' ok' : '') + '"><b>' + nf + '/' + tot + '</b> fait' + (nf > 1 ? 's' : '') + '</span></div></div>' +
+      '<p class="ms-mot">' + esc(nf === tot ? "Semaine bouclée. Tu peux être fier de toi." : nf ? "Bien parti : coche au fur et à mesure, c'est motivant de voir la colonne se remplir." : "Un créneau fixe chaque jour devient vite une habitude : tu n'auras plus à te forcer.") + '</p>' +
+      '<div class="edt-g">' + cols + '</div>' +
+      (P.reste.length ? '<p class="edt-reste"><b>' + P.reste.length + ' tâche' + (P.reste.length > 1 ? 's' : '') + ' sans créneau</b> (' + P.reste.slice(0, 2).map(function (x) { return '<a href="' + x.h + '">' + esc(x.m.nom) + '</a>'; }).join(", ") + (P.reste.length > 2 ? '…' : '') + ') : allonge un créneau ou ajoute un jour.</p>' : '') +
+      reg;
+    el.hidden = false;
+
+    /* Écouteurs : posés une fois, délégués. */
+    if (!el.getAttribute("data-edt-ok")) {
+      el.setAttribute("data-edt-ok", "1");
+      var refaire = function () { var o = el.querySelector(".edt-reg"), ouvert = o && o.open; edtRevision(el, el.getAttribute("data-classe")); maSemaine(document.getElementById("maSemaine"), el.getAttribute("data-classe")); var n = el.querySelector(".edt-reg"); if (n && ouvert) n.open = true; };
+      el.addEventListener("change", function (e) {
+        var t = e.target, R2 = reglages();
+        if (t.hasAttribute("data-edt")) { var f = A.lire("edtFait", {}); if (t.checked) f[t.getAttribute("data-edt")] = 1; else delete f[t.getAttribute("data-edt")]; A.ecrire("edtFait", f); refaire(); return; }
+        if (t.hasAttribute("data-edt-h")) { var i = +t.getAttribute("data-edt-h"); R2.jours[i] = t.value ? { h: t.value, min: (R2.jours[i] && R2.jours[i].min) || 60 } : null; A.ecrire("edt", R2); refaire(); return; }
+        if (t.hasAttribute("data-edt-m")) { var i2 = +t.getAttribute("data-edt-m"); if (R2.jours[i2]) { R2.jours[i2].min = +t.value; A.ecrire("edt", R2); refaire(); } }
+      });
+      el.addEventListener("click", function (e) {
+        var b = e.target.closest ? e.target.closest("[data-edt-c],[data-edt-raz],[data-edt-mat]") : null; if (!b) return;
+        var R3 = reglages();
+        if (b.hasAttribute("data-edt-raz")) { A.ecrire("edt", { jours: EDT_DEFAUT.slice(), cours: {} }); refaire(); return; }
+        if (b.hasAttribute("data-edt-mat")) {
+          var cl = el.getAttribute("data-classe"), ids = mesMatieres(cl).map(function (x) { return x.id; }), id = b.getAttribute("data-edt-mat");
+          ids = ids.indexOf(id) >= 0 ? ids.filter(function (x) { return x !== id; }) : ids.concat([id]);
+          if (!ids.length) return;
+          R3.mats = ids; A.ecrire("edt", R3); refaire(); return;
+        }
+        var m = b.getAttribute("data-edt-c"), j = +b.getAttribute("data-j"), L = R3.cours[m] || [];
+        R3.cours[m] = L.indexOf(j) >= 0 ? L.filter(function (x) { return x !== j; }) : L.concat([j]);
+        A.ecrire("edt", R3); refaire();
+      });
+    }
+    el.setAttribute("data-classe", c);
+  }
+
   W.VRT = W.VRT || {};
-  W.VRT.annee = { SESSION: SESSION, rendre: rendre, echeances: echeances, examen: examen, situation: situation };
+  W.VRT.annee = { SESSION: SESSION, rendre: rendre, echeances: echeances, examen: examen, situation: situation,
+    SEMAINES: SEMAINES, NB_COURS: NB_COURS, semaineDe: semaineDe, plan: plan, bilan: bilan, kCourant: kCourant, maSemaine: maSemaine, edtRevision: edtRevision };
 })(window);

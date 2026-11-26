@@ -8,7 +8,7 @@
 <meta name="robots" content="noindex">
 <link rel="icon" href="../VERITAS_favicon_512.png">
 <link rel="preload" href="/assets/polices/roboto-latin-400-normal.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="stylesheet" href="apprendre.css?v=20261116k">
+<link rel="stylesheet" href="apprendre.css?v=s20261126a">
 <link rel="stylesheet" href="jeu.css?v=20261112v">
 <link rel="stylesheet" href="modele.css?v=20261120a">
 <style>
@@ -187,6 +187,9 @@
   </section>
 
   <div class="objectif-z"><div class="objectif" id="objectifJour"></div><div class="kalao-accueil" id="kalaoAccueil"></div></div>
+  <!-- 26/11/2026 : ce que la progression prévoit cette semaine, matière par matière (calendrier.js, maSemaine). -->
+  <section class="ma-semaine" id="maSemaine" aria-label="Ma semaine" hidden></section>
+  <section class="ma-semaine edt" id="edtRev" aria-label="Mon emploi du temps de révision" hidden></section>
   <div class="blocs" id="blocs"></div>
   <!-- 13/11/2026 « trop touffu » : les matières d'abord, juste sous la classe choisie. -->
   <div class="sec-t"><h2 id="matsT">Mes matières</h2><a href="#defi">Défi express ›</a></div>
@@ -243,7 +246,7 @@
 <script src="charge.js?v=e414971d"></script>
 <script src="commun.js?v=20261120a"></script>
 <script src="jeu.js?v=20261110g"></script>
-<script src="calendrier.js?v=20261113a"></script>
+<script src="calendrier.js?v=s20261126a"></script>
 <script>
 (function(){
   "use strict";
@@ -274,12 +277,17 @@
        la clé globale « derniere » affichait une leçon de philo de Tle A alors
        que la 3e était cochée. lus[id] porte la date de lecture. */
     var b=[], ids=lecs(classe), der=Object.keys(lus).filter(function(k){return LE[k]&&LE[k].c===classe}).sort(function(x,y){return lus[y]-lus[x]})[0]||""; if(!ids.length) ids=lecs();
-    var jourId=ids.length?ids[(function(s){var h=0;for(var i=0;i<s.length;i++)h=(h*31+s.charCodeAt(i))>>>0;return h})(A.jour()+classe)%ids.length]:null;
+    var hJ=(function(s){var h=0;for(var i=0;i<s.length;i++)h=(h*31+s.charCodeAt(i))>>>0;return h})(A.jour()+classe);
+    /* 26/11/2026 : la leçon du jour est prise dans la semaine de la progression (non lue d'abord), au hasard sinon. */
+    var semIds=[]; if(VRT.annee&&VRT.annee.plan){var kS=VRT.annee.kCourant(); A.MATIERES.forEach(function(m){(VRT.annee.plan(classe,m.id)[kS]||[]).forEach(function(L){if(L.id&&LE[L.id]&&!lus[L.id])semIds.push(L.id)})})}
+    var jourId=semIds.length?semIds[hJ%semIds.length]:ids.length?ids[hJ%ids.length]:null;
     if(jourId){var L=LE[jourId],M=A.PAR_ID[L.m];
       b.push('<a class="bloc" href="lecon.html?id='+jourId+'"><small>Leçon du jour</small><div class="jour"><span class="med" style="--c:'+M.t[0]+';--cp:'+M.t[1]+';background:'+M.t[1]+'">'+A.ico(M.ico,38)+'</span><div><h2>'+esc(L.titre)+'</h2><p>'+esc(M.nom)+' · '+esc(L.c)+' · '+(L.duree||15)+' min. '+esc((L.accroche||"").slice(0,120))+'</p></div></div><span class="go">Commencer ›</span></a>');}
     if(der&&LE[der]){var D=LE[der];b.push('<a class="bloc" href="lecon.html?id='+der+'"><small>Reprendre</small><h2>'+esc(D.titre)+'</h2><p>'+esc(A.PAR_ID[D.m].nom)+' · '+esc(D.c)+(qz[der]?' · quiz : '+qz[der][0]+'/'+qz[der][1]:' · quiz pas encore fait')+'</p><span class="go">'+(qz[der]?'Revoir':'Faire le quiz')+' ›</span></a>')}
     /* (13/11/2026) plus de carte « Les scènes vivantes » ici : doublon de la section « Scènes vivantes de ta classe ». */
     $("#blocs").innerHTML=b.join("");
+    if(VRT.annee&&VRT.annee.maSemaine) VRT.annee.maSemaine($("#maSemaine"),classe);
+    if(VRT.annee&&VRT.annee.edtRevision) VRT.annee.edtRevision($("#edtRev"),classe);
 
     /* mon année : compte à rebours, actualités et classe virtuelle de la classe choisie */
     $("#anneeT").textContent="Mon année en "+classe;
