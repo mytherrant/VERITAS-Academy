@@ -362,6 +362,14 @@ jobs:
       - name: 🏷️ La vitrine annonce-t-elle le prix que l'admin a réglé ?
         run: node tests/banc_prix_vitrine.cjs
 
+      # ── 📅 « MA SEMAINE » D'APPRENDRE (26/11/2026). Les fiches MINESEC ne donnent
+      #    que le rang des leçons : apprendre/calendrier.js calcule la semaine
+      #    (25 semaines de cours, 5 d'évaluation, vacances retirées). Le banc vérifie
+      #    que chaque leçon tombe dans une semaine de cours, dans l'ordre, et qu'un
+      #    nouvel élève ne lit pas « 183 leçons à rattraper ».
+      - name: 📅 Apprendre place-t-il chaque leçon dans la bonne semaine ?
+        run: node tests/banc_apprendre_semaine.cjs
+
       # ── 🧾 UN PAIEMENT QUI N'OUVRE RIEN DOIT SE VOIR. camerpayGrant() posait
       #    `granted` sur la seule lisibilité de la base : un octroi qui n'avait
       #    RIEN ouvert (« accountId manquant », « compte introuvable ») sortait
