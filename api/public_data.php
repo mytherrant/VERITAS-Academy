@@ -296,11 +296,18 @@ $__pd_en_code = [
     'cours_registres_langue_5e' => ['externalUrl' => 'https://veritas-school.com/cours/registres_de_langue_5e.html'],
 ];
 
+/* 26/11/2026 « remplace toutes les fausses épreuves » : les 24 fiches « Épreuves Séq. » de la base
+   (lycées inventés, aucun document derrière, démos) ne sortent plus. Les vraies épreuves séquentielles
+   (ressources/sequentielles/, générées par tools/sequentielles.cjs) prennent leur place plus bas. */
+$__pd_fausses_epreuves = ['el1', 'el2', 'el3', 'el4', 'el5', 'el11', 'el21', 'el22', 'el23', 'el24', 'el25', 'el26',
+    'el27', 'el28', 'el29', 'el30', 'el31', 'el32', 'el33', 'el34', 'el35', 'demo_maths3', 'demo_pc2nde', 'demo_bac_tle_c'];
+
 $__pd_contenus = [];
 foreach ($__pd_contenus_src as $c) {
     if (!is_array($c) || !isset($c['id'])) continue;
     $id = (string)$c['id'];
     if (in_array($id, $__pd_supprimes, true)) continue;      // retiré par l'admin
+    if (in_array($id, $__pd_fausses_epreuves, true)) continue; // fausse épreuve, remplacée
     if (count($__pd_contenus) >= 400) break;                  // garde-fou de poids
 
     $offerte = in_array($id, $__pd_offertes, true);
@@ -332,6 +339,51 @@ foreach ($__pd_contenus_src as $c) {
         if (!empty($c['resPedago']))   $row['resPedago']   = (string)$c['resPedago'];
     }
     $__pd_contenus[] = $row;
+}
+
+/* Les VRAIES épreuves séquentielles et examens blancs : une fiche par page publiée.
+   La page est publique (premier exercice offert) ; la suite, le corrigé et les PDF y sont
+   vendus à l'unité ou ouverts par l'abonnement, sous le verrou d'api/apprendre.php. */
+$__pd_contenus = array_merge($__pd_contenus, vrt_pd_sequentielles($db, 400 - count($__pd_contenus)));
+
+function vrt_pd_sequentielles(array $db, int $max): array {
+    $dir = dirname(__DIR__) . '/ressources/sequentielles';
+    $fichiers = @glob($dir . '/*.html');
+    if (!$fichiers || $max <= 0) return [];
+    $classes = ['3e' => '3ème', '1re-a' => '1ère A', '1re-c' => '1ère C', '1re-d' => '1ère D',
+                'tle-a' => 'Tle A', 'tle-c' => 'Tle C', 'tle-d' => 'Tle D'];
+    $matieres = ['mathematiques' => 'Mathématiques', 'pct' => 'Physique-Chimie', 'physique' => 'Physique',
+        'chimie' => 'Chimie', 'svt' => 'SVT', 'etudetexte' => 'Français', 'orthographe' => 'Français',
+        'expression' => 'Français', 'langue' => 'Français', 'litterature' => 'Français',
+        'philosophie' => 'Philosophie', 'anglais' => 'Anglais', 'espagnol' => 'Espagnol', 'allemand' => 'Allemand',
+        'histoire' => 'Histoire-Géographie', 'geographie' => 'Histoire-Géographie', 'ecm' => 'ECM',
+        'informatique' => 'Informatique'];
+    $prix = (int) ($db['tarifs']['sequentielle'] ?? 0);
+    if ($prix <= 0) $prix = 150;
+    $out = [];
+    foreach ($fichiers as $f) {
+        $id = basename($f, '.html');
+        if (!preg_match('/^(3e|1re-[acd]|tle-[acd])-(seq([1-6])|blanc)-([a-z]+)$/', $id, $m)) continue;
+        if (count($out) >= $max) break;
+        $tete = (string) @file_get_contents($f, false, null, 0, 4096);
+        $titre = preg_match('/<title>([^<|]+)/u', $tete, $t) ? trim(html_entity_decode($t[1], ENT_QUOTES, 'UTF-8')) : $id;
+        $seq = $m[2] === 'blanc' ? 'Examen blanc' : 'Séquence ' . $m[3];
+        $out[] = [
+            'id' => 'sq_' . $id, 'cat' => 'cat1', 'titre' => vrt_pd_coupe($titre, 120),
+            'classe' => $classes[$m[1]] ?? $m[1], 'matiere' => $matieres[$m[4]] ?? ucfirst($m[4]),
+            /* « gratuit » = la CARTE ouvre la page sans passer par l'achat e-learning, qui ne sait pas
+               débloquer une séquentielle (l'élève aurait payé pour rien). Le premier exercice est libre ;
+               la suite se paie SUR la page (intent sequentielle, api/apprendre.php). */
+            'seq' => $seq, 'prix' => 0, 'gratuit' => true, 'plans' => [],
+            'apercu' => 'Premier exercice en accès libre. Suite du sujet, corrigé avec barème et PDF : '
+                      . $prix . ' F l\'épreuve, ou inclus dans l\'abonnement.',
+            'desc' => 'Épreuve VÉRITAS au format officiel des évaluations APC, avec son corrigé. '
+                    . $prix . ' F l\'épreuve, ou incluse dans l\'abonnement.',
+            'dispo' => true, 'fileType' => 'pdf',
+            'externalUrl' => 'https://veritas-school.com/ressources/sequentielles/' . $id . '.html',
+        ];
+    }
+    return $out;
 }
 
 // ─────────────────────────────────────────────────────────────────────────
