@@ -274,7 +274,10 @@ ul.mx-check li::before{border-color:var(--vm-mag)}
 #mx .card.mx section#erreurs ul:not([class])>li::before,#mx .card.mx .mx-piege ul:not([class])>li::before{
   width:12px!important;height:12px!important;left:2px!important;top:.4em!important;border-radius:0!important;
   background:linear-gradient(45deg,transparent 42%,#C62828 42% 58%,transparent 58%),linear-gradient(-45deg,transparent 42%,#C62828 42% 58%,transparent 58%)!important}
-#mx .card.mx ol:not([class])>li{margin:0 0 5px!important;padding-left:2px}
+/* 26/11/2026 : l'habillage du site pose une pastille numérotée de 30 px (::before)
+   sur chaque ol sans classe ; avec 2 px de retrait elle recouvrait le début des
+   phrases (« Richtig oder falsch? » : « 1 l wohnt in Yaoundé »). Place réservée. */
+#mx .card.mx ol:not([class])>li{position:relative;margin:0 0 8px!important;padding-left:42px!important;min-height:30px}
 #mx .card.mx ol:not([class])>li::marker{color:#1E499B;font-weight:700}
 #mx .card.mx .partie{margin-top:36px}
 
