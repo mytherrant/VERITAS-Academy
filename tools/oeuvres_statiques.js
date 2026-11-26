@@ -134,11 +134,12 @@ function bloc(o, cle, nom) {
   const f = o.fiche || {};
   const out = ['<!-- oeuvre-statique -->', '<section class="oeuvre-statique" aria-label="Analyse de l’œuvre" style="text-align:left">'];
 
-  const identite = [['Genre', f.genre], ['Forme', f.forme], ['Édition', f.edition], ['Époque', f.epoque],
-    ['Mouvement', f.mouvement], ['Lieu', f.lieu]].filter(x => x[1]);
+  /* 26/11/2026 « fade, embellis » : chaque rubrique a sa couleur et son icône (data-k, voir oeuvres_statiques.css) */
+  const identite = [['Genre', f.genre, 'genre'], ['Forme', f.forme, 'forme'], ['Édition', f.edition, 'edition'], ['Époque', f.epoque, 'epoque'],
+    ['Mouvement', f.mouvement, 'mouvement'], ['Lieu', f.lieu, 'lieu']].filter(x => x[1]);
   if (identite.length) {
     out.push(h2('fiche', 'graduation', 'Fiche d’identité'));
-    out.push('<ul class="oe-fiche">' + identite.map(x => '<li><strong>' + esc(x[0]) + '</strong> ' + esc(x[1]) + '</li>').join('') + '</ul>');
+    out.push('<ul class="oe-fiche">' + identite.map(x => '<li data-k="' + x[2] + '"><strong>' + esc(x[0]) + '</strong> ' + esc(x[1]) + '</li>').join('') + '</ul>');
   }
 
   if ((f.axes || []).length) {
