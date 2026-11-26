@@ -99,7 +99,9 @@ const STYLE = '<!-- oeuvre-style -->\n<style>'
   + ':root[data-vrt-theme="sombre"] .r-perso{color:#F49AC1}'
   + ':root[data-vrt-theme="sombre"] .r-titre{color:#9DBBF5}'
   + ':root[data-vrt-theme="sombre"] .r-auteur{color:#FFE08A;background:none}'
-  + '</style>\n<!-- /oeuvre-style -->';
+  + '</style>\n'
+  /* 25/11/2026 : cartes mentales zoomables (plein écran, pincement) — même visionneuse que les leçons, autonome */
+  + '<script src="/apprendre/zoom.js?v=20261125a" defer></script>\n<!-- /oeuvre-style -->';
 
 function examen(classe) {
   const c = String(classe || '').toLowerCase();
