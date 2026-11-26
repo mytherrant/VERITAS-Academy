@@ -8,7 +8,7 @@
 <meta name="robots" content="noindex">
 <link rel="icon" href="../VERITAS_favicon_512.png">
 <link rel="preload" href="/assets/polices/roboto-latin-400-normal.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="stylesheet" href="apprendre.css?v=20261116k">
+<link rel="stylesheet" href="apprendre.css?v=s20261126d">
 <link rel="stylesheet" href="jeu.css?v=20261112v">
 <link rel="stylesheet" href="modele.css?v=20261120a">
 <style>
@@ -80,6 +80,7 @@ a.lg:hover{background:var(--kp)}
 <script src="charge.js?v=e414971d"></script>
 <script src="commun.js?v=20261120a"></script>
 <script src="jeu.js?v=20261110g"></script>
+<script src="calendrier.js?v=s20261126d"></script>
 <script>
 (function(){
   "use strict";
@@ -151,15 +152,35 @@ a.lg:hover{background:var(--kp)}
     '</nav>'+
     (sc.length?'<div class="scenes-m">'+sc.map(function(s){return '<a class="scene" href="/scenes/'+s+'.html"><span class="pl">'+A.pic("masques",30)+'</span><span><small>Scène vivante</small><strong>'+esc((window.VRT_SCENES_TITRES||{})[s]||s)+'</strong></span><span class="jouer">'+A.pic("lecture",30)+'</span></a>'}).join("")+'</div>':'')+
     /* 13/11/2026 : les leçons d'abord, l'offre payante après (elle coupait la page en deux). */
+    '<section class="ouj" id="ouJ" aria-label="Où j\'en suis" hidden></section>'+
     '<div id="liste"></div>'+
     /* l'encart des professeurs passe sous les leçons (14/11/2026) */
     (AT?'<section class="prof-fr" aria-label="Professeurs de français">'+A.pic("plume",30)+'<div><b>Vous enseignez le français en '+esc(c)+' ?</b><span>Chaque chapitre ouvre l’évaluation de sa séquence dans l’Atelier de français : texte du corpus, questions, barème et corrigé conformes au MINESEC, relecture par vos collègues.</span></div><a href="'+lienAtelier(0,'progressions')+'">Ouvrir l’Atelier</a></section>':'')+(tot&&nred<tot?A.offre(c,M.id,'matiere'):'')+'</div>';
-  rendu("");
+  /* 26/11/2026 — « Où j'en suis » : leçons rédigées des semaines passées de la
+     progression, lues ou non, et ce que prévoit la semaine (calendrier.js). */
+  function libSem(){var Y=VRT.annee,e=Y&&Y.semaineDe?Y.semaineDe().etat:"cours";return e==="cours"?"Cette semaine":e==="vac"?"À la reprise":e==="avant"?"À la rentrée":"Semaine prochaine"}
+  function marquer(){var Y=VRT.annee;if(!Y||!Y.plan)return;(Y.plan(c,M.id)[Y.kCourant()]||[]).forEach(function(L){var e=document.getElementById("l"+L.n);if(e&&!e.querySelector(".sem-b")){e.classList.add("lgw-sem");var t=e.querySelector(".t");if(t)t.insertAdjacentHTML("afterend",'<span class="sem-b">'+libSem()+'</span>')}})}
+  function ouJ(){var z=$("#ouJ"),Y=VRT.annee;if(!z||!Y||!Y.bilan)return;var b=Y.bilan(c,M.id),cet=b.cette,LEs=window.VRT_LECONS||{};
+    if(!b.dues.length&&!cet.length){z.hidden=true;return}
+    var r=b.retard.length,etat=r?'<b>'+r+' leçon'+(r>1?'s':'')+' à rattraper</b> sur la progression de '+esc(M.nom)+'. Un quart d\'heure par jour suffit pour revenir à jour.'
+      :b.commence?'<b>Tu es à jour</b> sur les dernières semaines de la progression. Continue sur ta lancée.'
+      :b.dues.length?'<b>Commence par les leçons ci-dessous</b> : chaque leçon lue te remet au rythme de ta classe.'
+      :'<b>Prends de l\'avance</b> : la progression de '+esc(M.nom)+' commence ici.';
+    var lien=function(L){return L.id?'lecon.html?id='+L.id:'#l'+L.n};
+    var ver=cet.filter(function(L){return L.id&&LEs[L.id]&&LEs[L.id].verrou}).length;
+    var vt=function(ico,k,sur,t,tag,cl){return '<div class="vt'+(cl||'')+'" style="--k:'+k+';--cp:'+M.t[1]+'"><span class="vt-n">'+(ico.charAt(0)==="<"?ico:A.si(ico,24))+'</span><div class="vt-x">'+(sur?'<small>'+sur+'</small>':'')+'<'+tag+'>'+t+'</'+tag+'></div></div>'};
+    z.innerHTML='<div class="ouj-t">'+vt(A.icoM(M,30),M.t[0],"Mon avancement en "+esc(M.nom),"Où j\'en suis","h2"," vt-m")+'<p>'+etat+'</p></div>'+
+      (r?'<div class="ouj-l">'+vt("i-refresh","#A84200","","À rattraper","h3"," vt-s")+b.retard.slice(0,3).map(function(L){return '<a href="lecon.html?id='+L.id+'">'+esc(L.t)+'<span>Rattraper ›</span></a>'}).join("")+(r>3?'<span class="ouj-plus">et '+(r-3)+' autre'+(r-3>1?'s':'')+'</span>':'')+'</div>':'')+
+      (cet.length?'<div class="ouj-s">'+vt("i-calendar",M.t[0],"Au programme",libSem(),"h3")+cet.map(function(L){return '<a href="'+lien(L)+'">'+esc(L.t)+'</a>'}).join("")+'</div>':'')+
+      (ver?'<div class="ouj-ab"><span class="vt-n vt-mini" style="--k:#5B4FA8">'+A.si("i-key",18)+'</span><p>'+ver+' leçon'+(ver>1?'s':'')+' de '+(libSem()==="Cette semaine"?'cette semaine':'la semaine à venir')+' ne montre'+(ver>1?'nt':'')+' que '+(ver>1?'leur':'son')+' début. Avec l\'abonnement, tu les lis en entier et tu restes à jour toute l\'année.</p><a href="/app.html#abonnement">Je m\'abonne</a></div>':'')+
+      '<p class="ouj-n">Estimé d\'après la progression officielle et le calendrier 2026-2027.</p>';
+    z.hidden=false}
+  rendu("");marquer();ouJ();
   /* arrivée depuis l'Atelier (?seq=N) : on montre la séquence demandée */
   var sv=+(u.get("seq")||0); if(sv){var cs=document.getElementById("seq-"+sv); if(cs){cs.classList.add("cible");cs.scrollIntoView({block:"start"})}}
   /* arrivée sur une leçon précise : le filtre a pu masquer l'ancre, on attend le rendu */
   if(/^#l\d+$/.test(location.hash)){var cib=document.querySelector(location.hash);if(cib){cib.classList.add("lgw-v");cib.scrollIntoView({block:"center"})}}
-  $$(".filtres button").forEach(function(b){b.addEventListener("click",function(){$$(".filtres button").forEach(function(x){x.setAttribute("aria-pressed",x===b)});rendu(b.getAttribute("data-f"))})});
+  $$(".filtres button").forEach(function(b){b.addEventListener("click",function(){$$(".filtres button").forEach(function(x){x.setAttribute("aria-pressed",x===b)});rendu(b.getAttribute("data-f"));marquer()})});
 })();
 </script>
 </body>
