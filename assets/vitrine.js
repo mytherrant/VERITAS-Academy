@@ -3083,7 +3083,13 @@
 
     // Fermer les menus au clic extérieur.
     document.addEventListener('click', function (e) {
-      if (S.plus && !e.target.closest('#vrtPlusWrap')) { S.plus = false; fermerMenus(); }
+      /* 26/11/2026 — #vrtPlusWrap n'existe sur aucune page : tout clic, y
+         compris sur le bouton « Plus » lui-même, refermait le panneau aussitôt
+         ouvert (seul le survol l'affichait). Le panneau est désormais une
+         fenêtre (module « PLUS » en fin de fichier) : on épargne le bouton,
+         la fenêtre et le lien du menu téléphone qui l'ouvre. Le clic sur le
+         fond assombri est traité par le module lui-même. */
+      if (S.plus && !e.target.closest('#vrtPlusWrap, #vrtPlus, [onclick*="basculerPlus"], [data-vmd-ouvrir]')) { S.plus = false; fermerMenus(); }
     });
     document.addEventListener('keydown', function (e) {
       if (e.key !== 'Escape') return;
@@ -3858,4 +3864,277 @@
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', poser);
   else poser();
+})();
+
+/* ============================================================================
+ *  « PLUS » EN FENÊTRE, AVEC RECHERCHE  (26/11/2026)
+ *
+ *  Jacques : « fais la même chose ici pour ne plus surcharger l'interface en
+ *  gardant mes couleurs » — modèle : le panneau « Plus » de TchouSkou (tous
+ *  les écrans dans une fenêtre, regroupés par thème, un champ de recherche,
+ *  un titre et quelques mots par entrée, sans vignette).
+ *
+ *  Le panneau #vrtPlus de la barre s'ouvrait au SURVOL en pleine largeur :
+ *  22 entrées, 22 pastilles d'icônes, cinq colonnes, et il recouvrait la page
+ *  dès que la souris passait sur « Plus ». Au téléphone, les mêmes 22 entrées
+ *  allongeaient le menu burger de tout l'écran.
+ *
+ *  Ce module LIT les entrées déjà écrites dans la page (build_vitrine.js puis
+ *  habiller_pages.py : une seule source, la table MENU) et les repose dans
+ *  une fenêtre centrée. Rien n'est retiré : chaque lien garde son href, chaque
+ *  bouton son onclick et son data-go. Le nouveau conteneur reprend
+ *  l'identifiant #vrtPlus : fermerMenus() et aria-controls continuent de le
+ *  piloter sans changement.
+ *
+ *  Les couleurs restent celles du menu : une teinte par profil (bleu, sarcelle,
+ *  framboise, cuivre, violet), texte #001136, fond blanc. Le thème sombre
+ *  passe par l'inversion globale de la page : aucune règle propre ici.
+ * ==========================================================================*/
+(function () {
+  'use strict';
+  var TEINTES = [
+    ['#1E499B', '#EEF3FC'], ['#0E7C86', '#E9F5F3'], ['#B03A6E', '#FBEEF3'],
+    ['#A84200', '#FFF4E8'], ['#5B4FA8', '#F1EEF9']
+  ];
+
+  function sansAccent(s) {
+    s = String(s || '').toLowerCase();
+    return s.normalize ? s.normalize('NFD').replace(/[̀-ͯ]/g, '') : s;
+  }
+
+  function poserStyle() {
+    if (document.getElementById('vmdStyle')) return;
+    var st = document.createElement('style');
+    st.id = 'vmdStyle';
+    st.textContent = [
+      /* (3,2,0) : bat la règle de survol `*:has(> #vrtPlus):hover > #vrtPlus[hidden]`
+         (2,2,0), qui viserait <body> une fois la fenêtre posée à sa racine. */
+      '#vrtPlus#vrtPlus#vrtPlus.vmd[hidden]{display:none!important}',
+      '#vrtPlus.vmd{position:fixed;inset:0;z-index:2147483000;display:flex;align-items:center;justify-content:center;',
+        'padding:24px;background:rgba(0,17,54,.42);-webkit-backdrop-filter:blur(2px);backdrop-filter:blur(2px);',
+        'animation:vmdFond .18s ease-out;font-family:Poppins,system-ui,sans-serif}',
+      '.vmd-c{position:relative;width:100%;max-width:1060px;max-height:min(86vh,860px);display:flex;flex-direction:column;',
+        'background:#fff;border-radius:18px;box-shadow:0 30px 80px rgba(0,17,54,.28);overflow:hidden;',
+        'animation:vmdCarte .22s cubic-bezier(.22,1,.36,1)}',
+      '.vmd-h{padding:26px 32px 18px;border-bottom:1px solid #E7EBF3}',
+      '.vmd-h h2{margin:0 0 6px;font:600 26px/1.2 Poppins,system-ui,sans-serif;color:#001136}',
+      '.vmd-h p{margin:0 0 16px;font:400 14.5px/1.5 Poppins,system-ui,sans-serif;color:#5A6275}',
+      '.vmd-x{position:absolute;top:18px;right:18px;width:40px;height:40px;border:0;border-radius:50%;background:transparent;',
+        'color:#001136;cursor:pointer;display:flex;align-items:center;justify-content:center}',
+      '.vmd-x:hover,.vmd-x:focus-visible{background:#EEF3FC;outline:none}',
+      '.vmd-r{position:relative}',
+      '.vmd-r svg{position:absolute;left:16px;top:50%;transform:translateY(-50%);color:#6E7385;pointer-events:none}',
+      '.vmd-r input{width:100%;box-sizing:border-box;height:52px;padding:0 16px 0 46px;border:1px solid #D5DCEA;border-radius:12px;',
+        'font:400 16px Poppins,system-ui,sans-serif;color:#001136;background:#fff;outline:none;transition:border-color .15s,box-shadow .15s}',
+      '.vmd-r input::placeholder{color:#8A90A0}',
+      '.vmd-r input:focus{border-color:#1E499B;box-shadow:0 0 0 3px rgba(30,73,155,.14)}',
+      /* Colonnes « journal » et non grille : le groupe Élève (une entrée) ne
+         doit pas laisser un trou de la hauteur du groupe Parent (sept). */
+      '.vmd-b{flex:1 1 auto;min-height:0;overflow:auto;overscroll-behavior:contain;padding:18px 32px 28px}',
+      /* Les colonnes vivent DANS la zone qui défile : posées sur elle, une
+         hauteur bornée envoyait les groupes en trop dans des colonnes
+         débordant sur le côté (au téléphone, seul « Élève » restait visible). */
+      '.vmd-cols{columns:2;column-gap:44px}',
+      '.vmd-g{min-width:0;margin-bottom:14px;break-inside:avoid;-webkit-column-break-inside:avoid}',
+      '.vmd-g[hidden]{display:none}',
+      '.vmd-t{margin:10px 0 6px;padding:0 12px;font:600 12.5px Poppins,system-ui,sans-serif;letter-spacing:.09em;text-transform:uppercase;color:var(--vt)}',
+      '.vmd-t small{margin-left:8px;font:400 12.5px Poppins,system-ui,sans-serif;letter-spacing:0;text-transform:none;color:#8A90A0}',
+      '.vmd-i{display:block;width:100%;box-sizing:border-box;margin:0;padding:9px 12px;border:0;border-radius:10px;background:none;',
+        'text-align:left;text-decoration:none;cursor:pointer;color:#001136;font:inherit;line-height:1.45;transition:background .15s}',
+      '.vmd-i[hidden]{display:none}',
+      '.vmd-i:hover,.vmd-i:focus-visible{background:var(--vf);outline:none}',
+      '.vmd-i:focus-visible{box-shadow:0 0 0 2px var(--vt) inset}',
+      '.vmd-n{font:500 16px Poppins,system-ui,sans-serif;color:#001136;margin-right:10px}',
+      '.vmd-d{font:400 13.5px Poppins,system-ui,sans-serif;color:#6E7385}',
+      '.vmd-l{display:inline-block;margin-left:8px;vertical-align:-1px;color:#5B4FA8}',
+      '.vmd-v{column-span:all;margin:24px 0;text-align:center;font:400 15px Poppins,system-ui,sans-serif;color:#5A6275}',
+      '.vmd-v[hidden]{display:none}',
+      '.vmd-k{display:inline-flex;align-items:center;margin-left:8px;padding:1px 8px;border-radius:999px;background:#EEF3FC;',
+        'color:#1E499B;font:600 11.5px/1.6 Poppins,system-ui,sans-serif}',
+      'html.vmd-ouvert,html.vmd-ouvert body{overflow:hidden!important}',
+      /* Téléphone : la fenêtre prend l'écran ; le menu burger ne porte plus que
+         l'entrée « Toutes les rubriques » au lieu de 22 lignes. */
+      '.vmn.vmn-mob{display:none!important}',
+      '.vmd-o{display:flex;align-items:center;justify-content:space-between;gap:10px;width:100%;box-sizing:border-box;margin-top:6px;',
+        'padding:12px 14px;border:1px solid #DCE3F0;border-radius:12px;background:#fff;cursor:pointer;',
+        'font:500 15px Poppins,system-ui,sans-serif;color:#001136;text-align:left}',
+      /* `.vrt-hab button` (habillage) remet le padding des boutons à zéro. */
+      '#vrtBurger button.vmd-o.vmd-o{padding:12px 14px!important;margin-top:6px!important}',
+      '.vmd-o:hover,.vmd-o:focus-visible{background:#EEF3FC;outline:none}',
+      '@media (max-width:760px){',
+        '#vrtPlus.vmd{padding:0;align-items:stretch}',
+        '.vmd-c{max-height:none;height:100%;border-radius:0}',
+        '.vmd-h{padding:20px 16px 14px}',
+        '.vmd-h h2{font-size:22px}',
+        '.vmd-x{top:12px;right:8px}',
+        '.vmd-b{padding:10px 16px 28px}',
+        '.vmd-cols{columns:1}',
+        '.vmd-n{display:block;margin:0}',
+      '}',
+      '@keyframes vmdFond{from{opacity:0}to{opacity:1}}',
+      '@keyframes vmdCarte{from{opacity:0;transform:translateY(10px) scale(.985)}to{opacity:1;transform:none}}',
+      '@media (prefers-reduced-motion:reduce){#vrtPlus.vmd,.vmd-c{animation:none}.vmd-i,.vmd-r input{transition:none}}'
+    ].join('');
+    document.head.appendChild(st);
+  }
+
+  function fermer() {
+    var S = window.VRT && window.VRT.etat;
+    if (S && S.plus) { window.VRT.act('basculerPlus'); }
+    else { var f = document.getElementById('vrtPlus'); if (f) f.hidden = true; }
+  }
+  function ouvrir() {
+    var S = window.VRT && window.VRT.etat;
+    if (S) { S.burger = false; S.plus = false; window.VRT.act('basculerPlus'); }
+    else { var f = document.getElementById('vrtPlus'); if (f) f.hidden = false; }
+  }
+
+  function construire() {
+    var ancien = document.getElementById('vrtPlus');
+    if (!ancien || ancien.classList.contains('vmd')) return;
+    var cols = ancien.querySelectorAll('.vmn-col');
+    if (!cols.length) return;
+
+    var corps = document.createElement('div');
+    corps.className = 'vmd-b';
+    var grille = document.createElement('div');
+    grille.className = 'vmd-cols';
+    corps.appendChild(grille);
+    var total = 0;
+    [].forEach.call(cols, function (col, k) {
+      var t = TEINTES[k % TEINTES.length];
+      var g = document.createElement('section');
+      g.className = 'vmd-g';
+      g.style.setProperty('--vt', t[0]);
+      g.style.setProperty('--vf', t[1]);
+      var titre = col.querySelector('.vmn-t');
+      var sous = titre && titre.querySelector('small');
+      var nomGroupe = titre ? (titre.firstChild && titre.firstChild.nodeType === 3 ? titre.firstChild.nodeValue : titre.textContent) : '';
+      var h = document.createElement('h3');
+      h.className = 'vmd-t';
+      h.textContent = String(nomGroupe).trim();
+      if (sous) { var sm = document.createElement('small'); sm.textContent = sous.textContent.trim(); h.appendChild(sm); }
+      g.appendChild(h);
+      [].forEach.call(col.querySelectorAll('.vmn-i'), function (e) {
+        var x = e.querySelector('.vmn-x');
+        var d = x && x.querySelector('small');
+        var nom = x ? (x.firstChild && x.firstChild.nodeType === 3 ? x.firstChild.nodeValue : x.textContent) : e.textContent;
+        var n = e.cloneNode(false);          // garde href, onclick, data-go, type
+        n.className = 'vmd-i';
+        n.removeAttribute('style');
+        var sn = document.createElement('span'); sn.className = 'vmd-n'; sn.textContent = String(nom).trim(); n.appendChild(sn);
+        if (d) { var sd = document.createElement('span'); sd.className = 'vmd-d'; sd.textContent = d.textContent.trim(); n.appendChild(sd); }
+        if (e.querySelector('.vmn-l')) {
+          var l = document.createElement('span'); l.className = 'vmd-l'; l.title = 'Réservé aux membres inscrits';
+          l.innerHTML = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" aria-hidden="true"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg><span class="vsr">Réservé aux membres inscrits</span>';
+          n.appendChild(l);
+        }
+        n.setAttribute('data-vmd-cle', sansAccent(nomGroupe + ' ' + n.textContent));
+        g.appendChild(n);
+        total++;
+      });
+      grille.appendChild(g);
+    });
+    var vide = document.createElement('p');
+    vide.className = 'vmd-v'; vide.hidden = true;
+    vide.textContent = 'Aucune rubrique ne correspond. Essayez un autre mot, ou ouvrez le plan du site.';
+    corps.appendChild(vide);
+
+    var f = document.createElement('div');
+    f.id = 'vrtPlus';
+    f.className = 'vmd';
+    f.hidden = true;
+    f.setAttribute('role', 'dialog');
+    f.setAttribute('aria-modal', 'true');
+    f.setAttribute('aria-labelledby', 'vmdTitre');
+    f.innerHTML = '<div class="vmd-c">'
+      + '<div class="vmd-h">'
+      +   '<h2 id="vmdTitre">Plus</h2>'
+      +   '<p>Toutes les rubriques (' + total + '), regroupées par profil. Rien n’a été retiré : les plus utiles restent dans la barre.</p>'
+      +   '<div class="vmd-r"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>'
+      +   '<input type="search" id="vmdRech" autocomplete="off" placeholder="Rechercher une rubrique (orientation, abonnement, corrigés…)" aria-label="Rechercher une rubrique"></div>'
+      +   '<button type="button" class="vmd-x" aria-label="Fermer"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg></button>'
+      + '</div></div>';
+    f.firstChild.appendChild(corps);
+
+    ancien.parentNode.removeChild(ancien);
+    document.body.appendChild(f);
+
+    var champ = f.querySelector('#vmdRech');
+    var entrees = f.querySelectorAll('.vmd-i');
+    var groupes = f.querySelectorAll('.vmd-g');
+    function filtrer() {
+      var mots = sansAccent(champ.value).split(/\s+/).filter(Boolean);
+      var vus = 0;
+      [].forEach.call(entrees, function (e) {
+        var cle = e.getAttribute('data-vmd-cle');
+        var ok = mots.every(function (m) { return cle.indexOf(m) >= 0; });
+        e.hidden = !ok; if (ok) vus++;
+      });
+      [].forEach.call(groupes, function (g) { g.hidden = !g.querySelector('.vmd-i:not([hidden])'); });
+      vide.hidden = vus > 0;
+    }
+    champ.addEventListener('input', filtrer);
+    champ.addEventListener('keydown', function (e) {
+      if (e.key !== 'Enter') return;
+      var premier = f.querySelector('.vmd-i:not([hidden])');
+      if (premier) { e.preventDefault(); premier.click(); }
+    });
+    f.querySelector('.vmd-x').addEventListener('click', fermer);
+    f.addEventListener('click', function (e) {
+      if (e.target === f) { fermer(); return; }
+      if (e.target.closest && e.target.closest('.vmd-i')) setTimeout(fermer, 0);
+    });
+    /* Tabulation tenue dans la fenêtre. */
+    f.addEventListener('keydown', function (e) {
+      if (e.key !== 'Tab') return;
+      var foc = [].filter.call(f.querySelectorAll('input,button,a[href]'), function (x) { return !x.hidden && x.offsetParent !== null; });
+      if (!foc.length) return;
+      var a = foc[0], z = foc[foc.length - 1];
+      if (e.shiftKey && document.activeElement === a) { e.preventDefault(); z.focus(); }
+      else if (!e.shiftKey && document.activeElement === z) { e.preventDefault(); a.focus(); }
+    });
+
+    var retour = null;
+    new MutationObserver(function () {
+      var ouvert = !f.hidden;
+      document.documentElement.classList.toggle('vmd-ouvert', ouvert);
+      if (ouvert) {
+        retour = document.activeElement;
+        champ.value = ''; filtrer();
+        f.querySelector('.vmd-b').scrollTop = 0;
+        /* Au doigt, on ne fait pas surgir le clavier sur toute la liste. */
+        var tactile = window.matchMedia && window.matchMedia('(pointer:coarse)').matches;
+        setTimeout(function () { (tactile ? f.querySelector('.vmd-x') : champ).focus(); }, 30);
+      } else if (retour && retour.focus && f.contains(document.activeElement)) {
+        try { retour.focus(); } catch (e) {}
+      }
+    }).observe(f, { attributes: true, attributeFilter: ['hidden'] });
+
+    /* Le bouton « Plus » de la barre annonce le nombre de rubriques. */
+    var btn = document.querySelector('[onclick*="basculerPlus"]');
+    if (btn && !btn.querySelector('.vmd-k')) {
+      var k = document.createElement('span');
+      k.className = 'vmd-k'; k.textContent = String(total);
+      k.setAttribute('aria-label', total + ' rubriques');
+      var chevron = btn.querySelector('svg');
+      if (chevron) chevron.style.display = 'none';
+      btn.appendChild(k);
+      btn.setAttribute('aria-haspopup', 'dialog');
+    }
+
+    /* Menu téléphone : une entrée à la place des 22. */
+    var burger = document.getElementById('vrtBurger');
+    if (burger && !burger.querySelector('[data-vmd-ouvrir]')) {
+      var o = document.createElement('button');
+      o.type = 'button'; o.className = 'vmd-o'; o.setAttribute('data-vmd-ouvrir', '');
+      o.innerHTML = '<span>Toutes les rubriques</span><span class="vmd-k">' + total + '</span>';
+      o.addEventListener('click', function (e) { e.preventDefault(); ouvrir(); });
+      burger.appendChild(o);
+    }
+  }
+
+  function demarrer() { try { poserStyle(); construire(); } catch (e) {} }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', demarrer);
+  else demarrer();
 })();
