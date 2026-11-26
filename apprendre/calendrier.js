@@ -478,7 +478,7 @@
       (puces.length ? '<div class="ms-ps">' + puces.join("") + '</div>' : '') + '</div>' +
       '<p class="ms-mot">' + esc(motive) + '</p>' +
       (lignes.length ? '<div class="ms-g">' + lignes.join("") + '</div>' : '<p class="ms-vide">Rien de prévu pour ta classe cette semaine.</p>') +
-      '<div class="ms-pied"><div class="ms-as">' + entete("i-lightbulb", "#B8860B", "Astuce de la semaine", "Le bon réflexe", "", "h3") + '<p>' + esc(astuce) + '</p></div>' + cta + '</div>' +
+      '<div class="ms-pied"><div class="ms-as"><span class="ms-as-tab">' + si("i-lightbulb", 20) + 'Astuce de la semaine</span><p>' + esc(astuce) + '</p></div>' + cta + '</div>' +
       '<p class="ms-note">Semaine estimée d\'après la progression officielle du MINESEC et le calendrier 2026-2027 : ton professeur peut avoir un peu d\'avance ou de retard.</p>';
     el.hidden = false;
     if (A.replier) A.replier(el.querySelector(".ms-g"), 6, "matières");
@@ -586,7 +586,7 @@
       var corps = j.t.length ? j.t.map(function (x) {
         var k = cleSem + "|" + x.cle, ok = !!fait[k];
         return '<label class="edt-t' + (ok ? ' fait' : '') + '" style="--c:' + x.m.t[0] + ';--cp:' + x.m.t[1] + '"><input type="checkbox" data-edt="' + esc(k) + '"' + (ok ? ' checked' : '') + '>' +
-          '<span><small>' + esc(x.m.nom) + ' · ' + x.min + ' min</small><a href="' + x.h + '">' + esc(x.t) + '</a></span></label>';
+          '<span><small>' + A.icoM(x.m, 15) + esc(x.m.nom) + ' · ' + x.min + ' min</small><a href="' + x.h + '">' + esc(x.t) + '</a></span></label>';
       }).join("") : '<p class="edt-v">' + (r && r.min ? 'Créneau libre : refais un quiz au choix.' : 'Repos. Profites-en.') + '</p>';
       return '<div class="edt-j' + (i === auj && s.etat !== "vac" && s.etat !== "avant" ? ' auj' : '') + (r && r.min ? '' : ' off') + '">' + tete + corps + '</div>';
     }).join("");

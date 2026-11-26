@@ -1245,3 +1245,43 @@ h2 .num .pic{vertical-align:middle}
   .ms-ab .ms-go{margin-left:0}
   .ouj-s a,.ouj-l a{margin-left:0}
 }
+
+/* ── 26/11/2026 (suite) ─────────────────────────────────────────────────── */
+/* Astuce de la semaine : l'encart des leçons (« Condition indispensable »),
+   étiquette blanche penchée posée sur le bord, coin replié. */
+.ma-semaine .ms-as{position:relative;background:#FFF6D6!important;border:1px solid #F1D98C!important;border-radius:4px 4px 26px 4px!important;
+  padding:30px 22px 18px!important;margin-top:14px;box-shadow:4px 5px 0 rgba(184,134,11,.14)!important}
+.ms-as-tab{position:absolute;top:-17px;left:50%;transform:translateX(-50%) rotate(-2deg);display:inline-flex;align-items:center;gap:8px;white-space:nowrap;
+  background:#fff;padding:5px 14px;font:700 16.5px var(--sans);color:#8A5A00;box-shadow:0 2px 7px rgba(0,17,54,.14)}
+.ms-as-tab .si{color:#B8860B}
+.ma-semaine .ms-as p{margin:0!important;font:600 16.5px/1.6 var(--sans)!important;font-style:normal!important;color:#4A3600!important;text-align:left!important}
+.ms-pied{align-items:start}
+
+/* Médaillon de la matière : tuile claire, icône d'origine en couleurs */
+.vt-m .vt-n{background:linear-gradient(145deg,#fff,var(--cp))!important;border:1.5px solid color-mix(in srgb,var(--k) 28%,#fff);
+  box-shadow:0 6px 14px color-mix(in srgb,var(--k) 22%,transparent)!important}
+.vt-m .vt-n svg{width:30px;height:30px}
+.vt-m .vt-n .etiq{position:absolute;bottom:-4px;right:-6px}
+.edt-t small svg{width:15px;height:15px;vertical-align:-3px;margin-right:4px}
+.edt-t small .etiq{display:none}
+
+/* Calendrier « Mon année » : plus de lignes en cartes ; dates en couleur vive */
+#anCal .cal-l{gap:0}
+#anCal .cal-l li,#anCal .cal-l li.vac,#anCal .cal-l li.exa{background:none!important;border-radius:0;padding:10px 2px;border-bottom:1px solid #EEF0F5}
+#anCal .cal-l li:last-child{border-bottom:0}
+#anCal .cal-i{background:none!important;width:auto;flex-basis:26px}
+#anCal .cal-t small{font:700 13px var(--sans);color:#D62839}
+#anCal .cal-l li.vac .cal-t small{color:#0B8A2A}
+#anCal .cal-j{font:800 14px var(--sans);color:#D62839}
+#anCal .cal-l li.vac .cal-j{color:#0B8A2A}
+
+/* Offre en bas de page : plus discrète (moins de fonds pleins) */
+html body .fo.fo-h{background:#FFFDF6!important;border:1px solid #F3EAD0!important;box-shadow:none!important}
+html body .fo .fo-btn.fo-btn-h{display:inline-flex;align-self:flex-start;justify-content:center;background:none!important;color:#C24E00!important;
+  border:1.5px solid #E7B48C;border-radius:999px;padding:9px 20px;font:600 14.5px var(--sans)}
+html body .fo .fo-btn.fo-btn-h:hover{background:#FFF4EA!important}
+html body .fo .fo-lien{text-align:left;font-weight:500;font-size:13.5px}
+html body .offre-n.offre-n{background:none!important;border:0!important;border-radius:0!important;padding:4px 2px!important;font:400 14px/1.6 var(--sans)!important;color:#6B7287!important}
+html body .offre-l.offre-l,html body .offre-l.offre-l.ol-ens,html body .offre-l.offre-l.ol-prof,html body .offre-l.offre-l.ol-cahier{background:none!important;border:0!important;border-top:1px solid #EEF0F5!important;border-radius:0!important;padding:14px 2px!important}
+html body .offre-l.offre-l>svg{width:36px!important;height:36px!important;flex-basis:36px!important;padding:9px!important}
+html body .offre-l.offre-l b{font-size:16px!important}
