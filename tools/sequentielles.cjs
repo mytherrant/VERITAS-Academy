@@ -41,6 +41,9 @@ const MATIERES = {
   orthographe: ["Français : correction orthographique", ["Français"], "francais"],
   expression: ["Français : expression écrite", ["Français"], "francais"],
   francais: ["Français", ["Français"], "francais"],
+  // Au 2nd cycle, deux épreuves séparées, comme dans les sujets de séquence réels (19/11/2026).
+  langue: ["Français : langue française", ["Français"], "francais"],
+  litterature: ["Français : littérature", ["Français"], "francais"],
   mathematiques: ["Mathématiques", ["Mathématiques"], "maths"],
   pct: ["Physique, chimie et technologie", ["PCT"], "pct"],
   physique: ["Physique", ["Physique"], "physique"],
