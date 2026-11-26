@@ -1148,3 +1148,60 @@ h2 .num .pic{vertical-align:middle}
 .edt-mats button{border:1px solid #DCE3F0;background:#fff;border-radius:999px;padding:6px 12px;font:600 13px var(--sans);color:var(--titre);cursor:pointer}
 .edt-mats button[aria-pressed="true"]{background:var(--cp);border-color:var(--c);color:var(--c)}
 .ms-p{white-space:nowrap}
+
+/* ══ « Enlève les encadrés, les tableaux dans les tableaux : il faut que tout
+   fonde dans le décor. Mets Où j'en suis et Semaine prochaine en évidence »
+   (Jacques, 26/11/2026). Dernière couche, posée APRÈS toutes les autres :
+   plus de carte autour du chapitre, plus de liste encadrée dans la carte,
+   plus de pastille dans le bloc ; l'emphase passe par la typographie. ══ */
+
+/* Page matière : le chapitre n'est plus une boîte */
+.mpage .chap{border:0!important;border-radius:0!important;background:none!important;box-shadow:none!important;overflow:visible!important;margin:0 0 30px!important}
+.mpage .chap.cible{box-shadow:none!important}
+.mpage .chap-t{background:none!important;padding:0 0 10px!important;border:0!important}
+.mpage .lst{border:0!important;border-radius:0!important;box-shadow:none!important;background:none!important}
+.mpage .lgw{border-top:1px solid #EEF0F5}
+.mpage .lgw:last-child{border-bottom:1px solid #EEF0F5}
+.mpage .lg{padding-left:4px!important;padding-right:4px!important}
+.mpage .lgw-sem>.lg,.mpage .lgw-sem>a.lg{background:none!important}
+
+/* « Où j'en suis » : en vedette, sans cadre */
+.ouj{background:none!important;box-shadow:none!important;border-radius:0!important;padding:4px 0 8px!important;margin:6px 0 34px!important}
+.ouj-t small{display:block;font:700 13px var(--sans);letter-spacing:.1em;text-transform:uppercase;color:#C24E00}
+.ouj-t p{margin:6px 0 0;font:400 19px/1.5 var(--sans);color:var(--titre)}
+.ouj-t p b{color:var(--ink);font-weight:700}
+.ouj-s,.ouj-l{margin-top:18px;gap:0}
+.ouj-s small{display:block;margin:0 0 6px;font:700 13px var(--sans);letter-spacing:.1em;text-transform:uppercase;color:var(--m)}
+.ouj-s a,.ouj-l a{background:none!important;border-radius:0;padding:10px 0;border-bottom:1px solid #EEF0F5;font:600 17px/1.4 var(--sans);color:var(--ink);display:flex;align-items:center;gap:12px}
+.ouj-s a::before{content:"";flex:0 0 10px;height:10px;border-radius:50%;background:#FFC93C}
+.ouj-l a::before{content:"";flex:0 0 10px;height:10px;border-radius:50%;background:#C24E00}
+.ouj-s a::after{content:"›";margin-left:auto;color:var(--m);font-size:20px}
+.ouj-l a span{margin-left:auto}
+.ouj-s a:hover,.ouj-l a:hover{color:var(--m)}
+.ouj-ab{background:none!important;border-radius:0;padding:14px 0 0;margin-top:4px}
+.ouj-ab p{font-size:15.5px;color:var(--texte)}
+
+/* Accueil : « Ma semaine » et l'emploi du temps, à même la page */
+.ma-semaine{background:none!important;box-shadow:none!important;border-radius:0!important;padding:0!important;margin:8px 0 38px!important}
+.ms-t small{color:#C24E00;font-size:13px;letter-spacing:.1em}
+.ms-t h2{font-size:26px}
+.ms-p,.ms-p.ok,.ms-p.re,.ms-p.ex{background:none!important;padding:0!important;border-radius:0;font-size:15px}
+.ms-ps{gap:6px 18px}
+.ms-p.ex{color:#A84200}
+.ms-g{gap:0 28px}
+.ms-l{border:0!important;border-bottom:1px solid #EEF0F5!important;border-radius:0!important;padding:12px 2px!important}
+.ms-l:hover,.ms-l:focus-visible{background:none!important}
+.ms-l:hover .ms-x b{color:var(--m)}
+.ms-e,.ms-e.ok,.ms-e.red,.ms-e.av{background:none!important;padding:0!important}
+.ms-pied{gap:28px;margin-top:20px}
+.ms-as,.ms-ab,.ms-ab.doux{background:none!important;border-radius:0!important;padding:0!important}
+.ms-as small{color:#9A6F00}
+.ms-as p{font:italic 16px/1.55 var(--serif)}
+.edt-j,.edt-j.off{background:none!important;border-radius:0;border-top:2px solid #EEF0F5;padding:8px 2px 4px}
+.edt-j.auj{box-shadow:none!important;border-top-color:var(--m)}
+.edt-j.auj .edt-h b{color:var(--m)}
+.edt-t{background:none!important;box-shadow:none!important;border-radius:0;padding:5px 0;border-bottom:1px solid #F2F4F8}
+.edt-reg{border-top:0}
+@media (max-width:900px){.edt-j{border-top-width:1px}}
+.ms-ps{align-items:baseline}
+.ms-p.ex{font-weight:700}
