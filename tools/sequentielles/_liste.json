@@ -355,6 +355,56 @@
   "u": "/ressources/sequentielles/1re-d-seq1-langue.html"
  },
  {
+  "id": "1re-c-seq2-langue",
+  "classe": "1re C",
+  "m": "langue",
+  "mat": "francais",
+  "matiere": "Français : langue française",
+  "seq": 2,
+  "rangs": [
+   17,
+   18,
+   19,
+   20,
+   21,
+   22,
+   23,
+   24,
+   25,
+   26,
+   27,
+   28,
+   29,
+   30
+  ],
+  "u": "/ressources/sequentielles/1re-c-seq2-langue.html"
+ },
+ {
+  "id": "1re-d-seq2-langue",
+  "classe": "1re D",
+  "m": "langue",
+  "mat": "francais",
+  "matiere": "Français : langue française",
+  "seq": 2,
+  "rangs": [
+   17,
+   18,
+   19,
+   20,
+   21,
+   22,
+   23,
+   24,
+   25,
+   26,
+   27,
+   28,
+   29,
+   30
+  ],
+  "u": "/ressources/sequentielles/1re-d-seq2-langue.html"
+ },
+ {
   "id": "1re-c-seq1-litterature",
   "classe": "1re C",
   "m": "litterature",
@@ -407,6 +457,56 @@
    16
   ],
   "u": "/ressources/sequentielles/1re-d-seq1-litterature.html"
+ },
+ {
+  "id": "1re-c-seq2-litterature",
+  "classe": "1re C",
+  "m": "litterature",
+  "mat": "francais",
+  "matiere": "Français : littérature",
+  "seq": 2,
+  "rangs": [
+   17,
+   18,
+   19,
+   20,
+   21,
+   22,
+   23,
+   24,
+   25,
+   26,
+   27,
+   28,
+   29,
+   30
+  ],
+  "u": "/ressources/sequentielles/1re-c-seq2-litterature.html"
+ },
+ {
+  "id": "1re-d-seq2-litterature",
+  "classe": "1re D",
+  "m": "litterature",
+  "mat": "francais",
+  "matiere": "Français : littérature",
+  "seq": 2,
+  "rangs": [
+   17,
+   18,
+   19,
+   20,
+   21,
+   22,
+   23,
+   24,
+   25,
+   26,
+   27,
+   28,
+   29,
+   30
+  ],
+  "u": "/ressources/sequentielles/1re-d-seq2-litterature.html"
  },
  {
   "id": "1re-c-seq1-mathematiques",
@@ -485,6 +585,50 @@
    13
   ],
   "u": "/ressources/sequentielles/3e-seq1-mathematiques.html"
+ },
+ {
+  "id": "1re-c-seq2-mathematiques",
+  "classe": "1re C",
+  "m": "mathematiques",
+  "mat": "maths",
+  "matiere": "Mathématiques",
+  "seq": 2,
+  "rangs": [
+   22,
+   23,
+   24,
+   25,
+   26,
+   27,
+   28,
+   29,
+   30,
+   31,
+   32,
+   33,
+   34,
+   35
+  ],
+  "u": "/ressources/sequentielles/1re-c-seq2-mathematiques.html"
+ },
+ {
+  "id": "1re-d-seq2-mathematiques",
+  "classe": "1re D",
+  "m": "mathematiques",
+  "mat": "maths",
+  "matiere": "Mathématiques",
+  "seq": 2,
+  "rangs": [
+   12,
+   13,
+   14,
+   15,
+   16,
+   17,
+   18,
+   19
+  ],
+  "u": "/ressources/sequentielles/1re-d-seq2-mathematiques.html"
  },
  {
   "id": "3e-seq2-mathematiques",
@@ -776,6 +920,43 @@
   "u": "/ressources/sequentielles/1re-d-seq1-physique.html"
  },
  {
+  "id": "1re-c-seq2-physique",
+  "classe": "1re C",
+  "m": "physique",
+  "mat": "physique",
+  "matiere": "Physique",
+  "seq": 2,
+  "rangs": [
+   7,
+   8,
+   9,
+   10,
+   11,
+   12
+  ],
+  "u": "/ressources/sequentielles/1re-c-seq2-physique.html"
+ },
+ {
+  "id": "1re-d-seq2-physique",
+  "classe": "1re D",
+  "m": "physique",
+  "mat": "physique",
+  "matiere": "Physique",
+  "seq": 2,
+  "rangs": [
+   7,
+   8,
+   9,
+   10,
+   11,
+   12,
+   13,
+   14,
+   15
+  ],
+  "u": "/ressources/sequentielles/1re-d-seq2-physique.html"
+ },
+ {
   "id": "1re-c-seq1-chimie",
   "classe": "1re C",
   "m": "chimie",
@@ -804,6 +985,36 @@
    4
   ],
   "u": "/ressources/sequentielles/1re-d-seq1-chimie.html"
+ },
+ {
+  "id": "1re-c-seq2-chimie",
+  "classe": "1re C",
+  "m": "chimie",
+  "mat": "chimie",
+  "matiere": "Chimie",
+  "seq": 2,
+  "rangs": [
+   5,
+   6,
+   7,
+   8
+  ],
+  "u": "/ressources/sequentielles/1re-c-seq2-chimie.html"
+ },
+ {
+  "id": "1re-d-seq2-chimie",
+  "classe": "1re D",
+  "m": "chimie",
+  "mat": "chimie",
+  "matiere": "Chimie",
+  "seq": 2,
+  "rangs": [
+   5,
+   6,
+   7,
+   8
+  ],
+  "u": "/ressources/sequentielles/1re-d-seq2-chimie.html"
  },
  {
   "id": "1re-c-seq1-svt",
@@ -880,6 +1091,46 @@
    13
   ],
   "u": "/ressources/sequentielles/3e-seq1-svt.html"
+ },
+ {
+  "id": "1re-c-seq2-svt",
+  "classe": "1re C",
+  "m": "svt",
+  "mat": "svt",
+  "matiere": "SVTEEHB",
+  "seq": 2,
+  "rangs": [
+   9,
+   10,
+   11,
+   12,
+   13,
+   14
+  ],
+  "u": "/ressources/sequentielles/1re-c-seq2-svt.html"
+ },
+ {
+  "id": "1re-d-seq2-svt",
+  "classe": "1re D",
+  "m": "svt",
+  "mat": "svt",
+  "matiere": "SVTEEHB",
+  "seq": 2,
+  "rangs": [
+   12,
+   13,
+   14,
+   15,
+   16,
+   17,
+   18,
+   19,
+   20,
+   21,
+   22,
+   23
+  ],
+  "u": "/ressources/sequentielles/1re-d-seq2-svt.html"
  },
  {
   "id": "3e-seq2-svt",
@@ -1087,6 +1338,54 @@
    26
   ],
   "u": "/ressources/sequentielles/3e-seq1-anglais.html"
+ },
+ {
+  "id": "1re-c-seq2-anglais",
+  "classe": "1re C",
+  "m": "anglais",
+  "mat": "anglais",
+  "matiere": "Anglais",
+  "seq": 2,
+  "rangs": [
+   14,
+   15,
+   16,
+   17,
+   18,
+   19,
+   20,
+   21,
+   22,
+   23,
+   24,
+   25,
+   26
+  ],
+  "u": "/ressources/sequentielles/1re-c-seq2-anglais.html"
+ },
+ {
+  "id": "1re-d-seq2-anglais",
+  "classe": "1re D",
+  "m": "anglais",
+  "mat": "anglais",
+  "matiere": "Anglais",
+  "seq": 2,
+  "rangs": [
+   14,
+   15,
+   16,
+   17,
+   18,
+   19,
+   20,
+   21,
+   22,
+   23,
+   24,
+   25,
+   26
+  ],
+  "u": "/ressources/sequentielles/1re-d-seq2-anglais.html"
  },
  {
   "id": "3e-seq2-anglais",
@@ -1305,6 +1604,36 @@
    2
   ],
   "u": "/ressources/sequentielles/3e-seq1-histoire.html"
+ },
+ {
+  "id": "1re-c-seq2-histoire",
+  "classe": "1re C",
+  "m": "histoire",
+  "mat": "histoire",
+  "matiere": "Histoire",
+  "seq": 2,
+  "rangs": [
+   5,
+   6,
+   7,
+   8
+  ],
+  "u": "/ressources/sequentielles/1re-c-seq2-histoire.html"
+ },
+ {
+  "id": "1re-d-seq2-histoire",
+  "classe": "1re D",
+  "m": "histoire",
+  "mat": "histoire",
+  "matiere": "Histoire",
+  "seq": 2,
+  "rangs": [
+   5,
+   6,
+   7,
+   8
+  ],
+  "u": "/ressources/sequentielles/1re-d-seq2-histoire.html"
  },
  {
   "id": "3e-seq2-histoire",
@@ -1547,6 +1876,36 @@
   "u": "/ressources/sequentielles/3e-seq1-ecm.html"
  },
  {
+  "id": "1re-c-seq2-ecm",
+  "classe": "1re C",
+  "m": "ecm",
+  "mat": "ecm",
+  "matiere": "Éducation à la citoyenneté et à la morale",
+  "seq": 2,
+  "rangs": [
+   4,
+   5,
+   6,
+   7
+  ],
+  "u": "/ressources/sequentielles/1re-c-seq2-ecm.html"
+ },
+ {
+  "id": "1re-d-seq2-ecm",
+  "classe": "1re D",
+  "m": "ecm",
+  "mat": "ecm",
+  "matiere": "Éducation à la citoyenneté et à la morale",
+  "seq": 2,
+  "rangs": [
+   4,
+   5,
+   6,
+   7
+  ],
+  "u": "/ressources/sequentielles/1re-d-seq2-ecm.html"
+ },
+ {
   "id": "3e-seq2-ecm",
   "classe": "3e",
   "m": "ecm",
@@ -1692,6 +2051,34 @@
    8
   ],
   "u": "/ressources/sequentielles/3e-seq1-informatique.html"
+ },
+ {
+  "id": "1re-c-seq2-informatique",
+  "classe": "1re C",
+  "m": "informatique",
+  "mat": "info",
+  "matiere": "Informatique",
+  "seq": 2,
+  "rangs": [
+   10,
+   11,
+   12
+  ],
+  "u": "/ressources/sequentielles/1re-c-seq2-informatique.html"
+ },
+ {
+  "id": "1re-d-seq2-informatique",
+  "classe": "1re D",
+  "m": "informatique",
+  "mat": "info",
+  "matiere": "Informatique",
+  "seq": 2,
+  "rangs": [
+   10,
+   11,
+   12
+  ],
+  "u": "/ressources/sequentielles/1re-d-seq2-informatique.html"
  },
  {
   "id": "3e-seq2-informatique",
