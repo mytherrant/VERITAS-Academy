@@ -404,6 +404,16 @@
   function tirage(liste, graine) { var h = 0; for (var i = 0; i < graine.length; i++) h = (h * 31 + graine.charCodeAt(i)) >>> 0; return liste[h % liste.length]; }
   function courtD(t) { var x = new Date(t.getTime() + 3600000); return x.getUTCDate() + (x.getUTCDate() === 1 ? "ᵉʳ" : "") + " " + MOIS[x.getUTCMonth()]; }
 
+  /* En-tête illustré, au dessin des chapitres de la page matière (modele.css,
+     .chap-n) : tuile en dégradé de la teinte, point doré, icône d'origine du
+     site (veritas-icons.svg), surtitre en capitales, titre souligné. */
+  function entete(ico, k, sur, titre, sous, tag) {
+    tag = tag || "h2";
+    return '<div class="vt" style="--k:' + k + '"><span class="vt-n">' + si(ico, 24) + '</span><div class="vt-x">' + (sur ? '<small>' + esc(sur) + '</small>' : '') +
+      '<' + tag + '>' + esc(titre) + '</' + tag + '>' + (sous ? '<p>' + esc(sous) + '</p>' : '') + '</div></div>';
+  }
+  var ICO_ETAT = { cours: ["i-calendar", "#1E499B"], eval: ["i-clipboard-check", "#B03A6E"], vac: ["i-sparkle", "#0E7C86"], avant: ["i-school", "#1E499B"], apres: ["i-graduation", "#5B4FA8"] };
+
   /* ---------- 5. « MA SEMAINE » (accueil d'Apprendre) ---------- */
   function maSemaine(el, c) {
     if (!el || !A || !NB_COURS) return;
@@ -460,14 +470,15 @@
     var astuce = tirage(ASTUCES, graine), motive = tirage(MOTIVE[s.etat] || MOTIVE.cours, graine + "m");
     /* L'abonnement, au moment où il sert : quand une leçon de CETTE semaine ne montre que son début. */
     var cta = verrous
-      ? '<div class="ms-ab"><p><b>Cette semaine, ' + verrous + ' leçon' + (verrous > 1 ? 's ne montrent' : ' ne montre') + ' que ' + (verrous > 1 ? 'leur' : 'son') + ' début.</b> Avec l\'abonnement, tu lis chaque leçon en entier, toute l\'année, et tu ne prends jamais de retard.</p><a class="ms-go" href="/app.html#abonnement">Je débloque ma semaine</a></div>'
-      : '<div class="ms-ab doux"><p>Envie d\'aller plus loin que la leçon ? Découvre ce que l\'abonnement ajoute pour ta classe.</p><a class="ms-go" href="/#tarifs">Voir l\'abonnement</a></div>';
+      ? '<div class="ms-ab">' + entete("i-key", "#5B4FA8", "Abonnement", "Débloque ta semaine", "", "h3") + '<p><b>Cette semaine, ' + verrous + ' leçon' + (verrous > 1 ? 's ne montrent' : ' ne montre') + ' que ' + (verrous > 1 ? 'leur' : 'son') + ' début.</b> Avec l\'abonnement, tu lis chaque leçon en entier, toute l\'année, et tu ne prends jamais de retard.</p><a class="ms-go" href="/app.html#abonnement">Je débloque ma semaine</a></div>'
+      : '<div class="ms-ab doux">' + entete("i-award", "#5B4FA8", "Abonnement", "Va plus loin", "", "h3") + '<p>Envie d\'aller plus loin que la leçon ? Découvre ce que l\'abonnement ajoute pour ta classe.</p><a class="ms-go" href="/#tarifs">Voir l\'abonnement</a></div>';
 
-    el.innerHTML = '<div class="ms-t"><div><small>Ma semaine</small><h2>' + esc(titre) + '</h2>' + (sous ? '<p>' + esc(sous) + '</p>' : '') + '</div>' +
+    var ie = ICO_ETAT[s.etat] || ICO_ETAT.cours;
+    el.innerHTML = '<div class="ms-t">' + entete(ie[0], ie[1], "Ma semaine", titre, sous) +
       (puces.length ? '<div class="ms-ps">' + puces.join("") + '</div>' : '') + '</div>' +
       '<p class="ms-mot">' + esc(motive) + '</p>' +
       (lignes.length ? '<div class="ms-g">' + lignes.join("") + '</div>' : '<p class="ms-vide">Rien de prévu pour ta classe cette semaine.</p>') +
-      '<div class="ms-pied"><div class="ms-as"><small>Astuce de la semaine</small><p>' + esc(astuce) + '</p></div>' + cta + '</div>' +
+      '<div class="ms-pied"><div class="ms-as">' + entete("i-lightbulb", "#B8860B", "Astuce de la semaine", "Le bon réflexe", "", "h3") + '<p>' + esc(astuce) + '</p></div>' + cta + '</div>' +
       '<p class="ms-note">Semaine estimée d\'après la progression officielle du MINESEC et le calendrier 2026-2027 : ton professeur peut avoir un peu d\'avance ou de retard.</p>';
     el.hidden = false;
     if (A.replier) A.replier(el.querySelector(".ms-g"), 6, "matières");
@@ -582,7 +593,7 @@
 
     var M = mesMatieres(c), TOUTES = A.MATIERES.filter(function (m) { return plan(c, m.id).some(function (x) { return x.length; }); });
     var H = heures();
-    var reg = '<details class="edt-reg"><summary>Régler mon emploi du temps</summary>' +
+    var reg = '<details class="edt-reg"><summary>' + si("i-tool", 18) + 'Régler mon emploi du temps</summary>' +
       '<div class="edt-rg"><div><p class="edt-rt">Mes créneaux de révision</p>' + JOURS_L.map(function (n, i) {
         var r = R.jours[i];
         return '<div class="edt-rl"><span>' + n.charAt(0).toUpperCase() + n.slice(1) + '</span><select data-edt-h="' + i + '" aria-label="Heure du ' + n + '"><option value="">Pas de révision</option>' +
@@ -600,8 +611,8 @@
       }).join("") + '</div></div>' +
       '<button type="button" class="edt-raz" data-edt-raz>Revenir à la proposition</button></details>';
 
-    el.innerHTML = '<div class="ms-t"><div><small>Mon emploi du temps de révision</small><h2>' + (s.etat === "eval" ? "Ma semaine de révision" : "Ma semaine, heure par heure") + '</h2>' +
-      '<p>Une proposition faite d\'après tes leçons de la semaine. Règle-la selon tes cours à l\'école.</p></div>' +
+    el.innerHTML = '<div class="ms-t">' + entete("i-clock", "#0E7C86", "Mon emploi du temps de révision", s.etat === "eval" ? "Ma semaine de révision" : "Ma semaine, heure par heure",
+      "Une proposition faite d'après tes leçons de la semaine. Règle-la selon tes cours à l'école.") +
       '<div class="ms-ps"><span class="ms-p' + (nf === tot ? ' ok' : '') + '"><b>' + nf + '/' + tot + '</b> fait' + (nf > 1 ? 's' : '') + '</span></div></div>' +
       '<p class="ms-mot">' + esc(nf === tot ? "Semaine bouclée. Tu peux être fier de toi." : nf ? "Bien parti : coche au fur et à mesure, c'est motivant de voir la colonne se remplir." : "Un créneau fixe chaque jour devient vite une habitude : tu n'auras plus à te forcer.") + '</p>' +
       '<div class="edt-g">' + cols + '</div>' +

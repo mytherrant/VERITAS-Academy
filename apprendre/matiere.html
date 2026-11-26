@@ -8,7 +8,7 @@
 <meta name="robots" content="noindex">
 <link rel="icon" href="../VERITAS_favicon_512.png">
 <link rel="preload" href="/assets/polices/roboto-latin-400-normal.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="stylesheet" href="apprendre.css?v=s20261126b">
+<link rel="stylesheet" href="apprendre.css?v=s20261126c">
 <link rel="stylesheet" href="jeu.css?v=20261112v">
 <link rel="stylesheet" href="modele.css?v=20261120a">
 <style>
@@ -80,7 +80,7 @@ a.lg:hover{background:var(--kp)}
 <script src="charge.js?v=e414971d"></script>
 <script src="commun.js?v=20261120a"></script>
 <script src="jeu.js?v=20261110g"></script>
-<script src="calendrier.js?v=s20261126a"></script>
+<script src="calendrier.js?v=s20261126c"></script>
 <script>
 (function(){
   "use strict";
@@ -168,10 +168,11 @@ a.lg:hover{background:var(--kp)}
       :'<b>Prends de l\'avance</b> : la progression de '+esc(M.nom)+' commence ici.';
     var lien=function(L){return L.id?'lecon.html?id='+L.id:'#l'+L.n};
     var ver=cet.filter(function(L){return L.id&&LEs[L.id]&&LEs[L.id].verrou}).length;
-    z.innerHTML='<div class="ouj-t"><small>Où j\'en suis</small><p>'+etat+'</p></div>'+
-      (r?'<div class="ouj-l">'+b.retard.slice(0,3).map(function(L){return '<a href="lecon.html?id='+L.id+'">'+esc(L.t)+'<span>Rattraper ›</span></a>'}).join("")+(r>3?'<span class="ouj-plus">et '+(r-3)+' autre'+(r-3>1?'s':'')+'</span>':'')+'</div>':'')+
-      (cet.length?'<div class="ouj-s"><small>'+libSem()+'</small>'+cet.map(function(L){return '<a href="'+lien(L)+'">'+esc(L.t)+'</a>'}).join("")+'</div>':'')+
-      (ver?'<div class="ouj-ab"><p>'+ver+' leçon'+(ver>1?'s':'')+' de '+(libSem()==="Cette semaine"?'cette semaine':'la semaine à venir')+' ne montre'+(ver>1?'nt':'')+' que '+(ver>1?'leur':'son')+' début. Avec l\'abonnement, tu les lis en entier et tu restes à jour toute l\'année.</p><a href="/app.html#abonnement">Je m\'abonne</a></div>':'')+
+    var vt=function(ico,k,sur,t,tag,cl){return '<div class="vt'+(cl||'')+'" style="--k:'+k+'"><span class="vt-n">'+A.si(ico,24)+'</span><div class="vt-x">'+(sur?'<small>'+sur+'</small>':'')+'<'+tag+'>'+t+'</'+tag+'></div></div>'};
+    z.innerHTML='<div class="ouj-t">'+vt("i-target","#C24E00","Mon avancement en "+esc(M.nom),"Où j\'en suis","h2")+'<p>'+etat+'</p></div>'+
+      (r?'<div class="ouj-l">'+vt("i-refresh","#A84200","","À rattraper","h3"," vt-s")+b.retard.slice(0,3).map(function(L){return '<a href="lecon.html?id='+L.id+'">'+esc(L.t)+'<span>Rattraper ›</span></a>'}).join("")+(r>3?'<span class="ouj-plus">et '+(r-3)+' autre'+(r-3>1?'s':'')+'</span>':'')+'</div>':'')+
+      (cet.length?'<div class="ouj-s">'+vt("i-calendar","#1E499B","Au programme",libSem(),"h3")+cet.map(function(L){return '<a href="'+lien(L)+'">'+esc(L.t)+'</a>'}).join("")+'</div>':'')+
+      (ver?'<div class="ouj-ab"><span class="vt-n vt-mini" style="--k:#5B4FA8">'+A.si("i-key",18)+'</span><p>'+ver+' leçon'+(ver>1?'s':'')+' de '+(libSem()==="Cette semaine"?'cette semaine':'la semaine à venir')+' ne montre'+(ver>1?'nt':'')+' que '+(ver>1?'leur':'son')+' début. Avec l\'abonnement, tu les lis en entier et tu restes à jour toute l\'année.</p><a href="/app.html#abonnement">Je m\'abonne</a></div>':'')+
       '<p class="ouj-n">Estimé d\'après la progression officielle et le calendrier 2026-2027.</p>';
     z.hidden=false}
   rendu("");marquer();ouJ();
